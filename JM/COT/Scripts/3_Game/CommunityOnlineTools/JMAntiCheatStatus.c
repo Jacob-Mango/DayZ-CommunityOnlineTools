@@ -32,7 +32,41 @@ class JMAntiCheatStatus
 
 	//! Matches JMServerStats: two missed broadcasts plus slack. A client that
 	//! stops hearing from the server shows no badge rather than a stale one.
-	private static const int STALE_AFTER_MS = 8000;
+	protected static const int STALE_AFTER_MS = 8000;
+
+	//! The one question the footer asks: is there anything to raise a badge for?
+	static bool HasFlags()
+	{
+		if ( !IsValid() )
+			return false;
+
+		return FlaggedCount > 0;
+	}
+
+	//! Is this one player flagged? False on a stale or never-received mirror,
+	//! which is the safe answer: a badge nobody can justify is worse than none.
+	static bool IsFlagged( string guid )
+	{
+		if ( guid == "" )
+			return false;
+
+		if ( !IsValid() )
+			return false;
+
+		if ( !FlaggedGuids )
+			return false;
+
+		return FlaggedGuids.Find( guid ) >= 0;
+	}
+
+	//! False until the first broadcast lands, and again once they stop coming.
+	static bool IsValid()
+	{
+		if ( LastUpdateMs == 0 )
+			return false;
+
+		return ( g_Game.GetTime() - LastUpdateMs ) < STALE_AFTER_MS;
+	}
 
 	static void Set( int flagged, array< string > guids = NULL )
 	{
@@ -58,45 +92,11 @@ class JMAntiCheatStatus
 		FlaggedGuids.Clear();
 	}
 
-	//! Is this one player flagged? False on a stale or never-received mirror,
-	//! which is the safe answer: a badge nobody can justify is worse than none.
-	static bool IsFlagged( string guid )
-	{
-		if ( guid == "" )
-			return false;
-
-		if ( !IsValid() )
-			return false;
-
-		if ( !FlaggedGuids )
-			return false;
-
-		return FlaggedGuids.Find( guid ) >= 0;
-	}
-
 	//! Static ref arrays are not constructed for us, and every entry point here
 	//! can be the first one called.
-	private static void EnsureList()
+	protected static void EnsureList()
 	{
 		if ( !FlaggedGuids )
 			FlaggedGuids = new array< string >;
-	}
-
-	//! False until the first broadcast lands, and again once they stop coming.
-	static bool IsValid()
-	{
-		if ( LastUpdateMs == 0 )
-			return false;
-
-		return ( g_Game.GetTime() - LastUpdateMs ) < STALE_AFTER_MS;
-	}
-
-	//! The one question the footer asks: is there anything to raise a badge for?
-	static bool HasFlags()
-	{
-		if ( !IsValid() )
-			return false;
-
-		return FlaggedCount > 0;
 	}
 }

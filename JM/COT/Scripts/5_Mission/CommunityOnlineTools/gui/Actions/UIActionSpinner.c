@@ -20,12 +20,49 @@ class UIActionSpinner: UIActionBase
 	protected EditBoxWidget m_EditBox;
 	protected ButtonWidget  m_BtnDec;
 	protected ButtonWidget  m_BtnInc;
-
 	protected float m_Value;
 	protected float m_Min;
 	protected float m_Max;
 	protected float m_Step;
 	protected bool  m_IntegerOnly;
+
+	int GetValueInt()
+	{
+		return ( int ) m_Value;
+	}
+
+	void SetIntegerOnly( bool intOnly )
+	{
+		m_IntegerOnly = intOnly;
+	}
+
+	void SetMinMax( float min, float max )
+	{
+		m_Min = min;
+		m_Max = max;
+		SetValue( m_Value );
+	}
+
+	void SetStep( float step )
+	{
+		if ( step > 0 )
+			m_Step = step;
+	}
+
+	void SetValue( float value )
+	{
+		m_Value = Math.Clamp( value, m_Min, m_Max );
+		if ( m_IntegerOnly )
+			m_Value = Math.Round( m_Value );
+
+		if ( m_EditBox )
+		{
+			if ( m_IntegerOnly )
+				m_EditBox.SetText( "" + ( int ) m_Value );
+			else
+				m_EditBox.SetText( string.Format( "%.2f", m_Value ) );
+		}
+	}
 
 	override void OnInit()
 	{
@@ -46,39 +83,6 @@ class UIActionSpinner: UIActionBase
 		text = Widget.TranslateString( text );
 		if ( m_Label )
 			m_Label.SetText( text );
-	}
-
-	void SetMinMax( float min, float max )
-	{
-		m_Min = min;
-		m_Max = max;
-		SetValue( m_Value );
-	}
-
-	void SetStep( float step )
-	{
-		if ( step > 0 )
-			m_Step = step;
-	}
-
-	void SetIntegerOnly( bool intOnly )
-	{
-		m_IntegerOnly = intOnly;
-	}
-
-	void SetValue( float value )
-	{
-		m_Value = Math.Clamp( value, m_Min, m_Max );
-		if ( m_IntegerOnly )
-			m_Value = Math.Round( m_Value );
-
-		if ( m_EditBox )
-		{
-			if ( m_IntegerOnly )
-				m_EditBox.SetText( "" + ( int ) m_Value );
-			else
-				m_EditBox.SetText( string.Format( "%.2f", m_Value ) );
-		}
 	}
 
 	//! Pull whatever is currently typed into the edit box into m_Value.
@@ -111,11 +115,6 @@ class UIActionSpinner: UIActionBase
 	override float GetCurrent()
 	{
 		return m_Value;
-	}
-
-	int GetValueInt()
-	{
-		return ( int ) m_Value;
 	}
 
 	override bool IsFocusWidget( Widget widget )

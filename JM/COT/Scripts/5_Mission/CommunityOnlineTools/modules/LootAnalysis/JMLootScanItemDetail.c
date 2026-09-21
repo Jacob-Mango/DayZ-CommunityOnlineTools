@@ -28,8 +28,12 @@ class JMLootScanItemDetail
 	//! nothing for them) - the hover panel shows this instead of Quantity
 	//! whenever it is >= 0.
 	int m_AmmoCount;
-
 	ref TStringArray m_Attachments;
+
+	//! What the model preview needs to draw the entity as it really is - health, quantity, food
+	//! stage - for the item itself and, index-parallel to m_Attachments, for each attachment.
+	ref JMLootPreviewState m_State = new JMLootPreviewState();
+	ref array<ref JMLootPreviewState> m_AttachmentStates = new array<ref JMLootPreviewState>;
 
 	void JMLootScanItemDetail(string className, float healthPct, float quantityPct, int lifetimeSeconds, TStringArray attachments, int ammoCount = -1)
 	{

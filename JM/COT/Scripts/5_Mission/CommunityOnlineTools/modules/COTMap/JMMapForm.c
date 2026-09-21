@@ -3,20 +3,25 @@
 
 class JMMapForm: JMFormBase
 {
-	private MapWidget m_MapWidget;
-	private Widget m_BackgroundWidget;
+	protected MapWidget m_MapWidget;
+	protected Widget m_BackgroundWidget;
+	protected JMMapModule m_Module;
+	protected vector m_TeleportPosition;
+	protected ref array<string> m_LootMarkerNames;
+	protected ref array<vector> m_LootMarkerPositions;
 
-	private JMMapModule m_Module;
+	void SetLootMarkers(array<string> names, array<vector> positions)
+	{
+		m_LootMarkerNames = names;
+		m_LootMarkerPositions = positions;
+		// Full redraw so existing marks (players + old loot) are cleared first
+		UpdateMapMarkers();
+	}
 
-	private vector m_TeleportPosition;
-
-	private ref array<string> m_LootMarkerNames;
-	private ref array<vector> m_LootMarkerPositions;
-	
-	override void OnInit()
+	override void OnCreate()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+JMMapForm::OnInit" );
+		Print( "+JMMapForm::OnCreate" );
 		#endif
 
 		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
@@ -25,7 +30,7 @@ class JMMapForm: JMFormBase
 		m_BackgroundWidget.Show( false );
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-JMMapForm::OnInit" );
+		Print( "-JMMapForm::OnCreate" );
 		#endif
 	}
 
@@ -33,15 +38,15 @@ class JMMapForm: JMFormBase
 	{
 		return Class.CastTo( m_Module, mdl );
 	}
-	
+
 	override void OnShow()
 	{
 		if ( !JMPermissions.Has( JMConstants.PERM_MAP_VIEW ) )
 			return;
 
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
+		DeferCall( "UpdateMapPosition", 34, false, new Param2< bool, vector >( true, vector.Zero ) );
 
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapMarkers, 1000, true );
+		DeferCall( "UpdateMapMarkers", 1000, true );
 	}
 
 	void UpdateMapPosition( bool usePlayerPosition, vector mapPosition = vector.Zero )
@@ -64,7 +69,7 @@ class JMMapForm: JMFormBase
 
 	override void OnHide() 
 	{
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( UpdateMapMarkers );
+		CancelDeferredCall( "UpdateMapMarkers" );
 	}
 
 	void UpdateMapMarkers()
@@ -80,14 +85,6 @@ class JMMapForm: JMFormBase
 #endif
 	}
 
-	void SetLootMarkers(array<string> names, array<vector> positions)
-	{
-		m_LootMarkerNames = names;
-		m_LootMarkerPositions = positions;
-		// Full redraw so existing marks (players + old loot) are cleared first
-		UpdateMapMarkers();
-	}
-
 	void ClearLootMarkers()
 	{
 		m_LootMarkerNames = null;
@@ -95,7 +92,7 @@ class JMMapForm: JMFormBase
 		UpdateMapMarkers();
 	}
 
-	private void UpdateLootMarkers()
+	protected void UpdateLootMarkers()
 	{
 		if (!m_LootMarkerNames || !m_LootMarkerPositions)
 			return;
@@ -109,9 +106,9 @@ class JMMapForm: JMFormBase
 		}
 	}
 
-	private void UpdatePlayers() 
+	protected void UpdatePlayers() 
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Map.Players" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_MAP_PLAYERS ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
@@ -139,7 +136,7 @@ class JMMapForm: JMFormBase
 		if ( w == m_MapWidget )
 		{
 			m_TeleportPosition = SnapToGround(m_MapWidget.ScreenToMap(Vector( x, y, 0 )));
-			CreateAdvancedPlayerConfirm("#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", "TeleportPlayerMulti", "TeleportPlayerSingle", "TeleportPlayerSelf", false);
+			ConfirmPlayerAction( "#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", this, "TeleportPlayerTargets", false );
 			
 			return true;
 		}
@@ -147,23 +144,13 @@ class JMMapForm: JMFormBase
 		return false;
 	}
 
-	void TeleportPlayerMulti(JMConfirmation confirmation = NULL)
+	void TeleportPlayerTargets( array<string> targets, JMConfirmation confirmation = NULL )
 	{
-		CF_Modules<JMTeleportModule>.Get().Position( m_TeleportPosition, JM_GetSelected().GetPlayers() );
-	}
-
-	void TeleportPlayerSingle(JMConfirmation confirmation = NULL)
-	{
-		CF_Modules<JMTeleportModule>.Get().Position( m_TeleportPosition, {JM_GetSelected().GetPlayers()[0]} );
-	}
-
-	void TeleportPlayerSelf(JMConfirmation confirmation = NULL)
-	{
-		CF_Modules<JMTeleportModule>.Get().Position( m_TeleportPosition, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
+		CF_Modules<JMTeleportModule>.Get().Position( m_TeleportPosition, targets );
 	}
 
 #ifdef EXPANSIONMODNAVIGATION
-	private void UpdateExpansionMarkers()
+	protected void UpdateExpansionMarkers()
 	{
 		ExpansionMapSettings mapSettings = GetExpansionSettings().GetMap();
 		if ( !mapSettings || !mapSettings.ServerMarkers )
@@ -183,7 +170,7 @@ class JMMapForm: JMFormBase
 		}
 	}
 
-	private void UpdateExpansionSafezones()
+	protected void UpdateExpansionSafezones()
 	{
 		ExpansionSafeZoneSettings szSettings = GetExpansionSettings().GetSafeZone();
 		if ( !szSettings || !szSettings.Enabled )
@@ -211,7 +198,7 @@ class JMMapForm: JMFormBase
 	}
 
 	// Approximates a circle on the map by placing dot markers around the perimeter.
-	private void DrawMapCircle( vector center, float radius, int color )
+	protected void DrawMapCircle( vector center, float radius, int color )
 	{
 		int segments = 12;
 		float step = Math.PI2 / segments;

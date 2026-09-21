@@ -1,7 +1,6 @@
 class UIActionEditableText: UIActionBase 
 {
 	static ref TStringArray VALID_NUMBERS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_Text;
 	//! The visible field (fill + focus ring + edit box). Resizing this is what
@@ -10,13 +9,79 @@ class UIActionEditableText: UIActionBase
 	protected Widget m_Chrome;
 	protected ButtonWidget m_Button;
 	protected TextWidget m_ButtonText;
-
 	protected bool m_OnlyNumbers;
 	protected bool m_OnlyIntegers;
-
 	protected string m_PreviousText;
-
 	protected bool m_Edited;
+
+	ButtonWidget GetButtonWidget()
+	{
+		return m_Button;
+	}
+
+	EditBoxWidget GetEditBoxWidget()
+	{
+		return m_Text;
+	}
+
+	TextWidget GetLabelWidget()
+	{
+		return m_Label;
+	}
+
+	bool IsEdited()
+	{
+		return m_Edited;
+	}
+
+	bool IsOnlyNumbers()
+	{
+		return m_OnlyNumbers;
+	}
+
+	void SetEditBoxWidth( float width )
+	{
+		// The edit box fills its chrome, so the chrome is what has to change
+		// size. Resizing the inner box instead left the field drawn at its
+		// original width with the usable text area stopping short of the edge.
+		if ( m_Chrome )
+		{
+			SetWidgetWidth( m_Chrome, width );
+			return;
+		}
+
+		SetWidgetWidth( m_Text, width );
+	}
+
+	void SetEdited(bool edited)
+	{
+		m_Edited = edited;
+	}
+
+	//! Set label column width and expand the edit box to fill the remainder.
+	void SetLabelWidth( float labelFraction )
+	{
+		SetWidgetWidth( m_Label, labelFraction );
+		SetWidgetWidth( m_Text, 1.0 - labelFraction );
+	}
+
+	void SetOnlyNumbers( bool onlyNumbers, bool onlyInts = false )
+	{
+		m_OnlyNumbers = onlyNumbers;
+
+		if ( m_OnlyNumbers )
+		{
+			m_OnlyIntegers = onlyInts;
+		} else
+		{
+			m_OnlyIntegers = false;
+		}
+	}
+
+	void SetText( float num )
+	{
+		SetText( "" + num );
+	}
 
 	override void OnInit() 
 	{
@@ -40,31 +105,11 @@ class UIActionEditableText: UIActionBase
 	{
 	}
 
-	TextWidget GetLabelWidget()
-	{
-		return m_Label;
-	}
-
-	EditBoxWidget GetEditBoxWidget()
-	{
-		return m_Text;
-	}
-
-	ButtonWidget GetButtonWidget()
-	{
-		return m_Button;
-	}
-
 	override void SetLabel( string text )
 	{
 		text = Widget.TranslateString( text );
 
 		m_Label.SetText( text );
-	}
-
-	void SetText( float num )
-	{
-		SetText( "" + num );
 	}
 
 	override bool IsFocusWidget( Widget widget )
@@ -176,24 +221,6 @@ class UIActionEditableText: UIActionBase
 		return true;
 	}
 
-	void SetOnlyNumbers( bool onlyNumbers, bool onlyInts = false )
-	{
-		m_OnlyNumbers = onlyNumbers;
-
-		if ( m_OnlyNumbers )
-		{
-			m_OnlyIntegers = onlyInts;
-		} else
-		{
-			m_OnlyIntegers = false;
-		}
-	}
-
-	bool IsOnlyNumbers()
-	{
-		return m_OnlyNumbers;
-	}
-
 	override void SetButton( string text )
 	{
 		text = Widget.TranslateString( text );
@@ -206,16 +233,6 @@ class UIActionEditableText: UIActionBase
 		m_Edited = true;
 
 		return super.OnKeyPress( w, x, y, key );
-	}
-
-	void SetEdited(bool edited)
-	{
-		m_Edited = edited;
-	}
-
-	bool IsEdited()
-	{
-		return m_Edited;
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
@@ -253,26 +270,5 @@ class UIActionEditableText: UIActionBase
 		}
 
 		return ret;
-	}
-
-	void SetEditBoxWidth( float width )
-	{
-		// The edit box fills its chrome, so the chrome is what has to change
-		// size. Resizing the inner box instead left the field drawn at its
-		// original width with the usable text area stopping short of the edge.
-		if ( m_Chrome )
-		{
-			SetWidgetWidth( m_Chrome, width );
-			return;
-		}
-
-		SetWidgetWidth( m_Text, width );
-	}
-
-	//! Set label column width and expand the edit box to fill the remainder.
-	void SetLabelWidth( float labelFraction )
-	{
-		SetWidgetWidth( m_Label, labelFraction );
-		SetWidgetWidth( m_Text, 1.0 - labelFraction );
 	}
 }

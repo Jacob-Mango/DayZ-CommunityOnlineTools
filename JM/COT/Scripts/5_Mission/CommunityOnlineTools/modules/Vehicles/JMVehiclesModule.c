@@ -26,19 +26,15 @@ class JMVehicleMetaData
 {
 	int m_NetworkIDLow;
 	int m_NetworkIDHigh;
-
 	int m_PersistentIDA;
 	int m_PersistentIDB;
 	int m_PersistentIDC;
 	int m_PersistentIDD;
-
 	string m_ClassName;
 	vector m_Position;
 	vector m_Orientation;
-
 	int m_VehicleType;
 	int m_DestructionType;
-
 	bool m_HasKeys;
 	bool m_IsCover;
 
@@ -52,19 +48,74 @@ class JMVehicleMetaData
 	int    m_CrewCount;
 	string m_CrewNames;   //!< comma-joined occupant names, driver seat first
 	bool   m_IsLocked;
-
 	string m_OwnerName;
 	string m_OwnerUID;
 	string m_LastDriverUID;
 	string m_LastDriverSteam;
 	string m_LastDriverGUID;
-
 	[NonSerialized()]
 	string m_DisplayName;
-
 	[NonSerialized()]
 	EntityAI m_Entity;
-	
+
+	string GetVehicleDestructionState()
+	{
+		string type = "";
+
+		if ( m_DestructionType != JMDT_NONE )
+		{
+			if ( m_DestructionType & JMDT_DESTROYED )
+			{
+				type += "Destroyed ";
+			}
+			if ( m_DestructionType & JMDT_EXPLODED )
+			{
+				type += "Exploded ";
+			}
+		} else
+		{
+			type = "None";
+		}
+
+		return type;
+	}
+
+	string GetVehicleType()
+	{
+		string type = "";
+
+		if ( m_VehicleType & JMVT_CAR )
+			type += "Car ";
+		if ( m_VehicleType & JMVT_BOAT )
+			type += "Boat ";
+		if ( m_VehicleType & JMVT_HELICOPTER )
+			type += "Helicopter ";
+		if ( m_VehicleType & JMVT_PLANE )
+			type += "Plane ";
+		if ( m_VehicleType & JMVT_BIKE )
+			type += "Motorbike ";
+
+		return type;
+	}
+
+	bool IsDestroyed()
+	{
+		return m_DestructionType & JMDT_DESTROYED;
+	}
+
+	bool IsExploded()
+	{
+		return m_DestructionType & JMDT_EXPLODED;
+	}
+
+	void SetDisplayName()
+	{
+		if ( g_Game.ConfigIsExisting( "cfgVehicles " + m_ClassName + " displayName" ) )
+			g_Game.ConfigGetText( "cfgVehicles " + m_ClassName + " displayName", m_DisplayName );
+		else
+			m_DisplayName = m_ClassName;
+	}
+
 	static JMVehicleMetaData Create( EntityAI entity, string type = string.Empty )
 	{
 		JMVehicleMetaData meta = new JMVehicleMetaData();
@@ -253,64 +304,6 @@ class JMVehicleMetaData
 	}
 	#endif
 
-	string GetVehicleType()
-	{
-		string type = "";
-
-		if ( m_VehicleType & JMVT_CAR )
-			type += "Car ";
-		if ( m_VehicleType & JMVT_BOAT )
-			type += "Boat ";
-		if ( m_VehicleType & JMVT_HELICOPTER )
-			type += "Helicopter ";
-		if ( m_VehicleType & JMVT_PLANE )
-			type += "Plane ";
-		if ( m_VehicleType & JMVT_BIKE )
-			type += "Motorbike ";
-
-		return type;
-	}
-
-	string GetVehicleDestructionState()
-	{
-		string type = "";
-
-		if ( m_DestructionType != JMDT_NONE )
-		{
-			if ( m_DestructionType & JMDT_DESTROYED )
-			{
-				type += "Destroyed ";
-			}
-			if ( m_DestructionType & JMDT_EXPLODED )
-			{
-				type += "Exploded ";
-			}
-		} else
-		{
-			type = "None";
-		}
-
-		return type;
-	}
-
-	bool IsDestroyed()
-	{
-		return m_DestructionType & JMDT_DESTROYED;
-	}
-
-	bool IsExploded()
-	{
-		return m_DestructionType & JMDT_EXPLODED;
-	}
-
-	void SetDisplayName()
-	{
-		if ( g_Game.ConfigIsExisting( "cfgVehicles " + m_ClassName + " displayName" ) )
-			g_Game.ConfigGetText( "cfgVehicles " + m_ClassName + " displayName", m_DisplayName );
-		else
-			m_DisplayName = m_ClassName;
-	}
-
 	void Write( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_NetworkIDLow );
@@ -399,10 +392,23 @@ class JMVehicleMetaData
 
 class JMVehiclesModule: JMRenderableModuleBase
 {
-	private ref array<ref JMVehicleMetaData> m_Vehicles;
+	protected ref array<ref JMVehicleMetaData> m_Vehicles;
 
 	void JMVehiclesModule()
 	{
+		m_Vehicles = new array<ref JMVehicleMetaData>;
+	}
+
+	array< ref JMVehicleMetaData > GetServerVehicles()
+	{
+		return m_Vehicles;
+	}
+
+	//! Called on both client and server as the module registers, before the mission loads.
+	override void DeclarePermissions()
+	{
+		super.DeclarePermissions();
+
 		JMPermissions.Register( JMConstants.PERM_VEHICLES_VIEW );
 
 		JMPermissions.Register( JMConstants.PERM_VEHICLES_DELETE );
@@ -422,65 +428,29 @@ class JMVehiclesModule: JMRenderableModuleBase
 		JMPermissions.Register( JMConstants.PERM_VEHICLES_CLEARCARGO );
 		JMPermissions.Register( JMConstants.PERM_VEHICLES_SPAWNKEY );
 		#endif
-
-		m_Vehicles = new array<ref JMVehicleMetaData>;
 	}
 
-	override bool HasAccess()
+	override void DescribeModule( JMModuleInfo info )
 	{
-		return JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW );
-	}
+		super.DescribeModule( info );
 
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/vehicles/Vehicles_Menu.layout";
-	}
+		info.Title = "#STR_COT_VEHICLE_MANAGEMENT_MODULE_NAME";
+		info.WebhookTitle = "Vehicles Module";
+		info.Icon = "car";
+		info.Layout = "JM/COT/GUI/layouts/vehicles/Vehicles_Menu.layout";
+		info.Category = JMSideBarConfig.CATEGORY_VEHICLES;
+		info.ViewPermission = JMConstants.PERM_VEHICLES_VIEW;
+		info.InputToggle = "UACOTToggleVehicle";
+		info.SetRPCRange( JMVehiclesModuleRPC.INVALID, JMVehiclesModuleRPC.COUNT );
 
-	override string GetInputToggle()
-	{
-		return "UACOTToggleVehicle";
-	}
-
-	override string GetCategory()
-	{
-		return "Vehicles";
-	}
-
-	override string GetTitle()
-	{
-		return "#STR_COT_VEHICLE_MANAGEMENT_MODULE_NAME";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "car" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Vehicles Module";
-	}
-
-	override void GetWebhookTypes( out array<string> types )
-	{
-		types.Insert( "Delete"   );
-		types.Insert( "Teleport" );
-		types.Insert( "Repair"   );
-		types.Insert( "Refuel"   );
-		types.Insert( "Unstuck"  );
-		types.Insert( "Cover"    );
-		types.Insert( "Lock"     );
-		types.Insert( "Unpair"   );
+		info.AddWebhookType( "Delete" );
+		info.AddWebhookType( "Teleport" );
+		info.AddWebhookType( "Repair" );
+		info.AddWebhookType( "Refuel" );
+		info.AddWebhookType( "Unstuck" );
+		info.AddWebhookType( "Cover" );
+		info.AddWebhookType( "Lock" );
+		info.AddWebhookType( "Unpair" );
 	}
 
 	override void RegisterKeyMouseBindings()
@@ -508,7 +478,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( meta ) RequestRepairVehicle( meta );
 	}
 
-	private void UpdateVehiclesMetaData()
+	protected void UpdateVehiclesMetaData()
 	{
 		if ( m_Vehicles.Count() > 0 )
 			m_Vehicles.Clear();
@@ -600,16 +570,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 			form.LoadVehicles();
 	}
 
-	override int GetRPCMin()
-	{
-		return JMVehiclesModuleRPC.INVALID;
-	}
-
-	override int GetRPCMax()
-	{
-		return JMVehiclesModuleRPC.COUNT;
-	}
-
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
 		switch ( rpc_type )
@@ -695,7 +655,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.RequestVehicleUpsert, true );
 	}
 
-	private void RPC_RequestVehicleUpsert( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RequestVehicleUpsert( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
@@ -885,7 +845,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.SendServerVehicles, true, senderRPC );
 	}
 
-	private void RPC_SendServerVehicles( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_SendServerVehicles( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionClient() )
 			return;
@@ -949,14 +909,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicle, true );
 	}
 
-	private void RPC_DeleteVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_DeleteVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_DELETE, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_DELETE, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -982,14 +942,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 	}
 
 	#ifdef EXPANSIONMODVEHICLE
-	private void RPC_DeleteVehicleUnclaimed( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_DeleteVehicleUnclaimed( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_DELETE_UNCLAIMED, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_DELETE_UNCLAIMED, senderRPC, instance ) )
 			return;
 
 		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted all UNCLAIMED vehicles" );
@@ -1047,14 +1007,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 	}
 	#endif
 
-	private void RPC_DeleteVehicleDestroyed( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_DeleteVehicleDestroyed( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_DELETE_DESTROYED, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_DELETE_DESTROYED, senderRPC, instance ) )
 			return;
 
 		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted all DESTROYED vehicles" );
@@ -1124,14 +1084,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		#endif
 	}
 
-	private void RPC_DeleteVehicleAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_DeleteVehicleAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_DELETE_ALL, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_DELETE_ALL, senderRPC, instance ) )
 			return;
 
 		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted ALL vehicles" );
@@ -1202,14 +1162,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportToVehicle, true );
 	}
 
-	private void RPC_TeleportToVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_TeleportToVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1242,7 +1202,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 		player.SetWorldPosition( pos );
 	}
 
-
 	void RequestTeleportVehicleToMe( JMVehicleMetaData meta )
 	{
 		//! Recorded from the metadata rather than from the entity: the vehicle
@@ -1256,14 +1215,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleToMe, true );
 	}
 
-	private void RPC_TeleportVehicleToMe( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_TeleportVehicleToMe( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1312,14 +1271,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleTo, true );
 	}
 
-	private void RPC_TeleportVehicleTo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_TeleportVehicleTo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1369,14 +1328,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.RepairVehicle, true );
 	}
 
-	private void RPC_RepairVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RepairVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_REPAIR, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_REPAIR, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1437,14 +1396,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.RefuelVehicle, true );
 	}
 
-	private void RPC_RefuelVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RefuelVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_REFUEL, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_REFUEL, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1512,14 +1471,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.UnstuckVehicle, true );
 	}
 
-	private void RPC_UnstuckVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_UnstuckVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_UNSTUCK, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_UNSTUCK, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1563,7 +1522,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 	#endif
 	}
 
-	private void RPC_CoverVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_CoverVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 	#ifdef EXPANSIONMODVEHICLE
 		if ( !IsMissionHost() )
@@ -1571,7 +1530,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_COVER, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_COVER, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1689,7 +1648,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 	#endif
 	}
 
-	private void RPC_LockVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_LockVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 	#ifdef EXPANSIONMODVEHICLE
 		if ( !IsMissionHost() )
@@ -1697,7 +1656,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_LOCK, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_LOCK, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1756,7 +1715,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 	#endif
 	}
 
-	private void RPC_UnPairVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_UnPairVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 	#ifdef EXPANSIONMODVEHICLE
 		if ( !IsMissionHost() )
@@ -1764,7 +1723,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_UNPAIR, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_UNPAIR, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1816,14 +1775,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.ClearVehicleCargo, true );
 	}
 
-	private void RPC_ClearVehicleCargo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_ClearVehicleCargo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_CLEARCARGO, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_CLEARCARGO, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1895,14 +1854,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehiclesModuleRPC.SpawnVehicleKey, true );
 	}
 
-	private void RPC_SpawnVehicleKey( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_SpawnVehicleKey( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_VEHICLES_SPAWNKEY, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_SPAWNKEY, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1952,10 +1911,5 @@ class JMVehiclesModule: JMRenderableModuleBase
 	#else
 		return false;
 	#endif
-	}
-
-	array< ref JMVehicleMetaData > GetServerVehicles()
-	{
-		return m_Vehicles;
 	}
 }

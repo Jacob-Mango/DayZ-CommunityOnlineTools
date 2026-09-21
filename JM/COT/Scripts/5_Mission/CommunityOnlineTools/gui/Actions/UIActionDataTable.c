@@ -25,7 +25,7 @@
 //      {
 //          if ( eid != UIEvent.CLICK_RIGHT )
 //              return;
-//          m_Menu.ShowAt( m_Table.GetLastRightClickX(), m_Table.GetLastRightClickY() );
+//          m_Menu.OpenAt( m_Table.GetLastRightClickX(), m_Table.GetLastRightClickY() );
 //      }
 // =============================================================================
 class UIActionDataTable: UIActionBase
@@ -34,11 +34,9 @@ class UIActionDataTable: UIActionBase
 	protected Widget  m_BodyContainer;
 	protected Widget  m_HeaderRow;
 	protected Widget  m_Body;
-
 	protected ref array<string>  m_ColumnLabels;
 	protected ref array<float>   m_ColumnWidths;
 	protected ref array<Widget>  m_RowWidgets;
-
 	protected int m_SelectedRow;
 
 	//! Cursor position of the last right-click, in screen pixels. Captured
@@ -52,12 +50,60 @@ class UIActionDataTable: UIActionBase
 	protected int m_HoveredRow;
 	protected int m_LastHoverX;
 	protected int m_LastHoverY;
-
 	static const int COLOR_ROW_EVEN     = JMTheme.INK_800;
 	static const int COLOR_ROW_ODD      = JMTheme.INK_700;
 	static const int COLOR_ROW_SELECTED = JMTheme.ACCENT_WASH_STRONG;
-
 	static const int ROW_HEIGHT = 24;
+
+	int GetHoveredRow()
+	{
+		return m_HoveredRow;
+	}
+
+	int GetLastHoverX()
+	{
+		return m_LastHoverX;
+	}
+
+	int GetLastHoverY()
+	{
+		return m_LastHoverY;
+	}
+
+	int GetLastRightClickX()
+	{
+		return m_LastRightClickX;
+	}
+
+	int GetLastRightClickY()
+	{
+		return m_LastRightClickY;
+	}
+
+	int GetSelectedRow()
+	{
+		return m_SelectedRow;
+	}
+
+	protected bool IsChildOf( Widget w, Widget parent )
+	{
+		Widget cur = w;
+		while ( cur )
+		{
+			if ( cur == parent )
+				return true;
+			cur = cur.GetParent();
+		}
+		return false;
+	}
+
+	//! Define column headers and their fractional widths (should sum to ~1.0).
+	void SetColumns( notnull array<string> labels, notnull array<float> widths )
+	{
+		m_ColumnLabels.Copy( labels );
+		m_ColumnWidths.Copy( widths );
+		RebuildHeader();
+	}
 
 	override void OnInit()
 	{
@@ -77,14 +123,6 @@ class UIActionDataTable: UIActionBase
 		m_HoveredRow = -1;
 		m_LastHoverX = 0;
 		m_LastHoverY = 0;
-	}
-
-	//! Define column headers and their fractional widths (should sum to ~1.0).
-	void SetColumns( notnull array<string> labels, notnull array<float> widths )
-	{
-		m_ColumnLabels.Copy( labels );
-		m_ColumnWidths.Copy( widths );
-		RebuildHeader();
 	}
 
 	//! Add a data row. Values map to columns in order.
@@ -159,36 +197,6 @@ class UIActionDataTable: UIActionBase
 		m_RowWidgets.Clear();
 		m_SelectedRow = -1;
 		m_HoveredRow  = -1;
-	}
-
-	int GetSelectedRow()
-	{
-		return m_SelectedRow;
-	}
-
-	int GetLastRightClickX()
-	{
-		return m_LastRightClickX;
-	}
-
-	int GetLastRightClickY()
-	{
-		return m_LastRightClickY;
-	}
-
-	int GetHoveredRow()
-	{
-		return m_HoveredRow;
-	}
-
-	int GetLastHoverX()
-	{
-		return m_LastHoverX;
-	}
-
-	int GetLastHoverY()
-	{
-		return m_LastHoverY;
 	}
 
 	//! Rows are built from several widgets, so the pointer crosses a boundary
@@ -287,7 +295,7 @@ class UIActionDataTable: UIActionBase
 		return -1;
 	}
 
-	private void RebuildHeader()
+	protected void RebuildHeader()
 	{
 		if ( !m_HeaderContainer )
 			return;
@@ -340,17 +348,5 @@ class UIActionDataTable: UIActionBase
 				SetWidgetWidth( cellWidget, w );
 			}
 		}
-	}
-
-	private bool IsChildOf( Widget w, Widget parent )
-	{
-		Widget cur = w;
-		while ( cur )
-		{
-			if ( cur == parent )
-				return true;
-			cur = cur.GetParent();
-		}
-		return false;
 	}
 }

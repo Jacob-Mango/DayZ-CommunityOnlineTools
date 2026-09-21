@@ -1,9 +1,7 @@
 class JMWebhookQueueItem : Managed
 {
 	string m_Type;
-
 	int m_Time;
-
 	ref JMWebhookMessage m_Message;
 
 	// Optional target context for per-player/per-role filtering.
@@ -20,16 +18,6 @@ class JMWebhookQueueItem : Managed
 		m_TargetRole = targetRole;
 	}
 
-	string GetType()
-	{
-		return m_Type;
-	}
-
-	int GetTime()
-	{
-		return m_Time;
-	}
-
 	JMWebhookMessage GetMessage()
 	{
 		return m_Message;
@@ -44,25 +32,44 @@ class JMWebhookQueueItem : Managed
 	{
 		return m_TargetRole;
 	}
+
+	int GetTime()
+	{
+		return m_Time;
+	}
+
+	string GetType()
+	{
+		return m_Type;
+	}
 }
 
 class JMWebhookModule: JMModuleBase
 {
 	static ref JsonSerializer s_Serializer = new JsonSerializer();
-
-	private RestApi m_Core;
-
-	private ref map< string, ref set< JMWebhookConnection > > m_ConnectionMap;
-
-	private ref array< ref JMWebhookQueueItem > m_Queue;
-
-	private JMWebhookSerialize m_Settings;
-
-	private string m_ServerHostName;
+	protected RestApi m_Core;
+	protected ref map< string, ref set< JMWebhookConnection > > m_ConnectionMap;
+	protected ref array< ref JMWebhookQueueItem > m_Queue;
+	protected JMWebhookSerialize m_Settings;
+	protected string m_ServerHostName;
 
 	void JMWebhookModule()
 	{
 		m_Queue = new array< ref JMWebhookQueueItem >();
+	}
+
+	bool SetConnection( string name, string grpName, bool enabled )
+	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_3(this, "SetConnection").Add(name).Add(grpName).Add(enabled);
+		#endif
+
+		JMWebhookConnectionGroup group = m_Settings.Get( grpName );
+		if ( Assert_Null( group ) )
+			return false;
+
+		group.Set( name, enabled );
+		return true;
 	}
 
 	override void EnableUpdate()
@@ -236,7 +243,7 @@ class JMWebhookModule: JMModuleBase
 		return true;
 	}
 
-	private void FixConnectionMap()
+	protected void FixConnectionMap()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "FixConnectionMap");
@@ -261,20 +268,6 @@ class JMWebhookModule: JMModuleBase
 				mappedConnections.Insert( m_Settings.Connections[i].Types[j] );
 			}
 		}
-	}
-
-	bool SetConnection( string name, string grpName, bool enabled )
-	{
-		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_3(this, "SetConnection").Add(name).Add(grpName).Add(enabled);
-		#endif
-
-		JMWebhookConnectionGroup group = m_Settings.Get( grpName );
-		if ( Assert_Null( group ) )
-			return false;
-
-		group.Set( name, enabled );
-		return true;
 	}
 
 	bool RemoveConnection( string name, string grpName )
@@ -395,7 +388,7 @@ class JMWebhookModule: JMModuleBase
 		m_Queue.Insert( new JMWebhookQueueItem( connectionType, message, targetGUID, targetRole ) );
 	}
 
-	private void Thread_ProcessQueue()
+	protected void Thread_ProcessQueue()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Thread_ProcessQueue");

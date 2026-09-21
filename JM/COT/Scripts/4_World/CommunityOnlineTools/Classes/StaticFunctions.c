@@ -109,6 +109,19 @@ static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
 	return COT_PerformRayCast(from, to, ignore);
 }
 
+//! First surface along the camera's view within `distance`. The position-only pick, for a caller that
+//! wants "where is the admin looking" and nothing else; GetCursorPos() is the one that also steps
+//! around the player and sorts view vs geometry hits.
+static bool COT_CameraRaycast( float distance, out vector contactPos, Object ignore = NULL )
+{
+	vector from = g_Game.GetCurrentCameraPosition();
+	vector to = from + ( g_Game.GetCurrentCameraDirection() * distance );
+	vector contactDir;
+	int contactComponent;
+
+	return DayZPhysics.RaycastRV( from, to, contactPos, contactDir, contactComponent, NULL, NULL, ignore, false, true );
+}
+
 static vector GetCursorPos( Object ignore = NULL )
 {
 	vector rayStart = g_Game.GetCurrentCameraPosition();

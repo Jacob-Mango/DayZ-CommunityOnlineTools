@@ -2,21 +2,19 @@ class JMWebhookConnection : Managed
 {
 	string Name;
 	bool Enabled;
-	
 	[NonSerialized()]
 	JMWebhookConnectionGroup m_Group;
-	
 	[NonSerialized()]
 	RestContext m_Context;
-
-	string GetContextURL()
-	{
-		return m_Group.ContextURL;
-	}
 
 	string GetAddress()
 	{
 		return m_Group.Address;
+	}
+
+	string GetContextURL()
+	{
+		return m_Group.ContextURL;
 	}
 
 	void Remove()

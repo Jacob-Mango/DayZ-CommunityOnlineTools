@@ -11,37 +11,29 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	static int s_JMConfirmationCount;
 #endif
 
-	private Widget layoutRoot;
-	
-	private Managed m_Base;
-	
-	private TextWidget m_TextTitle;
-	private TextWidget m_TextMessage;
-	private EditBoxWidget m_EditBox;
+	protected Widget layoutRoot;
+	protected Managed m_Base;
+	protected TextWidget m_TextTitle;
+	protected TextWidget m_TextMessage;
+	protected EditBoxWidget m_EditBox;
 	//! The input drew its own box through vanilla's Editor style, which is the
 	//! olive menuButton nine-slice. It now uses the same fill/ring chrome as
 	//! every other COT input, so the two panels track the box's visibility.
-	private Widget m_EditBoxFill;
-	private Widget m_EditBoxRing;
-
-	private Widget m_Buttons1Panel;
-	private Widget m_Buttons2Panel;
-	private Widget m_Buttons3Panel;
-
-	private ButtonWidget m_Button1;
-	private ButtonWidget m_Button2;
-	private ButtonWidget m_Button3;
-
-	private TextWidget m_ButtonText1;
-	private TextWidget m_ButtonText2;
-	private TextWidget m_ButtonText3;
-
-	private string m_Callback1;
-	private string m_Callback2;
-	private string m_Callback3;
-
-	private string m_EditBoxValue;
-
+	protected Widget m_EditBoxFill;
+	protected Widget m_EditBoxRing;
+	protected Widget m_Buttons1Panel;
+	protected Widget m_Buttons2Panel;
+	protected Widget m_Buttons3Panel;
+	protected ButtonWidget m_Button1;
+	protected ButtonWidget m_Button2;
+	protected ButtonWidget m_Button3;
+	protected TextWidget m_ButtonText1;
+	protected TextWidget m_ButtonText2;
+	protected TextWidget m_ButtonText3;
+	protected string m_Callback1;
+	protected string m_Callback2;
+	protected string m_Callback3;
+	protected string m_EditBoxValue;
 	string m_SelectedCallback;
 
 	void JMConfirmation() 
@@ -72,6 +64,47 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if (s_JMConfirmationCount <= 0)
 			CF_Log.Info("JMConfirmation count: " + s_JMConfirmationCount);
 	#endif
+	}
+
+	string GetEditBoxValue()
+	{
+		return m_EditBoxValue;
+	}
+
+	//bool GetEditBoxValueFloat(out float value, float min = -float.MAX, float max = float.MAX)
+	bool GetEditBoxValueFloat(out float value, float min = -3.40282e+38, float max = 3.40282e+38)
+	{
+		if ( m_EditBoxValue == "" )
+			return false;
+
+		value = m_EditBoxValue.ToFloat();
+		if (value < min || value > max)
+			return false;
+
+		return true;
+	}
+
+	//bool GetEditBoxValueInt(out int value, int min = int.MIN, int max = int.MAX)
+	bool GetEditBoxValueInt(out int value, int min = -2147483648, int max = 2147483647)
+	{
+		if ( m_EditBoxValue == "" )
+			return false;
+
+		value = m_EditBoxValue.ToInt();
+		if (value < min || value > max)
+			return false;
+
+		return true;
+	}
+
+	Widget GetLayoutRoot() 
+	{
+		return layoutRoot;
+	}
+
+	string GetSelectedCallback()
+	{
+		return m_SelectedCallback;
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -335,48 +368,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		CommunityOnlineToolsBase.ForceDisableInputs(false);
 	}
 
-	string GetEditBoxValue()
-	{
-		return m_EditBoxValue;
-	}
-
-	//bool GetEditBoxValueFloat(out float value, float min = -float.MAX, float max = float.MAX)
-	bool GetEditBoxValueFloat(out float value, float min = -3.40282e+38, float max = 3.40282e+38)
-	{
-		if ( m_EditBoxValue == "" )
-			return false;
-
-		value = m_EditBoxValue.ToFloat();
-		if (value < min || value > max)
-			return false;
-
-		return true;
-	}
-
-	//bool GetEditBoxValueInt(out int value, int min = int.MIN, int max = int.MAX)
-	bool GetEditBoxValueInt(out int value, int min = -2147483648, int max = 2147483647)
-	{
-		if ( m_EditBoxValue == "" )
-			return false;
-
-		value = m_EditBoxValue.ToInt();
-		if (value < min || value > max)
-			return false;
-
-		return true;
-	}
-
-	string GetSelectedCallback()
-	{
-		return m_SelectedCallback;
-	}
-
-	Widget GetLayoutRoot() 
-	{
-		return layoutRoot;
-	}
-
-	private void ShowEditBox( bool show )
+	protected void ShowEditBox( bool show )
 	{
 		if ( m_EditBox )     m_EditBox.Show( show );
 		if ( m_EditBoxFill ) m_EditBoxFill.Show( show );

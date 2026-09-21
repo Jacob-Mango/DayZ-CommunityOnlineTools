@@ -24,17 +24,17 @@ class UIActionImageButtonToggle: UIActionImageButton
 	protected string m_ImageOff;
 	protected string m_ImageOn;
 
+	bool IsToggled()
+	{
+		return m_IsToggled;
+	}
+
 	void SetImageToggle( string imageOff, string imageOn )
 	{
 		m_ImageOff = imageOff;
 		m_ImageOn  = imageOn;
 
 		ApplyImage();
-	}
-
-	bool IsToggled()
-	{
-		return m_IsToggled;
 	}
 
 	//! Set the state without firing the callback - for restoring a remembered

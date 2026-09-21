@@ -208,7 +208,7 @@ class JMCompensationHelper
 	}
 #endif
 
-	private static JMLoadoutItem ProcessPlayerLoadout( PlayerBase player )
+	protected static JMLoadoutItem ProcessPlayerLoadout( PlayerBase player )
 	{
 		if ( !player )
 			return null;
@@ -260,7 +260,7 @@ class JMCompensationHelper
 		return item;
 	}
 
-	private static JMLoadoutItem ProcessVehicleLoadout( EntityAI vehicle )
+	protected static JMLoadoutItem ProcessVehicleLoadout( EntityAI vehicle )
 	{
 		if ( !vehicle )
 			return null;
@@ -303,7 +303,7 @@ class JMCompensationHelper
 		return item;
 	}
 
-	private static JMLoadoutSubItem ProcessSubItem( EntityAI parent )
+	protected static JMLoadoutSubItem ProcessSubItem( EntityAI parent )
 	{
 		if ( !parent )
 			return null;

@@ -6,9 +6,7 @@ class UIActionImageButton: UIActionButton
 	//  both come back once the hold is over. No fade - there is nothing here to
 	//  read, and a cut is what makes a fast second click still register.
 	static const float FEEDBACK_HOLD = 1.0;
-
 	protected ImageWidget m_Image;
-
 	protected string m_RestImage;
 	protected string m_FeedbackImage;
 	protected int    m_FeedbackColor;
@@ -16,10 +14,70 @@ class UIActionImageButton: UIActionButton
 	protected float  m_FeedbackHold;
 	protected bool   m_FeedbackActive;
 	protected float  m_FeedbackTimer;
-
 	protected bool   m_PulseActive;
 	protected float  m_PulseTimer;
 	protected float  m_PulseDuration;
+
+	//! Double click to leave the button firing its own callback once a
+	//! second, double click again to stop. Opt-in per button (see
+	//! UIActionManager.CreateRefreshButton) rather than on by default: a
+	//! second click on a delete or apply button must never arm anything.
+	static const int   AUTO_REPEAT_DOUBLE_CLICK_MS = 400;
+	static const float AUTO_REPEAT_INTERVAL        = 1.0;
+	protected bool  m_AutoRepeatEnabled;
+
+	//! Spin the icon on every CLICK, including the ones auto-repeat fires, so
+	//! a refresh handler does not have to animate its own button.
+	protected bool  m_SpinOnClick;
+	protected bool  m_AutoRepeatActive;
+	protected float m_AutoRepeatTimer;
+	protected int   m_LastClickTime;
+
+	bool IsAutoRepeating()
+	{
+		return m_AutoRepeatActive;
+	}
+
+	bool IsShowingFeedback()
+	{
+		return m_FeedbackActive;
+	}
+
+	//! Pill colour while the feedback face is up.
+	void SetFeedbackColor( int color )
+	{
+		m_FeedbackColor = color;
+	}
+
+	//! Seconds the check mark stays up.
+	void SetFeedbackDuration( float seconds )
+	{
+		m_FeedbackHold = Math.Max( 0.1, seconds );
+	}
+
+	//! Glyph shown while the feedback face is up. Defaults to a check mark.
+	void SetFeedbackIcon( string image )
+	{
+		m_FeedbackImage = image;
+	}
+
+	void SetImage( string image )
+	{
+		m_RestImage = image;
+
+		// Mid-feedback the check mark owns the widget; the new resting icon
+		// lands when the swap ends, so a refresh cannot eat the confirmation.
+		if ( m_FeedbackActive )
+			return;
+
+		if ( m_Image )
+			m_Image.LoadImageFile( 0, image );
+	}
+
+	void SetSpinOnClick( bool enable )
+	{
+		m_SpinOnClick = enable;
+	}
 
 	override void OnInit()
 	{
@@ -40,42 +98,6 @@ class UIActionImageButton: UIActionButton
 		m_PulseActive   = false;
 		m_PulseTimer    = 0;
 		m_PulseDuration = 2.0;
-	}
-
-	void SetImage( string image )
-	{
-		m_RestImage = image;
-
-		// Mid-feedback the check mark owns the widget; the new resting icon
-		// lands when the swap ends, so a refresh cannot eat the confirmation.
-		if ( m_FeedbackActive )
-			return;
-
-		if ( m_Image )
-			m_Image.LoadImageFile( 0, image );
-	}
-
-	//! Glyph shown while the feedback face is up. Defaults to a check mark.
-	void SetFeedbackIcon( string image )
-	{
-		m_FeedbackImage = image;
-	}
-
-	//! Pill colour while the feedback face is up.
-	void SetFeedbackColor( int color )
-	{
-		m_FeedbackColor = color;
-	}
-
-	//! Seconds the check mark stays up.
-	void SetFeedbackDuration( float seconds )
-	{
-		m_FeedbackHold = Math.Max( 0.1, seconds );
-	}
-
-	bool IsShowingFeedback()
-	{
-		return m_FeedbackActive;
 	}
 
 	//! Start the swap. Called again while the check mark is already up it just
@@ -159,6 +181,81 @@ class UIActionImageButton: UIActionButton
 		TriggerSpin( Math.Max( 1, revolutions ) );
 	}
 
+	override bool CallEvent( UIEvent eid )
+	{
+		if ( m_SpinOnClick && eid == UIEvent.CLICK )
+			TriggerSpin( 2 );
+
+		return super.CallEvent( eid );
+	}
+
+	//! Allow this button to be armed by a double click. Only buttons whose
+	//! action is safe to repeat unattended should get this.
+	void EnableAutoRepeat( bool enable )
+	{
+		m_AutoRepeatEnabled = enable;
+
+		if ( !enable )
+			StopAutoRepeat();
+	}
+
+	void StopAutoRepeat()
+	{
+		if ( !m_AutoRepeatActive )
+			return;
+
+		m_AutoRepeatActive = false;
+		m_AutoRepeatTimer  = 0;
+
+		SetColor( m_SavedFillColor );
+	}
+
+	protected void StartAutoRepeat()
+	{
+		m_AutoRepeatActive = true;
+
+		//! Counts a full interval before the first repeat - the click that
+		//! armed it has already fired one.
+		m_AutoRepeatTimer = 0;
+
+		//! Tinted for as long as it is armed, because a button that keeps
+		//! firing on its own has to look different from one that does not.
+		SetColor( JMTheme.ACCENT );
+	}
+
+	//! Arming needs a double click (a single click on a refresh button has
+	//! to stay a single refresh, not a trap that starts looping). Stopping
+	//! does not - once it is already firing on its own, any click is
+	//! obviously meant to stop that, not to start counting toward a second
+	//! double click.
+	override bool OnClick( Widget w, int x, int y, int button )
+	{
+		bool ret = super.OnClick( w, x, y, button );
+
+		if ( !m_AutoRepeatEnabled || w != m_Button )
+			return ret;
+
+		if ( m_AutoRepeatActive )
+		{
+			StopAutoRepeat();
+			m_LastClickTime = 0;
+			return ret;
+		}
+
+		int now = g_Game.GetTime();
+
+		if ( now - m_LastClickTime <= AUTO_REPEAT_DOUBLE_CLICK_MS )
+		{
+			m_LastClickTime = 0;
+			StartAutoRepeat();
+			return ret;
+		}
+
+		m_LastClickTime = now;
+
+		return ret;
+	}
+
 	override void AnimateError()
 	{
 		SetColor( JMTheme.DANGER );
@@ -173,6 +270,11 @@ class UIActionImageButton: UIActionButton
 		// A form closed mid-swap would come back still wearing the check mark.
 		ResetFeedback();
 		StopPulse();
+
+		//! Closing the panel/menu/module that owns the button is what ends
+		//! an armed refresh - it must not keep firing at whatever is behind
+		//! it, nor come back still armed the next time it is opened.
+		StopAutoRepeat();
 	}
 
 	override void Update( float timeSlice )
@@ -181,6 +283,29 @@ class UIActionImageButton: UIActionButton
 
 		if ( m_Image && m_SpinActive )
 			m_Image.SetRotation( 0, 0, m_SpinAngle );
+
+		if ( m_AutoRepeatActive )
+		{
+			//! Stop rather than pause when the owner goes away. A button
+			//! whose widget is gone or hidden has no panel left to refresh,
+			//! and OnHide does not fire for every way that can happen.
+			if ( !layoutRoot || !layoutRoot.IsVisibleHierarchy() )
+			{
+				StopAutoRepeat();
+			}
+			else
+			{
+				m_AutoRepeatTimer += timeSlice;
+
+				if ( m_AutoRepeatTimer >= AUTO_REPEAT_INTERVAL )
+				{
+					m_AutoRepeatTimer = 0;
+
+					AnimateSpin();
+					CallEvent( UIEvent.CLICK );
+				}
+			}
+		}
 
 		if ( m_PulseActive )
 		{

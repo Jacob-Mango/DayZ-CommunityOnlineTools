@@ -1,64 +1,51 @@
 #ifdef JM_CommunityOnlineTools
-// Example: Creating a UIActionCard panel with header action buttons (Refresh / Apply / Delete / Save)
+// Example: a card with action buttons in its title bar. Premade Refresh / Apply / Delete
+// buttons pack right-to-left, and AddCardHeaderAction takes any Lucide icon.
 modded class JMPlayerForm
 {
-	protected UIActionCard m_HeaderButtonDemoCard;
-	protected UIActionImageButton m_CardRefreshBtn;
-	protected UIActionImageButton m_CardApplyBtn;
-	protected UIActionImageButton m_CardDeleteBtn;
-
-	protected void InitHeaderButtonsCardDemo( Widget parent )
+	override void OnCreate()
 	{
-		// 1. Create UIActionCard container
-		m_HeaderButtonDemoCard = UIActionManager.CreateCard( parent, "Card Title Bar Action Buttons" );
-		if ( !m_HeaderButtonDemoCard )
-			return;
+		super.OnCreate();
 
-		// 2. Add premade action buttons directly into card header strip (packed right-to-left)
-		m_CardRefreshBtn = m_HeaderButtonDemoCard.AddRefreshButton( this, "OnClick_DemoCardRefresh", "Refresh section data" );
-		m_CardApplyBtn   = m_HeaderButtonDemoCard.AddApplyButton( this, "OnClick_DemoCardApply", "Apply pending changes" );
-		m_CardDeleteBtn  = m_HeaderButtonDemoCard.AddDeleteButton( this, "OnClick_DemoCardDelete", "Wipe section data" );
-
-		// 3. Add custom header action button using Lucide icon
-		UIActionImageButton customHeaderBtn = m_HeaderButtonDemoCard.AddCardHeaderAction( JMConstants.Lucide( "download" ), this, "OnClick_DemoCardExport", "Export configuration" );
-
-		Widget cardContent = m_HeaderButtonDemoCard.GetContent();
-		if ( cardContent )
-		{
-			UIActionManager.CreateText( cardContent, "Notice:", "Header action buttons sit inside the card title bar." );
-		}
+		AddTab( "Header", JMConstants.Lucide( "panel-top" ), "BuildHeaderButtonsTab" );
 	}
 
-	void OnClick_DemoCardRefresh( UIEvent eid, UIActionBase action )
+	void BuildHeaderButtonsTab( Widget parentPanel )
 	{
-		if ( eid != UIEvent.CLICK )
+		UIActionCard card = UIActionManager.CreateCard( parentPanel, "Card Title Bar Buttons" );
+		if ( !card )
 			return;
 
-		action.AnimateSpin(); // 360 degree spin animation
+		card.AddRefreshButton( this, "OnClick_DemoRefresh", "Refresh section data" );
+		card.AddApplyButton( this, "OnClick_DemoApply", "Apply pending changes" );
+		card.AddDeleteButton( this, "OnClick_DemoDelete", "Wipe section data" );
+		card.AddCardHeaderAction( JMConstants.Lucide( "download" ), this, "OnClick_DemoExport", "Export configuration" );
+
+		UIActionManager.CreateText( card.GetContent(), "Notice:", "The buttons sit in the card's title bar." );
 	}
 
-	void OnClick_DemoCardApply( UIEvent eid, UIActionBase action )
+	void OnClick_DemoRefresh( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		action.AnimateFeedback(); // Green checkmark flash
+		if ( eid == UIEvent.CLICK )
+			action.AnimateSpin(); // 360 degree spin
 	}
 
-	void OnClick_DemoCardDelete( UIEvent eid, UIActionBase action )
+	void OnClick_DemoApply( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		action.AnimateFeedback();
+		if ( eid == UIEvent.CLICK )
+			action.AnimateFeedback(); // green check flash
 	}
 
-	void OnClick_DemoCardExport( UIEvent eid, UIActionBase action )
+	void OnClick_DemoDelete( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
+		if ( eid == UIEvent.CLICK )
+			action.AnimateFeedback();
+	}
 
-		action.AnimateFeedback();
+	void OnClick_DemoExport( UIEvent eid, UIActionBase action )
+	{
+		if ( eid == UIEvent.CLICK )
+			action.AnimateFeedback();
 	}
 }
 #endif

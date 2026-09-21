@@ -35,12 +35,10 @@ class UIActionDropdown: UIActionBase
 	protected TextWidget   m_SelectedText;
 	protected ButtonWidget m_Toggle;
 	protected ImageWidget  m_ToggleImage;
-
 	protected Widget m_ListAnchor;
 	protected Widget           m_ListPanel;
 	protected ScrollWidget     m_Scroller;
 	protected GridSpacerWidget m_List;
-
 	protected ref array<ref JMDropdownEntry> m_Entries;
 	protected int   m_SelectedIndex;
 	protected int   m_HoveredRow;     // -1 when nothing highlighted
@@ -52,7 +50,6 @@ class UIActionDropdown: UIActionBase
 
 	//! Gap kept between an open list and the edges of its anchor.
 	static const float LIST_EDGE_MARGIN = 4;
-
 	static const int COLOR_ROW_NORMAL = JMTheme.SURFACE_OVERLAY;
 	static const int COLOR_ROW_HOVER  = JMTheme.ACCENT_WASH;
 	static const int COLOR_ROW_SELECT = JMTheme.SELECTED_FILL;
@@ -69,6 +66,136 @@ class UIActionDropdown: UIActionBase
 	static const int TEXT_ICON_GAP     = 20;
 	static const int TEXT_OFFSET_ICON  = ICON_RIGHT_EDGE + TEXT_ICON_GAP;   // 40
 	static const int TEXT_OFFSET_PLAIN = 8;    // no icon: just a left padding
+
+	//! Pixels per wheel notch. A direct GetVScrollPos/VScrollToPos move rather
+	//! than VScrollStep: VScrollStep's own step size is engine-controlled and
+	//! landed several rows at once per notch, which read as the list jumping
+	//! rather than scrolling; this also sidesteps VScrollStep's step direction
+	//! disagreeing with `wheel`'s own sign, which is what had the wheel scroll
+	//! backwards from what it showed - scrolling up moved the list down.
+	static const float WHEEL_PIXEL_STEP = 40.0;
+
+	//! The open list is parented to the ANCHOR, not to this control, so that it
+	//! floats above whatever the host is drawing instead of being clipped by
+	//! it. That also means unlinking the control does not take the panel with
+	//! it - a dropdown built inside a section that gets rebuilt would leave one
+	//! orphan panel behind per rebuild, still handled by a dead script. Take it
+	//! down here.
+	void ~UIActionDropdown()
+	{
+		if ( !g_Game )
+			return;
+
+		if ( m_ListPanel )
+			m_ListPanel.Unlink();
+	}
+
+	string GetSelectedText()
+	{
+		if ( m_SelectedIndex < 0 || m_SelectedIndex >= m_Entries.Count() )
+			return "";
+		return m_Entries[ m_SelectedIndex ].Text;
+	}
+
+	//! Is `widget` any part of the collapsed control - the label, the field, the
+	//! selected icon or text, the chevron? The open list is NOT part of it: it
+	//! is parented to the list anchor rather than to layoutRoot, so the walk
+	//! below never reaches it.
+	protected bool IsHeaderWidget( Widget widget )
+	{
+		if ( !widget || !layoutRoot )
+			return false;
+
+		Widget w = widget;
+		while ( w )
+		{
+			if ( w == layoutRoot )
+				return true;
+
+			w = w.GetParent();
+		}
+
+		return false;
+	}
+
+	protected bool IsListWidget( Widget widget )
+	{
+		if ( !widget || !m_ListPanel )
+			return false;
+
+		Widget w = widget;
+		while ( w )
+		{
+			if ( w == m_ListPanel )
+				return true;
+
+			w = w.GetParent();
+		}
+
+		return false;
+	}
+
+	bool IsOpen()
+	{
+		return m_Open;
+	}
+
+	void SetEntries( notnull array<ref JMDropdownEntry> entries )
+	{
+		m_Entries.Clear();
+		foreach ( JMDropdownEntry e : entries )
+			m_Entries.Insert( e );
+
+		m_SelectedIndex = -1;
+		RebuildList();
+	}
+
+	protected void SetHoveredRow( int idx )
+	{
+		m_HoveredRow = idx;
+		RefreshRowColors();
+	}
+
+	// Convenience for plain string lists (parity with UIActionDropdownList /
+	// UIActionSelectBox APIs).
+	void SetItems( notnull array<string> items )
+	{
+		m_Entries.Clear();
+		foreach ( string s : items )
+			m_Entries.Insert( new JMDropdownEntry( s ) );
+
+		m_SelectedIndex = -1;
+		RebuildList();
+		UpdateHeader();
+	}
+
+	protected void SetOpen( bool open )
+	{
+		m_Open = open;
+
+		if ( m_ListPanel )
+		{
+			if ( open )
+			{
+				m_OpenDelay = 0.15;
+				m_ListPanel.Show( true );
+				m_ListPanel.SetSort( 9999, true );
+				// Start keyboard-nav highlight at the current selection so
+				// the user's first arrow press moves from a sensible place.
+				m_HoveredRow = m_SelectedIndex;
+				RefreshRowColors();
+			}
+			// Hide is deferred until animation completes (handled in Update).
+		}
+
+		if ( m_ToggleImage )
+		{
+			if ( open )
+				m_ToggleImage.SetRotation( 0, 0, 180 );
+			else
+				m_ToggleImage.SetRotation( 0, 0, 0 );
+		}
+	}
 
 	override void OnInit()
 	{
@@ -94,21 +221,6 @@ class UIActionDropdown: UIActionBase
 			m_ToggleImage.LoadImageFile( 0, JMConstants.ICON_CHEVRON_DOWN );
 			m_ToggleImage.SetImage( 0 );
 		}
-	}
-
-	//! The open list is parented to the ANCHOR, not to this control, so that it
-	//! floats above whatever the host is drawing instead of being clipped by
-	//! it. That also means unlinking the control does not take the panel with
-	//! it - a dropdown built inside a section that gets rebuilt would leave one
-	//! orphan panel behind per rebuild, still handled by a dead script. Take it
-	//! down here.
-	void ~UIActionDropdown()
-	{
-		if ( !g_Game )
-			return;
-
-		if ( m_ListPanel )
-			m_ListPanel.Unlink();
 	}
 
 	void InitList( notnull Widget listAnchor )
@@ -165,29 +277,6 @@ class UIActionDropdown: UIActionBase
 		RebuildList();
 	}
 
-	void SetEntries( notnull array<ref JMDropdownEntry> entries )
-	{
-		m_Entries.Clear();
-		foreach ( JMDropdownEntry e : entries )
-			m_Entries.Insert( e );
-
-		m_SelectedIndex = -1;
-		RebuildList();
-	}
-
-	// Convenience for plain string lists (parity with UIActionDropdownList /
-	// UIActionSelectBox APIs).
-	void SetItems( notnull array<string> items )
-	{
-		m_Entries.Clear();
-		foreach ( string s : items )
-			m_Entries.Insert( new JMDropdownEntry( s ) );
-
-		m_SelectedIndex = -1;
-		RebuildList();
-		UpdateHeader();
-	}
-
 	void ClearEntries()
 	{
 		m_Entries.Clear();
@@ -212,11 +301,6 @@ class UIActionDropdown: UIActionBase
 		return m_SelectedIndex;
 	}
 
-	bool IsOpen()
-	{
-		return m_Open;
-	}
-
 	//! The base class's IsVisible() reads layoutRoot, which here is the dropdown
 	//! button itself - visible whenever the control is on screen, whether or
 	//! not its list is expanded. m_Open tracks the list, which is what the
@@ -239,13 +323,6 @@ class UIActionDropdown: UIActionBase
 		SetOpen( false );
 	}
 
-	string GetSelectedText()
-	{
-		if ( m_SelectedIndex < 0 || m_SelectedIndex >= m_Entries.Count() )
-			return "";
-		return m_Entries[ m_SelectedIndex ].Text;
-	}
-
 	override void SetSelection( int i, bool sendEvent = true )
 	{
 		if ( m_Entries.Count() == 0 )
@@ -266,35 +343,7 @@ class UIActionDropdown: UIActionBase
 			CallEvent( UIEvent.CHANGE );
 	}
 
-	private void SetOpen( bool open )
-	{
-		m_Open = open;
-
-		if ( m_ListPanel )
-		{
-			if ( open )
-			{
-				m_OpenDelay = 0.15;
-				m_ListPanel.Show( true );
-				m_ListPanel.SetSort( 9999, true );
-				// Start keyboard-nav highlight at the current selection so
-				// the user's first arrow press moves from a sensible place.
-				m_HoveredRow = m_SelectedIndex;
-				RefreshRowColors();
-			}
-			// Hide is deferred until animation completes (handled in Update).
-		}
-
-		if ( m_ToggleImage )
-		{
-			if ( open )
-				m_ToggleImage.SetRotation( 0, 0, 180 );
-			else
-				m_ToggleImage.SetRotation( 0, 0, 0 );
-		}
-	}
-
-	private void UpdateHeader()
+	protected void UpdateHeader()
 	{
 		if ( m_SelectedIndex < 0 || m_SelectedIndex >= m_Entries.Count() )
 		{
@@ -326,7 +375,7 @@ class UIActionDropdown: UIActionBase
 		}
 	}
 
-	private void RebuildList()
+	protected void RebuildList()
 	{
 		if ( !m_List )
 			return;
@@ -426,14 +475,6 @@ class UIActionDropdown: UIActionBase
 		return super.OnKeyPress( w, x, y, key );
 	}
 
-	//! Pixels per wheel notch. A direct GetVScrollPos/VScrollToPos move rather
-	//! than VScrollStep: VScrollStep's own step size is engine-controlled and
-	//! landed several rows at once per notch, which read as the list jumping
-	//! rather than scrolling; this also sidesteps VScrollStep's step direction
-	//! disagreeing with `wheel`'s own sign, which is what had the wheel scroll
-	//! backwards from what it showed - scrolling up moved the list down.
-	static const float WHEEL_PIXEL_STEP = 40.0;
-
 	override bool OnMouseWheel( Widget w, int x, int y, int wheel )
 	{
 		if ( m_Open && m_Scroller && m_ListPanel && m_ListPanel.IsVisible() )
@@ -479,12 +520,6 @@ class UIActionDropdown: UIActionBase
 		return -1;
 	}
 
-	protected void SetHoveredRow( int idx )
-	{
-		m_HoveredRow = idx;
-		RefreshRowColors();
-	}
-
 	protected void RefreshRowColors()
 	{
 		if ( !m_List )
@@ -502,27 +537,6 @@ class UIActionDropdown: UIActionBase
 			child = child.GetSibling();
 			i++;
 		}
-	}
-
-	//! Is `widget` any part of the collapsed control - the label, the field, the
-	//! selected icon or text, the chevron? The open list is NOT part of it: it
-	//! is parented to the list anchor rather than to layoutRoot, so the walk
-	//! below never reaches it.
-	protected bool IsHeaderWidget( Widget widget )
-	{
-		if ( !widget || !layoutRoot )
-			return false;
-
-		Widget w = widget;
-		while ( w )
-		{
-			if ( w == layoutRoot )
-				return true;
-
-			w = w.GetParent();
-		}
-
-		return false;
 	}
 
 	//! The whole control opens the list, not just the 24px chevron.
@@ -664,23 +678,6 @@ class UIActionDropdown: UIActionBase
 				}
 			}
 		}
-	}
-
-	protected bool IsListWidget( Widget widget )
-	{
-		if ( !widget || !m_ListPanel )
-			return false;
-
-		Widget w = widget;
-		while ( w )
-		{
-			if ( w == m_ListPanel )
-				return true;
-
-			w = w.GetParent();
-		}
-
-		return false;
 	}
 
 	override bool IsFocusWidget( Widget widget )

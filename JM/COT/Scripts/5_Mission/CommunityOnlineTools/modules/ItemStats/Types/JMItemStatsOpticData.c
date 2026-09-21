@@ -2,7 +2,6 @@ class JMItemStatsOpticData: JMItemStatsBaseData
 {
     vector m_RecoilModifier;
     vector m_SwayModifier;
-
     ref JMItemStatsOpticsInfoData m_OpticsInfo;
 
 	void JMItemStatsOpticData(string path, string name)

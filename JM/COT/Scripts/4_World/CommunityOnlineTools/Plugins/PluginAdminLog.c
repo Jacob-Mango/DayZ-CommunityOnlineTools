@@ -1,8 +1,7 @@
 modded class PluginAdminLog
 {
-	private JMWebhookModule m_Webhook;
-
-	private string m_LoggingType;
+	protected JMWebhookModule m_Webhook;
+	protected string m_LoggingType;
 
 	void SetWebhook( JMWebhookModule webhook )
 	{

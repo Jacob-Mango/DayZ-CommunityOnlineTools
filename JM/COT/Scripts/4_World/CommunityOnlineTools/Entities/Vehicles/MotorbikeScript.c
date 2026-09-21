@@ -6,9 +6,8 @@
 modded class MotorbikeScript
 {
 	static ref CF_DoublyLinkedNodes_WeakRef<MotorbikeScript> s_JM_AllBikes = new CF_DoublyLinkedNodes_WeakRef<MotorbikeScript>();
-
 	ref CF_DoublyLinkedNode_WeakRef<MotorbikeScript> s_JM_Node;
-	private bool m_JM_WasDestroyed = false;
+	protected bool m_JM_WasDestroyed = false;
 
 	// Tracks the last player who entered the driver seat (non-Expansion fallback)
 	string m_JM_LastDriverUID;
@@ -49,7 +48,7 @@ modded class MotorbikeScript
 		}
 	}
 
-	private void CheckAndCreateCompensation()
+	protected void CheckAndCreateCompensation()
 	{
 		string ownerSteamID = "";
 

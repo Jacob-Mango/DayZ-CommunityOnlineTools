@@ -62,7 +62,16 @@ class JMServerStats
 	//! Stats older than this are stale enough not to be worth showing - the
 	//! server stopped broadcasting, or this client never had the permission to
 	//! receive them. Two missed broadcasts plus slack.
-	private static const int STALE_AFTER_MS = 8000;
+	protected static const int STALE_AFTER_MS = 8000;
+
+	//! False until the first broadcast lands, and again once they stop coming.
+	static bool IsValid()
+	{
+		if ( LastUpdateMs == 0 )
+			return false;
+
+		return ( g_Game.GetTime() - LastUpdateMs ) < STALE_AFTER_MS;
+	}
 
 	static void Set( float average, float low, float high, int maxFPS )
 	{
@@ -80,15 +89,6 @@ class JMServerStats
 		OnePercentHigh = 0;
 		MaxFPS = 0;
 		LastUpdateMs = 0;
-	}
-
-	//! False until the first broadcast lands, and again once they stop coming.
-	static bool IsValid()
-	{
-		if ( LastUpdateMs == 0 )
-			return false;
-
-		return ( g_Game.GetTime() - LastUpdateMs ) < STALE_AFTER_MS;
 	}
 
 	//! Colour for an fps value, from the thresholds above.

@@ -35,21 +35,16 @@ class UIActionBadge: UIActionBase
 	//! without turning into a second status colour.
 	static const float HOVER_LIFT = 0.35;
 
-	override void OnInit()
+	bool IsClickable()
 	{
-		super.OnInit();
+		return m_Clickable;
+	}
 
-		Class.CastTo( m_Label,      layoutRoot.FindAnyWidget( "action_label"  ) );
-		Class.CastTo( m_Pill,       layoutRoot.FindAnyWidget( "action_pill"   ) );
-		Class.CastTo( m_StatusText, layoutRoot.FindAnyWidget( "action"        ) );
-		Class.CastTo( m_Button,     layoutRoot.FindAnyWidget( "action_button" ) );
+	void SetBadgeColor( int color )
+	{
+		m_PillColor = color;
 
-		m_Clickable = false;
-		m_Hovered   = false;
-		m_PillColor = JMTheme.SUCCESS_DIM;
-
-		if ( m_Button )
-			m_Button.Show( false );
+		ApplyPillColor();
 	}
 
 	//! Turn the chip into a control. The hit area covers the whole badge, so
@@ -67,18 +62,6 @@ class UIActionBadge: UIActionBase
 		ApplyPillColor();
 	}
 
-	bool IsClickable()
-	{
-		return m_Clickable;
-	}
-
-	override void SetLabel( string text )
-	{
-		text = Widget.TranslateString( text );
-		if ( m_Label )
-			m_Label.SetText( text );
-	}
-
 	//! Set the badge text and background color in one call.
 	void SetStatus( string status, int color = JMTheme.SUCCESS_DIM )
 	{
@@ -87,6 +70,30 @@ class UIActionBadge: UIActionBase
 			m_StatusText.SetText( m_StatusValue );
 
 		SetBadgeColor( color );
+	}
+
+	override void OnInit()
+	{
+		super.OnInit();
+
+		Class.CastTo( m_Label,      layoutRoot.FindAnyWidget( "action_label"  ) );
+		Class.CastTo( m_Pill,       layoutRoot.FindAnyWidget( "action_pill"   ) );
+		Class.CastTo( m_StatusText, layoutRoot.FindAnyWidget( "action"        ) );
+		Class.CastTo( m_Button,     layoutRoot.FindAnyWidget( "action_button" ) );
+
+		m_Clickable = false;
+		m_Hovered   = false;
+		m_PillColor = JMTheme.SUCCESS_DIM;
+
+		if ( m_Button )
+			m_Button.Show( false );
+	}
+
+	override void SetLabel( string text )
+	{
+		text = Widget.TranslateString( text );
+		if ( m_Label )
+			m_Label.SetText( text );
 	}
 
 	override void SetText( string text )
@@ -99,13 +106,6 @@ class UIActionBadge: UIActionBase
 	override string GetText()
 	{
 		return m_StatusValue;
-	}
-
-	void SetBadgeColor( int color )
-	{
-		m_PillColor = color;
-
-		ApplyPillColor();
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )

@@ -252,7 +252,7 @@ class JMAntiCheatKillHook
 		victim.COT_SetLastHitSnapshot( evt, g_Game.GetTime() );
 	}
 
-	private static void Enqueue( JMAntiCheatKillEvent evt )
+	protected static void Enqueue( JMAntiCheatKillEvent evt )
 	{
 		if ( Pending.Count() > 200 )
 			Pending.Remove( 0 ); // drop oldest

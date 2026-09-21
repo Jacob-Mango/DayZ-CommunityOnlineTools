@@ -41,11 +41,9 @@ class UIActionTimePicker: UIActionBase
 	protected EditBoxWidget m_Hours;
 	protected EditBoxWidget m_Minutes;
 	protected EditBoxWidget m_Seconds;
-
 	protected Widget m_HoursChrome;
 	protected Widget m_MinutesChrome;
 	protected Widget m_SecondsChrome;
-
 	protected int m_H;
 	protected int m_M;
 	protected int m_S;
@@ -62,14 +60,63 @@ class UIActionTimePicker: UIActionBase
 	//! Per-field text watch driving the deferred commit.
 	protected ref array<string> m_LastText;
 	protected ref array<float>  m_IdleTime;
-
 	protected bool m_WasPressed;
-
 
 	//! Seconds a field must sit unchanged before it is normalised. Committing on
 	//! every keystroke rewrites the box mid-entry, which is how "20" typed into
 	//! seconds used to collapse to 0.
 	static const float COMMIT_DELAY = 0.6;
+
+	int GetHours()   { return m_H; }
+
+	int GetMinutes() { return m_M; }
+
+	int GetSeconds() { return m_S; }
+
+	int GetTotalSeconds()
+	{
+		return m_H * 3600 + m_M * 60 + m_S;
+	}
+
+	protected void SetFields( int h, int m, int s, bool repaintEditing )
+	{
+		// Carry overflow/underflow through a single total.
+		int total = h * 3600 + m * 60 + s;
+		total = Math.Max( 0, total );
+
+		// Enforce's '/' is floating point even for two ints, so the usual
+		// "total / 3600 * 3600" trick does not truncate and the remainders come
+		// out as zero - 100 seconds normalised to 00:00:00 instead of 00:01:40.
+		// Integer division has to be spelled out.
+		int hours = Math.Floor( total / 3600 );
+		int rest  = total - hours * 3600;
+		int mins  = Math.Floor( rest / 60 );
+		int secs  = rest - mins * 60;
+
+		m_H = Math.Clamp( hours, 0, m_MaxHours );
+		m_M = Math.Clamp( mins,  0, 59 );
+		m_S = Math.Clamp( secs,  0, 59 );
+
+		int hDigits = 2;
+		if ( m_H >= 100 )
+			hDigits = 3;
+
+		PadField( 0, m_Hours,   m_H, hDigits, repaintEditing );
+		PadField( 1, m_Minutes, m_M, 2,       repaintEditing );
+		PadField( 2, m_Seconds, m_S, 2,       repaintEditing );
+	}
+
+	//! Set max hours (e.g. 24 for time-of-day, 9999 for duration).
+	void SetMaxHours( int max )
+	{
+		m_MaxHours = Math.Max( 0, max );
+		SetFields( m_H, m_M, m_S, true );
+	}
+
+	void SetTotalSeconds( int totalSeconds )
+	{
+		SetFields( 0, 0, Math.Max( 0, totalSeconds ), true );
+	}
 
 	override void OnInit()
 	{
@@ -102,34 +149,12 @@ class UIActionTimePicker: UIActionBase
 
 	}
 
-
 	override void SetLabel( string text )
 	{
 		text = Widget.TranslateString( text );
 		if ( m_Label )
 			m_Label.SetText( text );
 	}
-
-	//! Set max hours (e.g. 24 for time-of-day, 9999 for duration).
-	void SetMaxHours( int max )
-	{
-		m_MaxHours = Math.Max( 0, max );
-		SetFields( m_H, m_M, m_S, true );
-	}
-
-	void SetTotalSeconds( int totalSeconds )
-	{
-		SetFields( 0, 0, Math.Max( 0, totalSeconds ), true );
-	}
-
-	int GetTotalSeconds()
-	{
-		return m_H * 3600 + m_M * 60 + m_S;
-	}
-
-	int GetHours()   { return m_H; }
-	int GetMinutes() { return m_M; }
-	int GetSeconds() { return m_S; }
 
 	// -------------------------------------------------------------------------
 	//  Polling
@@ -283,35 +308,7 @@ class UIActionTimePicker: UIActionBase
 		m_LastText.Set( field, box.GetText() );
 	}
 
-	private void SetFields( int h, int m, int s, bool repaintEditing )
-	{
-		// Carry overflow/underflow through a single total.
-		int total = h * 3600 + m * 60 + s;
-		total = Math.Max( 0, total );
-
-		// Enforce's '/' is floating point even for two ints, so the usual
-		// "total / 3600 * 3600" trick does not truncate and the remainders come
-		// out as zero - 100 seconds normalised to 00:00:00 instead of 00:01:40.
-		// Integer division has to be spelled out.
-		int hours = Math.Floor( total / 3600 );
-		int rest  = total - hours * 3600;
-		int mins  = Math.Floor( rest / 60 );
-		int secs  = rest - mins * 60;
-
-		m_H = Math.Clamp( hours, 0, m_MaxHours );
-		m_M = Math.Clamp( mins,  0, 59 );
-		m_S = Math.Clamp( secs,  0, 59 );
-
-		int hDigits = 2;
-		if ( m_H >= 100 )
-			hDigits = 3;
-
-		PadField( 0, m_Hours,   m_H, hDigits, repaintEditing );
-		PadField( 1, m_Minutes, m_M, 2,       repaintEditing );
-		PadField( 2, m_Seconds, m_S, 2,       repaintEditing );
-	}
-
-	private void PadField( int field, EditBoxWidget box, int value, int digits, bool force )
+	protected void PadField( int field, EditBoxWidget box, int value, int digits, bool force )
 	{
 		if ( !box )
 			return;
@@ -329,7 +326,7 @@ class UIActionTimePicker: UIActionBase
 		m_LastText.Set( field, box.GetText() );
 	}
 
-	private void WriteField( EditBoxWidget box, int value, int digits )
+	protected void WriteField( EditBoxWidget box, int value, int digits )
 	{
 		string s = "" + value;
 		while ( s.Length() < digits )

@@ -18,8 +18,26 @@ class UIActionCollapsibleSection: UIActionBase
 	protected ButtonWidget m_Button;
 	protected ImageWidget  m_Arrow;
 	protected Widget       m_Content;
-
 	protected bool m_Expanded;
+
+	//! Returns the content panel. Add child widgets here.
+	Widget GetContent()
+	{
+		return m_Content;
+	}
+
+	bool IsExpanded()
+	{
+		return m_Expanded;
+	}
+
+	void SetExpanded( bool expanded )
+	{
+		m_Expanded = expanded;
+		if ( m_Content )
+			m_Content.Show( m_Expanded );
+		UpdateArrow();
+	}
 
 	override void OnInit()
 	{
@@ -41,25 +59,6 @@ class UIActionCollapsibleSection: UIActionBase
 			m_Label.SetText( text );
 	}
 
-	//! Returns the content panel. Add child widgets here.
-	Widget GetContent()
-	{
-		return m_Content;
-	}
-
-	bool IsExpanded()
-	{
-		return m_Expanded;
-	}
-
-	void SetExpanded( bool expanded )
-	{
-		m_Expanded = expanded;
-		if ( m_Content )
-			m_Content.Show( m_Expanded );
-		UpdateArrow();
-	}
-
 	void Toggle()
 	{
 		SetExpanded( !m_Expanded );
@@ -76,7 +75,7 @@ class UIActionCollapsibleSection: UIActionBase
 		return false;
 	}
 
-	private void UpdateArrow()
+	protected void UpdateArrow()
 	{
 		if ( !m_Arrow )
 			return;

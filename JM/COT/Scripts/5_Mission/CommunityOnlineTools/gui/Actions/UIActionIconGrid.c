@@ -40,7 +40,6 @@ class JMIconGridEntry
 class UIActionIconGrid: UIActionBase
 {
 	protected WrapSpacerWidget m_Grid;
-
 	protected ref array<ref JMIconGridEntry>  m_Entries;
 	protected ref map<string, JMIconGridEntry> m_ById;
 	protected string                          m_LastClickedId;
@@ -60,7 +59,6 @@ class UIActionIconGrid: UIActionBase
 	static const int COLOR_OUTLINE       = JMTheme.BUTTON_OUTLINE;
 	static const int COLOR_OUTLINE_ON    = JMTheme.SELECTED_OUTLINE;
 	static const int COLOR_OUTLINE_HOVER = JMTheme.BUTTON_OUTLINE_HOVER;
-
 	static const int ICON_SIZE   = 40;
 	static const int BADGE_COLOR = JMTheme.DANGER;
 
@@ -81,6 +79,85 @@ class UIActionIconGrid: UIActionBase
 	static const string PRESET_LOAD     = "preset_load";
 	static const string PRESET_CLOSE_X  = "preset_close_x";
 
+	//! When true, AddIcon uses a wider cell with a visible text label next to
+	//! the icon (chip style) instead of the default 40x40 icon-only square.
+	//! Must be set BEFORE the first AddIcon call.
+	protected bool m_UseLabeledCells = false;
+
+	string GetLastClickedId()
+	{
+		return m_LastClickedId;
+	}
+
+	bool IsMomentary()
+	{
+		return m_Momentary;
+	}
+
+	//! Set or clear the badge count on an icon (0 = hide badge).
+	void SetBadgeCount( string id, int count )
+	{
+		JMIconGridEntry entry = m_ById.Get( id );
+		if ( !entry )
+			return;
+
+		entry.BadgeCount = count;
+
+		if ( !entry.BadgeText && count > 0 && entry.Button )
+		{
+			// Create badge overlay on first use
+			Widget badgeWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", entry.Button.GetParent() );
+
+			// Fallback: just use a TextWidget directly
+			if ( !badgeWidget && entry.Button.GetParent() )
+			{
+				TextWidget tw = TextWidget.Cast( g_Game.GetWorkspace().CreateWidgets( "TextWidget", entry.Button.GetParent() ) );
+				entry.BadgeText = tw;
+			}
+		}
+
+		if ( entry.BadgeText )
+		{
+			entry.BadgeText.Show( count > 0 );
+			if ( count > 0 )
+				entry.BadgeText.SetText( "" + count );
+		}
+	}
+
+	//! Turn off the latched highlight.
+	//!
+	//! A cell that stays blue is a claim that the thing it selected is still
+	//! in force. For a grid of one-shot commands that claim goes stale the
+	//! instant anything else changes the state, so those grids say so here and
+	//! the cell falls back to plain hover feedback.
+	void SetMomentary( bool momentary )
+	{
+		m_Momentary = momentary;
+
+		if ( momentary )
+			SetSelected( "" );
+	}
+
+	void SetSelected( string id )
+	{
+		// Clear old highlight.
+		if ( m_SelectedId != "" )
+		{
+			JMIconGridEntry old = m_ById.Get( m_SelectedId );
+			if ( old )
+				PaintCell( old, false );
+		}
+
+		m_SelectedId = id;
+
+		if ( id != "" )
+		{
+			JMIconGridEntry entry = m_ById.Get( id );
+			if ( entry )
+				PaintCell( entry, false );
+		}
+	}
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -90,11 +167,6 @@ class UIActionIconGrid: UIActionBase
 		m_Entries = new array<ref JMIconGridEntry>;
 		m_ById    = new map<string, JMIconGridEntry>;
 	}
-
-	//! When true, AddIcon uses a wider cell with a visible text label next to
-	//! the icon (chip style) instead of the default 40x40 icon-only square.
-	//! Must be set BEFORE the first AddIcon call.
-	protected bool m_UseLabeledCells = false;
 
 	void UseLabeledCells( bool labeled = true )
 	{
@@ -201,55 +273,39 @@ class UIActionIconGrid: UIActionBase
 		m_Entries.RemoveItem( entry );
 	}
 
-	//! Set or clear the badge count on an icon (0 = hide badge).
-	void SetBadgeCount( string id, int count )
-	{
-		JMIconGridEntry entry = m_ById.Get( id );
-		if ( !entry )
-			return;
-
-		entry.BadgeCount = count;
-
-		if ( !entry.BadgeText && count > 0 && entry.Button )
-		{
-			// Create badge overlay on first use
-			Widget badgeWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", entry.Button.GetParent() );
-
-			// Fallback: just use a TextWidget directly
-			if ( !badgeWidget && entry.Button.GetParent() )
-			{
-				TextWidget tw = TextWidget.Cast( g_Game.GetWorkspace().CreateWidgets( "TextWidget", entry.Button.GetParent() ) );
-				entry.BadgeText = tw;
-			}
-		}
-
-		if ( entry.BadgeText )
-		{
-			entry.BadgeText.Show( count > 0 );
-			if ( count > 0 )
-				entry.BadgeText.SetText( "" + count );
-		}
-	}
-
 	// ---------------------------------------------------------------------------
 	//  Presets - one method per common action.  Each is a no-op if the id
 	//  already exists, so calling AddDefaultPresets() twice is safe.
 	// ---------------------------------------------------------------------------
 
 	void AddPreset_Close()    { AddIcon( PRESET_CLOSE,    JMConstants.ICON_CANCEL,       "Close"    ); }
+
 	void AddPreset_Minimize() { AddIcon( PRESET_MINIMIZE, JMConstants.ICON_EXPAND, 		 "Minimize" ); }
+
 	void AddPreset_Pin()      { AddIcon( PRESET_PIN,      JMConstants.ICON_PIN,          "Pin"      ); }
+
 	void AddPreset_Refresh()  { AddIcon( PRESET_REFRESH,  JMConstants.ICON_CLOCKWISE,    "Refresh"  ); }
+
 	void AddPreset_Info()     { AddIcon( PRESET_INFO,     JMConstants.ICON_INFO,         "Info"     ); }
+
 	void AddPreset_Copy()     { AddIcon( PRESET_COPY,     JMConstants.ICON_STACK, 		 "Copy"     ); }
+
 	void AddPreset_Play()     { AddIcon( PRESET_PLAY,     JMConstants.ICON_PLAY,         "Play"     ); }
+
 	void AddPreset_Pause()    { AddIcon( PRESET_PAUSE,    JMConstants.ICON_PAUSE,        "Pause"    ); }
+
 	void AddPreset_Next()     { AddIcon( PRESET_NEXT,     JMConstants.ICON_FAST_FORWARD, "Next"     ); }
+
 	void AddPreset_Previous() { AddIcon( PRESET_PREVIOUS, JMConstants.ICON_FAST_BACKWARD,"Previous" ); }
+
 	void AddPreset_Edit()     { AddIcon( PRESET_EDIT,     JMConstants.ICON_PENCIL,       "Edit"     ); }
+
 	void AddPreset_Delete()   { AddIcon( PRESET_DELETE,   JMConstants.ICON_TRASH_CAN,    "Delete"   ); }
+
 	void AddPreset_Save()     { AddIcon( PRESET_SAVE,     JMConstants.ICON_SAVE_ARROW,   "Save"     ); }
+
 	void AddPreset_Load()     { AddIcon( PRESET_LOAD,     JMConstants.ICON_OPEN_FOLDER,  "Load"     ); }
+
 	void AddPreset_CloseX()   { AddIcon( PRESET_CLOSE_X,  JMConstants.ICON_CLOSE,        "Close"    ); }
 
 	//! Apply the delete preset style to a confirm-inline or button: trash-can icon + red colour.
@@ -303,50 +359,6 @@ class UIActionIconGrid: UIActionBase
 		m_Entries.Clear();
 		m_ById.Clear();
 		m_LastClickedId = "";
-	}
-
-	string GetLastClickedId()
-	{
-		return m_LastClickedId;
-	}
-
-	//! Turn off the latched highlight.
-	//!
-	//! A cell that stays blue is a claim that the thing it selected is still
-	//! in force. For a grid of one-shot commands that claim goes stale the
-	//! instant anything else changes the state, so those grids say so here and
-	//! the cell falls back to plain hover feedback.
-	void SetMomentary( bool momentary )
-	{
-		m_Momentary = momentary;
-
-		if ( momentary )
-			SetSelected( "" );
-	}
-
-	bool IsMomentary()
-	{
-		return m_Momentary;
-	}
-
-	void SetSelected( string id )
-	{
-		// Clear old highlight.
-		if ( m_SelectedId != "" )
-		{
-			JMIconGridEntry old = m_ById.Get( m_SelectedId );
-			if ( old )
-				PaintCell( old, false );
-		}
-
-		m_SelectedId = id;
-
-		if ( id != "" )
-		{
-			JMIconGridEntry entry = m_ById.Get( id );
-			if ( entry )
-				PaintCell( entry, false );
-		}
 	}
 
 	//! Repaint one cell's pill. Selection wins over hover, so the chosen icon

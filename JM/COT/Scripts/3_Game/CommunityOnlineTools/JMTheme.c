@@ -189,7 +189,6 @@ class JMTheme
 	//! An unselected pill in a group draws no fill at all, so only the ON one
 	//! carries weight.
 	static const int SELECTED_FILL_OFF     = 0x0015191E;
-
 	static const int BUTTON_FILL           = 0xF0222932;
 	static const int BUTTON_FILL_HOVER     = 0xF73A424C;
 	//! Press has to read at a glance, so it drops well below base-300 rather

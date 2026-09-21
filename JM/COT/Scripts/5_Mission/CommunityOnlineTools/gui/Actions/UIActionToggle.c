@@ -21,14 +21,12 @@ class UIActionToggle: UIActionBase
 	protected Widget       m_CheckCircle;   // styled panel, COTField4Set
 	protected TextWidget   m_Label;
 	protected ImageWidget  m_Icon;
-
 	protected bool  m_Checked;
 	protected bool  m_Round;
 	protected int   m_CheckColor;
 	//! True once SetColor() was called, which pins the mark colour and stops
 	//! ApplyShape from re-deriving it from the shape.
 	protected bool  m_CheckColorSet;
-
 	protected ref JMAnimFloat m_AnimCheck;
 	protected ref JMAnimColor m_AnimBox;
 
@@ -45,6 +43,23 @@ class UIActionToggle: UIActionBase
 	//! box keeps its unfilled ring, so its dot carries the colour instead.
 	static const int COLOR_MARK_SQUARE = JMTheme.TEXT_ON_ACCENT;
 	static const int COLOR_MARK_ROUND  = JMTheme.ACCENT;
+
+	bool IsRound() { return m_Round; }
+
+	void SetCheckedSilent( bool checked )
+	{
+		if ( checked == m_Checked )
+			return;
+
+		m_Checked = checked;
+		SnapVisuals();
+	}
+
+	void SetRound( bool round )
+	{
+		m_Round = round;
+		ApplyShape();
+	}
 
 	override void OnInit()
 	{
@@ -107,14 +122,6 @@ class UIActionToggle: UIActionBase
 			m_Label.SetTextOffset( 56, 0 );
 	}
 
-	void SetRound( bool round )
-	{
-		m_Round = round;
-		ApplyShape();
-	}
-
-	bool IsRound() { return m_Round; }
-
 	override bool IsChecked() { return m_Checked; }
 
 	override void SetChecked( bool checked )
@@ -125,15 +132,6 @@ class UIActionToggle: UIActionBase
 		m_Checked = checked;
 		ApplyVisuals();
 		CallEvent( UIEvent.CHANGE );
-	}
-
-	void SetCheckedSilent( bool checked )
-	{
-		if ( checked == m_Checked )
-			return;
-
-		m_Checked = checked;
-		SnapVisuals();
 	}
 
 	override void SetColor( int color )
@@ -190,7 +188,7 @@ class UIActionToggle: UIActionBase
 		}
 	}
 
-	private void ApplyShape()
+	protected void ApplyShape()
 	{
 		// Shape picks the mark colour unless a caller overrode it.
 		if ( !m_CheckColorSet )
@@ -224,7 +222,7 @@ class UIActionToggle: UIActionBase
 	// Set visuals to their final state immediately, bypassing animation.
 	// Used during shape change / initial construction where animation would
 	// either glitch (stale Value) or be invisible (zero timeSlice).
-	private void SnapVisuals()
+	protected void SnapVisuals()
 	{
 		float finalAlpha    = 0.0;
 		int   finalBoxColor = COLOR_BOX_OFF;
@@ -250,7 +248,7 @@ class UIActionToggle: UIActionBase
 		}
 	}
 
-	private void ApplyVisuals()
+	protected void ApplyVisuals()
 	{
 		static const float SPEED = 20.0;
 

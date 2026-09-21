@@ -1,10 +1,8 @@
 class JMCommand
 {
 	protected string m_Command;
-
 	protected Class m_Instance;
 	protected string m_Function;
-
 	protected string m_Permission;
 
 	void JMCommand(Class instance, string command, string function, string permission)
@@ -15,21 +13,14 @@ class JMCommand
 		m_Permission = permission;
 	}
 
-	void Execute(PlayerIdentity sender, array<string> arguments)
-	{
-		if (!sender) return;
-
-		JMPlayerInstance instance;
-		if (!GetPermissionsManager().HasPermissionRPC(m_Permission, sender, instance)) return;
-
-		auto cmdParamList = new JMCommandParameterList(arguments);
-		auto params = new Param3<ref JMCommandParameterList, PlayerIdentity, JMPlayerInstance>(cmdParamList, sender, instance);
-		g_Script.CallFunctionParams(m_Instance, m_Function, null, params);
-	}
-
 	string GetCommand()
 	{
 		return m_Command;
+	}
+
+	string GetFunction()
+	{
+		return m_Function;
 	}
 
 	Class GetInstance()
@@ -37,9 +28,16 @@ class JMCommand
 		return m_Instance;
 	}
 
-	string GetFunction()
+	void Execute(PlayerIdentity sender, array<string> arguments)
 	{
-		return m_Function;
+		if (!sender) return;
+
+		JMPlayerInstance instance;
+		if (!JMPermissions.HasRPC(m_Permission, sender, instance)) return;
+
+		auto cmdParamList = new JMCommandParameterList(arguments);
+		auto params = new Param3<ref JMCommandParameterList, PlayerIdentity, JMPlayerInstance>(cmdParamList, sender, instance);
+		g_Script.CallFunctionParams(m_Instance, m_Function, null, params);
 	}
 }
 

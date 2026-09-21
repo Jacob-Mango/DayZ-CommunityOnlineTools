@@ -13,26 +13,33 @@ class UIActionMultiSelectList: UIActionBase
 {
 	protected TextWidget  m_Label;
 	protected Widget      m_ListContainer;
-
 	protected ref array<string>              m_Items;
 	protected ref array<ref JMMultiSelectRow> m_Rows;
 
-	override void OnInit()
+	array<int> GetSelectedIndices()
 	{
-		super.OnInit();
-
-		Class.CastTo( m_Label,         layoutRoot.FindAnyWidget( "action_label"          ) );
-		Class.CastTo( m_ListContainer, layoutRoot.FindAnyWidget( "action_list_container" ) );
-
-		m_Items = new array<string>;
-		m_Rows  = new array<ref JMMultiSelectRow>;
+		array<int> result = new array<int>;
+		foreach ( int i, JMMultiSelectRow r : m_Rows )
+			if ( r && r.Checked ) result.Insert( i );
+		return result;
 	}
 
-	override void SetLabel( string text )
+	array<string> GetSelectedItems()
 	{
-		text = Widget.TranslateString( text );
-		if ( m_Label )
-			m_Label.SetText( text );
+		array<string> result = new array<string>;
+		foreach ( int i, JMMultiSelectRow r : m_Rows )
+			if ( r && r.Checked ) result.Insert( m_Items[i] );
+		return result;
+	}
+
+	void SetChecked( int index, bool checked )
+	{
+		if ( index < 0 || index >= m_Rows.Count() )
+			return;
+		JMMultiSelectRow r = m_Rows[index];
+		if ( !r ) return;
+		r.Checked = checked;
+		PaintRow( r );
 	}
 
 	void SetItems( notnull array<string> items )
@@ -89,30 +96,22 @@ class UIActionMultiSelectList: UIActionBase
 		}
 	}
 
-	array<string> GetSelectedItems()
+	override void OnInit()
 	{
-		array<string> result = new array<string>;
-		foreach ( int i, JMMultiSelectRow r : m_Rows )
-			if ( r && r.Checked ) result.Insert( m_Items[i] );
-		return result;
+		super.OnInit();
+
+		Class.CastTo( m_Label,         layoutRoot.FindAnyWidget( "action_label"          ) );
+		Class.CastTo( m_ListContainer, layoutRoot.FindAnyWidget( "action_list_container" ) );
+
+		m_Items = new array<string>;
+		m_Rows  = new array<ref JMMultiSelectRow>;
 	}
 
-	array<int> GetSelectedIndices()
+	override void SetLabel( string text )
 	{
-		array<int> result = new array<int>;
-		foreach ( int i, JMMultiSelectRow r : m_Rows )
-			if ( r && r.Checked ) result.Insert( i );
-		return result;
-	}
-
-	void SetChecked( int index, bool checked )
-	{
-		if ( index < 0 || index >= m_Rows.Count() )
-			return;
-		JMMultiSelectRow r = m_Rows[index];
-		if ( !r ) return;
-		r.Checked = checked;
-		PaintRow( r );
+		text = Widget.TranslateString( text );
+		if ( m_Label )
+			m_Label.SetText( text );
 	}
 
 	protected void PaintRow( JMMultiSelectRow r )

@@ -35,21 +35,9 @@
 
 class JMLootAnalysisForm: JMFormBase
 {
-	static const int TAB_ITEM_SCAN    = 0;
-	static const int TAB_DISTRIBUTION = 1;
-
-	//! Layers this form owns on its own two maps.
-	static const string MAP_LAYER_SCAN = "loot_scan";
-	static const string MAP_LAYER_DIST = "loot_distribution";
-
-	//! Marker right-click menu rows.
-	static const string MENU_MK_TELEPORT = "mk_teleport";
-	static const string MENU_MK_COPYPOS  = "mk_copypos";
-	static const string MENU_MK_FOCUS    = "mk_focus";
-	static const string MENU_MK_COPYNAME = "mk_copyname";
-
-	//! Category filter menu id for "".
-	static const string MENU_ID_ALL = "__all";
+	//! Tab indices - what the strip's AddTab() returned for each tab, never written as numbers.
+	protected int m_TabIdItemScan;
+	protected int m_TabIdDistribution;
 
 	//! Left column bands, top to bottom, in layout pixels. Pinned from
 	//! OnResize rather than left to the layout file - see JMObjectSpawnerForm
@@ -62,7 +50,6 @@ class JMLootAnalysisForm: JMFormBase
 	//! fixed pixel width beside a fractional one.
 	static const float SEARCH_ROW_W = 0.85;
 	static const float FILTER_ROW_W = 0.14;
-
 	static const int LEFT_HEADER_H = 70;
 
 	//! Right column bands within each tab: the map card filling whatever is
@@ -70,10 +57,6 @@ class JMLootAnalysisForm: JMFormBase
 	//! classes' own layout math.
 	static const int STATS_H = 64;
 	static const int MAP_CARD_CHROME = 44;
-
-	//! How many recent categories are kept - a shortcut back to what was just
-	//! used, not a second category list.
-	static const int RECENT_MAX = 4;
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	//! Also public enough (no modifier) for the two tab classes to reach it
@@ -84,17 +67,11 @@ class JMLootAnalysisForm: JMFormBase
 	protected Widget m_SearchWrapper;
 	protected Widget m_RecentWrapper;
 	protected Widget m_ListWrapper;
-
 	protected UIActionSearchBox m_SearchBox;
 	protected UIActionImageButton m_FilterButton;
-	protected UIActionContextMenu m_CategoryMenu;
-
+	protected ref JMItemCategoryPicker m_Categories;
 	protected string m_SearchFilter = "";
 	protected string m_CurrentCategory = "";
-
-	protected ref TStringArray m_RecentIds = new TStringArray;
-	protected ref array<ref UIActionButton> m_RecentButtons = new array<ref UIActionButton>;
-
 	protected UIActionItemList m_ItemList;
 
 	// ---- Right column --------------------------------------------------------
@@ -104,14 +81,21 @@ class JMLootAnalysisForm: JMFormBase
 
 	//! One class per tab, in its own file - only this form constructs/
 	//! dispatches to them.
-	private ref JMLootAnalysisFormTabItemScan    m_TabItemScanCtrl;
-	private ref JMLootAnalysisFormTabDistribution m_TabDistributionCtrl;
+	protected ref JMLootAnalysisFormTabItemScan    m_TabItemScanCtrl;
+	protected ref JMLootAnalysisFormTabDistribution m_TabDistributionCtrl;
+
+	//! Right-click marker menu, shared by both maps.
+	protected ref JMLootMarkerMenu m_MarkerMenu;
 
 	//! Last content height OnResize computed for the right column - a tab
 	//! built lazily after the last resize has missed every pass so far and
 	//! needs laying out immediately, not on the next window resize that may
 	//! never come. Public: both tab classes' Measure() re-layout against it.
 	float m_LastRightContentH;
+
+	//! The size OnResize last received, for laying the right column out again when the tab strip wraps.
+	protected float m_LastResizeW;
+	protected float m_LastResizeH;
 
 	//! CE tuning values for the last classname either tab asked about. Shared
 	//! across both tabs' stats panels - nominal/tiers are a property of the
@@ -131,440 +115,6 @@ class JMLootAnalysisForm: JMFormBase
 	//! Stored classname for Delete All confirmation (prevents stale selection).
 	//! Public: JMLootAnalysisFormTabItemScan.OnClick_DeleteAll sets this.
 	string m_PendingDeleteClassName;
-
-	//! Right-click marker menu - shared by both maps, since the action set is
-	//! identical either way.
-	protected UIActionContextMenu m_MarkerMenu;
-	protected UIActionMap m_MarkerMenuMap;
-	protected vector m_MarkerMenuPos;
-	protected string m_MarkerMenuLabel;
-
-	protected override bool SetModule(JMRenderableModuleBase mdl)
-	{
-		return Class.CastTo(m_Module, mdl);
-	}
-
-	override void OnInit()
-	{
-		m_LeftPanel         = layoutRoot.FindAnyWidget("panel_left");
-		m_RightPanel        = layoutRoot.FindAnyWidget("panel_right");
-		m_RightTabStrip     = layoutRoot.FindAnyWidget("panel_right_tabs");
-		m_RightContent      = layoutRoot.FindAnyWidget("panel_right_content");
-		m_RightPanelDisable = layoutRoot.FindAnyWidget("panel_right_disable");
-
-		m_SearchWrapper = layoutRoot.FindAnyWidget("la_search_wrapper");
-		m_RecentWrapper = layoutRoot.FindAnyWidget("la_recent_wrapper");
-		m_ListWrapper   = layoutRoot.FindAnyWidget("la_list_wrapper");
-
-		InitWidgetsLeft();
-		InitWidgetsRight();
-	}
-
-	//! The list reaches as far down the left column as the window allows,
-	//! which is the only measurement on the left. On the right, each tab's
-	//! map takes whatever is left after its own fixed bands.
-	override void OnResize(float w, float h)
-	{
-		super.OnResize(w, h);
-
-		PinBand(m_SearchWrapper, 0, SEARCH_H);
-		PinBand(m_RecentWrapper, SEARCH_H, RECENT_H);
-
-		if (m_ListWrapper && h > LEFT_HEADER_H)
-		{
-			float listH = h - LEFT_HEADER_H;
-
-			PinBand(m_ListWrapper, LEFT_HEADER_H, listH);
-
-			//! The list is told the height rather than measuring it - same
-			//! number, one source.
-			if (m_ItemList)
-				m_ItemList.SetViewportHeight(listH);
-		}
-
-		PinRightPanelGeometry(h);
-
-		m_LastRightContentH = h - TAB_STRIP_HEIGHT;
-
-		if (m_TabItemScanCtrl)
-			m_TabItemScanCtrl.Layout(m_LastRightContentH);
-
-		if (m_TabDistributionCtrl)
-			m_TabDistributionCtrl.Layout(m_LastRightContentH);
-	}
-
-	//! Place one band: exact y, exact height, full width. Public: both tab
-	//! classes' Layout() call this through their back-reference.
-	void PinBand(Widget band, float y, float height)
-	{
-		if (!band)
-			return;
-
-		band.SetFlags(WidgetFlags.VEXACTPOS | WidgetFlags.VEXACTSIZE, true);
-		band.SetPos(0, y);
-		band.SetSize(1, height);
-	}
-
-	//! Markers are real widgets repositioned every tick (see UIActionMap), so
-	//! only the map on the visible tab is ticked - the other has nothing to
-	//! place itself against. Same for the stats card measurement below it.
-	override void Update()
-	{
-		super.Update();
-
-		if (IsTabActive(TAB_ITEM_SCAN) && m_TabItemScanCtrl)
-			m_TabItemScanCtrl.Tick();
-
-		if (IsTabActive(TAB_DISTRIBUTION) && m_TabDistributionCtrl)
-			m_TabDistributionCtrl.Tick();
-	}
-
-	// =========================================================================
-	//  Left column
-	// =========================================================================
-
-	protected void InitWidgetsLeft()
-	{
-		if (m_SearchWrapper)
-		{
-			//! Search box and filter button only - the search box already has
-			//! its own built-in clear "x" (see UIActionSearchBox), so a second
-			//! one here was a redundant fixed-size sibling that fought the
-			//! fractional search box for room on a narrow left column.
-			Widget searchSpacer = UIActionManager.CreateWrapSpacerCompact(m_SearchWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER);
-			m_SearchBox = UIActionManager.CreateSearchBox(searchSpacer, this, "OnChange_Search", "Search:");
-			m_SearchBox.SetWidth(SEARCH_ROW_W);
-
-			m_FilterButton = UIActionManager.CreateIconButton(searchSpacer, JMConstants.Lucide("list-filter"), this, "OnClick_CategoryFilter");
-			m_FilterButton.SetWidth(FILTER_ROW_W);
-			m_FilterButton.SetTooltip("Filter by item category");
-		}
-
-		// Shared item list - pooled rows, not one widget per class. See the
-		// class header comment for why this replaced TextListboxWidget.
-		if (m_ListWrapper)
-		{
-			m_ItemList = UIActionManager.CreateItemList(m_ListWrapper, this, "OnClick_ItemList");
-			m_ItemList.SetEmptyText("No items found");
-		}
-
-		UpdateItemList();
-	}
-
-	// -------------------------------------------------------------------------
-	//  Categories - id / icon / label, one table read by both the filter menu
-	//  and the recent chips so the two can never drift apart.
-	// -------------------------------------------------------------------------
-
-	static void CategoryTable(out TStringArray ids, out TStringArray icons, out TStringArray labels)
-	{
-		ids = new TStringArray;
-		icons = new TStringArray;
-		labels = new TStringArray;
-
-		AddCategoryRow(ids, icons, labels, "",               JMConstants.Lucide("layers"),     "All");
-		AddCategoryRow(ids, icons, labels, "edible_base",     JMConstants.ICON_MEAT,            "Food");
-		AddCategoryRow(ids, icons, labels, "transport",       JMConstants.ICON_JEEP,            "Vehicles");
-		AddCategoryRow(ids, icons, labels, "weapon_base",     JMConstants.ICON_FAMAS,           "Firearms");
-		AddCategoryRow(ids, icons, labels, "magazine_base",   JMConstants.ICON_MACHINE_GUN_MAG, "Ammo/Mags");
-		AddCategoryRow(ids, icons, labels, "clothing_base",   JMConstants.ICON_CLOTHES,         "Clothing");
-		AddCategoryRow(ids, icons, labels, "container_base",  JMConstants.ICON_KNAPSACK,        "Containers");
-		AddCategoryRow(ids, icons, labels, "inventory_base",  JMConstants.ICON_FULL_FOLDER,     "Items");
-	}
-
-	static void AddCategoryRow(TStringArray ids, TStringArray icons, TStringArray labels, string id, string icon, string label)
-	{
-		ids.Insert(id);
-		icons.Insert(icon);
-		labels.Insert(label);
-	}
-
-	protected string MenuIdFor(string categoryId)
-	{
-		if (categoryId == "")
-			return MENU_ID_ALL;
-
-		return categoryId;
-	}
-
-	protected string CategoryIdFor(string menuId)
-	{
-		if (menuId == MENU_ID_ALL)
-			return "";
-
-		return menuId;
-	}
-
-	protected string CategoryLabel(string id)
-	{
-		TStringArray ids, icons, labels;
-		CategoryTable(ids, icons, labels);
-
-		for (int i = 0; i < ids.Count(); i++)
-			if (ids[i] == id)
-				return labels[i];
-
-		return "";
-	}
-
-	protected string CategoryIcon(string id)
-	{
-		TStringArray ids, icons, labels;
-		CategoryTable(ids, icons, labels);
-
-		for (int i = 0; i < ids.Count(); i++)
-			if (ids[i] == id)
-				return icons[i];
-
-		return JMConstants.Lucide("layers");
-	}
-
-	//! Open the category list under the filter button, the way the object
-	//! spawner opens its own.
-	void OnClick_CategoryFilter(UIEvent eid, UIActionBase action)
-	{
-		if (eid != UIEvent.CLICK || !m_FilterButton)
-			return;
-
-		if (!m_CategoryMenu)
-		{
-			if (!GetWindow())
-				return;
-
-			m_CategoryMenu = UIActionManager.CreateContextMenu(layoutRoot, GetWindow().GetWidgetRoot(), this, "OnClick_CategoryMenu");
-
-			if (!m_CategoryMenu)
-				return;
-
-			RegisterOverlay(m_CategoryMenu);
-			m_CategoryMenu.SetOwnerWidget(m_FilterButton.GetLayoutRoot());
-		}
-
-		if (m_CategoryMenu.IsOpen())
-		{
-			m_CategoryMenu.Close();
-			return;
-		}
-
-		RebuildCategoryMenu();
-
-		float fx, fy, fw, fh;
-		m_FilterButton.GetLayoutRoot().GetScreenPos(fx, fy);
-		m_FilterButton.GetLayoutRoot().GetScreenSize(fw, fh);
-
-		m_CategoryMenu.ShowAt(fx, fy + fh);
-	}
-
-	protected void RebuildCategoryMenu()
-	{
-		if (!m_CategoryMenu)
-			return;
-
-		m_CategoryMenu.ClearItems();
-
-		TStringArray ids, icons, labels;
-		CategoryTable(ids, icons, labels);
-
-		for (int i = 0; i < ids.Count(); i++)
-		{
-			int color = 0;
-			if (ids[i] == m_CurrentCategory)
-				color = JMTheme.ACCENT;
-
-			m_CategoryMenu.AddItem(MenuIdFor(ids[i]), labels[i], icons[i], color);
-		}
-	}
-
-	void OnClick_CategoryMenu(UIEvent eid, UIActionBase action)
-	{
-		if (eid != UIEvent.CLICK || !m_CategoryMenu)
-			return;
-
-		SelectCategory(CategoryIdFor(m_CategoryMenu.GetLastClickedId()));
-	}
-
-	//! Which chip was pressed, from the action that fired. The buttons carry
-	//! no id of their own - their position in m_RecentButtons IS their
-	//! position in m_RecentIds, because the two are built in one pass.
-	void OnClick_RecentChip(UIEvent eid, UIActionBase action)
-	{
-		if (eid != UIEvent.CLICK)
-			return;
-
-		UIActionButton chip;
-		if (!Class.CastTo(chip, action))
-			return;
-
-		int index = m_RecentButtons.Find(chip);
-		if (index < 0 || index >= m_RecentIds.Count())
-			return;
-
-		SelectCategory(m_RecentIds[index]);
-	}
-
-	protected void SelectCategory(string id)
-	{
-		m_CurrentCategory = id;
-
-		//! A chip press must never destroy the strip it landed on - the
-		//! rebuild is deferred a tick so it cannot happen inside the click
-		//! that caused it.
-		if (PushRecentCategory(id))
-			g_Game.GetCallQueue(CALL_CATEGORY_GUI).Call(RebuildRecentCategories);
-
-		UpdateItemList();
-	}
-
-	//! Newest first, capped. "All" gets no chip - it is the first row of the
-	//! menu.
-	protected bool PushRecentCategory(string id)
-	{
-		if (id == "")
-			return false;
-
-		if (m_RecentIds.Find(id) >= 0)
-			return false;
-
-		m_RecentIds.InsertAt(id, 0);
-
-		while (m_RecentIds.Count() > RECENT_MAX)
-			m_RecentIds.Remove(m_RecentIds.Count() - 1);
-
-		return true;
-	}
-
-	protected void RebuildRecentCategories()
-	{
-		if (!m_RecentWrapper)
-			return;
-
-		//! Drop the script references BEFORE the widgets that own them go, so
-		//! a chip is never left alive with a layoutRoot that has been
-		//! unlinked.
-		m_RecentButtons.Clear();
-
-		Widget child = m_RecentWrapper.GetChildren();
-		while (child)
-		{
-			Widget next = child.GetSibling();
-			child.Unlink();
-			child = next;
-		}
-
-		if (m_RecentIds.Count() == 0)
-			return;
-
-		Widget strip = UIActionManager.CreateWrapSpacerCompact(m_RecentWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER);
-
-		float chipW = 0.99 / m_RecentIds.Count();
-
-		for (int i = 0; i < m_RecentIds.Count(); i++)
-		{
-			UIActionButton chip = UIActionManager.CreateButton(strip, CategoryLabel(m_RecentIds[i]), this, "OnClick_RecentChip");
-			if (!chip)
-				continue;
-
-			chip.SetWidth(chipW);
-			chip.SetIcon(CategoryIcon(m_RecentIds[i]));
-
-			m_RecentButtons.Insert(chip);
-		}
-	}
-
-	void OnChange_Search(UIEvent eid, UIActionBase action)
-	{
-		if (eid != UIEvent.CHANGE)
-			return;
-
-		m_SearchFilter = m_SearchBox.GetText();
-
-		//! Debounced: this scans every CfgVehicles/CfgWeapons/CfgMagazines
-		//! entry, so running it on every keystroke lags typing once the
-		//! server has a large modded item set.
-		g_Game.GetCallQueue(CALL_CATEGORY_GUI).Remove(UpdateItemList);
-		g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(UpdateItemList, 300, false);
-	}
-
-	// -------------------------------------------------------------------------
-	//  UpdateItemList - iterate CfgVehicles / CfgWeapons / CfgMagazines, apply
-	//  category + keyword search, set autocomplete preview on the search box.
-	//  Note: JMEntityTracker is server-side only and always returns 0 on the
-	//  client, so we scan config directly here. The server scan (ShowItemsOnMap)
-	//  filters to actually-spawned entities when the user requests map markers.
-	// -------------------------------------------------------------------------
-	void UpdateItemList()
-	{
-		if (!m_ItemList)
-			return;
-
-		COT_String strSearch = m_SearchFilter;
-		bool requireAllKeywords;
-		TStringArray keywords = strSearch.KeywordSearch_Prepare(requireAllKeywords);
-		string closestMatch;
-
-		TStringArray configs = new TStringArray;
-		configs.Insert(CFG_VEHICLESPATH);
-		configs.Insert(CFG_WEAPONSPATH);
-		configs.Insert(CFG_MAGAZINESPATH);
-
-		array<string> names = new array<string>;
-
-		COT_String strNameLower;
-
-		for (int nConfig = 0; nConfig < configs.Count(); nConfig++)
-		{
-			string strConfigPath = configs.Get(nConfig);
-			int nClasses = g_Game.ConfigGetChildrenCount(strConfigPath);
-
-			for (int nClass = 0; nClass < nClasses; nClass++)
-			{
-				string strName;
-				g_Game.ConfigGetChildName(strConfigPath, nClass, strName);
-
-				int scope = g_Game.ConfigGetInt(strConfigPath + " " + strName + " scope");
-				if (scope == 0)
-					continue;
-
-				strNameLower = strName;
-				strNameLower.ToLower();
-
-				// Apply category filter
-				if (m_CurrentCategory != "" && !g_Game.IsKindOf(strNameLower, m_CurrentCategory))
-					continue;
-
-				// Apply keyword search filter
-				if (strSearch != "" && !strNameLower.KeywordSearchImplEx(strSearch, keywords, requireAllKeywords, closestMatch))
-					continue;
-
-				names.Insert(strName);
-			}
-		}
-
-		m_ItemList.SetItems(names);
-
-		if (m_SearchBox)
-			m_SearchBox.SetTextPreview(closestMatch);
-	}
-
-	void OnClick_ItemList(UIEvent eid, UIActionBase action)
-	{
-		if (eid == UIEvent.DOUBLE_CLICK)
-			ActivateSelection();
-	}
-
-	//! Show On Map / Find CE Spawns, whichever the active tab means - shared
-	//! by the list's double-click.
-	protected void ActivateSelection()
-	{
-		string className = GetSelectedItem();
-		if (className == "" || !m_Module)
-			return;
-
-		if (GetActiveTabIndex() == TAB_DISTRIBUTION)
-			m_Module.ShowCESpawnLocations(className);
-		else
-			m_Module.ShowItemsOnMap(className);
-	}
 
 	// Returns the selected list row, or the search bar text if nothing is
 	// selected - used for Show On Map so a typed classname works without
@@ -599,6 +149,253 @@ class JMLootAnalysisForm: JMFormBase
 		return m_ItemList.GetSelectedItem();
 	}
 
+	//! Called by the module once the server answers either request with the
+	//! classname's CE tuning values (or m_Found = false if it has none).
+	void SetItemTypeInfo(JMLootItemTypeInfo info)
+	{
+		m_LastTypeInfo = info;
+
+		if (m_TabItemScanCtrl)
+			m_TabItemScanCtrl.RefreshStats();
+
+		if (m_TabDistributionCtrl)
+			m_TabDistributionCtrl.RefreshStats();
+	}
+
+	protected override bool SetModule(JMRenderableModuleBase mdl)
+	{
+		return Class.CastTo(m_Module, mdl);
+	}
+
+	override void OnCreate()
+	{
+		m_LeftPanel         = layoutRoot.FindAnyWidget("panel_left");
+		m_RightPanel        = layoutRoot.FindAnyWidget("panel_right");
+		m_RightTabStrip     = layoutRoot.FindAnyWidget("panel_right_tabs");
+		m_RightContent      = layoutRoot.FindAnyWidget("panel_right_content");
+		m_RightPanelDisable = layoutRoot.FindAnyWidget("panel_right_disable");
+
+		m_SearchWrapper = layoutRoot.FindAnyWidget("la_search_wrapper");
+		m_RecentWrapper = layoutRoot.FindAnyWidget("la_recent_wrapper");
+		m_ListWrapper   = layoutRoot.FindAnyWidget("la_list_wrapper");
+
+		//! Same category filter (menu, groups, recent chips) as the Object Spawner.
+		m_Categories = new JMItemCategoryPicker(this, m_RecentWrapper, JMFilterRegistry.ITEMS, this, "OnCategoryChanged");
+
+		m_MarkerMenu = new JMLootMarkerMenu(this);
+
+		InitWidgetsLeft();
+		InitWidgetsRight();
+	}
+
+	//! The list reaches as far down the left column as the window allows,
+	//! which is the only measurement on the left. On the right, each tab's
+	//! map takes whatever is left after its own fixed bands.
+	override void OnResize(float w, float h)
+	{
+		super.OnResize(w, h);
+
+		PinBand(m_SearchWrapper, 0, SEARCH_H);
+		PinBand(m_RecentWrapper, SEARCH_H, RECENT_H);
+
+		if (m_ListWrapper && h > LEFT_HEADER_H)
+		{
+			float listH = h - LEFT_HEADER_H;
+
+			PinBand(m_ListWrapper, LEFT_HEADER_H, listH);
+
+			//! The list is told the height rather than measuring it - same
+			//! number, one source.
+			if (m_ItemList)
+				m_ItemList.SetViewportHeight(listH);
+		}
+
+		PinRightPanelGeometry(h);
+
+		m_LastResizeW = w;
+		m_LastResizeH = h;
+		m_LastRightContentH = h - GetPinnedStripHeight(m_RightTabStrip);
+
+		ResizeTabs(w, m_LastRightContentH);
+	}
+
+	//! The tab strip wrapped or unwrapped: the right column has a row more or less than OnResize assumed.
+	override void OnTabStripFitted()
+	{
+		super.OnTabStripFitted();
+
+		if (m_LastResizeH <= 0)
+			return;
+
+		m_LastRightContentH = m_LastResizeH - GetPinnedStripHeight(m_RightTabStrip);
+
+		ResizeTabs(m_LastResizeW, m_LastRightContentH);
+	}
+
+	//! Place one band: exact y, exact height, full width. Public: both tab
+	//! classes' OnResize() call this through their back-reference.
+	void PinBand(Widget band, float y, float height)
+	{
+		if (!band)
+			return;
+
+		band.SetFlags(WidgetFlags.VEXACTPOS | WidgetFlags.VEXACTSIZE, true);
+		band.SetPos(0, y);
+		band.SetSize(1, height);
+	}
+
+	//! Markers are real widgets repositioned every tick (see UIActionMap), so
+	//! only the map on the focused tab is ticked - the other has nothing to
+	//! place itself against. Same for the stats card measurement below it.
+	override void Update()
+	{
+		super.Update();
+
+		UpdateActiveTab();
+	}
+
+	// =========================================================================
+	//  Left column
+	// =========================================================================
+
+	protected void InitWidgetsLeft()
+	{
+		if (m_SearchWrapper)
+		{
+			//! Search box and filter button only - the search box already has
+			//! its own built-in clear "x" (see UIActionSearchBox), so a second
+			//! one here was a redundant fixed-size sibling that fought the
+			//! fractional search box for room on a narrow left column.
+			Widget searchSpacer = UIActionManager.CreateWrapSpacerCompact(m_SearchWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER);
+			m_SearchBox = UIActionManager.CreateSearchBox(searchSpacer, this, "OnChange_Search", "Search:");
+			m_SearchBox.SetWidth(SEARCH_ROW_W);
+
+			m_FilterButton = UIActionManager.CreateIconButton(searchSpacer, JMConstants.Lucide("list-filter"), this, "OnClick_CategoryFilter");
+			m_FilterButton.SetWidth(FILTER_ROW_W);
+			m_FilterButton.SetTooltip("#STR_COT_LOOTANALYSIS_FILTER_BY_ITEM_CATEGORY");
+		}
+
+		// Shared item list - pooled rows, not one widget per class. See the
+		// class header comment for why this replaced TextListboxWidget.
+		if (m_ListWrapper)
+		{
+			m_ItemList = UIActionManager.CreateItemList(m_ListWrapper, this, "OnClick_ItemList");
+			m_ItemList.SetEmptyText("No items found");
+		}
+
+		UpdateItemList();
+	}
+
+	// -------------------------------------------------------------------------
+	//  Categories - the filter button, its menu and the recent chips are a
+	//  JMItemCategoryPicker, shared with the Object Spawner.
+	// -------------------------------------------------------------------------
+
+	void OnClick_CategoryFilter(UIEvent eid, UIActionBase action)
+	{
+		if (eid == UIEvent.CLICK && m_Categories && m_FilterButton)
+			m_Categories.Toggle(m_FilterButton.GetLayoutRoot());
+	}
+
+	//! The picker's change callback: "" is everything, otherwise the config base class to filter on.
+	void OnCategoryChanged(string categoryId)
+	{
+		m_CurrentCategory = categoryId;
+
+		UpdateItemList();
+	}
+
+	void OnChange_Search(UIEvent eid, UIActionBase action)
+	{
+		if (eid != UIEvent.CHANGE)
+			return;
+
+		m_SearchFilter = m_SearchBox.GetText();
+
+		//! Debounced: this scans every CfgVehicles/CfgWeapons/CfgMagazines
+		//! entry, so running it on every keystroke lags typing once the
+		//! server has a large modded item set.
+		DeferCall( "UpdateItemList", 300 );
+	}
+
+	// -------------------------------------------------------------------------
+	//  UpdateItemList - iterate CfgVehicles / CfgWeapons / CfgMagazines, apply
+	//  category + keyword search, set autocomplete preview on the search box.
+	//  Note: JMEntityTracker is server-side only and always returns 0 on the
+	//  client, so we scan config directly here. The server scan (ShowItemsOnMap)
+	//  filters to actually-spawned entities when the user requests map markers.
+	// -------------------------------------------------------------------------
+	void UpdateItemList()
+	{
+		if (!m_ItemList)
+			return;
+
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
+
+		TStringArray configs = new TStringArray;
+		configs.Insert(CFG_VEHICLESPATH);
+		configs.Insert(CFG_WEAPONSPATH);
+		configs.Insert(CFG_MAGAZINESPATH);
+
+		array<string> names = new array<string>;
+
+		COT_String strNameLower;
+
+		for (int nConfig = 0; nConfig < configs.Count(); nConfig++)
+		{
+			string strConfigPath = configs.Get(nConfig);
+			int nClasses = g_Game.ConfigGetChildrenCount(strConfigPath);
+
+			for (int nClass = 0; nClass < nClasses; nClass++)
+			{
+				string strName;
+				g_Game.ConfigGetChildName(strConfigPath, nClass, strName);
+
+				int scope = g_Game.ConfigGetInt(strConfigPath + " " + strName + " scope");
+				if (scope == 0)
+					continue;
+
+				strNameLower = strName;
+				strNameLower.ToLower();
+
+				// Apply category filter
+				if (m_CurrentCategory != "" && !g_Game.IsKindOf(strNameLower, m_CurrentCategory))
+					continue;
+
+				// Apply keyword search filter
+				if (!matcher.Matches(strNameLower))
+					continue;
+
+				names.Insert(strName);
+			}
+		}
+
+		m_ItemList.SetItems(names);
+
+		if (m_SearchBox)
+			m_SearchBox.SetTextPreview(matcher.GetClosestMatch());
+	}
+
+	void OnClick_ItemList(UIEvent eid, UIActionBase action)
+	{
+		if (eid == UIEvent.DOUBLE_CLICK)
+			ActivateSelection();
+	}
+
+	//! Show On Map / Find CE Spawns, whichever the active tab means - shared
+	//! by the list's double-click.
+	protected void ActivateSelection()
+	{
+		string className = GetSelectedItem();
+		if (className == "" || !m_Module)
+			return;
+
+		if (GetActiveTabIndex() == m_TabIdDistribution)
+			m_Module.ShowCESpawnLocations(className);
+		else
+			m_Module.ShowItemsOnMap(className);
+	}
+
 	// =========================================================================
 	//  Right column - tabs
 	// =========================================================================
@@ -608,72 +405,50 @@ class JMLootAnalysisForm: JMFormBase
 		m_TabItemScan     = UIActionManager.CreatePanel(m_RightContent, 0x00000000);
 		m_TabDistribution = UIActionManager.CreatePanel(m_RightContent, 0x00000000);
 
-		ref array<string> tabLabels = { "#STR_COT_LOOT_TAB_ITEM_SCAN", "#STR_COT_LOOT_TAB_DISTRIBUTION" };
-		ref array<string> tabIcons  = { JMConstants.Lucide("scan-search"), JMConstants.Lucide("map-pin") };
 
-		m_Tabs = UIActionManager.CreateTabs(m_RightTabStrip, tabLabels, tabIcons, this, "OnChange_Tab");
+		m_Tabs = UIActionManager.CreateTabStrip( m_RightTabStrip, this, "OnChange_Tab" );
 
-		m_Tabs.AddContent(m_TabItemScan);
-		m_Tabs.AddContent(m_TabDistribution);
+		m_TabIdItemScan = m_Tabs.AddTab( "#STR_COT_LOOT_TAB_ITEM_SCAN", JMConstants.Lucide("scan-search"), m_TabItemScan );
+		m_TabIdDistribution = m_Tabs.AddTab( "#STR_COT_LOOT_TAB_DISTRIBUTION", JMConstants.Lucide("map-pin"), m_TabDistribution );
 
-		InitTabState(2);
+		DeclareTabs(2);
 
-		m_Tabs.SetSelection(TAB_ITEM_SCAN, false);
+		m_Tabs.SetSelection(m_TabIdItemScan, false);
 
-		BuildTabIfNeeded(TAB_ITEM_SCAN);
+		InitTabFocus(m_TabIdItemScan);
 	}
 
-	private void BuildTabIfNeeded(int tabIdx)
+	override protected void OnTabCreate( int tab, Widget panel )
 	{
-		//! ShouldBuildTab is true exactly once per index, and marks it built.
-		if (!ShouldBuildTab(tabIdx))
-			return;
-
-		switch (tabIdx)
+		if (tab == m_TabIdItemScan)
 		{
-			case TAB_ITEM_SCAN:
-				m_TabItemScanCtrl = new JMLootAnalysisFormTabItemScan(this);
-				m_TabItemScanCtrl.Build(m_TabItemScan);
-				break;
-
-			case TAB_DISTRIBUTION:
-				m_TabDistributionCtrl = new JMLootAnalysisFormTabDistribution(this);
-				m_TabDistributionCtrl.Build(m_TabDistribution);
-				break;
+			m_TabItemScanCtrl = new JMLootAnalysisFormTabItemScan( this );
+			RegisterTab( m_TabIdItemScan, m_TabItemScanCtrl );
 		}
+		else if (tab == m_TabIdDistribution)
+		{
+			m_TabDistributionCtrl = new JMLootAnalysisFormTabDistribution( this );
+			RegisterTab( m_TabIdDistribution, m_TabDistributionCtrl );
+		}
+
+		super.OnTabCreate(tab, panel);
 
 		//! A tab built after the form's first resize has missed every layout
 		//! pass so far - apply the cached height now instead of waiting on a
 		//! window resize that may never come.
 		if (m_LastRightContentH > 0)
-		{
-			if (m_TabItemScanCtrl)
-				m_TabItemScanCtrl.Layout(m_LastRightContentH);
-
-			if (m_TabDistributionCtrl)
-				m_TabDistributionCtrl.Layout(m_LastRightContentH);
-		}
+			OnTabResize(tab, 0, m_LastRightContentH);
 	}
 
-	override int GetActiveTabIndex()
+	protected override COT_ScriptedWidgetEventHandler GetTabStrip()
 	{
-		if (!m_Tabs)
-			return -1;
-
-		return m_Tabs.GetSelection();
+		return m_Tabs;
 	}
 
 	void OnChange_Tab(UIEvent eid, UIActionBase action)
 	{
-		if (eid != UIEvent.CHANGE)
-			return;
-
-		CloseAllOverlays();
-
-		if (m_TabItemScanCtrl)
-			m_TabItemScanCtrl.HideHoverInfo();
-
-		BuildTabIfNeeded(GetActiveTabIndex());
+		if (eid == UIEvent.CHANGE)
+			HandleTabChange();
 	}
 
 	override void OnHide()
@@ -704,7 +479,7 @@ class JMLootAnalysisForm: JMFormBase
 		editRow.ReadValues(m_LastTypeInfo, m_PendingSaveCENominal, m_PendingSaveCEMin, m_PendingSaveCELifetime, m_PendingSaveCERestock);
 		m_PendingSaveCEClassName = className;
 
-		CreateConfirmation_Two(JMConfirmationType.EDIT, "Save CE Data", "Overwrite " + className + "'s Nominal/Min/Lifetime/Restock in its source types.xml? A server restart or economy reload is needed for the change to affect spawns.", "Cancel", "", "Save", "SaveCEData_Yes");
+		PromptInput( "#STR_COT_LOOTANALYSIS_SAVE_CE_DATA", "Overwrite " + className + "'s Nominal/Min/Lifetime/Restock in its source types.xml? A server restart or economy reload is needed for the change to affect spawns.", "SaveCEData_Yes", "#STR_COT_LOOTANALYSIS_SAVE" );
 	}
 
 	void SaveCEData_Yes(JMConfirmation confirmation)
@@ -767,19 +542,6 @@ class JMLootAnalysisForm: JMFormBase
 	{
 		if (m_TabDistributionCtrl)
 			m_TabDistributionCtrl.AddMarkers(names, positions, types);
-	}
-
-	//! Called by the module once the server answers either request with the
-	//! classname's CE tuning values (or m_Found = false if it has none).
-	void SetItemTypeInfo(JMLootItemTypeInfo info)
-	{
-		m_LastTypeInfo = info;
-
-		if (m_TabItemScanCtrl)
-			m_TabItemScanCtrl.RefreshStats();
-
-		if (m_TabDistributionCtrl)
-			m_TabDistributionCtrl.RefreshStats();
 	}
 
 	//! Tiers only - Nominal/Min/Lifetime/Restock moved out to JMLootCEEditRow
@@ -878,92 +640,12 @@ class JMLootAnalysisForm: JMFormBase
 		if (markerId == "")
 			return;
 
-		ShowMarkerMenu(clickedMap, markerId);
-	}
-
-	protected void ShowMarkerMenu(UIActionMap clickedMap, string markerId)
-	{
-		JMMapMarker marker = clickedMap.GetMarker(markerId);
-		if (!marker)
-			return;
-
-		if (!m_MarkerMenu)
-		{
-			if (!GetWindow())
-				return;
-
-			m_MarkerMenu = UIActionManager.CreateContextMenu(layoutRoot, GetWindow().GetWidgetRoot(), this, "OnClick_MarkerMenu");
-
-			if (!m_MarkerMenu)
-				return;
-
-			RegisterOverlay(m_MarkerMenu);
-		}
-
-		m_MarkerMenuMap   = clickedMap;
-		m_MarkerMenuPos   = marker.Position;
-		m_MarkerMenuLabel = marker.Label;
-
 		//! Distribution markers carry no on-map label (see AddDistributionMarkers) -
 		//! their name lives in the side table instead.
-		if (m_MarkerMenuLabel == "" && m_TabDistributionCtrl && clickedMap == m_TabDistributionCtrl.GetMap())
-			m_MarkerMenuLabel = m_TabDistributionCtrl.GetMarkerName(markerId);
+		string fallbackLabel = "";
+		if (m_TabDistributionCtrl && clickedMap == m_TabDistributionCtrl.GetMap())
+			fallbackLabel = m_TabDistributionCtrl.GetMarkerName(markerId);
 
-		m_MarkerMenu.ClearItems();
-		m_MarkerMenu.AddItem(MENU_MK_TELEPORT, "Teleport To", JMConstants.Lucide("footprints"));
-		m_MarkerMenu.AddItem(MENU_MK_COPYPOS, "Copy Position", JMConstants.Lucide("copy"));
-		m_MarkerMenu.AddItem(MENU_MK_FOCUS, "Center Map Here", JMConstants.Lucide("locate-fixed"));
-
-		if (m_MarkerMenuLabel != "")
-			m_MarkerMenu.AddItem(MENU_MK_COPYNAME, "Copy Name", JMConstants.Lucide("copy"));
-
-		m_MarkerMenu.SetItemEnabled(MENU_MK_TELEPORT, JMPermissions.Has(JMConstants.PERM_PLAYER_TELEPORT_POSITION));
-
-		int mx, my;
-		GetMousePos(mx, my);
-
-		m_MarkerMenu.ShowAt(mx, my);
-	}
-
-	void OnClick_MarkerMenu(UIEvent eid, UIActionBase action)
-	{
-		if (eid != UIEvent.CLICK || !m_MarkerMenu)
-			return;
-
-		string id = m_MarkerMenu.GetLastClickedId();
-
-		if (id == MENU_MK_TELEPORT)
-		{
-			if (!JMPermissions.Has(JMConstants.PERM_PLAYER_TELEPORT_POSITION))
-				return;
-
-			JMTeleportModule teleportModule = CF_Modules<JMTeleportModule>.Get();
-			JMPlayerInstance self = GetPermissionsManager().GetClientPlayer();
-
-			if (teleportModule && self)
-				teleportModule.Position(m_MarkerMenuPos, { self.GetGUID() });
-
-			return;
-		}
-
-		if (id == MENU_MK_COPYPOS)
-		{
-			g_Game.CopyToClipboard("<" + m_MarkerMenuPos[0] + ", " + m_MarkerMenuPos[1] + ", " + m_MarkerMenuPos[2] + ">");
-			return;
-		}
-
-		if (id == MENU_MK_FOCUS)
-		{
-			if (m_MarkerMenuMap)
-				m_MarkerMenuMap.CenterOn(m_MarkerMenuPos);
-
-			return;
-		}
-
-		if (id == MENU_MK_COPYNAME)
-		{
-			g_Game.CopyToClipboard(m_MarkerMenuLabel);
-			return;
-		}
+		m_MarkerMenu.Show(clickedMap, markerId, fallbackLabel);
 	}
 }

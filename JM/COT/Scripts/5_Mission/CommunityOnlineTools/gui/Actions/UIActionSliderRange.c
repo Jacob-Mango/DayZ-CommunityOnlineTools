@@ -40,7 +40,6 @@ class UIActionSliderRange: UIActionBase
 	protected float m_FlowWidth;
 	protected Widget      m_HandleLow;
 	protected Widget      m_HandleHigh;
-
 	protected float m_Min;
 	protected float m_Max;
 	protected float m_Low;
@@ -86,6 +85,178 @@ class UIActionSliderRange: UIActionBase
 	//! not readable at the width one of these rows gets.
 	//! Must match the number of grad_N panels in UIActionSliderRange.layout.
 	static const int GRADIENT_SEGMENTS = 16;
+
+	//! Track width the handles were last placed against - see
+	//! UIActionSlider.RefreshOnTrackResize for why this is needed.
+	protected float m_LastTrackWidth;
+
+	int GetFlowDirection()
+	{
+		return m_FlowDir;
+	}
+
+	float GetMax() { return m_Max; }
+
+	float GetMin() { return m_Min; }
+
+	float GetRangeHigh() { return m_High; }
+
+	float GetRangeLow()  { return m_Low;  }
+
+	bool IsSingle()
+	{
+		return m_Single;
+	}
+
+	void SetAlpha( float alpha )
+	{
+		if ( m_Fill )
+			m_Fill.SetAlpha( alpha );
+	}
+
+	//! Point the arrows at the end the value is moving toward.
+	//!
+	//! 1 drifts them right, -1 left, 0 turns them off - which is the default,
+	//! so a range slider that is only a range shows none of this.
+	void SetFlowDirection( int direction )
+	{
+		if ( direction == m_FlowDir )
+			return;
+
+		m_FlowDir = direction;
+
+		if ( direction == 0 )
+			return;
+
+		//! Loaded only when the direction changes, not every frame.
+		string icon = JMConstants.ICON_CHEVRON_RIGHT;
+
+		if ( direction < 0 )
+			icon = JMConstants.ICON_CHEVRON_LEFT;
+
+		for ( int i = 0; i < m_Arrows.Count(); i++ )
+		{
+			m_Arrows[i].LoadImageFile( 0, icon );
+			m_Arrows[i].SetImage( 0 );
+		}
+	}
+
+	void SetFormat( string fmt )
+	{
+		m_Format = fmt;
+		UpdateVisuals();
+	}
+
+	//! Shade the filled bar across its own span.
+	//!
+	//! `stops` are evenly spaced over the slider's min..max, and every point in
+	//! between is mixed from the two it falls between - so a health slider can
+	//! run ruined-red through to pristine-green and each part of the bar shows
+	//! the condition of the values under it. Pass an empty array to go back to
+	//! one flat colour.
+	//!
+	//! The bar is not one widget shaded but a row of small ones each painted
+	//! its own colour: nothing in the engine gradients a panel.
+	void SetGradient( notnull TIntArray stops )
+	{
+		m_Gradient.Clear();
+
+		for ( int i = 0; i < stops.Count(); i++ )
+			m_Gradient.Insert( stops[i] );
+
+		UpdateVisuals();
+	}
+
+	void SetMinMax( float min, float max )
+	{
+		m_Min  = min;
+		m_Max  = max;
+		m_Low  = Math.Clamp( m_Low,  m_Min, m_Max );
+		m_High = Math.Clamp( m_High, m_Min, m_Max );
+		UpdateVisuals();
+	}
+
+	void SetRange( float low, float high )
+	{
+		m_Low  = SnapToStep( Math.Clamp( low,  m_Min, m_Max ) );
+		m_High = SnapToStep( Math.Clamp( high, m_Low, m_Max ) );
+		UpdateVisuals();
+	}
+
+	//! Colour the two ends independently.
+	//!
+	//! A range whose meaning changes across it - health running ruined to
+	//! pristine - says more when each handle carries the colour of the value it
+	//! is sitting on, and the bar between them the blend. One flat colour for
+	//! the whole control can only describe one end of it.
+	void SetRangeColors( int lowColor, int highColor )
+	{
+		m_FillColor = JMTheme.Mix( lowColor, highColor, 0.5 );
+
+		if ( m_Fill )
+			m_Fill.SetColor( m_FillColor );
+
+		if ( m_HandleLow )
+			m_HandleLow.SetColor( lowColor );
+
+		if ( m_HandleHigh )
+			m_HandleHigh.SetColor( highColor );
+	}
+
+	void SetRangeHigh( float value )
+	{
+		m_High = SnapToStep( Math.Clamp( value, m_Low, m_Max ) );
+		UpdateVisuals();
+	}
+
+	void SetRangeLow( float value )
+	{
+		m_Low = SnapToStep( Math.Clamp( value, m_Min, m_High ) );
+		UpdateVisuals();
+	}
+
+	//! Collapse the control to one handle, or open it back up to two.
+	//!
+	//! The low handle is HIDDEN rather than the row being rebuilt as a
+	//! UIActionSlider: the two read identically apart from that second handle,
+	//! and swapping the widget out would cost the caller its reference, its
+	//! gradient and its colours every time the mode changed.
+	//!
+	//! Collapsing loses where the low handle was. A caller that wants the span
+	//! back as it left it keeps that value itself and re-applies it with
+	//! SetRange after switching back - see JMObjectSpawnerForm.ApplyRangeMode.
+	void SetSingle( bool single )
+	{
+		if ( m_Single == single )
+			return;
+
+		m_Single = single;
+
+		if ( m_HandleLow )
+			m_HandleLow.Show( !m_Single );
+
+		UpdateVisuals();
+	}
+
+	//! Move the value while single, clamped to the control's own bounds.
+	//!
+	//! NOT through the high handle's usual clamp: that floors at m_Low, which is
+	//! sitting exactly on the value here, so the number could be dragged up and
+	//! never back down again.
+	protected void SetSingleValue( float value )
+	{
+		m_High = SnapToStep( Math.Clamp( value, m_Min, m_Max ) );
+		m_Low  = m_High;
+	}
+
+	void SetStep( float step )
+	{
+		m_Step = Math.Max( 0.001, step );
+
+		//! The step decides whether the readout rounds, so changing it changes
+		//! what the text should say.
+		UpdateVisuals();
+	}
 
 	override void OnInit()
 	{
@@ -150,83 +321,6 @@ class UIActionSliderRange: UIActionBase
 			m_Label.SetText( text );
 	}
 
-	void SetMinMax( float min, float max )
-	{
-		m_Min  = min;
-		m_Max  = max;
-		m_Low  = Math.Clamp( m_Low,  m_Min, m_Max );
-		m_High = Math.Clamp( m_High, m_Min, m_Max );
-		UpdateVisuals();
-	}
-
-	void SetStep( float step )
-	{
-		m_Step = Math.Max( 0.001, step );
-
-		//! The step decides whether the readout rounds, so changing it changes
-		//! what the text should say.
-		UpdateVisuals();
-	}
-
-	void SetFormat( string fmt )
-	{
-		m_Format = fmt;
-		UpdateVisuals();
-	}
-
-	//! Collapse the control to one handle, or open it back up to two.
-	//!
-	//! The low handle is HIDDEN rather than the row being rebuilt as a
-	//! UIActionSlider: the two read identically apart from that second handle,
-	//! and swapping the widget out would cost the caller its reference, its
-	//! gradient and its colours every time the mode changed.
-	//!
-	//! Collapsing loses where the low handle was. A caller that wants the span
-	//! back as it left it keeps that value itself and re-applies it with
-	//! SetRange after switching back - see JMObjectSpawnerForm.ApplyRangeMode.
-	void SetSingle( bool single )
-	{
-		if ( m_Single == single )
-			return;
-
-		m_Single = single;
-
-		if ( m_HandleLow )
-			m_HandleLow.Show( !m_Single );
-
-		UpdateVisuals();
-	}
-
-	bool IsSingle()
-	{
-		return m_Single;
-	}
-
-	void SetRangeLow( float value )
-	{
-		m_Low = SnapToStep( Math.Clamp( value, m_Min, m_High ) );
-		UpdateVisuals();
-	}
-
-	void SetRangeHigh( float value )
-	{
-		m_High = SnapToStep( Math.Clamp( value, m_Low, m_Max ) );
-		UpdateVisuals();
-	}
-
-	void SetRange( float low, float high )
-	{
-		m_Low  = SnapToStep( Math.Clamp( low,  m_Min, m_Max ) );
-		m_High = SnapToStep( Math.Clamp( high, m_Low, m_Max ) );
-		UpdateVisuals();
-	}
-
-	float GetRangeLow()  { return m_Low;  }
-	float GetRangeHigh() { return m_High; }
-
-	float GetMin() { return m_Min; }
-	float GetMax() { return m_Max; }
-
 	//! Tint the filled span and both handles, the same way UIActionSlider tints
 	//! its bar - a caller that colours a value by how good it is (health, for
 	//! one) expects the same control to answer.
@@ -242,26 +336,6 @@ class UIActionSliderRange: UIActionBase
 
 		if ( m_HandleHigh )
 			m_HandleHigh.SetColor( color );
-	}
-
-	//! Shade the filled bar across its own span.
-	//!
-	//! `stops` are evenly spaced over the slider's min..max, and every point in
-	//! between is mixed from the two it falls between - so a health slider can
-	//! run ruined-red through to pristine-green and each part of the bar shows
-	//! the condition of the values under it. Pass an empty array to go back to
-	//! one flat colour.
-	//!
-	//! The bar is not one widget shaded but a row of small ones each painted
-	//! its own colour: nothing in the engine gradients a panel.
-	void SetGradient( notnull TIntArray stops )
-	{
-		m_Gradient.Clear();
-
-		for ( int i = 0; i < stops.Count(); i++ )
-			m_Gradient.Insert( stops[i] );
-
-		UpdateVisuals();
 	}
 
 	//! Colour at `t`, where 0 is the slider's min and 1 its max.
@@ -405,38 +479,6 @@ class UIActionSliderRange: UIActionBase
 		PaintHandles( fillLeft, fillRight );
 	}
 
-	//! Point the arrows at the end the value is moving toward.
-	//!
-	//! 1 drifts them right, -1 left, 0 turns them off - which is the default,
-	//! so a range slider that is only a range shows none of this.
-	void SetFlowDirection( int direction )
-	{
-		if ( direction == m_FlowDir )
-			return;
-
-		m_FlowDir = direction;
-
-		if ( direction == 0 )
-			return;
-
-		//! Loaded only when the direction changes, not every frame.
-		string icon = JMConstants.ICON_CHEVRON_RIGHT;
-
-		if ( direction < 0 )
-			icon = JMConstants.ICON_CHEVRON_LEFT;
-
-		for ( int i = 0; i < m_Arrows.Count(); i++ )
-		{
-			m_Arrows[i].LoadImageFile( 0, icon );
-			m_Arrows[i].SetImage( 0 );
-		}
-	}
-
-	int GetFlowDirection()
-	{
-		return m_FlowDir;
-	}
-
 	//! Slide the arrows one frame along the filled span.
 	protected void UpdateFlow( float timeSlice )
 	{
@@ -518,43 +560,6 @@ class UIActionSliderRange: UIActionBase
 
 		if ( m_HandleHigh )
 			m_HandleHigh.SetColor( SampleGradient( fillRight ) );
-	}
-
-	//! Colour the two ends independently.
-	//!
-	//! A range whose meaning changes across it - health running ruined to
-	//! pristine - says more when each handle carries the colour of the value it
-	//! is sitting on, and the bar between them the blend. One flat colour for
-	//! the whole control can only describe one end of it.
-	void SetRangeColors( int lowColor, int highColor )
-	{
-		m_FillColor = JMTheme.Mix( lowColor, highColor, 0.5 );
-
-		if ( m_Fill )
-			m_Fill.SetColor( m_FillColor );
-
-		if ( m_HandleLow )
-			m_HandleLow.SetColor( lowColor );
-
-		if ( m_HandleHigh )
-			m_HandleHigh.SetColor( highColor );
-	}
-
-	void SetAlpha( float alpha )
-	{
-		if ( m_Fill )
-			m_Fill.SetAlpha( alpha );
-	}
-
-	//! Move the value while single, clamped to the control's own bounds.
-	//!
-	//! NOT through the high handle's usual clamp: that floors at m_Low, which is
-	//! sitting exactly on the value here, so the number could be dragged up and
-	//! never back down again.
-	protected void SetSingleValue( float value )
-	{
-		m_High = SnapToStep( Math.Clamp( value, m_Min, m_Max ) );
-		m_Low  = m_High;
 	}
 
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
@@ -690,7 +695,7 @@ class UIActionSliderRange: UIActionBase
 	//! picks the low handle, which is clamped by the high one and so cannot
 	//! move up - a collapsed range would be frozen. The tie is broken by which
 	//! side of the pair was clicked instead, so it can always be opened.
-	private int PickHandle( float value )
+	protected int PickHandle( float value )
 	{
 		//! Only one handle to pick from.
 		if ( m_Single )
@@ -713,7 +718,7 @@ class UIActionSliderRange: UIActionBase
 		return 2;
 	}
 
-	private float SnapToStep( float value )
+	protected float SnapToStep( float value )
 	{
 		if ( m_Step <= 0 )
 			return value;
@@ -721,7 +726,7 @@ class UIActionSliderRange: UIActionBase
 		return m_Min + steps * m_Step;
 	}
 
-	private float XToValue( int screenX )
+	protected float XToValue( int screenX )
 	{
 		if ( !m_Track )
 			return m_Min;
@@ -733,10 +738,6 @@ class UIActionSliderRange: UIActionBase
 		float t = Math.Clamp( ( screenX - tx ) / tw, 0, 1 );
 		return m_Min + t * ( m_Max - m_Min );
 	}
-
-	//! Track width the handles were last placed against - see
-	//! UIActionSlider.RefreshOnTrackResize for why this is needed.
-	protected float m_LastTrackWidth;
 
 	protected void RefreshOnTrackResize()
 	{
@@ -759,7 +760,7 @@ class UIActionSliderRange: UIActionBase
 	//! A hidden widget measures zero wide, so taking this from the low handle
 	//! returned 0 the moment single mode hid it - and the remaining handle was
 	//! then drawn with its LEFT edge on the value instead of its centre.
-	private float HandleHalfWidth()
+	protected float HandleHalfWidth()
 	{
 		if ( !m_Track || !m_HandleHigh )
 			return 0;
@@ -775,12 +776,12 @@ class UIActionSliderRange: UIActionBase
 		return ( handleW * 0.5 ) / trackW;
 	}
 
-	private float ClampHandlePos( float t, float half )
+	protected float ClampHandlePos( float t, float half )
 	{
 		return Math.Clamp( t - half, 0, Math.Max( 0, 1 - half - half ) );
 	}
 
-	private void UpdateVisuals()
+	protected void UpdateVisuals()
 	{
 		if ( !m_Track )
 			return;

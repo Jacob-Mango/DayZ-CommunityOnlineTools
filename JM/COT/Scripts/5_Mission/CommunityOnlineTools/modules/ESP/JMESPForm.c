@@ -4,14 +4,8 @@
 //! (JMESPFormTabFilters.c / JMESPFormTabObjects.c / JMESPFormTabSettings.c).
 //! What stays here:
 //!   - The shared toolbar (ESP on/off + classname filter), above the tab strip.
-//!   - `IconForViewType` - JMESPViewTypeWidget.c calls it class-qualified
-//!     (JMESPForm.IconForViewType), so it has to stay a static on this exact
-//!     class.
-//!   - OnRightClick_CategoryRow / OnChange_CategoryRow / OpenCategoryColourPopup
-//!     - thin forwarders into the Filters tab. JMESPViewTypeWidget.c holds a
-//!     JMESPForm-typed back-reference and calls these three directly, so
-//!     they cannot move without also editing that file; forwarding keeps
-//!     that file untouched.
+//!   - `IconForViewType` - a deprecated static forwarder to JMESPViewTypeWidget, for sub-mods
+//!     that still call it on this class.
 //!   - DeleteSelected / MoveToCursor / CreateLoadout_Confirm /
 //!     OnSendMessage_Confirm / PromptSendMessage - JMConfirmation dispatches
 //!     its named callbacks against whatever object its window was Init()'d
@@ -21,16 +15,14 @@
 //!     independent reason it cannot move.
 class JMESPForm: JMFormBase
 {
+	//! Tab indices - what the strip's AddTab() returned for each tab, never written as numbers.
+	protected int m_TabIdFilters;
+	protected int m_TabIdObjects;
+	protected int m_TabIdSettings;
+
 	//! Height of panel_top in esp_form.layout. The tab strip below is pinned
 	//! against it in OnResize; keep the two in step.
 	static const int TOOLBAR_HEIGHT = 44;
-
-	static const int TAB_FILTERS  = 0;
-	static const int TAB_OBJECTS  = 1;
-	static const int TAB_SETTINGS = 2;
-
-	protected autoptr array< ref JMESPViewTypeWidget > m_ESPTypeList;
-	protected ref map<typename, JMESPViewTypeWidget> m_ESPTypeWidgetsByType;
 
 	// -- Toolbar (panel_top) --------------------------------------------------
 	protected ref UIActionFlexRow m_ToolbarRow;
@@ -47,11 +39,7 @@ class JMESPForm: JMFormBase
 	//! through their back-reference.
 	JMESPModule m_Module;
 	JMLoadoutModule m_LoadoutModule;
-
 	protected UIActionTabs m_Tabs;
-	protected Widget m_TabFiltersPanel;
-	protected Widget m_TabObjectsPanel;
-	protected Widget m_TabSettingsPanel;
 
 	//! One class per tab, in its own file - only this form constructs/
 	//! dispatches to them. Not private: the toolbar/lifecycle forwarders
@@ -63,12 +51,10 @@ class JMESPForm: JMFormBase
 	//! Last content height OnResize reported. Public: JMESPFormTabObjects's
 	//! ApplyObjectListHeight() needs it to size the object list.
 	float m_ContentHeight;
+	protected string m_PendingMsgPlayerGUID;
 
 	void JMESPForm()
 	{
-		m_ESPTypeList = new array< ref JMESPViewTypeWidget >;
-		m_ESPTypeWidgetsByType = new map<typename, JMESPViewTypeWidget>;
-
 		JMScriptInvokers.ESP_VIEWTYPE_CHANGED.Insert( OnESPViewTypeChanged );
 	}
 
@@ -82,7 +68,7 @@ class JMESPForm: JMFormBase
 		return Class.CastTo( m_Module, mdl );
 	}
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		JMESPWidgetHandler.espMenu = this;
 
@@ -103,7 +89,8 @@ class JMESPForm: JMFormBase
 		m_ToolbarRow = UIActionManager.CreateFlexRow( top, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 		Widget row = m_ToolbarRow.GetContent();
 
-		m_ToggleButton = UIActionManager.CreateButton( row, "#STR_COT_ESP_MODULE_TOGGLE", this, "OnClick_UpdateESP" );
+		m_ToggleButton = UIActionManager.CreateButton( row, "#STR_COT_ESP_MODULE_TOGGLE", this, "" );
+		if ( m_ToggleButton ) m_ToggleButton.SetOnClick( this, "OnClick_UpdateESP" );
 		m_ToggleButton.SetFlex( 0, 150, 150 );
 		m_ToggleButton.SetIcon( JMConstants.Lucide( "eye" ) );
 		m_ToggleButton.SetTooltip( "#STR_COT_ESP_MODULE_TT_TOGGLE_ESP" );
@@ -126,7 +113,7 @@ class JMESPForm: JMFormBase
 		{
 			m_SearchBox.InitSuggestionList( GetWindow().GetWidgetRoot() );
 			m_SearchBox.SetMaxVisibleSuggestions( 10 );
-			RegisterOverlay( m_SearchBox );
+			AddOverlay( m_SearchBox );
 		}
 
 		m_ToolbarRow.SetGap( 10 );
@@ -138,174 +125,85 @@ class JMESPForm: JMFormBase
 
 	protected void InitWidgetsBottom()
 	{
-		m_TabFiltersPanel  = layoutRoot.FindAnyWidget( "esp_filters_panel" );
-		m_TabObjectsPanel  = layoutRoot.FindAnyWidget( "esp_objects_panel" );
-		m_TabSettingsPanel = layoutRoot.FindAnyWidget( "esp_settings_panel" );
+		Widget panelFilters  = layoutRoot.FindAnyWidget( "esp_filters_panel" );
+		Widget panelObjects  = layoutRoot.FindAnyWidget( "esp_objects_panel" );
+		Widget panelSettings = layoutRoot.FindAnyWidget( "esp_settings_panel" );
 
-		ref array<string> tabLabels = { "#STR_COT_ESP_TAB_FILTERS", "#STR_COT_ESP_TAB_VISIBLE", "#STR_COT_ESP_TAB_SETTINGS" };
-		ref array<string> tabIcons  = { JMConstants.Lucide( "filter" ), JMConstants.Lucide( "eye" ), JMConstants.Lucide( "settings" ) };
 
-		m_Tabs = UIActionManager.CreateTabs( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), tabLabels, tabIcons, this, "OnChange_Tab" );
+		m_BottomTabStrip = layoutRoot.FindAnyWidget( "panel_bottom_tabs" );
+		m_BottomContent  = layoutRoot.FindAnyWidget( "panel_bottom_content" );
 
-		m_Tabs.AddContent( m_TabFiltersPanel );
-		m_Tabs.AddContent( m_TabObjectsPanel );
-		m_Tabs.AddContent( m_TabSettingsPanel );
+		m_Tabs = UIActionManager.CreateTabStrip( m_BottomTabStrip, this, "OnChange_Tab" );
 
-		InitTabState( 3 );
+		m_TabIdFilters = m_Tabs.AddTab( "#STR_COT_ESP_TAB_FILTERS", JMConstants.Lucide( "filter" ), panelFilters );
+		m_TabIdObjects = m_Tabs.AddTab( "#STR_COT_ESP_TAB_VISIBLE", JMConstants.Lucide( "eye" ), panelObjects );
+		m_TabIdSettings = m_Tabs.AddTab( "#STR_COT_ESP_TAB_SETTINGS", JMConstants.Lucide( "settings" ), panelSettings );
 
-		m_Tabs.SetSelection( TAB_FILTERS, false );
+		DeclareTabs( 3 );
 
-		BuildTabIfNeeded( TAB_FILTERS );
-	}
+		m_Tabs.SetSelection( m_TabIdFilters, false );
 
-	// =========================================================================
-	//  JMESPViewTypeWidget forwarders - see file header.
-	// =========================================================================
-
-	void OnRightClick_CategoryRow( JMESPViewTypeWidget row )
-	{
-		if ( m_TabFilters )
-			m_TabFilters.OnRightClick_CategoryRow( row );
-	}
-
-	void OnChange_CategoryRow()
-	{
-		if ( m_TabFilters )
-			m_TabFilters.OnChange_CategoryRow();
-	}
-
-	void OpenCategoryColourPopup( JMESPViewTypeWidget row, Widget anchor )
-	{
-		if ( m_TabFilters )
-			m_TabFilters.OpenCategoryColourPopup( row, anchor );
-	}
-
-	//! Glyph baked into a category row's switch thumb. Keyed on typename the
-	//! same way GroupIndexFor is, and for the same reason: a sub-mod's own view
-	//! type falls through to the generic marker instead of rendering blank.
-	//!
-	//! Most-specific first - every weapon and item leaf also passes the base
-	//! test, so the bases have to be asked last. Referenced class-qualified
-	//! from JMESPViewTypeWidget.c - must stay on JMESPForm.
-	static string IconForViewType( JMESPViewType viewType )
-	{
-		typename t = viewType.Type();
-
-		if ( t == JMESPViewTypePlayer )   return JMConstants.Lucide( "user" );
-		if ( t == JMESPViewTypePlayerAI ) return JMConstants.Lucide( "bot" );
-		if ( t == JMESPViewTypeInfected ) return JMConstants.Lucide( "skull" );
-		if ( t == JMESPViewTypeAnimal )   return JMConstants.Lucide( "rabbit" );
-
-		if ( t == JMESPViewTypeCar )   return JMConstants.Lucide( "car" );
-		if ( t == JMESPViewTypeBoat )  return JMConstants.Lucide( "ship" );
-		if ( t == JMESPViewTypeTrain ) return JMConstants.Lucide( "train-front" );
-
-		if ( t == JMESPViewTypeArchery )         return JMConstants.Lucide( "bow-arrow" );
-		if ( t == JMESPViewTypePistol )          return JMConstants.Lucide( "target" );
-		if ( t == JMESPViewTypeLauncher )        return JMConstants.Lucide( "rocket" );
-		if ( t == JMESPViewTypeRifle )           return JMConstants.Lucide( "crosshair" );
-		if ( t == JMESPViewTypeBoltRifle )       return JMConstants.Lucide( "crosshair" );
-		if ( t == JMESPViewTypeBoltActionRifle ) return JMConstants.Lucide( "crosshair" );
-
-		if ( t == JMESPViewTypeTent )         return JMConstants.Lucide( "tent" );
-		if ( t == JMESPViewTypeBaseBuilding ) return JMConstants.Lucide( "blocks" );
-		if ( t == JMESPViewTypeFood )         return JMConstants.Lucide( "apple" );
-		if ( t == JMESPViewTypeExplosive )    return JMConstants.Lucide( "bomb" );
-		if ( t == JMESPViewTypeBook )         return JMConstants.Lucide( "book" );
-		if ( t == JMESPViewTypeContainer )    return JMConstants.Lucide( "box" );
-		if ( t == JMESPViewTypeTransmitter )  return JMConstants.Lucide( "radio" );
-		if ( t == JMESPViewTypeClothing )     return JMConstants.Lucide( "shirt" );
-		if ( t == JMESPViewTypeMagazine )     return JMConstants.Lucide( "layers" );
-		if ( t == JMESPViewTypeAmmo )         return JMConstants.Lucide( "shell" );
-		if ( t == JMESPViewTypeUnknown )      return JMConstants.Lucide( "circle-help" );
-
-		if ( t == JMESPViewTypeBuilding )    return JMConstants.Lucide( "building" );
-		if ( t == JMESPViewTypeRock )        return JMConstants.Lucide( "gem" );
-		if ( t == JMESPViewTypeTree )        return JMConstants.Lucide( "tree-pine" );
-		if ( t == JMESPViewTypeBush )        return JMConstants.Lucide( "shrub" );
-		if ( t == JMESPViewTypePlainObject ) return JMConstants.Lucide( "square" );
-
-		if ( t.IsInherited( JMESPViewTypeWeapon ) )    return JMConstants.Lucide( "swords" );
-		if ( t.IsInherited( JMESPViewTypeItemBase ) )  return JMConstants.Lucide( "package" );
-		if ( t.IsInherited( JMESPViewTypeImmovable ) ) return JMConstants.Lucide( "mountain" );
-
-		return JMConstants.Lucide( "map-pin" );
+		InitTabFocus( m_TabIdFilters );
 	}
 
 	// =========================================================================
 	//  Tabs & lifecycle
 	// =========================================================================
 
-	private void BuildTabIfNeeded( int tabIdx )
+	override protected void OnTabCreate( int tab, Widget panel )
 	{
-		if ( !ShouldBuildTab( tabIdx ) )
-			return;
-
-		switch ( tabIdx )
+		if ( tab == m_TabIdFilters )
 		{
-			case TAB_FILTERS:
-				m_TabFilters = new JMESPFormTabFilters( this );
-				m_TabFilters.Build( m_TabFiltersPanel );
-				break;
-
-			case TAB_OBJECTS:
-				m_TabObjects = new JMESPFormTabObjects( this );
-				m_TabObjects.Build( m_TabObjectsPanel );
-				break;
-
-			case TAB_SETTINGS:
-				m_TabSettings = new JMESPFormTabSettings( this );
-				m_TabSettings.Build( m_TabSettingsPanel );
-				break;
+			m_TabFilters = new JMESPFormTabFilters( this );
+			RegisterTab( m_TabIdFilters, m_TabFilters );
+			m_TabFilters.OnCreate( panel );
+		}
+		else if ( tab == m_TabIdObjects )
+		{
+			m_TabObjects = new JMESPFormTabObjects( this );
+			RegisterTab( m_TabIdObjects, m_TabObjects );
+			m_TabObjects.OnCreate( panel );
+		}
+		else if ( tab == m_TabIdSettings )
+		{
+			m_TabSettings = new JMESPFormTabSettings( this );
+			RegisterTab( m_TabIdSettings, m_TabSettings );
+			m_TabSettings.OnCreate( panel );
 		}
 
 		UpdateUI();
 	}
 
-	override int GetActiveTabIndex()
+	protected override COT_ScriptedWidgetEventHandler GetTabStrip()
 	{
-		if ( !m_Tabs )
-			return -1;
-
-		return m_Tabs.GetSelection();
+		return m_Tabs;
 	}
 
 	void OnChange_Tab( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		CloseAllOverlays();
-
-		BuildTabIfNeeded( GetActiveTabIndex() );
-
-		if ( IsTabActive( TAB_OBJECTS ) && m_TabObjects )
-			m_TabObjects.RefreshList();
+		if ( eid == UIEvent.CHANGE )
+			HandleTabChange();
 	}
 
 	override void OnResize( float w, float h )
 	{
 		super.OnResize( w, h );
 
-		PinStripGeometry( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), layoutRoot.FindAnyWidget( "panel_bottom_content" ), h - TOOLBAR_HEIGHT, TAB_STRIP_HEIGHT );
+		PinBottomPanelGeometry( h - TOOLBAR_HEIGHT );
 
 		if ( m_ToolbarRow )
 			m_ToolbarRow.Layout();
 
 		m_ContentHeight = h;
 
-		if ( m_TabFilters )
-			m_TabFilters.OnResize();
-
-		if ( m_TabObjects )
-			m_TabObjects.OnResize();
+		ResizeTabs( w, h );
 	}
 
 	override void OnShow()
 	{
 		super.OnShow();
 
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateUI, 500, true );
+		DeferCall( "UpdateUI", 500, true );
 
 		UpdateUI();
 	}
@@ -314,7 +212,7 @@ class JMESPForm: JMFormBase
 	{
 		super.OnHide();
 
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( UpdateUI );
+		CancelDeferredCall( "UpdateUI" );
 	}
 
 	//! Kept because JMESPModule.OnClientPermissionsUpdated calls it. The
@@ -370,8 +268,7 @@ class JMESPForm: JMFormBase
 		if ( m_TabSettings )
 			m_TabSettings.RefreshSliders();
 
-		if ( IsTabActive( TAB_OBJECTS ) && m_TabObjects )
-			m_TabObjects.RefreshList();
+		UpdateActiveTab();
 
 		ApplyToggleFace();
 	}
@@ -429,11 +326,8 @@ class JMESPForm: JMFormBase
 	//  Toolbar handlers
 	// =========================================================================
 
-	void OnClick_UpdateESP( UIEvent eid, UIActionBase action )
+	void OnClick_UpdateESP( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
 		if ( !JMPermissions.Has( JMConstants.PERM_ESP_VIEW ) )
 			return;
 
@@ -496,15 +390,10 @@ class JMESPForm: JMFormBase
 
 	void MoveToCursor()
 	{
-		vector dir = g_Game.GetCurrentCameraDirection();
-		vector from = g_Game.GetCurrentCameraPosition();
-		vector to = from + ( dir * 1000 );
-		vector contact_pos;
-		vector contact_dir;
-		int contact_component;
+		vector contactPos;
 
-		if ( DayZPhysics.RaycastRV( from, to, contact_pos, contact_dir, contact_component, NULL, NULL, NULL, false, true ) )
-			m_Module.MoveToCursor( contact_pos );
+		if ( COT_CameraRaycast( 1000, contactPos ) )
+			m_Module.MoveToCursor( contactPos );
 	}
 
 	void CreateLoadout_Confirm( JMConfirmation confirmation )
@@ -519,12 +408,10 @@ class JMESPForm: JMFormBase
 		m_LoadoutModule.Create( name );
 	}
 
-	protected string m_PendingMsgPlayerGUID;
-
 	void PromptSendMessage( string playerGUID, string playerName )
 	{
 		m_PendingMsgPlayerGUID = playerGUID;
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", Widget.TranslateString( "#STR_COT_ESP_MODULE_MESSAGE_PROMPT" ) + " " + playerName + ":", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnSendMessage_Confirm" );
+		PromptInput( "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", Widget.TranslateString( "#STR_COT_ESP_MODULE_MESSAGE_PROMPT" ) + " " + playerName + ":", "OnSendMessage_Confirm" );
 	}
 
 	void OnSendMessage_Confirm( JMConfirmation confirmation )
@@ -539,5 +426,13 @@ class JMESPForm: JMFormBase
 			playerModule.DoMessage( { m_PendingMsgPlayerGUID }, msgText );
 		}
 		m_PendingMsgPlayerGUID = "";
+	}
+
+	//! DEPRECATED - moved to JMESPViewTypeWidget.IconForViewType().
+	static string IconForViewType( JMESPViewType viewType )
+	{
+		JMDeprecated.WarnOnce( null, "JMESPForm.IconForViewType() is deprecated. It moved to JMESPViewTypeWidget.IconForViewType()." );
+
+		return JMESPViewTypeWidget.IconForViewType( viewType );
 	}
 }

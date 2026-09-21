@@ -3,12 +3,25 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 	string username;
 	string avatar_url;
 	string content;
-
 	ref array< ref JMWebhookDiscordEmbed > embeds;
 
 	void JMWebhookDiscordMessage()
 	{
 		embeds = new array< ref JMWebhookDiscordEmbed >;
+	}
+
+	JMWebhookDiscordEmbed GetEmbed( int idx = 0 )
+	{
+		if ( embeds.Count() <= idx )
+			return embeds[idx];
+		
+		for ( int i = embeds.Count(); i <= idx; ++i )
+		{
+			JMWebhookDiscordEmbed embed = new JMWebhookDiscordEmbed;
+			embeds.Insert( embed );
+		}
+		
+		return embeds[idx];
 	}
 
 	void SetHeader( string userName, string avatarUrl, string msgContent )
@@ -28,20 +41,6 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 		JMWebhookDiscordEmbed embed = new JMWebhookDiscordEmbed;
 		embeds.Insert( embed );
 		return embed;
-	}
-
-	JMWebhookDiscordEmbed GetEmbed( int idx = 0 )
-	{
-		if ( embeds.Count() <= idx )
-			return embeds[idx];
-		
-		for ( int i = embeds.Count(); i <= idx; ++i )
-		{
-			JMWebhookDiscordEmbed embed = new JMWebhookDiscordEmbed;
-			embeds.Insert( embed );
-		}
-		
-		return embeds[idx];
 	}
 
 	override string Prepare( JsonSerializer serializer )
@@ -95,43 +94,18 @@ class JMWebhookDiscordEmbedFooter : Managed
 class JMWebhookDiscordEmbed : Managed
 {
 	ref JMWebhookDiscordEmbedAuthor author = NULL;
-
 	string title;
 	string url;
 	string description;
 	int color;
-
 	ref array< ref JMWebhookDiscordEmbedField > fields;
-
 	ref JMWebhookDiscordEmbedThumbnail thumbnail = NULL;
-
 	ref JMWebhookDiscordEmbedImage image = NULL;
-
 	ref JMWebhookDiscordEmbedFooter footer = NULL;
 
 	void JMWebhookDiscordEmbed()
 	{
 		fields = new array< ref JMWebhookDiscordEmbedField >;
-	}
-
-	void SetTitle( string txt )
-	{
-		title = txt;
-	}
-
-	void SetURL( string txt )
-	{
-		url = txt;
-	}
-
-	void SetDescription( string txt )
-	{
-		description = txt;
-	}
-
-	void SetColor( int txt )
-	{
-		color = txt;
 	}
 
 	void SetAuthor( string name, string urlLink = "", string icon_url = "" )
@@ -144,23 +118,23 @@ class JMWebhookDiscordEmbed : Managed
 		author.icon_url = icon_url;
 	}
 
-	void AddField( string name, string value, bool inline = false )
+	void SetColor( int txt )
 	{
-		JMWebhookDiscordEmbedField field = new JMWebhookDiscordEmbedField;
-
-		field.name = name;
-		field.value = value;
-		field.inline = inline;
-
-		fields.Insert( field );
+		color = txt;
 	}
 
-	void SetThumbnail( string urlLink )
+	void SetDescription( string txt )
 	{
-		if ( !thumbnail )
-			thumbnail = new JMWebhookDiscordEmbedThumbnail;
+		description = txt;
+	}
 
-		thumbnail.url = urlLink;
+	void SetFooter( string text, string icon_url = "" )
+	{
+		if ( !footer )
+			footer = new JMWebhookDiscordEmbedFooter;
+
+		footer.text = text;
+		footer.icon_url = icon_url;
 	}
 
 	void SetImage( string urlLink )
@@ -171,12 +145,32 @@ class JMWebhookDiscordEmbed : Managed
 		image.url = urlLink;
 	}
 
-	void SetFooter( string text, string icon_url = "" )
+	void SetThumbnail( string urlLink )
 	{
-		if ( !footer )
-			footer = new JMWebhookDiscordEmbedFooter;
+		if ( !thumbnail )
+			thumbnail = new JMWebhookDiscordEmbedThumbnail;
 
-		footer.text = text;
-		footer.icon_url = icon_url;
+		thumbnail.url = urlLink;
+	}
+
+	void SetTitle( string txt )
+	{
+		title = txt;
+	}
+
+	void SetURL( string txt )
+	{
+		url = txt;
+	}
+
+	void AddField( string name, string value, bool inline = false )
+	{
+		JMWebhookDiscordEmbedField field = new JMWebhookDiscordEmbedField;
+
+		field.name = name;
+		field.value = value;
+		field.inline = inline;
+
+		fields.Insert( field );
 	}
 }

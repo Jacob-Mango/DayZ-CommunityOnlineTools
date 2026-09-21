@@ -4,22 +4,22 @@
 class UIActionScroller: UIActionBase 
 {
 	const int WHEEL_STEP = 20;
-
 	protected Widget m_Content;
 	protected Widget m_ScrollerContainer;
 	protected Widget m_Scroller;
-
 	protected float m_RootHeight;
 	protected float m_ContentHeight;
 	protected float m_Position;
-
 	protected float m_ScrollStartPos;
 	protected int m_MouseStartPos;
-
 	protected bool m_IsDragScrolling;
 	protected bool m_IsMouseScrolling;
-
 	protected bool m_IsUpdating;
+
+	Widget GetContentWidget()
+	{
+		return m_Content;
+	}
 
 	override void OnInit() 
 	{
@@ -33,11 +33,6 @@ class UIActionScroller: UIActionBase
 		m_Position = 0;
 
 		UpdateScroller();
-	}
-
-	Widget GetContentWidget()
-	{
-		return m_Content;
 	}
 
 	override void OnShow()
@@ -240,7 +235,7 @@ class UIActionScroller: UIActionBase
 	
 		return false;
 	}
-	
+
 	override bool OnMouseButtonUp( Widget w, int x, int y, int button)
 	{
 		StopDragScrolling();
@@ -248,7 +243,7 @@ class UIActionScroller: UIActionBase
 
 		return false;
 	}
-	
+
 	override bool OnMouseWheel( Widget w, int x, int y, int wheel )
 	{
 		if ( m_IsDragScrolling || m_ContentHeight <= m_RootHeight )

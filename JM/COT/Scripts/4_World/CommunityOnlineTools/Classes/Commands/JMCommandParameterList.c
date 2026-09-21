@@ -2,7 +2,7 @@ class JMCommandParameterList
 {
 	ref array<string> m_Arguments;
 	int m_Index;
-	
+
 	void JMCommandParameterList(array<string> arguments)
 	{
 		m_Arguments = new array<string>();
@@ -10,23 +10,23 @@ class JMCommandParameterList
 
 		m_Index = -1;
 	}
-	
-	string Current()
-	{
-		return m_Arguments[m_Index];
-	}
 
 	bool HasNext()
 	{
 		return m_Arguments.Count() > (m_Index + 1);
 	}
-	
+
+	string Current()
+	{
+		return m_Arguments[m_Index];
+	}
+
 	bool Next()
 	{
 		m_Index++;
 		return m_Index < m_Arguments.Count();
 	}
-	
+
 	bool Next(out int param)
 	{
 		if (!Next()) return false;
@@ -34,7 +34,7 @@ class JMCommandParameterList
 		param = Current().ToInt();
 		return true;
 	}
-	
+
 	bool Next(out float param)
 	{
 		if (!Next()) return false;
@@ -42,7 +42,7 @@ class JMCommandParameterList
 		param = Current().ToFloat();
 		return true;
 	}
-	
+
 	bool Next(out string param)
 	{
 		if (!Next()) return false;
@@ -50,7 +50,7 @@ class JMCommandParameterList
 		param = Current();
 		return true;
 	}
-	
+
 	bool Next(out JMPlayerInstance param)
 	{
 		if (!Next()) return false;
@@ -58,7 +58,7 @@ class JMCommandParameterList
 		param = GetPermissionsManager().GetPlayer(Current());
 		return param != null;
 	}
-	
+
 	bool Next(out PlayerBase param)
 	{
 		if (!Next()) return false;

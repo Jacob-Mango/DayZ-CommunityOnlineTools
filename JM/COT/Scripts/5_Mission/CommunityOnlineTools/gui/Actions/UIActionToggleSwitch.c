@@ -11,7 +11,6 @@ class UIActionToggleSwitch: UIActionBase
 	protected Widget       m_Track;
 	protected Widget       m_Thumb;
 	protected ImageWidget  m_ThumbImage;
-
 	protected bool m_Checked;
 
 	//! Per-instance thumb colours. Default to the shared ON/OFF pair; a caller
@@ -20,11 +19,9 @@ class UIActionToggleSwitch: UIActionBase
 	//! them so the switch doubles as the colour swatch.
 	protected int m_ThumbColorOn;
 	protected int m_ThumbColorOff;
-
 	protected ref JMAnimFloat  m_AnimPos;     // thumb X
 	protected ref JMAnimColor  m_AnimTrack;   // track colour
 	protected ref JMAnimColor  m_AnimThumb;   // thumb colour
-
 	static const int COLOR_TRACK_ON  = JMTheme.ACCENT;
 	static const int COLOR_TRACK_OFF = JMTheme.INK_500;
 	static const int COLOR_THUMB_ON  = JMTheme.TEXT_ON_ACCENT;
@@ -40,12 +37,41 @@ class UIActionToggleSwitch: UIActionBase
 	// real size.
 	static const float THUMB_X_ON  = 24;
 	static const float THUMB_X_OFF =  2;
-
 	protected float m_ThumbXOn  = THUMB_X_ON;
 	protected float m_ThumbXOff = THUMB_X_OFF;
 	protected float m_MeasuredWidth;
-
 	static const float ANIM_SPEED = 16.0;
+
+	//! Colour of the LABEL. NOT SetColor - the base paints layoutRoot, so a
+	//! caller reaching for "mark this row dangerous" with SetColor fills the
+	//! whole row with a flat block of that colour instead of tinting the text.
+	void SetLabelColor( int color )
+	{
+		if ( m_Label )
+			m_Label.SetColor( color );
+	}
+
+	//! Override the thumb's ON/OFF tint for this switch only. Call before
+	//! SetChecked, or follow it with SetChecked to re-target the animation.
+	void SetThumbColors( int colorOn, int colorOff )
+	{
+		m_ThumbColorOn  = colorOn;
+		m_ThumbColorOff = colorOff;
+
+		RetargetAnim();
+	}
+
+	//! Bake a glyph into the sliding thumb, replacing the plain circle. The
+	//! switch then says WHAT it toggles as well as whether it is on, which is
+	//! what lets a long list of them stay readable without a separate icon
+	//! column per row.
+	void SetThumbIcon( string imagePath )
+	{
+		if ( !m_ThumbImage || imagePath == "" )
+			return;
+
+		m_ThumbImage.LoadImageFile( 0, imagePath );
+	}
 
 	override void OnInit()
 	{
@@ -75,15 +101,6 @@ class UIActionToggleSwitch: UIActionBase
 			m_Label.SetText( text );
 	}
 
-	//! Colour of the LABEL. NOT SetColor - the base paints layoutRoot, so a
-	//! caller reaching for "mark this row dangerous" with SetColor fills the
-	//! whole row with a flat block of that colour instead of tinting the text.
-	void SetLabelColor( int color )
-	{
-		if ( m_Label )
-			m_Label.SetColor( color );
-	}
-
 	override void SetChecked( bool checked )
 	{
 		m_Checked = checked;
@@ -98,28 +115,6 @@ class UIActionToggleSwitch: UIActionBase
 	void Toggle()
 	{
 		SetChecked( !m_Checked );
-	}
-
-	//! Bake a glyph into the sliding thumb, replacing the plain circle. The
-	//! switch then says WHAT it toggles as well as whether it is on, which is
-	//! what lets a long list of them stay readable without a separate icon
-	//! column per row.
-	void SetThumbIcon( string imagePath )
-	{
-		if ( !m_ThumbImage || imagePath == "" )
-			return;
-
-		m_ThumbImage.LoadImageFile( 0, imagePath );
-	}
-
-	//! Override the thumb's ON/OFF tint for this switch only. Call before
-	//! SetChecked, or follow it with SetChecked to re-target the animation.
-	void SetThumbColors( int colorOn, int colorOff )
-	{
-		m_ThumbColorOn  = colorOn;
-		m_ThumbColorOff = colorOff;
-
-		RetargetAnim();
 	}
 
 	//! Right-click never toggles - it reports CLICK_RIGHT so the host can raise
@@ -174,7 +169,7 @@ class UIActionToggleSwitch: UIActionBase
 	// GetSize returns 0 until the widget has been laid out, hence the bail-out;
 	// the width check makes this a no-op on every frame but the first and any
 	// subsequent resize.
-	private void Measure()
+	protected void Measure()
 	{
 		if ( !m_Button || !m_Thumb )
 			return;
@@ -204,7 +199,7 @@ class UIActionToggleSwitch: UIActionBase
 		ApplyImmediate();
 	}
 
-	private void RetargetAnim()
+	protected void RetargetAnim()
 	{
 		int trackColor = COLOR_TRACK_OFF;
 		int thumbColor = m_ThumbColorOff;
@@ -222,7 +217,7 @@ class UIActionToggleSwitch: UIActionBase
 	}
 
 	// Snap visuals to the current state without animating (initial paint only).
-	private void ApplyImmediate()
+	protected void ApplyImmediate()
 	{
 		int trackColor = COLOR_TRACK_OFF;
 		int thumbColor = m_ThumbColorOff;

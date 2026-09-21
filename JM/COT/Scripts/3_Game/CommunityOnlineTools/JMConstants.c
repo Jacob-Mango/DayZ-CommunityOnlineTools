@@ -13,7 +13,6 @@ class JMConstants
 	static const string OFFLINE_GUID 	= "OFFLINE";
 	static const string OFFLINE_STEAM 	= "OFFLINE";
 	static const string OFFLINE_NAME 	= "OFFLINE";
-	
 	static const string PERM_ROOT = "ROOT";
 
 	// Permissions
@@ -40,10 +39,8 @@ class JMConstants
 	static const string PERM_PLAYER_STATISTICS_VIEW                = "Admin.Player.Statistics.View";
 	static const string PERM_PLAYER_INVENTORY                     = "Admin.Player.Inventory";
 	static const string PERM_PLAYER_INJECTED_PANEL                = "Admin.Player.InjectedPanel";
-
 	static const string PERM_MAP_PLAYERS                          = "Admin.Map.Players";
 	static const string PERM_MAP_VIEW                             = "Admin.Map.View";
-
 	static const string PERM_WEATHER_VIEW                         = "Weather.View";
 	static const string PERM_WEATHER_QUICKACTION                  = "Weather.QuickAction";
 	static const string PERM_WEATHER_QUICKACTION_CLEAR            = "Weather.QuickAction.Clear";
@@ -69,7 +66,6 @@ class JMConstants
 	static const string PERM_WEATHER_PRESET_UPDATE                = "Weather.Preset.Update";
 	static const string PERM_WEATHER_PRESET_REMOVE                = "Weather.Preset.Remove";
 	static const string PERM_WEATHER_PRESET_DYNAMIC               = "Weather.Preset.Dynamic";
-
 	static const string PERM_VEHICLES_VIEW                        = "Vehicles.View";
 	static const string PERM_VEHICLES_DELETE                      = "Vehicles.Delete";
 	static const string PERM_VEHICLES_DELETE_ALL                  = "Vehicles.Delete.All";
@@ -84,12 +80,10 @@ class JMConstants
 	static const string PERM_VEHICLES_UNPAIR                      = "Vehicles.UnPair";
 	static const string PERM_VEHICLES_CLEARCARGO                  = "Vehicles.ClearCargo";
 	static const string PERM_VEHICLES_SPAWNKEY                    = "Vehicles.SpawnKey";
-
 	static const string PERM_ESP_VIEW                             = "ESP.View";
 	static const string PERM_ESP_OBJECT_MOVETOCURSOR              = "ESP.Object.MoveToCursor";
 	static const string PERM_ESP_OBJECT_DELETEALL                 = "ESP.Object.DeleteAll";
 	static const string PERM_ESP_OBJECT_DUPLICATEALL              = "ESP.Object.DuplicateAll";
-
 	static const string PERM_WEBHOOK_VIEW                         = "Webhook.View";
 	static const string PERM_WEBHOOK_MANAGE                       = "Webhook.Manage";
 	static const string PERM_WEBHOOK_MANAGE_URL                   = "Webhook.Manage.URL";
@@ -100,7 +94,6 @@ class JMConstants
 	static const string PERM_WEBHOOK_MANAGE_TYPE_ADD              = "Webhook.Manage.Type.Add";
 	static const string PERM_WEBHOOK_MANAGE_TYPE_REMOVE           = "Webhook.Manage.Type.Remove";
 	static const string PERM_WEBHOOK_MANAGE_TYPE_STATE            = "Webhook.Manage.Type.State";
-
 	static const string PERM_ITEMSPAWNER_VIEW                     = "ItemSpawner.View";
 	static const string PERM_ITEMSPAWNER_SPAWN                    = "ItemSpawner.Spawn";
 	static const string PERM_OBJECTSPAWNER_VIEW                   = "ObjectSpawner.View";
@@ -108,7 +101,6 @@ class JMConstants
 	static const string PERM_ROLEMANAGER_VIEW                     = "RoleManager.View";
 	static const string PERM_BANS_VIEW                            = "Bans.View";
 	static const string PERM_CAMERA_VIEW                          = "Camera.View";
-
 	static const string PERM_BAN_VIEW                             = "Admin.Ban.View";
 	static const string PERM_BAN_UNBAN                            = "Admin.Ban.Unban";
 
@@ -117,30 +109,131 @@ class JMConstants
 	//! constant per event since the event list itself is data, not code.
 	static const string PERM_NAMALSK                              = "Namalsk";
 	static const string PERM_NAMALSK_VIEW                         = "Namalsk.View";
-
 	static const string PERM_ANTICHEAT_VIEW                       = "Admin.AntiCheat.View";
 	static const string PERM_ANTICHEAT_CLEAR                      = "Admin.AntiCheat.Clear";
-
 	static const string PERM_LOOTANALYSIS_VIEW                    = "Admin.LootAnalysis.View";
 	static const string PERM_LOOTANALYSIS_ITEMSCAN                = "Admin.LootAnalysis.ItemScan";
 	static const string PERM_LOOTANALYSIS_DISTRIBUTION            = "Admin.LootAnalysis.Distribution";
 	static const string PERM_LOOTANALYSIS_DELETE                  = "Admin.LootAnalysis.Delete";
 	static const string PERM_LOOTANALYSIS_EDIT                    = "Admin.LootAnalysis.Edit";
-
 	static const string PERM_ROLES_VIEW                           = "Admin.Roles.View";
 	static const string PERM_ROLES_CREATE                         = "Admin.Roles.Create";
 	static const string PERM_ROLES_DELETE                         = "Admin.Roles.Delete";
 	static const string PERM_ROLES_PERMISSIONS                    = "Admin.Roles.Permissions";
 
+	//! Every permission node the mod registers or checks has a constant here, so a
+	//! literal typo cannot silently create (or miss) a node. Values are the on-disk
+	//! role-file keys: never change one, add a new constant instead.
+	static const string PERM_ACTIONS_QUICKACTIONS                           = "Actions.QuickActions";
+	static const string PERM_COMPENSATIONS_DELETE                           = "Compensations.Delete";
+	static const string PERM_COMPENSATIONS_SPAWN                            = "Compensations.Spawn";
+	static const string PERM_COMPENSATIONS_VIEW                             = "Compensations.View";
+	static const string PERM_COT_VIEW                                       = "COT.View";
+	static const string PERM_ENTITY_DELETE                                  = "Entity.Delete";
+	static const string PERM_ENTITY_SPAWN_INVENTORY                         = "Entity.Spawn.Inventory";
+	static const string PERM_ENTITY_SPAWN_POSITION                          = "Entity.Spawn.Position";
+	static const string PERM_ENTITY_VIEW                                    = "Entity.View";
+	static const string PERM_ESP_OBJECT_BASEBUILDING_BUILD                  = "ESP.Object.BaseBuilding.Build";
+	static const string PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED= "ESP.Object.BaseBuilding.Build.MaterialsNotRequired";
+	static const string PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE              = "ESP.Object.BaseBuilding.Dismantle";
+	static const string PERM_ESP_OBJECT_BASEBUILDING_REPAIR                 = "ESP.Object.BaseBuilding.Repair";
+	static const string PERM_ESP_OBJECT_BASEBUILDING_SETHEALTH              = "ESP.Object.BaseBuilding.SetHealth";
+	static const string PERM_ESP_OBJECT_CAR_LOCKWHEELS                      = "ESP.Object.Car.LockWheels";
+	static const string PERM_ESP_OBJECT_CAR_REFUEL                          = "ESP.Object.Car.Refuel";
+	static const string PERM_ESP_OBJECT_CAR_UNSTUCK                         = "ESP.Object.Car.Unstuck";
+	static const string PERM_ESP_OBJECT_CHANGECOLOR                         = "ESP.Object.ChangeColor";
+	static const string PERM_ESP_OBJECT_CLEARCARGO                          = "ESP.Object.ClearCargo";
+	static const string PERM_ESP_OBJECT_DELETE                              = "ESP.Object.Delete";
+	static const string PERM_ESP_OBJECT_FIREPLACE                           = "ESP.Object.Fireplace";
+	static const string PERM_ESP_OBJECT_FLAG                                = "ESP.Object.Flag";
+	static const string PERM_ESP_OBJECT_GETCODE                             = "ESP.Object.GetCode";
+	static const string PERM_ESP_OBJECT_HEAL                                = "ESP.Object.Heal";
+	static const string PERM_ESP_OBJECT_IMMOBILIZE                          = "ESP.Object.Immobilize";
+	static const string PERM_ESP_OBJECT_LOCK                                = "ESP.Object.Lock";
+	static const string PERM_ESP_OBJECT_OPENCLOSE                           = "ESP.Object.OpenClose";
+	static const string PERM_ESP_OBJECT_SETATTACHMENT                       = "ESP.Object.SetAttachment";
+	static const string PERM_ESP_OBJECT_SETCLEANNESS                        = "ESP.Object.SetCleanness";
+	static const string PERM_ESP_OBJECT_SETCODE                             = "ESP.Object.SetCode";
+	static const string PERM_ESP_OBJECT_SETFOODSTAGE                        = "ESP.Object.SetFoodStage";
+	static const string PERM_ESP_OBJECT_SETHEALTH                           = "ESP.Object.SetHealth";
+	static const string PERM_ESP_OBJECT_SETLIQUID                           = "ESP.Object.SetLiquid";
+	static const string PERM_ESP_OBJECT_SETORIENTATION                      = "ESP.Object.SetOrientation";
+	static const string PERM_ESP_OBJECT_SETPOSITION                         = "ESP.Object.SetPosition";
+	static const string PERM_ESP_OBJECT_SETQUANTITY                         = "ESP.Object.SetQuantity";
+	static const string PERM_ESP_OBJECT_TRAP                                = "ESP.Object.Trap";
+	static const string PERM_ESP_OBJECT_WEAPON                              = "ESP.Object.Weapon";
+
+	//! Undo/redo an action another admin performed. Without it an admin can only
+	//! step back their own actions on the shared JMActionHistory stack.
+	static const string PERM_ACTIONHISTORY_UNDOOTHERS                       = "ActionHistory.UndoOthers";
+	static const string PERM_EXAMPLE_BUTTON                                 = "Admin.Example.Button";
+	static const string PERM_EXAMPLE_DROPDOWN                               = "Admin.Example.Dropdown";
+	static const string PERM_EXAMPLE_VIEW                                   = "Admin.Example.View";
+	static const string PERM_EXPANSION_TERRITORY                            = "Expansion.Territory";
+	static const string PERM_EXPANSION_TERRITORY_SETLEVEL                   = "Expansion.Territory.SetLevel";
+	static const string PERM_EXPANSION_TERRITORY_VIEW                       = "Expansion.Territory.View";
+	static const string PERM_ITEMS_CREATESET                                = "Items.CreateSet";
+	static const string PERM_ITEMSTATS_VIEW                                 = "ItemStats.View";
+	static const string PERM_LOADOUTS_BACKUP                                = "Loadouts.Backup";
+	static const string PERM_LOADOUTS_CREATE                                = "Loadouts.Create";
+	static const string PERM_LOADOUTS_DELETE                                = "Loadouts.Delete";
+	static const string PERM_LOADOUTS_LOAD                                  = "Loadouts.Load";
+	static const string PERM_LOADOUTS_SPAWN_CURSOR                          = "Loadouts.Spawn.Cursor";
+	static const string PERM_LOADOUTS_SPAWN_SELECTEDPLAYERS                 = "Loadouts.Spawn.SelectedPlayers";
+	static const string PERM_LOADOUTS_SPAWN_TARGET                          = "Loadouts.Spawn.Target";
+	static const string PERM_LOADOUTS_VIEW                                  = "Loadouts.View";
+	static const string PERM_MAP                                            = "Admin.Map";
+	static const string PERM_MAPEDITOR_DELETE                               = "Admin.MapEditor.Delete";
+	static const string PERM_MAPEDITOR_SPAWN                                = "Admin.MapEditor.Spawn";
+	static const string PERM_MAPEDITOR_TRANSFORM                            = "Admin.MapEditor.Transform";
+	static const string PERM_MAPEDITOR_VIEW                                 = "Admin.MapEditor.View";
+	static const string PERM_PLAYER_ACCESSINVENTORY                         = "Admin.Player.AccessInventory";
+	static const string PERM_PLAYER_ADMINNVG                                = "Admin.Player.AdminNVG";
+	static const string PERM_PLAYER_BLEED_ADD                               = "Admin.Player.Bleed.Add";
+	static const string PERM_PLAYER_BLEED_STOP                              = "Admin.Player.Bleed.Stop";
+	static const string PERM_PLAYER_BROKENLEGS                              = "Admin.Player.BrokenLegs";
+	static const string PERM_PLAYER_CANNOTBETARGETEDBYAI                    = "Admin.Player.CannotBeTargetedByAI";
+	static const string PERM_PLAYER_DISEASE_ADD                             = "Admin.Player.Disease.Add";
+	static const string PERM_PLAYER_DISEASE_REMOVE                          = "Admin.Player.Disease.Remove";
+	static const string PERM_PLAYER_DRY                                     = "Admin.Player.Dry";
+	static const string PERM_PLAYER_HEAL_ATTACHMENTS                        = "Admin.Player.Heal.Attachments";
+	static const string PERM_PLAYER_HEAL_CARGO                              = "Admin.Player.Heal.Cargo";
+	static const string PERM_PLAYER_INVENTORY_DELETE                        = "Admin.Player.Inventory.Delete";
+	static const string PERM_PLAYER_INVENTORY_MODIFY                        = "Admin.Player.Inventory.Modify";
+	static const string PERM_PLAYER_INVENTORY_REPAIR                        = "Admin.Player.Inventory.Repair";
+	static const string PERM_PLAYER_INVENTORY_TAKE                          = "Admin.Player.Inventory.Take";
+	static const string PERM_PLAYER_NOTIF                                   = "Admin.Player.Notif";
+	static const string PERM_PLAYER_PERMISSIONS                             = "Admin.Player.Permissions";
+	static const string PERM_PLAYER_READ                                    = "Admin.Player.Read";
+	static const string PERM_PLAYER_RECEIVEDAMAGEDEALT                      = "Admin.Player.ReceiveDamageDealt";
+	static const string PERM_PLAYER_REMOVECOLLISION                         = "Admin.Player.RemoveCollision";
+	static const string PERM_PLAYER_ROLES                                   = "Admin.Player.Roles";
+	static const string PERM_PLAYER_SCALE                                   = "Admin.Player.Scale";
+	static const string PERM_PLAYER_SET_BLOOD                               = "Admin.Player.Set.Blood";
+	static const string PERM_PLAYER_SET_BLOODYHANDS                         = "Admin.Player.Set.BloodyHands";
+	static const string PERM_PLAYER_SET_ENERGY                              = "Admin.Player.Set.Energy";
+	static const string PERM_PLAYER_SET_HEALTH                              = "Admin.Player.Set.Health";
+	static const string PERM_PLAYER_SET_HEATBUFFER                          = "Admin.Player.Set.HeatBuffer";
+	static const string PERM_PLAYER_SET_SHOCK                               = "Admin.Player.Set.Shock";
+	static const string PERM_PLAYER_SET_STAMINA                             = "Admin.Player.Set.Stamina";
+	static const string PERM_PLAYER_SET_WATER                               = "Admin.Player.Set.Water";
+	static const string PERM_PLAYER_STOPBLEEDING                            = "Admin.Player.StopBleeding";
+	static const string PERM_PLAYER_TELEPORT_POSITION_CURSOR                = "Admin.Player.Teleport.Position.Cursor";
+	static const string PERM_PLAYER_TELEPORT_POSITION_CURSOR_NOLOG          = "Admin.Player.Teleport.Position.Cursor.NoLog";
+	static const string PERM_PLAYER_TELEPORT_POSITION_VIEW                  = "Admin.Player.Teleport.Position.View";
+	static const string PERM_PLAYER_TELEPORT_PREVIOUS                       = "Admin.Player.Teleport.Previous";
+	static const string PERM_PLAYER_UNLIMITEDAMMO                           = "Admin.Player.UnlimitedAmmo";
+	static const string PERM_PLAYER_UNLIMITEDSTAMINA                        = "Admin.Player.UnlimitedStamina";
+	static const string PERM_PLAYER_VOMIT                                   = "Admin.Player.Vomit";
+	static const string PERM_ROLES_UPDATE                                   = "Admin.Roles.Update";
+	static const string PERM_TRANSPORT_REPAIR                               = "Admin.Transport.Repair";
 	static const string DIR_COT = "$profile:CommunityOnlineTools\\";
 	static const string DIR_PF = "$profile:PermissionsFramework\\";
-
 	static const string DIR_PERMISSIONS = DIR_PF + "Permissions\\";
 	static const string DIR_ROLES 		= DIR_PF + "Roles\\";
 	static const string DIR_PLAYERS 	= DIR_PF + "Players\\";
 	static const string DIR_BANS 		= DIR_PF + "Bans\\";
 	static const string DIR_NOTES 		= DIR_PF + "Notes\\";
-
 	static const string EXT_PERMISSION 	= ".txt";
 	static const string EXT_ROLE 		= ".txt";
 	static const string EXT_PLAYER 		= ".json";
@@ -148,7 +241,6 @@ class JMConstants
 	static const string EXT_NOTE 		= ".json";
 	static const string EXT_CSV 		= ".csv";
 	static const string EXT_WINDOWS_DEFAULT = ".txt";
-
 	static const string FILE_WEBHOOK 	= DIR_COT + "Webhooks.json";
 	static const string FILE_WEATHER 	= DIR_COT + "Weather.json";
 	static const string FILE_TELEPORT 	= DIR_COT + "Teleports_";
@@ -158,7 +250,6 @@ class JMConstants
 	static const string DIR_DELETIONS 	= DIR_COT + "Deletions\\";
 	static const string DIR_COMPENSATIONS = DIR_COT + "Compensations\\";
 	static const string DIR_EXPORTS 	= DIR_COT + "Exports\\";
-
 	static const string EXT_LOG 		= ".log";
 	static const string EXT_TELEPORT 	= ".json";
 	static const string EXT_LOADOUT 	= ".json";
@@ -187,7 +278,9 @@ class JMConstants
 	static const float STAT_STAMINA_MIN       = 0.0;
 	static const float STAT_STAMINA_MAX       = 100.0;
 	static const float STAT_HEATBUFFER_MIN    = 0.0;
-	static const float STAT_HEATBUFFER_MAX    = 1.0;
+	//! The stat itself runs -30..30 (vanilla). The Player tab's slider is 0-3 and is sent x10, so this
+	//! has to reach 30: at 1.0 every value above a tenth of the slider was clamped away.
+	static const float STAT_HEATBUFFER_MAX    = 30.0;
 
 	// Spawner config file
 	static const string FILE_SPAWNER_CONFIG   = DIR_COT + "SpawnerConfig.json";
@@ -362,6 +455,19 @@ class JMConstants
 	static const string ICON_WINTER_HAT            = "JM/COT/GUI/textures/icons/winter-hat.edds";
 	static const string ICON_WORLD                 = "JM/COT/GUI/textures/icons/lucide/globe.edds";
 
+	// -------------------------------------------------------------------------
+	//  Rounded surface textures
+	//
+	//  Pure white with a shaped alpha channel, so an ImageWidget using them can
+	//  be tinted with SetColor() exactly like the flat PanelWidgets they replace.
+	//  DayZ has no border-radius; a rounded control is an ImageWidget wearing one
+	//  of these instead of a PanelWidget.
+	//
+	//  Each texture's aspect is picked close to its real use so the corner radius
+	//  barely distorts when the widget stretches. Fixed-size controls (toggle
+	//  thumb, radio dot, swatch) get an exact-size texture and do not distort.
+	// -------------------------------------------------------------------------
+	static const string SURFACE_CHECK              = "JM/COT/GUI/textures/ui/surface_check.paa";
 
 	// -------------------------------------------------------------------------
 	//  Lucide icon set (2034 icons, ISC) under GUI/textures/icons/lucide/.
@@ -378,18 +484,4 @@ class JMConstants
 	{
 		return "JM/COT/GUI/textures/icons/lucide/" + name + ".edds";
 	}
-
-	// -------------------------------------------------------------------------
-	//  Rounded surface textures
-	//
-	//  Pure white with a shaped alpha channel, so an ImageWidget using them can
-	//  be tinted with SetColor() exactly like the flat PanelWidgets they replace.
-	//  DayZ has no border-radius; a rounded control is an ImageWidget wearing one
-	//  of these instead of a PanelWidget.
-	//
-	//  Each texture's aspect is picked close to its real use so the corner radius
-	//  barely distorts when the widget stretches. Fixed-size controls (toggle
-	//  thumb, radio dot, swatch) get an exact-size texture and do not distort.
-	// -------------------------------------------------------------------------
-	static const string SURFACE_CHECK              = "JM/COT/GUI/textures/ui/surface_check.paa";
 }

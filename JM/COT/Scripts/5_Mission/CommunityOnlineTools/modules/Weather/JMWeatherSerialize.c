@@ -34,7 +34,6 @@ class JMWeatherSerialize
 	//! dynamic chain. The chain starts from a random preset instead, so this is
 	//! ignored while DynamicEnabled is set.
 	string InitialPreset;
-
 	autoptr array< ref JMWeatherPreset > Presets;
 
 	// --- Dynamic weather -----------------------------------------------------
@@ -59,7 +58,6 @@ class JMWeatherSerialize
 	int DurationMax;
 	int TransitionMin;
 	int TransitionMax;
-
 	autoptr array< ref JMWeatherTransition > Transitions;
 
 	void JMWeatherSerialize()
@@ -80,13 +78,23 @@ class JMWeatherSerialize
 		Transitions = new array< ref JMWeatherTransition >;
 	}
 
+	//! Fade one phenomenon to `forecast` and hold it for PRESET_MIN_DURATION.
+	protected void SetPhenomenon( JMWeatherPhenomenon phenomenon, float forecast )
+	{
+		phenomenon.Forecast = forecast;
+		phenomenon.Time = PRESET_TRANSITION;
+		phenomenon.MinDuration = PRESET_MIN_DURATION;
+	}
+
 	static JMWeatherSerialize Load()
 	{
 		JMWeatherSerialize settings = new JMWeatherSerialize();
 
 		if ( FileExist( JMConstants.FILE_WEATHER ) )
 		{
-			JsonFileLoader<JMWeatherSerialize>.JsonLoadFile( JMConstants.FILE_WEATHER, settings );
+			//! An unreadable file is reported by Load() and kept as it is: falling through to
+			//! Defaults() below would overwrite the admin's presets with the stock ones.
+			JMJsonFile<JMWeatherSerialize>.Load( JMConstants.FILE_WEATHER, settings );
 
 			settings.MigrateDynamic();
 			settings.NormalizePresets();
@@ -225,7 +233,7 @@ class JMWeatherSerialize
 
 	void Save()
 	{
-		JsonFileLoader<JMWeatherSerialize>.JsonSaveFile( JMConstants.FILE_WEATHER, this );
+		JMJsonFile<JMWeatherSerialize>.Save( JMConstants.FILE_WEATHER, this );
 	}
 
 	void Defaults()
@@ -244,7 +252,7 @@ class JMWeatherSerialize
 	//! preset, so "No Rain" also forced overcast, snow, wind magnitude and wind
 	//! direction to zero and held all of them - a preset doing four things its
 	//! name does not mention.
-	private JMWeatherPreset NeutralPreset( string name )
+	protected JMWeatherPreset NeutralPreset( string name )
 	{
 		JMWeatherPreset preset = new JMWeatherPreset;
 
@@ -307,15 +315,7 @@ class JMWeatherSerialize
 		return preset;
 	}
 
-	//! Fade one phenomenon to `forecast` and hold it for PRESET_MIN_DURATION.
-	private void SetPhenomenon( JMWeatherPhenomenon phenomenon, float forecast )
-	{
-		phenomenon.Forecast = forecast;
-		phenomenon.Time = PRESET_TRANSITION;
-		phenomenon.MinDuration = PRESET_MIN_DURATION;
-	}
-
-	private void PresetNoRain()
+	protected void PresetNoRain()
 	{
 		JMWeatherPreset preset = NeutralPreset( "No Rain" );
 
@@ -324,7 +324,7 @@ class JMWeatherSerialize
 		Presets.Insert( preset );
 	}
 
-	private void PresetNoSnow()
+	protected void PresetNoSnow()
 	{
 		JMWeatherPreset preset = NeutralPreset( "No Snow" );
 
@@ -333,7 +333,7 @@ class JMWeatherSerialize
 		Presets.Insert( preset );
 	}
 
-	private void PresetNoFog()
+	protected void PresetNoFog()
 	{
 		JMWeatherPreset preset = NeutralPreset( "No Fog" );
 
@@ -349,7 +349,7 @@ class JMWeatherSerialize
 		Presets.Insert( preset );
 	}
 
-	private void PresetNoRainAndFog()
+	protected void PresetNoRainAndFog()
 	{
 		JMWeatherPreset preset = NeutralPreset( "No Rain and Fog" );
 

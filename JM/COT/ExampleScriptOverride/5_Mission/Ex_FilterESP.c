@@ -1,18 +1,19 @@
 #ifdef JM_CommunityOnlineTools
-// Example: Adding custom ESP view type filter category (JMESPModule)
-class JMESPViewTypeSubModCustom: JMESPViewType
+// Example: a new ESP category. Give it a name, a colour, a permission suffix and a test; ESP
+// registers the "ESP.View.<Permission>" permission and adds the category to the filters tab.
+class JMESPViewTypeExampleBarrels: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeSubModCustom()
+	void JMESPViewTypeExampleBarrels()
 	{
-		Localisation = "Sub-Mod Structures";
-		Colour = 0xFF3399FF;
-		Permission = "SubModStructures";
+		Permission = "Item.ExampleBarrels";
+		Localisation = "Example: Barrels";
+		Colour = ARGB( 255, 51, 153, 255 );
 	}
 
-	override bool IsValid( Object obj, out JMESPMeta meta )
+	// Which world objects belong to this category.
+	override bool CheckLootCategory( Object obj )
 	{
-		// Custom target condition for ESP rendering
-		return false;
+		return obj.IsKindOf( "Barrel_ColorBase" );
 	}
 }
 
@@ -22,8 +23,7 @@ modded class JMESPModule
 	{
 		super.RegisterTypes( types );
 
-		// Register custom ESP view type category
-		types.Insert( JMESPViewTypeSubModCustom );
+		types.Insert( JMESPViewTypeExampleBarrels );
 	}
 }
 #endif

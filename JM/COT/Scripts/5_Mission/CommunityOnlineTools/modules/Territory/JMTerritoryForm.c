@@ -3,16 +3,14 @@ class JMTerritoryForm: JMFormBase
 {
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMTerritoryModule m_Module;
-
 	protected UIActionScroller m_sclr_Territories;
 	protected Widget m_ContentWrapper;
 	protected Widget m_TerritoriesWrapper;
-
 	protected ref UIActionFlexRow m_SearchRow;
 	protected UIActionSearchBox m_SearchBar;
 	protected string m_SearchFilter;
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		InitWidgetsTop();
 		InitWidgetsBottom();
@@ -23,24 +21,10 @@ class JMTerritoryForm: JMFormBase
 	//! under the caret mid-typing.
 	protected void InitWidgetsTop()
 	{
-		m_SearchRow = UIActionManager.CreateFlexRow( layoutRoot.FindAnyWidget( "panel_top" ), WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-		Widget searchRow = m_SearchRow.GetContent();
+		JMSearchRow toolbar = UIActionManager.CreateSearchFlexRow( layoutRoot.FindAnyWidget( "panel_top" ), "#STR_COT_GENERIC_SEARCH", this, "OnChange_Search", "OnClick_Refresh", "#STR_COT_TERRITORY_TT_REFRESH", 30 );
 
-		UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( searchRow, this, "OnClick_Refresh", "#STR_COT_TERRITORY_TT_REFRESH" );
-		if ( refreshBtn )
-		{
-			refreshBtn.SetFixedSize( 30, 30 );
-			m_SearchRow.Add( refreshBtn );
-		}
-
-		m_SearchBar = UIActionManager.CreateSearchBox( searchRow, this, "OnChange_Search", "#STR_COT_GENERIC_SEARCH" );
-		if ( m_SearchBar )
-		{
-			m_SearchBar.SetFlex( 1.0, 60 );
-			m_SearchRow.Add( m_SearchBar );
-		}
-
-		m_SearchRow.SetGap( 14 );
+		m_SearchRow = toolbar.Row;
+		m_SearchBar = toolbar.Search;
 	}
 
 	protected void InitWidgetsBottom()
@@ -60,13 +44,6 @@ class JMTerritoryForm: JMFormBase
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
-	}
-
-	override void OnShow()
-	{
-		super.OnShow();
-
-		m_Module.RequestTerritories();
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -93,7 +70,7 @@ class JMTerritoryForm: JMFormBase
 
 		m_TerritoriesWrapper = UIActionManager.CreateGridSpacer( m_ContentWrapper, 1, 1 );
 
-		bool canSetLevel = GetPermissionsManager().HasPermission( "Expansion.Territory.SetLevel" );
+		bool canSetLevel = JMPermissions.Has( JMConstants.PERM_EXPANSION_TERRITORY_SETLEVEL );
 
 		if ( !m_Module.m_Territories || m_Module.m_Territories.Count() < 1 )
 		{
@@ -105,21 +82,12 @@ class JMTerritoryForm: JMFormBase
 		UIActionCard card = UIActionManager.CreateCard( m_TerritoriesWrapper, "#STR_COT_TERRITORY_SECTION_LIST" );
 		Widget listBody = card.GetContent();
 
-		string filter = m_SearchFilter;
-		filter.ToLower();
-
-		string nameLower;
+		JMSearchMatcher matcher = new JMSearchMatcher( m_SearchFilter );
 
 		foreach ( JMTerritoryData data: m_Module.m_Territories )
 		{
-			if ( filter != "" )
-			{
-				nameLower = data.TerritoryName;
-				nameLower.ToLower();
-
-				if ( nameLower.IndexOf( filter ) == -1 )
-					continue;
-			}
+			if ( !matcher.Matches( data.TerritoryName ) )
+				continue;
 
 			Widget row = UIActionManager.CreateWrapSpacer( listBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
@@ -133,7 +101,8 @@ class JMTerritoryForm: JMFormBase
 			// Enforce type-pool for the whole module.
 			if ( canSetLevel && data.CurrentLevel > 1 )
 			{
-				UIActionImageButton downBtn = UIActionManager.CreateIconButton( row, JMConstants.Lucide( "chevron-down" ), this, "DowngradeTerritory" );
+				UIActionImageButton downBtn = UIActionManager.CreateIconButton( row, JMConstants.Lucide( "chevron-down" ), this, "" );
+				if ( downBtn ) downBtn.SetOnClick( this, "DowngradeTerritory" );
 				downBtn.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
 				downBtn.SetData( data );
 				downBtn.SetTooltip( "#STR_COT_TERRITORY_TT_DOWNGRADE" );
@@ -141,7 +110,8 @@ class JMTerritoryForm: JMFormBase
 
 			if ( canSetLevel && data.CurrentLevel < data.MaxLevel )
 			{
-				UIActionImageButton upBtn = UIActionManager.CreateIconButton( row, JMConstants.Lucide( "chevron-up" ), this, "UpgradeTerritory" );
+				UIActionImageButton upBtn = UIActionManager.CreateIconButton( row, JMConstants.Lucide( "chevron-up" ), this, "" );
+				if ( upBtn ) upBtn.SetOnClick( this, "UpgradeTerritory" );
 				upBtn.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
 				upBtn.SetData( data );
 				upBtn.SetTooltip( "#STR_COT_TERRITORY_TT_UPGRADE" );
@@ -169,17 +139,12 @@ class JMTerritoryForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		action.AnimateSpin( 2 );
-
 		m_Module.RequestTerritories();
 	}
 
-	void UpgradeTerritory( UIEvent eid, UIActionBase action )
+	void UpgradeTerritory( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( !GetPermissionsManager().HasPermission( "Expansion.Territory.SetLevel" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_EXPANSION_TERRITORY_SETLEVEL ) )
 			return;
 
 		JMTerritoryData data;
@@ -193,12 +158,9 @@ class JMTerritoryForm: JMFormBase
 		RebuildTerritoryList();
 	}
 
-	void DowngradeTerritory( UIEvent eid, UIActionBase action )
+	void DowngradeTerritory( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( !GetPermissionsManager().HasPermission( "Expansion.Territory.SetLevel" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_EXPANSION_TERRITORY_SETLEVEL ) )
 			return;
 
 		JMTerritoryData data;

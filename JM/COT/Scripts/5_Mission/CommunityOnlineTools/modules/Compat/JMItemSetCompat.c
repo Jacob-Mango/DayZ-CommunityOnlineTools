@@ -38,10 +38,8 @@ class JMItemSetSerialize
 {
 	[NonSerialized()]
 	string m_FileName;
-
 	string Name;
 	string ContainerClassName;
-
 	ref array< ref JMItemSetItemInfo > Items;
 
 	void JMItemSetSerialize()

@@ -1,0 +1,80 @@
+PanelWidgetClass JMESPTransformPopup_Panel {
+ position 0 0
+ size 640 1
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ clipchildren 1
+ color 0.114 0.137 0.165 0.969
+ style COTBox8Set
+ {
+  PanelWidgetClass popup_titlebar {
+   position 0 0
+   size 1 32
+   hexactpos 0
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   {
+    TextWidgetClass popup_title {
+     position 10 0
+     size 0.6 1
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "#STR_COT_ESP_MODULE_PAGE_TRANSFORM_EDIT"
+     font "gui/fonts/sdf_MetronLight72"
+     "bold text" 1
+     "exact text" 1
+     "exact text size" 16
+     "text halign" left
+     "text valign" center
+    }
+    PanelWidgetClass popup_titlebar_buttons {
+     ignorepointer 1
+     color 0 0 0 0
+     position -10 0
+     size 96 28
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+    }
+   }
+  }
+  GridSpacerWidgetClass popup_root {
+   position 0 32
+   size 1 1
+   hexactpos 0
+   vexactpos 1
+   hexactsize 0
+   vexactsize 0
+   "Size To Content V" 1
+   Padding 10
+   Margin 0
+   Columns 1
+   Rows 1
+   {
+    GridSpacerWidgetClass popup_content {
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content V" 1
+     Padding 0
+     Margin 0
+     Columns 1
+     Rows 1
+    }
+   }
+  }
+ }
+}

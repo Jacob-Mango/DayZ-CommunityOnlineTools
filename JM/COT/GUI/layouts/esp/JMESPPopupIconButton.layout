@@ -1,0 +1,45 @@
+ButtonWidgetClass JMESPPopupIconButton {
+ ignorepointer 0
+ color 0 0 0 0
+ position 0 0
+ size 28 28
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ style Empty
+ {
+  PanelWidgetClass btn_hover {
+   ignorepointer 1
+   visible 0
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   color 1.000 1.000 1.000 0.180
+   style COTPill6Set
+  }
+  ImageWidgetClass btn_icon {
+   ignorepointer 1
+   inheritalpha 0
+   position 0 0
+   size 16 16
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 0.831 0.859 0.902 0.750
+   mode blend
+   "src alpha" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+   filter 1
+  }
+ }
+}

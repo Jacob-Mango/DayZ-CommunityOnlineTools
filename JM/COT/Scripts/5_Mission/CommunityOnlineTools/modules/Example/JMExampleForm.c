@@ -18,16 +18,11 @@ class JMExampleForm: JMFormBase
 {
 	protected JMExampleModule m_Module;
 
-	protected override bool SetModule( JMRenderableModuleBase mdl )
-	{
-		return Class.CastTo( m_Module, mdl );
-	}
-
-	// ?? top-level tab bar ??????????????????????????????????????????????????????
+	// --- top-level tab bar -----------------------------------------------------
 	protected UIActionScroller m_OuterScroller;
 	protected UIActionTabs    m_TopTabs;
 
-	// ?? panel widgets (one per top-level tab) ?????????????????????????????????
+	// --- panel widgets (one per top-level tab) --------------------------------
 	protected GridSpacerWidget m_PanelBasics;
 	protected GridSpacerWidget m_PanelLayout;
 	protected GridSpacerWidget m_PanelInput;
@@ -35,7 +30,7 @@ class JMExampleForm: JMFormBase
 	protected GridSpacerWidget m_PanelSelection;
 	protected GridSpacerWidget m_PanelAdvanced;
 
-	// ?? Basics ????????????????????????????????????????????????????????????????
+	// --- Basics ---------------------------------------------------------------
 	protected UIActionText              m_Text;
 	protected UIActionEditableText      m_EditableText;
 	protected UIActionEditableVector    m_EditableVector;
@@ -52,13 +47,13 @@ class JMExampleForm: JMFormBase
 	protected UIActionFeedbackButton    m_FeedbackButton;
 	protected UIActionEditableRichText  m_RichText;
 
-	// ?? Layout ????????????????????????????????????????????????????????????????
+	// --- Layout ---------------------------------------------------------------
 	protected ref JMScrollableSection   m_ScrollSection;
 	protected UIActionButton            m_BtnAdd;
 	protected UIActionButton            m_BtnClear;
 	protected UIActionKeyValueList      m_KVList;
 
-	// ?? Input ?????????????????????????????????????????????????????????????????
+	// --- Input ----------------------------------------------------------------
 	protected UIActionSearchBox         m_SearchBox;
 	protected UIActionSearchBox         m_SmartSearch;
 	protected ref array<string>         m_SmartSearchItems = { "Jacob Mango", "Liquidrock", "Arkensor", "LieutenantMaster", "DannyDog", "Survivor (76561198000000001)", "Bandit (76561198000000002)" };
@@ -72,7 +67,7 @@ class JMExampleForm: JMFormBase
 	protected UIActionTimePicker        m_TimePicker;
 	protected UIActionSliderRange       m_SliderRange;
 
-	// ?? Display ???????????????????????????????????????????????????????????????
+	// --- Display --------------------------------------------------------------
 	protected UIActionProgressBar       m_ProgressBar;
 	protected UIActionBadge             m_Badge;
 	protected UIActionLogView           m_LogView;
@@ -80,7 +75,7 @@ class JMExampleForm: JMFormBase
 	protected UIActionContextMenu       m_ContextMenu;
 	protected UIActionText              m_ContextMenuResult;
 
-	// ?? Selection ?????????????????????????????????????????????????????????????
+	// --- Selection ------------------------------------------------------------
 	protected UIActionMultiSelectList   m_MultiSelect;
 	protected UIActionFilterBar         m_FilterBar;
 	protected UIActionIconGrid          m_IconGrid;
@@ -89,7 +84,7 @@ class JMExampleForm: JMFormBase
 	protected UIActionStagedIcon        m_StagedIcon;
 	protected UIActionDropdown          m_DropdownIcons;
 
-	// ?? Advanced ??????????????????????????????????????????????????????????????
+	// --- Advanced -------------------------------------------------------------
 	protected UIActionTabs              m_NestedTabs;
 	protected GridSpacerWidget          m_NestedPanelA;
 	protected GridSpacerWidget          m_NestedPanelB;
@@ -117,26 +112,27 @@ class JMExampleForm: JMFormBase
 	//! What the preview rows try to draw. A helmet: small, has a clean invView,
 	//! and every world has it.
 	static const string LAB_ITEM = "Mich2001Helmet";
-
 	protected ref UIActionTooltip m_Tooltip;
-
 	protected JMPlayerModule m_PlayerModule;
+	protected static ref array<string> s_BatteryIcons  = { "", "", "", "", "" };
+	protected static ref array<int>    s_BatteryColors = { 0, 0, 0, 0, 0 };
+	protected static ref array<string> s_BatteryLabels = { "Empty (0%)", "Low (25%)", "Half (50%)", "Good (75%)", "Full (100%)" };
 
-	// ?? OnInit ????????????????????????????????????????????????????????????????
+	protected override bool SetModule( JMRenderableModuleBase mdl )
+	{
+		return Class.CastTo( m_Module, mdl );
+	}
 
-	override void OnInit()
+	// --- OnCreate ---------------------------------------------------------------
+
+	override void OnCreate()
 	{
 		Widget root = layoutRoot.FindAnyWidget( "panel" );
 		m_OuterScroller = UIActionManager.CreateScroller( root );
 		Widget outerContent = m_OuterScroller.GetContentWidget();
 
-		// Top-level tab bar - drives visibility of the 6 content panels below.
-		ref array<string> topLabels = { "Basics", "Layout", "Input", "Display", "Selection", "Advanced", "PreviewLab" };
-		ref array<string> topIcons = { JMConstants.ICON_SETTINGS_KNOBS, JMConstants.ICON_STACK, JMConstants.ICON_MOVE, JMConstants.ICON_NOTEBOOK, JMConstants.ICON_RADAR_SWEEP, JMConstants.ICON_TINKER };
-		//! Appended rather than written into the literal above: every other entry
-		//! is a static const, and a CALL inside an array initialiser is not.
-		topIcons.Insert( JMConstants.Lucide( "flask-conical" ) );
-		m_TopTabs = UIActionManager.CreateTabs( outerContent, topLabels, topIcons, this, "OnChange_TopTab" );
+		// Top-level tab strip - each AddTab below hands back the tab's id and shows its panel while selected.
+		m_TopTabs = UIActionManager.CreateTabStrip( outerContent, this, "OnChange_TopTab" );
 
 		m_PanelBasics    = UIActionManager.CreateGridSpacer( outerContent, 16, 1 );
 		m_PanelLayout    = UIActionManager.CreateGridSpacer( outerContent, 12, 1 );
@@ -146,13 +142,13 @@ class JMExampleForm: JMFormBase
 		m_PanelAdvanced  = UIActionManager.CreateGridSpacer( outerContent, 11, 1 );
 		m_PanelPreviewLab = UIActionManager.CreateGridSpacer( outerContent, 6, 1 );
 
-		m_TopTabs.AddContent( m_PanelBasics    );
-		m_TopTabs.AddContent( m_PanelLayout    );
-		m_TopTabs.AddContent( m_PanelInput     );
-		m_TopTabs.AddContent( m_PanelDisplay   );
-		m_TopTabs.AddContent( m_PanelSelection );
-		m_TopTabs.AddContent( m_PanelAdvanced  );
-		m_TopTabs.AddContent( m_PanelPreviewLab );
+		m_TopTabs.AddTab( "Basics",     JMConstants.ICON_SETTINGS_KNOBS, m_PanelBasics );
+		m_TopTabs.AddTab( "Layout",     JMConstants.ICON_STACK,          m_PanelLayout );
+		m_TopTabs.AddTab( "Input",      JMConstants.ICON_MOVE,           m_PanelInput );
+		m_TopTabs.AddTab( "Display",    JMConstants.ICON_NOTEBOOK,       m_PanelDisplay );
+		m_TopTabs.AddTab( "Selection",  JMConstants.ICON_RADAR_SWEEP,    m_PanelSelection );
+		m_TopTabs.AddTab( "Advanced",   JMConstants.ICON_TINKER,         m_PanelAdvanced );
+		m_TopTabs.AddTab( "PreviewLab", JMConstants.Lucide( "flask-conical" ), m_PanelPreviewLab );
 
 		InitBasics();
 		InitLayout();
@@ -162,14 +158,14 @@ class JMExampleForm: JMFormBase
 		InitAdvanced();
 		InitPreviewLab();
 
-		if ( m_Button      ) m_Button.UpdatePermission(       "Admin.Example.Button"   );
-		if ( m_Dropdown    ) m_Dropdown.UpdatePermission(     "Admin.Example.Dropdown" );
-		if ( m_BtnAdd      ) m_BtnAdd.UpdatePermission(       "Admin.Example.Button"   );
-		if ( m_BtnClear    ) m_BtnClear.UpdatePermission(     "Admin.Example.Button"   );
-		if ( m_ConfirmInline ) m_ConfirmInline.UpdatePermission("Admin.Example.Button" );
-		if ( m_ConfirmInlineIcon ) m_ConfirmInlineIcon.UpdatePermission("Admin.Example.Button" );
+		BindPermission( m_Button, JMConstants.PERM_EXAMPLE_BUTTON );
+		BindPermission( m_Dropdown, JMConstants.PERM_EXAMPLE_DROPDOWN );
+		BindPermission( m_BtnAdd, JMConstants.PERM_EXAMPLE_BUTTON );
+		BindPermission( m_BtnClear, JMConstants.PERM_EXAMPLE_BUTTON );
+		BindPermission( m_ConfirmInline, JMConstants.PERM_EXAMPLE_BUTTON );
+		BindPermission( m_ConfirmInlineIcon, JMConstants.PERM_EXAMPLE_BUTTON );
 
-		if ( m_TopTabs ) m_TopTabs.SetSelection( 0 );
+		if ( m_TopTabs ) m_TopTabs.SelectFirstVisibleTab();
 
 		m_Tooltip = UIActionManager.CreateTooltip( layoutRoot );
 
@@ -184,9 +180,9 @@ class JMExampleForm: JMFormBase
 			m_ScrollSection.UpdateScroller();
 	}
 
-	// ?? Panel initialisers ????????????????????????????????????????????????????
+	// --- Panel initialisers ---------------------------------------------------
 
-	private void InitBasics()
+	protected void InitBasics()
 	{
 		Widget p = m_PanelBasics;
 
@@ -207,7 +203,8 @@ class JMExampleForm: JMFormBase
 		m_ButtonToggle = UIActionManager.CreateButtonToggle( p, "Toggle: OFF", "Toggle: ON", this, "OnClick_Toggle" );
 		if ( m_ButtonToggle ) m_ButtonToggle.SetTooltip( "Toggles between two states" );
 
-		m_FeedbackButton = UIActionManager.CreateFeedbackButton( p, "Copy Steam ID", "Copied!", JMConstants.ICON_CHECK_MARK, this, "OnClick_FeedbackButton" );
+		m_FeedbackButton = UIActionManager.CreateFeedbackButton( p, "Copy Steam ID", "Copied!", JMConstants.ICON_CHECK_MARK, this, "" );
+		if ( m_FeedbackButton ) m_FeedbackButton.SetOnClick( this, "OnClick_FeedbackButton" );
 		if ( m_FeedbackButton ) m_FeedbackButton.SetTooltip( "Fades its label out and back to confirm the click" );
 
 		UIActionManager.CreateSectionHeader( p, "Dropdown & Slider" );
@@ -218,9 +215,14 @@ class JMExampleForm: JMFormBase
 			m_Dropdown.SetWidth( 0.65 );
 		}
 
-		m_Slider = UIActionManager.CreateSlider( p, "Slidy:", 0, 100, this, "OnChange_Slider", 0.5 );
+		//! CreateSyncedSlider is CreateSlider plus a numeric box: the admin can drag
+		//! OR type an exact value. It returns the same UIActionSlider, so the
+		//! ( UIEvent, UIActionBase ) callback, SetCurrent and SetStepValue work as
+		//! usual, and SetWidth sizes the slider + box pair together.
+		m_Slider = UIActionManager.CreateSyncedSlider( p, "Slidy:", 0, 100, this, "OnChange_Slider" );
 		if ( m_Slider )
 		{
+			m_Slider.SetWidth( 0.5 );
 			m_Slider.SetCurrent( 50 );
 			m_Slider.SetStepValue( 1 );
 		}
@@ -243,7 +245,7 @@ class JMExampleForm: JMFormBase
 		}
 	}
 
-	private void InitLayout()
+	protected void InitLayout()
 	{
 		Widget p = m_PanelLayout;
 
@@ -287,7 +289,7 @@ class JMExampleForm: JMFormBase
 		m_KVList.SetValue( "Map",     "Chernarus" );
 	}
 
-	private void InitInput()
+	protected void InitInput()
 	{
 		Widget p = m_PanelInput;
 
@@ -353,7 +355,7 @@ class JMExampleForm: JMFormBase
 		}
 	}
 
-	private void InitDisplay()
+	protected void InitDisplay()
 	{
 		Widget p = m_PanelDisplay;
 
@@ -406,7 +408,7 @@ class JMExampleForm: JMFormBase
 		m_ContextMenu = UIActionManager.CreateContextMenu( layoutRoot, layoutRoot, this, "OnClick_ContextMenu" );
 	}
 
-	private void InitSelection()
+	protected void InitSelection()
 	{
 		Widget p = m_PanelSelection;
 
@@ -598,13 +600,12 @@ class JMExampleForm: JMFormBase
 		}
 	}
 
-	private void InitAdvanced()
+	protected void InitAdvanced()
 	{
 		Widget p = m_PanelAdvanced;
 
 		UIActionManager.CreateSectionHeader( p, "Nested Tabs" );
-		ref array<string> nestedLabels = { "Tab A", "Tab B" };
-		m_NestedTabs = UIActionManager.CreateTabs( p, nestedLabels, this, "OnChange_NestedTab" );
+		m_NestedTabs = UIActionManager.CreateTabStrip( p, this, "OnChange_NestedTab" );
 
 		m_NestedPanelA = UIActionManager.CreateGridSpacer( p, 3, 1 );
 		UIActionManager.CreateText( m_NestedPanelA, "Tab A content", "" );
@@ -616,9 +617,9 @@ class JMExampleForm: JMFormBase
 
 		if ( m_NestedTabs )
 		{
-			m_NestedTabs.AddContent( m_NestedPanelA );
-			m_NestedTabs.AddContent( m_NestedPanelB );
-			m_NestedTabs.SetSelection( 0 );
+			int nestedA = m_NestedTabs.AddTab( "Tab A", "", m_NestedPanelA );
+			m_NestedTabs.AddTab( "Tab B", "", m_NestedPanelB );
+			m_NestedTabs.SetSelection( nestedA );
 		}
 
 		UIActionManager.CreateDivider( p );
@@ -660,7 +661,7 @@ class JMExampleForm: JMFormBase
 		m_ConfirmInlineIcon.SetTooltip( "Delete Something (icon variant)" );
 	}
 
-	// ?? Callbacks ?????????????????????????????????????????????????????????????
+	// --- Callbacks ------------------------------------------------------------
 
 	// =========================================================================
 	//  PREVIEW LAB
@@ -853,7 +854,7 @@ class JMExampleForm: JMFormBase
 	{
 		UIActionManager.CreateText( parent, label, "" );
 
-		Widget row = UIActionManager.CreatePanel( parent, 0x00000000, 72 );
+		Widget row = UIActionManager.CreateRow( parent, 72 );
 		Widget host = g_Game.GetWorkspace().CreateWidgets( layoutPath, row );
 
 		if ( !host )
@@ -899,7 +900,7 @@ class JMExampleForm: JMFormBase
 	{
 		UIActionManager.CreateText( parent, label, "" );
 
-		Widget row = UIActionManager.CreatePanel( parent, 0x00000000, 208 );
+		Widget row = UIActionManager.CreateRow( parent, 208 );
 		Widget host = g_Game.GetWorkspace().CreateWidgets( layoutPath, row );
 
 		if ( !host )
@@ -1326,9 +1327,8 @@ class JMExampleForm: JMFormBase
 	}
 
 	//! The button swaps its own face; the callback only does the actual work.
-	void OnClick_FeedbackButton( UIEvent eid, UIActionBase action )
+	void OnClick_FeedbackButton( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
 		g_Game.CopyToClipboard( "76561198000000000" );
 	}
 
@@ -1566,7 +1566,7 @@ class JMExampleForm: JMFormBase
 
 	//! Rebuilt on every open so the entries can reflect the row that was hit -
 	//! a menu built once at init cannot be row-specific.
-	private void ShowTableContextMenu()
+	protected void ShowTableContextMenu()
 	{
 		if ( !m_ContextMenu || !m_DataTable )
 			return;
@@ -1584,7 +1584,7 @@ class JMExampleForm: JMFormBase
 		// dropped, so the menu keeps the same shape whatever row was clicked.
 		m_ContextMenu.SetItemEnabled( "inspect", row != 1 );
 
-		m_ContextMenu.ShowAt( m_DataTable.GetLastRightClickX(), m_DataTable.GetLastRightClickY() );
+		m_ContextMenu.OpenAt( m_DataTable.GetLastRightClickX(), m_DataTable.GetLastRightClickY() );
 	}
 
 	void OnClick_ContextMenu( UIEvent eid, UIActionBase action )
@@ -1626,11 +1626,7 @@ class JMExampleForm: JMFormBase
 		int sel = m_SelectBox.GetSelection();
 	}
 
-	private static ref array<string> s_BatteryIcons  = { "", "", "", "", "" };
-	private static ref array<int>    s_BatteryColors = { 0, 0, 0, 0, 0 };
-	private static ref array<string> s_BatteryLabels = { "Empty (0%)", "Low (25%)", "Half (50%)", "Good (75%)", "Full (100%)" };
-
-	private void UpdateStagedIconTooltip()
+	protected void UpdateStagedIconTooltip()
 	{
 		if ( !m_StagedIcon )
 			return;

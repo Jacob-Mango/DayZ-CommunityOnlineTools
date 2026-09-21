@@ -31,11 +31,16 @@ class JMPreviewLabMenu extends UIScriptedMenu
 
 	//! Same class the in-form tentatives use, for a like-for-like comparison.
 	static const string LAB_ITEM = "Mich2001Helmet";
-
 	protected ItemPreviewWidget m_Preview;
 	protected MapWidget         m_LabMap;
 	protected EntityAI          m_Item;
 	protected ButtonWidget      m_CloseButton;
+
+	void ~JMPreviewLabMenu()
+	{
+		if ( g_Game && m_Item )
+			g_Game.ObjectDelete( m_Item );
+	}
 
 	override Widget Init()
 	{
@@ -135,11 +140,5 @@ class JMPreviewLabMenu extends UIScriptedMenu
 		}
 
 		return super.OnClick( w, x, y, button );
-	}
-
-	void ~JMPreviewLabMenu()
-	{
-		if ( g_Game && m_Item )
-			g_Game.ObjectDelete( m_Item );
 	}
 }

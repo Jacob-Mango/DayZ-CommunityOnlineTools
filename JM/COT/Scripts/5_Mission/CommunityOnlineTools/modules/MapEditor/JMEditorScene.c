@@ -14,6 +14,12 @@
 
 class JMEditorScene
 {
+	// Sample the terrain height under (x, z). Returns 0 if no surface.
+	static float GetSurfaceY( float x, float z )
+	{
+		return g_Game.SurfaceY( x, z );
+	}
+
 	// Cast a ray from the active camera through the screen-pixel (x, y).
 	// Returns the world-space hit point and the hit Object (or NULL on miss).
 	//
@@ -54,11 +60,5 @@ class JMEditorScene
 				return;
 			}
 		}
-	}
-
-	// Sample the terrain height under (x, z). Returns 0 if no surface.
-	static float GetSurfaceY( float x, float z )
-	{
-		return g_Game.SurfaceY( x, z );
 	}
 }

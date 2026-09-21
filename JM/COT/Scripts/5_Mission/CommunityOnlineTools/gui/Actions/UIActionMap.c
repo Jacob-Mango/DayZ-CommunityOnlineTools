@@ -97,7 +97,6 @@ class UIActionMap: UIActionBase
 	//! Parent for marker widgets - the panel action_map itself sits in, not
 	//! the MapWidget: a widget parented to a MapWidget comes back blank.
 	protected Widget m_MapHost;
-
 	protected ref array<ref JMMapMarker>       m_Markers;
 	protected ref map<string, ref JMMapMarker> m_ById;
 
@@ -106,7 +105,6 @@ class UIActionMap: UIActionBase
 	protected ref map<string, ref JMUIActionMapMarker> m_Widgets;
 	protected ref map<string, ref JMUIActionMapMarker> m_ParkedWidgets;
 	protected bool m_FlushScheduled;
-
 	protected string m_SelectedId;
 	protected string m_HoveredMarkerId;
 
@@ -120,7 +118,6 @@ class UIActionMap: UIActionBase
 	//! cannot drift, stall on a dropped frame, or double up if two ticks land
 	//! in the same one. Matches JMVehiclesForm's own selection ring.
 	static const int RING_PERIOD_MS = 7000;
-
 	protected string m_LastClickedMarkerId;
 	protected vector m_LastClickWorld;
 	protected int    m_LastClickButton;
@@ -157,7 +154,6 @@ class UIActionMap: UIActionBase
 	static const string ICON_DOT          = "JM/COT/GUI/textures/icons/lucide/dot.edds";
 	static const string ICON_DOT_SELECTED = "JM/COT/GUI/textures/icons/lucide/circle-dot.edds";
 	static const string ICON_CAR          = "JM/COT/GUI/textures/icons/lucide/car.edds";
-
 	static const string ICON_BORDER_CROSS = "JM/COT/GUI/textures/icons/lucide/milestone.edds";
 	static const string ICON_BROADLEAF    = "JM/COT/GUI/textures/icons/lucide/tree-deciduous.edds";
 	static const string ICON_CAMP         = "JM/COT/GUI/textures/icons/lucide/tent.edds";
@@ -179,6 +175,175 @@ class UIActionMap: UIActionBase
 	static const string ICON_VINEYARD     = "JM/COT/GUI/textures/icons/lucide/leafy-green.edds";
 	static const string ICON_WATERPUMP    = "JM/COT/GUI/textures/icons/lucide/droplet.edds";
 
+	vector GetCenter()
+	{
+		if ( !m_Map )
+			return vector.Zero;
+
+		return m_Map.GetMapPos();
+	}
+
+	//! Marker under the last hover, or "" if none. Same shape as
+	//! UIActionDataTable.GetHoveredRow().
+	string GetHoveredMarkerId()
+	{
+		return m_HoveredMarkerId;
+	}
+
+	int GetLastClickButton()
+	{
+		return m_LastClickButton;
+	}
+
+	// -------------------------------------------------------------------------
+	//  Interaction
+	// -------------------------------------------------------------------------
+
+	//! Marker under the last press, or "" if it landed on open ground.
+	string GetLastClickedMarkerId()
+	{
+		return m_LastClickedMarkerId;
+	}
+
+	//! Where the last press landed, snapped to the ground.
+	vector GetLastClickWorldPos()
+	{
+		return m_LastClickWorld;
+	}
+
+	//! The raw widget, for the rare caller that needs something this wrapper
+	//! does not cover. Prefer the methods below.
+	MapWidget GetMapWidget()
+	{
+		return m_Map;
+	}
+
+	JMMapMarker GetMarker( string id )
+	{
+		if ( !m_ById.Contains( id ) )
+			return NULL;
+
+		return m_ById.Get( id );
+	}
+
+	int GetMarkerCount()
+	{
+		return m_Markers.Count();
+	}
+
+	float GetScale()
+	{
+		if ( !m_Map )
+			return DEFAULT_SCALE;
+
+		return m_Map.GetScale();
+	}
+
+	string GetSelectedMarker()
+	{
+		return m_SelectedId;
+	}
+
+	// -------------------------------------------------------------------------
+	//  Widget lifecycle
+	// -------------------------------------------------------------------------
+
+	protected JMUIActionMapMarker GetWidgetFor( string id )
+	{
+		if ( !m_Widgets.Contains( id ) )
+			return null;
+
+		return m_Widgets.Get( id );
+	}
+
+	void SetCenter( vector worldPos )
+	{
+		if ( m_Map )
+			m_Map.SetMapPos( worldPos );
+	}
+
+	bool SetMarkerColor( string id, int color )
+	{
+		JMMapMarker marker = GetMarker( id );
+
+		if ( !marker )
+			return false;
+
+		marker.Color = color;
+
+		JMUIActionMapMarker widget = GetWidgetFor( id );
+		if ( widget && id != m_SelectedId )
+			widget.SetColor( color );
+
+		return true;
+	}
+
+	bool SetMarkerLabel( string id, string label )
+	{
+		JMMapMarker marker = GetMarker( id );
+
+		if ( !marker )
+			return false;
+
+		marker.Label = label;
+
+		JMUIActionMapMarker widget = GetWidgetFor( id );
+		if ( widget )
+			widget.SetLabel( label );
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------
+	//  View
+	// -------------------------------------------------------------------------
+
+	//! Height comes from UIActionBase.SetHeight, and the root is already
+	//! VEXACTSIZE - CreateMap sets that when it applies the height it was
+	//! asked for - so a host that wants the map to fill a band just calls it
+	//! with the band's height in layout pixels. A MapWidget has no content
+	//! height of its own, so somebody always has to.
+
+	void SetScale( float scale )
+	{
+		if ( m_Map )
+			m_Map.SetScale( scale );
+	}
+
+	//! Highlight one marker, so the map and a list beside it agree on what is
+	//! being looked at. "" clears the highlight.
+	void SetSelectedMarker( string id )
+	{
+		if ( m_SelectedId == id )
+			return;
+
+		if ( m_SelectedId != "" )
+		{
+			JMUIActionMapMarker prevWidget = GetWidgetFor( m_SelectedId );
+			JMMapMarker         prevData   = GetMarker( m_SelectedId );
+
+			if ( prevWidget )
+			{
+				prevWidget.SetSelected( false );
+
+				if ( prevData )
+					prevWidget.SetColor( prevData.Color );
+			}
+		}
+
+		m_SelectedId = id;
+
+		if ( m_SelectedId == "" )
+			return;
+
+		JMUIActionMapMarker widget = GetWidgetFor( m_SelectedId );
+		if ( widget )
+		{
+			widget.SetSelected( true );
+			widget.SetColor( COLOR_SELECTED );
+		}
+	}
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -199,52 +364,8 @@ class UIActionMap: UIActionBase
 	}
 
 	override void OnShow() {}
+
 	override void OnHide() {}
-
-	//! The raw widget, for the rare caller that needs something this wrapper
-	//! does not cover. Prefer the methods below.
-	MapWidget GetMapWidget()
-	{
-		return m_Map;
-	}
-
-	// -------------------------------------------------------------------------
-	//  View
-	// -------------------------------------------------------------------------
-
-	//! Height comes from UIActionBase.SetHeight, and the root is already
-	//! VEXACTSIZE - CreateMap sets that when it applies the height it was
-	//! asked for - so a host that wants the map to fill a band just calls it
-	//! with the band's height in layout pixels. A MapWidget has no content
-	//! height of its own, so somebody always has to.
-
-	void SetScale( float scale )
-	{
-		if ( m_Map )
-			m_Map.SetScale( scale );
-	}
-
-	float GetScale()
-	{
-		if ( !m_Map )
-			return DEFAULT_SCALE;
-
-		return m_Map.GetScale();
-	}
-
-	void SetCenter( vector worldPos )
-	{
-		if ( m_Map )
-			m_Map.SetMapPos( worldPos );
-	}
-
-	vector GetCenter()
-	{
-		if ( !m_Map )
-			return vector.Zero;
-
-		return m_Map.GetMapPos();
-	}
 
 	//! Put `worldPos` in the middle, optionally changing zoom. A negative scale
 	//! means "leave the zoom where the user left it", which is what a "show me
@@ -355,38 +476,6 @@ class UIActionMap: UIActionBase
 		return true;
 	}
 
-	bool SetMarkerLabel( string id, string label )
-	{
-		JMMapMarker marker = GetMarker( id );
-
-		if ( !marker )
-			return false;
-
-		marker.Label = label;
-
-		JMUIActionMapMarker widget = GetWidgetFor( id );
-		if ( widget )
-			widget.SetLabel( label );
-
-		return true;
-	}
-
-	bool SetMarkerColor( string id, int color )
-	{
-		JMMapMarker marker = GetMarker( id );
-
-		if ( !marker )
-			return false;
-
-		marker.Color = color;
-
-		JMUIActionMapMarker widget = GetWidgetFor( id );
-		if ( widget && id != m_SelectedId )
-			widget.SetColor( color );
-
-		return true;
-	}
-
 	//! `redraw` is kept for source compatibility with existing callers -
 	//! there is nothing left to redraw, a marker's widget is the only copy of
 	//! it there ever was.
@@ -457,74 +546,11 @@ class UIActionMap: UIActionBase
 		m_ParkedWidgets.Clear();
 	}
 
-	JMMapMarker GetMarker( string id )
-	{
-		if ( !m_ById.Contains( id ) )
-			return NULL;
-
-		return m_ById.Get( id );
-	}
-
-	int GetMarkerCount()
-	{
-		return m_Markers.Count();
-	}
-
-	//! Highlight one marker, so the map and a list beside it agree on what is
-	//! being looked at. "" clears the highlight.
-	void SetSelectedMarker( string id )
-	{
-		if ( m_SelectedId == id )
-			return;
-
-		if ( m_SelectedId != "" )
-		{
-			JMUIActionMapMarker prevWidget = GetWidgetFor( m_SelectedId );
-			JMMapMarker         prevData   = GetMarker( m_SelectedId );
-
-			if ( prevWidget )
-			{
-				prevWidget.SetSelected( false );
-
-				if ( prevData )
-					prevWidget.SetColor( prevData.Color );
-			}
-		}
-
-		m_SelectedId = id;
-
-		if ( m_SelectedId == "" )
-			return;
-
-		JMUIActionMapMarker widget = GetWidgetFor( m_SelectedId );
-		if ( widget )
-		{
-			widget.SetSelected( true );
-			widget.SetColor( COLOR_SELECTED );
-		}
-	}
-
-	string GetSelectedMarker()
-	{
-		return m_SelectedId;
-	}
-
 	//! Kept for source compatibility - there is no longer a mass redraw to
 	//! bracket, every marker call already only touches its own widget.
 	void BeginBatch() {}
+
 	void EndBatch()   {}
-
-	// -------------------------------------------------------------------------
-	//  Widget lifecycle
-	// -------------------------------------------------------------------------
-
-	protected JMUIActionMapMarker GetWidgetFor( string id )
-	{
-		if ( !m_Widgets.Contains( id ) )
-			return null;
-
-		return m_Widgets.Get( id );
-	}
 
 	protected void CreateOrReuseMarkerWidget( JMMapMarker marker )
 	{
@@ -621,13 +647,6 @@ class UIActionMap: UIActionBase
 		selected.SetRingAngle( ( cycle / RING_PERIOD_MS ) * 360.0 );
 	}
 
-	//! Marker under the last hover, or "" if none. Same shape as
-	//! UIActionDataTable.GetHoveredRow().
-	string GetHoveredMarkerId()
-	{
-		return m_HoveredMarkerId;
-	}
-
 	// -------------------------------------------------------------------------
 	//  Callbacks from JMUIActionMapMarker
 	// -------------------------------------------------------------------------
@@ -679,27 +698,6 @@ class UIActionMap: UIActionBase
 
 		m_HoveredMarkerId = "";
 		CallEvent( UIEvent.MOUSE_LEAVE );
-	}
-
-	// -------------------------------------------------------------------------
-	//  Interaction
-	// -------------------------------------------------------------------------
-
-	//! Marker under the last press, or "" if it landed on open ground.
-	string GetLastClickedMarkerId()
-	{
-		return m_LastClickedMarkerId;
-	}
-
-	//! Where the last press landed, snapped to the ground.
-	vector GetLastClickWorldPos()
-	{
-		return m_LastClickWorld;
-	}
-
-	int GetLastClickButton()
-	{
-		return m_LastClickButton;
 	}
 
 	//! Screen point -> world point, snapped to the ground.

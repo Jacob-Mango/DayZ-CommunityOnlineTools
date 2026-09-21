@@ -1,0 +1,167 @@
+PanelWidgetClass JMESPVectorInputRow {
+ size 1 50
+ halign left_ref
+ valign top_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ scriptclass "JMESPVectorInputRow"
+ {
+  GridSpacerWidgetClass spacer {
+   position 0 0
+   size 1 1
+   Padding 0
+   Margin 10
+   Columns 3
+   Rows 1
+   {
+    PanelWidgetClass action_x_chrome {
+     ignorepointer 0
+     color 0 0 0 0
+     position 0 0
+     size 1 1
+     {
+      PanelWidgetClass action_x_fill {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.082 0.098 0.118 0.941
+       style COTField4Set
+      }
+      PanelWidgetClass action_x_ring {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.925 0.976 1.000 0.502
+       style COTField4LineSet
+      }
+      EditBoxWidgetClass action_x {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "{X}"
+       "exact text" 1
+       "no focus" 0
+       font "gui/fonts/Metron"
+       style COTInput
+       "text offset" 8 0
+      }
+     }
+    }
+    PanelWidgetClass action_y_chrome {
+     ignorepointer 0
+     color 0 0 0 0
+     position 0 0
+     size 1 1
+     {
+      PanelWidgetClass action_y_fill {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.082 0.098 0.118 0.941
+       style COTField4Set
+      }
+      PanelWidgetClass action_y_ring {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.925 0.976 1.000 0.502
+       style COTField4LineSet
+      }
+      EditBoxWidgetClass action_y {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "{Y}"
+       "exact text" 1
+       "no focus" 0
+       font "gui/fonts/Metron"
+       style COTInput
+       "text offset" 8 0
+      }
+     }
+    }
+    PanelWidgetClass action_z_chrome {
+     ignorepointer 0
+     color 0 0 0 0
+     position 0 0
+     size 1 1
+     {
+      PanelWidgetClass action_z_fill {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.082 0.098 0.118 0.941
+       style COTField4Set
+      }
+      PanelWidgetClass action_z_ring {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.925 0.976 1.000 0.502
+       style COTField4LineSet
+      }
+      EditBoxWidgetClass action_z {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "{Z}"
+       "exact text" 1
+       "no focus" 0
+       font "gui/fonts/Metron"
+       style COTInput
+       "text offset" 8 0
+      }
+     }
+    }
+   }
+  }
+ }
+}

@@ -51,6 +51,29 @@ class JMPlayerStats : Managed
 		SessionStartMs       = 0;
 	}
 
+	//! Seconds the current life has been running, or 0 when there is none.
+	int GetCurrentLifeSeconds()
+	{
+		if ( CurrentLifeStartUnix <= 0 )
+			return 0;
+
+		int now = JMAntiCheatClock.UtcNow();
+		if ( now <= CurrentLifeStartUnix )
+			return 0;
+
+		return now - CurrentLifeStartUnix;
+	}
+
+	//! Total playtime including the session currently in progress, which is the
+	//! number an admin looking at a connected player expects to see.
+	int GetLivePlaytimeSeconds()
+	{
+		if ( SessionStartMs <= 0 )
+			return TotalPlaytimeSec;
+
+		return TotalPlaytimeSec + ( g_Game.GetTime() - SessionStartMs ) / 1000;
+	}
+
 	//! True when nothing has ever been recorded. The save path uses this to
 	//! decide whether the player file is worth keeping at all - without it, an
 	//! ordinary player with default roles has their file deleted on every save
@@ -122,29 +145,6 @@ class JMPlayerStats : Managed
 			LongestLifeSec = lifeLength;
 
 		CurrentLifeStartUnix = 0;
-	}
-
-	//! Seconds the current life has been running, or 0 when there is none.
-	int GetCurrentLifeSeconds()
-	{
-		if ( CurrentLifeStartUnix <= 0 )
-			return 0;
-
-		int now = JMAntiCheatClock.UtcNow();
-		if ( now <= CurrentLifeStartUnix )
-			return 0;
-
-		return now - CurrentLifeStartUnix;
-	}
-
-	//! Total playtime including the session currently in progress, which is the
-	//! number an admin looking at a connected player expects to see.
-	int GetLivePlaytimeSeconds()
-	{
-		if ( SessionStartMs <= 0 )
-			return TotalPlaytimeSec;
-
-		return TotalPlaytimeSec + ( g_Game.GetTime() - SessionStartMs ) / 1000;
 	}
 
 	//! "3d 04h 12m" / "4h 12m" / "12m 30s". A duration an admin reads at a

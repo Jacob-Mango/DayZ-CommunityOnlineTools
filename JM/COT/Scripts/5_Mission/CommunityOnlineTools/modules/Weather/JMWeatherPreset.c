@@ -1,10 +1,52 @@
 class JMWeatherBase
 {
-	void Apply()
+	//! Node the sender must hold for the server to accept it.
+	string GetPermission()
 	{
+		return "";
+	}
+
+	//! What a payload needs to travel: the RPC that carries it, the node its sender
+	//! must hold, and how it reads in the webhook. JMWeatherModule.Submit() does the
+	//! rest, so a new payload is this class plus one case in ReadPayload().
+
+	//! The RPC that carries this payload from an admin's client to the server.
+	int GetRPC()
+	{
+		return JMWeatherModuleRPC.INVALID;
+	}
+
+	//! Webhook event type. Must be one of JMWeatherModule.GetWebhookTypes().
+	string GetWebhookType()
+	{
+		return "SetWeather";
+	}
+
+	//! Whether the server, having accepted this from an admin, also pushes it to every
+	//! client. Only the date needs it: the engine's own calendar replication takes a few
+	//! seconds to reach clients, while weather phenomena replicate on their own.
+	bool IsPushedToClients()
+	{
+		return false;
 	}
 
 	void SetFromWorld()
+	{
+	}
+
+	//! The line the webhook carries, e.g. "Set fog=0.5".
+	string Describe()
+	{
+		return "";
+	}
+
+	//! Serialize as the concrete type. The engine writes a class by the type it is
+	//! handed, so the base class cannot do this once for everybody.
+	void WriteTo( ParamsWriteContext ctx )
+	{
+	}
+
+	void Apply()
 	{
 	}
 
@@ -15,7 +57,7 @@ class JMWeatherBase
 	void ResumeCurrentChangeInProgress()
 	{
 	}
-	
+
 	void Log( PlayerIdentity pidentLog )
 	{
 	}
@@ -26,6 +68,14 @@ class JMWeatherStorm: JMWeatherBase
 	float Density;
 	float Threshold;
 	float MinTimeBetweenLightning;
+
+	override int GetRPC() { return JMWeatherModuleRPC.Storm; }
+
+	override string GetPermission() { return JMConstants.PERM_WEATHER_STORM; }
+
+	override string Describe() { return "Set storm density=" + Density + " threshold=" + Threshold; }
+
+	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
 
 	override void Apply()
 	{
@@ -78,6 +128,14 @@ class JMWeatherSandstorm: JMWeatherBase
 	float FadeInTime = -1;
 	float OvercastValue = -1;
 	float WindMagnitudeValue = -1;
+
+	override int GetRPC() { return JMWeatherModuleRPC.Sandstorm; }
+
+	override string GetPermission() { return JMConstants.PERM_WEATHER_SANDSTORM; }
+
+	override string Describe() { return "Set sandstorm enabled=" + Enabled + " duration=" + Duration; }
+
+	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
 
 	override void Apply()
 	{
@@ -171,9 +229,14 @@ class JMWeatherPhenomenon: JMWeatherBase
 	float Forecast;
 	float Time;
 	float MinDuration;
-
 	[NonSerialized()]
 	float Actual;
+
+	//! Noun the webhook line is built around ("fog", "wind direction").
+	string GetLabel()
+	{
+		return "";
+	}
 
 	WeatherPhenomenon GetPhenomenon()
 	{
@@ -195,6 +258,14 @@ class JMWeatherPhenomenon: JMWeatherBase
 
 		return null;
 	}
+
+	override string Describe()
+	{
+		return "Set " + GetLabel() + "=" + Forecast;
+	}
+
+	//! Every phenomenon has the same three fields, so one write covers all of them.
+	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
 
 	override void Apply()
 	{
@@ -330,6 +401,9 @@ class JMWeatherPhenomenon: JMWeatherBase
 
 class JMWeatherFog: JMWeatherPhenomenon
 {
+	override int GetRPC() { return JMWeatherModuleRPC.Fog; }
+	override string GetPermission() { return JMConstants.PERM_WEATHER_FOG; }
+	override string GetLabel() { return "fog"; }
 }
 
 class JMWeatherDynamicFog: JMWeatherBase
@@ -338,6 +412,14 @@ class JMWeatherDynamicFog: JMWeatherBase
 	float Height;
 	float Bias;
 	float Time;
+
+	override int GetRPC() { return JMWeatherModuleRPC.DynamicFog; }
+
+	override string GetPermission() { return JMConstants.PERM_WEATHER_FOG_DYNAMIC; }
+
+	override string Describe() { return "Set dynamic fog dist=" + Distance + " height=" + Height; }
+
+	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
 
 	override void Apply()
 	{
@@ -377,22 +459,37 @@ class JMWeatherDynamicFog: JMWeatherBase
 
 class JMWeatherRain: JMWeatherPhenomenon
 {
+	override int GetRPC() { return JMWeatherModuleRPC.Rain; }
+	override string GetPermission() { return JMConstants.PERM_WEATHER_RAIN; }
+	override string GetLabel() { return "rain"; }
 }
 
 class JMWeatherSnow: JMWeatherPhenomenon
 {
+	override int GetRPC() { return JMWeatherModuleRPC.Snow; }
+	override string GetPermission() { return JMConstants.PERM_WEATHER_SNOW; }
+	override string GetLabel() { return "snow"; }
 }
 
 class JMWeatherOvercast: JMWeatherPhenomenon
 {
+	override int GetRPC() { return JMWeatherModuleRPC.Overcast; }
+	override string GetPermission() { return JMConstants.PERM_WEATHER_OVERCAST; }
+	override string GetLabel() { return "overcast"; }
 }
 
 class JMWeatherWindMagnitude: JMWeatherPhenomenon
 {
+	override int GetRPC() { return JMWeatherModuleRPC.WindMagnitude; }
+	override string GetPermission() { return JMConstants.PERM_WEATHER_WIND; }
+	override string GetLabel() { return "wind magnitude"; }
 }
 
 class JMWeatherWindDirection: JMWeatherPhenomenon
 {
+	override int GetRPC() { return JMWeatherModuleRPC.WindDirection; }
+	override string GetPermission() { return JMConstants.PERM_WEATHER_WIND; }
+	override string GetLabel() { return "wind direction"; }
 }
 
 class JMWeatherWindFunction: JMWeatherBase
@@ -400,6 +497,14 @@ class JMWeatherWindFunction: JMWeatherBase
 	float Min;
 	float Max;
 	float Speed;
+
+	override int GetRPC() { return JMWeatherModuleRPC.WindFunctionParams; }
+
+	override string GetPermission() { return JMConstants.PERM_WEATHER_WIND_FUNCPARAMS; }
+
+	override string Describe() { return "Set wind function params"; }
+
+	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
 
 	override void Apply()
 	{
@@ -434,6 +539,18 @@ class JMWeatherDate: JMWeatherBase
 	int Hour;
 	int Minute;
 
+	override int GetRPC() { return JMWeatherModuleRPC.Date; }
+
+	override string GetPermission() { return JMConstants.PERM_WEATHER_DATE; }
+
+	override string GetWebhookType() { return "SetTime"; }
+
+	override string Describe() { return "Set date " + Year + "/" + Month + "/" + Day + " " + Hour + ":" + Minute; }
+
+	override bool IsPushedToClients() { return true; }
+
+	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+
 	override void Apply()
 	{
 		if (Year != -1)
@@ -459,6 +576,14 @@ class JMWeatherRainThreshold: JMWeatherBase
 	float OvercastMin;
 	float OvercastMax;
 	float Time;
+
+	override int GetRPC() { return JMWeatherModuleRPC.RainThresholds; }
+
+	override string GetPermission() { return JMConstants.PERM_WEATHER_RAIN_THRESHOLDS; }
+
+	override string Describe() { return "Set rain thresholds min=" + OvercastMin + " max=" + OvercastMax; }
+
+	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
 
 	override void Apply()
 	{
@@ -496,6 +621,14 @@ class JMWeatherSnowThreshold: JMWeatherBase
 	float OvercastMax;
 	float Time;
 
+	override int GetRPC() { return JMWeatherModuleRPC.SnowThresholds; }
+
+	override string GetPermission() { return JMConstants.PERM_WEATHER_SNOW_THRESHOLDS; }
+
+	override string Describe() { return "Set snow thresholds min=" + OvercastMin + " max=" + OvercastMax; }
+
+	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+
 	override void Apply()
 	{
 		if (Time != -1)
@@ -529,24 +662,17 @@ class JMWeatherSnowThreshold: JMWeatherBase
 class JMWeatherPreset
 {
 	string Name;
-
 	float Time;
-
 	autoptr JMWeatherDate PDate;
-
 	autoptr JMWeatherStorm Storm;
 	autoptr JMWeatherSandstorm PSandstorm;
 	autoptr JMWeatherOvercast POvercast;
-
 	autoptr JMWeatherFog PFog;
 	autoptr JMWeatherDynamicFog PDynFog;
-
 	autoptr JMWeatherRain PRain;
 	autoptr JMWeatherRainThreshold RainThreshold;
-	
 	autoptr JMWeatherSnow PSnow;
 	autoptr JMWeatherSnowThreshold SnowThreshold;
-
 	autoptr JMWeatherWindMagnitude PWindMagnitude;
 	autoptr JMWeatherWindDirection PWindDirection;
 	autoptr JMWeatherWindFunction WindFunc;
@@ -571,7 +697,6 @@ class JMWeatherPreset
 	int DurationMax;
 	int TransitionMin;
 	int TransitionMax;
-
 	autoptr array< ref JMWeatherNextState > NextStates;
 
 	void JMWeatherPreset()
@@ -620,6 +745,16 @@ class JMWeatherPreset
 		}
 
 		return phenomena;
+	}
+
+	void SetFromWorld()
+	{
+		array<JMWeatherBase> phenomena = GetPhenomena();
+
+		foreach (JMWeatherBase phenomenom: phenomena)
+		{
+			phenomenom.SetFromWorld();
+		}
 	}
 
 	void Apply()
@@ -742,16 +877,6 @@ class JMWeatherPreset
 		PWindMagnitude.ApplyTimed( transition, duration );
 		PWindDirection.ApplyTimed( transition, duration );
 		WindFunc.Apply();
-	}
-
-	void SetFromWorld()
-	{
-		array<JMWeatherBase> phenomena = GetPhenomena();
-
-		foreach (JMWeatherBase phenomenom: phenomena)
-		{
-			phenomenom.SetFromWorld();
-		}
 	}
 
 	void StopCurrentChangesInProgress()

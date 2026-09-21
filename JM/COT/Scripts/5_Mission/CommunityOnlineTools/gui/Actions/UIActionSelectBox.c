@@ -9,7 +9,6 @@ class UIActionSelectBox: UIActionBase
 {
 	protected Widget m_Frame;
 	protected TextWidget m_Label;
-
 	protected ref OptionSelectorMultistate m_Selection;
 
 	void ~UIActionSelectBox()
@@ -20,16 +19,11 @@ class UIActionSelectBox: UIActionBase
 		delete m_Selection;
 	}
 
-	override void OnInit()
+	// Backwards-compat alias for callers written against the (brief) Dropdown-style API.
+	void SetItems( notnull array<string> options )
 	{
-		super.OnInit();
-
-		Class.CastTo( m_Frame, layoutRoot.FindAnyWidget( "action" ) );
-		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		SetSelections( options );
 	}
-
-	override void OnShow()  {}
-	override void OnHide()  {}
 
 	void SetSelections( notnull array<string> options )
 	{
@@ -45,11 +39,27 @@ class UIActionSelectBox: UIActionBase
 		m_Selection.Enable();
 	}
 
-	// Backwards-compat alias for callers written against the (brief) Dropdown-style API.
-	void SetItems( notnull array<string> options )
+	void SetSelectorWidth( float width )
 	{
-		SetSelections( options );
+		if ( !m_Frame )
+			return;
+		float w, h;
+		m_Frame.GetSize( w, h );
+		m_Frame.SetSize( width, h );
+		m_Frame.Update();
 	}
+
+	override void OnInit()
+	{
+		super.OnInit();
+
+		Class.CastTo( m_Frame, layoutRoot.FindAnyWidget( "action" ) );
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+	}
+
+	override void OnShow()  {}
+
+	override void OnHide()  {}
 
 	override void Disable()
 	{
@@ -98,15 +108,5 @@ class UIActionSelectBox: UIActionBase
 		if ( w == m_Selection )
 			ret = CallEvent( UIEvent.CLICK );
 		return ret;
-	}
-
-	void SetSelectorWidth( float width )
-	{
-		if ( !m_Frame )
-			return;
-		float w, h;
-		m_Frame.GetSize( w, h );
-		m_Frame.SetSize( width, h );
-		m_Frame.Update();
 	}
 }

@@ -38,9 +38,15 @@ class UIActionItemList: UIActionBase
 	protected Widget     m_ScrollContainer;
 	protected Widget     m_ScrollHandle;
 	protected TextWidget m_EmptyText;
-
 	protected ref array<string> m_Items;
 	protected ref array<string> m_Subs;
+
+	//! Per-item selection state OWNED BY THE HOST, distinct from m_Selected
+	//! (the row this widget itself last clicked/pressed). A host tracking its
+	//! own multi-select data (e.g. ESP's tracked-object list) marks entries
+	//! here to get a left-edge accent instead of borrowing the click-highlight,
+	//! which only ever fits one row at a time.
+	protected ref array<bool> m_Highlighted;
 
 	//! The row widgets. Never more than fit on screen, never rebuilt on a data
 	//! change - only repainted.
@@ -48,7 +54,6 @@ class UIActionItemList: UIActionBase
 
 	//! Index of the item currently drawn in row 0.
 	protected int m_Top;
-
 	protected int m_Selected;
 	protected int m_Hovered;
 
@@ -59,7 +64,6 @@ class UIActionItemList: UIActionBase
 	//! only place screen pixels appear is the scrollbar drag, which measures
 	//! its own track at drag time so both sides of that sum are screen space.
 	protected float m_ViewportH;
-
 	protected bool m_Dragging;
 	protected int  m_DragMouseY;
 	protected int  m_DragTop;
@@ -74,7 +78,6 @@ class UIActionItemList: UIActionBase
 	//! menu needs to tell a select from a right-click, and both arrive on the
 	//! same event.
 	protected int m_LastClickButton;
-
 	static const int ROW_H = 22;
 
 	//! Scrollbar geometry as UIActionItemList.layout declares it: an 8px bar
@@ -86,19 +89,16 @@ class UIActionItemList: UIActionBase
 	//! Row width used until there is something to measure - the first frame,
 	//! before the body has been laid out. See ApplyRowWidth for the real one.
 	static const float ROW_W = 0.972;
-
 	static const int DOUBLE_CLICK_MS = 400;
 
 	//! Items the selection moves per wheel notch.
 	static const int WHEEL_STEP = 1;
-
 	static const int COLOR_ROW_NORMAL   = 0x00000000;
 
 	//! Banding is a hint, not a border. The style this sits on already carries
 	//! its own tint, so the wash on top of it is barely there on purpose - at
 	//! anything stronger the list reads as stripes rather than as rows.
 	static const int COLOR_ROW_ALT      = 0x08ECF9FF;
-
 	static const int COLOR_ROW_HOVER    = JMTheme.ACCENT_WASH;
 
 	//! The selected row is a solid accent bar with light text on it, not a
@@ -107,49 +107,107 @@ class UIActionItemList: UIActionBase
 	//! row has to say.
 	static const int COLOR_ROW_SELECTED = JMTheme.SELECTED_FILL;
 
-	override void OnInit()
+	//! Host-driven per-item highlight (row_accent), separate from the fill
+	//! colours above.
+	static const int COLOR_ACCENT_NONE      = 0x00000000;
+	static const int COLOR_ACCENT_HIGHLIGHT = JMTheme.SUCCESS;
+
+	int GetItemCount()
 	{
-		super.OnInit();
-
-		Class.CastTo( m_Body,            layoutRoot.FindAnyWidget( "list_body" ) );
-		Class.CastTo( m_ScrollContainer, layoutRoot.FindAnyWidget( "list_scroll_container" ) );
-		Class.CastTo( m_ScrollHandle,    layoutRoot.FindAnyWidget( "list_scroll_handle" ) );
-		Class.CastTo( m_EmptyText,       layoutRoot.FindAnyWidget( "list_empty" ) );
-
-		m_Items = new array<string>;
-		m_Subs  = new array<string>;
-		m_Rows  = new array<Widget>;
-
-		m_Top       = 0;
-		m_Selected  = -1;
-		m_Hovered   = -1;
-		m_ViewportH = 0;
-
-		m_LastClickTime = 0;
-		m_LastClickItem = -1;
-
-		//! Every widget of the control answers to this script, so a wheel notch
-		//! is caught wherever in the list it lands - over a row, over the empty
-		//! space under the last one, or over the frame itself.
-		layoutRoot.SetHandler( this );
-
-		if ( m_Body )
-			m_Body.SetHandler( this );
-
-		Widget frame = layoutRoot.FindAnyWidget( "list_frame" );
-
-		if ( frame )
-			frame.SetHandler( this );
-
-		if ( m_ScrollHandle )
-			m_ScrollHandle.SetHandler( this );
-
-		if ( m_ScrollContainer )
-			m_ScrollContainer.SetHandler( this );
+		return m_Items.Count();
 	}
 
-	override void OnShow() {}
-	override void OnHide() {}
+	//! Which mouse button raised the CLICK being handled. MouseState.LEFT or
+	//! MouseState.RIGHT.
+	int GetLastClickButton()
+	{
+		return m_LastClickButton;
+	}
+
+	int GetSelectedIndex()
+	{
+		return m_Selected;
+	}
+
+	string GetSelectedItem()
+	{
+		if ( m_Selected < 0 || m_Selected >= m_Items.Count() )
+			return "";
+
+		return m_Items[m_Selected];
+	}
+
+	bool IsHighlighted( int index )
+	{
+		if ( index < 0 || index >= m_Highlighted.Count() )
+			return false;
+
+		return m_Highlighted[index];
+	}
+
+	void SetEmptyText( string text )
+	{
+		if ( m_EmptyText )
+			m_EmptyText.SetText( Widget.TranslateString( text ) );
+	}
+
+	//! Host-driven highlight for `index` - independent of the click-selection
+	//! this widget tracks itself. Does not scroll or otherwise touch selection.
+	void SetHighlighted( int index, bool highlighted )
+	{
+		if ( index < 0 || index >= m_Highlighted.Count() )
+			return;
+
+		if ( m_Highlighted[index] == highlighted )
+			return;
+
+		m_Highlighted[index] = highlighted;
+		Refresh();
+	}
+
+	// -------------------------------------------------------------------------
+	//  Data
+	// -------------------------------------------------------------------------
+
+	//! `subs` is optional; pass NULL for a single-column list. Where it is
+	//! given it must be the same length as `items` - it is the same row.
+	void SetItems( notnull array<string> items, array<string> subs = NULL )
+	{
+		m_Items.Clear();
+		m_Subs.Clear();
+		m_Highlighted.Clear();
+
+		for ( int i = 0; i < items.Count(); i++ )
+		{
+			m_Items.Insert( items[i] );
+			m_Highlighted.Insert( false );
+		}
+
+		if ( subs )
+		{
+			for ( int j = 0; j < subs.Count(); j++ )
+				m_Subs.Insert( subs[j] );
+		}
+
+		m_Selected = -1;
+		m_Hovered  = -1;
+		m_Top      = 0;
+
+		Refresh();
+	}
+
+	void SetSelectedIndex( int index, bool scrollTo = true )
+	{
+		if ( index < -1 || index >= m_Items.Count() )
+			return;
+
+		m_Selected = index;
+
+		if ( scrollTo && index >= 0 )
+			ScrollTo( index );
+
+		Refresh();
+	}
 
 	// -------------------------------------------------------------------------
 	//  Geometry
@@ -180,6 +238,52 @@ class UIActionItemList: UIActionBase
 		SyncRowPool();
 		Refresh();
 	}
+
+	override void OnInit()
+	{
+		super.OnInit();
+
+		Class.CastTo( m_Body,            layoutRoot.FindAnyWidget( "list_body" ) );
+		Class.CastTo( m_ScrollContainer, layoutRoot.FindAnyWidget( "list_scroll_container" ) );
+		Class.CastTo( m_ScrollHandle,    layoutRoot.FindAnyWidget( "list_scroll_handle" ) );
+		Class.CastTo( m_EmptyText,       layoutRoot.FindAnyWidget( "list_empty" ) );
+
+		m_Items = new array<string>;
+		m_Subs  = new array<string>;
+		m_Rows  = new array<Widget>;
+		m_Highlighted = new array<bool>;
+
+		m_Top       = 0;
+		m_Selected  = -1;
+		m_Hovered   = -1;
+		m_ViewportH = 0;
+
+		m_LastClickTime = 0;
+		m_LastClickItem = -1;
+
+		//! Every widget of the control answers to this script, so a wheel notch
+		//! is caught wherever in the list it lands - over a row, over the empty
+		//! space under the last one, or over the frame itself.
+		layoutRoot.SetHandler( this );
+
+		if ( m_Body )
+			m_Body.SetHandler( this );
+
+		Widget frame = layoutRoot.FindAnyWidget( "list_frame" );
+
+		if ( frame )
+			frame.SetHandler( this );
+
+		if ( m_ScrollHandle )
+			m_ScrollHandle.SetHandler( this );
+
+		if ( m_ScrollContainer )
+			m_ScrollContainer.SetHandler( this );
+	}
+
+	override void OnShow() {}
+
+	override void OnHide() {}
 
 	//! How many rows fit. One less than the pool would leave a strip of the
 	//! frame showing at the bottom, so the pool holds the partial row too and
@@ -224,6 +328,13 @@ class UIActionItemList: UIActionBase
 				return;
 
 			row.SetHandler( this );
+
+			ImageWidget selectedIcon;
+			if ( Class.CastTo( selectedIcon, row.FindAnyWidget( "row_selected_icon" ) ) )
+			{
+				selectedIcon.LoadImageFile( 0, JMConstants.Lucide( "check" ) );
+				selectedIcon.SetImage( 0 );
+			}
 
 			// The row's own index in the POOL, not in the data. It is the only
 			// per-widget storage a plain Widget offers, and it is what turns a
@@ -281,72 +392,15 @@ class UIActionItemList: UIActionBase
 		}
 	}
 
-	// -------------------------------------------------------------------------
-	//  Data
-	// -------------------------------------------------------------------------
-
-	//! `subs` is optional; pass NULL for a single-column list. Where it is
-	//! given it must be the same length as `items` - it is the same row.
-	void SetItems( notnull array<string> items, array<string> subs = NULL )
-	{
-		m_Items.Clear();
-		m_Subs.Clear();
-
-		for ( int i = 0; i < items.Count(); i++ )
-			m_Items.Insert( items[i] );
-
-		if ( subs )
-		{
-			for ( int j = 0; j < subs.Count(); j++ )
-				m_Subs.Insert( subs[j] );
-		}
-
-		m_Selected = -1;
-		m_Hovered  = -1;
-		m_Top      = 0;
-
-		Refresh();
-	}
-
 	void Clear()
 	{
 		m_Items.Clear();
 		m_Subs.Clear();
+		m_Highlighted.Clear();
 
 		m_Selected = -1;
 		m_Hovered  = -1;
 		m_Top      = 0;
-
-		Refresh();
-	}
-
-	int GetItemCount()
-	{
-		return m_Items.Count();
-	}
-
-	int GetSelectedIndex()
-	{
-		return m_Selected;
-	}
-
-	string GetSelectedItem()
-	{
-		if ( m_Selected < 0 || m_Selected >= m_Items.Count() )
-			return "";
-
-		return m_Items[m_Selected];
-	}
-
-	void SetSelectedIndex( int index, bool scrollTo = true )
-	{
-		if ( index < -1 || index >= m_Items.Count() )
-			return;
-
-		m_Selected = index;
-
-		if ( scrollTo && index >= 0 )
-			ScrollTo( index );
 
 		Refresh();
 	}
@@ -365,12 +419,6 @@ class UIActionItemList: UIActionBase
 			m_Top = index - rows + 1;
 
 		ClampTop();
-	}
-
-	void SetEmptyText( string text )
-	{
-		if ( m_EmptyText )
-			m_EmptyText.SetText( Widget.TranslateString( text ) );
 	}
 
 	protected void ClampTop()
@@ -463,6 +511,23 @@ class UIActionItemList: UIActionBase
 			color = COLOR_ROW_SELECTED;
 
 		fill.SetColor( color );
+
+		bool highlighted = item < m_Highlighted.Count() && m_Highlighted[item];
+
+		Widget rowAccent = m_Rows[poolIndex].FindAnyWidget( "row_accent" );
+
+		if ( rowAccent )
+		{
+			if ( highlighted )
+				rowAccent.SetColor( COLOR_ACCENT_HIGHLIGHT );
+			else
+				rowAccent.SetColor( COLOR_ACCENT_NONE );
+		}
+
+		Widget rowSelectedIcon = m_Rows[poolIndex].FindAnyWidget( "row_selected_icon" );
+
+		if ( rowSelectedIcon )
+			rowSelectedIcon.Show( highlighted );
 
 		TextWidget rowText;
 		Class.CastTo( rowText, m_Rows[poolIndex].FindAnyWidget( "row_text" ) );
@@ -640,13 +705,6 @@ class UIActionItemList: UIActionBase
 		CallEvent( UIEvent.CLICK );
 
 		return true;
-	}
-
-	//! Which mouse button raised the CLICK being handled. MouseState.LEFT or
-	//! MouseState.RIGHT.
-	int GetLastClickButton()
-	{
-		return m_LastClickButton;
 	}
 
 	//! The wheel moves the SELECTION, and the view follows it.

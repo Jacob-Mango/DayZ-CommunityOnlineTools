@@ -8,14 +8,43 @@
 class COTModule : JMModuleBase
 {
 	protected JMCOTSideBar m_COTMenu;
-
 	protected bool m_WasVisible;
-
 	protected bool m_ForceHUD;
-
 	protected bool m_GameActive;
-
 	protected bool m_LeftMouseDown;
+
+	//! How often open sessions are written through, in milliseconds.
+	//!
+	//! Playtime is only folded into the total on disconnect, so without this a
+	//! server crash loses every connected player's session outright - and a
+	//! crash is exactly when a server has been up longest. Five minutes bounds
+	//! that loss without writing a file per player any more often than a role
+	//! change already does.
+	static const int STATS_FLUSH_INTERVAL_MS = 300000;
+
+	//! Own down/up edge tracking for the sidebar toggle, polled from raw
+	//! hardware KeyState() in OnUpdate() instead of going through the
+	//! UAInput/CF Bind() dispatch system (see PollToggleMenuKey()). Two
+	//! LocalPress()/LocalHold()-based attempts before this one both still
+	//! misfired: ForceDisable(true)/(false) - which every context menu and
+	//! list-row widget cycles on focus change via UIActionBase::Update - does
+	//! not just gate whether our callback gets invoked, it gates what the
+	//! UAInput itself REPORTS. So if Y was already held down when some
+	//! unrelated widget force-disabled inputs, the read on re-enable comes
+	//! back as a fresh "press" no matter which Local*() method or how the
+	//! edge bookkeeping is done - any state derived from that UAInput is
+	//! equally poisoned. Raw KeyState() reads the physical key directly and
+	//! is not part of COT's own ForceDisable plumbing, so it can't be
+	//! perturbed by a module or context menu opening/closing.
+	protected bool m_ToggleMenuKeyDown;
+
+	//! Same reasoning as m_ToggleMenuKeyDown: Escape used to go through
+	//! CloseCOT() (Bind()'d to UAUIBack), which is exactly the ForceDisable-
+	//! poisoned path the Y fix moved away from. Polled raw instead so it can't
+	//! misfire from a context menu or module window churning input-disable
+	//! state, and so it can implement the close priority below instead of the
+	//! single global toggle UAUIBack gave it.
+	protected bool m_EscapeKeyDown;
 
 	void COTModule()
 	{
@@ -23,7 +52,7 @@ class COTModule : JMModuleBase
 
 		JMScriptInvokers.COT_ON_OPEN.Insert( SetMenuState );
 
-		GetPermissionsManager().RegisterPermission( "COT.View" );
+		JMPermissions.Register( JMConstants.PERM_COT_VIEW );
 	}
 
 	void ~COTModule()
@@ -33,6 +62,40 @@ class COTModule : JMModuleBase
 		if ( m_COTMenu )
 		{
 			m_COTMenu.Destroy();
+		}
+	}
+
+	void SetMenuState( bool show )
+	{
+		bool hasCotMenu = m_COTMenu != NULL;
+		bool cotMenuShown = false;
+		if ( hasCotMenu )
+			cotMenuShown = m_COTMenu.IsShown();
+
+		#ifdef COT_DEBUGLOGS
+		//! Bug history: "(m_COTMenu != NULL).ToString()" is fine on its own,
+		//! but ".ToString()" on the PARENTHESIZED "&&" expression itself -
+		//! "(m_COTMenu && m_COTMenu.IsShown()).ToString()" - crashed the real
+		//! engine natively at boot every time (SetMenuState is a COT_ON_OPEN
+		//! listener, invoked unconditionally from OnStart()), despite passing
+		//! the custom lint tool and despite the plain-bool fields above being
+		//! fine. Precomputing into plain bool locals first avoids the pattern
+		//! entirely instead of relying on '.ToString()' placement.
+		Print("[COT_DBG] SetMenuState(" + show.ToString() + ") - COT_ON_OPEN listener, m_COTMenu=" + hasCotMenu.ToString() + " IsShown=" + cotMenuShown.ToString());
+		#endif
+
+		if ( !m_COTMenu )
+			return;
+
+		if ( show )
+		{
+			if ( !m_COTMenu.IsShown() )
+			{
+				m_COTMenu.Show();
+			}
+		} else {
+			if ( m_COTMenu.IsShown() )
+				m_COTMenu.Hide();
 		}
 	}
 
@@ -119,15 +182,6 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	//! How often open sessions are written through, in milliseconds.
-	//!
-	//! Playtime is only folded into the total on disconnect, so without this a
-	//! server crash loses every connected player's session outright - and a
-	//! crash is exactly when a server has been up longest. Five minutes bounds
-	//! that loss without writing a file per player any more often than a role
-	//! change already does.
-	static const int STATS_FLUSH_INTERVAL_MS = 300000;
-
 	//! Fold the in-progress session of every connected player into their total
 	//! and write it out. AccumulateSession re-bases its own start time, so
 	//! running this repeatedly does not double-count.
@@ -190,7 +244,7 @@ class COTModule : JMModuleBase
 	}
 	#else
 	#ifdef COT_DEBUGLOGS
-	private static bool s_JM_LoggedInputBranch = false;
+	protected static bool s_JM_LoggedInputBranch = false;
 	#endif
 
 	override void OnUpdate( float timeslice )
@@ -314,40 +368,6 @@ class COTModule : JMModuleBase
 			g_Game.GetMission().GetHud().Show( true );
 	}
 
-	void SetMenuState( bool show )
-	{
-		bool hasCotMenu = m_COTMenu != NULL;
-		bool cotMenuShown = false;
-		if ( hasCotMenu )
-			cotMenuShown = m_COTMenu.IsShown();
-
-		#ifdef COT_DEBUGLOGS
-		//! Bug history: "(m_COTMenu != NULL).ToString()" is fine on its own,
-		//! but ".ToString()" on the PARENTHESIZED "&&" expression itself -
-		//! "(m_COTMenu && m_COTMenu.IsShown()).ToString()" - crashed the real
-		//! engine natively at boot every time (SetMenuState is a COT_ON_OPEN
-		//! listener, invoked unconditionally from OnStart()), despite passing
-		//! the custom lint tool and despite the plain-bool fields above being
-		//! fine. Precomputing into plain bool locals first avoids the pattern
-		//! entirely instead of relying on '.ToString()' placement.
-		Print("[COT_DBG] SetMenuState(" + show.ToString() + ") - COT_ON_OPEN listener, m_COTMenu=" + hasCotMenu.ToString() + " IsShown=" + cotMenuShown.ToString());
-		#endif
-
-		if ( !m_COTMenu )
-			return;
-
-		if ( show )
-		{
-			if ( !m_COTMenu.IsShown() )
-			{
-				m_COTMenu.Show();
-			}
-		} else {
-			if ( m_COTMenu.IsShown() )
-				m_COTMenu.Hide();
-		}
-	}
-
 	void CloseCOT( UAInput input )
 	{
 		if (!g_Game)
@@ -371,22 +391,6 @@ class COTModule : JMModuleBase
 				CommunityOnlineToolsBase.ForceDisableInputs(false);
 		}
 	}
-
-	//! Own down/up edge tracking for the sidebar toggle, polled from raw
-	//! hardware KeyState() in OnUpdate() instead of going through the
-	//! UAInput/CF Bind() dispatch system (see PollToggleMenuKey()). Two
-	//! LocalPress()/LocalHold()-based attempts before this one both still
-	//! misfired: ForceDisable(true)/(false) - which every context menu and
-	//! list-row widget cycles on focus change via UIActionBase::Update - does
-	//! not just gate whether our callback gets invoked, it gates what the
-	//! UAInput itself REPORTS. So if Y was already held down when some
-	//! unrelated widget force-disabled inputs, the read on re-enable comes
-	//! back as a fresh "press" no matter which Local*() method or how the
-	//! edge bookkeeping is done - any state derived from that UAInput is
-	//! equally poisoned. Raw KeyState() reads the physical key directly and
-	//! is not part of COT's own ForceDisable plumbing, so it can't be
-	//! perturbed by a module or context menu opening/closing.
-	protected bool m_ToggleMenuKeyDown;
 
 	//! Client-only, called every frame from OnUpdate(). Bypasses Bind() /
 	//! ForceDisableInputs entirely - see m_ToggleMenuKeyDown's comment for why.
@@ -419,14 +423,6 @@ class COTModule : JMModuleBase
 
 		GetCommunityOnlineToolsBase().ToggleOpen();
 	}
-
-	//! Same reasoning as m_ToggleMenuKeyDown: Escape used to go through
-	//! CloseCOT() (Bind()'d to UAUIBack), which is exactly the ForceDisable-
-	//! poisoned path the Y fix moved away from. Polled raw instead so it can't
-	//! misfire from a context menu or module window churning input-disable
-	//! state, and so it can implement the close priority below instead of the
-	//! single global toggle UAUIBack gave it.
-	protected bool m_EscapeKeyDown;
 
 	//! Client-only, called every frame from OnUpdate().
 	void PollEscapeKey()
@@ -597,7 +593,7 @@ class COTModule : JMModuleBase
 		if ( m_COTMenu == NULL )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_COT_VIEW ) )
 			return;
 
 		GetCommunityOnlineToolsBase().ToggleActive();

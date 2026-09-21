@@ -1,39 +1,38 @@
 #ifdef JM_CommunityOnlineTools
-// Example: Adding custom filter entry for Player List (JMPlayerForm)
+// Example: a checkbox row in the Player list's filter menu. One Register() call adds the row
+// (re-registering the same id replaces it, so OnCreate can run more than once); the state
+// callback makes it a checkbox, PassesListFilters decides which players the list shows.
+// The same call works for every filter menu - only the scope changes (see JMFilterRegistry).
 modded class JMPlayerForm
 {
-	protected bool m_FilterShowSubModVip = true;
+	protected bool m_ExOnlyAdmins;
 
-	override protected void OnClick_PlayerListFilters( UIEvent eid, UIActionBase action )
+	// Drives the row's checkbox.
+	bool IsExFilterAdmins()
 	{
-		super.OnClick_PlayerListFilters( eid, action );
+		return m_ExOnlyAdmins;
+	}
 
-		if ( !m_FilterMenu )
-			return;
+	override void OnCreate()
+	{
+		super.OnCreate();
 
-		// Append custom filter toggle to player list filter dropdown menu
-		m_FilterMenu.AddItem( "f_vip", "Show VIP Players Only", JMConstants.Lucide( "star" ) );
-		
-		int color = JMTheme.TEXT_DISABLED;
-		if ( m_FilterShowSubModVip )
-			color = JMTheme.TEXT_PRIMARY;
+		JMFilterRegistry.Register( JMFilterRegistry.PLAYERS, "ex_only_admins", "Only Admins (example)", "", 0, this, "OnExFilterAdmins", "IsExFilterAdmins" );
+	}
 
-		m_FilterMenu.SetItemTextColor( "f_vip", color );
-
+	// Called with the id of the clicked row.
+	void OnExFilterAdmins( string id )
+	{
+		m_ExOnlyAdmins = !m_ExOnlyAdmins;
+		UpdatePlayerList( true );
 	}
 
 	override protected bool PassesListFilters( JMPlayerInstance player )
 	{
-		if ( !super.PassesListFilters( player ) )
+		if ( m_ExOnlyAdmins && !player.HasPermission( "COT" ) )
 			return false;
 
-		// Apply custom filter condition
-		if ( !m_FilterShowSubModVip )
-		{
-			// Example filter logic: exclude specific player group
-		}
-
-		return true;
+		return super.PassesListFilters( player );
 	}
 }
 #endif

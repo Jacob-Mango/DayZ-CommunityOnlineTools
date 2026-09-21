@@ -110,7 +110,6 @@ class JMMapEditorForm : JMFormBase
 	//! is still up would race whatever the user is mid-click on - hence the
 	//! guard in HandleKeyboardShortcuts.
 	protected JMConfirmation m_ActiveConfirmation;
-
 	protected const int  TICK_HANDLE = 0;
 	protected const int  TICK_PERIOD_MS = 33;  // ~30 fps UI tick
 
@@ -118,16 +117,6 @@ class JMMapEditorForm : JMFormBase
 	// resolve a method by name when it's a static class member, so the
 	// static TickStatic dispatches to the single active form.
 	protected static ref JMMapEditorForm s_Instance;
-
-	//! Whether this form currently owns Ctrl+Z/Ctrl+Y. While shown, its own
-	//! Tick()-polled shortcut handles them against its OWN undo stack; the
-	//! global hotkey (MissionGameplay.OnUpdate) steps aside so the same
-	//! keypress cannot fire both.
-	static bool IsShown()
-	{
-		return s_Instance != NULL;
-	}
-
 	protected JMMapEditorModule m_Module;
 
 	void JMMapEditorForm()
@@ -147,16 +136,25 @@ class JMMapEditorForm : JMFormBase
 		m_SelectedIds       = new set< int >;
 	}
 
+	//! Whether this form currently owns Ctrl+Z/Ctrl+Y. While shown, its own
+	//! Tick()-polled shortcut handles them against its OWN undo stack; the
+	//! global hotkey (MissionGameplay.OnUpdate) steps aside so the same
+	//! keypress cannot fire both.
+	static bool IsShown()
+	{
+		return s_Instance != NULL;
+	}
+
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
 	}
 
 	// ========================================================================
-	//  OnInit - build all UI
+	//  OnCreate - build all UI
 	// ========================================================================
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		// ---- Top toolbar (2 rows: mode buttons + file ops, then snap toggles) ----
 		// WrapSpacer (flex-wrap) so the mode buttons don't overflow when the
@@ -172,25 +170,27 @@ class JMMapEditorForm : JMFormBase
 		m_ModeScale  = MakeModeButton( modeRow, "Scale",  MAPEDITOR_MODE_SCALE,  "Scale the selected object (drag the cube)" );
 		m_ModeSpawn  = MakeModeButton( modeRow, "Spawn",  MAPEDITOR_MODE_SPAWN,  "Pick an asset in the sidebar, then click in the 3D viewport" );
 
-		m_Save = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_SAVE", this, "OnClick_Save" );
+		m_Save = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_SAVE", this, "" );
+		if ( m_Save ) m_Save.SetOnClick( this, "OnClick_Save" );
 		m_Save.SetWidth( 0.07 );
-		m_Save.SetTooltip( "Save the current layout to a preset file on disk (per server)" );
+		m_Save.SetTooltip( "#STR_COT_MAPEDITOR_SAVE_THE_CURRENT_LAYOUT_TO_A" );
 
-		m_Load = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_LOAD", this, "OnClick_Load" );
+		m_Load = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_LOAD", this, "" );
+		if ( m_Load ) m_Load.SetOnClick( this, "OnClick_Load" );
 		m_Load.SetWidth( 0.07 );
-		m_Load.SetTooltip( "Load a saved layout preset from disk" );
+		m_Load.SetTooltip( "#STR_COT_MAPEDITOR_LOAD_A_SAVED_LAYOUT_PRESET_FROM" );
 
 		m_Undo = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_UNDO", this, "OnClick_Undo" );
 		m_Undo.SetWidth( 0.07 );
-		m_Undo.SetTooltip( "Undo the last pending mutation (client-side stack)" );
+		m_Undo.SetTooltip( "#STR_COT_MAPEDITOR_UNDO_THE_LAST_PENDING_MUTATION_CLIENT" );
 
 		m_Redo = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_REDO", this, "OnClick_Redo" );
 		m_Redo.SetWidth( 0.07 );
-		m_Redo.SetTooltip( "Redo a previously undone mutation" );
+		m_Redo.SetTooltip( "#STR_COT_MAPEDITOR_REDO_A_PREVIOUSLY_UNDONE_MUTATION" );
 
 		m_Refresh = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_REFRESH", this, "OnClick_Refresh" );
 		m_Refresh.SetWidth( 0.07 );
-		m_Refresh.SetTooltip( "Reload the placed-object list from the server" );
+		m_Refresh.SetTooltip( "#STR_COT_MAPEDITOR_RELOAD_THE_PLACED_OBJECT_LIST_FROM" );
 		// No SetIcon - toolbar buttons are text-only so the icon doesn't
 		// sit in the center. The vanilla button class doesn't expose an
 		// image-align API, so the simpler path is to keep all toolbar
@@ -199,20 +199,20 @@ class JMMapEditorForm : JMFormBase
 		Widget snapRow = UIActionManager.CreateWrapSpacer( topStack );
 		m_SnapTerrain = UIActionManager.CreateCheckbox( snapRow, "#STR_COT_MAPEDITOR_SNAP_TERRAIN", this, "Click_SnapTerrain", false );
 		m_SnapTerrain.SetWidth( 0.33 );
-		m_SnapTerrain.SetTooltip( "Spawned/moved objects snap to the ground beneath them" );
+		m_SnapTerrain.SetTooltip( "#STR_COT_MAPEDITOR_SPAWNED_MOVED_OBJECTS_SNAP_TO_THE" );
 		m_SnapGrid    = UIActionManager.CreateCheckbox( snapRow, "#STR_COT_MAPEDITOR_SNAP_GRID", this, "Click_SnapGrid", false );
 		m_SnapGrid.SetWidth( 0.33 );
-		m_SnapGrid.SetTooltip( "Round coordinates to 1 m increments" );
+		m_SnapGrid.SetTooltip( "#STR_COT_MAPEDITOR_ROUND_COORDINATES_TO_1_M_INCREMENTS" );
 		m_SnapSurface = UIActionManager.CreateCheckbox( snapRow, "#STR_COT_MAPEDITOR_SNAP_SURFACE", this, "Click_SnapSurface", false );
 		m_SnapSurface.SetWidth( 0.33 );
-		m_SnapSurface.SetTooltip( "Align yaw to the surface normal" );
+		m_SnapSurface.SetTooltip( "#STR_COT_MAPEDITOR_ALIGN_YAW_TO_THE_SURFACE_NORMAL" );
 
 		// ---- Left sidebar: asset browser ----
 		Widget left = layoutRoot.FindAnyWidget( "panel_left" );
 		Widget leftStack = UIActionManager.CreateGridSpacer( left, 2, 1 );
 
 		m_AssetSearch = UIActionManager.CreateSearchBox( leftStack, this, "OnChange_AssetFilter", "Search assets..." );
-		m_AssetSearch.SetTooltip( "Filter the asset browser by classname or display name" );
+		m_AssetSearch.SetTooltip( "#STR_COT_MAPEDITOR_FILTER_THE_ASSET_BROWSER_BY_CLASSNAME" );
 
 		m_AssetScroller = UIActionManager.CreateScroller( leftStack );
 		m_AssetContent  = m_AssetScroller.GetContentWidget();
@@ -224,7 +224,7 @@ class JMMapEditorForm : JMFormBase
 
 		UIActionManager.CreateText( rightStack, "#STR_COT_MAPEDITOR_PROPERTIES", "" );
 
-		m_SelId = UIActionManager.CreateText( rightStack, "", "No selection" );
+		m_SelId = UIActionManager.CreateText( rightStack, "", "#STR_COT_MAPEDITOR_NO_SELECTION" );
 		m_SelId.SetWidth( 1.0 );
 
 		m_SelClass = UIActionManager.CreateText( rightStack, "", "" );
@@ -233,78 +233,87 @@ class JMMapEditorForm : JMFormBase
 		Widget posRow = UIActionManager.CreateGridSpacer( rightStack, 1, 3 );
 		m_PosX = UIActionManager.CreateEditableText( posRow, "X:", this, "" );
 		m_PosX.SetWidth( 0.32 );
-		m_PosX.SetTooltip( "World X (meters)" );
+		m_PosX.SetTooltip( "#STR_COT_MAPEDITOR_WORLD_X_METERS" );
 		m_PosY = UIActionManager.CreateEditableText( posRow, "Y:", this, "" );
 		m_PosY.SetWidth( 0.32 );
-		m_PosY.SetTooltip( "World Y (meters)" );
+		m_PosY.SetTooltip( "#STR_COT_MAPEDITOR_WORLD_Y_METERS" );
 		m_PosZ = UIActionManager.CreateEditableText( posRow, "Z:", this, "" );
 		m_PosZ.SetWidth( 0.32 );
-		m_PosZ.SetTooltip( "World Z (meters)" );
+		m_PosZ.SetTooltip( "#STR_COT_MAPEDITOR_WORLD_Z_METERS" );
 
 		Widget oriRow = UIActionManager.CreateGridSpacer( rightStack, 1, 1 );
-		m_OriYaw = UIActionManager.CreateEditableText( oriRow, "Yaw (deg):", this, "" );
+		m_OriYaw = UIActionManager.CreateEditableText( oriRow, "#STR_COT_MAPEDITOR_YAW_DEG", this, "" );
 		m_OriYaw.SetWidth( 1.0 );
-		m_OriYaw.SetTooltip( "Yaw rotation in degrees (0-359)" );
+		m_OriYaw.SetTooltip( "#STR_COT_MAPEDITOR_YAW_ROTATION_IN_DEGREES_0_359" );
 
-		m_Scale = UIActionManager.CreateSlider( rightStack, "Scale:", 0.1, 5.0, this, "" );
+		m_Scale = UIActionManager.CreateSlider( rightStack, "#STR_COT_MAPEDITOR_SCALE", 0.1, 5.0, this, "" );
 		m_Scale.SetCurrent( 1.0 );
 		m_Scale.SetStepValue( 0.1 );
 		m_Scale.SetWidth( 0.95 );
-		m_Scale.SetTooltip( "Uniform scale multiplier" );
+		m_Scale.SetTooltip( "#STR_COT_MAPEDITOR_UNIFORM_SCALE_MULTIPLIER" );
 
 		Widget actionRow = UIActionManager.CreateGridSpacer( rightStack, 1, 3 );
-		m_ApplyTransform = UIActionManager.CreateButton( actionRow, "#STR_COT_MAPEDITOR_APPLY", this, "OnClick_ApplyTransform" );
+		m_ApplyTransform = UIActionManager.CreateButton( actionRow, "#STR_COT_MAPEDITOR_APPLY", this, "" );
+		if ( m_ApplyTransform ) m_ApplyTransform.SetOnClick( this, "OnClick_ApplyTransform" );
 		m_ApplyTransform.SetWidth( 0.32 );
-		m_ApplyTransform.SetTooltip( "Apply position / rotation / scale to the selected object" );
-		m_TeleportTo = UIActionManager.CreateButton( actionRow, "#STR_COT_MAPEDITOR_TELEPORT", this, "OnClick_TeleportTo" );
+		m_ApplyTransform.SetTooltip( "#STR_COT_MAPEDITOR_APPLY_POSITION_ROTATION_SCALE_TO_THE" );
+		m_TeleportTo = UIActionManager.CreateButton( actionRow, "#STR_COT_MAPEDITOR_TELEPORT", this, "" );
+		if ( m_TeleportTo ) m_TeleportTo.SetOnClick( this, "OnClick_TeleportTo" );
 		m_TeleportTo.SetWidth( 0.32 );
-		m_TeleportTo.SetTooltip( "Teleport your player to the selected object" );
+		m_TeleportTo.SetTooltip( "#STR_COT_MAPEDITOR_TELEPORT_YOUR_PLAYER_TO_THE_SELECTED" );
 		m_Delete = UIActionManager.CreateButton( actionRow, "#STR_COT_MAPEDITOR_DELETE", this, "OnClick_Delete" );
 		m_Delete.SetColor( JMTheme.DANGER_FILL );
 		m_Delete.SetWidth( 0.32 );
-		m_Delete.SetTooltip( "Delete the selected object" );
+		m_Delete.SetTooltip( "#STR_COT_MAPEDITOR_DELETE_THE_SELECTED_OBJECT_2" );
 
 		Widget clearRow = UIActionManager.CreateGridSpacer( rightStack, 1, 1 );
-		m_ClearAll = UIActionManager.CreateButton( clearRow, "#STR_COT_MAPEDITOR_CLEAR_ALL", this, "OnClick_ClearAll" );
+		m_ClearAll = UIActionManager.CreateButton( clearRow, "#STR_COT_MAPEDITOR_CLEAR_ALL", this, "" );
+		if ( m_ClearAll ) m_ClearAll.SetOnClick( this, "OnClick_ClearAll" );
 		m_ClearAll.SetColor( JMTheme.DANGER_FILL );
 		m_ClearAll.SetWidth( 1.0 );
-		m_ClearAll.SetTooltip( "Delete every placed object (irreversible)" );
+		m_ClearAll.SetTooltip( "#STR_COT_MAPEDITOR_DELETE_EVERY_PLACED_OBJECT_IRREVERSIBLE" );
 
 		// ---- Bulk + clipboard + undo/undo rows ----
 		Widget bulkRow = UIActionManager.CreateGridSpacer( rightStack, 1, 3 );
-		m_BulkMove   = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_MOVE", this, "OnClick_BulkMove" );
+		m_BulkMove   = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_MOVE", this, "" );
+		if ( m_BulkMove ) m_BulkMove.SetOnClick( this, "OnClick_BulkMove" );
 		m_BulkMove.SetWidth( 0.33 );
-		m_BulkMove.SetTooltip( "Apply X / Y / Z delta to the cursor (or use the pos fields above). Affects all selected objects" );
-		m_BulkRotate = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_ROTATE", this, "OnClick_BulkRotate" );
+		m_BulkMove.SetTooltip( "#STR_COT_MAPEDITOR_APPLY_X_Y_Z_DELTA_TO" );
+		m_BulkRotate = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_ROTATE", this, "" );
+		if ( m_BulkRotate ) m_BulkRotate.SetOnClick( this, "OnClick_BulkRotate" );
 		m_BulkRotate.SetWidth( 0.33 );
-		m_BulkRotate.SetTooltip( "Add the yaw value (deg) above) to all selected objects" );
-		m_BulkScale  = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_SCALE", this, "OnClick_BulkScale" );
+		m_BulkRotate.SetTooltip( "#STR_COT_MAPEDITOR_ADD_THE_YAW_VALUE_DEG_ABOVE" );
+		m_BulkScale  = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_SCALE", this, "" );
+		if ( m_BulkScale ) m_BulkScale.SetOnClick( this, "OnClick_BulkScale" );
 		m_BulkScale.SetWidth( 0.33 );
-		m_BulkScale.SetTooltip( "Multiply the current scale of every selected object by the scale value above" );
+		m_BulkScale.SetTooltip( "#STR_COT_MAPEDITOR_MULTIPLY_THE_CURRENT_SCALE_OF_EVERY" );
 
 		Widget clipRow = UIActionManager.CreateGridSpacer( rightStack, 1, 3 );
-		m_CopyBtn   = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_COPY", this, "OnClick_Copy" );
+		m_CopyBtn   = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_COPY", this, "" );
+		if ( m_CopyBtn ) m_CopyBtn.SetOnClick( this, "OnClick_Copy" );
 		m_CopyBtn.SetWidth( 0.33 );
-		m_CopyBtn.SetTooltip( "Snapshot the currently-selected object into the clipboard" );
-		m_CutBtn    = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_CUT", this, "OnClick_Cut" );
+		m_CopyBtn.SetTooltip( "#STR_COT_MAPEDITOR_SNAPSHOT_THE_CURRENTLY_SELECTED_OBJECT_I" );
+		m_CutBtn    = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_CUT", this, "" );
+		if ( m_CutBtn ) m_CutBtn.SetOnClick( this, "OnClick_Cut" );
 		m_CutBtn.SetWidth( 0.33 );
-		m_CutBtn.SetTooltip( "Snapshot + delete the currently-selected object" );
-		m_PasteBtn  = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_PASTE", this, "OnClick_Paste" );
+		m_CutBtn.SetTooltip( "#STR_COT_MAPEDITOR_SNAPSHOT_DELETE_THE_CURRENTLY_SELECTED_O" );
+		m_PasteBtn  = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_PASTE", this, "" );
+		if ( m_PasteBtn ) m_PasteBtn.SetOnClick( this, "OnClick_Paste" );
 		m_PasteBtn.SetWidth( 0.33 );
-		m_PasteBtn.SetTooltip( "Spawn the clipboard at the cursor world position (snap-to-terrain on)" );
+		m_PasteBtn.SetTooltip( "#STR_COT_MAPEDITOR_SPAWN_THE_CLIPBOARD_AT_THE_CURSOR" );
 
 		Widget undoRow = UIActionManager.CreateGridSpacer( rightStack, 1, 2 );
 		m_UndoBtn = UIActionManager.CreateButton( undoRow, "#STR_COT_MAPEDITOR_UNDO", this, "OnClick_Undo" );
 		m_UndoBtn.SetWidth( 0.49 );
-		m_UndoBtn.SetTooltip( "Revert the last server-side mutation" );
+		m_UndoBtn.SetTooltip( "#STR_COT_MAPEDITOR_REVERT_THE_LAST_SERVER_SIDE_MUTATION" );
 		m_RedoBtn = UIActionManager.CreateButton( undoRow, "#STR_COT_MAPEDITOR_REDO", this, "OnClick_Redo" );
 		m_RedoBtn.SetWidth( 0.49 );
-		m_RedoBtn.SetTooltip( "Re-apply a reverted mutation" );
+		m_RedoBtn.SetTooltip( "#STR_COT_MAPEDITOR_RE_APPLY_A_REVERTED_MUTATION" );
 
 		// ---- How to use ----
 		Widget helpRow = UIActionManager.CreateGridSpacer( rightStack, 1, 1 );
-		Widget help = UIActionManager.CreatePanel( helpRow, 0x00000000, 140 );
-		UIActionManager.CreateText( help, "#STR_COT_MAPEDITOR_HOW_TO_USE", "1. Open the freecam (Camera module). 2. Click an object in the 3D world to select. 3. Shift-click to multi-select. 4. Use Bulk Move / Rotate / Scale to act on every selected. 5. Use Copy / Cut / Paste to clone. 6. Undo / Redo for history. 7. Snap to Terrain / Grid / Surface as needed." );
+		Widget help = UIActionManager.CreateRow( helpRow, 140 );
+		UIActionManager.CreateText( help, "#STR_COT_MAPEDITOR_HOW_TO_USE", "#STR_COT_MAPEDITOR_1_OPEN_THE_FREECAM_CAMERA_MODULE" );
 
 		// ---- Permissions ----
 		//! Mirrors exactly what JMMapEditorModule's own RPC handlers enforce, so
@@ -312,21 +321,21 @@ class JMMapEditorForm : JMFormBase
 		//! accepted. The module is already behind Admin.MapEditor.View via
 		//! HasAccess(), so read-only controls (Refresh, Copy, the snap toggles)
 		//! need nothing further.
-		BindPermission( m_ApplyTransform, "Admin.MapEditor.Transform" );
-		BindPermission( m_BulkMove,       "Admin.MapEditor.Transform" );
-		BindPermission( m_BulkRotate,     "Admin.MapEditor.Transform" );
-		BindPermission( m_BulkScale,      "Admin.MapEditor.Transform" );
-		BindPermission( m_Undo,           "Admin.MapEditor.Transform" );
-		BindPermission( m_Redo,           "Admin.MapEditor.Transform" );
-		BindPermission( m_UndoBtn,        "Admin.MapEditor.Transform" );
-		BindPermission( m_RedoBtn,        "Admin.MapEditor.Transform" );
+		BindPermission( m_ApplyTransform, JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_BulkMove,       JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_BulkRotate,     JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_BulkScale,      JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_Undo,           JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_Redo,           JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_UndoBtn,        JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_RedoBtn,        JMConstants.PERM_MAPEDITOR_TRANSFORM );
 
-		BindPermission( m_Delete,         "Admin.MapEditor.Delete" );
-		BindPermission( m_ClearAll,       "Admin.MapEditor.Delete" );
-		BindPermission( m_CutBtn,         "Admin.MapEditor.Delete" );
+		BindPermission( m_Delete,         JMConstants.PERM_MAPEDITOR_DELETE );
+		BindPermission( m_ClearAll,       JMConstants.PERM_MAPEDITOR_DELETE );
+		BindPermission( m_CutBtn,         JMConstants.PERM_MAPEDITOR_DELETE );
 
-		BindPermission( m_PasteBtn,       "Admin.MapEditor.Spawn" );
-		BindPermission( m_Load,           "Admin.MapEditor.Spawn" );
+		BindPermission( m_PasteBtn,       JMConstants.PERM_MAPEDITOR_SPAWN );
+		BindPermission( m_Load,           JMConstants.PERM_MAPEDITOR_SPAWN );
 
 		// ---- Initial paint ----
 		RefreshModeButtons();
@@ -337,13 +346,13 @@ class JMMapEditorForm : JMFormBase
 	{
 		super.OnShow();
 
-		m_Refresh.UpdatePermission( "Admin.MapEditor.View" );
-		m_Save.UpdatePermission( "Admin.MapEditor.Spawn" );
-		m_Load.UpdatePermission( "Admin.MapEditor.Spawn" );
-		m_ApplyTransform.UpdatePermission( "Admin.MapEditor.Transform" );
-		m_TeleportTo.UpdatePermission( "Admin.MapEditor.Transform" );
-		m_Delete.UpdatePermission( "Admin.MapEditor.Delete" );
-		m_ClearAll.UpdatePermission( "Admin.MapEditor.Delete" );
+		BindPermission( m_Refresh, JMConstants.PERM_MAPEDITOR_VIEW );
+		BindPermission( m_Save, JMConstants.PERM_MAPEDITOR_SPAWN );
+		BindPermission( m_Load, JMConstants.PERM_MAPEDITOR_SPAWN );
+		BindPermission( m_ApplyTransform, JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_TeleportTo, JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		BindPermission( m_Delete, JMConstants.PERM_MAPEDITOR_DELETE );
+		BindPermission( m_ClearAll, JMConstants.PERM_MAPEDITOR_DELETE );
 
 		// Register per-frame tick. Drives 3D gizmo draw, axis hover, drag,
 		// and 3D-pick click handling. 30 fps is fine for a UI panel.
@@ -669,18 +678,6 @@ class JMMapEditorForm : JMFormBase
 		return vector.Zero;
 	}
 
-	override void OnClientPermissionsUpdated()
-	{
-		super.OnClientPermissionsUpdated();
-		m_Refresh.UpdatePermission( "Admin.MapEditor.View" );
-		m_Save.UpdatePermission( "Admin.MapEditor.Spawn" );
-		m_Load.UpdatePermission( "Admin.MapEditor.Spawn" );
-		m_ApplyTransform.UpdatePermission( "Admin.MapEditor.Transform" );
-		m_TeleportTo.UpdatePermission( "Admin.MapEditor.Transform" );
-		m_Delete.UpdatePermission( "Admin.MapEditor.Delete" );
-		m_ClearAll.UpdatePermission( "Admin.MapEditor.Delete" );
-	}
-
 	override void OnResize( float w, float h )
 	{
 		super.OnResize( w, h );
@@ -692,20 +689,18 @@ class JMMapEditorForm : JMFormBase
 	//  Mode buttons
 	// ========================================================================
 
-	private UIActionButton MakeModeButton( Widget parent, string label, int mode, string tooltip )
+	protected UIActionButton MakeModeButton( Widget parent, string label, int mode, string tooltip )
 	{
-		UIActionButton b = UIActionManager.CreateButton( parent, label, this, "OnClick_Mode" );
+		UIActionButton b = UIActionManager.CreateButton( parent, label, this, "" );
+		if ( b ) b.SetOnClick( this, "OnClick_Mode" );
 		b.SetWidth( 0.08 );
 		b.SetData( new JMMapEditorModeData( mode ) );
 		b.SetTooltip( tooltip );
 		return b;
 	}
 
-	void OnClick_Mode( UIEvent eid, UIActionBase action )
+	void OnClick_Mode( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
 		JMMapEditorModeData data;
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
@@ -715,7 +710,7 @@ class JMMapEditorForm : JMFormBase
 		RefreshModeButtons();
 	}
 
-	private void RefreshModeButtons()
+	protected void RefreshModeButtons()
 	{
 		int ACTIVE   = ARGB(255, 80, 200, 80);
 		int INACTIVE = ARGB(255, 220, 220, 220);
@@ -784,18 +779,14 @@ class JMMapEditorForm : JMFormBase
 	//  Save / Load / Refresh
 	// ========================================================================
 
-	void OnClick_Save( UIEvent eid, UIActionBase action )
+	void OnClick_Save( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
 		if ( m_Module )
 			m_Module.SaveToDisk();
 	}
 
-	void OnClick_Load( UIEvent eid, UIActionBase action )
+	void OnClick_Load( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
 		if ( m_Module )
 		{
 			m_Module.LoadFromDisk();
@@ -834,18 +825,12 @@ class JMMapEditorForm : JMFormBase
 	//  Asset browser
 	// ========================================================================
 
-	private void BuildAssetBrowser()
+	protected void BuildAssetBrowser()
 	{
 		if ( !m_AssetContent )
 			return;
 
-		Widget child = m_AssetContent.GetChildren();
-		while ( child )
-		{
-			Widget next = child.GetSibling();
-			child.Unlink();
-			child = next;
-		}
+		UIActionManager.ClearChildren( m_AssetContent );
 
 		array< ref JMMapEditorAsset > items = JMMapEditorCatalog.Build();
 		array< string > categories = JMMapEditorCatalog.GetCategories();
@@ -861,7 +846,8 @@ class JMMapEditorForm : JMFormBase
 				if ( a.Category != cat )
 					continue;
 
-				UIActionButton row = UIActionManager.CreateButton( m_AssetContent, a.DisplayName, this, "OnClick_Asset" );
+				UIActionButton row = UIActionManager.CreateButton( m_AssetContent, a.DisplayName, this, "" );
+				if ( row ) row.SetOnClick( this, "OnClick_Asset" );
 				row.SetWidth( 1.0 );
 				row.SetData( new JMMapEditorAssetRowData( a.ClassName, a.DisplayName ) );
 				row.SetTooltip( "Class: " + a.ClassName );
@@ -880,11 +866,8 @@ class JMMapEditorForm : JMFormBase
 		BuildAssetBrowser();
 	}
 
-	void OnClick_Asset( UIEvent eid, UIActionBase action )
+	void OnClick_Asset( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
 		JMMapEditorAssetRowData data;
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
@@ -898,9 +881,8 @@ class JMMapEditorForm : JMFormBase
 	//  Bulk + clipboard + undo click handlers
 	// ========================================================================
 
-	void OnClick_BulkMove( UIEvent eid, UIActionBase action )
+	void OnClick_BulkMove( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
 		if ( !m_Module || m_SelectedIds.Count() == 0 ) return;
 		if ( m_SelectedId == -1 && m_PosX.GetText() == "" ) return;
 
@@ -927,9 +909,8 @@ class JMMapEditorForm : JMFormBase
 		m_Module.BulkTransform( ids, dp, dor, ds );
 	}
 
-	void OnClick_BulkRotate( UIEvent eid, UIActionBase action )
+	void OnClick_BulkRotate( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
 		if ( !m_Module || m_SelectedIds.Count() == 0 ) return;
 
 		float yawDelta = 0;
@@ -952,9 +933,8 @@ class JMMapEditorForm : JMFormBase
 		m_Module.BulkTransform( ids, dp, dor, ds );
 	}
 
-	void OnClick_BulkScale( UIEvent eid, UIActionBase action )
+	void OnClick_BulkScale( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
 		if ( !m_Module || m_SelectedIds.Count() == 0 ) return;
 
 		float scaleFactor = m_Scale.GetCurrent();
@@ -975,16 +955,14 @@ class JMMapEditorForm : JMFormBase
 		m_Module.BulkTransform( ids, dp, dor, ds );
 	}
 
-	void OnClick_Copy( UIEvent eid, UIActionBase action )
+	void OnClick_Copy( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
 		if ( m_SelectedId == -1 || !m_Module ) return;
 		m_Module.CopyObject( m_SelectedId );
 	}
 
-	void OnClick_Cut( UIEvent eid, UIActionBase action )
+	void OnClick_Cut( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
 		if ( m_SelectedId == -1 || !m_Module ) return;
 		m_Module.CutObject( m_SelectedId );
 		// After cut the selection no longer points to a live object
@@ -993,9 +971,8 @@ class JMMapEditorForm : JMFormBase
 		RebuildList();
 	}
 
-	void OnClick_Paste( UIEvent eid, UIActionBase action )
+	void OnClick_Paste( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
 		if ( !m_Module ) return;
 
 		// Spawn at the cursor's world position. Falls back to the selected
@@ -1075,7 +1052,7 @@ class JMMapEditorForm : JMFormBase
 	//  Selection / transform apply / delete
 	// ========================================================================
 
-	private JMMapEditorEntry FindEntry( int id )
+	protected JMMapEditorEntry FindEntry( int id )
 	{
 		foreach ( JMMapEditorEntry e : m_AllEntries )
 			if ( e.Id == id )
@@ -1083,10 +1060,8 @@ class JMMapEditorForm : JMFormBase
 		return NULL;
 	}
 
-	void OnClick_ApplyTransform( UIEvent eid, UIActionBase action )
+	void OnClick_ApplyTransform( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
 		if ( m_SelectedId == -1 || !m_Module )
 			return;
 
@@ -1100,10 +1075,8 @@ class JMMapEditorForm : JMFormBase
 		m_Module.TransformObject( m_SelectedId, pos, ori, scale );
 	}
 
-	void OnClick_TeleportTo( UIEvent eid, UIActionBase action )
+	void OnClick_TeleportTo( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
 		if ( m_SelectedId == -1 )
 			return;
 		JMMapEditorEntry e = FindEntry( m_SelectedId );
@@ -1124,7 +1097,7 @@ class JMMapEditorForm : JMFormBase
 			return;
 		if ( m_SelectedId == -1 || !m_Module )
 			return;
-		m_ActiveConfirmation = CreateConfirmation_Two( JMConfirmationType.INFO, "Delete object", "Delete the selected object?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnConfirmation_Delete" );
+		m_ActiveConfirmation = ConfirmAction( "#STR_COT_MAPEDITOR_DELETE_OBJECT", "#STR_COT_MAPEDITOR_DELETE_THE_SELECTED_OBJECT", "OnConfirmation_Delete" );
 	}
 
 	void OnConfirmation_Delete( JMConfirmation confirmation )
@@ -1137,11 +1110,9 @@ class JMMapEditorForm : JMFormBase
 		m_SelClass.SetText( "" );
 	}
 
-	void OnClick_ClearAll( UIEvent eid, UIActionBase action )
+	void OnClick_ClearAll( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-		m_ActiveConfirmation = CreateConfirmation_Two( JMConfirmationType.INFO, "Clear all", "Delete every object placed by the map editor?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnConfirmation_ClearAll" );
+		m_ActiveConfirmation = ConfirmAction( "#STR_COT_MAPEDITOR_CLEAR_ALL_2", "#STR_COT_MAPEDITOR_DELETE_EVERY_OBJECT_PLACED_BY_THE", "OnConfirmation_ClearAll" );
 	}
 
 	void OnConfirmation_ClearAll( JMConfirmation confirmation )

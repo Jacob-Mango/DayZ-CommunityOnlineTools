@@ -10,7 +10,7 @@ modded class ActionTargetsCursor
 			typename callbackClass = animatedAction.COT_GetCallbackClassTypename();
 			if (callbackClass.IsInherited(ActionContinuousBaseCB))
 			{
-				if (GetCommunityOnlineToolsBase().IsActive() && GetPermissionsManager().HasPermission("Actions.QuickActions"))
+				if (GetCommunityOnlineToolsBase().IsActive() && JMPermissions.Has(JMConstants.PERM_ACTIONS_QUICKACTIONS))
 					desc = "[COT QuickAction] " + desc;
 			}
 		}

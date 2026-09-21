@@ -1,9 +1,8 @@
 class JMLoadoutForm: JMFormBase
 {
-	private UIActionScroller m_sclr_MainActions;
-	private Widget m_ContentWrapper;
-	private Widget m_ActionsWrapper;
-
+	protected UIActionScroller m_sclr_MainActions;
+	protected Widget m_ContentWrapper;
+	protected Widget m_ActionsWrapper;
 	protected UIActionDropdown m_SpawnModeDropdown;
 	protected ref array< string > m_SpawnModeText =
 	{
@@ -14,7 +13,6 @@ class JMLoadoutForm: JMFormBase
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMLoadoutModule m_Module;
-
 	JMLoadoutButtonData m_TempData;
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -22,7 +20,7 @@ class JMLoadoutForm: JMFormBase
 		return Class.CastTo( m_Module, mdl );
 	}
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
 		m_ContentWrapper = m_sclr_MainActions.GetContentWidget();
@@ -33,12 +31,11 @@ class JMLoadoutForm: JMFormBase
 		Widget toolbar = UIActionManager.CreateWrapSpacer( m_ContentWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
 		UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( toolbar, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
-		refreshBtn.SetFixedSize( 30, 30 );
 
 		m_SpawnModeDropdown = UIActionManager.CreateDropdown( toolbar, "", layoutRoot, this, "OnClick_SpawnMode", m_SpawnModeText );
 		m_SpawnModeDropdown.SetWidth( 0.85 );
 		m_SpawnModeDropdown.SetSelection( 0, false );
-		RegisterOverlay( m_SpawnModeDropdown );
+		AddOverlay( m_SpawnModeDropdown );
 
 		m_sclr_MainActions.UpdateScroller();
 	}
@@ -72,7 +69,7 @@ class JMLoadoutForm: JMFormBase
 
 		if (names.Count() < 1)
 		{
-			UIActionManager.CreateText( m_ActionsWrapper, "Use the ESP to create new Sets from the quick action tab (right side)" );
+			UIActionManager.CreateText( m_ActionsWrapper, "#STR_COT_LOADOUT_USE_THE_ESP_TO_CREATE_NEW" );
 			m_sclr_MainActions.UpdateScroller();
 			return;
 		}
@@ -89,25 +86,19 @@ class JMLoadoutForm: JMFormBase
 
 			// Icon-only delete (32x32). Compact confirm labels because the button
 			// is narrow - full "Confirm"/"Cancel" would clip on small widths.
-			UIActionConfirmInline delbttn = UIActionManager.CreateConfirmInline( row, "", this, "OnClick_Delete" );
-			UIActionIconGrid.ApplyDeletePreset( delbttn );
-			delbttn.SetButton( "" );
-			delbttn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
-			delbttn.CenterIcon( ICON_BUTTON_PX, 16 );
-			delbttn.SetConfirmLabel( "O" );
-			delbttn.SetCancelLabel( "X" );
-			delbttn.SetTooltip( "Delete this loadout" );
+			UIActionConfirmInline delbttn = UIActionManager.CreateDeleteConfirmIcon( row, this, "OnClick_Delete" );
+			delbttn.SetTooltip( "#STR_COT_LOADOUT_DELETE_THIS_LOADOUT" );
 			delbttn.SetData( new JMLoadoutButtonData( name ) );
 
 			// Fractional Spawn directly after the delete icon.
-			UIActionButton spwnbttn = UIActionManager.CreateButton( row, "Spawn", this, "OnClick_Spawn" );
+			UIActionButton spwnbttn = UIActionManager.CreateButton( row, "#STR_COT_GENERIC_SPAWN", this, "OnClick_Spawn" );
 			spwnbttn.SetWidth( 0.20 );
 			spwnbttn.SetData( new JMLoadoutButtonData( name ) );
 
 			//! These rows are rebuilt on every refresh, so bind per-call rather
 			//! than registering a permanent binding to a widget that is about
 			//! to be destroyed.
-			UpdatePermission( delbttn, "Loadouts.Delete" );
+			UpdatePermission( delbttn, JMConstants.PERM_LOADOUTS_DELETE );
 
 			//! Spawn has no single permission - which one the server checks
 			//! depends on the spawn-mode dropdown at click time (Cursor,
@@ -115,11 +106,11 @@ class JMLoadoutForm: JMFormBase
 			//! three is held and let the server enforce the specific one,
 			//! rather than hiding a button the admin could legitimately use
 			//! after changing mode.
-			bool canSpawnAny = GetPermissionsManager().HasPermission( "Loadouts.Spawn.Cursor" );
+			bool canSpawnAny = JMPermissions.Has( JMConstants.PERM_LOADOUTS_SPAWN_CURSOR );
 			if ( !canSpawnAny )
-				canSpawnAny = GetPermissionsManager().HasPermission( "Loadouts.Spawn.Target" );
+				canSpawnAny = JMPermissions.Has( JMConstants.PERM_LOADOUTS_SPAWN_TARGET );
 			if ( !canSpawnAny )
-				canSpawnAny = GetPermissionsManager().HasPermission( "Loadouts.Spawn.SelectedPlayers" );
+				canSpawnAny = JMPermissions.Has( JMConstants.PERM_LOADOUTS_SPAWN_SELECTEDPLAYERS );
 
 			spwnbttn.SetEnabled( canSpawnAny );
 
@@ -150,10 +141,6 @@ class JMLoadoutForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
-
-		UIActionButton btn;
-		if ( Class.CastTo( btn, action ) )
-			btn.TriggerSpin( 2 );
 
 		m_Module.Load();
 
@@ -191,7 +178,7 @@ class JMLoadoutForm: JMFormBase
 				m_Module.SpawnPlayers( data.Filename, JM_GetSelected().GetPlayersOrSelf() );
 			break;
 			default:
-				CreateConfirmation_One( JMConfirmationType.INFO, "Unknown spawn mode", "Selected spawn mode is not handled. Re-select the mode and try again.", "#STR_COT_GENERIC_OK", "" );
+				ShowNotice( "#STR_COT_LOADOUT_UNKNOWN_SPAWN_MODE", "#STR_COT_LOADOUT_SELECTED_SPAWN_MODE_IS_NOT_HANDLED" );
 			break;
 		}
 	}

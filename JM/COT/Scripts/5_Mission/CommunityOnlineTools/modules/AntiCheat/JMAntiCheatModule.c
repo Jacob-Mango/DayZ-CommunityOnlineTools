@@ -101,65 +101,164 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		m_ClientKillGuidOrder = new array< string >;
 		m_ClientKillStats     = new map< string, ref JMAntiCheatKillStats >;
 
+	}
+
+	map< string, ref JMAntiCheatFlag > GetClientFlags()
+	{
+		return m_ClientFlags;
+	}
+
+	// -----------------------------------------------------------------------
+	//  Client accessors for the form
+	// -----------------------------------------------------------------------
+
+	array< string > GetClientGuidOrder()
+	{
+		return m_ClientGuidOrder;
+	}
+
+	// -----------------------------------------------------------------------
+	//  Client accessors for the form
+	// -----------------------------------------------------------------------
+
+	array< string > GetClientKillGuidOrder()
+	{
+		return m_ClientKillGuidOrder;
+	}
+
+	map< string, ref JMAntiCheatKillStats > GetClientKillStats()
+	{
+		return m_ClientKillStats;
+	}
+
+	//! How many players are flagged hard enough to be worth an admin's time.
+	//!
+	//! A flag entry exists the moment a player trips anything at all, and on a
+	//! busy server that is most of them - counting entries would light a footer
+	//! badge permanently and teach everyone to ignore it. The bar used here is
+	//! the module's own FlagThresholdHigh, the score at which it already
+	//! considers the detection worth a WARNING webhook.
+	//!
+	//! Flags decay, so this clears itself if nothing else happens - but only
+	//! slowly, and a certain detection outlives an admin's whole shift. The
+	//! intended reading is unchanged: while it is raised, somebody has to look.
+	int GetFlaggedCount()
+	{
+		array< string > guids = new array< string >;
+		GetFlaggedGuids( guids );
+		return guids.Count();
+	}
+
+	//! The GUIDs behind GetFlaggedCount, for consumers that need to ask about
+	//! one player - the player list draws a badge per row from this.
+	void GetFlaggedGuids( out array< string > guids )
+	{
+		guids.Clear();
+
+		if ( !IsMissionHost() )
+			return;
+
+		int threshold = 15;
+		if ( m_Config )
+			threshold = m_Config.FlagThresholdHigh;
+
+		foreach ( string guid, JMAntiCheatFlag flag : m_Flags )
+		{
+			if ( flag.TotalScore >= threshold )
+				guids.Insert( guid );
+		}
+	}
+
+	// Server-side helper for testing
+	map< string, ref JMAntiCheatFlag > GetServerFlags()
+	{
+		return m_Flags;
+	}
+
+	// Server-side helper
+	map< string, ref JMAntiCheatKillStats > GetServerKillStats()
+	{
+		return m_KillStats;
+	}
+
+	// -----------------------------------------------------------------------
+	//  Shared helpers
+	// -----------------------------------------------------------------------
+
+	//! Does this player hold COT access at all.
+	//!
+	//! This used to be an exemption: anyone with COT was skipped by every rule,
+	//! which meant a stolen admin account was invisible to the whole module.
+	//! It is not an exemption any more. Admins are scanned like everybody else,
+	//! and the things an admin legitimately does that look like cheats are
+	//! excused per ACTION instead - see JMAntiCheatSanction. The one place this
+	//! is still consulted is the denied-RPC burst, where holding COT genuinely
+	//! changes what a denial means.
+	protected bool HasCOTAccess( string guid )
+	{
+		if ( guid == "" )
+			return false;
+
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( guid );
+		if ( !instance )
+			return false;
+
+		return instance.HasPermission( "COT" );
+	}
+
+	protected bool IsInVehicle( PlayerBase pb )
+	{
+		if ( !pb )
+			return false;
+
+		//! Covers cars, boats and anything else deriving from Transport. A
+		//! player in a seat has the vehicle as their hierarchy parent.
+		if ( pb.GetParent() && Transport.Cast( pb.GetParent() ) )
+			return true;
+
+		HumanCommandVehicle cmdVehicle = pb.GetCommand_Vehicle();
+		if ( cmdVehicle )
+			return true;
+
+		return false;
+	}
+
+	protected bool IsOnCooldown( string guid, string detector, int nowMs )
+	{
+		string key = guid + "|" + detector;
+
+		if ( !m_LastFlagMs.Contains( key ) )
+			return false;
+
+		int elapsed = nowMs - m_LastFlagMs.Get( key );
+
+		return elapsed < (int)( m_Config.DetectorCooldownS * 1000 );
+	}
+
+	//! Called on both client and server as the module registers, before the mission loads.
+	override void DeclarePermissions()
+	{
+		super.DeclarePermissions();
+
 		JMPermissions.Register( JMConstants.PERM_ANTICHEAT_VIEW );
 		JMPermissions.Register( JMConstants.PERM_ANTICHEAT_CLEAR );
-		GetPermissionsManager().RegisterPermission( "COT" );
+		JMPermissions.Register( "COT" );
 	}
 
-	override bool HasAccess()
+	override void DescribeModule( JMModuleInfo info )
 	{
-		return JMPermissions.Has( JMConstants.PERM_ANTICHEAT_VIEW );
-	}
+		super.DescribeModule( info );
 
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/anticheat_form.layout";
-	}
+		info.Title = "#STR_COT_ANTICHEAT_MODULE_NAME";
+		info.WebhookTitle = "Anti-Cheat Module";
+		info.Icon = "shield-alert";
+		info.Layout = "JM/COT/GUI/layouts/anticheat_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_SERVER;
+		info.ViewPermission = JMConstants.PERM_ANTICHEAT_VIEW;
+		info.SetRPCRange( JMAntiCheatModuleRPC.INVALID, JMAntiCheatModuleRPC.COUNT );
 
-	override string GetCategory()
-	{
-		return "Server";
-	}
-
-	override string GetTitle()
-	{
-		return "#STR_COT_ANTICHEAT_MODULE_NAME";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "shield-alert" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Anti-Cheat Module";
-	}
-
-	override void GetWebhookTypes( out array< string > types )
-	{
-		types.Insert( "Detection" );
-		types.Insert( "Action" );
-	}
-
-	override int GetRPCMin()
-	{
-		return JMAntiCheatModuleRPC.INVALID;
-	}
-
-	override int GetRPCMax()
-	{
-		return JMAntiCheatModuleRPC.COUNT;
+		info.AddWebhookType( "Detection" );
+		info.AddWebhookType( "Action" );
 	}
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
@@ -253,7 +352,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	//  Unauthorized RPC
 	// -----------------------------------------------------------------------
 
-	private void DrainDeniedRpcQueue()
+	protected void DrainDeniedRpcQueue()
 	{
 		array< string > guids = new array< string >;
 		array< string > permissions = new array< string >;
@@ -318,7 +417,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	//  Infinite ammo
 	// -----------------------------------------------------------------------
 
-	private void DrainShotQueue()
+	protected void DrainShotQueue()
 	{
 		array< string > guids = new array< string >;
 		array< int > ammoCounts = new array< int >;
@@ -376,7 +475,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		}
 	}
 
-	private void DrainKillEventQueue()
+	protected void DrainKillEventQueue()
 	{
 		if ( !JMAntiCheatKillHook.Pending )
 			return;
@@ -410,7 +509,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	// Same logic as RecordKill but reads the body-part from the event
 	// instead of looking up the most recent hit (this version is correct
 	// when the hook fires both events in the same tick).
-	private void RecordKillFromEvent( JMAntiCheatKillEvent evt )
+	protected void RecordKillFromEvent( JMAntiCheatKillEvent evt )
 	{
 		if ( !IsMissionHost() || !evt.Killer )
 			return;
@@ -447,7 +546,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	//! Non-fatal hit taken straight from the event, so the aim direction and
 	//! delivery class captured at impact are still available. RecordHit below
 	//! is kept for callers that only have the two players.
-	private void RecordHitFromEvent( JMAntiCheatKillEvent evt )
+	protected void RecordHitFromEvent( JMAntiCheatKillEvent evt )
 	{
 		if ( !IsMissionHost() || !evt.Killer )
 			return;
@@ -467,7 +566,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	//  Detection loop
 	// -----------------------------------------------------------------------
 
-	private void PollAllPlayers()
+	protected void PollAllPlayers()
 	{
 		array< Man > players = new array< Man >;
 		g_Game.GetPlayers( players );
@@ -503,7 +602,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	//  30 m/s; without the exemption every vehicle on the server trips the
 	//  speed rule on every poll and the flag list stops meaning anything.
 	// -----------------------------------------------------------------------
-	private void PollMovement( string guid, PlayerBase pb, int nowMs )
+	protected void PollMovement( string guid, PlayerBase pb, int nowMs )
 	{
 		vector pos = pb.GetPosition();
 
@@ -571,23 +670,6 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		JMAntiCheatSanction.Grant( guid, JMAntiCheatSanction.MOVEMENT, m_Config.PositionGraceS );
 	}
 
-	private bool IsInVehicle( PlayerBase pb )
-	{
-		if ( !pb )
-			return false;
-
-		//! Covers cars, boats and anything else deriving from Transport. A
-		//! player in a seat has the vehicle as their hierarchy parent.
-		if ( pb.GetParent() && Transport.Cast( pb.GetParent() ) )
-			return true;
-
-		HumanCommandVehicle cmdVehicle = pb.GetCommand_Vehicle();
-		if ( cmdVehicle )
-			return true;
-
-		return false;
-	}
-
 	// -----------------------------------------------------------------------
 	//  Inventory
 	//
@@ -595,7 +677,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	//  player once a second is real server cost for a signal that does not
 	//  move that fast, and the rule is a rate over a window anyway.
 	// -----------------------------------------------------------------------
-	private void PollInventories( array< Man > players, float windowS, int nowMs )
+	protected void PollInventories( array< Man > players, float windowS, int nowMs )
 	{
 		foreach ( Man m : players )
 		{
@@ -643,7 +725,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		}
 	}
 
-	private int CountInventory( PlayerBase pb )
+	protected int CountInventory( PlayerBase pb )
 	{
 		if ( !pb || !pb.GetInventory() )
 			return 0;
@@ -654,35 +736,10 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		return items.Count();
 	}
 
-	// -----------------------------------------------------------------------
-	//  Shared helpers
-	// -----------------------------------------------------------------------
-
-	//! Does this player hold COT access at all.
-	//!
-	//! This used to be an exemption: anyone with COT was skipped by every rule,
-	//! which meant a stolen admin account was invisible to the whole module.
-	//! It is not an exemption any more. Admins are scanned like everybody else,
-	//! and the things an admin legitimately does that look like cheats are
-	//! excused per ACTION instead - see JMAntiCheatSanction. The one place this
-	//! is still consulted is the denied-RPC burst, where holding COT genuinely
-	//! changes what a denial means.
-	private bool HasCOTAccess( string guid )
-	{
-		if ( guid == "" )
-			return false;
-
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( guid );
-		if ( !instance )
-			return false;
-
-		return instance.HasPermission( "COT" );
-	}
-
 	//! Score a set of hits against a player found by guid, honouring the
 	//! per-detector cooldown. The detector argument is the cooldown bucket,
 	//! not the text shown to an admin.
-	private void ApplyHitsForGuid( string guid, string detector, array< ref JMAntiCheatHit > hits, int nowMs )
+	protected void ApplyHitsForGuid( string guid, string detector, array< ref JMAntiCheatHit > hits, int nowMs )
 	{
 		if ( hits.Count() == 0 )
 			return;
@@ -700,19 +757,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		ApplyHits( guid, pb, hits, nowMs );
 	}
 
-	private bool IsOnCooldown( string guid, string detector, int nowMs )
-	{
-		string key = guid + "|" + detector;
-
-		if ( !m_LastFlagMs.Contains( key ) )
-			return false;
-
-		int elapsed = nowMs - m_LastFlagMs.Get( key );
-
-		return elapsed < (int)( m_Config.DetectorCooldownS * 1000 );
-	}
-
-	private void ApplyHits( string guid, PlayerBase player, array< ref JMAntiCheatHit > hits, int nowMs )
+	protected void ApplyHits( string guid, PlayerBase player, array< ref JMAntiCheatHit > hits, int nowMs )
 	{
 		if ( hits.Count() == 0 )
 			return;
@@ -795,7 +840,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 	//! Bleed every score down, and forget entries that have been at zero for
 	//! long enough that keeping them is just file growth.
-	private void DecayFlags()
+	protected void DecayFlags()
 	{
 		if ( !m_Config || m_Config.FlagDecayPerHour <= 0 )
 			return;
@@ -838,16 +883,14 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		}
 	}
 
-	private void LoadFlags()
+	protected void LoadFlags()
 	{
 		if ( !IsMissionHost() || !m_Config || !m_Config.PersistFlags )
 			return;
 
-		if ( !FileExist( JMAntiCheatFlagStore.FILE ) )
-			return;
-
 		JMAntiCheatFlagStore store = new JMAntiCheatFlagStore();
-		JsonFileLoader<JMAntiCheatFlagStore>.JsonLoadFile( JMAntiCheatFlagStore.FILE, store );
+		if ( !JMJsonFile<JMAntiCheatFlagStore>.Load( JMAntiCheatFlagStore.FILE, store ) )
+			return;
 
 		if ( !store.Entries )
 			return;
@@ -891,7 +934,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	//! Write the table out. A no-op unless something actually changed, so the
 	//! periodic call costs nothing on a quiet server. Pass force on shutdown
 	//! and after an admin action, where the next periodic write may not come.
-	private void SaveFlags( bool force )
+	protected void SaveFlags( bool force )
 	{
 		if ( !IsMissionHost() || !m_Config || !m_Config.PersistFlags )
 			return;
@@ -899,14 +942,12 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		if ( !force && !m_FlagsDirty )
 			return;
 
-		MakeDirectory( JMAntiCheatFlagStore.DIR );
-
 		JMAntiCheatFlagStore store = new JMAntiCheatFlagStore();
 
 		foreach ( string guid, JMAntiCheatFlag flag : m_Flags )
 			store.Entries.Insert( flag );
 
-		JsonFileLoader<JMAntiCheatFlagStore>.JsonSaveFile( JMAntiCheatFlagStore.FILE, store );
+		JMJsonFile<JMAntiCheatFlagStore>.Save( JMAntiCheatFlagStore.FILE, store );
 
 		m_FlagsDirty = false;
 	}
@@ -914,6 +955,11 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	// -----------------------------------------------------------------------
 	//  Admin client RPC
 	// -----------------------------------------------------------------------
+
+	override void RequestData()
+	{
+		RequestFlags();
+	}
 
 	void RequestFlags()
 	{
@@ -928,14 +974,14 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMAntiCheatModuleRPC.RequestFlags, true, NULL );
 	}
 
-	private void RPC_RequestFlags( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RequestFlags( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ANTICHEAT_VIEW, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ANTICHEAT_VIEW, senderRPC, instance ) )
 			return;
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -976,7 +1022,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMAntiCheatModuleRPC.Flags, true, senderRPC );
 	}
 
-	private void RPC_Flags( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Flags( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 			return;
@@ -1108,14 +1154,14 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		ExecClearFlag( guid, NULL );
 	}
 
-	private void RPC_ClearFlag( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_ClearFlag( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ANTICHEAT_CLEAR, senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ANTICHEAT_CLEAR, senderRPC, instance ) )
 			return;
 
 		string guid;
@@ -1125,7 +1171,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		ExecClearFlag( guid, senderRPC );
 	}
 
-	private void ExecClearFlag( string guid, PlayerIdentity senderRPC )
+	protected void ExecClearFlag( string guid, PlayerIdentity senderRPC )
 	{
 		if ( m_Flags.Contains( guid ) )
 		{
@@ -1143,24 +1189,10 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		}
 	}
 
-	// -----------------------------------------------------------------------
-	//  Client accessors for the form
-	// -----------------------------------------------------------------------
-
-	array< string > GetClientGuidOrder()
-	{
-		return m_ClientGuidOrder;
-	}
-
-	map< string, ref JMAntiCheatFlag > GetClientFlags()
-	{
-		return m_ClientFlags;
-	}
-
 	//! Best name available for a guid. The live identity when there is one, the
 	//! permission roster otherwise, and the guid itself as a last resort - a
 	//! flag with no name attached is nearly useless to an admin.
-	private string ResolvePlayerName( string guid, PlayerIdentity identity )
+	protected string ResolvePlayerName( string guid, PlayerIdentity identity )
 	{
 		if ( identity )
 			return identity.GetName();
@@ -1181,7 +1213,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	// -----------------------------------------------------------------------
 
 	//! Rules that judge the ATTACKER, on every hit and kill.
-	private void EvaluateAttacker( string guid, JMAntiCheatKillEvent evt, int nowMs )
+	protected void EvaluateAttacker( string guid, JMAntiCheatKillEvent evt, int nowMs )
 	{
 		if ( guid == "" )
 			return;
@@ -1206,7 +1238,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	}
 
 	//! Rules that need the accumulated kill record, so they run on kills only.
-	private void EvaluateKillPatterns( string guid, JMAntiCheatKillStats stats, int nowMs )
+	protected void EvaluateKillPatterns( string guid, JMAntiCheatKillStats stats, int nowMs )
 	{
 		if ( !stats || guid == "" )
 			return;
@@ -1235,7 +1267,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	//! Append this kill and return how many fall inside the window. The list is
 	//! pruned from the front every call, so it stays the size of the window
 	//! rather than the size of the session.
-	private int RecordAndCountRecentKills( string guid, int nowMs )
+	protected int RecordAndCountRecentKills( string guid, int nowMs )
 	{
 		array< int > stamps = m_RecentKillMs.Get( guid );
 		if ( !stamps )
@@ -1256,7 +1288,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 	//! The damage-immunity rule judges the VICTIM: the cheat that matters here
 	//! is one that keeps its own health pinned while real damage lands on it.
-	private void EvaluateVictimImmunity( JMAntiCheatKillEvent evt, int nowMs )
+	protected void EvaluateVictimImmunity( JMAntiCheatKillEvent evt, int nowMs )
 	{
 		if ( !evt.Victim || !evt.Victim.GetIdentity() )
 			return;
@@ -1309,50 +1341,6 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		{
 			m_NoDropHits.Set( guid, 0 );
 			ApplyHitsForGuid( guid, "godmode", hits, nowMs );
-		}
-	}
-
-	// Server-side helper for testing
-	map< string, ref JMAntiCheatFlag > GetServerFlags()
-	{
-		return m_Flags;
-	}
-
-	//! How many players are flagged hard enough to be worth an admin's time.
-	//!
-	//! A flag entry exists the moment a player trips anything at all, and on a
-	//! busy server that is most of them - counting entries would light a footer
-	//! badge permanently and teach everyone to ignore it. The bar used here is
-	//! the module's own FlagThresholdHigh, the score at which it already
-	//! considers the detection worth a WARNING webhook.
-	//!
-	//! Flags decay, so this clears itself if nothing else happens - but only
-	//! slowly, and a certain detection outlives an admin's whole shift. The
-	//! intended reading is unchanged: while it is raised, somebody has to look.
-	int GetFlaggedCount()
-	{
-		array< string > guids = new array< string >;
-		GetFlaggedGuids( guids );
-		return guids.Count();
-	}
-
-	//! The GUIDs behind GetFlaggedCount, for consumers that need to ask about
-	//! one player - the player list draws a badge per row from this.
-	void GetFlaggedGuids( out array< string > guids )
-	{
-		guids.Clear();
-
-		if ( !IsMissionHost() )
-			return;
-
-		int threshold = 15;
-		if ( m_Config )
-			threshold = m_Config.FlagThresholdHigh;
-
-		foreach ( string guid, JMAntiCheatFlag flag : m_Flags )
-		{
-			if ( flag.TotalScore >= threshold )
-				guids.Insert( guid );
 		}
 	}
 
@@ -1449,25 +1437,5 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		if ( victim.GetIdentity() )
 			victimName = victim.GetIdentity().GetName();
 		stats.RecordHit( victimName, lastBodyPart, distance, g_Game.GetTime() );
-	}
-
-	// -----------------------------------------------------------------------
-	//  Client accessors for the form
-	// -----------------------------------------------------------------------
-
-	array< string > GetClientKillGuidOrder()
-	{
-		return m_ClientKillGuidOrder;
-	}
-
-	map< string, ref JMAntiCheatKillStats > GetClientKillStats()
-	{
-		return m_ClientKillStats;
-	}
-
-	// Server-side helper
-	map< string, ref JMAntiCheatKillStats > GetServerKillStats()
-	{
-		return m_KillStats;
 	}
 }

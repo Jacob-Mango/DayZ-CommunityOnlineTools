@@ -28,7 +28,6 @@ class UIActionSearchBox: UIActionBase
 	protected ButtonWidget   m_ChevronBtn;
 	protected ImageWidget    m_ChevronIcon;
 	protected Widget         m_ChevronHover;
-
 	protected string m_PlaceholderText;
 	protected string m_PreviewText;
 	protected string m_PreviousText;
@@ -49,9 +48,154 @@ class UIActionSearchBox: UIActionBase
 	protected int                m_HoveredRow;
 	//! Index into m_Suggestions of the committed entry, -1 when none.
 	protected int                m_SelectedIndex;
-
 	static const int CHANGE_DEBOUNCE_MS = 100;
 	static const float LIST_EDGE_MARGIN = 4;
+
+	//! See UIActionDropdown.OnMouseWheel - same fix, same reason: a direct
+	//! pixel move instead of VScrollStep, which jumped several rows per notch
+	//! and scrolled backwards from what the wheel showed.
+	static const float WHEEL_PIXEL_STEP = 40.0;
+
+	EditBoxWidget   GetEditBoxWidget()         { return m_EditBox; }
+
+	EditBoxWidget   GetEditPreviewBoxWidget()  { return m_PreviewBox; }
+
+	// -- Widget getters (parity with UIActionEditableTextPreview) ---------------
+
+	TextWidget      GetLabelWidget()           { return m_Label; }
+
+	string GetSelectedText()
+	{
+		if ( m_SelectedIndex < 0 || m_SelectedIndex >= m_Suggestions.Count() )
+			return "";
+		return m_Suggestions[m_SelectedIndex];
+	}
+
+	string GetTextPreview()
+	{
+		return m_PreviewText;
+	}
+
+	protected bool IsListWidget( Widget widget )
+	{
+		if ( !widget || !m_ListPanel )
+			return false;
+
+		Widget w = widget;
+		while ( w )
+		{
+			if ( w == m_ListPanel )
+				return true;
+
+			w = w.GetParent();
+		}
+
+		return false;
+	}
+
+	protected bool IsSearchOrList( Widget w )
+	{
+		if ( !w )
+			return false;
+		if ( w == m_EditBox || w == m_ClearBtn || w == m_ChevronBtn )
+			return true;
+		if ( IsListWidget( w ) )
+			return true;
+		return false;
+	}
+
+	void SetAutoFilter( bool enabled )
+	{
+		m_AutoFilter = enabled;
+		RebuildList();
+	}
+
+	// Resize only the edit box (matches UIActionEditableTextPreview API).
+	void SetEditBoxWidth( float width )
+	{
+		// The edit box, the preview ghost text and the placeholder all fill the
+		// field, so the field itself is resized and they follow. The clear
+		// button is parented to the chrome in the layout, so it tracks the new
+		// right edge on its own.
+		if ( m_Chrome )
+		{
+			SetWidgetWidth( m_Chrome, width );
+
+			if ( m_PreviewBox )
+				SetWidgetWidth( m_PreviewBox, width );
+
+			if ( m_PlaceholderWidget )
+				SetWidgetWidth( m_PlaceholderWidget, width );
+
+			return;
+		}
+
+		if ( m_EditBox )
+			SetWidgetWidth( m_EditBox, width );
+	}
+
+	protected void SetHoveredRow( int ordinal )
+	{
+		if ( ordinal == m_HoveredRow )
+			return;
+
+		m_HoveredRow = ordinal;
+		RefreshRowColors();
+	}
+
+	protected void SetListOpen( bool open )
+	{
+		if ( !m_ListPanel )
+			return;
+		m_ListOpen = open;
+		if ( open )
+		{
+			m_OpenDelay = 0.15;
+			m_ListPanel.Show( true );
+			// Raise above all siblings (item lists, other panels) so the dropdown
+			// is never obscured by widgets drawn later in the same parent.
+			m_ListPanel.SetSort( 9999, true );
+			// Start the keyboard-nav highlight on the committed row so the first
+			// arrow press moves from a sensible place (matches UIActionDropdown).
+			m_HoveredRow = OrdinalOfSource( m_SelectedIndex );
+		}
+		else
+		{
+			m_HoveredRow = -1;
+		}
+		RefreshRowColors();
+		// Hide is deferred in Update() when the animation finishes.
+	}
+
+	void SetMaxVisibleSuggestions( int n )
+	{
+		m_MaxVisible = Math.Max( 1, n );
+	}
+
+	// -- Placeholder (greyed hint inside the field when empty) ------------------
+
+	void SetPlaceholder( string text )
+	{
+		m_PlaceholderText = Widget.TranslateString( text );
+		UpdatePlaceholder();
+	}
+
+	void SetSuggestions( notnull array<string> items )
+	{
+		m_Suggestions.Clear();
+		foreach ( string s: items )
+			m_Suggestions.Insert( s );
+		m_SelectedIndex = -1;
+		RebuildList();
+	}
+
+	// -- Autocomplete preview ---------------------------------------------------
+
+	void SetTextPreview( string text )
+	{
+		m_PreviewText = Widget.TranslateString( text );
+		UpdatePreview();
+	}
 
 	override void OnInit()
 	{
@@ -114,44 +258,11 @@ class UIActionSearchBox: UIActionBase
 		UpdateClearButton();
 	}
 
-	void SetSuggestions( notnull array<string> items )
-	{
-		m_Suggestions.Clear();
-		foreach ( string s: items )
-			m_Suggestions.Insert( s );
-		m_SelectedIndex = -1;
-		RebuildList();
-	}
-
 	//! Index into the suggestion set of the last committed row, -1 when none.
 	override int GetSelection()
 	{
 		return m_SelectedIndex;
 	}
-
-	string GetSelectedText()
-	{
-		if ( m_SelectedIndex < 0 || m_SelectedIndex >= m_Suggestions.Count() )
-			return "";
-		return m_Suggestions[m_SelectedIndex];
-	}
-
-	void SetAutoFilter( bool enabled )
-	{
-		m_AutoFilter = enabled;
-		RebuildList();
-	}
-
-	void SetMaxVisibleSuggestions( int n )
-	{
-		m_MaxVisible = Math.Max( 1, n );
-	}
-
-	// -- Widget getters (parity with UIActionEditableTextPreview) ---------------
-
-	TextWidget      GetLabelWidget()           { return m_Label; }
-	EditBoxWidget   GetEditBoxWidget()         { return m_EditBox; }
-	EditBoxWidget   GetEditPreviewBoxWidget()  { return m_PreviewBox; }
 
 	// -- Label ------------------------------------------------------------------
 
@@ -162,27 +273,6 @@ class UIActionSearchBox: UIActionBase
 		text = Widget.TranslateString( text );
 		m_Label.SetText( text );
 		m_Label.Show( text != "" );
-	}
-
-	// -- Placeholder (greyed hint inside the field when empty) ------------------
-
-	void SetPlaceholder( string text )
-	{
-		m_PlaceholderText = Widget.TranslateString( text );
-		UpdatePlaceholder();
-	}
-
-	// -- Autocomplete preview ---------------------------------------------------
-
-	void SetTextPreview( string text )
-	{
-		m_PreviewText = Widget.TranslateString( text );
-		UpdatePreview();
-	}
-
-	string GetTextPreview()
-	{
-		return m_PreviewText;
 	}
 
 	// -- Text -------------------------------------------------------------------
@@ -202,30 +292,6 @@ class UIActionSearchBox: UIActionBase
 	override string GetText()
 	{
 		return m_EditBox.GetText();
-	}
-
-	// Resize only the edit box (matches UIActionEditableTextPreview API).
-	void SetEditBoxWidth( float width )
-	{
-		// The edit box, the preview ghost text and the placeholder all fill the
-		// field, so the field itself is resized and they follow. The clear
-		// button is parented to the chrome in the layout, so it tracks the new
-		// right edge on its own.
-		if ( m_Chrome )
-		{
-			SetWidgetWidth( m_Chrome, width );
-
-			if ( m_PreviewBox )
-				SetWidgetWidth( m_PreviewBox, width );
-
-			if ( m_PlaceholderWidget )
-				SetWidgetWidth( m_PlaceholderWidget, width );
-
-			return;
-		}
-
-		if ( m_EditBox )
-			SetWidgetWidth( m_EditBox, width );
 	}
 
 	void Clear()
@@ -418,11 +484,6 @@ class UIActionSearchBox: UIActionBase
 		return super.OnKeyPress( w, x, y, key );
 	}
 
-	//! See UIActionDropdown.OnMouseWheel - same fix, same reason: a direct
-	//! pixel move instead of VScrollStep, which jumped several rows per notch
-	//! and scrolled backwards from what the wheel showed.
-	static const float WHEEL_PIXEL_STEP = 40.0;
-
 	override bool OnMouseWheel( Widget w, int x, int y, int wheel )
 	{
 		if ( m_ListOpen && m_Scroller && m_ListPanel && m_ListPanel.IsVisible() )
@@ -442,7 +503,7 @@ class UIActionSearchBox: UIActionBase
 		CallEvent( UIEvent.CHANGE );
 	}
 
-	private void UpdateClearButton()
+	protected void UpdateClearButton()
 	{
 		bool hasText = m_EditBox.GetText().Length() > 0;
 
@@ -462,7 +523,7 @@ class UIActionSearchBox: UIActionBase
 			m_ChevronHover.Show( false );
 	}
 
-	private void UpdatePlaceholder()
+	protected void UpdatePlaceholder()
 	{
 		if ( !m_PlaceholderWidget )
 			return;
@@ -479,7 +540,7 @@ class UIActionSearchBox: UIActionBase
 		}
 	}
 
-	private void UpdatePreview()
+	protected void UpdatePreview()
 	{
 		if ( !m_PreviewBox )
 			return;
@@ -515,30 +576,6 @@ class UIActionSearchBox: UIActionBase
 		RebuildList();
 		SetListOpen( true );
 		SetFocus( m_EditBox );
-	}
-
-	protected void SetListOpen( bool open )
-	{
-		if ( !m_ListPanel )
-			return;
-		m_ListOpen = open;
-		if ( open )
-		{
-			m_OpenDelay = 0.15;
-			m_ListPanel.Show( true );
-			// Raise above all siblings (item lists, other panels) so the dropdown
-			// is never obscured by widgets drawn later in the same parent.
-			m_ListPanel.SetSort( 9999, true );
-			// Start the keyboard-nav highlight on the committed row so the first
-			// arrow press moves from a sensible place (matches UIActionDropdown).
-			m_HoveredRow = OrdinalOfSource( m_SelectedIndex );
-		}
-		else
-		{
-			m_HoveredRow = -1;
-		}
-		RefreshRowColors();
-		// Hide is deferred in Update() when the animation finishes.
 	}
 
 	protected void RebuildList()
@@ -627,15 +664,6 @@ class UIActionSearchBox: UIActionBase
 			child = child.GetSibling();
 			ordinal++;
 		}
-	}
-
-	protected void SetHoveredRow( int ordinal )
-	{
-		if ( ordinal == m_HoveredRow )
-			return;
-
-		m_HoveredRow = ordinal;
-		RefreshRowColors();
 	}
 
 	//! Ordinal of any widget that is a row, or a child of a row. -1 otherwise.
@@ -825,33 +853,5 @@ class UIActionSearchBox: UIActionBase
 					SetListOpen( false );
 			}
 		}
-	}
-
-	protected bool IsListWidget( Widget widget )
-	{
-		if ( !widget || !m_ListPanel )
-			return false;
-
-		Widget w = widget;
-		while ( w )
-		{
-			if ( w == m_ListPanel )
-				return true;
-
-			w = w.GetParent();
-		}
-
-		return false;
-	}
-
-	protected bool IsSearchOrList( Widget w )
-	{
-		if ( !w )
-			return false;
-		if ( w == m_EditBox || w == m_ClearBtn || w == m_ChevronBtn )
-			return true;
-		if ( IsListWidget( w ) )
-			return true;
-		return false;
 	}
 }

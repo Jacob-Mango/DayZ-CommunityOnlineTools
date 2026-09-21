@@ -33,11 +33,9 @@ class JMEditorGizmos
 	static const int MODE_MOVE   = 0;
 	static const int MODE_ROTATE = 1;
 	static const int MODE_SCALE  = 2;
-
 	vector m_Position;
 	vector m_Orientation;
 	float  m_Scale;
-
 	int    m_Mode;
 	int    m_HoveredAxis;
 

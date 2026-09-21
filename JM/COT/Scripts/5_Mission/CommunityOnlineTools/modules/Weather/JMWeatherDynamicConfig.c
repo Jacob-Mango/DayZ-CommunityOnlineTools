@@ -19,14 +19,11 @@ class JMWeatherDynamicConfig
 
 	//! "" = update the master switch only.
 	string PresetName;
-
 	bool InRotation;
-
 	int DurationMin;
 	int DurationMax;
 	int TransitionMin;
 	int TransitionMax;
-
 	autoptr array< ref JMWeatherNextState > NextStates;
 
 	void JMWeatherDynamicConfig()

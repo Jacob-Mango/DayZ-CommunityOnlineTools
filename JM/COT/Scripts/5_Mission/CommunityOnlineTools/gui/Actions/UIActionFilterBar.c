@@ -23,13 +23,11 @@ class UIActionFilterBar: UIActionBase
 {
 	protected Widget m_Bar;
 	protected Widget m_BarParent;
-
 	protected ref array<string>        m_Labels;
 	protected ref array<ButtonWidget>  m_Buttons;
 	protected ref array<Widget>        m_Fills;      // the coloured fill image per button
 	protected ref array<Widget>        m_Outlines;   // ring, drawn on the active chip only
 	protected ref array<bool>          m_Active;
-
 	protected bool m_MultiSelect;
 	protected int  m_Hovered;   // -1 = no filter hovered
 
@@ -43,19 +41,46 @@ class UIActionFilterBar: UIActionBase
 	static const int COLOR_OUTLINE_ON    = JMTheme.SELECTED_OUTLINE;
 	static const int COLOR_OUTLINE_HOVER = JMTheme.BUTTON_OUTLINE_HOVER;
 
-	override void OnInit()
+	array<string> GetActiveFilters()
 	{
-		super.OnInit();
+		array<string> result = new array<string>;
+		for ( int i = 0; i < m_Labels.Count(); i++ )
+			if ( m_Active[i] ) result.Insert( m_Labels[i] );
+		return result;
+	}
 
-		Class.CastTo( m_BarParent, layoutRoot.FindAnyWidget( "action_wrapper" ) );
+	array<int> GetActiveIndices()
+	{
+		array<int> result = new array<int>;
+		for ( int i = 0; i < m_Active.Count(); i++ )
+			if ( m_Active[i] ) result.Insert( i );
+		return result;
+	}
 
-		m_Labels      = new array<string>;
-		m_Buttons     = new array<ButtonWidget>;
-		m_Fills       = new array<Widget>;
-		m_Outlines    = new array<Widget>;
-		m_Active      = new array<bool>;
-		m_MultiSelect = false;
-		m_Hovered     = -1;
+	bool IsActive( int index )
+	{
+		if ( index < 0 || index >= m_Active.Count() )
+			return false;
+		return m_Active[index];
+	}
+
+	//! Activate filter by index, optionally firing callback.
+	void SetActive( int index, bool sendEvent = false )
+	{
+		if ( index < 0 || index >= m_Labels.Count() )
+			return;
+
+		if ( !m_MultiSelect )
+		{
+			for ( int i = 0; i < m_Active.Count(); i++ )
+				m_Active[i] = false;
+		}
+
+		m_Active[index] = true;
+		UpdateColors();
+
+		if ( sendEvent )
+			CallEvent( UIEvent.CHANGE );
 	}
 
 	//! Build filter buttons from label array.  Clears existing buttons.
@@ -123,31 +148,6 @@ class UIActionFilterBar: UIActionBase
 		UpdateColors();
 	}
 
-	//! Allow multiple filters active simultaneously (default: false = exclusive).
-	void SetMultiSelect( bool multi )
-	{
-		m_MultiSelect = multi;
-	}
-
-	//! Activate filter by index, optionally firing callback.
-	void SetActive( int index, bool sendEvent = false )
-	{
-		if ( index < 0 || index >= m_Labels.Count() )
-			return;
-
-		if ( !m_MultiSelect )
-		{
-			for ( int i = 0; i < m_Active.Count(); i++ )
-				m_Active[i] = false;
-		}
-
-		m_Active[index] = true;
-		UpdateColors();
-
-		if ( sendEvent )
-			CallEvent( UIEvent.CHANGE );
-	}
-
 	//! Deactivate filter by index.
 	void SetInactive( int index, bool sendEvent = false )
 	{
@@ -161,27 +161,25 @@ class UIActionFilterBar: UIActionBase
 			CallEvent( UIEvent.CHANGE );
 	}
 
-	bool IsActive( int index )
+	//! Allow multiple filters active simultaneously (default: false = exclusive).
+	void SetMultiSelect( bool multi )
 	{
-		if ( index < 0 || index >= m_Active.Count() )
-			return false;
-		return m_Active[index];
+		m_MultiSelect = multi;
 	}
 
-	array<string> GetActiveFilters()
+	override void OnInit()
 	{
-		array<string> result = new array<string>;
-		for ( int i = 0; i < m_Labels.Count(); i++ )
-			if ( m_Active[i] ) result.Insert( m_Labels[i] );
-		return result;
-	}
+		super.OnInit();
 
-	array<int> GetActiveIndices()
-	{
-		array<int> result = new array<int>;
-		for ( int i = 0; i < m_Active.Count(); i++ )
-			if ( m_Active[i] ) result.Insert( i );
-		return result;
+		Class.CastTo( m_BarParent, layoutRoot.FindAnyWidget( "action_wrapper" ) );
+
+		m_Labels      = new array<string>;
+		m_Buttons     = new array<ButtonWidget>;
+		m_Fills       = new array<Widget>;
+		m_Outlines    = new array<Widget>;
+		m_Active      = new array<bool>;
+		m_MultiSelect = false;
+		m_Hovered     = -1;
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )
@@ -243,7 +241,7 @@ class UIActionFilterBar: UIActionBase
 		return false;
 	}
 
-	private void UpdateColors()
+	protected void UpdateColors()
 	{
 		for ( int i = 0; i < m_Fills.Count(); i++ )
 		{

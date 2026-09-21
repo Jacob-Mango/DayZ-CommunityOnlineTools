@@ -5,6 +5,53 @@ class JMEntityTracker
 	// Store entities by classname for fast lookup
 	static ref map<string, ref array<EntityAI>> m_EntitiesByType = new map<string, ref array<EntityAI>>;
 
+	static void GetAllClassnames(out array<string> outClassnames)
+	{
+		if (!outClassnames)
+			outClassnames = new array<string>;
+		else
+			outClassnames.Clear();
+
+		for (int i = 0; i < m_EntitiesByType.Count(); i++)
+		{
+			outClassnames.Insert(m_EntitiesByType.GetKey(i));
+		}
+	}
+
+	static void GetByClassname(string className, out array<EntityAI> outItems, bool clearExistingArray = true)
+	{
+		if (!outItems)
+		{
+			outItems = new array<EntityAI>;
+		}
+		else if (clearExistingArray)
+		{
+			outItems.Clear();
+		}
+
+		if (className == "")
+			return;
+
+		array<EntityAI> bucket;
+		if (m_EntitiesByType.Find(className, bucket))
+		{
+			outItems.Copy(bucket);
+		}
+	}
+
+	static int GetClassnameCount(string className)
+	{
+		array<EntityAI> bucket;
+		if (m_EntitiesByType.Find(className, bucket))
+			return bucket.Count();
+		return 0;
+	}
+
+	static int GetTotalEntityCount()
+	{
+		return m_EntityCount;
+	}
+
 	static void Register(EntityAI item)
 	{
 		if (!item)
@@ -54,27 +101,6 @@ class JMEntityTracker
 			m_EntitiesByType.Remove(t);
 	}
 
-	static void GetByClassname(string className, out array<EntityAI> outItems, bool clearExistingArray = true)
-	{
-		if (!outItems)
-		{
-			outItems = new array<EntityAI>;
-		}
-		else if (clearExistingArray)
-		{
-			outItems.Clear();
-		}
-
-		if (className == "")
-			return;
-
-		array<EntityAI> bucket;
-		if (m_EntitiesByType.Find(className, bucket))
-		{
-			outItems.Copy(bucket);
-		}
-	}
-
 	static int DeleteAllEntities(string className)
 	{
 		int deleteCount = 0;
@@ -99,31 +125,5 @@ class JMEntityTracker
 		}
 
 		return deleteCount;
-	}
-
-	static int GetTotalEntityCount()
-	{
-		return m_EntityCount;
-	}
-
-	static int GetClassnameCount(string className)
-	{
-		array<EntityAI> bucket;
-		if (m_EntitiesByType.Find(className, bucket))
-			return bucket.Count();
-		return 0;
-	}
-
-	static void GetAllClassnames(out array<string> outClassnames)
-	{
-		if (!outClassnames)
-			outClassnames = new array<string>;
-		else
-			outClassnames.Clear();
-
-		for (int i = 0; i < m_EntitiesByType.Count(); i++)
-		{
-			outClassnames.Insert(m_EntitiesByType.GetKey(i));
-		}
 	}
 }

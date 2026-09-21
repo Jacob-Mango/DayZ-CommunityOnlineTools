@@ -25,8 +25,8 @@
 // =============================================================================
 class JMScrollableSection
 {
-	private UIActionScroller m_Scroller;
-	private Widget           m_Content;
+	protected UIActionScroller m_Scroller;
+	protected Widget           m_Content;
 
 	void JMScrollableSection( UIActionScroller scroller, Widget content )
 	{

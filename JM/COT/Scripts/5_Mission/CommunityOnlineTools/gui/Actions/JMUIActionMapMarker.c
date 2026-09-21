@@ -19,7 +19,6 @@ class JMUIActionMapMarker: ScriptedWidgetEventHandler
 	protected ImageWidget m_Icon;
 	protected ButtonWidget m_MarkerButton;
 	protected ImageWidget m_SelectRing;
-
 	protected UIActionMap m_Owner;
 	protected string m_Id;
 	protected vector m_Position;
@@ -28,9 +27,7 @@ class JMUIActionMapMarker: ScriptedWidgetEventHandler
 	//! True while the cursor is over this marker - held so a color set while
 	//! hovered doesn't stomp the hover tint, mirroring JMVehiclesMapMarker.
 	protected bool m_Frozen;
-
 	static const int MARKER_HOVER_COLOR = JMTheme.ACCENT_HOVER;
-
 	static const string SELECT_RING_ICON  = "circle-dashed";
 	static const int    SELECT_RING_COLOR = JMTheme.ACCENT_HOVER;
 
@@ -87,17 +84,6 @@ class JMUIActionMapMarker: ScriptedWidgetEventHandler
 		return m_Position;
 	}
 
-	void SetPosition( vector position )
-	{
-		m_Position = position;
-	}
-
-	void SetLabel( string label )
-	{
-		if ( m_Name )
-			m_Name.SetText( Widget.TranslateString( label ) );
-	}
-
 	void SetColor( int color )
 	{
 		m_Color = color;
@@ -118,6 +104,26 @@ class JMUIActionMapMarker: ScriptedWidgetEventHandler
 			m_Icon.LoadImageFile( 0, icon );
 	}
 
+	void SetLabel( string label )
+	{
+		if ( m_Name )
+			m_Name.SetText( Widget.TranslateString( label ) );
+	}
+
+	void SetPosition( vector position )
+	{
+		m_Position = position;
+	}
+
+	//! Driven from UIActionMap.TickMarkers() for whichever marker is currently
+	//! selected - only one ring spins at a time, so there is no per-marker
+	//! timer, just this setter.
+	void SetRingAngle( float degrees )
+	{
+		if ( m_SelectRing && m_SelectRing.IsVisible() )
+			m_SelectRing.SetRotation( 0, 0, degrees );
+	}
+
 	//! Ring visibility. Left at whatever angle SetRingAngle last put it so a
 	//! re-selection does not start mid-spin from a stale angle.
 	void SetSelected( bool selected )
@@ -129,15 +135,6 @@ class JMUIActionMapMarker: ScriptedWidgetEventHandler
 
 		if ( !selected )
 			m_SelectRing.SetRotation( 0, 0, 0 );
-	}
-
-	//! Driven from UIActionMap.TickMarkers() for whichever marker is currently
-	//! selected - only one ring spins at a time, so there is no per-marker
-	//! timer, just this setter.
-	void SetRingAngle( float degrees )
-	{
-		if ( m_SelectRing && m_SelectRing.IsVisible() )
-			m_SelectRing.SetRotation( 0, 0, degrees );
 	}
 
 	//! Reproject onto the map's current pan/zoom. Cheap; UIActionMap only

@@ -1,11 +1,10 @@
 class JMDeferredMessage
 {
 	static ref array<ref JMDeferredMessage> QueuedMessages = new array<ref JMDeferredMessage>;
-
 	string Title;
 	string Message;
 
-	private void JMDeferredMessage(string title, string message)
+	protected void JMDeferredMessage(string title, string message)
 	{
 		Title = title;
 		Message = message;

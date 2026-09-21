@@ -8,13 +8,17 @@ class JMWebhookConnectionGroup : Managed
 	// specified player GUID or role name.  Empty string = no filter (fires for all).
 	string FilterGUID;
 	string FilterRole;
-
 	ref array< ref JMWebhookConnection > Types;
 
 	void JMWebhookConnectionGroup()
 	{
 		Name = "Main";
 		Types = new array< ref JMWebhookConnection >;
+	}
+
+	JMWebhookConnection Get( int index )
+	{
+		return Types[index];
 	}
 
 	void Init()
@@ -42,7 +46,7 @@ class JMWebhookConnectionGroup : Managed
 		#endif
 	}
 
-	private JMWebhookConnection Insert( string name, bool enabled )
+	protected JMWebhookConnection Insert( string name, bool enabled )
 	{
 		JMWebhookConnection type = new JMWebhookConnection();
 
@@ -90,11 +94,6 @@ class JMWebhookConnectionGroup : Managed
 		}
 
 		return false;
-	}
-
-	JMWebhookConnection Get( int index )
-	{
-		return Types[index];
 	}
 
 	int Count()

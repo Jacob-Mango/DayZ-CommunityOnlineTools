@@ -1,73 +1,45 @@
 class JMRoleManagerModule : JMRenderableModuleBase
 {
-	void JMRoleManagerModule()
+	void SetRolePermissions( string roleName, array<string> serializedPerms )
 	{
-		JMPermissions.Register( JMConstants.PERM_ROLES_VIEW        );
-		JMPermissions.Register( JMConstants.PERM_ROLES_CREATE      );
-		JMPermissions.Register( JMConstants.PERM_ROLES_DELETE      );
-		JMPermissions.Register( JMConstants.PERM_ROLES_PERMISSIONS );
+		if ( IsMissionHost() )
+		{
+			Exec_SetRolePermissions( roleName, serializedPerms, NULL, NULL );
+		}
+		else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( roleName );
+			rpc.Write( serializedPerms );
+			rpc.Send( NULL, JMRoleManagerModuleRPC.SetRolePermissions, true, NULL );
+		}
+	}
+
+	override void DescribeModule( JMModuleInfo info )
+	{
+		super.DescribeModule( info );
+
+		info.Title = "#STR_COT_ROLEMANAGER_MODULE_NAME";
+		info.WebhookTitle = "Role Manager Module";
+		info.Icon = "shield-user";
+		info.Layout = "JM/COT/GUI/layouts/role_manager_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_PLAYERS;
+		info.ViewPermission = JMConstants.PERM_ROLES_VIEW;
+		info.SetRPCRange( JMRoleManagerModuleRPC.INVALID, JMRoleManagerModuleRPC.COUNT );
+
+		//! Called on both client and server as the module registers, before the mission loads.
+		info.AddPermission( JMConstants.PERM_ROLES_CREATE );
+		info.AddPermission( JMConstants.PERM_ROLES_DELETE );
+		info.AddPermission( JMConstants.PERM_ROLES_PERMISSIONS );
+
+		info.AddWebhookType( "CreateRole" );
+		info.AddWebhookType( "DeleteRole" );
+		info.AddWebhookType( "SetRolePermissions" );
 	}
 
 	// -------------------------------------------------------------------------
 	//  JMRenderableModuleBase overrides
 	// -------------------------------------------------------------------------
-
-	override bool HasAccess()
-	{
-		return JMPermissions.Has( JMConstants.PERM_ROLES_VIEW );
-	}
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/role_manager_form.layout";
-	}
-
-	override string GetCategory()
-	{
-		return "Players";
-	}
-
-	override string GetTitle()
-	{
-		return "#STR_COT_ROLEMANAGER_MODULE_NAME";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "shield-user" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Role Manager Module";
-	}
-
-	override void GetWebhookTypes( out array<string> types )
-	{
-		types.Insert( "CreateRole" );
-		types.Insert( "DeleteRole" );
-		types.Insert( "SetRolePermissions" );
-	}
-
-	override int GetRPCMin()
-	{
-		return JMRoleManagerModuleRPC.INVALID;
-	}
-
-	override int GetRPCMax()
-	{
-		return JMRoleManagerModuleRPC.COUNT;
-	}
 
 #ifndef SERVER
 	override void EnableUpdate()
@@ -104,6 +76,11 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	// -------------------------------------------------------------------------
 	//  Public API - called by JMRoleManagerForm
 	// -------------------------------------------------------------------------
+
+	override void RequestData()
+	{
+		RequestRoleList();
+	}
 
 	void RequestRoleList()
 	{
@@ -146,26 +123,11 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		}
 	}
 
-	void SetRolePermissions( string roleName, array<string> serializedPerms )
-	{
-		if ( IsMissionHost() )
-		{
-			Exec_SetRolePermissions( roleName, serializedPerms, NULL, NULL );
-		}
-		else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( roleName );
-			rpc.Write( serializedPerms );
-			rpc.Send( NULL, JMRoleManagerModuleRPC.SetRolePermissions, true, NULL );
-		}
-	}
-
 	// -------------------------------------------------------------------------
 	//  Server: send role list to a specific client (or NULL = self on host)
 	// -------------------------------------------------------------------------
 
-	private void SendRoleListToClient( PlayerIdentity recipient )
+	protected void SendRoleListToClient( PlayerIdentity recipient )
 	{
 		array<JMRole> roles = new array<JMRole>();
 		GetPermissionsManager().GetRolesAsList( roles );
@@ -187,7 +149,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	//  Server RPCs
 	// -------------------------------------------------------------------------
 
-	private void RPC_RequestRoleList( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	protected void RPC_RequestRoleList( ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
@@ -199,14 +161,14 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		SendRoleListToClient( sender );
 	}
 
-	private void RPC_CreateRole( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	protected void RPC_CreateRole( ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ROLES_CREATE, sender, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ROLES_CREATE, sender, instance ) )
 			return;
 
 		string name;
@@ -216,14 +178,14 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		Exec_CreateRole( name, sender, instance );
 	}
 
-	private void RPC_DeleteRole( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	protected void RPC_DeleteRole( ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ROLES_DELETE, sender, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ROLES_DELETE, sender, instance ) )
 			return;
 
 		string name;
@@ -233,14 +195,14 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		Exec_DeleteRole( name, sender, instance );
 	}
 
-	private void RPC_SetRolePermissions( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	protected void RPC_SetRolePermissions( ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ROLES_PERMISSIONS, sender, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ROLES_PERMISSIONS, sender, instance ) )
 			return;
 
 		string roleName;
@@ -258,7 +220,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	//  Client RPC: receive role list, push to open form
 	// -------------------------------------------------------------------------
 
-	private void RPC_RoleList( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	protected void RPC_RoleList( ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		if ( IsMissionHost() )
 			return;
@@ -292,7 +254,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	//  Exec helpers (run server-side, also called directly when IsMissionHost)
 	// -------------------------------------------------------------------------
 
-	private void Exec_CreateRole( string name, PlayerIdentity ident, JMPlayerInstance instance )
+	protected void Exec_CreateRole( string name, PlayerIdentity ident, JMPlayerInstance instance )
 	{
 		if ( GetPermissionsManager().RoleExists( name ) )
 		{
@@ -311,7 +273,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			SendRoleListToClient( ident );
 	}
 
-	private void Exec_DeleteRole( string name, PlayerIdentity ident, JMPlayerInstance instance )
+	protected void Exec_DeleteRole( string name, PlayerIdentity ident, JMPlayerInstance instance )
 	{
 		if ( name == "everyone" )
 		{
@@ -345,7 +307,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			SendRoleListToClient( ident );
 	}
 
-	private void Exec_SetRolePermissions( string roleName, array<string> serializedPerms, PlayerIdentity ident, JMPlayerInstance instance )
+	protected void Exec_SetRolePermissions( string roleName, array<string> serializedPerms, PlayerIdentity ident, JMPlayerInstance instance )
 	{
 		JMRole role = GetPermissionsManager().GetRole( roleName );
 		if ( !role )

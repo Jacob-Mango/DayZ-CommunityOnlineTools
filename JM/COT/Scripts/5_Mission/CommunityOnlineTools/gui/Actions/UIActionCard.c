@@ -81,7 +81,6 @@ class UIActionCard: UIActionBase
 	//! layout has room to resolve in, and the first SyncHeight shrinks the card
 	//! to whatever it actually needs.
 	static const int SEED_HEIGHT = 240;
-
 	protected Widget     m_Header;
 	protected Widget     m_Content;
 	protected Widget     m_Ring;
@@ -93,12 +92,41 @@ class UIActionCard: UIActionBase
 	//! parent that ignores the pointer. Declared after card_ring in the layout
 	//! so it also draws over the border.
 	protected Widget     m_HeaderActions;
-
 	protected bool m_HasHeader;
 
 	//! Last height pushed onto the root. Kept so the per-frame check is a float
 	//! compare and not a SetSize on every card on screen every frame.
 	protected float m_AppliedHeight;
+
+	//! The widget callers put their rows into.
+	Widget GetContent()
+	{
+		return m_Content;
+	}
+
+	//! Right-aligned strip in the title bar, for controls that act on the card
+	//! as a whole - a refresh, a destructive action. Children are packed toward
+	//! the right edge in creation order, so the first one created sits leftmost.
+	//! Size them explicitly: the strip is 30px tall and gives its children no
+	//! width of their own.
+	Widget GetHeaderActions()
+	{
+		return m_HeaderActions;
+	}
+
+	//! Tint the border. A destructive section gets a red ring rather than a red
+	//! heading, so the whole block reads as dangerous and not just its name.
+	void SetRingColor( int color )
+	{
+		if ( m_Ring )
+			m_Ring.SetColor( color );
+	}
+
+	void SetTitleColor( int color )
+	{
+		if ( m_Title )
+			m_Title.SetColor( color );
+	}
 
 	override void OnInit()
 	{
@@ -130,78 +158,72 @@ class UIActionCard: UIActionBase
 		layoutRoot.SetSize( rw, SEED_HEIGHT );
 	}
 
-	//! The widget callers put their rows into.
-	Widget GetContent()
-	{
-		return m_Content;
-	}
-
-	//! Right-aligned strip in the title bar, for controls that act on the card
-	//! as a whole - a refresh, a destructive action. Children are packed toward
-	//! the right edge in creation order, so the first one created sits leftmost.
-	//! Size them explicitly: the strip is 30px tall and gives its children no
-	//! width of their own.
-	Widget GetHeaderActions()
-	{
-		return m_HeaderActions;
-	}
-
 	// ---------------------------------------------------------------------------
 	//  Convenience Premade Card Header Action Creators
 	// ---------------------------------------------------------------------------
+	//! Every header action is the same size, so the helpers apply it and callers
+	//! never resize what they get back.
+	protected UIActionImageButton SizeHeaderAction( UIActionImageButton btn )
+	{
+		if ( btn )
+			btn.SetFixedSize( JMFormBase.HEADER_ACTION_PX, JMFormBase.HEADER_ACTION_PX );
+
+		return btn;
+	}
+
 	UIActionImageButton AddRefreshButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_REFRESH" )
 	{
-		return UIActionManager.CreateRefreshButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateRefreshButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddDeleteButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_DELETE" )
 	{
-		return UIActionManager.CreateDeleteButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateDeleteButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddSaveButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_SAVE" )
 	{
-		return UIActionManager.CreateSaveButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateSaveButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddApplyButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_APPLY" )
 	{
-		return UIActionManager.CreateApplyButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateApplyButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddCopyButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_COPY" )
 	{
-		return UIActionManager.CreateCopyButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateCopyButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddPasteButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_PASTE" )
 	{
-		return UIActionManager.CreatePasteButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreatePasteButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddAddButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_ADD" )
 	{
-		return UIActionManager.CreateAddButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateAddButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddEditButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_EDIT" )
 	{
-		return UIActionManager.CreateEditButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateEditButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddSearchButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_SEARCH" )
 	{
-		return UIActionManager.CreateSearchButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateSearchButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddLockButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_LOCK" )
 	{
-		return UIActionManager.CreateLockButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateLockButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	UIActionImageButton AddVisibilityButton( Class instance, string callback, string tooltip = "#STR_COT_GENERIC_VIEW" )
 	{
-		return UIActionManager.CreateVisibilityButton( GetHeaderActions(), instance, callback, tooltip );
+		return SizeHeaderAction( UIActionManager.CreateVisibilityButton( GetHeaderActions(), instance, callback, tooltip ) );
 	}
 
 	//! Escape hatch behind the named helpers above: a header action with an
@@ -223,6 +245,13 @@ class UIActionCard: UIActionBase
 		}
 
 		return btn;
+	}
+
+	//! Take a button added with AddCardHeaderAction / Add*Button out of the title bar.
+	void RemoveCardHeaderAction( UIActionImageButton button )
+	{
+		if ( button && button.GetLayoutRoot() )
+			button.GetLayoutRoot().Unlink();
 	}
 
 	override void SetLabel( string text )
@@ -248,20 +277,6 @@ class UIActionCard: UIActionBase
 
 		if ( m_HasHeader && m_Title )
 			m_Title.SetText( Widget.TranslateString( text ) );
-	}
-
-	void SetTitleColor( int color )
-	{
-		if ( m_Title )
-			m_Title.SetColor( color );
-	}
-
-	//! Tint the border. A destructive section gets a red ring rather than a red
-	//! heading, so the whole block reads as dangerous and not just its name.
-	void SetRingColor( int color )
-	{
-		if ( m_Ring )
-			m_Ring.SetColor( color );
 	}
 
 	override void Update( float timeSlice )

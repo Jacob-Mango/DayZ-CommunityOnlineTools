@@ -4,12 +4,9 @@
 class JMESPViewType
 {
 	typename MetaType = JMESPMeta;
-
 	string Localisation;
 	string Permission;
-
 	int Colour;
-
 	bool HasPermission;
 	bool View;
 
@@ -21,6 +18,22 @@ class JMESPViewType
 		Colour = ARGB( 255, 255, 255, 255 );
 
 		View = false;
+	}
+
+	static bool IsPlayer( Object obj, out DayZPlayer player = null )
+	{
+		if ( !Class.CastTo( player, obj ) )
+			return false;
+
+		DayZPlayerInstanceType type = player.GetInstanceType();
+
+		return type == DayZPlayerInstanceType.INSTANCETYPE_CLIENT || type == DayZPlayerInstanceType.INSTANCETYPE_REMOTE || type == DayZPlayerInstanceType.INSTANCETYPE_SERVER || player.GetIdentity() != NULL || player == g_Game.GetPlayer();
+	}
+
+	bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		Error( "Not implemented!" );
+		return false;
 	}
 
 	void CreateMeta( out JMESPMeta meta )
@@ -39,22 +52,6 @@ class JMESPViewType
 		Print( "-JMESPViewType::CreateMeta( out = " + meta + " ) void;" );
 		#endif
 		#endif
-	}
-
-	bool IsValid( Object obj, out JMESPMeta meta )
-	{
-		Error( "Not implemented!" );
-		return false;
-	}
-
-	static bool IsPlayer( Object obj, out DayZPlayer player = null )
-	{
-		if ( !Class.CastTo( player, obj ) )
-			return false;
-
-		DayZPlayerInstanceType type = player.GetInstanceType();
-
-		return type == DayZPlayerInstanceType.INSTANCETYPE_CLIENT || type == DayZPlayerInstanceType.INSTANCETYPE_REMOTE || type == DayZPlayerInstanceType.INSTANCETYPE_SERVER || player.GetIdentity() != NULL || player == g_Game.GetPlayer();
 	}
 }
 
@@ -295,6 +292,45 @@ class JMESPViewTypeBoat: JMESPViewType
 		return true;
 	}
 }
+
+#ifndef DAYZ_1_29
+class JMESPViewTypeMotorbike: JMESPViewType
+{
+	void JMESPViewTypeMotorbike()
+	{
+		Permission = "Motorbike";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Motorbike";
+
+		MetaType = JMESPMetaCar;
+
+		Colour = ARGB( 255, 255, 113, 237 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		Print( "+JMESPViewTypeMotorbike::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		#endif
+
+		if ( !obj.IsInherited(Motorbike) )
+			return false;
+
+		CreateMeta( meta );
+
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+
+		meta.name = meta.GetName();
+
+		return true;
+	}
+}
+#endif
 
 class JMESPViewTypeTrain: JMESPViewType
 {

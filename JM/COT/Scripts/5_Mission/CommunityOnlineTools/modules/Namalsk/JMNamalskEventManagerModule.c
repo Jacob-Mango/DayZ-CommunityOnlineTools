@@ -1,15 +1,11 @@
 class JMNamalskEventManagerModule: JMRenderableModuleBase
 {
-	private Class m_EventManager;
-
+	protected Class m_EventManager;
 	autoptr array<string> Events = new array<string>();
 	int MaxEventCount;
-	
+
 	void JMNamalskEventManagerModule()
 	{
-		JMPermissions.Register( JMConstants.PERM_NAMALSK );
-		JMPermissions.Register( JMConstants.PERM_NAMALSK_VIEW );
-
 		//! Just use a hardcoded list and be done with it
 		TStringArray evts = {"Aurora", "Blizzard", "ExtremeCold", "Snowfall", "EVRStorm", "EVRStormDeadly", "HeavyFog"};
 		foreach (string evt: evts)
@@ -18,7 +14,28 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 				continue;
 
 			Events.Insert(evt);
+		}
+	}
 
+	bool IsEventActive(string evt)
+	{
+		if (!m_EventManager) return false;
+
+		bool active = false;
+		g_Script.CallFunction(m_EventManager, "IsEventActive", active, evt.ToType());
+		return active;
+	}
+
+	//! Runs after the constructor, so Events is already filtered down to the event types this map has.
+	override void DeclarePermissions()
+	{
+		super.DeclarePermissions();
+
+		JMPermissions.Register( JMConstants.PERM_NAMALSK );
+		JMPermissions.Register( JMConstants.PERM_NAMALSK_VIEW );
+
+		foreach (string evt: Events)
+		{
 			JMPermissions.Register( JMConstants.PERM_NAMALSK + "." + evt + ".Start" );
 			JMPermissions.Register( JMConstants.PERM_NAMALSK + "." + evt + ".Cancel" );
 		}
@@ -33,52 +50,22 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		return true; // module isn't loaded if namalsk isn't loaded anyways
 	}
 
-	override bool HasAccess()
+	override void DescribeModule( JMModuleInfo info )
 	{
-		return JMPermissions.Has( JMConstants.PERM_NAMALSK_VIEW );
+		super.DescribeModule( info );
+
+		info.Title = "Namalsk";
+		info.WebhookTitle = "Namalsk Events Module";
+		info.Icon = "radiation";
+		info.Layout = "JM/COT/GUI/layouts/eventspawner_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_EVENTS;
+		info.ViewPermission = JMConstants.PERM_NAMALSK_VIEW;
+		info.SetRPCRange( JMNamalskEventManagerRPC.INVALID, JMNamalskEventManagerRPC.COUNT );
+
+		info.AddWebhookType( "StartEvent" );
+		info.AddWebhookType( "CancelEvent" );
 	}
 
-	override string GetCategory()
-	{
-		return "Events";
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Namalsk Events Module";
-	}
-
-	override void GetWebhookTypes( out array<string> types )
-	{
-		types.Insert( "StartEvent"  );
-		types.Insert( "CancelEvent" );
-	}
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/eventspawner_form.layout";
-	}
-	
-	override string GetTitle()
-	{
-		return "Namalsk";
-	}
-		
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "radiation" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-	
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
@@ -92,7 +79,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			RequestEvents();
 		}
 	}
-	
+
 	override void OnClientPermissionsUpdated()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -108,16 +95,6 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			RequestEvents();
 		}
 	}
-	
-	override int GetRPCMin()
-	{
-		return JMNamalskEventManagerRPC.INVALID;
-	}
-	
-	override int GetRPCMax()
-	{
-		return JMNamalskEventManagerRPC.COUNT;
-	}
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
@@ -131,7 +108,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			{
 				if (!ctx.Read(evt)) return;
 
-				if (!GetPermissionsManager().HasPermissionRPC("Namalsk." + evt + ".Start", sender, instance)) return;
+				if (!JMPermissions.HasRPC("Namalsk." + evt + ".Start", sender, instance)) return;
 
 				GetCommunityOnlineToolsBase().Log( sender, "Started Namalsk event: " + evt );
 				SendWebhookColored( "StartEvent", instance, "Started Namalsk event: " + evt, JMConstants.WEBHOOK_COLOR_WARNING );
@@ -145,7 +122,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			{
 				if (!ctx.Read(evt)) return;
 
-				if (!GetPermissionsManager().HasPermissionRPC("Namalsk." + evt + ".Cancel", sender, instance)) return;
+				if (!JMPermissions.HasRPC("Namalsk." + evt + ".Cancel", sender, instance)) return;
 
 				GetCommunityOnlineToolsBase().Log( sender, "Cancelled Namalsk event: " + evt );
 				SendWebhookColored( "CancelEvent", instance, "Cancelled Namalsk event: " + evt, JMConstants.WEBHOOK_COLOR_WARNING );
@@ -178,7 +155,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 				if (!sender) return;
 
-				if (!GetPermissionsManager().HasPermissionRPC("Namalsk", sender, instance)) return;
+				if (!JMPermissions.HasRPC("Namalsk", sender, instance)) return;
 
 				ScriptRPC rpc = new ScriptRPC();
 				rpc.Write(Events);
@@ -188,15 +165,6 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 				break;
 			}
 		}
-	}
-
-	bool IsEventActive(string evt)
-	{
-		if (!m_EventManager) return false;
-
-		bool active = false;
-		g_Script.CallFunction(m_EventManager, "IsEventActive", active, evt.ToType());
-		return active;
 	}
 
 	void RetrievePossibleEvents()
@@ -257,7 +225,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void StartEvent(string evt)
+	protected void StartEvent(string evt)
 	{
 		auto trace = CF_Trace_0(this, "StartEvent");
 
@@ -267,7 +235,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		g_Script.CallFunctionParams(m_EventManager, "StartEvent", null, parms);
 	}
 
-	private void CancelEvent(string evt)
+	protected void CancelEvent(string evt)
 	{
 		auto trace = CF_Trace_0(this, "CancelEvent");
 
@@ -275,7 +243,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 		g_Script.CallFunction(m_EventManager, "CancelEvent", null, evt.ToType());
 	}
-	
+
 	void RequestEvents()
 	{
 		auto trace = CF_Trace_0(this, "RequestEvents");

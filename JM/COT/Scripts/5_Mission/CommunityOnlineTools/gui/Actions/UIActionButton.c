@@ -23,11 +23,9 @@ class UIActionButton: UIActionBase
 	//! How fast the icon swings to a new resting angle. Matches the fold
 	//! panel's slide so a chevron and the rows it opens move together.
 	static const float ICON_ROTATE_SPEED = 14.0;
-
 	protected TextWidget  m_Text;
 	protected ButtonWidget m_Button;
 	protected ImageWidget  m_Icon;
-
 	protected Widget      m_Fill;
 	protected Widget      m_Outline;
 
@@ -50,7 +48,6 @@ class UIActionButton: UIActionBase
 	//! Pixels the icon and label are pushed in from the left edge, which is how
 	//! a flat row encodes its depth. See SetContentIndent.
 	protected float m_ContentIndent;
-
 	protected bool  m_SpinActive;
 	protected float m_SpinAngle;
 	protected float m_SpinTotal;
@@ -61,6 +58,95 @@ class UIActionButton: UIActionBase
 	//! opened; swapping one glyph for another states only that something is
 	//! different now. See SetIconRotation.
 	protected ref JMAnimFloat m_IconAngle;
+
+	float GetIconRotation()
+	{
+		if ( !m_IconAngle )
+			return 0;
+
+		return m_IconAngle.Target;
+	}
+
+	bool IsFlat()
+	{
+		return m_Flat;
+	}
+
+	//! How far in from the left edge the icon and the label sit, in pixels.
+	//! Only a flat button honours this; a pill centres its label by design.
+	void SetContentIndent( float px )
+	{
+		m_ContentIndent = px;
+		ApplyContentIndent();
+	}
+
+	//! Drop the pill chrome and left-align the label, keeping the hit area and
+	//! the click event intact.
+	//!
+	//! A tree is read by its indentation, and a filled, ringed pill per node
+	//! draws a hard box around every row, which competes with that. Flat rows
+	//! stay quiet at rest and light up with a faint accent wash on hover, so
+	//! the affordance survives without the chrome.
+	void SetFlat( bool flat )
+	{
+		m_Flat = flat;
+
+		if ( flat )
+		{
+			m_FillColor      = JMTheme.TRANSPARENT;
+			m_FillHover      = JMTheme.ACCENT_WASH;
+			m_FillPressed    = JMTheme.ACCENT_WASH_STRONG;
+			m_OutlineColor   = JMTheme.TRANSPARENT;
+			m_OutlineHover   = JMTheme.TRANSPARENT;
+			m_OutlinePressed = JMTheme.TRANSPARENT;
+
+			if ( m_Text )
+				m_Text.ClearFlags( WidgetFlags.CENTER );
+		}
+		else
+		{
+			m_FillColor      = JMTheme.BUTTON_FILL;
+			m_FillHover      = JMTheme.BUTTON_FILL_HOVER;
+			m_FillPressed    = JMTheme.BUTTON_FILL_PRESSED;
+			m_OutlineColor   = JMTheme.BUTTON_OUTLINE;
+			m_OutlineHover   = JMTheme.BUTTON_OUTLINE_HOVER;
+			m_OutlinePressed = JMTheme.BUTTON_OUTLINE_PRESSED;
+
+			if ( m_Text )
+				m_Text.SetFlags( WidgetFlags.CENTER );
+		}
+
+		ApplyContentIndent();
+		ApplyButtonColors();
+	}
+
+	//! Turn the icon to `degrees` and leave it there.
+	//!
+	//! This is the icon's RESTING angle, not a one-shot: TriggerSpin borrows
+	//! the icon while it runs and hands it back at this angle afterwards.
+	void SetIconRotation( float degrees, bool animate = true )
+	{
+		if ( !m_IconAngle )
+			return;
+
+		if ( animate )
+		{
+			m_IconAngle.SetTarget( degrees, ICON_ROTATE_SPEED );
+			return;
+		}
+
+		m_IconAngle.Set( degrees );
+		ApplyIconRotation();
+	}
+
+	//! Colour of the LABEL. NOT SetColor - the base and the override below both
+	//! paint the pill, so a caller reaching for "grey this button out" with
+	//! SetColor gets a grey pill behind unchanged text instead.
+	void SetTextColor( int color )
+	{
+		if ( m_Text )
+			m_Text.SetColor( color );
+	}
 
 	override void OnInit()
 	{
@@ -147,59 +233,6 @@ class UIActionButton: UIActionBase
 			m_Text.SetTextOffset( 16, 0 );
 	}
 
-	//! Drop the pill chrome and left-align the label, keeping the hit area and
-	//! the click event intact.
-	//!
-	//! A tree is read by its indentation, and a filled, ringed pill per node
-	//! draws a hard box around every row, which competes with that. Flat rows
-	//! stay quiet at rest and light up with a faint accent wash on hover, so
-	//! the affordance survives without the chrome.
-	void SetFlat( bool flat )
-	{
-		m_Flat = flat;
-
-		if ( flat )
-		{
-			m_FillColor      = JMTheme.TRANSPARENT;
-			m_FillHover      = JMTheme.ACCENT_WASH;
-			m_FillPressed    = JMTheme.ACCENT_WASH_STRONG;
-			m_OutlineColor   = JMTheme.TRANSPARENT;
-			m_OutlineHover   = JMTheme.TRANSPARENT;
-			m_OutlinePressed = JMTheme.TRANSPARENT;
-
-			if ( m_Text )
-				m_Text.ClearFlags( WidgetFlags.CENTER );
-		}
-		else
-		{
-			m_FillColor      = JMTheme.BUTTON_FILL;
-			m_FillHover      = JMTheme.BUTTON_FILL_HOVER;
-			m_FillPressed    = JMTheme.BUTTON_FILL_PRESSED;
-			m_OutlineColor   = JMTheme.BUTTON_OUTLINE;
-			m_OutlineHover   = JMTheme.BUTTON_OUTLINE_HOVER;
-			m_OutlinePressed = JMTheme.BUTTON_OUTLINE_PRESSED;
-
-			if ( m_Text )
-				m_Text.SetFlags( WidgetFlags.CENTER );
-		}
-
-		ApplyContentIndent();
-		ApplyButtonColors();
-	}
-
-	bool IsFlat()
-	{
-		return m_Flat;
-	}
-
-	//! How far in from the left edge the icon and the label sit, in pixels.
-	//! Only a flat button honours this; a pill centres its label by design.
-	void SetContentIndent( float px )
-	{
-		m_ContentIndent = px;
-		ApplyContentIndent();
-	}
-
 	//! The icon slot is reserved whether or not an icon is loaded, so a leaf
 	//! row with no chevron still lines its label up with its siblings.
 	protected void ApplyContentIndent()
@@ -227,15 +260,6 @@ class UIActionButton: UIActionBase
 		}
 
 		return ret;
-	}
-
-	//! Colour of the LABEL. NOT SetColor - the base and the override below both
-	//! paint the pill, so a caller reaching for "grey this button out" with
-	//! SetColor gets a grey pill behind unchanged text instead.
-	void SetTextColor( int color )
-	{
-		if ( m_Text )
-			m_Text.SetColor( color );
 	}
 
 	//! Retint the pill. The ring follows the new fill so a red / green button
@@ -323,33 +347,6 @@ class UIActionButton: UIActionBase
 
 		if ( m_Outline )
 			m_Outline.SetColor( ringColor );
-	}
-
-	//! Turn the icon to `degrees` and leave it there.
-	//!
-	//! This is the icon's RESTING angle, not a one-shot: TriggerSpin borrows
-	//! the icon while it runs and hands it back at this angle afterwards.
-	void SetIconRotation( float degrees, bool animate = true )
-	{
-		if ( !m_IconAngle )
-			return;
-
-		if ( animate )
-		{
-			m_IconAngle.SetTarget( degrees, ICON_ROTATE_SPEED );
-			return;
-		}
-
-		m_IconAngle.Set( degrees );
-		ApplyIconRotation();
-	}
-
-	float GetIconRotation()
-	{
-		if ( !m_IconAngle )
-			return 0;
-
-		return m_IconAngle.Target;
 	}
 
 	protected void ApplyIconRotation()

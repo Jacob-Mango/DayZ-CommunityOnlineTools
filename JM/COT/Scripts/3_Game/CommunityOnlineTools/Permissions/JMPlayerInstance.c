@@ -2,26 +2,19 @@
 modded class CF_Permission_PlayerBase
 {
 	protected int m_DataLastUpdated;
-
 	protected vector m_Position;
 	protected vector m_Orientation;
-
 	protected float m_Health;
 	protected float m_Blood;
 	protected float m_Shock;
-
 	protected int m_BloodStatType;
-
 	protected float m_Energy;
 	protected float m_Water;
-
 	protected float m_HeatComfort;
-	protected float m_HeatBuffer;	
-
+	protected float m_HeatBuffer;
 	protected float m_Wet;
 	protected float m_Tremor;
 	protected float m_Stamina;
-
 	protected int m_LifeSpanState;
 	protected bool m_BloodyHands;
 	protected bool m_GodMode;
@@ -33,6 +26,126 @@ modded class CF_Permission_PlayerBase
 	protected bool m_CannotBeTargetedByAI;
 	protected bool m_RemoveCollision;
 
+	float GetBlood()
+	{
+		return m_Blood;
+	}
+
+	int GetBloodStatType()
+	{
+		return m_BloodStatType;
+	}
+
+	bool GetCannotBeTargetedByAI()
+	{
+		return m_CannotBeTargetedByAI;
+	}
+
+	int GetDataLastUpdatedTime()
+	{
+		return m_DataLastUpdated;
+	}
+
+	float GetEnergy()
+	{
+		return m_Energy;
+	}
+
+	float GetHealth()
+	{
+		return m_Health;
+	}
+
+	float GetHeatBuffer()
+	{
+		return m_HeatBuffer;
+	}
+
+	float GetHeatComfort()
+	{
+		return m_HeatComfort;
+	}
+
+	int GetLifeSpanState()
+	{
+		return m_LifeSpanState;
+	}
+
+	vector GetOrientation()
+	{
+		return m_Orientation;
+	}
+
+	vector GetPosition()
+	{
+		return m_Position;
+	}
+
+	bool GetReceiveDmgDealt()
+	{
+		return m_ReceiveDmgDealt;
+	}
+
+	bool GetRemoveCollision()
+	{
+		return m_RemoveCollision;
+	}
+
+	float GetShock()
+	{
+		return m_Shock;
+	}
+
+	float GetStamina()
+	{
+		return m_Stamina;
+	}
+
+	float GetTremor()
+	{
+		return m_Tremor;
+	}
+
+	float GetWater()
+	{
+		return m_Water;
+	}
+
+	float GetWet()
+	{
+		return m_Wet;
+	}
+
+	bool HasBloodyHands()
+	{
+		return m_BloodyHands;
+	}
+
+	bool HasGodMode()
+	{
+		return m_GodMode;
+	}
+
+	bool HasInvisibility()
+	{
+		return m_Invisibility;
+	}
+
+	bool HasUnlimitedAmmo()
+	{
+		return m_UnlimitedAmmo;
+	}
+
+	bool IsFrozen()
+	{
+		return m_Frozen;
+	}
+
+	bool IsRagdoll()
+	{
+		return m_Ragdoll;
+	}
+
 	override void OnSend( ParamsWriteContext ctx )
 	{
 		super.OnSend( ctx );
@@ -41,7 +154,7 @@ modded class CF_Permission_PlayerBase
 		OnSendOrientation( ctx );
 		OnSendHealth( ctx );
 	}
-	
+
 	override void OnRecieve( ParamsReadContext ctx )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -56,7 +169,7 @@ modded class CF_Permission_PlayerBase
 
 		m_DataLastUpdated = g_Game.GetTime();
 	}
-	
+
 	void OnSendPosition( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Position );
@@ -66,7 +179,7 @@ modded class CF_Permission_PlayerBase
 	{
 		ctx.Read( m_Position );
 	}
-	
+
 	void OnSendOrientation( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Orientation );
@@ -76,7 +189,7 @@ modded class CF_Permission_PlayerBase
 	{
 		ctx.Read( m_Orientation );
 	}
-	
+
 	void OnSendHealth( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Health );
@@ -125,126 +238,6 @@ modded class CF_Permission_PlayerBase
 		ctx.Read( m_ReceiveDmgDealt );
 		ctx.Read( m_CannotBeTargetedByAI );
 		ctx.Read( m_RemoveCollision );
-	}
-
-	int GetDataLastUpdatedTime()
-	{
-		return m_DataLastUpdated;
-	}
-
-	vector GetPosition()
-	{
-		return m_Position;
-	}
-
-	vector GetOrientation()
-	{
-		return m_Orientation;
-	}
-
-	float GetHealth()
-	{
-		return m_Health;
-	}
-
-	float GetBlood()
-	{
-		return m_Blood;
-	}
-
-	float GetShock()
-	{
-		return m_Shock;
-	}
-
-	int GetBloodStatType()
-	{
-		return m_BloodStatType;
-	}
-
-	float GetEnergy()
-	{
-		return m_Energy;
-	}
-
-	float GetWater()
-	{
-		return m_Water;
-	}
-
-	float GetHeatComfort()
-	{
-		return m_HeatComfort;
-	}
-
-	float GetHeatBuffer()
-	{
-		return m_HeatBuffer;
-	}
-
-	float GetWet()
-	{
-		return m_Wet;
-	}
-
-	float GetTremor()
-	{
-		return m_Tremor;
-	}
-
-	float GetStamina()
-	{
-		return m_Stamina;
-	}
-
-	int GetLifeSpanState()
-	{
-		return m_LifeSpanState;
-	}
-
-	bool HasBloodyHands()
-	{
-		return m_BloodyHands;
-	}
-
-	bool HasGodMode()
-	{
-		return m_GodMode;
-	}
-
-	bool IsFrozen()
-	{
-		return m_Frozen;
-	}
-
-	bool IsRagdoll()
-	{
-		return m_Ragdoll;
-	}
-
-	bool HasInvisibility()
-	{
-		return m_Invisibility;
-	}
-
-	bool HasUnlimitedAmmo()
-	{
-		return m_UnlimitedAmmo;
-	}
-
-	bool GetReceiveDmgDealt()
-	{
-		return m_ReceiveDmgDealt;
-	}
-
-	bool GetCannotBeTargetedByAI()
-	{
-		return m_CannotBeTargetedByAI;
-	}
-
-	bool GetRemoveCollision()
-	{
-		return m_RemoveCollision;
 	}
 }
 #endif

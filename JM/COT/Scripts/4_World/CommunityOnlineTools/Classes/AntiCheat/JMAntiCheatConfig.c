@@ -153,7 +153,6 @@ class JMAntiCheatConfig
 	// Auto-actions
 	bool AutoKickOnCritical = false;
 	int  AutoActionCooldownS = 600; // don't auto-act on the same player within 10 min
-
 	static const string DIR  = "$profile:CommunityOnlineTools\\AntiCheat\\";
 	static const string FILE = "$profile:CommunityOnlineTools\\AntiCheat\\config.json";
 

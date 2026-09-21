@@ -2,10 +2,8 @@ class UIActionNavigateButton: UIActionBase
 {
 	protected TextWidget  m_Text;
 	protected ImageWidget m_Icon;
-
 	protected ImageWidget  m_Image_Left;
 	protected ImageWidget  m_Image_Right;
-
 	protected ButtonWidget m_Button_Left;
 	protected ButtonWidget m_Button_Right;
 
@@ -25,6 +23,12 @@ class UIActionNavigateButton: UIActionBase
 	protected int  m_OutlinePressed;
 	protected bool m_IsHovered;
 	protected bool m_IsPressed;
+
+	void SetImages( string imageL, string imageR )
+	{
+		m_Button_Left.SetText("");
+		m_Button_Right.SetText("");
+	}
 
 	override void OnInit()
 	{
@@ -64,12 +68,6 @@ class UIActionNavigateButton: UIActionBase
 		text = Widget.TranslateString( text );
 		
 		m_Text.SetText( text );
-	}
-
-	void SetImages( string imageL, string imageR )
-	{
-		m_Button_Left.SetText("");
-		m_Button_Right.SetText("");
 	}
 
 	override void SetIcon( string imagePath )

@@ -1,9 +1,13 @@
 class UIActionButtonToggle: UIActionButton 
 {
 	bool m_IsToggled;
-
 	string m_TextOff;
 	string m_TextOn;
+
+	bool IsToggled()
+	{
+		return m_IsToggled;
+	}
 
 	void SetButtonToggle( string textOff, string textOn )
 	{
@@ -11,6 +15,16 @@ class UIActionButtonToggle: UIActionButton
 		m_TextOn = textOn;
 		
 		SetButton(textOff);
+	}
+
+	void SetToggle(bool state)
+	{
+		m_IsToggled = state;
+
+		if (m_IsToggled)
+			SetButton(m_TextOn);
+		else
+			SetButton(m_TextOff);
 	}
 
 	override bool OnClick(Widget w, int x, int y, int button)
@@ -30,20 +44,5 @@ class UIActionButtonToggle: UIActionButton
 		}
 
 		return ret;
-	}
-
-	bool IsToggled()
-	{
-		return m_IsToggled;
-	}
-
-	void SetToggle(bool state)
-	{
-		m_IsToggled = state;
-
-		if (m_IsToggled)
-			SetButton(m_TextOn);
-		else
-			SetButton(m_TextOff);
 	}
 }

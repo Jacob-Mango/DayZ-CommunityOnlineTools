@@ -1,45 +1,30 @@
 #ifdef JM_CommunityOnlineTools
-// Example: Adding a custom tab with its own lazily-built panels and content
+// Example: adding a tab to an existing form. One AddTab() call; the callback runs lazily,
+// the first time the tab is opened, and receives the empty panel to fill.
 modded class JMPlayerForm
 {
-	protected UIActionCard m_CustomTabCard;
-
-	override void OnInit()
+	override void OnCreate()
 	{
-		super.OnInit();
+		super.OnCreate();
 
-		// Clean 1-line tab registration: Label, Icon, Callback function name
-		AddTab( "SubMod", JMConstants.Lucide( "star" ), "BuildCustomTabContent" );
+		AddTab( "SubMod", JMConstants.Lucide( "star" ), "BuildSubModTab" );
 	}
 
-	// Invoked lazily the FIRST time the user clicks on the "SubMod" tab
-	void BuildCustomTabContent( Widget parentPanel )
+	void BuildSubModTab( Widget parentPanel )
 	{
-		if ( !parentPanel )
-			return;
-
-		UIActionManager.CreatePanel( parentPanel, 0x00000000, 10 );
-
-		m_CustomTabCard = UIActionManager.CreateCard( parentPanel, "Custom Tab Settings" );
-		if ( !m_CustomTabCard )
-			return;
-
-		Widget body = m_CustomTabCard.GetContent();
+		Widget body = UIActionManager.CreateSection( parentPanel, "Custom Tab" );
 		if ( !body )
 			return;
 
-		UIActionManager.CreateText( body, "Status:", "This tab and its widgets were created lazily!" );
-		UIActionButton actionBtn = UIActionManager.CreateButton( body, "Tab Action", this, "OnClick_CustomTabAction" );
+		UIActionManager.CreateText( body, "Status:", "This tab was created lazily." );
 
-		// Bind permission constant
-		BindPermission( actionBtn, JMConstants.PERM_PLAYER_INJECTED_PANEL );
+		UIActionButton action = UIActionManager.CreateButton( body, "Tab Action", null, "" );
+		action.SetOnClick( this, "OnSubModTabAction" );
+		BindPermission( action, JMConstants.PERM_PLAYER_INJECTED_TAB );
 	}
 
-	void OnClick_CustomTabAction( UIEvent eid, UIActionBase action )
+	void OnSubModTabAction( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
 		action.AnimateFeedback();
 	}
 }

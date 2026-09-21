@@ -28,11 +28,6 @@
 // =============================================================================
 class UIActionFeedbackButton: UIActionButton
 {
-	override void AnimateFeedback()
-	{
-		ShowFeedback();
-	}
-
 	//! Idle - the resting label is showing and nothing is animating.
 	static const int PHASE_IDLE        = 0;
 	//! Resting face fading out, feedback face about to be swapped in.
@@ -49,10 +44,8 @@ class UIActionFeedbackButton: UIActionButton
 	//! One fade leg. Short on purpose: this is a confirmation, not a transition.
 	static const float FADE_SECONDS = 0.10;
 	static const float DEFAULT_HOLD = 1.40;
-
 	protected string m_RestText;
 	protected string m_RestIcon;
-
 	protected string m_FeedbackText;
 	protected string m_FeedbackIcon;
 
@@ -60,12 +53,74 @@ class UIActionFeedbackButton: UIActionButton
 	protected bool m_HasFeedbackColor;
 	protected int  m_FeedbackColor;
 	protected int  m_SavedFillColor;
-
 	protected bool  m_AutoFeedback;
 	protected float m_HoldSeconds;
-
 	protected int   m_Phase;
 	protected float m_PhaseTimer;
+
+	bool IsShowingFeedback()
+	{
+		return m_Phase != PHASE_IDLE;
+	}
+
+	//! Off means the click alone no longer swaps the face - call ShowFeedback()
+	//! from the callback once the action has actually succeeded.
+	void SetAutoFeedback( bool enabled )
+	{
+		m_AutoFeedback = enabled;
+	}
+
+	//! Only the label and the icon fade; the pill itself stays put so the
+	//! button never looks like it is dropping out of the form.
+	protected void SetFaceAlpha( float alpha )
+	{
+		if ( alpha < 0 )
+			alpha = 0;
+
+		if ( m_Text )
+			m_Text.SetAlpha( alpha );
+
+		if ( m_Icon )
+			m_Icon.SetAlpha( alpha );
+	}
+
+	// -- Feedback face ----------------------------------------------------------
+
+	//! The label shown after the click. Pass "" to keep the resting label.
+	//! imagePath "" leaves the feedback icon alone (a check mark by default);
+	//! use SetFeedbackIcon( "" ) for a feedback face with no icon at all.
+	void SetFeedback( string text, string imagePath = "" )
+	{
+		m_FeedbackText = Widget.TranslateString( text );
+
+		if ( imagePath != "" )
+			m_FeedbackIcon = imagePath;
+	}
+
+	//! Retint the pill while the feedback face is up. The resting colour comes
+	//! back when it fades out again.
+	void SetFeedbackColor( int color )
+	{
+		m_HasFeedbackColor = true;
+		m_FeedbackColor    = color;
+	}
+
+	//! Seconds the feedback face stays up between its two fades.
+	void SetFeedbackDuration( float seconds )
+	{
+		m_HoldSeconds = Math.Max( 0.1, seconds );
+	}
+
+	//! Feedback icon, verbatim - "" means the feedback face shows text only.
+	void SetFeedbackIcon( string imagePath )
+	{
+		m_FeedbackIcon = imagePath;
+	}
+
+	override void AnimateFeedback()
+	{
+		ShowFeedback();
+	}
 
 	override void OnInit()
 	{
@@ -130,54 +185,9 @@ class UIActionFeedbackButton: UIActionButton
 			ResetFace();
 	}
 
-	// -- Feedback face ----------------------------------------------------------
-
-	//! The label shown after the click. Pass "" to keep the resting label.
-	//! imagePath "" leaves the feedback icon alone (a check mark by default);
-	//! use SetFeedbackIcon( "" ) for a feedback face with no icon at all.
-	void SetFeedback( string text, string imagePath = "" )
-	{
-		m_FeedbackText = Widget.TranslateString( text );
-
-		if ( imagePath != "" )
-			m_FeedbackIcon = imagePath;
-	}
-
-	//! Feedback icon, verbatim - "" means the feedback face shows text only.
-	void SetFeedbackIcon( string imagePath )
-	{
-		m_FeedbackIcon = imagePath;
-	}
-
-	//! Retint the pill while the feedback face is up. The resting colour comes
-	//! back when it fades out again.
-	void SetFeedbackColor( int color )
-	{
-		m_HasFeedbackColor = true;
-		m_FeedbackColor    = color;
-	}
-
 	void ClearFeedbackColor()
 	{
 		m_HasFeedbackColor = false;
-	}
-
-	//! Seconds the feedback face stays up between its two fades.
-	void SetFeedbackDuration( float seconds )
-	{
-		m_HoldSeconds = Math.Max( 0.1, seconds );
-	}
-
-	//! Off means the click alone no longer swaps the face - call ShowFeedback()
-	//! from the callback once the action has actually succeeded.
-	void SetAutoFeedback( bool enabled )
-	{
-		m_AutoFeedback = enabled;
-	}
-
-	bool IsShowingFeedback()
-	{
-		return m_Phase != PHASE_IDLE;
 	}
 
 	//! Start the swap. Called again while the feedback face is already up it
@@ -364,19 +374,5 @@ class UIActionFeedbackButton: UIActionButton
 
 		if ( m_Text )
 			m_Text.SetTextOffset( 16, 0 );
-	}
-
-	//! Only the label and the icon fade; the pill itself stays put so the
-	//! button never looks like it is dropping out of the form.
-	protected void SetFaceAlpha( float alpha )
-	{
-		if ( alpha < 0 )
-			alpha = 0;
-
-		if ( m_Text )
-			m_Text.SetAlpha( alpha );
-
-		if ( m_Icon )
-			m_Icon.SetAlpha( alpha );
 	}
 }

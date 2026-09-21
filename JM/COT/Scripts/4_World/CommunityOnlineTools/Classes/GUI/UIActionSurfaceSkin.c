@@ -44,7 +44,6 @@ class UIActionSurfaceSkin
 	protected int m_AccentColor;
 	protected int m_TextIdle;
 	protected int m_TextHover;
-
 	protected int  m_Role;
 	protected int  m_Variant;
 	protected bool m_Hovered;
@@ -60,6 +59,189 @@ class UIActionSurfaceSkin
 		m_Role      = JMUISurfaceStyle.ROLE_BUTTON;
 		m_TextIdle  = JMUISurfaceStyle.TEXT_IDLE;
 		m_TextHover = JMUISurfaceStyle.TEXT_HOVER;
+		Rebuild();
+	}
+
+	int GetRole()
+	{
+		return m_Role;
+	}
+
+	int GetVariant()
+	{
+		return m_Variant;
+	}
+
+	bool IsSelected()
+	{
+		return m_Selected;
+	}
+
+	//! Override the accent bar colour independently of the fill palette.
+	void SetAccentColor( int color )
+	{
+		m_AccentColor = color;
+		Apply();
+	}
+
+	//! Drive the whole palette from one custom base fill. Keeps the caller's
+	//! hue while still producing a hover, a press and a matching border.
+	void SetBaseColor( int color )
+	{
+		m_FillIdle    = color;
+		m_FillHover   = JMUISurfaceStyle.Lighten( color, JMUISurfaceStyle.HOVER_LIGHTEN );
+		m_FillPress   = JMUISurfaceStyle.Darken(  color, JMUISurfaceStyle.PRESS_DARKEN  );
+		m_BorderIdle  = JMUISurfaceStyle.Lighten( color, JMUISurfaceStyle.BORDER_LIGHTEN );
+		m_BorderHover = JMUISurfaceStyle.Lighten( color, JMUISurfaceStyle.BORDER_HOVER   );
+		m_AccentColor = m_BorderHover;
+
+		// A near-black base lightens to flat grey, which reads as "disabled"
+		// rather than "interactive". Blend toward the app accent instead.
+		bool neutral = m_Variant == JMUISurfaceStyle.VARIANT_DEFAULT;
+		if ( neutral || m_Variant == JMUISurfaceStyle.VARIANT_GHOST )
+		{
+			m_FillHover   = JMUISurfaceStyle.Blend( color, JMUISurfaceStyle.ACCENT_DEFAULT, 0.45 );
+			m_BorderHover = JMUISurfaceStyle.ACCENT_DEFAULT;
+			m_AccentColor = JMUISurfaceStyle.ACCENT_DEFAULT;
+		}
+
+		// A transparent row has nothing to lighten, so its hover and selected
+		// tints come from the palette directly.
+		if ( m_Role == JMUISurfaceStyle.ROLE_ROW )
+		{
+			m_FillHover = JMUISurfaceStyle.ROW_HOVER;
+			m_FillPress = JMUISurfaceStyle.ROW_SELECTED;
+		}
+
+		Apply();
+	}
+
+	//! Bind the disable overlay separately when it is not under the frame.
+	void SetDisableOverlay( Widget w )
+	{
+		m_Disable = w;
+
+		if ( m_Disable )
+			m_Disable.SetColor( JMUISurfaceStyle.DISABLE_OVERLAY );
+	}
+
+	void SetEnabled( bool enabled )
+	{
+		if ( m_Enabled == enabled )
+			return;
+
+		m_Enabled = enabled;
+
+		if ( !enabled )
+		{
+			m_Hovered = false;
+			m_Pressed = false;
+			m_Focused = false;
+		}
+
+		Apply();
+	}
+
+	//! Keyboard focus - inputs light their border while being typed into.
+	void SetFocused( bool focused )
+	{
+		if ( m_Focused == focused )
+			return;
+
+		m_Focused = focused;
+		Apply();
+	}
+
+	// -------------------------------------------------------------------------
+	//  State
+	// -------------------------------------------------------------------------
+
+	void SetHovered( bool hovered )
+	{
+		if ( m_Hovered == hovered )
+			return;
+
+		m_Hovered = hovered;
+		Apply();
+	}
+
+	//! Override just the hover fill, keeping the resting look. Used for ghost
+	//! controls that sit transparent until pointed at - a title-bar close
+	//! button that flushes red on hover, for instance.
+	void SetHoverFill( int color )
+	{
+		m_FillHover = color;
+		Apply();
+	}
+
+	void SetIconWidget( ImageWidget w )
+	{
+		m_Icon = w;
+		Apply();
+	}
+
+	//! Point the skin at the label / icon it should tint. Call before Attach()
+	//! when the widget names are not the conventional ones.
+	void SetLabelWidget( TextWidget w )
+	{
+		m_Text = w;
+		Apply();
+	}
+
+	void SetPressed( bool pressed )
+	{
+		if ( m_Pressed == pressed )
+			return;
+
+		m_Pressed = pressed;
+		Apply();
+	}
+
+	//! Override the pressed fill, keeping the resting and hover looks.
+	void SetPressFill( int color )
+	{
+		m_FillPress = color;
+		Apply();
+	}
+
+	// -------------------------------------------------------------------------
+	//  Palette
+	// -------------------------------------------------------------------------
+
+	//! Pick the surface role (button / input / row / surface / header).
+	void SetRole( int role )
+	{
+		m_Role = role;
+
+		if ( role == JMUISurfaceStyle.ROLE_SURFACE )
+			m_TextIdle = JMUISurfaceStyle.TEXT_MUTED;
+		else
+			m_TextIdle = JMUISurfaceStyle.TEXT_IDLE;
+
+		Rebuild();
+	}
+
+	//! Sticky "on" look: a toggled button, a selected row, the active tab.
+	void SetSelected( bool selected )
+	{
+		if ( m_Selected == selected )
+			return;
+
+		m_Selected = selected;
+		Apply();
+	}
+
+	void SetTextColors( int idle, int hover )
+	{
+		m_TextIdle  = idle;
+		m_TextHover = hover;
+		Apply();
+	}
+
+	//! Pick one of the JMUISurfaceStyle.VARIANT_* presets.
+	void SetVariant( int variant )
+	{
+		m_Variant = variant;
 		Rebuild();
 	}
 
@@ -98,63 +280,6 @@ class UIActionSurfaceSkin
 		Apply();
 	}
 
-	//! Bind the disable overlay separately when it is not under the frame.
-	void SetDisableOverlay( Widget w )
-	{
-		m_Disable = w;
-
-		if ( m_Disable )
-			m_Disable.SetColor( JMUISurfaceStyle.DISABLE_OVERLAY );
-	}
-
-	//! Point the skin at the label / icon it should tint. Call before Attach()
-	//! when the widget names are not the conventional ones.
-	void SetLabelWidget( TextWidget w )
-	{
-		m_Text = w;
-		Apply();
-	}
-
-	void SetIconWidget( ImageWidget w )
-	{
-		m_Icon = w;
-		Apply();
-	}
-
-	// -------------------------------------------------------------------------
-	//  Palette
-	// -------------------------------------------------------------------------
-
-	//! Pick the surface role (button / input / row / surface / header).
-	void SetRole( int role )
-	{
-		m_Role = role;
-
-		if ( role == JMUISurfaceStyle.ROLE_SURFACE )
-			m_TextIdle = JMUISurfaceStyle.TEXT_MUTED;
-		else
-			m_TextIdle = JMUISurfaceStyle.TEXT_IDLE;
-
-		Rebuild();
-	}
-
-	int GetRole()
-	{
-		return m_Role;
-	}
-
-	//! Pick one of the JMUISurfaceStyle.VARIANT_* presets.
-	void SetVariant( int variant )
-	{
-		m_Variant = variant;
-		Rebuild();
-	}
-
-	int GetVariant()
-	{
-		return m_Variant;
-	}
-
 	//! Resolve the whole palette from the current role + variant.
 	protected void Rebuild()
 	{
@@ -165,132 +290,6 @@ class UIActionSurfaceSkin
 			base_color = JMUISurfaceStyle.FillForVariant( m_Variant );
 
 		SetBaseColor( base_color );
-	}
-
-	//! Drive the whole palette from one custom base fill. Keeps the caller's
-	//! hue while still producing a hover, a press and a matching border.
-	void SetBaseColor( int color )
-	{
-		m_FillIdle    = color;
-		m_FillHover   = JMUISurfaceStyle.Lighten( color, JMUISurfaceStyle.HOVER_LIGHTEN );
-		m_FillPress   = JMUISurfaceStyle.Darken(  color, JMUISurfaceStyle.PRESS_DARKEN  );
-		m_BorderIdle  = JMUISurfaceStyle.Lighten( color, JMUISurfaceStyle.BORDER_LIGHTEN );
-		m_BorderHover = JMUISurfaceStyle.Lighten( color, JMUISurfaceStyle.BORDER_HOVER   );
-		m_AccentColor = m_BorderHover;
-
-		// A near-black base lightens to flat grey, which reads as "disabled"
-		// rather than "interactive". Blend toward the app accent instead.
-		bool neutral = m_Variant == JMUISurfaceStyle.VARIANT_DEFAULT;
-		if ( neutral || m_Variant == JMUISurfaceStyle.VARIANT_GHOST )
-		{
-			m_FillHover   = JMUISurfaceStyle.Blend( color, JMUISurfaceStyle.ACCENT_DEFAULT, 0.45 );
-			m_BorderHover = JMUISurfaceStyle.ACCENT_DEFAULT;
-			m_AccentColor = JMUISurfaceStyle.ACCENT_DEFAULT;
-		}
-
-		// A transparent row has nothing to lighten, so its hover and selected
-		// tints come from the palette directly.
-		if ( m_Role == JMUISurfaceStyle.ROLE_ROW )
-		{
-			m_FillHover = JMUISurfaceStyle.ROW_HOVER;
-			m_FillPress = JMUISurfaceStyle.ROW_SELECTED;
-		}
-
-		Apply();
-	}
-
-	//! Override just the hover fill, keeping the resting look. Used for ghost
-	//! controls that sit transparent until pointed at - a title-bar close
-	//! button that flushes red on hover, for instance.
-	void SetHoverFill( int color )
-	{
-		m_FillHover = color;
-		Apply();
-	}
-
-	//! Override the accent bar colour independently of the fill palette.
-	void SetAccentColor( int color )
-	{
-		m_AccentColor = color;
-		Apply();
-	}
-
-	//! Override the pressed fill, keeping the resting and hover looks.
-	void SetPressFill( int color )
-	{
-		m_FillPress = color;
-		Apply();
-	}
-
-	void SetTextColors( int idle, int hover )
-	{
-		m_TextIdle  = idle;
-		m_TextHover = hover;
-		Apply();
-	}
-
-	// -------------------------------------------------------------------------
-	//  State
-	// -------------------------------------------------------------------------
-
-	void SetHovered( bool hovered )
-	{
-		if ( m_Hovered == hovered )
-			return;
-
-		m_Hovered = hovered;
-		Apply();
-	}
-
-	void SetPressed( bool pressed )
-	{
-		if ( m_Pressed == pressed )
-			return;
-
-		m_Pressed = pressed;
-		Apply();
-	}
-
-	//! Keyboard focus - inputs light their border while being typed into.
-	void SetFocused( bool focused )
-	{
-		if ( m_Focused == focused )
-			return;
-
-		m_Focused = focused;
-		Apply();
-	}
-
-	//! Sticky "on" look: a toggled button, a selected row, the active tab.
-	void SetSelected( bool selected )
-	{
-		if ( m_Selected == selected )
-			return;
-
-		m_Selected = selected;
-		Apply();
-	}
-
-	bool IsSelected()
-	{
-		return m_Selected;
-	}
-
-	void SetEnabled( bool enabled )
-	{
-		if ( m_Enabled == enabled )
-			return;
-
-		m_Enabled = enabled;
-
-		if ( !enabled )
-		{
-			m_Hovered = false;
-			m_Pressed = false;
-			m_Focused = false;
-		}
-
-		Apply();
 	}
 
 	// -------------------------------------------------------------------------

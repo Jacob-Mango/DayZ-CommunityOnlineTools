@@ -2,12 +2,9 @@ class JMItemStatsBaseData
 {
 	string m_Classname;
 	string m_DisplayName;
-
 	vector m_ItemSize;
 	vector m_ItemsCargoSize;
-
 	ref TStringArray m_Attachments;
-
 	int m_Health;
 
 	void JMItemStatsBaseData(string path, string name)
@@ -23,25 +20,6 @@ class JMItemStatsBaseData
 		
 		m_Attachments = new TStringArray;
 		g_Game.ConfigGetTextArray(path + " attachments", m_Attachments);
-	}
-
-	string GetExportHeaderData()
-	{
-		string result;
-
-		result += "Classname";
-		result += ", ";
-		result += "DisplayName";
-		result += ", ";
-		result += "ItemSize";
-		result += ", ";
-		result += "ItemsCargoSize";
-		result += ", ";
-		result += "Attachments";
-		result += ", ";
-		result += "Health";
-
-		return result;
 	}
 
 	string GetExportData()
@@ -64,6 +42,25 @@ class JMItemStatsBaseData
 		result += att;
 		result += ", ";
 		result += m_Health.ToString();
+
+		return result;
+	}
+
+	string GetExportHeaderData()
+	{
+		string result;
+
+		result += "Classname";
+		result += ", ";
+		result += "DisplayName";
+		result += ", ";
+		result += "ItemSize";
+		result += ", ";
+		result += "ItemsCargoSize";
+		result += ", ";
+		result += "Attachments";
+		result += ", ";
+		result += "Health";
 
 		return result;
 	}

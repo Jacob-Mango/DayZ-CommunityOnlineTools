@@ -35,7 +35,6 @@ class JMPreviewLayerMenu extends UIScriptedMenu
 {
 	//! Clear of vanilla's MenuID enum, of Expansion's range and of the lab ids.
 	static const int MENU_ID = 8125;
-
 	static JMPreviewLayerMenu s_Instance;
 
 	//! Sort applied to the layer root when it opens, or -1 to leave the sort
@@ -47,7 +46,6 @@ class JMPreviewLayerMenu extends UIScriptedMenu
 	//! SetSort on a menu root breaks the render pass" from "only a sort past
 	//! some threshold does".
 	static int s_SortStep = 0;
-
 	static const ref array<int> SORT_STEPS = { -1, 921, 930, 970 };
 
 	//! Placeholder inside a COT window, and the preview pinned to it. Index i of
@@ -69,6 +67,14 @@ class JMPreviewLayerMenu extends UIScriptedMenu
 	{
 		m_Anchors = new array<Widget>;
 		m_Hosts   = new array<Widget>;
+	}
+
+	//! OnHide is the normal path, but a menu torn down by CloseAll or by the
+	//! mission ending may not see it. Leaving COT's windows stuck at sort 0
+	//! would put the HUD over them for the rest of the session.
+	void ~JMPreviewLayerMenu()
+	{
+		RestoreWindows();
 	}
 
 	override Widget Init()
@@ -147,14 +153,6 @@ class JMPreviewLayerMenu extends UIScriptedMenu
 		m_WindowSortSaved = true;
 
 		JMStatics.WINDOWS_CONTAINER.SetSort( 0 );
-	}
-
-	//! OnHide is the normal path, but a menu torn down by CloseAll or by the
-	//! mission ending may not see it. Leaving COT's windows stuck at sort 0
-	//! would put the HUD over them for the rest of the session.
-	void ~JMPreviewLayerMenu()
-	{
-		RestoreWindows();
 	}
 
 	protected void RestoreWindows()

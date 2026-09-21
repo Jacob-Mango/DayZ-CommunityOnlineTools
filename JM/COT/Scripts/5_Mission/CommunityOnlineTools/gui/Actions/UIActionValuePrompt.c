@@ -36,7 +36,6 @@ class UIActionValuePrompt: UIActionBase
 	protected Widget           m_Anchor;
 	protected Widget           m_Panel;
 	protected GridSpacerWidget m_Grid;
-
 	protected UIActionText     m_TitleAction;
 	protected UIActionSlider   m_Slider;
 	protected UIActionDropdown m_Dropdown;
@@ -47,7 +46,6 @@ class UIActionValuePrompt: UIActionBase
 	//! whatever list the caller passed, and those are rarely 0..n-1: a liquid
 	//! type is a bit flag and a food stage starts at 1.
 	protected ref array<int> m_OptionValues;
-
 	protected string m_PromptId;
 	protected bool   m_Open;
 	protected bool   m_IsSlider;
@@ -57,7 +55,6 @@ class UIActionValuePrompt: UIActionBase
 	//! of leaving every prompt the same flat fill regardless of what the number
 	//! means. NONE leaves the slider's default colour alone.
 	protected int m_SliderColorMode;
-
 	static const int SLIDER_COLOR_NONE        = 0;
 	static const int SLIDER_COLOR_HEALTH      = 1;
 	static const int SLIDER_COLOR_TEMPERATURE = 2;
@@ -72,6 +69,52 @@ class UIActionValuePrompt: UIActionBase
 	static const float PANEL_WIDTH  = 420;
 	static const float PANEL_PAD    = 12;
 
+	void ~UIActionValuePrompt()
+	{
+		if ( m_Open )
+			CommunityOnlineToolsBase.ForceDisableInputs( false );
+
+		if ( m_Panel )
+		{
+			JMStatics.RemoveOverlay( m_Panel );
+			m_Panel.Unlink();
+		}
+	}
+
+	string GetPromptId()
+	{
+		return m_PromptId;
+	}
+
+	//! Option prompts: the caller's own value for the selected row, not the row
+	//! index. Returns 0 when nothing is selected.
+	int GetSelectedValue()
+	{
+		if ( !m_Dropdown || !m_OptionValues )
+			return 0;
+
+		int row = m_Dropdown.GetSelection();
+		if ( row < 0 || row >= m_OptionValues.Count() )
+			return 0;
+
+		return m_OptionValues[row];
+	}
+
+	//! Slider prompts: the number the admin left the handle on. Not GetValue -
+	//! UIActionBase already has one of those, and it answers a vector.
+	float GetSliderValue()
+	{
+		if ( !m_Slider )
+			return 0;
+
+		return m_Slider.GetCurrent();
+	}
+
+	bool IsOpen()
+	{
+		return m_Open;
+	}
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -82,18 +125,6 @@ class UIActionValuePrompt: UIActionBase
 		m_IsSlider        = true;
 		m_FullHeight      = 0;
 		m_SliderColorMode = SLIDER_COLOR_NONE;
-	}
-
-	void ~UIActionValuePrompt()
-	{
-		if ( m_Open )
-			CommunityOnlineToolsBase.ForceDisableInputs( false );
-
-		if ( m_Panel )
-		{
-			JMStatics.UnregisterOverlay( m_Panel );
-			m_Panel.Unlink();
-		}
 	}
 
 	//! Build the panel under `anchor`. Must be called before either Show.
@@ -112,7 +143,7 @@ class UIActionValuePrompt: UIActionBase
 		// UI?" ancestor walk cannot find a window above it. Without this the
 		// click reads as a world click and the game takes the mouse back -
 		// which turns the camera in the middle of a slider drag.
-		JMStatics.RegisterOverlay( m_Panel );
+		JMStatics.AddOverlay( m_Panel );
 
 		Class.CastTo( m_Grid, m_Panel.FindAnyWidget( "prompt_grid" ) );
 		if ( !m_Grid )
@@ -130,12 +161,8 @@ class UIActionValuePrompt: UIActionBase
 
 		Widget buttons = UIActionManager.CreateGridSpacer( m_Grid, 1, 2 );
 		m_Cancel  = UIActionManager.CreateButton( buttons, "#STR_COT_GENERIC_CANCEL",  this, "OnClick_Cancel"  );
-		m_Confirm = UIActionManager.CreateButton( buttons, "#STR_COT_GENERIC_CONFIRM", this, "OnClick_Confirm" );
-	}
-
-	bool IsOpen()
-	{
-		return m_Open;
+		m_Confirm = UIActionManager.CreateButton( buttons, "#STR_COT_GENERIC_CONFIRM", this, "" );
+		if ( m_Confirm ) m_Confirm.SetOnClick( this, "OnClick_Confirm" );
 	}
 
 	//! layoutRoot is a 1px stub here too (see class note) - m_Open is the real
@@ -145,38 +172,25 @@ class UIActionValuePrompt: UIActionBase
 		return m_Open;
 	}
 
-	string GetPromptId()
-	{
-		return m_PromptId;
-	}
-
-	//! Slider prompts: the number the admin left the handle on. Not GetValue -
-	//! UIActionBase already has one of those, and it answers a vector.
-	float GetSliderValue()
-	{
-		if ( !m_Slider )
-			return 0;
-
-		return m_Slider.GetCurrent();
-	}
-
-	//! Option prompts: the caller's own value for the selected row, not the row
-	//! index. Returns 0 when nothing is selected.
-	int GetSelectedValue()
-	{
-		if ( !m_Dropdown || !m_OptionValues )
-			return 0;
-
-		int row = m_Dropdown.GetSelection();
-		if ( row < 0 || row >= m_OptionValues.Count() )
-			return 0;
-
-		return m_OptionValues[row];
-	}
-
 	//! Ask for a number. `colorMode` is one of the SLIDER_COLOR_* constants -
 	//! leave it NONE for a plain slider.
+	//! DEPRECATED - use OpenSlider
 	void ShowSlider( string id, string title, string label, float min, float max, float current, float step = 1, string format = "%1", int colorMode = 0 )
+	{
+		JMDeprecated.WarnOnce( this, "UIActionValuePrompt.ShowSlider() is deprecated. Please use OpenSlider()." );
+
+		OpenSlider( id, title, label, min, max, current, step, format, colorMode );
+	}
+
+	//! DEPRECATED - use OpenOptions
+	void ShowOptions( string id, string title, string label, notnull array<string> labels, notnull array<int> values, int current )
+	{
+		JMDeprecated.WarnOnce( this, "UIActionValuePrompt.ShowOptions() is deprecated. Please use OpenOptions()." );
+
+		OpenOptions( id, title, label, labels, values, current );
+	}
+
+	void OpenSlider( string id, string title, string label, float min, float max, float current, float step = 1, string format = "%1", int colorMode = 0 )
 	{
 		if ( !m_Panel || !m_Slider )
 			return;
@@ -258,7 +272,7 @@ class UIActionValuePrompt: UIActionBase
 
 	//! Ask for one of a fixed list. `labels` and `values` are parallel; the row
 	//! whose value matches `current` is preselected, falling back to the first.
-	void ShowOptions( string id, string title, string label, notnull array<string> labels, notnull array<int> values, int current )
+	void OpenOptions( string id, string title, string label, notnull array<string> labels, notnull array<int> values, int current )
 	{
 		if ( !m_Panel || !m_Dropdown )
 			return;
@@ -430,11 +444,8 @@ class UIActionValuePrompt: UIActionBase
 		Close();
 	}
 
-	void OnClick_Confirm( UIEvent eid, UIActionBase action )
+	void OnClick_Confirm( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
 		// Closed BEFORE the callback: the host usually answers by opening a
 		// confirmation or rebuilding the panel this prompt is drawn over, and
 		// a prompt still up over that reads as one that failed to take.

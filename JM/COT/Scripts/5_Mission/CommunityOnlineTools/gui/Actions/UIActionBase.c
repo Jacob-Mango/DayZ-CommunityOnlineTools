@@ -8,7 +8,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 #endif
 
 	protected Widget layoutRoot;
-
 	protected Widget m_Disable;
 
 	//! Focus and hover chrome.
@@ -45,21 +44,21 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	//! Widget has no IsEnabled(), and 11 layouts have no disable
 	//! overlay to read the state back off, so it is tracked here.
 	protected bool m_Enabled = true;
-
 	protected Class m_Instance;
 	protected string m_FuncName;
-
 	protected bool m_IsShown;
-
 	protected bool m_HasCallback;
 
+	//! Single-event callbacks - see SetOnClick / SetOnChange.
+	protected Class m_OnClickInstance;
+	protected string m_OnClickFunc;
+	protected Class m_OnChangeInstance;
+	protected string m_OnChangeFunc;
 	protected bool m_WasFocused;
-
 	protected bool m_LeftMouseDown;
-
 	protected ref UIActionData m_Data;
 
-	// ??? Flex layout spec (opt-in) ??????????????????????????????????????????
+	// --- Flex layout spec (opt-in) ------------------------------------------
 	// Set via SetFlex(). Read by UIActionFlexRow during layout. When
 	// m_HasFlex is false the element uses whatever width SetWidth/SetFixedSize
 	// gave it and is ignored by the flex pass - default behaviour unchanged.
@@ -67,6 +66,14 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	protected float m_FlexGrow;    // proportional share of leftover space (0 = none)
 	protected float m_FlexBasisPx; // fixed pixel floor before growing (min width)
 	protected float m_FlexMaxPx;   // pixel ceiling; <= 0 means unbounded
+
+	//! Seconds for one full dim-to-bright-to-dim cycle. Slow enough to read as
+	//! a warning rather than a flicker.
+	static const float WARN_PULSE_PERIOD = 1.6;
+	protected string m_TooltipText;
+	protected string m_TooltipIcon;
+	protected int    m_TooltipSwatchColor;
+	protected int    m_TooltipTextColor;
 
 	void UIActionBase()
 	{
@@ -102,6 +109,381 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	#endif
 	}
 
+	string GetButton()
+	{
+		return "";
+	}
+
+	float GetCurrent()
+	{
+		return 0.0;
+	}
+
+	UIActionData GetData()
+	{
+		return m_Data;
+	}
+
+	float GetFlexBasis() { return m_FlexBasisPx; }
+
+	float GetFlexGrow()  { return m_FlexGrow; }
+
+	float GetFlexMax()   { return m_FlexMaxPx; }
+
+	float GetHeight()
+	{
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		return h;
+	}
+
+	Widget GetLayoutRoot() 
+	{
+		return layoutRoot;
+	}
+
+	int GetSelection()
+	{
+		return -1;
+	}
+
+	string GetText()
+	{
+		return "";
+	}
+
+	void GetUserData( out Class data )
+	{
+		layoutRoot.GetUserData( data );
+	}
+
+	vector GetValue()
+	{
+		return "0 0 0";
+	}
+
+	bool  HasFlex()      { return m_HasFlex; }
+
+	bool IsChecked()
+	{
+		return false;
+	}
+
+	bool IsEnabled()
+	{
+		if ( !m_Disable )
+			return m_Enabled;
+
+		return !m_Disable.IsVisible();
+	}
+
+	bool IsFocused()
+	{
+		return m_WasFocused;
+	}
+
+	bool IsFocusWidget( Widget widget )
+	{
+		return false;
+	}
+
+	bool IsWarning()
+	{
+		return m_Warning;
+	}
+
+	void SetButton( string text )
+	{
+	}
+
+	void SetCallback( Class instance, string funcname )
+	{
+		if ( instance == NULL || funcname == "" ) return;
+
+		m_Instance = instance;
+		m_FuncName = funcname;
+
+		m_HasCallback = true;
+	}
+
+	void SetChecked( bool checked )
+	{
+	}
+
+	void SetColor( int color )
+	{
+		layoutRoot.SetColor( color );
+	}
+
+	void SetColorAlpha( int rgb, float alpha )
+	{
+		int color = (rgb & 0x00FFFFFF) | ((int)(alpha * 255) << 24);
+		SetColor( color );
+	}
+
+	void SetCurrent( float value )
+	{
+		
+	}
+
+	void SetData( UIActionData data )
+	{
+		m_Data = data;
+	}
+
+	void SetDisableAlpha( float alpha )
+	{
+		if ( m_Disable )
+			m_Disable.SetAlpha(alpha);
+	}
+
+	void SetDisableColor( int color )
+	{
+		if ( m_Disable )
+			m_Disable.SetColor(color);
+	}
+
+	void SetEnabled( bool enable )
+	{
+		if ( enable )
+		{
+			Enable();
+		} else
+		{
+			Disable();
+		}
+	}
+
+	void SetEnabledIf( bool condition )
+	{
+		SetEnabled( condition );
+	}
+
+	void SetFixedHeight( float height )
+	{
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
+		layoutRoot.SetSize( w, height );
+		layoutRoot.Update();
+	}
+
+	void SetFixedSize( float width, float height )
+	{
+		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
+		layoutRoot.SetFlags( WidgetFlags.HEXACTSIZE, true );
+		layoutRoot.SetSize( width, height );
+		layoutRoot.Update();
+	}
+
+	//! Mark this element as a flex child of a UIActionFlexRow.
+	//!   grow   - proportional share of the row's leftover space (after every
+	//!            child's basis floor is reserved). 0 = never grows past basis.
+	//!   minPx  - pixel floor; the element never renders narrower than this,
+	//!            even on a very narrow form. This is the "min size" guarantee
+	//!            the raw fractional SetWidth could not express.
+	//!   maxPx  - pixel ceiling; <= 0 means unbounded.
+	//! Elements that never call SetFlex are untouched by the flex pass, so
+	//! existing forms keep their current behaviour.
+	void SetFlex( float grow, float minPx, float maxPx = -1 )
+	{
+		m_HasFlex     = true;
+		m_FlexGrow    = grow;
+		m_FlexBasisPx = minPx;
+		m_FlexMaxPx   = maxPx;
+	}
+
+	void SetHeight( float height )
+	{
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		layoutRoot.SetSize( w, height );
+		layoutRoot.Update();
+	}
+
+	void SetIcon( string imagePath )
+	{
+	}
+
+	void SetLabel( string text )
+	{
+	}
+
+	//! Same as SetOnClick, for UIEvent.CHANGE (slider moved, box edited, tab or
+	//! selection changed, toggle flipped).
+	void SetOnChange( Class instance, string funcname )
+	{
+		m_OnChangeInstance = instance;
+		m_OnChangeFunc = funcname;
+	}
+
+	//! Single-event callbacks: the handler is `void Fn( UIActionBase action )`
+	//! and runs only for that event, so it never needs the
+	//! `if ( eid != UIEvent.CLICK ) return;` guard the general (UIEvent,
+	//! UIActionBase) callback requires. Both kinds can be set on one control.
+	//!
+	//!     UIActionManager.CreateButton( parent, "Go", null, "" ).SetOnClick( this, "OnGo" );
+	//!     void OnGo( UIActionBase action ) { ... }
+	void SetOnClick( Class instance, string funcname )
+	{
+		m_OnClickInstance = instance;
+		m_OnClickFunc = funcname;
+	}
+
+	void SetPosition( float xpos )
+	{
+		float w;
+		float h;
+		layoutRoot.GetPos( w, h );
+		layoutRoot.SetPos( xpos, h );
+		layoutRoot.Update();
+	}
+
+	void SetPosition( float xpos, float ypos )
+	{
+		layoutRoot.SetPos( xpos, ypos );
+		layoutRoot.Update();
+	}
+
+	void SetSelection( int i, bool sendEvent = true )
+	{
+	}
+
+	void SetSize( float width, float height )
+	{
+		layoutRoot.SetSize( width, height );
+		layoutRoot.Update();
+	}
+
+	void SetText( string text )
+	{
+	}
+
+	void SetTooltip( string text, string iconPath = "", int swatchColor = 0, int textColor = 0 )
+	{
+		m_TooltipText        = text;
+		m_TooltipIcon        = iconPath;
+		m_TooltipSwatchColor = swatchColor;
+		m_TooltipTextColor   = textColor;
+
+		// Lazy-create the global tooltip overlay if the owning form didn't do
+		// it explicitly. Walk up to the largest ancestor that still has a
+		// parent (i.e. one below the workspace root) so the tooltip floats
+		// above the whole form but stays inside the event-routing tree.
+		if ( text != "" && !UIActionTooltip.s_Instance && layoutRoot )
+		{
+			Widget anchor = layoutRoot;
+			Widget parent = anchor.GetParent();
+			while ( parent && parent.GetParent() )
+			{
+				anchor = parent;
+				parent = anchor.GetParent();
+			}
+			UIActionManager.CreateTooltip( anchor );
+		}
+	}
+
+	void SetUserData( Class data )
+	{
+		layoutRoot.SetUserData( data );
+	}
+
+	void SetValue( vector v )
+	{
+	}
+
+	//! Show or hide from a condition, without the caller writing the branch.
+	//!
+	//! NOT an overload of Show(). Enforce has no method overloading: a second
+	//! Show taking a bool made the two indistinguishable to the call resolver,
+	//! and resolving a call to it crashed the script compiler outright - a
+	//! native access violation while the Mission module was still compiling,
+	//! so no script error was ever printed and the server died before boot.
+	//! Keep this name distinct from Show()/Hide().
+	void SetVisible( bool show )
+	{
+		if ( show )
+			Show();
+		else
+			Hide();
+	}
+
+	//! Flag or clear the warning.
+	//!
+	//! `tooltip` is what the icon says on hover - the CONSEQUENCE of the
+	//! current value, not a restatement of the value itself. Passing an empty
+	//! tooltip leaves the icon with nothing to explain, so pass one.
+	void SetWarning( bool warning, string tooltip = "" )
+	{
+		if ( tooltip != "" )
+			m_WarnTooltip = tooltip;
+
+		if ( warning == m_Warning )
+			return;
+
+		m_Warning   = warning;
+		m_WarnPhase = 0;
+
+		if ( m_WarnIcon )
+			m_WarnIcon.Show( warning );
+
+		//! Hand the layout's own ring colours back the moment the warning
+		//! clears, so a control that warned once does not stay red-ish.
+		if ( !warning )
+		{
+			for ( int i = 0; i < m_ChromeRingRest.Count(); i++ )
+			{
+				if ( i < m_WarnRingRest.Count() )
+					m_ChromeRingRest[i] = m_WarnRingRest[i];
+			}
+
+			ApplyChrome();
+		}
+	}
+
+	void SetWidgetPosition( Widget widget, float xpos )
+	{
+		float x;
+		float y;
+		widget.GetPos( x, y );
+		widget.SetPos( xpos, y );
+		layoutRoot.Update();
+		widget.Update();
+	}
+
+	void SetWidgetWidth( Widget widget, float width )
+	{
+		float w;
+		float h;
+		widget.GetSize( w, h );
+		widget.ClearFlags( WidgetFlags.HEXACTSIZE );
+		widget.SetSize( width, h );
+		layoutRoot.Update();
+		widget.Update();
+	}
+
+	void SetWidth( float width )
+	{
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		layoutRoot.ClearFlags( WidgetFlags.HEXACTSIZE );
+		layoutRoot.SetSize( width, h );
+		layoutRoot.Update();
+	}
+
+	void SetYPosition( float ypos )
+	{
+		float w;
+		float h;
+		layoutRoot.GetPos( w, h );
+		layoutRoot.SetPos( w, ypos );
+		layoutRoot.Update();
+	}
+
 	void Deactivate()
 	{
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
@@ -121,16 +503,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 			m_WasFocused = false;
 		}
 		CommunityOnlineTools.ForceDisableInputs(false);
-	}
-
-	void GetUserData( out Class data )
-	{
-		layoutRoot.GetUserData( data );
-	}
-
-	void SetUserData( Class data )
-	{
-		layoutRoot.SetUserData( data );
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -313,16 +685,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		}
 	}
 
-	bool IsFocused()
-	{
-		return m_WasFocused;
-	}
-
-	bool IsFocusWidget( Widget widget )
-	{
-		return false;
-	}
-
 	//! The name every caller uses on a control. Kept as its own declaration
 	//! rather than an override so JMFormBase is free to expose the unrelated
 	//! two-argument UpdatePermission( control, permission ) helper without the
@@ -336,7 +698,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	//! comment for why a second Show(bool) is not safe to add here.
 	void UpdatePermission( string permission )
 	{
-		bool allowed = GetPermissionsManager().HasPermission( permission );
+		bool allowed = JMPermissions.Has( permission );
 
 		SetEnabled( allowed );
 		SetVisible( allowed );
@@ -347,22 +709,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	override void COT_ApplyPermission( string permission )
 	{
 		UpdatePermission( permission );
-	}
-
-	void SetEnabled( bool enable )
-	{
-		if ( enable )
-		{
-			Enable();
-		} else
-		{
-			Disable();
-		}
-	}
-
-	void SetEnabledIf( bool condition )
-	{
-		SetEnabled( condition );
 	}
 
 	void Disable()
@@ -385,78 +731,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 			m_Disable.Show( false );
 	}
 
-	bool IsEnabled()
-	{
-		if ( !m_Disable )
-			return m_Enabled;
-
-		return !m_Disable.IsVisible();
-	}
-
-	//! Show or hide from a condition, without the caller writing the branch.
-	//!
-	//! NOT an overload of Show(). Enforce has no method overloading: a second
-	//! Show taking a bool made the two indistinguishable to the call resolver,
-	//! and resolving a call to it crashed the script compiler outright - a
-	//! native access violation while the Mission module was still compiling,
-	//! so no script error was ever printed and the server died before boot.
-	//! Keep this name distinct from Show()/Hide().
-	void SetVisible( bool show )
-	{
-		if ( show )
-			Show();
-		else
-			Hide();
-	}
-
-	void SetDisableColor( int color )
-	{
-		if ( m_Disable )
-			m_Disable.SetColor(color);
-	}
-
-	void SetDisableAlpha( float alpha )
-	{
-		if ( m_Disable )
-			m_Disable.SetAlpha(alpha);
-	}
-
-	void SetColor( int color )
-	{
-		layoutRoot.SetColor( color );
-	}
-
-	void SetColorAlpha( int rgb, float alpha )
-	{
-		int color = (rgb & 0x00FFFFFF) | ((int)(alpha * 255) << 24);
-		SetColor( color );
-	}
-
-	void SetSize( float width, float height )
-	{
-		layoutRoot.SetSize( width, height );
-		layoutRoot.Update();
-	}
-
-	void SetWidth( float width )
-	{
-		float w;
-		float h;
-		layoutRoot.GetSize( w, h );
-		layoutRoot.ClearFlags( WidgetFlags.HEXACTSIZE );
-		layoutRoot.SetSize( width, h );
-		layoutRoot.Update();
-	}
-
-	void SetHeight( float height )
-	{
-		float w;
-		float h;
-		layoutRoot.GetSize( w, h );
-		layoutRoot.SetSize( w, height );
-		layoutRoot.Update();
-	}
-
 	//! Apply an exact pixel width while preserving the current height. Used by
 	//! UIActionFlexRow to lay out flex children deterministically. The value is
 	//! in the engine's exact-size space (same space as GetScreenSize / SetFixedSize),
@@ -473,104 +747,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.Update();
 	}
 
-	float GetHeight()
-	{
-		float w;
-		float h;
-		layoutRoot.GetSize( w, h );
-		return h;
-	}
-
-	// ??? Flex API (opt-in) ??????????????????????????????????????????????????
-	//! Mark this element as a flex child of a UIActionFlexRow.
-	//!   grow   - proportional share of the row's leftover space (after every
-	//!            child's basis floor is reserved). 0 = never grows past basis.
-	//!   minPx  - pixel floor; the element never renders narrower than this,
-	//!            even on a very narrow form. This is the "min size" guarantee
-	//!            the raw fractional SetWidth could not express.
-	//!   maxPx  - pixel ceiling; <= 0 means unbounded.
-	//! Elements that never call SetFlex are untouched by the flex pass, so
-	//! existing forms keep their current behaviour.
-	void SetFlex( float grow, float minPx, float maxPx = -1 )
-	{
-		m_HasFlex     = true;
-		m_FlexGrow    = grow;
-		m_FlexBasisPx = minPx;
-		m_FlexMaxPx   = maxPx;
-	}
-
-	bool  HasFlex()      { return m_HasFlex; }
-	float GetFlexGrow()  { return m_FlexGrow; }
-	float GetFlexBasis() { return m_FlexBasisPx; }
-	float GetFlexMax()   { return m_FlexMaxPx; }
-
-	void SetYPosition( float ypos )
-	{
-		float w;
-		float h;
-		layoutRoot.GetPos( w, h );
-		layoutRoot.SetPos( w, ypos );
-		layoutRoot.Update();
-	}
-
-	void SetFixedSize( float width, float height )
-	{
-		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
-		layoutRoot.SetFlags( WidgetFlags.HEXACTSIZE, true );
-		layoutRoot.SetSize( width, height );
-		layoutRoot.Update();
-	}
-
-	void SetFixedHeight( float height )
-	{
-		float w;
-		float h;
-		layoutRoot.GetSize( w, h );
-		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
-		layoutRoot.SetSize( w, height );
-		layoutRoot.Update();
-	}
-
-	void SetPosition( float xpos )
-	{
-		float w;
-		float h;
-		layoutRoot.GetPos( w, h );
-		layoutRoot.SetPos( xpos, h );
-		layoutRoot.Update();
-	}
-
-	void SetPosition( float xpos, float ypos )
-	{
-		layoutRoot.SetPos( xpos, ypos );
-		layoutRoot.Update();
-	}
-
-	void SetWidgetWidth( Widget widget, float width )
-	{
-		float w;
-		float h;
-		widget.GetSize( w, h );
-		widget.ClearFlags( WidgetFlags.HEXACTSIZE );
-		widget.SetSize( width, h );
-		layoutRoot.Update();
-		widget.Update();
-	}
-
-	void SetWidgetPosition( Widget widget, float xpos )
-	{
-		float x;
-		float y;
-		widget.GetPos( x, y );
-		widget.SetPos( xpos, y );
-		layoutRoot.Update();
-		widget.Update();
-	}
-
-	Widget GetLayoutRoot() 
-	{
-		return layoutRoot;
-	}
+	// --- Flex API (opt-in) --------------------------------------------------
 
 	override bool IsVisible()
 	{
@@ -580,18 +757,13 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		return layoutRoot.IsVisible();
 	}
 
-	void SetCallback( Class instance, string funcname )
-	{
-		if ( instance == NULL || funcname == "" ) return;
-
-		m_Instance = instance;
-		m_FuncName = funcname;
-
-		m_HasCallback = true;
-	}
-
 	bool CallEvent( UIEvent eid )
 	{
+		if ( eid == UIEvent.CLICK && m_OnClickInstance && m_OnClickFunc != "" )
+			g_Game.GameScript.CallFunctionParams( m_OnClickInstance, m_OnClickFunc, NULL, new Param1< UIActionBase >( this ) );
+		else if ( eid == UIEvent.CHANGE && m_OnChangeInstance && m_OnChangeFunc != "" )
+			g_Game.GameScript.CallFunctionParams( m_OnChangeInstance, m_OnChangeFunc, NULL, new Param1< UIActionBase >( this ) );
+
 		if ( !m_HasCallback )
 			return false;
 
@@ -599,79 +771,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		g_Game.GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, params );
 
 		return false;
-	}
-
-	void SetData( UIActionData data )
-	{
-		m_Data = data;
-	}
-
-	UIActionData GetData()
-	{
-		return m_Data;
-	}
-
-	void SetButton( string text )
-	{
-	}
-
-	string GetButton()
-	{
-		return "";
-	}
-
-	void SetLabel( string text )
-	{
-	}
-
-	void SetChecked( bool checked )
-	{
-	}
-	
-	bool IsChecked()
-	{
-		return false;
-	}
-	
-	void SetText( string text )
-	{
-	}
-
-	string GetText()
-	{
-		return "";
-	}
-
-	float GetCurrent()
-	{
-		return 0.0;
-	}
-
-	void SetCurrent( float value )
-	{
-		
-	}
-
-	void SetValue( vector v )
-	{
-	}
-
-	vector GetValue()
-	{
-		return "0 0 0";
-	}
-
-	void SetSelection( int i, bool sendEvent = true )
-	{
-	}
-
-	int GetSelection()
-	{
-		return -1;
-	}
-
-	void SetIcon( string imagePath )
-	{
 	}
 
 	// ---------------------------------------------------------------------------
@@ -700,68 +799,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	{
 	}
 
-	void SetTooltip( string text, string iconPath = "", int swatchColor = 0, int textColor = 0 )
-	{
-		m_TooltipText        = text;
-		m_TooltipIcon        = iconPath;
-		m_TooltipSwatchColor = swatchColor;
-		m_TooltipTextColor   = textColor;
-
-		// Lazy-create the global tooltip overlay if the owning form didn't do
-		// it explicitly. Walk up to the largest ancestor that still has a
-		// parent (i.e. one below the workspace root) so the tooltip floats
-		// above the whole form but stays inside the event-routing tree.
-		if ( text != "" && !UIActionTooltip.s_Instance && layoutRoot )
-		{
-			Widget anchor = layoutRoot;
-			Widget parent = anchor.GetParent();
-			while ( parent && parent.GetParent() )
-			{
-				anchor = parent;
-				parent = anchor.GetParent();
-			}
-			UIActionManager.CreateTooltip( anchor );
-		}
-	}
-
-	//! Flag or clear the warning.
-	//!
-	//! `tooltip` is what the icon says on hover - the CONSEQUENCE of the
-	//! current value, not a restatement of the value itself. Passing an empty
-	//! tooltip leaves the icon with nothing to explain, so pass one.
-	void SetWarning( bool warning, string tooltip = "" )
-	{
-		if ( tooltip != "" )
-			m_WarnTooltip = tooltip;
-
-		if ( warning == m_Warning )
-			return;
-
-		m_Warning   = warning;
-		m_WarnPhase = 0;
-
-		if ( m_WarnIcon )
-			m_WarnIcon.Show( warning );
-
-		//! Hand the layout's own ring colours back the moment the warning
-		//! clears, so a control that warned once does not stay red-ish.
-		if ( !warning )
-		{
-			for ( int i = 0; i < m_ChromeRingRest.Count(); i++ )
-			{
-				if ( i < m_WarnRingRest.Count() )
-					m_ChromeRingRest[i] = m_WarnRingRest[i];
-			}
-
-			ApplyChrome();
-		}
-	}
-
-	bool IsWarning()
-	{
-		return m_Warning;
-	}
-
 	//! One step of the red pulse, shared by the rings and the icon so they
 	//! brighten together rather than beating against each other.
 	protected void UpdateWarning( float timeSlice )
@@ -785,10 +822,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 		ApplyChrome();
 	}
-
-	//! Seconds for one full dim-to-bright-to-dim cycle. Slow enough to read as
-	//! a warning rather than a flicker.
-	static const float WARN_PULSE_PERIOD = 1.6;
 
 	void RefreshTooltip()
 	{
@@ -825,9 +858,4 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 		return false;
 	}
-
-	protected string m_TooltipText;
-	protected string m_TooltipIcon;
-	protected int    m_TooltipSwatchColor;
-	protected int    m_TooltipTextColor;
 }

@@ -142,6 +142,10 @@ static void JMAutoTest_RunAll()
 	JMAutoTest_EndSuite("JMServerStatsModule (no client->server surface)", pB, fB);
 
 	pB = g_JMAutoTestPassCount; fB = g_JMAutoTestFailCount;
+	JMAutoTest_JMActionHistory();
+	JMAutoTest_EndSuite("JMActionHistory stack rules + module RPC sweep", pB, fB);
+
+	pB = g_JMAutoTestPassCount; fB = g_JMAutoTestFailCount;
 	JMAutoTest_JMBanModule();
 	JMAutoTest_EndSuite("JMBanModule full RPC sweep", pB, fB);
 

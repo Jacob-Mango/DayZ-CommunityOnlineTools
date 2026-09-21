@@ -26,11 +26,11 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//! Seconds between refreshes. Player count, world clock, weather and the
 	//! server stats all move slowly enough that once a second looks live, and it
 	//! keeps the sidebar per-frame cost to one float add and one compare.
-	private static const float REFRESH_INTERVAL = 1.0;
+	protected static const float REFRESH_INTERVAL = 1.0;
 
 	//! Longest server name rendered before it is cut short with an ellipsis.
 	//! The name row is 254px wide at 15pt, which fits roughly this many glyphs.
-	private static const int SERVER_NAME_MAX = 34;
+	protected static const int SERVER_NAME_MAX = 34;
 
 	// --- Run-time packing ----------------------------------------------------
 	//  Two rows hold text whose width is not known until it is set - the weather
@@ -40,65 +40,59 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//  text width instead (TextWidget.GetTextSize reports rendered pixels).
 
 	//! Gap between an icon and the value it labels.
-	private static const int PAIR_GAP  = 6;
+	protected static const int PAIR_GAP  = 6;
 	//! Gap between one icon+value pair and the next.
-	private static const int GROUP_GAP = 12;
-
-	private Widget m_Root;
+	protected static const int GROUP_GAP = 12;
+	protected Widget m_Root;
 
 	//! Anti-cheat alarm. Sits after the player count because it is a fact about
 	//! the players, and it is the only thing in the footer that is ever clicked.
-	private ButtonWidget m_BtnAntiCheat;
-	private ImageWidget  m_IconAntiCheat;
-	private Widget       m_AntiCheatHover;
+	protected ButtonWidget m_BtnAntiCheat;
+	protected ImageWidget  m_IconAntiCheat;
+	protected Widget       m_AntiCheatHover;
 
 	//! The two mutually exclusive presentations.
-	private Widget m_GroupFull;
-	private Widget m_GroupCompact;
-	private bool m_IsCompact;
-
-	private ImageWidget m_IconTime;
-	private ImageWidget m_IconWeather;
-	private ImageWidget m_IconNext;
-	private ImageWidget m_IconNextArrow;
-	private ImageWidget m_IconLow;
-	private ImageWidget m_IconHigh;
-
-	private ImageWidget m_IconTimeCompact;
-	private ImageWidget m_IconWeatherCompact;
-	private ImageWidget m_IconNextCompact;
-	private ImageWidget m_IconNextArrowCompact;
-	private ImageWidget m_IconLowCompact;
-	private ImageWidget m_IconHighCompact;
-
-	private TextWidget m_TextServer;
-	private TextWidget m_TextPlayers;
-	private TextWidget m_TextTime;
-	private TextWidget m_TextWeather;
-	private TextWidget m_TextNext;
-	private TextWidget m_TextFPS;
-	private TextWidget m_TextLow;
-	private TextWidget m_TextHigh;
-	private TextWidget m_TextVersion;
-
-	private TextWidget m_TextPlayersCompact;
-	private TextWidget m_TextTimeCompact;
-	private TextWidget m_TextFPSCompact;
-	private TextWidget m_TextLowCompact;
-	private TextWidget m_TextHighCompact;
-
-	private float m_Elapsed;
+	protected Widget m_GroupFull;
+	protected Widget m_GroupCompact;
+	protected bool m_IsCompact;
+	protected ImageWidget m_IconTime;
+	protected ImageWidget m_IconWeather;
+	protected ImageWidget m_IconNext;
+	protected ImageWidget m_IconNextArrow;
+	protected ImageWidget m_IconLow;
+	protected ImageWidget m_IconHigh;
+	protected ImageWidget m_IconTimeCompact;
+	protected ImageWidget m_IconWeatherCompact;
+	protected ImageWidget m_IconNextCompact;
+	protected ImageWidget m_IconNextArrowCompact;
+	protected ImageWidget m_IconLowCompact;
+	protected ImageWidget m_IconHighCompact;
+	protected TextWidget m_TextServer;
+	protected TextWidget m_TextPlayers;
+	protected TextWidget m_TextTime;
+	protected TextWidget m_TextWeather;
+	protected TextWidget m_TextNext;
+	protected TextWidget m_TextFPS;
+	protected TextWidget m_TextLow;
+	protected TextWidget m_TextHigh;
+	protected TextWidget m_TextVersion;
+	protected TextWidget m_TextPlayersCompact;
+	protected TextWidget m_TextTimeCompact;
+	protected TextWidget m_TextFPSCompact;
+	protected TextWidget m_TextLowCompact;
+	protected TextWidget m_TextHighCompact;
+	protected float m_Elapsed;
 
 	//! Only reloaded when the value actually changes: LoadImageFile re-reads the
 	//! texture, and the clock icon is the same for hours at a time.
-	private int m_LastTimeOfDay;
-	private int m_LastWeatherKind;
-	private int m_LastForecastKind;
-	private bool m_LastIsNight;
+	protected int m_LastTimeOfDay;
+	protected int m_LastWeatherKind;
+	protected int m_LastForecastKind;
+	protected bool m_LastIsNight;
 
 	//! Cached because neither value can change while the client is connected.
-	private string m_ServerName;
-	private int m_MaxPlayers;
+	protected string m_ServerName;
+	protected int m_MaxPlayers;
 
 	void JMCOTSideBarFooter()
 	{
@@ -106,6 +100,108 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		m_LastTimeOfDay = -1;
 		m_LastWeatherKind = -1;
 		m_LastForecastKind = -1;
+	}
+
+	// -------------------------------------------------------------------------
+	//  Packing primitives
+	//
+	//  Everything here reads the ANCHOR widget position rather than working from
+	//  the row coordinates in the layout file. Those two do not agree: laying the
+	//  forecast and the tails out from the layout `position` values put both
+	//  groups exactly one row above the text they belong to. GetPos and SetPos
+	//  are symmetric, so measuring and placing in the same frame is correct
+	//  whatever that frame turns out to be.
+	// -------------------------------------------------------------------------
+
+	//! Position just past the end of a widget rendered text, and the row y to
+	//! place at. False when the widget has not been laid out yet - GetTextSize
+	//! reports 0 until the first layout pass, and packing against that would
+	//! stack the whole row on the left margin.
+	protected bool GetRunEnd( TextWidget anchor, out float x, out float y )
+	{
+		x = 0;
+		y = 0;
+
+		int textWidth, textHeight;
+		anchor.GetTextSize( textWidth, textHeight );
+
+		if ( textWidth <= 0 )
+			return false;
+
+		float anchorX, anchorY;
+		anchor.GetPos( anchorX, anchorY );
+
+		x = anchorX + textWidth + GROUP_GAP;
+		y = anchorY;
+
+		return true;
+	}
+
+	//! Returns 0:00 before the world exists - the first refresh runs from Init,
+	//! which the sidebar calls while the mission is still coming up.
+	protected void GetWorldClock( out int hour, out int minute )
+	{
+		hour = 0;
+		minute = 0;
+
+		World world = g_Game.GetWorld();
+		if ( !world )
+			return;
+
+		int year, month, day;
+		world.GetDate( year, month, day, hour, minute );
+	}
+
+	// -------------------------------------------------------------------------
+	//  Collapsed / expanded
+	//
+	//  A collapsed sidebar leaves only its leftmost 60px on screen. The full
+	//  strip is not narrowed to fit that - it is replaced, because a 254px
+	//  server name and a weather word have nothing useful to say in 60px.
+	// -------------------------------------------------------------------------
+	void SetCompact( bool compact )
+	{
+		m_IsCompact = compact;
+
+		if ( m_GroupFull )
+			m_GroupFull.Show( !compact );
+
+		if ( m_GroupCompact )
+			m_GroupCompact.Show( compact );
+
+		//! The hidden half stopped being updated while it was hidden, so bring
+		//! whichever half just appeared back in step immediately.
+		m_LastTimeOfDay = -1;
+		m_LastWeatherKind = -1;
+		m_LastForecastKind = -1;
+
+		Refresh();
+	}
+
+	protected void SetIcon( string widgetName, string imagePath )
+	{
+		ImageWidget icon;
+		if ( !Class.CastTo( icon, m_Root.FindAnyWidget( widgetName ) ) )
+			return;
+
+		icon.LoadImageFile( 0, imagePath );
+	}
+
+	protected void SetIconColor( ImageWidget widget, int color )
+	{
+		if ( !widget )
+			return;
+
+		widget.SetColor( color );
+	}
+
+	protected void SetValue( TextWidget widget, string value, int color )
+	{
+		if ( !widget )
+			return;
+
+		widget.SetText( value );
+		widget.SetColor( color );
 	}
 
 	void Init( Widget footer )
@@ -191,41 +287,6 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		Refresh();
 	}
 
-	private void SetIcon( string widgetName, string imagePath )
-	{
-		ImageWidget icon;
-		if ( !Class.CastTo( icon, m_Root.FindAnyWidget( widgetName ) ) )
-			return;
-
-		icon.LoadImageFile( 0, imagePath );
-	}
-
-	// -------------------------------------------------------------------------
-	//  Collapsed / expanded
-	//
-	//  A collapsed sidebar leaves only its leftmost 60px on screen. The full
-	//  strip is not narrowed to fit that - it is replaced, because a 254px
-	//  server name and a weather word have nothing useful to say in 60px.
-	// -------------------------------------------------------------------------
-	void SetCompact( bool compact )
-	{
-		m_IsCompact = compact;
-
-		if ( m_GroupFull )
-			m_GroupFull.Show( !compact );
-
-		if ( m_GroupCompact )
-			m_GroupCompact.Show( compact );
-
-		//! The hidden half stopped being updated while it was hidden, so bring
-		//! whichever half just appeared back in step immediately.
-		m_LastTimeOfDay = -1;
-		m_LastWeatherKind = -1;
-		m_LastForecastKind = -1;
-
-		Refresh();
-	}
-
 	// -------------------------------------------------------------------------
 	//  Driven from JMCOTSideBar.OnUpdate, which only calls in while the sidebar
 	//  is on screen.
@@ -242,7 +303,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		Refresh();
 	}
 
-	private void Refresh()
+	protected void Refresh()
 	{
 		int hour, minute;
 		GetWorldClock( hour, minute );
@@ -258,7 +319,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	// -------------------------------------------------------------------------
 	//  Clock
 	// -------------------------------------------------------------------------
-	private void UpdateTime( int hour, int minute )
+	protected void UpdateTime( int hour, int minute )
 	{
 		string clock = Pad2( hour ) + ":" + Pad2( minute );
 
@@ -284,25 +345,10 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 			m_IconTimeCompact.LoadImageFile( 0, icon );
 	}
 
-	//! Returns 0:00 before the world exists - the first refresh runs from Init,
-	//! which the sidebar calls while the mission is still coming up.
-	private void GetWorldClock( out int hour, out int minute )
-	{
-		hour = 0;
-		minute = 0;
-
-		World world = g_Game.GetWorld();
-		if ( !world )
-			return;
-
-		int year, month, day;
-		world.GetDate( year, month, day, hour, minute );
-	}
-
 	// -------------------------------------------------------------------------
 	//  Weather
 	// -------------------------------------------------------------------------
-	private void UpdateWeather( bool isNight )
+	protected void UpdateWeather( bool isNight )
 	{
 		int kind = JMWorldConditions.GetWeatherKind();
 		int forecast = JMWorldConditions.GetForecastWeatherKind();
@@ -348,7 +394,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//! The collapsed rail has no text at all, so it shows the arrow only for a
 	//! real change of kind; a bare arrow pointing at nothing is worse than no
 	//! arrow.
-	private void UpdateForecastIndicator( int kind, int forecast, bool isNight )
+	protected void UpdateForecastIndicator( int kind, int forecast, bool isNight )
 	{
 		bool changing = ( forecast != kind );
 
@@ -394,7 +440,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 			PackWeatherRow();
 	}
 
-	private void ShowForecastWidget( Widget widget, bool changing )
+	protected void ShowForecastWidget( Widget widget, bool changing )
 	{
 		if ( !widget )
 			return;
@@ -402,7 +448,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		widget.Show( changing );
 	}
 
-	private void LoadForecastIcon( ImageWidget widget, string icon, bool changing )
+	protected void LoadForecastIcon( ImageWidget widget, string icon, bool changing )
 	{
 		if ( !widget )
 			return;
@@ -424,7 +470,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//  leave the rest of the row stranded on the short one, so what follows is
 	//  positioned from the measured width instead.
 	// -------------------------------------------------------------------------
-	private void PackWeatherRow()
+	protected void PackWeatherRow()
 	{
 		if ( !m_TextWeather || !m_IconNextArrow || !m_IconNext || !m_TextNext )
 			return;
@@ -446,7 +492,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//! The two tails follow the average on the same rhythm the gauge icon and
 	//! the average itself use, rather than sitting at fixed columns with a gap
 	//! wide enough to read as a separate row.
-	private void PackPerformanceRow()
+	protected void PackPerformanceRow()
 	{
 		if ( !m_TextFPS || !m_IconLow || !m_TextLow || !m_IconHigh || !m_TextHigh )
 			return;
@@ -473,44 +519,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		m_TextHigh.SetPos( x, y );
 	}
 
-	// -------------------------------------------------------------------------
-	//  Packing primitives
-	//
-	//  Everything here reads the ANCHOR widget position rather than working from
-	//  the row coordinates in the layout file. Those two do not agree: laying the
-	//  forecast and the tails out from the layout `position` values put both
-	//  groups exactly one row above the text they belong to. GetPos and SetPos
-	//  are symmetric, so measuring and placing in the same frame is correct
-	//  whatever that frame turns out to be.
-	// -------------------------------------------------------------------------
-
-	//! Position just past the end of a widget rendered text, and the row y to
-	//! place at. False when the widget has not been laid out yet - GetTextSize
-	//! reports 0 until the first layout pass, and packing against that would
-	//! stack the whole row on the left margin.
-	private bool GetRunEnd( TextWidget anchor, out float x, out float y )
-	{
-		x = 0;
-		y = 0;
-
-		int textWidth, textHeight;
-		anchor.GetTextSize( textWidth, textHeight );
-
-		if ( textWidth <= 0 )
-			return false;
-
-		float anchorX, anchorY;
-		anchor.GetPos( anchorX, anchorY );
-
-		x = anchorX + textWidth + GROUP_GAP;
-		y = anchorY;
-
-		return true;
-	}
-
 	//! Drop an icon at x on the row owned by `row`, vertically centred against
 	//! it, and return the x just past the icon.
-	private float PlaceIcon( ImageWidget icon, float x, float y, TextWidget row )
+	protected float PlaceIcon( ImageWidget icon, float x, float y, TextWidget row )
 	{
 		float iconW, iconH;
 		icon.GetSize( iconW, iconH );
@@ -530,7 +541,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 
 	//! COT keeps its own synchronised roster, so this is the same number the
 	//! Players module lists rather than a guess from the local entity list.
-	private void UpdatePlayers()
+	protected void UpdatePlayers()
 	{
 		int online = 0;
 
@@ -564,7 +575,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//  AntiCheat form has ever been opened, and it is 0 for admins without the
 	//  permission to be told.
 	// -------------------------------------------------------------------------
-	private void UpdateAntiCheatBadge()
+	protected void UpdateAntiCheatBadge()
 	{
 		if ( !m_BtnAntiCheat )
 			return;
@@ -587,7 +598,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//! The badge follows the player count rather than sitting at a fixed column,
 	//! for the same reason the weather and performance tails do: "3 / 60" and
 	//! "12" are not the same width.
-	private void PackPlayersRow()
+	protected void PackPlayersRow()
 	{
 		if ( !m_TextPlayers || !m_BtnAntiCheat )
 			return;
@@ -637,7 +648,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//! Found by class name rather than by type: the module is a 5_Mission class
 	//! and this footer is 4_World, so the type is not nameable from here. The
 	//! module manager list is short and this runs once per click.
-	private void OpenAntiCheatModule()
+	protected void OpenAntiCheatModule()
 	{
 		JMModuleManager manager = GetModuleManager();
 		if ( !manager )
@@ -671,7 +682,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//  healthy average while one tick in a hundred takes 200ms is the server
 	//  whose players report rubber-banding, and only the low shows it.
 	// -------------------------------------------------------------------------
-	private void UpdateServerStats()
+	protected void UpdateServerStats()
 	{
 		bool valid = JMServerStats.IsValid();
 
@@ -714,27 +725,10 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		PackPerformanceRow();
 	}
 
-	private void SetValue( TextWidget widget, string value, int color )
-	{
-		if ( !widget )
-			return;
-
-		widget.SetText( value );
-		widget.SetColor( color );
-	}
-
-	private void SetIconColor( ImageWidget widget, int color )
-	{
-		if ( !widget )
-			return;
-
-		widget.SetColor( color );
-	}
-
 	// -------------------------------------------------------------------------
 	//  Values that cannot change for the lifetime of the connection.
 	// -------------------------------------------------------------------------
-	private void CacheStaticInfo()
+	protected void CacheStaticInfo()
 	{
 		m_ServerName = "";
 		m_MaxPlayers = 0;
@@ -763,7 +757,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	// -------------------------------------------------------------------------
 	//  Formatting
 	// -------------------------------------------------------------------------
-	private string Pad2( int value )
+	protected string Pad2( int value )
 	{
 		if ( value < 10 )
 			return "0" + value;
@@ -771,7 +765,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		return "" + value;
 	}
 
-	private string Truncate( string text, int maxLength )
+	protected string Truncate( string text, int maxLength )
 	{
 		if ( text.Length() <= maxLength )
 			return text;

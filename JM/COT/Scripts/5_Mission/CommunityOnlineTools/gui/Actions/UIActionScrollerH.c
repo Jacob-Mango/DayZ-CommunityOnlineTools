@@ -12,22 +12,22 @@
 class UIActionScrollerH: UIActionBase
 {
 	const int WHEEL_STEP = 40;
-
 	protected Widget m_Content;
 	protected Widget m_ScrollerContainer;
 	protected Widget m_Scroller;
-
 	protected float m_RootWidth;
 	protected float m_ContentWidth;
 	protected float m_Position;
-
 	protected float m_ScrollStartPos;
 	protected int   m_MouseStartPos;
-
 	protected bool m_IsDragScrolling;
 	protected bool m_IsMouseScrolling;
-
 	protected bool m_IsUpdating;
+
+	Widget GetContentWidget()
+	{
+		return m_Content;
+	}
 
 	override void OnInit()
 	{
@@ -40,11 +40,6 @@ class UIActionScrollerH: UIActionBase
 		m_Position = 0;
 
 		UpdateScroller();
-	}
-
-	Widget GetContentWidget()
-	{
-		return m_Content;
 	}
 
 	void UpdateScroller()

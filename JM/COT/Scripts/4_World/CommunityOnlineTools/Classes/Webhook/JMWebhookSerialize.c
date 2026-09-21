@@ -7,6 +7,24 @@ class JMWebhookSerialize : Managed
 		Connections = new array< ref JMWebhookConnectionGroup >;
 	}
 
+	JMWebhookConnectionGroup Get( string name )
+	{
+		for ( int i = 0; i < Connections.Count(); ++i )
+		{
+			if ( Connections[i].Name == name )
+			{
+				return Connections[i];
+			}
+		}
+
+		JMWebhookConnectionGroup group = new JMWebhookConnectionGroup();
+		group.Name = name;
+
+		Connections.Insert( group );
+
+		return group;
+	}
+
 	void Load()
 	{
 		JsonFileLoader< JMWebhookSerialize >.JsonLoadFile( JMConstants.FILE_WEBHOOK, this );
@@ -46,24 +64,6 @@ class JMWebhookSerialize : Managed
 		}
 
 		return false;
-	}
-
-	JMWebhookConnectionGroup Get( string name )
-	{
-		for ( int i = 0; i < Connections.Count(); ++i )
-		{
-			if ( Connections[i].Name == name )
-			{
-				return Connections[i];
-			}
-		}
-
-		JMWebhookConnectionGroup group = new JMWebhookConnectionGroup();
-		group.Name = name;
-
-		Connections.Insert( group );
-
-		return group;
 	}
 }
 

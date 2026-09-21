@@ -42,15 +42,31 @@ class JMCameraSerialize : Managed
 	ref array< ref JMCameraPath >     Paths;
 	ref array< ref JMCameraBookmark > Bookmarks;
 
+	protected void JMCameraSerialize()
+	{
+		Paths     = new array< ref JMCameraPath >;
+		Bookmarks = new array< ref JMCameraBookmark >;
+	}
+
+	TStringArray GetBookmarkNames()
+	{
+		TStringArray names = new TStringArray;
+		foreach ( auto b : Bookmarks )
+			names.Insert( b.Name );
+		return names;
+	}
+
 	static string GetFilePath()
 	{
 		return JMConstants.DIR_COT + "CameraPaths.json";
 	}
 
-	private void JMCameraSerialize()
+	TStringArray GetPathNames()
 	{
-		Paths     = new array< ref JMCameraPath >;
-		Bookmarks = new array< ref JMCameraBookmark >;
+		TStringArray names = new TStringArray;
+		foreach ( auto p : Paths )
+			names.Insert( p.Name );
+		return names;
 	}
 
 	// ----------------------------------------------------------
@@ -60,9 +76,7 @@ class JMCameraSerialize : Managed
 	{
 		JMCameraSerialize data = new JMCameraSerialize();
 
-		string filepath = GetFilePath();
-		if ( FileExist( filepath ) )
-			JsonFileLoader< JMCameraSerialize >.JsonLoadFile( filepath, data );
+		JMJsonFile< JMCameraSerialize >.Load( GetFilePath(), data );
 
 		return data;
 	}
@@ -72,11 +86,7 @@ class JMCameraSerialize : Managed
 	// ----------------------------------------------------------
 	void Save()
 	{
-		string dir = JMConstants.DIR_COT;
-		if ( !FileExist( dir ) )
-			MakeDirectory( dir );
-
-		JsonFileLoader< JMCameraSerialize >.JsonSaveFile( GetFilePath(), this );
+		JMJsonFile< JMCameraSerialize >.Save( GetFilePath(), this );
 	}
 
 	// ----------------------------------------------------------
@@ -175,21 +185,5 @@ class JMCameraSerialize : Managed
 			Bookmarks.Remove( idx );
 			Save();
 		}
-	}
-
-	TStringArray GetPathNames()
-	{
-		TStringArray names = new TStringArray;
-		foreach ( auto p : Paths )
-			names.Insert( p.Name );
-		return names;
-	}
-
-	TStringArray GetBookmarkNames()
-	{
-		TStringArray names = new TStringArray;
-		foreach ( auto b : Bookmarks )
-			names.Insert( b.Name );
-		return names;
 	}
 }

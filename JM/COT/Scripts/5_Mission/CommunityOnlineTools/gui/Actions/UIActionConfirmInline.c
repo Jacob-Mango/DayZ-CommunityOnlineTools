@@ -28,7 +28,6 @@ class UIActionConfirmInline: UIActionBase
 	protected TextWidget   m_ConfirmText;
 	protected TextWidget   m_CancelText;
 	protected ImageWidget  m_Icon;
-
 	protected bool  m_Pending;
 	protected float m_Timeout;
 	protected float m_Timer;
@@ -48,6 +47,40 @@ class UIActionConfirmInline: UIActionBase
 	static const int ICON_RIGHT_EDGE   = 26;
 	static const int ICON_TEXT_GAP     = 8;
 	static const int LABEL_OFFSET_ICON = ( ICON_RIGHT_EDGE + ICON_TEXT_GAP ) / 2;
+
+	bool IsPending()
+	{
+		return m_Pending;
+	}
+
+	void SetCancelLabel( string text )
+	{
+		text = Widget.TranslateString( text );
+		if ( m_CancelText )
+			m_CancelText.SetText( text );
+	}
+
+	void SetConfirmLabel( string text )
+	{
+		text = Widget.TranslateString( text );
+		if ( m_ConfirmText )
+			m_ConfirmText.SetText( text );
+	}
+
+	protected void SetState( bool pending )
+	{
+		m_Pending = pending;
+
+		if ( m_BtnAction  ) m_BtnAction.Show(  !pending );
+		if ( m_BtnConfirm ) m_BtnConfirm.Show(  pending );
+		if ( m_BtnCancel  ) m_BtnCancel.Show(   pending );
+	}
+
+	//! Seconds the confirm/cancel pair stays visible before auto-reverting.
+	void SetTimeout( float seconds )
+	{
+		m_TimeoutSeconds = Math.Max( 0.5, seconds );
+	}
 
 	override void OnInit()
 	{
@@ -71,20 +104,6 @@ class UIActionConfirmInline: UIActionBase
 		text = Widget.TranslateString( text );
 		if ( m_ActionText )
 			m_ActionText.SetText( text );
-	}
-
-	void SetConfirmLabel( string text )
-	{
-		text = Widget.TranslateString( text );
-		if ( m_ConfirmText )
-			m_ConfirmText.SetText( text );
-	}
-
-	void SetCancelLabel( string text )
-	{
-		text = Widget.TranslateString( text );
-		if ( m_CancelText )
-			m_CancelText.SetText( text );
 	}
 
 	// For icon-only / fixed-size buttons whose confirm+cancel pair would otherwise
@@ -175,17 +194,6 @@ class UIActionConfirmInline: UIActionBase
 			m_BtnAction.SetColor( color );
 	}
 
-	//! Seconds the confirm/cancel pair stays visible before auto-reverting.
-	void SetTimeout( float seconds )
-	{
-		m_TimeoutSeconds = Math.Max( 0.5, seconds );
-	}
-
-	bool IsPending()
-	{
-		return m_Pending;
-	}
-
 	//! Programmatic equivalent of the first click: arms the confirm/cancel pair
 	//! and (re)starts the timeout. Used by keybinds that need the same
 	//! "press once to arm, press again to confirm" flow as a mouse click,
@@ -258,16 +266,7 @@ class UIActionConfirmInline: UIActionBase
 			Revert();
 	}
 
-	private void SetState( bool pending )
-	{
-		m_Pending = pending;
-
-		if ( m_BtnAction  ) m_BtnAction.Show(  !pending );
-		if ( m_BtnConfirm ) m_BtnConfirm.Show(  pending );
-		if ( m_BtnCancel  ) m_BtnCancel.Show(   pending );
-	}
-
-	private void Revert()
+	protected void Revert()
 	{
 		SetState( false );
 	}

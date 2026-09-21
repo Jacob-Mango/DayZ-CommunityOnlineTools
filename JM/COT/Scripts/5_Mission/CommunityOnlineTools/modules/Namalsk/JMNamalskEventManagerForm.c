@@ -1,12 +1,12 @@
 class JMNamalskEventManagerForm: JMFormBase
 {
-	private UIActionScroller m_sclr_MainActions;
-	private Widget m_ContentWrapper;
-	private Widget m_ActionsWrapper;
+	protected UIActionScroller m_sclr_MainActions;
+	protected Widget m_ContentWrapper;
+	protected Widget m_ActionsWrapper;
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMNamalskEventManagerModule m_Module;
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		m_sclr_MainActions = UIActionManager.CreateScroller(layoutRoot.FindAnyWidget("panel"));
 		m_ContentWrapper = m_sclr_MainActions.GetContentWidget();
@@ -29,7 +29,7 @@ class JMNamalskEventManagerForm: JMFormBase
 		Rebuild();
 	}
 
-	private void Rebuild()
+	protected void Rebuild()
 	{
 		if (m_ActionsWrapper)
 			delete m_ActionsWrapper;
@@ -49,7 +49,7 @@ class JMNamalskEventManagerForm: JMFormBase
 		m_sclr_MainActions.UpdateScroller();
 	}
 
-	private void AddEvent(string event_name)
+	protected void AddEvent(string event_name)
 	{
 		bool canStart  = JMPermissions.Has(JMConstants.PERM_NAMALSK + "." + event_name + ".Start");
 		bool canCancel = JMPermissions.Has(JMConstants.PERM_NAMALSK + "." + event_name + ".Cancel");
@@ -62,7 +62,7 @@ class JMNamalskEventManagerForm: JMFormBase
 
 		if (!canStart && !canCancel)
 		{
-			UIActionText permField = UIActionManager.CreateText(row, "", "No Permission");
+			UIActionText permField = UIActionManager.CreateText(row, "", "#STR_COT_NAMALSK_NO_PERMISSION");
 			permField.SetWidth(0.40);
 			permField.SetTextVAlign(UIActionVAlign.CENTER);
 			return;
@@ -70,15 +70,9 @@ class JMNamalskEventManagerForm: JMFormBase
 
 		if (canCancel)
 		{
-			UIActionConfirmInline cancelBtn = UIActionManager.CreateConfirmInline(row, "", this, "OnClick_CancelEvent");
-			UIActionIconGrid.ApplyDeletePreset(cancelBtn);
-			cancelBtn.SetButton("");
-			cancelBtn.SetFixedSize(32, 32);
-			cancelBtn.CenterIcon(32, 16);
-			cancelBtn.SetConfirmLabel("O");
-			cancelBtn.SetCancelLabel("X");
+			UIActionConfirmInline cancelBtn = UIActionManager.CreateDeleteConfirmIcon( row, this, "OnClick_CancelEvent" );
 			cancelBtn.SetData(new JMNamalskEventManagerButtonData(event_name));
-			cancelBtn.SetTooltip("Cancel this event");
+			cancelBtn.SetTooltip("#STR_COT_NAMALSK_CANCEL_THIS_EVENT");
 		}
 
 		if (canStart)
@@ -87,7 +81,7 @@ class JMNamalskEventManagerForm: JMFormBase
 			startBtn.SetWidth(0.40);
 			startBtn.SetColor(JMTheme.SUCCESS_FILL);
 			startBtn.SetData(new JMNamalskEventManagerButtonData(event_name));
-			startBtn.SetTooltip("Start this event");
+			startBtn.SetTooltip("#STR_COT_NAMALSK_START_THIS_EVENT");
 		}
 	}
 

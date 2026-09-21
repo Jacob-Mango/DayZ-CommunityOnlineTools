@@ -21,30 +21,12 @@ class UIActionPaginator: UIActionBase
 	protected ButtonWidget m_BtnPrev;
 	protected ButtonWidget m_BtnNext;
 	protected TextWidget   m_PageLabel;
-
 	protected int m_CurrentPage;
 	protected int m_PageCount;
 
-	override void OnInit()
+	int GetCurrentPage()
 	{
-		super.OnInit();
-
-		Class.CastTo( m_BtnPrev,   layoutRoot.FindAnyWidget( "action_button_prev" ) );
-		Class.CastTo( m_BtnNext,   layoutRoot.FindAnyWidget( "action_button_next" ) );
-		Class.CastTo( m_PageLabel, layoutRoot.FindAnyWidget( "action"             ) );
-
-		m_CurrentPage = 0;
-		m_PageCount   = 1;
-		UpdateLabel();
-		UpdateButtons();
-	}
-
-	void SetPageCount( int count )
-	{
-		m_PageCount   = Math.Max( 1, count );
-		m_CurrentPage = Math.Clamp( m_CurrentPage, 0, m_PageCount - 1 );
-		UpdateLabel();
-		UpdateButtons();
+		return m_CurrentPage;
 	}
 
 	int GetPageCount()
@@ -67,9 +49,26 @@ class UIActionPaginator: UIActionBase
 			CallEvent( UIEvent.CHANGE );
 	}
 
-	int GetCurrentPage()
+	void SetPageCount( int count )
 	{
-		return m_CurrentPage;
+		m_PageCount   = Math.Max( 1, count );
+		m_CurrentPage = Math.Clamp( m_CurrentPage, 0, m_PageCount - 1 );
+		UpdateLabel();
+		UpdateButtons();
+	}
+
+	override void OnInit()
+	{
+		super.OnInit();
+
+		Class.CastTo( m_BtnPrev,   layoutRoot.FindAnyWidget( "action_button_prev" ) );
+		Class.CastTo( m_BtnNext,   layoutRoot.FindAnyWidget( "action_button_next" ) );
+		Class.CastTo( m_PageLabel, layoutRoot.FindAnyWidget( "action"             ) );
+
+		m_CurrentPage = 0;
+		m_PageCount   = 1;
+		UpdateLabel();
+		UpdateButtons();
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -95,13 +94,13 @@ class UIActionPaginator: UIActionBase
 		return false;
 	}
 
-	private void UpdateLabel()
+	protected void UpdateLabel()
 	{
 		if ( m_PageLabel )
 			m_PageLabel.SetText( string.Format( "%1 / %2", m_CurrentPage + 1, m_PageCount ) );
 	}
 
-	private void UpdateButtons()
+	protected void UpdateButtons()
 	{
 		if ( m_BtnPrev )
 		{

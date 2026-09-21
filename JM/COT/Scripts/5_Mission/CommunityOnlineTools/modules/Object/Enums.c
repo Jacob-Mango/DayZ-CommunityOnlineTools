@@ -17,6 +17,10 @@ enum COT_ESPMode
 {
 	COPYLISTRAW,
 	COPYLISTSPAWNABLETYPES,
+	COPYLISTTYPES,
+#ifdef DZ_Expansion_Core
+	COPYLISTMAP,
+#endif
 #ifdef DZ_Expansion_Market
 	COPYLISTEXPMARKET,
 #endif

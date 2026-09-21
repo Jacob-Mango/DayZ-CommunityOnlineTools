@@ -18,7 +18,7 @@ class JMCETypeData
 	int m_Cost      = -1;
 
 	//! Which types.xml this entry was parsed from - a mission can register
-	//! several (see Server_FindRegisteredTypesFiles). Save_ItemTypeInfo needs
+	//! several (see Exec_FindRegisteredTypesFiles). Save_ItemTypeInfo needs
 	//! this to know which file to patch; nothing else reads it.
 	string m_SourceFile;
 
@@ -71,28 +71,20 @@ class JMLootItemTypeInfo
 class JMLootAnalysisModule: JMRenderableModuleBase
 {
 	// CE data cached at startup (server only)
-	private ref map<string, ref JMCETypeData>  m_CETypes;       // classname -> type data
-	private ref map<string, ref JMCEGroupProto> m_CEProtos;     // group name -> gprProto data
-	private ref map<string, ref array<vector>>  m_CEPositions;  // group name -> world positions
-	private bool m_CEDataLoaded = false;
+	protected ref map<string, ref JMCETypeData>  m_CETypes;       // classname -> type data
+	protected ref map<string, ref JMCEGroupProto> m_CEProtos;     // group name -> gprProto data
+	protected ref map<string, ref array<vector>>  m_CEPositions;  // group name -> world positions
+	protected bool m_CEDataLoaded = false;
 
 	//! Classname the last RequestItemScan was for (client only). The scan
 	//! reply carries per-entity health/quantity/lifetime/attachments but not
 	//! the classname itself - every entity in one reply is the same class the
 	//! client already asked for, so it is cheaper to remember it here than to
 	//! round-trip it back over the RPC.
-	private string m_LastScanClassName;
+	protected string m_LastScanClassName;
 
 	void JMLootAnalysisModule()
 	{
-		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_VIEW);
-		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN);
-		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION);
-		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_DELETE);
-		//! Separate from Delete: writing to the server's own types.xml is a
-		//! different order of trust than deleting spawned entities.
-		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_EDIT);
-
 		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemScan", this, SingeplayerExecutionType.Both);
 		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SendItemScanResults", this, SingeplayerExecutionType.Both);
 		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestLootDistribution", this, SingeplayerExecutionType.Both);
@@ -103,51 +95,34 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemTypeInfo", this, SingeplayerExecutionType.Both);
 	}
 
-	override bool HasAccess()
+	//! Called on both client and server as the module registers, before the mission loads.
+	override void DeclarePermissions()
 	{
-		return JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_VIEW);
+		super.DeclarePermissions();
+
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_VIEW);
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN);
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION);
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_DELETE);
+		//! Separate from Delete: writing to the server's own types.xml is a
+		//! different order of trust than deleting spawned entities.
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_EDIT);
 	}
 
-	override string GetLayoutRoot()
+	override void DescribeModule( JMModuleInfo info )
 	{
-		return "JM/COT/GUI/layouts/loot_analysis_form.layout";
-	}
+		super.DescribeModule( info );
 
-	override string GetCategory()
-	{
-		return "World";
-	}
+		info.Title = "Loot Analysis";
+		info.WebhookTitle = "Loot Analysis";
+		info.Icon = "package-search";
+		info.Layout = "JM/COT/GUI/layouts/loot_analysis_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_WORLD;
+		info.ViewPermission = JMConstants.PERM_LOOTANALYSIS_VIEW;
 
-	override string GetTitle()
-	{
-		return "Loot Analysis";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "package-search" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Loot Analysis";
-	}
-
-	override void GetWebhookTypes( out array<string> types )
-	{
-		types.Insert( "ItemScan"     );
-		types.Insert( "Distribution" );
-		types.Insert( "Delete"       );
+		info.AddWebhookType( "ItemScan" );
+		info.AddWebhookType( "Distribution" );
+		info.AddWebhookType( "Delete" );
 	}
 
 	// -----------------------------------------------------------------------
@@ -159,18 +134,18 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 
 		if (IsMissionHost())
-			Server_LoadCEData();
+			Exec_LoadCEData();
 	}
 
-	private void Server_LoadCEData()
+	protected void Exec_LoadCEData()
 	{
 		m_CETypes     = new map<string, ref JMCETypeData>;
 		m_CEProtos    = new map<string, ref JMCEGroupProto>;
 		m_CEPositions = new map<string, ref array<vector>>;
 
-		Server_ParseAllTypesXml();
-		Server_ParseMapGroupProtoXml();
-		Server_ParseMapGroupPosXml();
+		Exec_ParseAllTypesXml();
+		Exec_ParseMapGroupProtoXml();
+		Exec_ParseMapGroupPosXml();
 
 		m_CEDataLoaded = true;
 	}
@@ -188,17 +163,17 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//
 	// Parsing only the hardcoded path silently drops every modded item from the
 	// analysis. See docs/audits/2026-07-15-todo-mods-audit.md.
-	private void Server_ParseAllTypesXml()
+	protected void Exec_ParseAllTypesXml()
 	{
 		array<string> files = new array<string>;
 		files.Insert("$mission:db/types.xml");
 
-		Server_FindRegisteredTypesFiles(files);
+		Exec_FindRegisteredTypesFiles(files);
 
 		int parsed = 0;
 		foreach (string path : files)
 		{
-			if (Server_ParseTypesXml(path))
+			if (Exec_ParseTypesXml(path))
 				parsed++;
 		}
 
@@ -208,7 +183,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// Walk cfgeconomycore.xml for <ce folder="X"><file name="Y" type="types"/>
 	// and append $mission:X/Y for each. A missing or ce-less cfgeconomycore is
 	// normal (vanilla missions have none) -- not an error.
-	private void Server_FindRegisteredTypesFiles(inout array<string> files)
+	protected void Exec_FindRegisteredTypesFiles(inout array<string> files)
 	{
 		CF_XML_Document coreDoc;
 		if (!CF_XML.ReadDocument("$mission:cfgeconomycore.xml", coreDoc))
@@ -271,7 +246,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//     <usage name="Military"/>
 	//   </type>
 	// </types>
-	private bool Server_ParseTypesXml(string path)
+	protected bool Exec_ParseTypesXml(string path)
 	{
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument(path, doc))
@@ -379,7 +354,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//! CF_XML has no GetText()/GetInnerText(); the inner text is reached by
 	//! calling GetContent() twice - once on the CF_XML_Tag to get its child
 	//! CF_XML_Element, once on that element to get the string it holds.
-	private int ParseIntTag(CF_XML_Element parent, string tagName, int defaultVal = -1)
+	protected int ParseIntTag(CF_XML_Element parent, string tagName, int defaultVal = -1)
 	{
 		array<CF_XML_Tag> tags = parent.Get(tagName);
 		if (!tags || tags.Count() == 0)
@@ -403,7 +378,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//     <usage name="Farm"/>
 	//   </group>
 	// </prototype>
-	private void Server_ParseMapGroupProtoXml()
+	protected void Exec_ParseMapGroupProtoXml()
 	{
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument("$mission:mapgroupproto.xml", doc))
@@ -469,7 +444,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// <map>
 	//   <group name="Land_Shed_M1" pos="80.26 113.79 4422.18" .../>
 	// </map>
-	private void Server_ParseMapGroupPosXml()
+	protected void Exec_ParseMapGroupPosXml()
 	{
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument("$mission:mapgrouppos.xml", doc))
@@ -528,13 +503,13 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// -----------------------------------------------------------------------
 
 	// Client -> Server: Request item scan
-	private void RPC_RequestItemScan(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	protected void RPC_RequestItemScan(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		JMPlayerInstance instance;
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance))
+		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance))
 			return;
 
 		Param1<string> data;
@@ -548,8 +523,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log(senderRPC, "Item scan: " + className);
 		SendWebhook("ItemScan", instance, "Scanned for: " + className);
 
-		Server_ScanItems(className, senderRPC);
-		Server_SendItemTypeInfo(className, senderRPC);
+		Exec_ScanItems(className, senderRPC);
+		Exec_SendItemTypeInfo(className, senderRPC);
 	}
 
 	// Server -> Client: Send item scan results
@@ -560,26 +535,26 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// primitive arrays are the pattern AddDistributionMarkers already proved
 	// working for per-marker usage types. Attachments are ";"-joined per
 	// entity, one string per entry, and split back out client-side.
-	private void RPC_SendItemScanResults(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	protected void RPC_SendItemScanResults(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		if (!JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN))
 			return;
 
-		Param7<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>> data;
+		Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>> data;
 		if (!ctx.Read(data))
 			return;
 
-		Client_ShowItemsOnMap(data.param1, data.param2, data.param3, data.param4, data.param5, data.param6, data.param7);
+		Client_ShowItemsOnMap(data.param1, data.param2, data.param3, data.param4, data.param5, data.param6, data.param7, data.param8);
 	}
 
 	// Client -> Server: Request loot distribution (CE spawn locations)
-	private void RPC_RequestLootDistribution(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	protected void RPC_RequestLootDistribution(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		JMPlayerInstance instance;
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance))
+		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance))
 			return;
 
 		Param1<string> data;
@@ -596,14 +571,14 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log(senderRPC, "CE spawn lookup: " + className);
 		SendWebhook("Distribution", instance, "CE spawn lookup: " + className);
 
-		Server_GetCESpawnLocations(className, senderRPC);
-		Server_SendItemTypeInfo(className, senderRPC);
+		Exec_GetCESpawnLocations(className, senderRPC);
+		Exec_SendItemTypeInfo(className, senderRPC);
 	}
 
 	// Server -> Client: Send CE spawn-location markers, one entry per matching
 	// building group position, each tagged with the usage that matched it so
 	// the client can colour/legend markers by spawn type.
-	private void RPC_SendLootSpawnLocations(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	protected void RPC_SendLootSpawnLocations(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		if (!JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION))
 			return;
@@ -617,7 +592,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	// Server -> Client: Send the CE tuning values for the classname a scan or
 	// distribution request just asked about - feeds the form's stats panel.
-	private void RPC_SendItemTypeInfo(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	protected void RPC_SendItemTypeInfo(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		Param1<ref JMLootItemTypeInfo> data;
 		if (!ctx.Read(data))
@@ -629,7 +604,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	}
 
 	// Client -> Server: Delete all items of type
-	private void RPC_DeleteAllItems(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	protected void RPC_DeleteAllItems(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		if (!senderRPC)
 			return;
@@ -659,13 +634,13 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	// Client -> Server: Save edited Nominal/Min/Lifetime/Restock back to the
 	// classname's source types.xml.
-	private void RPC_SaveItemTypeInfo(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	protected void RPC_SaveItemTypeInfo(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		JMPlayerInstance instance;
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_EDIT, senderRPC, instance))
+		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_EDIT, senderRPC, instance))
 			return;
 
 		Param5<string, int, int, int, int> data;
@@ -676,7 +651,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (className == "")
 			return;
 
-		bool ok = Server_SaveTypeXmlValues(className, data.param2, data.param3, data.param4, data.param5);
+		bool ok = Exec_SaveTypeXmlValues(className, data.param2, data.param3, data.param4, data.param5);
 
 		if (ok)
 		{
@@ -691,21 +666,21 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 		//! Re-send fresh info either way, so the card reflects exactly what
 		//! is now on disk (or the untouched values, if the save failed).
-		Server_SendItemTypeInfo(className, senderRPC);
+		Exec_SendItemTypeInfo(className, senderRPC);
 	}
 
 	// Client -> Server: reload Item Info for a classname without re-running a
 	// scan or distribution search - the header Reload button. Gated on either
 	// Loot Analysis permission rather than one specific tab's, since the same
 	// button exists on both Item Scan's and Distribution's Item Info card.
-	private void RPC_RequestItemTypeInfo(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	protected void RPC_RequestItemTypeInfo(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		JMPlayerInstance instance;
 		if (!senderRPC)
 			return;
 
-		bool canScan = GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance);
-		bool canDist = GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance);
+		bool canScan = JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance);
+		bool canDist = JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance);
 		if (!canScan && !canDist)
 			return;
 
@@ -717,7 +692,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (className == "")
 			return;
 
-		Server_SendItemTypeInfo(className, senderRPC);
+		Exec_SendItemTypeInfo(className, senderRPC);
 	}
 
 	// -----------------------------------------------------------------------
@@ -725,7 +700,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// -----------------------------------------------------------------------
 
 	// Server: Scan for spawned items and send positions to client
-	private void Server_ScanItems(string className, PlayerIdentity senderRPC)
+	protected void Exec_ScanItems(string className, PlayerIdentity senderRPC)
 	{
 		array<EntityAI> found = new array<EntityAI>;
 		JMEntityTracker.GetByClassname(className, found);
@@ -746,6 +721,11 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		array<float> quantityPct = new array<float>;
 		array<int> lifetimeSeconds = new array<int>;
 		array<string> attachmentsJoined = new array<string>;
+
+		//! One string per entity: the entity's own preview state, then one per attachment (same order as
+		//! attachmentsJoined), ";"-separated - see JMLootPreviewState. Lets the client draw the model as
+		//! it really is (ruined, half-eaten, rotten) instead of pristine.
+		array<string> previewStates = new array<string>;
 
 		//! -1 for anything that is not a firearm - same "N/A" sentinel every
 		//! other per-entity stat here uses. A firearm's own GetQuantityNormalized()
@@ -837,6 +817,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 			}
 
 			string attachCsv = "";
+			string stateCsv = JMLootPreviewState.FromEntity(entity).Encode();
 			int attachCount = entity.GetInventory().AttachmentCount();
 			for (int a = 0; a < attachCount; a++)
 			{
@@ -847,18 +828,20 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 				if (attachCsv != "")
 					attachCsv += ";";
 				attachCsv += attachment.GetType();
+				stateCsv += ";" + JMLootPreviewState.FromEntity(attachment).Encode();
 			}
 			attachmentsJoined.Insert(attachCsv);
+			previewStates.Insert(stateCsv);
 
 			names.Insert(displayName);
 			positions.Insert(entity.GetPosition());
 		}
 
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", new Param7<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>>(names, positions, healthPct, quantityPct, lifetimeSeconds, attachmentsJoined, ammoCount), true, senderRPC);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", new Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>>(names, positions, healthPct, quantityPct, lifetimeSeconds, attachmentsJoined, ammoCount, previewStates), true, senderRPC);
 	}
 
 	// Server: Find CE potential spawn locations for a classname using XML data
-	private void Server_GetCESpawnLocations(string className, PlayerIdentity senderRPC)
+	protected void Exec_GetCESpawnLocations(string className, PlayerIdentity senderRPC)
 	{
 		if (!m_CEDataLoaded)
 		{
@@ -964,7 +947,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// client's stats panel. A miss (no CE data loaded, or the item is not in
 	// types.xml) still sends a reply - m_Found = false - so the panel can say
 	// so instead of showing stale numbers from the previous lookup.
-	private void Server_SendItemTypeInfo(string className, PlayerIdentity senderRPC)
+	protected void Exec_SendItemTypeInfo(string className, PlayerIdentity senderRPC)
 	{
 		JMLootItemTypeInfo info = new JMLootItemTypeInfo();
 		info.m_ClassName = className;
@@ -1003,7 +986,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//  cannot touch anything it was not told to.
 	// -----------------------------------------------------------------------
 
-	private bool Server_SaveTypeXmlValues(string className, int nominal, int min, int lifetime, int restock)
+	protected bool Exec_SaveTypeXmlValues(string className, int nominal, int min, int lifetime, int restock)
 	{
 		string key = className;
 		key.ToLower();
@@ -1024,7 +1007,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		string path = typeData.m_SourceFile;
 
 		string content;
-		if (!Server_ReadFileText(path, content))
+		if (!Exec_ReadFileText(path, content))
 		{
 			Print("[LootAnalysis] Save failed: could not read " + path);
 			return false;
@@ -1061,11 +1044,11 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 		//! Backed up before the live file is touched - the one file operation
 		//! here that must never be skipped.
-		Server_WriteFileText(path + ".bak", content);
+		Exec_WriteFileText(path + ".bak", content);
 
 		string newContent = content.Substring(0, typeStart) + newBlock + content.Substring(blockEnd, content.Length() - blockEnd);
 
-		if (!Server_WriteFileText(path, newContent))
+		if (!Exec_WriteFileText(path, newContent))
 		{
 			Print("[LootAnalysis] Save failed: could not write " + path);
 			return false;
@@ -1089,7 +1072,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//! the tag is not present at all rather than inventing one - a type with
 	//! no <min> today gets no <min> written in, matching how ParseIntTag
 	//! reads it as -1 rather than 0.
-	private string ReplaceTagValue(string block, string tagName, int newValue)
+	protected string ReplaceTagValue(string block, string tagName, int newValue)
 	{
 		string openTag  = "<" + tagName + ">";
 		string closeTag = "</" + tagName + ">";
@@ -1112,7 +1095,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//! Whole-file read via the engine's line-based FGets, rejoined with "\n" -
 	//! the only text file I/O this engine exposes from script (see
 	//! JMLoadoutModule's own loadout loader for the same pattern).
-	private bool Server_ReadFileText(string path, out string content)
+	protected bool Exec_ReadFileText(string path, out string content)
 	{
 		if (!FileExist(path))
 			return false;
@@ -1138,7 +1121,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		return true;
 	}
 
-	private bool Server_WriteFileText(string path, string content)
+	protected bool Exec_WriteFileText(string path, string content)
 	{
 		FileHandle handle = OpenFile(path, FileMode.WRITE);
 		if (!handle)
@@ -1154,7 +1137,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// -----------------------------------------------------------------------
 
 	// Client: Show item scan results on the Item Scan tab's map
-	private void Client_ShowItemsOnMap(array<string> itemNames, array<vector> itemPositions, array<float> healthPct, array<float> quantityPct, array<int> lifetimeSeconds, array<string> attachmentsJoined, array<int> ammoCount)
+	protected void Client_ShowItemsOnMap(array<string> itemNames, array<vector> itemPositions, array<float> healthPct, array<float> quantityPct, array<int> lifetimeSeconds, array<string> attachmentsJoined, array<int> ammoCount, array<string> previewStates)
 	{
 		if (itemNames.Count() != itemPositions.Count())
 			return;
@@ -1187,7 +1170,22 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 			if (i < ammoCount.Count())
 				ammo = ammoCount[i];
 
-			details.Insert(new JMLootScanItemDetail(m_LastScanClassName, health, quantity, lifetime, attachments, ammo));
+			JMLootScanItemDetail detail = new JMLootScanItemDetail(m_LastScanClassName, health, quantity, lifetime, attachments, ammo);
+
+			//! First token is the item's own state, then one per attachment.
+			if (i < previewStates.Count())
+			{
+				TStringArray stateTokens = new TStringArray;
+				previewStates[i].Split(";", stateTokens);
+
+				if (stateTokens.Count() > 0)
+					detail.m_State = JMLootPreviewState.Decode(stateTokens[0]);
+
+				for (int t = 1; t < stateTokens.Count(); t++)
+					detail.m_AttachmentStates.Insert(JMLootPreviewState.Decode(stateTokens[t]));
+			}
+
+			details.Insert(detail);
 		}
 
 		form.AddItemScanMarkers(itemNames, itemPositions, details);
@@ -1196,7 +1194,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	}
 
 	// Client: Show CE spawn-location results on the Distribution tab's map
-	private void Client_ShowLootSpawnLocations(array<string> names, array<vector> positions, array<string> types)
+	protected void Client_ShowLootSpawnLocations(array<string> names, array<vector> positions, array<string> types)
 	{
 		if (names.Count() != positions.Count())
 			return;
@@ -1230,7 +1228,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	}
 
 	//! Edited Nominal/Min/Lifetime/Restock, patched into className's source
-	//! types.xml server-side - see Server_SaveTypeXmlValues.
+	//! types.xml server-side - see Exec_SaveTypeXmlValues.
 	void SaveItemTypeInfo(string className, int nominal, int min, int lifetime, int restock)
 	{
 		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SaveItemTypeInfo", new Param5<string, int, int, int, int>(className, nominal, min, lifetime, restock), true);

@@ -1,24 +1,25 @@
 #ifdef JM_CommunityOnlineTools
-// Example: Creating a standalone module and registering custom permissions
+// Example: a sidebar module. Everything a module needs is one small override each;
+// the form it opens is JMCustomExampleForm.c and it is loaded by Ex_ModuleRegistration.c.
 class JMCustomExampleModule: JMRenderableModuleBase
 {
-	void JMCustomExampleModule()
+	// Called on client AND server before the mission loads - no constructor needed.
+	override void DeclarePermissions()
 	{
-		// Always use static string constants from JMConstants for permission registration
-		GetPermissionsManager().RegisterPermission( JMConstants.PERM_CUSTOM_VIEW );
-		GetPermissionsManager().RegisterPermission( JMConstants.PERM_CUSTOM_ACTION );
-		GetPermissionsManager().RegisterPermission( JMConstants.PERM_RPC_EXECUTE );
-		GetPermissionsManager().RegisterPermission( JMConstants.PERM_PLAYER_INJECTED_PANEL );
+		JMPermissions.Register( JMConstants.PERM_CUSTOM_VIEW );
+		JMPermissions.Register( JMConstants.PERM_CUSTOM_ACTION );
+		JMPermissions.Register( JMConstants.PERM_PLAYER_INJECTED_TAB );
+		JMPermissions.Register( JMConstants.PERM_PLAYER_INJECTED_PANEL );
 	}
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( JMConstants.PERM_CUSTOM_VIEW );
+		return JMPermissions.Has( JMConstants.PERM_CUSTOM_VIEW );
 	}
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/GUI/layouts/Example_form.layout";
+		return "JM/COT/ExampleScriptOverride/GUI/layouts/JMCustomExampleForm.layout";
 	}
 
 	override string GetTitle()
@@ -26,35 +27,20 @@ class JMCustomExampleModule: JMRenderableModuleBase
 		return "Custom Sub-Mod Module";
 	}
 
-	// Module Category in the COT Sidebar navigation
 	override string GetCategory()
 	{
 		return "Custom Addons";
 	}
 
-	override string GetIconName()
+	// One Lucide icon name replaces GetIconName + ImageIsIcon + ImageHasPath.
+	override string GetLucideIcon()
 	{
-		return JMConstants.Lucide( "sparkles" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
+		return "sparkles";
 	}
 
 	override string GetWebhookTitle()
 	{
 		return "Custom Sub-Mod Module";
-	}
-
-	override void GetWebhookTypes( out array< string > types )
-	{
-		types.Insert( "CustomAction" );
 	}
 }
 #endif

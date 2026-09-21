@@ -4,8 +4,55 @@
 
 class JMBanForm : JMFormBase
 {
+    //! Tab indices - what the strip's AddTab() returned for each tab, never written as numbers.
+    protected int m_TabIdBans;
+    protected int m_TabIdOffline;
+
     // Duration presets
     static const int DURATION_COUNT = 8;
+
+    // -------------------------------------------------------------------------
+    //  Widgets
+    // -------------------------------------------------------------------------
+
+    protected UIActionTabs                  m_Tabs;
+    protected Widget                        m_TabListPanel;
+    protected Widget                        m_TabOfflinePanel;
+
+    //! Per-tab logic, one class per tab file - JMBanFormTabBans.c /
+    //! JMBanFormTabOffline.c. protected, not private: sub-mods reach for
+    //! these through the form.
+    protected ref JMBanFormTabBans    m_TabBans;
+    protected ref JMBanFormTabOffline m_TabOffline;
+    protected ref UIActionFlexRow         m_SearchRow;
+    // Shared search bar (filters both dropdown and ban list)
+    protected UIActionSearchBox             m_SearchBar;
+
+    // Action toolbar (above ban list) - lives outside any tab's content panel,
+    // so its click handlers stay on the form and forward into JMBanFormTabBans.
+    protected UIActionButton                m_EditDurationBtn;
+    protected UIActionConfirmInline         m_UnbanBtn;
+
+    // Pending flow state for the offline-ban confirmation chain
+    // (OnClick_ManualBan(Selected) -> OnManualBan_GotSteamID -> OpenBanReasonPopup
+    // -> OnManualBan_GotReason). Public: JMBanFormTabOffline writes it, and it
+    // has to stay readable by the confirmation-callback methods below, which
+    // in turn have to stay on the form - JMConfirmation dispatches its named
+    // callbacks against whatever object it was Init()'d with, not against
+    // whichever widget/tab raised the popup, so moving these off the form
+    // would silently break the callback.
+    string                        m_PendingSteamID;
+    string                        m_PendingPlayerName;
+
+    // Known players (from the last ban-list RPC), needed both by the Offline
+    // tab's dropdown and by this form's own OnManualBan_GotSteamID lookup.
+    ref array<string>                 m_KnownGuids    = new array<string>();
+    ref array<string>                 m_KnownNames    = new array<string>();
+
+    //! protected, not private: sub-mods reach for the module through the form.
+    //! Also read directly by JMBanFormTabBans/JMBanFormTabOffline through
+    //! their back-reference, which needs public rather than protected.
+    JMBanModule                 m_Module;
 
     static string GetDurationLabel( int idx )
     {
@@ -40,51 +87,24 @@ class JMBanForm : JMFormBase
     }
 
     // -------------------------------------------------------------------------
-    //  Widgets
+    //  Toolbar - lives above the tab strip, so its handlers stay here and
+    //  forward into whichever tab actually owns the selection/duration state.
     // -------------------------------------------------------------------------
 
-    protected UIActionTabs                  m_Tabs;
-    protected Widget                        m_TabListPanel;
-    protected Widget                        m_TabOfflinePanel;
+    void SetToolbarEnabled( bool enabled )
+    {
+        if ( m_EditDurationBtn )
+        {
+            if ( enabled ) m_EditDurationBtn.Enable();
+            else           m_EditDurationBtn.Disable();
+        }
 
-    static const int TAB_BANS    = 0;
-    static const int TAB_OFFLINE = 1;
-
-    //! Per-tab logic, one class per tab file - JMBanFormTabBans.c /
-    //! JMBanFormTabOffline.c. protected, not private: sub-mods reach for
-    //! these through the form.
-    protected ref JMBanFormTabBans    m_TabBans;
-    protected ref JMBanFormTabOffline m_TabOffline;
-
-    protected ref UIActionFlexRow         m_SearchRow;
-    // Shared search bar (filters both dropdown and ban list)
-    protected UIActionSearchBox             m_SearchBar;
-
-    // Action toolbar (above ban list) - lives outside any tab's content panel,
-    // so its click handlers stay on the form and forward into JMBanFormTabBans.
-    protected UIActionButton                m_EditDurationBtn;
-    protected UIActionConfirmInline         m_UnbanBtn;
-
-    // Pending flow state for the offline-ban confirmation chain
-    // (OnClick_ManualBan(Selected) -> OnManualBan_GotSteamID -> OpenBanReasonPopup
-    // -> OnManualBan_GotReason). Public: JMBanFormTabOffline writes it, and it
-    // has to stay readable by the confirmation-callback methods below, which
-    // in turn have to stay on the form - JMConfirmation dispatches its named
-    // callbacks against whatever object it was Init()'d with, not against
-    // whichever widget/tab raised the popup, so moving these off the form
-    // would silently break the callback.
-    string                        m_PendingSteamID;
-    string                        m_PendingPlayerName;
-
-    // Known players (from the last ban-list RPC), needed both by the Offline
-    // tab's dropdown and by this form's own OnManualBan_GotSteamID lookup.
-    ref array<string>                 m_KnownGuids    = new array<string>();
-    ref array<string>                 m_KnownNames    = new array<string>();
-
-    //! protected, not private: sub-mods reach for the module through the form.
-    //! Also read directly by JMBanFormTabBans/JMBanFormTabOffline through
-    //! their back-reference, which needs public rather than protected.
-    JMBanModule                 m_Module;
+        if ( m_UnbanBtn )
+        {
+            if ( enabled ) m_UnbanBtn.Enable();
+            else           m_UnbanBtn.Disable();
+        }
+    }
 
     // -------------------------------------------------------------------------
     //  SetModule
@@ -96,10 +116,10 @@ class JMBanForm : JMFormBase
     }
 
     // -------------------------------------------------------------------------
-    //  OnInit
+    //  OnCreate
     // -------------------------------------------------------------------------
 
-    override void OnInit()
+    override void OnCreate()
     {
         InitWidgetsTop();
         InitWidgetsBottom();
@@ -112,43 +132,23 @@ class JMBanForm : JMFormBase
     {
         Widget top = layoutRoot.FindAnyWidget( "panel_top" );
 
-        m_SearchRow = UIActionManager.CreateFlexRow( top, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-        Widget topRow = m_SearchRow.GetContent();
+        JMSearchRow toolbar = UIActionManager.CreateSearchFlexRow( top, "Search name / SteamID...", this, "OnChange_Search", "OnClick_Refresh" );
 
-        UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( topRow, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
-        if ( refreshBtn )
-        {
-            refreshBtn.SetFixedSize( 30, 30 );
-            m_SearchRow.Add( refreshBtn );
-        }
-
-        m_SearchBar = UIActionManager.CreateSearchBox( topRow, this, "OnChange_Search", "Search name / SteamID..." );
-        if ( m_SearchBar )
-        {
-            m_SearchBar.SetFlex( 1.0, 60 );
-            m_SearchRow.Add( m_SearchBar );
-        }
-
-        m_SearchRow.SetGap( 14 );
+        m_SearchRow = toolbar.Row;
+        m_SearchBar = toolbar.Search;
 
         // Toolbar: Unban (delete-style icon) + Edit Duration. Both act on the
         // checked rows, so they belong with the filter, above the grid.
         Widget toolbarRow = UIActionManager.CreateWrapSpacer( top, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-        m_UnbanBtn = UIActionManager.CreateConfirmInline( toolbarRow, "", this, "OnClick_Unban" );
-        UIActionIconGrid.ApplyDeletePreset( m_UnbanBtn );
-        m_UnbanBtn.SetButton( "" );
-        m_UnbanBtn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
-        m_UnbanBtn.CenterIcon( ICON_BUTTON_PX, 16 );
-        m_UnbanBtn.SetConfirmLabel( "O" );
-        m_UnbanBtn.SetCancelLabel( "X" );
-        m_UnbanBtn.SetTooltip( "Lift the selected ban(s) immediately" );
+        m_UnbanBtn = UIActionManager.CreateDeleteConfirmIcon( toolbarRow, this, "OnClick_Unban" );
+        m_UnbanBtn.SetTooltip( "#STR_COT_BANMANAGER_LIFT_THE_SELECTED_BAN_S_IMMEDIATELY" );
         m_UnbanBtn.Disable();
 
-        m_EditDurationBtn = UIActionManager.CreateButton( toolbarRow, "Edit Duration", this, "OnClick_EditDuration" );
+        m_EditDurationBtn = UIActionManager.CreateButton( toolbarRow, "#STR_COT_BANMANAGER_EDIT_DURATION", this, "OnClick_EditDuration" );
         m_EditDurationBtn.SetWidth( 1.0 );
         m_EditDurationBtn.Disable();
-        m_EditDurationBtn.SetTooltip( "Change the duration of the selected ban(s)" );
+        m_EditDurationBtn.SetTooltip( "#STR_COT_BANMANAGER_CHANGE_THE_DURATION_OF_THE_SELECTED" );
 
         BindPermission( m_UnbanBtn, JMConstants.PERM_BAN_UNBAN );
     }
@@ -158,82 +158,62 @@ class JMBanForm : JMFormBase
         m_TabListPanel    = layoutRoot.FindAnyWidget( "ban_list_panel" );
         m_TabOfflinePanel = layoutRoot.FindAnyWidget( "ban_offline_panel" );
 
-        ref array<string> tabLabels = { "Active Bans", "Ban Offline Player" };
-        ref array<string> tabIcons  = { JMConstants.Lucide( "ban" ), JMConstants.Lucide( "user-x" ) };
 
-        m_Tabs = UIActionManager.CreateTabs( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), tabLabels, tabIcons, this, "OnChange_Tab" );
+        m_BottomTabStrip = layoutRoot.FindAnyWidget( "panel_bottom_tabs" );
+        m_BottomContent  = layoutRoot.FindAnyWidget( "panel_bottom_content" );
 
-        m_Tabs.AddContent( m_TabListPanel );
-        m_Tabs.AddContent( m_TabOfflinePanel );
+        m_Tabs = UIActionManager.CreateTabStrip( m_BottomTabStrip, this, "OnChange_Tab" );
 
-        InitTabState( 2 );
+        m_TabIdBans = m_Tabs.AddTab( "Active Bans", JMConstants.Lucide( "ban" ), m_TabListPanel );
+        m_TabIdOffline = m_Tabs.AddTab( "Ban Offline Player", JMConstants.Lucide( "user-x" ), m_TabOfflinePanel );
 
-        m_Tabs.SetSelection( TAB_BANS, false );
+        DeclareTabs( 2 );
 
-        BuildTabIfNeeded( TAB_BANS );
+        m_Tabs.SetSelection( m_TabIdBans, false );
+
+        InitTabFocus( m_TabIdBans );
     }
 
-    private void BuildTabIfNeeded( int tabIdx )
+    override protected void OnTabCreate( int tab, Widget panel )
     {
-        if ( !ShouldBuildTab( tabIdx ) )
-            return;
-
-        switch ( tabIdx )
+        if ( tab == m_TabIdBans )
         {
-            case TAB_BANS:
-                m_TabBans = new JMBanFormTabBans( this );
-                m_TabBans.Build( m_TabListPanel );
-                break;
-
-            case TAB_OFFLINE:
-                m_TabOffline = new JMBanFormTabOffline( this );
-                m_TabOffline.Build( m_TabOfflinePanel );
-                break;
+            m_TabBans = new JMBanFormTabBans( this );
+            RegisterTab( m_TabIdBans, m_TabBans );
+            m_TabBans.OnCreate( panel );
+        }
+        else if ( tab == m_TabIdOffline )
+        {
+            m_TabOffline = new JMBanFormTabOffline( this );
+            RegisterTab( m_TabIdOffline, m_TabOffline );
+            m_TabOffline.OnCreate( panel );
         }
     }
 
-    override int GetActiveTabIndex()
+    protected override COT_ScriptedWidgetEventHandler GetTabStrip()
     {
-        if ( !m_Tabs )
-            return -1;
-
-        return m_Tabs.GetSelection();
+    	return m_Tabs;
     }
 
     void OnChange_Tab( UIEvent eid, UIActionBase action )
     {
-        if ( eid != UIEvent.CHANGE )
-            return;
-
-        CloseAllOverlays();
-
-        BuildTabIfNeeded( GetActiveTabIndex() );
+        if ( eid == UIEvent.CHANGE )
+            HandleTabChange();
     }
 
     override void OnResize( float w, float h )
     {
         super.OnResize( w, h );
 
-        PinStripGeometry( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), layoutRoot.FindAnyWidget( "panel_bottom_content" ), h - 80, TAB_STRIP_HEIGHT );
+        PinBottomPanelGeometry( h - 80 );
 
-        if ( m_TabBans )
-            m_TabBans.OnResize();
-
-        if ( m_TabOffline )
-            m_TabOffline.OnResize();
+        ResizeTabs( w, h );
     }
 
     // -------------------------------------------------------------------------
-    //  OnShow
+    //  OnShow - the ban list is requested by the base OnShow() through
+    //  JMBanModule.RequestData(), so the form has nothing of its own to do.
     // -------------------------------------------------------------------------
-
-    override void OnShow()
-    {
-        super.OnShow();
-
-        if ( m_Module )
-            m_Module.RequestBanList();
-    }
 
     override void OnClientPermissionsUpdated()
     {
@@ -251,7 +231,7 @@ class JMBanForm : JMFormBase
             m_Module.RequestBanList();
     }
 
-    private string CurrentFilter()
+    protected string CurrentFilter()
     {
         if ( !m_SearchBar )
             return "";
@@ -282,26 +262,6 @@ class JMBanForm : JMFormBase
             m_TabBans.SetBans( bans, currentFilter );
     }
 
-    // -------------------------------------------------------------------------
-    //  Toolbar - lives above the tab strip, so its handlers stay here and
-    //  forward into whichever tab actually owns the selection/duration state.
-    // -------------------------------------------------------------------------
-
-    void SetToolbarEnabled( bool enabled )
-    {
-        if ( m_EditDurationBtn )
-        {
-            if ( enabled ) m_EditDurationBtn.Enable();
-            else           m_EditDurationBtn.Disable();
-        }
-
-        if ( m_UnbanBtn )
-        {
-            if ( enabled ) m_UnbanBtn.Enable();
-            else           m_UnbanBtn.Disable();
-        }
-    }
-
     void OnClick_EditDuration( UIEvent eid, UIActionBase action )
     {
         if ( eid != UIEvent.CLICK )
@@ -326,10 +286,6 @@ class JMBanForm : JMFormBase
     {
         if ( eid != UIEvent.CLICK )
             return;
-
-        UIActionButton btn;
-        if ( Class.CastTo( btn, action ) )
-            btn.TriggerSpin( 2 );
 
         if ( m_Module )
             m_Module.RequestBanList();
@@ -393,15 +349,15 @@ class JMBanForm : JMFormBase
         // release the focus lock before the chained CreateConfirmation_Two
         // tries to acquire it again). Workaround: defer the second popup
         // by one CallLater tick so the first modal is fully torn down.
-        GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( OpenBanReasonPopup, 50, false );
+        DeferCall( "OpenBanReasonPopup", 50 );
     }
 
-    private void OpenBanReasonPopup()
+    protected void OpenBanReasonPopup()
     {
         if ( m_PendingSteamID == "" )
             return;
 
-        CreateConfirmation_Two( JMConfirmationType.EDIT, "Ban Reason", "Reason for banning " + m_PendingPlayerName + " (" + m_PendingSteamID + "):", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnManualBan_GotReason" );
+        PromptInput( "#STR_COT_BANMANAGER_BAN_REASON", "Reason for banning " + m_PendingPlayerName + " (" + m_PendingSteamID + "):", "OnManualBan_GotReason" );
     }
 
     void OnManualBan_GotReason( JMConfirmation confirmation )

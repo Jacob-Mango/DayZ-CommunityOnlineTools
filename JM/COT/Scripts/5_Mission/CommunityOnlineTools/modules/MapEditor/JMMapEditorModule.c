@@ -40,10 +40,47 @@ class JMMapEditorModule : JMRenderableModuleBase
 		m_ServerObjects = new array< ref JMMapEditorObject >;
 		m_ClientObjects = new array< ref JMMapEditorObject >;
 
-		GetPermissionsManager().RegisterPermission( "Admin.MapEditor.View" );
-		GetPermissionsManager().RegisterPermission( "Admin.MapEditor.Spawn" );
-		GetPermissionsManager().RegisterPermission( "Admin.MapEditor.Transform" );
-		GetPermissionsManager().RegisterPermission( "Admin.MapEditor.Delete" );
+	}
+
+	// -----------------------------------------------------------------------
+	//  Public client-facing helpers (for the form)
+	// -----------------------------------------------------------------------
+
+	array< ref JMMapEditorObject > GetClientObjects()
+	{
+		return m_ClientObjects;
+	}
+
+	// Exposed so the form can tick the gizmo loop + dispatch click-to-place.
+	bool IsFreecamActive()
+	{
+		return m_FreecamActive;
+	}
+
+	override void DescribeModule( JMModuleInfo info )
+	{
+		super.DescribeModule( info );
+
+		info.Title = "#STR_COT_MAPEDITOR_MODULE_NAME";
+		info.WebhookTitle = "Map Editor Module";
+		info.Icon = "pencil-ruler";
+		info.Layout = "JM/COT/GUI/layouts/mapeditor_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_WORLD;
+		info.ViewPermission = JMConstants.PERM_MAPEDITOR_VIEW;
+		info.InputToggle = "UACOTToggleMapEditor";
+		// Temporarily hidden from the sidebar.
+		info.HasButton = false;
+		info.SetRPCRange( JMMapEditorModuleRPC.INVALID, JMMapEditorModuleRPC.COUNT );
+
+		//! Called on both client and server as the module registers, before the mission loads.
+		info.AddPermission( JMConstants.PERM_MAPEDITOR_SPAWN );
+		info.AddPermission( JMConstants.PERM_MAPEDITOR_TRANSFORM );
+		info.AddPermission( JMConstants.PERM_MAPEDITOR_DELETE );
+
+		info.AddWebhookType( "Spawn" );
+		info.AddWebhookType( "Transform" );
+		info.AddWebhookType( "Delete" );
+		info.AddWebhookType( "Clear" );
 	}
 
 	override void OnUpdate( float timeslice )
@@ -51,72 +88,6 @@ class JMMapEditorModule : JMRenderableModuleBase
 		// The JMFreecam itself ticks via EOnFrame. This OnUpdate is reserved
 		// for future editor-side per-frame work (gizmo dispatch, snap-to-grid,
 		// etc.). For now it's a no-op while the freecam is inactive or absent.
-	}
-
-	override bool HasAccess()
-	{
-		return GetPermissionsManager().HasPermission( "Admin.MapEditor.View" );
-	}
-
-	// Temporarily hidden from the sidebar.
-	override bool HasButton() { return false; }
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/mapeditor_form.layout";
-	}
-
-	override string GetInputToggle()
-	{
-		return "UACOTToggleMapEditor";
-	}
-
-	override string GetCategory()
-	{
-		return "World";
-	}
-
-	override string GetTitle()
-	{
-		return "#STR_COT_MAPEDITOR_MODULE_NAME";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "pencil-ruler" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Map Editor Module";
-	}
-
-	override void GetWebhookTypes( out array< string > types )
-	{
-		types.Insert( "Spawn" );
-		types.Insert( "Transform" );
-		types.Insert( "Delete" );
-		types.Insert( "Clear" );
-	}
-
-	override int GetRPCMin()
-	{
-		return JMMapEditorModuleRPC.INVALID;
-	}
-
-	override int GetRPCMax()
-	{
-		return JMMapEditorModuleRPC.COUNT;
 	}
 
 	override void EnableUpdate()
@@ -141,12 +112,6 @@ class JMMapEditorModule : JMRenderableModuleBase
 	void DetachFreecam()
 	{
 		// Placeholder -- see AttachFreecam().
-	}
-
-	// Exposed so the form can tick the gizmo loop + dispatch click-to-place.
-	bool IsFreecamActive()
-	{
-		return m_FreecamActive;
 	}
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
@@ -256,7 +221,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		JMMapEditorStore.Save( store );
 	}
 
-	private void SpawnAllFromStore()
+	protected void SpawnAllFromStore()
 	{
 		foreach ( JMMapEditorObject obj : m_ServerObjects )
 		{
@@ -286,14 +251,14 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.RequestList, true, NULL );
 	}
 
-	private void RPC_RequestList( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RequestList( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.View", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_VIEW, senderRPC, instance ) )
 			return;
 
 		SendListTo( senderRPC );
@@ -315,7 +280,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.SpawnObject, true, NULL );
 	}
 
-	private void RPC_SpawnObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_SpawnObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		string className;
 		vector pos;
@@ -340,13 +305,13 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Spawn", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_SPAWN, senderRPC, instance ) )
 			return;
 
 		Exec_SpawnObject( className, pos, ori, scale, senderRPC );
 	}
 
-	private void Exec_SpawnObject( string className, vector pos, vector ori, float scale, PlayerIdentity ident )
+	protected void Exec_SpawnObject( string className, vector pos, vector ori, float scale, PlayerIdentity ident )
 	{
 		Object o = GetGame().CreateObjectEx( className, pos, ECE_PLACE_ON_SURFACE );
 		if ( !o )
@@ -363,7 +328,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( ident, "MapEditor Spawned " + className + " at " + pos.ToString() + " scale=" + scale.ToString() );
 
 		JMPlayerInstance instance;
-		GetPermissionsManager().HasPermission( "Admin.MapEditor.Spawn", ident, instance );
+		JMPermissions.Has( JMConstants.PERM_MAPEDITOR_SPAWN, ident, instance );
 		SendWebhookColored( "Spawn", instance, "Spawned " + className + " at " + pos.ToString(), JMConstants.WEBHOOK_COLOR_SUCCESS );
 
 		// Refresh everyone's list so other admins see the new marker
@@ -394,7 +359,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.TransformObject, true, NULL );
 	}
 
-	private void RPC_TransformObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_TransformObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		int id;
 		vector pos;
@@ -413,13 +378,13 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Transform", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_TRANSFORM, senderRPC, instance ) )
 			return;
 
 		Exec_TransformObject( id, pos, ori, scale, senderRPC );
 	}
 
-	private void Exec_TransformObject( int id, vector pos, vector ori, float scale, PlayerIdentity ident )
+	protected void Exec_TransformObject( int id, vector pos, vector ori, float scale, PlayerIdentity ident )
 	{
 		JMMapEditorObject entry = FindEntryById( id );
 		if ( !entry )
@@ -451,7 +416,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( ident, "MapEditor Transformed id=" + id.ToString() + " " + entry.ClassName + " to " + pos.ToString() );
 
 		JMPlayerInstance instance;
-		GetPermissionsManager().HasPermission( "Admin.MapEditor.Transform", ident, instance );
+		JMPermissions.Has( JMConstants.PERM_MAPEDITOR_TRANSFORM, ident, instance );
 		SendWebhookColored( "Transform", instance, "Transformed " + entry.ClassName + " (id=" + id.ToString() + ") to " + pos.ToString(), JMConstants.WEBHOOK_COLOR_NEUTRAL );
 
 		BroadcastList();
@@ -470,20 +435,20 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.DeleteObject, true, NULL );
 	}
 
-	private void RPC_DeleteObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_DeleteObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		int id;
 		if ( !ctx.Read( id ) ) return;
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Delete", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_DELETE, senderRPC, instance ) )
 			return;
 
 		Exec_DeleteObject( id, senderRPC );
 	}
 
-	private void Exec_DeleteObject( int id, PlayerIdentity ident )
+	protected void Exec_DeleteObject( int id, PlayerIdentity ident )
 	{
 		JMMapEditorObject entry = FindEntryById( id );
 		if ( !entry )
@@ -498,7 +463,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( ident, "MapEditor Deleted id=" + id.ToString() + " " + entry.ClassName );
 
 		JMPlayerInstance instance;
-		GetPermissionsManager().HasPermission( "Admin.MapEditor.Delete", ident, instance );
+		JMPermissions.Has( JMConstants.PERM_MAPEDITOR_DELETE, ident, instance );
 		SendWebhookColored( "Delete", instance, "Deleted " + entry.ClassName + " (id=" + id.ToString() + ")", JMConstants.WEBHOOK_COLOR_WARNING );
 
 		BroadcastList();
@@ -516,17 +481,17 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.ClearAll, true, NULL );
 	}
 
-	private void RPC_ClearAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_ClearAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Delete", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_DELETE, senderRPC, instance ) )
 			return;
 
 		Exec_ClearAll( senderRPC );
 	}
 
-	private void Exec_ClearAll( PlayerIdentity ident )
+	protected void Exec_ClearAll( PlayerIdentity ident )
 	{
 		int cleared = m_ServerObjects.Count();
 		foreach ( JMMapEditorObject entry : m_ServerObjects )
@@ -540,7 +505,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( ident, "MapEditor Cleared all (" + cleared.ToString() + " objects)" );
 
 		JMPlayerInstance instance;
-		GetPermissionsManager().HasPermission( "Admin.MapEditor.Delete", ident, instance );
+		JMPermissions.Has( JMConstants.PERM_MAPEDITOR_DELETE, ident, instance );
 		SendWebhookColored( "Clear", instance, "Cleared all map-editor objects (" + cleared.ToString() + ")", JMConstants.WEBHOOK_COLOR_DANGER );
 
 		BroadcastList();
@@ -574,11 +539,11 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.BulkTransform, true, NULL );
 	}
 
-	private void RPC_BulkTransform( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_BulkTransform( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Transform", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_TRANSFORM, senderRPC, instance ) )
 			return;
 
 		int count;
@@ -605,7 +570,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		Exec_BulkTransform( ids, dPos, dOri, dSc, senderRPC );
 	}
 
-	private void Exec_BulkTransform( array< int > ids, array< vector > dPos, array< vector > dOri, array< float > dScale, PlayerIdentity ident )
+	protected void Exec_BulkTransform( array< int > ids, array< vector > dPos, array< vector > dOri, array< float > dScale, PlayerIdentity ident )
 	{
 		JMMapEditorUndoEntry undo = new JMMapEditorUndoEntry();
 		undo.Type = "Bulk";
@@ -646,11 +611,11 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.BulkDelete, true, NULL );
 	}
 
-	private void RPC_BulkDelete( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_BulkDelete( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Delete", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_DELETE, senderRPC, instance ) )
 			return;
 
 		int count;
@@ -668,7 +633,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		Exec_BulkDelete( ids, senderRPC );
 	}
 
-	private void Exec_BulkDelete( array< int > ids, PlayerIdentity ident )
+	protected void Exec_BulkDelete( array< int > ids, PlayerIdentity ident )
 	{
 		JMMapEditorUndoEntry undo = new JMMapEditorUndoEntry();
 		undo.Type = "Bulk";
@@ -704,7 +669,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		Exec_PasteCloned( pos, ori, scale, NULL );
 	}
 
-	private void Exec_CopyObject( int id, bool isCut, PlayerIdentity ident )
+	protected void Exec_CopyObject( int id, bool isCut, PlayerIdentity ident )
 	{
 		JMMapEditorObject entry = FindEntryById( id );
 		if ( !entry ) return;
@@ -736,7 +701,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		BroadcastList();
 	}
 
-	private void Exec_PasteCloned( vector pos, vector ori, float scale, PlayerIdentity ident )
+	protected void Exec_PasteCloned( vector pos, vector ori, float scale, PlayerIdentity ident )
 	{
 		if ( !m_ServerClipboard || m_ServerClipboard.Count() == 0 )
 			return;
@@ -789,25 +754,25 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.Redo, true, NULL );
 	}
 
-	private void RPC_Undo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Undo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Transform", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_TRANSFORM, senderRPC, instance ) )
 			return;
 		Exec_Undo( senderRPC );
 	}
 
-	private void RPC_Redo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Redo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Transform", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_TRANSFORM, senderRPC, instance ) )
 			return;
 		Exec_Redo( senderRPC );
 	}
 
-	private void Exec_Undo( PlayerIdentity ident )
+	protected void Exec_Undo( PlayerIdentity ident )
 	{
 		if ( !m_UndoStack || m_UndoStack.Count() == 0 )
 			return;
@@ -822,7 +787,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		BroadcastList();
 	}
 
-	private void Exec_Redo( PlayerIdentity ident )
+	protected void Exec_Redo( PlayerIdentity ident )
 	{
 		if ( !m_RedoStack || m_RedoStack.Count() == 0 )
 			return;
@@ -840,7 +805,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	// Apply the snapshot side of an undo entry. For undo, the Pre is
 	// restored; for redo, the Post is restored.  We rebuild the server
 	// state from scratch (delete missing, add new, update existing).
-	private void RestoreEntry( JMMapEditorUndoEntry entry, bool usePost )
+	protected void RestoreEntry( JMMapEditorUndoEntry entry, bool usePost )
 	{
 		array< ref JMMapEditorObject > snap;
 		if ( usePost )
@@ -894,7 +859,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		}
 	}
 
-	private void PushUndo( JMMapEditorUndoEntry entry )
+	protected void PushUndo( JMMapEditorUndoEntry entry )
 	{
 		if ( !m_UndoStack ) m_UndoStack = new array< ref JMMapEditorUndoEntry >;
 		m_UndoStack.Insert( entry );
@@ -905,7 +870,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	}
 
 	// Push the current state of the given ids into the target snapshot array
-	private void PushCurrentStates( array< int > ids, array< ref JMMapEditorObject > target )
+	protected void PushCurrentStates( array< int > ids, array< ref JMMapEditorObject > target )
 	{
 		foreach ( int id : ids )
 		{
@@ -919,7 +884,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 	// Apply a transform to the live entity and update the entry. mode == true
 	// forces re-spawn if the live entity is gone.
-	private void ApplyTransform( JMMapEditorObject entry, vector pos, vector ori, float scale, bool forceRespawn )
+	protected void ApplyTransform( JMMapEditorObject entry, vector pos, vector ori, float scale, bool forceRespawn )
 	{
 		Object o = FindLiveEntity( entry );
 		bool wasMissing = ( o == NULL );
@@ -939,7 +904,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	}
 
 	// Helper: delete an entry by id (server-side only)
-	private void DeleteById( int id )
+	protected void DeleteById( int id )
 	{
 		JMMapEditorObject entry = FindEntryById( id );
 		if ( !entry ) return;
@@ -953,14 +918,14 @@ class JMMapEditorModule : JMRenderableModuleBase
 	//  Server -> Client
 	// -----------------------------------------------------------------------
 
-	private void BroadcastList()
+	protected void BroadcastList()
 	{
 		// Push the updated list to every connected admin client.
 		// Client-side handling checks permissions so non-admins ignore.
 		SendListTo( NULL );
 	}
 
-	private void SendListTo( PlayerIdentity sender )
+	protected void SendListTo( PlayerIdentity sender )
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( m_ServerObjects.Count() );
@@ -975,7 +940,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 		rpc.Send( NULL, JMMapEditorModuleRPC.List, true, sender );
 	}
 
-	private void RPC_List( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_List( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 			return;
@@ -1011,19 +976,10 @@ class JMMapEditorModule : JMRenderableModuleBase
 	}
 
 	// -----------------------------------------------------------------------
-	//  Public client-facing helpers (for the form)
-	// -----------------------------------------------------------------------
-
-	array< ref JMMapEditorObject > GetClientObjects()
-	{
-		return m_ClientObjects;
-	}
-
-	// -----------------------------------------------------------------------
 	//  Internals
 	// -----------------------------------------------------------------------
 
-	private JMMapEditorObject FindEntryById( int id )
+	protected JMMapEditorObject FindEntryById( int id )
 	{
 		foreach ( JMMapEditorObject entry : m_ServerObjects )
 		{
@@ -1037,7 +993,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	// DayZ has no robust server-side entity lookup by classname + position at small radii,
 	// so we walk the tracked list and re-resolve by class. If the engine despawned
 	// the entity (network evict, lifetime expiry), the caller falls back to re-spawn.
-	private Object FindLiveEntity( JMMapEditorObject entry )
+	protected Object FindLiveEntity( JMMapEditorObject entry )
 	{
 		// Approximate match by class + position within 1.0m
 		array< Object > objs = new array< Object >;

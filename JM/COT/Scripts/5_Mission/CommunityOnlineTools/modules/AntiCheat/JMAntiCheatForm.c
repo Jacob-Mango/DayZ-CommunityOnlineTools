@@ -17,23 +17,22 @@
 
 class JMAntiCheatForm : JMFormBase
 {
-	static const int TAB_FLAGGED   = 0;
-	static const int TAB_KILLSTATS = 1;
+	//! Tab indices - what the strip's AddTab() returned for each tab, never written as numbers.
+	protected int m_TabIdFlagged;
+	protected int m_TabIdKillStats;
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	//! Also public enough (no modifier) for JMAntiCheatFormTabFlagged /
 	//! JMAntiCheatFormTabKillStats to reach it through their back-reference.
 	JMAntiCheatModule m_Module;
-
 	protected UIActionTabs m_Tabs;
 	protected Widget m_TabFlaggedPanel;
 	protected Widget m_TabKillStatsPanel;
 
 	//! One class per tab, in its own file - only this form constructs/
 	//! dispatches to them.
-	private ref JMAntiCheatFormTabFlagged   m_TabFlagged;
-	private ref JMAntiCheatFormTabKillStats m_TabKillStats;
-
+	protected ref JMAntiCheatFormTabFlagged   m_TabFlagged;
+	protected ref JMAntiCheatFormTabKillStats m_TabKillStats;
 	protected UIActionSearchBox m_NameFilter;
 
 	//! Score order, as the same icon toggle the player list uses for its sort
@@ -53,7 +52,7 @@ class JMAntiCheatForm : JMFormBase
 		return Class.CastTo( m_Module, mdl );
 	}
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		InitWidgetsTop();
 		InitWidgetsBottom();
@@ -77,7 +76,7 @@ class JMAntiCheatForm : JMFormBase
 		//! worst offender is the one an admin opened this view for.
 		m_SortToggle = UIActionManager.CreateImageButtonToggle( topRow, JMConstants.Lucide( "arrow-down-1-0" ), JMConstants.Lucide( "arrow-down-0-1" ), this, "OnClick_Sort" );
 		m_SortToggle.SetFixedSize( 30, 30 );
-		m_SortToggle.SetTooltip( "Sort by score - highest first / lowest first" );
+		m_SortToggle.SetTooltip( "#STR_COT_ANTICHEAT_SORT_BY_SCORE_HIGHEST_FIRST_LOWEST" );
 	}
 
 	protected void InitWidgetsBottom()
@@ -85,79 +84,58 @@ class JMAntiCheatForm : JMFormBase
 		m_TabFlaggedPanel   = layoutRoot.FindAnyWidget( "panel_flagged_players" );
 		m_TabKillStatsPanel = layoutRoot.FindAnyWidget( "panel_kill_stats" );
 
-		ref array<string> tabLabels = { "Active Flagged Players", "Combat & Precision Stats" };
-		ref array<string> tabIcons  = { JMConstants.Lucide( "shield-alert" ), JMConstants.Lucide( "crosshair" ) };
 
-		m_Tabs = UIActionManager.CreateTabs( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), tabLabels, tabIcons, this, "OnChange_Tab" );
+		m_BottomTabStrip = layoutRoot.FindAnyWidget( "panel_bottom_tabs" );
+		m_BottomContent  = layoutRoot.FindAnyWidget( "panel_bottom_content" );
 
-		m_Tabs.AddContent( m_TabFlaggedPanel );
-		m_Tabs.AddContent( m_TabKillStatsPanel );
+		m_Tabs = UIActionManager.CreateTabStrip( m_BottomTabStrip, this, "OnChange_Tab" );
 
-		InitTabState( 2 );
+		m_TabIdFlagged = m_Tabs.AddTab( "Active Flagged Players", JMConstants.Lucide( "shield-alert" ), m_TabFlaggedPanel );
+		m_TabIdKillStats = m_Tabs.AddTab( "Combat & Precision Stats", JMConstants.Lucide( "crosshair" ), m_TabKillStatsPanel );
 
-		m_Tabs.SetSelection( TAB_FLAGGED, false );
+		DeclareTabs( 2 );
 
-		BuildTabIfNeeded( TAB_FLAGGED );
+		m_Tabs.SetSelection( m_TabIdFlagged, false );
+
+		InitTabFocus( m_TabIdFlagged );
 	}
 
-	private void BuildTabIfNeeded( int tabIdx )
+	override protected void OnTabCreate( int tab, Widget panel )
 	{
-		if ( !ShouldBuildTab( tabIdx ) )
-			return;
-
-		switch ( tabIdx )
+		if ( tab == m_TabIdFlagged )
 		{
-			case TAB_FLAGGED:
-				m_TabFlagged = new JMAntiCheatFormTabFlagged( this );
-				m_TabFlagged.Build( m_TabFlaggedPanel );
-				break;
-
-			case TAB_KILLSTATS:
-				m_TabKillStats = new JMAntiCheatFormTabKillStats( this );
-				m_TabKillStats.Build( m_TabKillStatsPanel );
-				break;
+			m_TabFlagged = new JMAntiCheatFormTabFlagged( this );
+			RegisterTab( m_TabIdFlagged, m_TabFlagged );
+			m_TabFlagged.OnCreate( panel );
+		}
+		else if ( tab == m_TabIdKillStats )
+		{
+			m_TabKillStats = new JMAntiCheatFormTabKillStats( this );
+			RegisterTab( m_TabIdKillStats, m_TabKillStats );
+			m_TabKillStats.OnCreate( panel );
 		}
 
 		RebuildList();
 	}
 
-	override int GetActiveTabIndex()
+	protected override COT_ScriptedWidgetEventHandler GetTabStrip()
 	{
-		if ( !m_Tabs )
-			return -1;
-
-		return m_Tabs.GetSelection();
+		return m_Tabs;
 	}
 
 	void OnChange_Tab( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		CloseAllOverlays();
-
-		BuildTabIfNeeded( GetActiveTabIndex() );
+		if ( eid == UIEvent.CHANGE )
+			HandleTabChange();
 	}
 
 	override void OnResize( float w, float h )
 	{
 		super.OnResize( w, h );
 
-		PinStripGeometry( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), layoutRoot.FindAnyWidget( "panel_bottom_content" ), h * 0.88, TAB_STRIP_HEIGHT );
+		PinBottomPanelGeometry( h * 0.88 );
 
-		if ( m_TabFlagged )
-			m_TabFlagged.OnResize();
-
-		if ( m_TabKillStats )
-			m_TabKillStats.OnResize();
-	}
-
-	override void OnShow()
-	{
-		super.OnShow();
-
-		if ( m_Module )
-			m_Module.RequestFlags();
+		ResizeTabs( w, h );
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -175,10 +153,6 @@ class JMAntiCheatForm : JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
-
-		UIActionImageButton btn;
-		if ( Class.CastTo( btn, action ) )
-			btn.TriggerSpin( 2 );
 
 		if ( m_Module )
 			m_Module.RequestFlags();
@@ -202,7 +176,7 @@ class JMAntiCheatForm : JMFormBase
 		RebuildList();
 	}
 
-	private void RebuildList()
+	protected void RebuildList()
 	{
 		if ( !m_Module )
 			return;

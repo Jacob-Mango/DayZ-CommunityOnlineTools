@@ -15,10 +15,8 @@
 class JMAntiCheatFlagStore
 {
 	static const int CURRENT_VERSION = 1;
-
 	static const string DIR  = "$profile:CommunityOnlineTools\AntiCheat\\";
 	static const string FILE = "$profile:CommunityOnlineTools\AntiCheat\flags.json";
-
 	int Version;
 	ref array< ref JMAntiCheatFlag > Entries;
 

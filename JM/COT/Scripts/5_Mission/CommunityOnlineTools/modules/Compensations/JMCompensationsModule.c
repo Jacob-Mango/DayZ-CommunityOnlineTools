@@ -1,103 +1,6 @@
 class JMCompensationsModule: JMRenderableModuleBase
 {
-	private ref array< ref JMCompensationEntry > m_CachedCompensations;
-
-	void JMCompensationsModule()
-	{
-		GetPermissionsManager().RegisterPermission( "Compensations.View" );
-		GetPermissionsManager().RegisterPermission( "Compensations.Spawn" );
-		GetPermissionsManager().RegisterPermission( "Compensations.Delete" );
-	}
-
-	override void EnableUpdate()
-	{
-	}
-
-	override bool HasAccess()
-	{
-		return GetPermissionsManager().HasPermission( "Compensations.View" );
-	}
-
-	// Temporarily hidden from the sidebar.
-	override bool HasButton() { return false; }
-
-	override string GetInputToggle()
-	{
-		return "UACOTToggleCompensations";
-	}
-
-	override string GetLayoutRoot()
-	{
-		return "JM\\COT\\GUI\\layouts\\compensations_form.layout";
-	}
-
-	override string GetCategory()
-	{
-		return "Items";
-	}
-
-	override string GetTitle()
-	{
-		return "Compensations";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "hand-coins" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Compensations Module";
-	}
-
-	override void GetWebhookTypes( out array< string > types )
-	{
-		types.Insert( "Spawn" );
-		types.Insert( "Delete" );
-	}
-
-	override int GetRPCMin()
-	{
-		return JMCompensationsModuleRPC.INVALID;
-	}
-
-	override int GetRPCMax()
-	{
-		return JMCompensationsModuleRPC.COUNT;
-	}
-
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
-	{
-		switch ( rpc_type )
-		{
-		case JMCompensationsModuleRPC.Load:
-			RPC_Load( ctx, sender, target );
-			break;
-		case JMCompensationsModuleRPC.SpawnCursor:
-			RPC_SpawnCursor( ctx, sender, target );
-			break;
-		case JMCompensationsModuleRPC.SpawnTarget:
-			RPC_SpawnTarget( ctx, sender, target );
-			break;
-		case JMCompensationsModuleRPC.SpawnPlayers:
-			RPC_SpawnPlayers( ctx, sender, target );
-			break;
-		case JMCompensationsModuleRPC.Delete:
-			RPC_Delete( ctx, sender, target );
-			break;
-		}
-	}
+	protected ref array< ref JMCompensationEntry > m_CachedCompensations;
 
 	array< ref JMCompensationEntry > GetCompensations()
 	{
@@ -152,6 +55,56 @@ class JMCompensationsModule: JMRenderableModuleBase
 		return compensations;
 	}
 
+	override void DescribeModule( JMModuleInfo info )
+	{
+		super.DescribeModule( info );
+
+		info.Title = "Compensations";
+		info.Icon = "hand-coins";
+		info.Layout = "JM\\COT\\GUI\\layouts\\compensations_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_ITEMS;
+		info.ViewPermission = JMConstants.PERM_COMPENSATIONS_VIEW;
+		info.InputToggle = "UACOTToggleCompensations";
+		info.WebhookTitle = "Compensations Module";
+		info.SetRPCRange( JMCompensationsModuleRPC.INVALID, JMCompensationsModuleRPC.COUNT );
+
+		//! Temporarily hidden from the sidebar.
+		info.HasButton = false;
+	}
+
+	//! The spawn and delete permissions and their webhook types come from the actions.
+	override void RegisterActions()
+	{
+		super.RegisterActions();
+
+		DefineAction( JMCompensationSpawnCursor );
+		DefineAction( JMCompensationSpawnTarget );
+		DefineAction( JMCompensationSpawnPlayers );
+		DefineAction( JMCompensationDelete );
+	}
+
+	override void EnableUpdate()
+	{
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
+		{
+		case JMCompensationsModuleRPC.Load:
+			RPC_Load( ctx, sender, target );
+			break;
+		default:
+			RunAction( sender, rpc_type, ctx );
+			break;
+		}
+	}
+
+	override void RequestData()
+	{
+		Load();
+	}
+
 	void Load()
 	{
 		if ( g_Game.IsClient() )
@@ -161,14 +114,14 @@ class JMCompensationsModule: JMRenderableModuleBase
 		}
 		else
 		{
-			Server_Load( NULL );
+			Exec_Load( NULL );
 		}
 	}
 
-	private void Server_Load( PlayerIdentity ident )
+	protected void Exec_Load( PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( ident && !GetPermissionsManager().HasPermission( "Compensations.View", ident, instance ) )
+		if ( ident && !JMPermissions.Has( JMConstants.PERM_COMPENSATIONS_VIEW, ident, instance ) )
 			return;
 
 		array< ref JMCompensationEntry > compensations = GetCompensations();
@@ -178,11 +131,11 @@ class JMCompensationsModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMCompensationsModuleRPC.Load, true, ident );
 	}
 
-	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( g_Game.IsDedicatedServer() )
 		{
-			Server_Load( senderRPC );
+			Exec_Load( senderRPC );
 		}
 		else
 		{
@@ -197,193 +150,80 @@ class JMCompensationsModule: JMRenderableModuleBase
 
 	void SpawnCursor( string steamID, string timestamp, vector position )
 	{
-		if ( IsMissionClient() )
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( steamID );
-			rpc.Write( timestamp );
-			rpc.Write( position );
-			rpc.Send( NULL, JMCompensationsModuleRPC.SpawnCursor, true, NULL );
-		}
-		else
-		{
-			Server_SpawnCursor( steamID, timestamp, position, NULL );
-		}
-	}
-
-	private void Server_SpawnCursor( string steamID, string timestamp, vector position, PlayerIdentity ident )
-	{
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Compensations.Spawn", ident, instance ) )
-			return;
-
-		JMLoadout loadout = LoadCompensation( steamID, timestamp );
-		if ( !loadout )
-			return;
-
-		JMLoadoutModule loadoutModule = JMLoadoutModule.Cast( GetModuleManager().GetModule( JMLoadoutModule ) );
-		if ( !loadoutModule )
-			return;
-
-		SpawnLoadout( loadoutModule, loadout, position );
-
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned compensation for " + steamID + " (" + timestamp + ") at " + position );
-		SendWebhookColored( "Spawn", instance, "Spawned compensation for **" + steamID + "** (" + timestamp + ") at " + position.ToString(), JMConstants.WEBHOOK_COLOR_SPAWN );
-	}
-
-	private void RPC_SpawnCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		if ( IsMissionHost() )
-		{
-			string steamID;
-			if ( !ctx.Read( steamID ) )
-				return;
-
-			string timestamp;
-			if ( !ctx.Read( timestamp ) )
-				return;
-
-			vector position;
-			if ( !ctx.Read( position ) )
-				return;
-
-			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
-				return;
-
-			Server_SpawnCursor( steamID, timestamp, position, senderRPC );
-		}
+		JMCompensationSpawnCursor action = new JMCompensationSpawnCursor();
+		action.SteamID = steamID;
+		action.Timestamp = timestamp;
+		action.Position = position;
+		SubmitAction( action );
 	}
 
 	void SpawnTarget( string steamID, string timestamp, EntityAI ent )
 	{
-		if ( IsMissionClient() )
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( steamID );
-			rpc.Write( timestamp );
-			rpc.Write( ent );
-			rpc.Send( NULL, JMCompensationsModuleRPC.SpawnTarget, true, NULL );
-		}
-		else
-		{
-			Server_SpawnTarget( steamID, timestamp, ent, NULL );
-		}
-	}
-
-	private void Server_SpawnTarget( string steamID, string timestamp, EntityAI ent, PlayerIdentity ident )
-	{
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Compensations.Spawn", ident, instance ) )
-			return;
-
-		JMLoadout loadout = LoadCompensation( steamID, timestamp );
-		if ( !loadout )
-			return;
-
-		JMLoadoutModule loadoutModule = JMLoadoutModule.Cast( GetModuleManager().GetModule( JMLoadoutModule ) );
-		if ( !loadoutModule )
-			return;
-
-		SpawnLoadout( loadoutModule, loadout, ent );
-
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned compensation for " + steamID + " (" + timestamp + ") on " + ent.GetType() );
-		SendWebhookColored( "Spawn", instance, "Spawned compensation for **" + steamID + "** (" + timestamp + ") on " + ent.GetType(), JMConstants.WEBHOOK_COLOR_SPAWN );
-	}
-
-	private void RPC_SpawnTarget( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		if ( IsMissionHost() )
-		{
-			string steamID;
-			if ( !ctx.Read( steamID ) )
-				return;
-
-			string timestamp;
-			if ( !ctx.Read( timestamp ) )
-				return;
-
-			EntityAI ent;
-			if ( !ctx.Read( ent ) )
-				return;
-
-			Server_SpawnTarget( steamID, timestamp, ent, senderRPC );
-		}
-	}
-
-	void Delete( string steamID, string timestamp )
-	{
-		if ( IsMissionClient() )
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( steamID );
-			rpc.Write( timestamp );
-			rpc.Send( NULL, JMCompensationsModuleRPC.Delete, true, NULL );
-		}
-		else
-		{
-			Server_Delete( steamID, timestamp, NULL );
-		}
-	}
-
-	private void Server_Delete( string steamID, string timestamp, PlayerIdentity ident )
-	{
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Compensations.Delete", ident, instance ) )
-			return;
-
-		string filepath = JMConstants.DIR_COMPENSATIONS + steamID + "\\" + timestamp + JMConstants.EXT_LOADOUT;
-		if ( DeleteFile( filepath ) )
-		{
-			GetCommunityOnlineToolsBase().Log( ident, "Deleted compensation for " + steamID + " (" + timestamp + ")" );
-			SendWebhookColored( "Delete", instance, "Deleted compensation for **" + steamID + "** (" + timestamp + ")", JMConstants.WEBHOOK_COLOR_DANGER );
-		}
-	}
-
-	private void RPC_Delete( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		if ( IsMissionHost() )
-		{
-			string steamID;
-			if ( !ctx.Read( steamID ) )
-				return;
-
-			string timestamp;
-			if ( !ctx.Read( timestamp ) )
-				return;
-
-			Server_Delete( steamID, timestamp, senderRPC );
-		}
+		JMCompensationSpawnTarget action = new JMCompensationSpawnTarget();
+		action.SteamID = steamID;
+		action.Timestamp = timestamp;
+		action.Target = ent;
+		SubmitAction( action );
 	}
 
 	void SpawnPlayers( string steamID, string timestamp, array< string > guids )
 	{
-		if ( IsMissionClient() )
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( steamID );
-			rpc.Write( timestamp );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMCompensationsModuleRPC.SpawnPlayers, true, NULL );
-		}
-		else
-		{
-			Server_SpawnPlayers( steamID, timestamp, guids, NULL );
-		}
+		JMCompensationSpawnPlayers action = new JMCompensationSpawnPlayers();
+		action.SteamID = steamID;
+		action.Timestamp = timestamp;
+		action.GUIDs = guids;
+		SubmitAction( action );
 	}
 
-	private void Server_SpawnPlayers( string steamID, string timestamp, array< string > guids, PlayerIdentity ident )
+	void Delete( string steamID, string timestamp )
 	{
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Compensations.Spawn", ident, instance ) )
-			return;
+		JMCompensationDelete action = new JMCompensationDelete();
+		action.SteamID = steamID;
+		action.Timestamp = timestamp;
+		SubmitAction( action );
+	}
 
+	//! What the actions do once they are permitted. False when there was nothing to spawn or delete.
+	bool SpawnAtPosition( string steamID, string timestamp, vector position )
+	{
 		JMLoadout loadout = LoadCompensation( steamID, timestamp );
 		if ( !loadout )
-			return;
+			return false;
 
 		JMLoadoutModule loadoutModule = JMLoadoutModule.Cast( GetModuleManager().GetModule( JMLoadoutModule ) );
 		if ( !loadoutModule )
-			return;
+			return false;
+
+		SpawnLoadout( loadoutModule, loadout, position );
+		return true;
+	}
+
+	bool SpawnOnEntity( string steamID, string timestamp, EntityAI ent )
+	{
+		if ( !ent )
+			return false;
+
+		JMLoadout loadout = LoadCompensation( steamID, timestamp );
+		if ( !loadout )
+			return false;
+
+		JMLoadoutModule loadoutModule = JMLoadoutModule.Cast( GetModuleManager().GetModule( JMLoadoutModule ) );
+		if ( !loadoutModule )
+			return false;
+
+		SpawnLoadout( loadoutModule, loadout, ent );
+		return true;
+	}
+
+	bool SpawnOnPlayers( string steamID, string timestamp, array< string > guids )
+	{
+		JMLoadout loadout = LoadCompensation( steamID, timestamp );
+		if ( !loadout )
+			return false;
+
+		JMLoadoutModule loadoutModule = JMLoadoutModule.Cast( GetModuleManager().GetModule( JMLoadoutModule ) );
+		if ( !loadoutModule )
+			return false;
 
 		array< Man > players = new array< Man >;
 		g_Game.GetWorld().GetPlayerList( players );
@@ -405,42 +245,26 @@ class JMCompensationsModule: JMRenderableModuleBase
 			}
 		}
 
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned compensation for " + steamID + " (" + timestamp + ") on " + guids.Count() + " player(s)" );
-		SendWebhookColored( "Spawn", instance, "Spawned compensation for **" + steamID + "** (" + timestamp + ") on " + guids.Count() + " player(s)", JMConstants.WEBHOOK_COLOR_SPAWN );
+		return true;
 	}
 
-	private void RPC_SpawnPlayers( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	bool DeleteCompensation( string steamID, string timestamp )
 	{
-		if ( IsMissionHost() )
-		{
-			string steamID;
-			if ( !ctx.Read( steamID ) )
-				return;
-
-			string timestamp;
-			if ( !ctx.Read( timestamp ) )
-				return;
-
-			array< string > guids;
-			if ( !ctx.Read( guids ) )
-				return;
-
-			Server_SpawnPlayers( steamID, timestamp, guids, senderRPC );
-		}
+		return DeleteFile( JMConstants.DIR_COMPENSATIONS + steamID + "\\" + timestamp + JMConstants.EXT_LOADOUT );
 	}
 
-	private JMLoadout LoadCompensation( string steamID, string timestamp )
+	protected JMLoadout LoadCompensation( string steamID, string timestamp )
 	{
 		string filepath = JMConstants.DIR_COMPENSATIONS + steamID + "\\" + timestamp + JMConstants.EXT_LOADOUT;
 		if ( !FileExist( filepath ) )
 			return NULL;
 
 		JMLoadout loadout = new JMLoadout();
-		JsonFileLoader<JMLoadout>.JsonLoadFile( filepath, loadout );
+		JMJsonFile<JMLoadout>.Load( filepath, loadout );
 		return loadout;
 	}
 
-	private void SpawnLoadout( JMLoadoutModule loadoutModule, JMLoadout loadout, vector position )
+	protected void SpawnLoadout( JMLoadoutModule loadoutModule, JMLoadout loadout, vector position )
 	{
 		if ( !loadout || !loadout.m_Items || loadout.m_Items.Count() == 0 )
 			return;
@@ -457,7 +281,7 @@ class JMCompensationsModule: JMRenderableModuleBase
 		}
 	}
 
-	private void SpawnLoadout( JMLoadoutModule loadoutModule, JMLoadout loadout, EntityAI ent )
+	protected void SpawnLoadout( JMLoadoutModule loadoutModule, JMLoadout loadout, EntityAI ent )
 	{
 		if ( !loadout || !loadout.m_Items || loadout.m_Items.Count() == 0 )
 			return;

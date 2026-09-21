@@ -40,87 +40,57 @@ class JMBanModule : JMRenderableModuleBase
 {
     static const string BAN_DIR  = "$profile:CommunityOnlineTools\\Bans\\";
     static const string BAN_FILE = "$profile:CommunityOnlineTools\\Bans\\Bans.json";
-
     static const float PRUNE_INTERVAL = 60.0;
-
     protected ref JMPlayerBanStore             m_Store;
     protected ref map<string, ref JMPlayerBan> m_ActiveIndex;
     protected float                            m_PruneTimer;
 
     // -------------------------------------------------------------------------
-    //  Constructor - register permissions, matching JMPlayerModule style
+    //  Store queries
     // -------------------------------------------------------------------------
 
-    void JMBanModule()
+    JMPlayerBan GetActiveBan( string steamID )
     {
-        JMPermissions.Register( JMConstants.PERM_BAN_VIEW  );
-        JMPermissions.Register( JMConstants.PERM_BAN_UNBAN );
+        if ( !m_ActiveIndex )
+            return NULL;
+        return m_ActiveIndex.Get( steamID );
     }
+
+    bool IsBanned( string steamID )
+    {
+        return m_ActiveIndex && m_ActiveIndex.Contains( steamID );
+    }
+
+    // -------------------------------------------------------------------------
+    //  Permissions
+    // -------------------------------------------------------------------------
+
+	override void DescribeModule( JMModuleInfo info )
+	{
+		super.DescribeModule( info );
+
+		info.Title = "Ban Management";
+		info.WebhookTitle = "Ban Management Module";
+		info.Icon = "gavel";
+		info.Layout = "JM/COT/GUI/layouts/ban_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_PLAYERS;
+		info.ViewPermission = JMConstants.PERM_BAN_VIEW;
+		info.SetRPCRange( JMBanModuleRPC.INVALID, JMBanModuleRPC.COUNT );
+
+		info.AddPermission( JMConstants.PERM_BAN_UNBAN );
+
+		info.AddWebhookType( "Ban" );
+		info.AddWebhookType( "Unban" );
+		info.AddWebhookType( "EditBan" );
+	}
 
     // -------------------------------------------------------------------------
     //  JMRenderableModuleBase overrides
     // -------------------------------------------------------------------------
 
-    override bool HasAccess()
-    {
-        return JMPermissions.Has( JMConstants.PERM_BAN_VIEW );
-    }
-
-    override string GetLayoutRoot()
-    {
-        return "JM/COT/GUI/layouts/ban_form.layout";
-    }
-
-    override string GetCategory()
-    {
-        return "Players";
-    }
-
-    override string GetTitle()
-    {
-        return "Ban Management";
-    }
-
-    override string GetIconName()
-    {
-        return JMConstants.Lucide( "gavel" );
-    }
-
-    override bool ImageIsIcon()
-    {
-        return true;
-    }
-
-    override bool ImageHasPath()
-    {
-        return true;
-    }
-
-    override string GetWebhookTitle()
-    {
-        return "Ban Management Module";
-    }
-
-    override void GetWebhookTypes( out array<string> types )
-    {
-        types.Insert( "Ban"     );
-        types.Insert( "Unban"   );
-        types.Insert( "EditBan" );
-    }
-
     // -------------------------------------------------------------------------
     //  RPC range
     // -------------------------------------------------------------------------
-
-    override int GetRPCMin()
-    {
-        return JMBanModuleRPC.INVALID;
-    }
-
-    override int GetRPCMax()
-    {
-        return JMBanModuleRPC.COUNT;
-    }
 
     // -------------------------------------------------------------------------
     //  Update - only needed server-side for expiry pruning.
@@ -218,6 +188,11 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // Ask the server to send the active ban list to this client.
+    override void RequestData()
+    {
+        RequestBanList();
+    }
+
     void RequestBanList()
     {
         ScriptRPC rpc = new ScriptRPC();
@@ -240,26 +215,10 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // -------------------------------------------------------------------------
-    //  Store queries
-    // -------------------------------------------------------------------------
-
-    JMPlayerBan GetActiveBan( string steamID )
-    {
-        if ( !m_ActiveIndex )
-            return NULL;
-        return m_ActiveIndex.Get( steamID );
-    }
-
-    bool IsBanned( string steamID )
-    {
-        return m_ActiveIndex && m_ActiveIndex.Contains( steamID );
-    }
-
-    // -------------------------------------------------------------------------
     //  Server: execute a ban
     // -------------------------------------------------------------------------
 
-    private void Exec_Ban( string steamID, string playerName, string message, int durationSeconds, string issuedBy, string issuedByName, PlayerIdentity adminIdent )
+    protected void Exec_Ban( string steamID, string playerName, string message, int durationSeconds, string issuedBy, string issuedByName, PlayerIdentity adminIdent )
     {
         ref JMPlayerBan ban = new JMPlayerBan();
         ban.SteamID       = steamID;
@@ -289,13 +248,13 @@ class JMBanModule : JMRenderableModuleBase
     //  Server RPC: RequestBanList
     // -------------------------------------------------------------------------
 
-    private void RPC_RequestBanList( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+    protected void RPC_RequestBanList( ParamsReadContext ctx, PlayerIdentity sender, Object target )
     {
         if ( !IsMissionHost() )
             return;
 
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_BAN_VIEW, sender ) )
+        if ( !JMPermissions.HasRPC( JMConstants.PERM_BAN_VIEW, sender ) )
             return;
 
         PruneExpired();
@@ -329,7 +288,7 @@ class JMBanModule : JMRenderableModuleBase
     //  Server RPC: RequestBan - client asks server to ban a player
     // -------------------------------------------------------------------------
 
-    private void RPC_RequestBan( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+    protected void RPC_RequestBan( ParamsReadContext ctx, PlayerIdentity sender, Object target )
     {
         if ( !IsMissionHost() )
             return;
@@ -341,7 +300,7 @@ class JMBanModule : JMRenderableModuleBase
         //! own ban RPC and the ESP action menu already check.
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_PLAYER_BAN, sender, instance ) )
+        if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BAN, sender, instance ) )
             return;
 
         string steamID;
@@ -367,14 +326,14 @@ class JMBanModule : JMRenderableModuleBase
     //  Server RPC: UnbanPlayer
     // -------------------------------------------------------------------------
 
-    private void RPC_UnbanPlayer( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+    protected void RPC_UnbanPlayer( ParamsReadContext ctx, PlayerIdentity sender, Object target )
     {
         if ( !IsMissionHost() )
             return;
 
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
+        if ( !JMPermissions.HasRPC( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
             return;
 
         string steamID;
@@ -391,7 +350,7 @@ class JMBanModule : JMRenderableModuleBase
     //! Shared by RPC_UnbanPlayer (client-triggered) and Unban() (host-direct);
     //! adminIdent is NULL when the mission host itself performs the unban, so
     //! every notify/log/webhook call below has to tolerate that.
-    private bool Exec_UnbanPlayer( string steamID, PlayerIdentity adminIdent )
+    protected bool Exec_UnbanPlayer( string steamID, PlayerIdentity adminIdent )
     {
         if ( !m_ActiveIndex.Contains( steamID ) )
         {
@@ -440,7 +399,7 @@ class JMBanModule : JMRenderableModuleBase
         }
     }
 
-    private void Exec_EditBanDuration( string steamID, int durationSeconds, PlayerIdentity adminIdent )
+    protected void Exec_EditBanDuration( string steamID, int durationSeconds, PlayerIdentity adminIdent )
     {
         JMPlayerBan ban = m_ActiveIndex.Get( steamID );
         if ( !ban )
@@ -466,14 +425,14 @@ class JMBanModule : JMRenderableModuleBase
         SendWebhook( "EditBan", NULL, "Edited ban duration for SteamID: " + steamID + " -> " + durationSeconds + "s" );
     }
 
-    private void RPC_EditBanDuration( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+    protected void RPC_EditBanDuration( ParamsReadContext ctx, PlayerIdentity sender, Object target )
     {
         if ( !IsMissionHost() )
             return;
 
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
+        if ( !JMPermissions.HasRPC( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
             return;
 
         string steamID;
@@ -494,7 +453,7 @@ class JMBanModule : JMRenderableModuleBase
     //  Client RPC: receive ban list, push to open form (matching JMESPModule pattern)
     // -------------------------------------------------------------------------
 
-    private void RPC_BanList( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+    protected void RPC_BanList( ParamsReadContext ctx, PlayerIdentity sender, Object target )
     {
         if ( IsMissionHost() )
             return;
@@ -540,21 +499,16 @@ class JMBanModule : JMRenderableModuleBase
     //  Persistence - JsonFileLoader<JMPlayerBanStore>
     // -------------------------------------------------------------------------
 
-    private void Load()
+    protected void Load()
     {
         m_Store = new JMPlayerBanStore();
         m_ActiveIndex.Clear();
 
         if ( !FileExist( BAN_FILE ) )
-        {
-            MakeDirectory( BAN_DIR );
             return;
-        }
 
-        string err;
-        if ( !JsonFileLoader<JMPlayerBanStore>.LoadFile( BAN_FILE, m_Store, err ) )
+        if ( !JMJsonFile<JMPlayerBanStore>.Load( BAN_FILE, m_Store ) )
         {
-            Print( "[COT/BanModule] ERROR loading " + BAN_FILE + ": " + err );
             m_Store = new JMPlayerBanStore();
             return;
         }
@@ -568,16 +522,12 @@ class JMBanModule : JMRenderableModuleBase
         Print( "[COT/BanModule] Loaded " + m_Store.Bans.Count() + " records, " + m_ActiveIndex.Count() + " active." );
     }
 
-    private void Save()
+    protected void Save()
     {
-        MakeDirectory( BAN_DIR );
-
-        string err;
-        if ( !JsonFileLoader<JMPlayerBanStore>.SaveFile( BAN_FILE, m_Store, err ) )
-            Print( "[COT/BanModule] ERROR saving " + BAN_FILE + ": " + err );
+        JMJsonFile<JMPlayerBanStore>.Save( BAN_FILE, m_Store );
     }
 
-    private void PruneExpired()
+    protected void PruneExpired()
     {
         array<string> toRemove = new array<string>();
 

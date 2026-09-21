@@ -6,59 +6,6 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		m_ServerPlayers = new array< Man >;
 
-		GetPermissionsManager().RegisterPermission( "Admin.Map" );
-
-		JMPermissions.Register( JMConstants.PERM_MAP_VIEW );
-		JMPermissions.Register( JMConstants.PERM_MAP_PLAYERS );
-
-		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_POSITION );
-	}
-
-	override void EnableUpdate()
-	{
-	}
-
-	override bool HasAccess()
-	{
-		return JMPermissions.Has( JMConstants.PERM_MAP_VIEW );
-	}
-
-	// Temporarily hidden from the sidebar.
-	override bool HasButton() { return false; }
-
-	override string GetInputToggle()
-	{
-		return "UACOTToggleMap";
-	}
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/mapview_form.layout";
-	}
-
-	override string GetCategory()
-	{
-		return "World";
-	}
-
-	override string GetTitle()
-	{
-		return "#STR_COT_MAP_MODULE_NAME";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "map" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
 	}
 
 	void SetLootMarkers(array<string> names, array<vector> positions)
@@ -68,6 +15,29 @@ class JMMapModule: JMRenderableModuleBase
 		{
 			form.SetLootMarkers(names, positions);
 		}
+	}
+
+	override void DescribeModule( JMModuleInfo info )
+	{
+		super.DescribeModule( info );
+
+		info.Title = "#STR_COT_MAP_MODULE_NAME";
+		info.Icon = "map";
+		info.Layout = "JM/COT/GUI/layouts/mapview_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_WORLD;
+		info.ViewPermission = JMConstants.PERM_MAP_VIEW;
+		info.InputToggle = "UACOTToggleMap";
+		// Temporarily hidden from the sidebar.
+		info.HasButton = false;
+
+		//! Called on both client and server as the module registers, before the mission loads.
+		info.AddPermission( JMConstants.PERM_MAP );
+		info.AddPermission( JMConstants.PERM_MAP_PLAYERS );
+		info.AddPermission( JMConstants.PERM_PLAYER_TELEPORT_POSITION );
+	}
+
+	override void EnableUpdate()
+	{
 	}
 
 	void ClearLootMarkers()

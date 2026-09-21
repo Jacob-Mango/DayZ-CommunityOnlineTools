@@ -35,7 +35,7 @@ class JMEventsAdapter: JMEntityManagerAdapter
 	override string GetPermissionPrefix()  { return "Events"; }
 	override string GetTitle()              { return "#STR_COT_EVENTS_MODULE_NAME"; }
 	override string GetIcon()               { return JMConstants.Lucide( "siren" ); }
-	override string GetCategory()           { return "Events"; }
+	override string GetCategory()           { return JMSideBarConfig.CATEGORY_EVENTS; }
 	override string GetWebhookTitle()       { return "Events Module"; }
 
 	override void GetWebhookTypes( out array<string> types )

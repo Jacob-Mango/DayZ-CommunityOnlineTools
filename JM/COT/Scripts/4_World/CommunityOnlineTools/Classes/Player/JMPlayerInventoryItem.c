@@ -36,16 +36,12 @@ class JMPlayerInventoryItem
 	static const int FLAG_JAMMED     = 32;
 	static const int FLAG_LIQUID     = 64;   //!< liquid container
 	static const int FLAG_FOOD       = 128;  //!< has cookable food stages
-
 	int    NetIdLow;
 	int    NetIdHigh;
-
 	string Type;         //!< classname, resolved to a display name client-side
 	string SlotName;     //!< attachment slot name, or "" for cargo and hands
-
 	int    Depth;        //!< 0 = directly on the player
 	int    ParentIndex;  //!< index into the flat array; -1 at the top level
-
 	float  Health;       //!< 0..MaxHealth, NOT always 0..100 - see MaxHealth
 	float  MaxHealth;    //!< the item's own GetMaxHealth( "", "" ), config-defined
 
@@ -63,7 +59,6 @@ class JMPlayerInventoryItem
 	float  Temperature;
 	int    LiquidType;   //!< LIQUID_*, 0 when empty or not a container
 	int    Stage;        //!< FoodStageType, 0 (NONE) when not food. Named around the FoodStage CLASS, which the name would shadow.
-
 	int    Flags;
 
 	void JMPlayerInventoryItem()
@@ -82,6 +77,94 @@ class JMPlayerInventoryItem
 		LiquidType  = 0;
 		Stage       = 0;
 		Flags       = 0;
+	}
+
+	//! Display name from CfgVehicles, falling back to the classname when the
+	//! config carries no displayName (common for base classes and debug items).
+	string GetDisplayName()
+	{
+		string display = "";
+		GetGame().ConfigGetText( "CfgVehicles " + Type + " displayName", display );
+
+		if ( display == "" )
+			return Type;
+
+		return display;
+	}
+
+	//! Which liquids this container's config will accept, as a LIQUID_* bit
+	//! mask. Read from the config rather than sent: the mask is a per-class
+	//! constant the client already has, so putting it on the wire would cost a
+	//! field per item for something no item can disagree with.
+	int GetLiquidContainerMask()
+	{
+		return GetGame().ConfigGetInt( "CfgVehicles " + Type + " liquidContainerType" );
+	}
+
+	//! Where the item sits, for the table's second column.
+	string GetLocationLabel()
+	{
+		if ( SlotName != "" )
+			return SlotName;
+
+		if ( ( Flags & FLAG_CARGO ) != 0 )
+			return "#STR_COT_PLAYER_MODULE_INV_LOC_CARGO";
+
+		return "#STR_COT_PLAYER_MODULE_INV_LOC_HANDS";
+	}
+
+	//! "12/30" for a stack or magazine, "-" for anything without a quantity.
+	string GetQuantityLabel()
+	{
+		if ( QuantityMax <= 0 )
+			return "-";
+
+		int cur = Math.Round( Quantity );
+		int max = Math.Round( QuantityMax );
+
+		return cur.ToString() + "/" + max.ToString();
+	}
+
+	bool HasFoodStage()
+	{
+		return ( Flags & FLAG_FOOD ) != 0;
+	}
+
+	//! A stack, a magazine or anything else with a quantity bar. Ammo piles and
+	//! magazines report their AMMO COUNT here, not the count of the item itself.
+	bool HasQuantity()
+	{
+		return QuantityMax > QuantityMin;
+	}
+
+	bool IsAttachment()
+	{
+		return ( Flags & FLAG_ATTACHMENT ) != 0;
+	}
+
+	bool IsJammed()
+	{
+		return ( Flags & FLAG_JAMMED ) != 0;
+	}
+
+	bool IsLiquidContainer()
+	{
+		return ( Flags & FLAG_LIQUID ) != 0;
+	}
+
+	bool IsMagazine()
+	{
+		return ( Flags & FLAG_MAGAZINE ) != 0;
+	}
+
+	bool IsRuined()
+	{
+		return ( Flags & FLAG_RUINED ) != 0;
+	}
+
+	bool IsWeapon()
+	{
+		return ( Flags & FLAG_WEAPON ) != 0;
 	}
 
 	void OnSend( ParamsWriteContext ctx )
@@ -126,93 +209,5 @@ class JMPlayerInventoryItem
 		if ( !ctx.Read( Flags ) )       return false;
 
 		return true;
-	}
-
-	bool IsRuined()
-	{
-		return ( Flags & FLAG_RUINED ) != 0;
-	}
-
-	bool IsAttachment()
-	{
-		return ( Flags & FLAG_ATTACHMENT ) != 0;
-	}
-
-	bool IsMagazine()
-	{
-		return ( Flags & FLAG_MAGAZINE ) != 0;
-	}
-
-	bool IsWeapon()
-	{
-		return ( Flags & FLAG_WEAPON ) != 0;
-	}
-
-	bool IsJammed()
-	{
-		return ( Flags & FLAG_JAMMED ) != 0;
-	}
-
-	bool IsLiquidContainer()
-	{
-		return ( Flags & FLAG_LIQUID ) != 0;
-	}
-
-	bool HasFoodStage()
-	{
-		return ( Flags & FLAG_FOOD ) != 0;
-	}
-
-	//! A stack, a magazine or anything else with a quantity bar. Ammo piles and
-	//! magazines report their AMMO COUNT here, not the count of the item itself.
-	bool HasQuantity()
-	{
-		return QuantityMax > QuantityMin;
-	}
-
-	//! Which liquids this container's config will accept, as a LIQUID_* bit
-	//! mask. Read from the config rather than sent: the mask is a per-class
-	//! constant the client already has, so putting it on the wire would cost a
-	//! field per item for something no item can disagree with.
-	int GetLiquidContainerMask()
-	{
-		return GetGame().ConfigGetInt( "CfgVehicles " + Type + " liquidContainerType" );
-	}
-
-	//! Display name from CfgVehicles, falling back to the classname when the
-	//! config carries no displayName (common for base classes and debug items).
-	string GetDisplayName()
-	{
-		string display = "";
-		GetGame().ConfigGetText( "CfgVehicles " + Type + " displayName", display );
-
-		if ( display == "" )
-			return Type;
-
-		return display;
-	}
-
-	//! Where the item sits, for the table's second column.
-	string GetLocationLabel()
-	{
-		if ( SlotName != "" )
-			return SlotName;
-
-		if ( ( Flags & FLAG_CARGO ) != 0 )
-			return "#STR_COT_PLAYER_MODULE_INV_LOC_CARGO";
-
-		return "#STR_COT_PLAYER_MODULE_INV_LOC_HANDS";
-	}
-
-	//! "12/30" for a stack or magazine, "-" for anything without a quantity.
-	string GetQuantityLabel()
-	{
-		if ( QuantityMax <= 0 )
-			return "-";
-
-		int cur = Math.Round( Quantity );
-		int max = Math.Round( QuantityMax );
-
-		return cur.ToString() + "/" + max.ToString();
 	}
 }

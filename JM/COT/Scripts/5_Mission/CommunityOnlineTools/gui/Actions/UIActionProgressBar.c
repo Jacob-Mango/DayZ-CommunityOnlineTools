@@ -4,12 +4,33 @@ class UIActionProgressBar: UIActionBase
 	protected Widget      m_Track;
 	protected Widget      m_Fill;
 	protected TextWidget  m_Text;
-
 	protected float m_Value;       // current displayed fraction 0..1
 	protected float m_TargetValue; // target fraction 0..1
 	protected int   m_FillColor;
-
 	static const float ANIM_SPEED = 3.0; // fraction per second
+
+	float GetProgress()
+	{
+		return m_TargetValue;
+	}
+
+	void SetFillColor( int color )
+	{
+		m_FillColor = color;
+		if ( m_Fill )
+			m_Fill.SetColor( color );
+	}
+
+	void SetProgress( float value )
+	{
+		m_TargetValue = Math.Clamp( value, 0.0, 1.0 );
+	}
+
+	void SetShowText( bool show )
+	{
+		if ( m_Text )
+			m_Text.Show( show );
+	}
 
 	override void OnInit()
 	{
@@ -42,29 +63,6 @@ class UIActionProgressBar: UIActionBase
 		}
 	}
 
-	void SetProgress( float value )
-	{
-		m_TargetValue = Math.Clamp( value, 0.0, 1.0 );
-	}
-
-	float GetProgress()
-	{
-		return m_TargetValue;
-	}
-
-	void SetFillColor( int color )
-	{
-		m_FillColor = color;
-		if ( m_Fill )
-			m_Fill.SetColor( color );
-	}
-
-	void SetShowText( bool show )
-	{
-		if ( m_Text )
-			m_Text.Show( show );
-	}
-
 	override void SetText( string text )
 	{
 		if ( m_Text )
@@ -90,7 +88,7 @@ class UIActionProgressBar: UIActionBase
 		ApplyFill();
 	}
 
-	private void ApplyFill()
+	protected void ApplyFill()
 	{
 		if ( m_Fill )
 			SetWidgetWidth( m_Fill, m_Value );

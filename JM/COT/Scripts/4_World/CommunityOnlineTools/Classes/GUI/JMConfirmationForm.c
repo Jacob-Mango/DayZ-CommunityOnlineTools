@@ -1,7 +1,7 @@
 class JMConfirmationForm: JMConfirmation 
 {
 	#ifndef CF_WINDOWS
-	private JMWindowBase m_Window;
+	protected JMWindowBase m_Window;
 
 	override void Init( Managed base )
 	{

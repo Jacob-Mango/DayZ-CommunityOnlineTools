@@ -11,14 +11,16 @@ class UIActionSlider: UIActionBase
 	//! track. A slider whose value IS a thickness can grow the bar with the
 	//! value so it previews what it sets; everything else leaves it at 1.
 	protected float       m_FillThickness;
-
 	protected float m_Min;
 	protected float m_Max;
 	protected float m_Current;
 	protected float m_Step;
 	protected string m_Format;
-
 	protected bool m_Dragging;
+
+	//! Optional numeric box coupled to this slider. Owned here so it lives and
+	//! dies with the slider; see UIActionSliderSync.
+	protected ref UIActionSliderSync m_Sync;
 
 	//! Track width the handle position was last computed against. The handle is
 	//! centred on its value using the track's SCREEN width, which is still 0
@@ -27,6 +29,74 @@ class UIActionSlider: UIActionBase
 	//! slider. Re-running once the real width appears (and whenever it changes,
 	//! e.g. the window is resized) fixes it without polling every frame.
 	protected float m_LastTrackWidth;
+
+	TextWidget GetLabelWidget()  { return m_Label;  }
+
+	float GetMax() { return m_Max; }
+
+	float GetMin() { return m_Min; }
+
+	Widget     GetSliderWidget() { return m_Track;  }
+
+	float GetStepValue() { return m_Step; }
+
+	UIActionSliderSync GetSync() { return m_Sync; }
+
+	TextWidget GetValueWidget()  { return m_Value;  }
+
+	void SetAlpha( float alpha )
+	{
+		if ( m_Fill )
+			m_Fill.SetAlpha( alpha );
+	}
+
+	//! Draw the fill as a bar `frac` of the track's height. Used by a slider
+	//! that sets a thickness, so the bar is a preview of the value rather than
+	//! just a position.
+	void SetFillThickness( float frac )
+	{
+		m_FillThickness = Math.Clamp( frac, 0.1, 1.0 );
+		UpdateVisuals();
+	}
+
+	void SetFormat( string format )
+	{
+		m_Format = format;
+		UpdateVisuals();
+	}
+
+	void SetMinMax( float min, float max )
+	{
+		if ( max <= min )
+			return;
+		m_Min = min;
+		m_Max = max;
+		m_Current = Math.Clamp( m_Current, m_Min, m_Max );
+		UpdateVisuals();
+	}
+
+	//! The slider's own width, bypassing the pair handling above.
+	void SetOwnWidth( float width )
+	{
+		super.SetWidth( width );
+	}
+
+	void SetSliderWidth( float width )
+	{
+		if ( m_Track )
+			SetWidgetWidth( m_Track, width );
+	}
+
+	void SetStepValue( float step )
+	{
+		if ( step > 0 )
+			m_Step = step;
+	}
+
+	void SetSync( UIActionSliderSync sync )
+	{
+		m_Sync = sync;
+	}
 
 	override void OnInit()
 	{
@@ -66,36 +136,51 @@ class UIActionSlider: UIActionBase
 		}
 	}
 
-	void SetFormat( string format )
+	//! With a numeric box attached, `width` is the width of the whole
+	//! slider + box pair, so callers that size a slider to fill its row
+	//! (SetWidth( 1.0 )) keep the box beside it instead of wrapping it away.
+	override void SetWidth( float width )
 	{
-		m_Format = format;
-		UpdateVisuals();
-	}
-
-	void SetMinMax( float min, float max )
-	{
-		if ( max <= min )
+		if ( m_Sync )
+		{
+			m_Sync.ApplyWidth( width );
 			return;
-		m_Min = min;
-		m_Max = max;
-		m_Current = Math.Clamp( m_Current, m_Min, m_Max );
-		UpdateVisuals();
+		}
+
+		super.SetWidth( width );
 	}
 
-	float GetMin() { return m_Min; }
-	float GetMax() { return m_Max; }
-
-	void SetStepValue( float step )
+	override void Show()
 	{
-		if ( step > 0 )
-			m_Step = step;
+		super.Show();
+
+		if ( m_Sync )
+			m_Sync.OnSliderShown( true );
 	}
 
-	float GetStepValue() { return m_Step; }
+	override void Hide()
+	{
+		super.Hide();
 
-	TextWidget GetLabelWidget()  { return m_Label;  }
-	Widget     GetSliderWidget() { return m_Track;  }
-	TextWidget GetValueWidget()  { return m_Value;  }
+		if ( m_Sync )
+			m_Sync.OnSliderShown( false );
+	}
+
+	override void Enable()
+	{
+		super.Enable();
+
+		if ( m_Sync )
+			m_Sync.OnSliderEnabled( true );
+	}
+
+	override void Disable()
+	{
+		super.Disable();
+
+		if ( m_Sync )
+			m_Sync.OnSliderEnabled( false );
+	}
 
 	override float GetCurrent() { return m_Current; }
 
@@ -120,33 +205,12 @@ class UIActionSlider: UIActionBase
 		UpdateHandleColor();
 	}
 
-	private void UpdateHandleColor()
+	protected void UpdateHandleColor()
 	{
 		if ( !m_Handle )
 			return;
 
 		m_Handle.SetColor( m_FillColor );
-	}
-
-	void SetAlpha( float alpha )
-	{
-		if ( m_Fill )
-			m_Fill.SetAlpha( alpha );
-	}
-
-	//! Draw the fill as a bar `frac` of the track's height. Used by a slider
-	//! that sets a thickness, so the bar is a preview of the value rather than
-	//! just a position.
-	void SetFillThickness( float frac )
-	{
-		m_FillThickness = Math.Clamp( frac, 0.1, 1.0 );
-		UpdateVisuals();
-	}
-
-	void SetSliderWidth( float width )
-	{
-		if ( m_Track )
-			SetWidgetWidth( m_Track, width );
 	}
 
 	override bool IsFocusWidget( Widget widget )
@@ -216,6 +280,9 @@ class UIActionSlider: UIActionBase
 
 	void UpdateValue()
 	{
+		if ( m_Sync )
+			m_Sync.Refresh();
+
 		if ( !m_Value )
 			return;
 
@@ -239,7 +306,7 @@ class UIActionSlider: UIActionBase
 		return false;
 	}
 
-	private float SnapToStep( float value )
+	protected float SnapToStep( float value )
 	{
 		if ( m_Step <= 0 || m_Max <= m_Min )
 			return value;
@@ -247,7 +314,7 @@ class UIActionSlider: UIActionBase
 		return m_Min + steps * m_Step;
 	}
 
-	private float XToValue( int screenX )
+	protected float XToValue( int screenX )
 	{
 		if ( !m_Track )
 			return m_Min;
@@ -275,7 +342,7 @@ class UIActionSlider: UIActionBase
 		UpdateVisuals();
 	}
 
-	private void UpdateVisuals()
+	protected void UpdateVisuals()
 	{
 		float range = m_Max - m_Min;
 		if ( range <= 0 )

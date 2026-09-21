@@ -56,16 +56,16 @@ class UIActionFlexRow
 		m_Entries = new array<ref UIActionFlexEntry>();
 	}
 
+	Widget GetContent()
+	{
+		return m_Row;
+	}
+
 	//! Override the per-gap padding allowance if a row uses a non-default
 	//! WrapSpacer variant (e.g. Compact = 0). Call before Layout().
 	void SetGap( float gapPx )
 	{
 		m_GapPx = gapPx;
-	}
-
-	Widget GetContent()
-	{
-		return m_Row;
 	}
 
 	//! Register a flex child. If the action called SetFlex() its spec is honoured;

@@ -41,6 +41,17 @@ class JMEntityManagerAdapter
 		m_CacheDirty     = true;
 	}
 
+	// ---------------------------------------------------------------------------
+	//  Action catalog
+	//
+	//  Per-entity actions appear in the right-hand options panel when an
+	//  entity is selected. Bulk actions (m_IsBulk=true) appear in the
+	//  left-hand list header.
+	// ---------------------------------------------------------------------------
+	void GetActions( out array<ref JMEntityAction> outActions )
+	{
+	}
+
 	// Call this instead of CollectEntities directly. Returns cached data when
 	// still fresh; rebuilds from CollectEntities otherwise.
 	void GetCachedEntities( out array<ref JMEntityMetaData> outEntities )
@@ -60,22 +71,58 @@ class JMEntityManagerAdapter
 			outEntities.Insert( e );
 	}
 
-	void InvalidateCache()
+	string GetCategory()           { return JMSideBarConfig.CATEGORY_ITEMS; }
+
+	// ---------------------------------------------------------------------------
+	//  Filters / categorization
+	// ---------------------------------------------------------------------------
+	// Optional filter tabs shown above the list. Return empty array for no filters.
+	void GetFilterLabels( out array<string> labels )
 	{
-		m_CacheDirty = true;
+	}
+
+	string GetIcon()               { return ""; }
+
+	// ---------------------------------------------------------------------------
+	//  Info panel - extra rows beyond the built-in ones (name, class, status,
+	//  position, type). Default implementation renders m_Extra as-is.
+	// ---------------------------------------------------------------------------
+	void GetInfoRows( JMEntityMetaData entity, out array<string> keys, out map<string, string> values )
+	{
+		keys = entity.m_ExtraKeys;
+		values = entity.m_Extra;
+	}
+
+	int GetLastRefreshScope()
+	{
+		return m_LastRefreshScope;
 	}
 
 	// ---------------------------------------------------------------------------
 	//  Identity / registration
 	// ---------------------------------------------------------------------------
 	string GetPermissionPrefix()   { return "EntityManager"; }     // e.g. "Vehicles", "Garage"
+
 	string GetTitle()              { return "Entity Manager"; }
-	string GetIcon()               { return ""; }
-	string GetCategory()           { return "Items"; }
+
 	string GetWebhookTitle()       { return GetTitle(); }
 
 	void GetWebhookTypes( out array<string> types )
 	{
+	}
+
+	// ---------------------------------------------------------------------------
+	//  Webhook / log forwarding - called from HandleServerAction implementations.
+	//  Requires the owning module to call SetOwnerModule(this) after construction.
+	// ---------------------------------------------------------------------------
+	void SetOwnerModule( JMModuleBase mod )
+	{
+		m_OwnerModule = mod;
+	}
+
+	void InvalidateCache()
+	{
+		m_CacheDirty = true;
 	}
 
 	// ---------------------------------------------------------------------------
@@ -87,30 +134,11 @@ class JMEntityManagerAdapter
 	{
 	}
 
-	// ---------------------------------------------------------------------------
-	//  Filters / categorization
-	// ---------------------------------------------------------------------------
-	// Optional filter tabs shown above the list. Return empty array for no filters.
-	void GetFilterLabels( out array<string> labels )
-	{
-	}
-
 	// Called when UI filters - return true to keep this entity for category idx.
 	// idx 0 = "All", idx n = filter labels[n-1].
 	bool MatchesFilter( JMEntityMetaData entity, int filterIndex )
 	{
 		return true;
-	}
-
-	// ---------------------------------------------------------------------------
-	//  Action catalog
-	//
-	//  Per-entity actions appear in the right-hand options panel when an
-	//  entity is selected. Bulk actions (m_IsBulk=true) appear in the
-	//  left-hand list header.
-	// ---------------------------------------------------------------------------
-	void GetActions( out array<ref JMEntityAction> outActions )
-	{
 	}
 
 	// ---------------------------------------------------------------------------
@@ -127,16 +155,6 @@ class JMEntityManagerAdapter
 	// ---------------------------------------------------------------------------
 	void HandleServerAction( string actionId, JMEntityMetaData entity, PlayerIdentity sender )
 	{
-	}
-
-	// ---------------------------------------------------------------------------
-	//  Info panel - extra rows beyond the built-in ones (name, class, status,
-	//  position, type). Default implementation renders m_Extra as-is.
-	// ---------------------------------------------------------------------------
-	void GetInfoRows( JMEntityMetaData entity, out array<string> keys, out map<string, string> values )
-	{
-		keys = entity.m_ExtraKeys;
-		values = entity.m_Extra;
 	}
 
 	// ---------------------------------------------------------------------------
@@ -164,11 +182,6 @@ class JMEntityManagerAdapter
 		m_LastRefreshScope = JMEntityRefreshScope.SINGLE_REMOVE;
 	}
 
-	int GetLastRefreshScope()
-	{
-		return m_LastRefreshScope;
-	}
-
 	void ResetLastRefreshScope()
 	{
 		m_LastRefreshScope = JMEntityRefreshScope.NONE;
@@ -190,15 +203,6 @@ class JMEntityManagerAdapter
 				return m;
 		}
 		return null;
-	}
-
-	// ---------------------------------------------------------------------------
-	//  Webhook / log forwarding - called from HandleServerAction implementations.
-	//  Requires the owning module to call SetOwnerModule(this) after construction.
-	// ---------------------------------------------------------------------------
-	void SetOwnerModule( JMModuleBase mod )
-	{
-		m_OwnerModule = mod;
 	}
 
 	protected void SendAdapterWebhookColored( string type, JMPlayerInstance inst, string msg, int color )

@@ -23,7 +23,6 @@
 class UIActionKeyValueList: UIActionBase
 {
 	protected Widget m_Rows;
-
 	protected ref array<string>            m_Keys;
 
 	//! Height of one row, matching UIActionText.layout's own `size 1 30`.
@@ -31,15 +30,18 @@ class UIActionKeyValueList: UIActionBase
 	protected ref map<string, TextWidget>  m_ValueWidgets;
 	protected ref map<string, string>      m_ValueStrings;
 
-	override void OnInit()
+	//! Returns all registered keys in insertion order.
+	array<string> GetKeys()
 	{
-		super.OnInit();
+		return m_Keys;
+	}
 
-		Class.CastTo( m_Rows, layoutRoot.FindAnyWidget( "action_rows" ) );
-
-		m_Keys         = new array<string>;
-		m_ValueWidgets = new map<string, TextWidget>;
-		m_ValueStrings = new map<string, string>;
+	//! Get the current displayed value for a key ("" if not present).
+	string GetValue( string key )
+	{
+		if ( m_ValueStrings.Contains( key ) )
+			return m_ValueStrings.Get( key );
+		return "";
 	}
 
 	//! Set or update a key/value pair.  Creates a new row if key is new.
@@ -88,6 +90,17 @@ class UIActionKeyValueList: UIActionBase
 		}
 	}
 
+	override void OnInit()
+	{
+		super.OnInit();
+
+		Class.CastTo( m_Rows, layoutRoot.FindAnyWidget( "action_rows" ) );
+
+		m_Keys         = new array<string>;
+		m_ValueWidgets = new map<string, TextWidget>;
+		m_ValueStrings = new map<string, string>;
+	}
+
 	//! Grow the root to fit the rows.
 	//!
 	//! UIActionKeyValueList.layout declares the root as `size 1 1` with
@@ -122,14 +135,6 @@ class UIActionKeyValueList: UIActionBase
 		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
 		layoutRoot.SetSize( w, height );
 		layoutRoot.Update();
-	}
-
-	//! Get the current displayed value for a key ("" if not present).
-	string GetValue( string key )
-	{
-		if ( m_ValueStrings.Contains( key ) )
-			return m_ValueStrings.Get( key );
-		return "";
 	}
 
 	//! Remove a single key/value row.
@@ -179,11 +184,5 @@ class UIActionKeyValueList: UIActionBase
 		m_Keys.Clear();
 
 		UpdateHeight();
-	}
-
-	//! Returns all registered keys in insertion order.
-	array<string> GetKeys()
-	{
-		return m_Keys;
 	}
 }

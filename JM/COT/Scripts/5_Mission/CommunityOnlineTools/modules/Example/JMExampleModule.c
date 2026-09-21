@@ -1,52 +1,24 @@
 class JMExampleModule: JMRenderableModuleBase
 {
-	void JMExampleModule()
+	override void DescribeModule( JMModuleInfo info )
 	{
-		GetPermissionsManager().RegisterPermission( "Admin.Example.View" );
-		GetPermissionsManager().RegisterPermission( "Admin.Example.Button" );
-		GetPermissionsManager().RegisterPermission( "Admin.Example.Dropdown" );
-	}
+		super.DescribeModule( info );
 
-	override bool HasAccess()
-	{
-		return GetPermissionsManager().HasPermission( "Admin.Example.View" );
+		info.Title = "Example Module";
+		info.WebhookTitle = "Example Module";
+		info.Icon = "info";
+		info.Layout = "JM/COT/GUI/layouts/Example_form.layout";
+		info.ViewPermission = JMConstants.PERM_EXAMPLE_VIEW;
+		// If you want to allow a keybind to open this menu this is how
+		info.InputToggle = "UACOTToggleExample";
+
+		//! Called on both client and server as the module registers, before the mission loads.
+		info.AddPermission( JMConstants.PERM_EXAMPLE_BUTTON );
+		info.AddPermission( JMConstants.PERM_EXAMPLE_DROPDOWN );
 	}
 
 	/*
-	// If you want to allow a keybind to open this menu this is how
-	override string GetInputToggle()
-	{
-		return "UACOTToggleExample";
-	}
 	*/
 
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/Example_form.layout";
-	}
-
-	override string GetTitle()
-	{
-		return "Example Module";
-	}
 	
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "info" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Example Module";
-	}
 }

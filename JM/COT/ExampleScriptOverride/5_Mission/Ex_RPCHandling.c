@@ -1,10 +1,8 @@
 #ifdef JM_CommunityOnlineTools
-// Example: Client <-> Server RPC handling within a custom COT module.
-//
-// This is its OWN standalone module, not a `modded class` addition to
-// JMCustomExampleModule (see JMCustomExampleModule.c) - Enforce Script cannot
-// resolve a `modded class` extending a base class defined in the same script
-// folder/compile pass, so every module gets its own class in its own file.
+// Example: client -> server -> client round trip in a module with no UI.
+// (It is its own class, not a `modded class JMCustomExampleModule`: Enforce cannot resolve a
+// modded class whose base is defined in the same addon's compile pass, so give each module its own class.)
+// Registered in Ex_ModuleRegistration.c; the button that calls it is in JMCustomExampleForm.c.
 enum JMCustomRPC
 {
 	INVALID = 20100,
@@ -12,8 +10,15 @@ enum JMCustomRPC
 	COUNT
 }
 
-class JMCustomExampleRPCModule: JMRenderableModuleBase
+class JMCustomExampleRPCModule: JMModuleBase
 {
+	protected ref JMCustomExampleSettings m_Settings;
+
+	override void DeclarePermissions()
+	{
+		JMPermissions.Register( JMConstants.PERM_RPC_EXECUTE );
+	}
+
 	override int GetRPCMin()
 	{
 		return JMCustomRPC.INVALID;
@@ -26,17 +31,14 @@ class JMCustomExampleRPCModule: JMRenderableModuleBase
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
+		// super applies COT's per-sender rate limit
 		super.OnRPC( sender, target, rpc_type, ctx );
 
-		switch ( rpc_type )
-		{
-			case JMCustomRPC.ExecuteSubModAction:
-				RPC_ExecuteSubModAction( ctx, sender, target );
-				break;
-		}
+		if ( rpc_type == JMCustomRPC.ExecuteSubModAction )
+			RPC_ExecuteSubModAction( ctx, sender );
 	}
 
-	// Client sends RPC request to server
+	// Client -> server
 	void SendSubModActionToServer( string targetGuid, int value )
 	{
 		if ( !g_Game.IsClient() )
@@ -45,11 +47,11 @@ class JMCustomExampleRPCModule: JMRenderableModuleBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( targetGuid );
 		rpc.Write( value );
-		rpc.Send( NULL, JMCustomRPC.ExecuteSubModAction, true, NULL );
+		rpc.Send( null, JMCustomRPC.ExecuteSubModAction, true, null );
 	}
 
-	// Server processes incoming RPC
-	private void RPC_ExecuteSubModAction( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	// Server: read, authorize, act, persist, reply
+	protected void RPC_ExecuteSubModAction( ParamsReadContext ctx, PlayerIdentity sender )
 	{
 		if ( !g_Game.IsServer() )
 			return;
@@ -60,12 +62,31 @@ class JMCustomExampleRPCModule: JMRenderableModuleBase
 		if ( !ctx.Read( targetGuid ) || !ctx.Read( value ) )
 			return;
 
-		// Security: Always check permissions on server before executing RPC payload
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_RPC_EXECUTE, sender ) )
+		// The UI's BindPermission only hides the button. This is the real check:
+		// HasRPC also reports a denied attempt to COT's anti-cheat.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_RPC_EXECUTE, sender ) )
 			return;
 
-		// Execute server-side logic
-		COTCreateNotification( sender, new StringLocaliser( "RPC executed by admin " + sender.GetName() ), JMConstants.Lucide( "check" ) );
+		if ( !m_Settings )
+			m_Settings = JMCustomExampleSettings.Load();
+
+		m_Settings.ActionsRun++;
+		m_Settings.Save();
+
+		SendWebhook( "CustomAction", GetPermissionsManager().GetPlayer( sender.GetId() ), "Executed action on " + targetGuid );
+
+		// Server -> client
+		COTCreateNotification( sender, new StringLocaliser( "Action #" + m_Settings.ActionsRun + " executed" ), JMConstants.Lucide( "check" ) );
+	}
+
+	override void GetWebhookTypes( out array<string> types )
+	{
+		types.Insert( "CustomAction" );
+	}
+
+	override string GetWebhookTitle()
+	{
+		return "Custom Sub-Mod Module";
 	}
 }
 #endif

@@ -18,6 +18,29 @@ class JMMapEditorCatalog
 	// Icons reused across the catalog (palette matches the rest of COT)
 	static const string ICON_DEFAULT = "JM/COT/GUI/textures/icons/cog.edds";
 
+	// Returns a sorted list of unique categories (Vehicles, Containers, ...)
+	static array< string > GetCategories()
+	{
+		ref array< ref JMMapEditorAsset > items = Build();
+		ref array< string > cats = new array< string >;
+		for ( int i = 0; i < items.Count(); i++ )
+		{
+			string c = items.Get( i ).Category;
+			bool found = false;
+			for ( int j = 0; j < cats.Count(); j++ )
+			{
+				if ( cats.Get( j ) == c )
+				{
+					found = true;
+					break;
+				}
+			}
+			if ( !found )
+				cats.Insert( c );
+		}
+		return cats;
+	}
+
 	static ref array< ref JMMapEditorAsset > Build()
 	{
 		ref array< ref JMMapEditorAsset > items = new array< ref JMMapEditorAsset >;
@@ -96,28 +119,5 @@ class JMMapEditorCatalog
 		e.Category = "Nature"; e.ClassName = "bldr_tree_oak";  e.DisplayName = "Oak Tree";    e.IconPath = ICON_DEFAULT; items.Insert( e );
 
 		return items;
-	}
-
-	// Returns a sorted list of unique categories (Vehicles, Containers, ...)
-	static array< string > GetCategories()
-	{
-		ref array< ref JMMapEditorAsset > items = Build();
-		ref array< string > cats = new array< string >;
-		for ( int i = 0; i < items.Count(); i++ )
-		{
-			string c = items.Get( i ).Category;
-			bool found = false;
-			for ( int j = 0; j < cats.Count(); j++ )
-			{
-				if ( cats.Get( j ) == c )
-				{
-					found = true;
-					break;
-				}
-			}
-			if ( !found )
-				cats.Insert( c );
-		}
-		return cats;
 	}
 }

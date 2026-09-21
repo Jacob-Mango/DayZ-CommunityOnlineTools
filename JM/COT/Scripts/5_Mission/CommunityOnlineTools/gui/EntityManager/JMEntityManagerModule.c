@@ -33,11 +33,19 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		}
 	}
 
-	// -- Subclass hooks -----------------------------------------------------------
-
-	JMEntityManagerAdapter CreateAdapter()
+	JMEntityManagerAdapter GetAdapter()
 	{
-		return null;
+		return m_Adapter;
+	}
+
+	array<ref JMEntityMetaData> GetEntities()
+	{
+		return m_Entities;
+	}
+
+	int GetRPCAction()
+	{
+		return -1;
 	}
 
 	int GetRPCRequest()
@@ -50,7 +58,7 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		return -1;
 	}
 
-	int GetRPCAction()
+	int GetRPCSendRemove()
 	{
 		return -1;
 	}
@@ -62,9 +70,11 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		return -1;
 	}
 
-	int GetRPCSendRemove()
+	// -- Subclass hooks -----------------------------------------------------------
+
+	JMEntityManagerAdapter CreateAdapter()
 	{
-		return -1;
+		return null;
 	}
 
 	override int GetRPCMin()
@@ -87,7 +97,7 @@ class JMEntityManagerModule: JMRenderableModuleBase
 	{
 		string prefix = m_Adapter.GetPermissionPrefix();
 
-		GetPermissionsManager().RegisterPermission( prefix + ".View" );
+		JMPermissions.Register( prefix + ".View" );
 		m_Permissions.Insert( prefix + ".View" );
 
 		array<ref JMEntityAction> actions = new array<ref JMEntityAction>;
@@ -98,19 +108,9 @@ class JMEntityManagerModule: JMRenderableModuleBase
 				continue;
 			if ( m_Permissions.Find( a.m_Permission ) != -1 )
 				continue;
-			GetPermissionsManager().RegisterPermission( a.m_Permission );
+			JMPermissions.Register( a.m_Permission );
 			m_Permissions.Insert( a.m_Permission );
 		}
-	}
-
-	JMEntityManagerAdapter GetAdapter()
-	{
-		return m_Adapter;
-	}
-
-	array<ref JMEntityMetaData> GetEntities()
-	{
-		return m_Entities;
 	}
 
 	// -- JMRenderableModuleBase ---------------------------------------------------
@@ -119,7 +119,7 @@ class JMEntityManagerModule: JMRenderableModuleBase
 	{
 		if ( !m_Adapter )
 			return false;
-		return GetPermissionsManager().HasPermission( m_Adapter.GetPermissionPrefix() + ".View" );
+		return JMPermissions.Has( m_Adapter.GetPermissionPrefix() + ".View" );
 	}
 
 	override string GetLayoutRoot()
@@ -219,7 +219,7 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		if ( !sender )
 			return;
 
-		if ( !GetPermissionsManager().HasPermissionRPC( m_Adapter.GetPermissionPrefix() + ".View", sender ) )
+		if ( !JMPermissions.HasRPC( m_Adapter.GetPermissionPrefix() + ".View", sender ) )
 			return;
 
 		UpdateEntitiesFromAdapter();
@@ -296,7 +296,7 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		{
 			if ( a.m_Id != actionId )
 				continue;
-			if ( a.m_Permission != "" && !GetPermissionsManager().HasPermissionRPC( a.m_Permission, sender ) )
+			if ( a.m_Permission != "" && !JMPermissions.HasRPC( a.m_Permission, sender ) )
 				return;
 			break;
 		}

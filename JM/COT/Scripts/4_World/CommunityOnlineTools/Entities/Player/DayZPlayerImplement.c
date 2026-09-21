@@ -1,9 +1,8 @@
 modded class DayZPlayerImplement
 {
-	private JMSpectatorCamera m_SpectatorCamera;
-	private Head_Default m_PlayerHead;
+	protected JMSpectatorCamera m_SpectatorCamera;
+	protected Head_Default m_PlayerHead;
 	bool m_JM_IsHeadInvisible;
-
 	vector m_COT_HeadBonePositionWS;
 	float m_COT_HeadBoneIdleTime;
 	vector m_COT_LHandBonePositionWS;
@@ -14,13 +13,42 @@ modded class DayZPlayerImplement
 	float m_COT_LFootBoneIdleTime;
 	vector m_COT_RFootBonePositionWS;
 	float m_COT_RFootBoneIdleTime;
-
 	bool m_COT_EnableBonePositionUpdate;
 
 	void DayZPlayerImplement()
 	{
 		if ( IsMissionClient() )
 			SetEventMask( EntityEvent.FRAME | EntityEvent.POSTFRAME );
+	}
+
+	void SetAttachmentInvisible( string slot, bool invisible )
+	{
+		int slot_id = InventorySlots.GetSlotIdFromString( slot );
+		EntityAI ent = GetInventory().FindAttachment( slot_id );
+		if ( ent )
+		{
+			COT_SetEntityInvisibleRecursive( ent, invisible );
+		}
+	}
+
+	void SetHeadInvisible( bool invisible )
+	{
+		CF_Log.Debug("SetHeadInvisible " + invisible);
+
+		if ( !m_PlayerHead )
+		{
+			int slot_id = InventorySlots.GetSlotIdFromString( "Head" );
+			m_PlayerHead = Head_Default.Cast( GetInventory().FindPlaceholderForSlot( slot_id ) );
+		}
+		
+		m_PlayerHead.SetInvisible( invisible );
+
+		SetAttachmentInvisible( "Head", invisible );
+		SetAttachmentInvisible( "Headgear", invisible );
+		SetAttachmentInvisible( "Mask", invisible );
+		SetAttachmentInvisible( "Eyewear", invisible );
+
+		m_JM_IsHeadInvisible = invisible;
 	}
 
 	override void CommandHandler( float pDt, int pCurrentCommandID, bool pCurrentCommandFinished )	
@@ -93,36 +121,6 @@ modded class DayZPlayerImplement
 				if (m_JM_IsHeadInvisible)
 					COT_SetEntityInvisibleRecursive(item, true);
 				break;
-		}
-	}
-
-	void SetHeadInvisible( bool invisible )
-	{
-		CF_Log.Debug("SetHeadInvisible " + invisible);
-
-		if ( !m_PlayerHead )
-		{
-			int slot_id = InventorySlots.GetSlotIdFromString( "Head" );
-			m_PlayerHead = Head_Default.Cast( GetInventory().FindPlaceholderForSlot( slot_id ) );
-		}
-		
-		m_PlayerHead.SetInvisible( invisible );
-
-		SetAttachmentInvisible( "Head", invisible );
-		SetAttachmentInvisible( "Headgear", invisible );
-		SetAttachmentInvisible( "Mask", invisible );
-		SetAttachmentInvisible( "Eyewear", invisible );
-
-		m_JM_IsHeadInvisible = invisible;
-	}
-
-	void SetAttachmentInvisible( string slot, bool invisible )
-	{
-		int slot_id = InventorySlots.GetSlotIdFromString( slot );
-		EntityAI ent = GetInventory().FindAttachment( slot_id );
-		if ( ent )
-		{
-			COT_SetEntityInvisibleRecursive( ent, invisible );
 		}
 	}
 

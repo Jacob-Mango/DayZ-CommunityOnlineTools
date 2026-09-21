@@ -31,7 +31,6 @@ class UIActionStagedIcon: UIActionBase
 {
 	protected ButtonWidget m_Button;
 	protected ImageWidget  m_Image;
-
 	protected ref array<ref JMStagedIconEntry> m_Stages;
 	protected int  m_CurrentStage;
 	protected bool m_CycleOnClick;
@@ -40,8 +39,66 @@ class UIActionStagedIcon: UIActionBase
 	//! UIEvent.CLICK_RIGHT by opening a menu there.
 	protected int  m_LastRightClickX;
 	protected int  m_LastRightClickY;
-
 	protected ref JMAnimColor m_ColorAnim;
+
+	int GetLastRightClickX()
+	{
+		return m_LastRightClickX;
+	}
+
+	int GetLastRightClickY()
+	{
+		return m_LastRightClickY;
+	}
+
+	int GetStage()
+	{
+		return m_CurrentStage;
+	}
+
+	int GetStageCount()
+	{
+		return m_Stages.Count();
+	}
+
+	//! When true, clicking the widget cycles to the next stage automatically.
+	void SetCycleOnClick( bool cycle )
+	{
+		m_CycleOnClick = cycle;
+	}
+
+	//! Jump to a specific stage index (clamped).
+	void SetStage( int stage, bool sendEvent = true )
+	{
+		if ( m_Stages.Count() == 0 )
+			return;
+
+		if ( stage < 0 )
+			stage = 0;
+		if ( stage >= m_Stages.Count() )
+			stage = m_Stages.Count() - 1;
+
+		if ( stage == m_CurrentStage )
+			return;
+
+		m_CurrentStage = stage;
+		ApplyStage();
+
+		if ( sendEvent )
+			CallEvent( UIEvent.CHANGE );
+	}
+
+	//! Replace all stages at once and reset to stage 0.
+	void SetStages( notnull array<string> imagePaths, int color = 0xFFFFFFFF )
+	{
+		m_Stages.Clear();
+		foreach ( string path : imagePaths )
+			m_Stages.Insert( new JMStagedIconEntry( path, color ) );
+
+		m_CurrentStage = -1;
+		if ( m_Stages.Count() > 0 )
+			SetStage( 0 );
+	}
 
 	override void OnInit()
 	{
@@ -68,49 +125,6 @@ class UIActionStagedIcon: UIActionBase
 			SetStage( 0 );
 	}
 
-	//! Replace all stages at once and reset to stage 0.
-	void SetStages( notnull array<string> imagePaths, int color = 0xFFFFFFFF )
-	{
-		m_Stages.Clear();
-		foreach ( string path : imagePaths )
-			m_Stages.Insert( new JMStagedIconEntry( path, color ) );
-
-		m_CurrentStage = -1;
-		if ( m_Stages.Count() > 0 )
-			SetStage( 0 );
-	}
-
-	int GetStage()
-	{
-		return m_CurrentStage;
-	}
-
-	int GetStageCount()
-	{
-		return m_Stages.Count();
-	}
-
-	//! Jump to a specific stage index (clamped).
-	void SetStage( int stage, bool sendEvent = true )
-	{
-		if ( m_Stages.Count() == 0 )
-			return;
-
-		if ( stage < 0 )
-			stage = 0;
-		if ( stage >= m_Stages.Count() )
-			stage = m_Stages.Count() - 1;
-
-		if ( stage == m_CurrentStage )
-			return;
-
-		m_CurrentStage = stage;
-		ApplyStage();
-
-		if ( sendEvent )
-			CallEvent( UIEvent.CHANGE );
-	}
-
 	//! Advance to the next stage, wrapping around.
 	void NextStage( bool sendEvent = true )
 	{
@@ -122,12 +136,6 @@ class UIActionStagedIcon: UIActionBase
 			next = 0;
 
 		SetStage( next, sendEvent );
-	}
-
-	//! When true, clicking the widget cycles to the next stage automatically.
-	void SetCycleOnClick( bool cycle )
-	{
-		m_CycleOnClick = cycle;
 	}
 
 	override void SetIcon( string imagePath )
@@ -174,22 +182,12 @@ class UIActionStagedIcon: UIActionBase
 		return true;
 	}
 
-	int GetLastRightClickX()
-	{
-		return m_LastRightClickX;
-	}
-
-	int GetLastRightClickY()
-	{
-		return m_LastRightClickY;
-	}
-
 	override bool IsFocusWidget( Widget widget )
 	{
 		return widget == m_Button;
 	}
 
-	private void ApplyStage()
+	protected void ApplyStage()
 	{
 		if ( !m_Image || m_CurrentStage < 0 || m_CurrentStage >= m_Stages.Count() )
 			return;

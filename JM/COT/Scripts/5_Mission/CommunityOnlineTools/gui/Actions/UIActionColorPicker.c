@@ -26,7 +26,6 @@ class UIActionColorPicker: UIActionBase
 	protected EditBoxWidget m_HexBox;
 	protected Widget        m_Preview;
 	protected ButtonWidget  m_PreviewButton;
-
 	protected int    m_Color;
 	protected string m_PreviousText;
 
@@ -56,24 +55,17 @@ class UIActionColorPicker: UIActionBase
 	//! Swallows the click that opened the popup so it does not immediately
 	//! count as an outside click and close it again.
 	protected float           m_OpenDelay;
-
 	static const string POPUP_LAYOUT = "JM/COT/GUI/layouts/uiactions/UIActionColorPicker_Popup.layout";
 
-	override void OnInit()
-	{
-		super.OnInit();
+	// =========================================================================
+	//  ARGB popup
+	// =========================================================================
 
-		Class.CastTo( m_Label,   layoutRoot.FindAnyWidget( "action_label"   ) );
-		Class.CastTo( m_HexBox,  layoutRoot.FindAnyWidget( "action"         ) );
-		Class.CastTo( m_Preview, layoutRoot.FindAnyWidget( "action_preview" ) );
-		Class.CastTo( m_PreviewButton, layoutRoot.FindAnyWidget( "action_preview_button" ) );
-
-		m_Color = ARGB( 255, 255, 255, 255 );
-		m_PreviousText = "";
-		m_Open = false;
-		m_OpenDelay = 0;
-		UpdatePreview();
-	}
+	//! Channel slider colours, so a glance at the popup says which row is which.
+	static const int COLOR_CHANNEL_A = 0xFFAAB0BB;
+	static const int COLOR_CHANNEL_R = 0xFFE05555;
+	static const int COLOR_CHANNEL_G = 0xFF55C46E;
+	static const int COLOR_CHANNEL_B = 0xFF5588FF;
 
 	void ~UIActionColorPicker()
 	{
@@ -82,25 +74,9 @@ class UIActionColorPicker: UIActionBase
 
 		if ( m_Popup )
 		{
-			JMStatics.UnregisterOverlay( m_Popup );
+			JMStatics.RemoveOverlay( m_Popup );
 			m_Popup.Unlink();
 		}
-	}
-
-	override void SetLabel( string text )
-	{
-		text = Widget.TranslateString( text );
-		if ( m_Label )
-			m_Label.SetText( text );
-	}
-
-	//! Set color from ARGB int - updates both preview and hex field.
-	override void SetColor( int color )
-	{
-		m_Color = color;
-		UpdatePreview();
-		UpdateHexBox();
-		SyncSlidersFromColor();
 	}
 
 	//! Returns the current ARGB color value.
@@ -109,20 +85,9 @@ class UIActionColorPicker: UIActionBase
 		return m_Color;
 	}
 
-	override bool IsFocusWidget( Widget widget )
-	{
-		if ( widget == m_HexBox )        return true;
-		if ( widget == m_PreviewButton ) return true;
-
-		if ( m_PopupAnchorWidget && IsInsideAnchor( widget ) )
-			return true;
-
-		return IsInsidePopup( widget );
-	}
-
 	//! True for the external anchor and anything inside it, so the button that
 	//! opens the popup is not also read as a click outside it.
-	private bool IsInsideAnchor( Widget widget )
+	protected bool IsInsideAnchor( Widget widget )
 	{
 		if ( !m_PopupAnchorWidget || !widget )
 			return false;
@@ -138,190 +103,22 @@ class UIActionColorPicker: UIActionBase
 		return false;
 	}
 
-	override bool OnClick( Widget w, int x, int y, int button )
+	//! True for the popup itself and anything inside it, so dragging a slider
+	//! is not mistaken for a click outside the popup.
+	protected bool IsInsidePopup( Widget widget )
 	{
-		if ( w == m_PreviewButton )
+		if ( !m_Popup || !widget )
+			return false;
+
+		Widget cur = widget;
+		while ( cur )
 		{
-			SetOpen( !m_Open );
-			return true;
+			if ( cur == m_Popup )
+				return true;
+			cur = cur.GetParent();
 		}
 
-		if ( w == m_HexBox )
-		{
-			SetFocus( m_HexBox );
-			return false;
-		}
 		return false;
-	}
-
-	override bool OnChange( Widget w, int x, int y, bool finished )
-	{
-		if ( w != m_HexBox || !finished )
-			return false;
-
-		string text = m_HexBox.GetText();
-		if ( text == m_PreviousText )
-			return false;
-
-		int parsed;
-		if ( TryParseHex( text, parsed ) )
-		{
-			m_Color        = parsed;
-			m_PreviousText = text;
-			UpdatePreview();
-			SyncSlidersFromColor();
-			CallEvent( UIEvent.CHANGE );
-		}
-
-		return true;
-	}
-
-	private bool TryParseHex( string input, out int color )
-	{
-		string s = input;
-
-		// Strip leading '#'
-		if ( s.Length() > 0 && s.Get(0) == "#" )
-			s = s.Substring( 1, s.Length() - 1 );
-
-		// Must be 6 (RRGGBB) or 8 (AARRGGBB) hex chars
-		if ( s.Length() != 6 && s.Length() != 8 )
-			return false;
-
-		s.ToUpper();
-
-		int value = 0;
-		int nibble;
-		string ch;
-		for ( int i = 0; i < s.Length(); i++ )
-		{
-			ch = s.Get( i );
-
-			if ( ch >= "0" && ch <= "9" )
-				nibble = ch.ToInt();
-			else if ( ch >= "A" && ch <= "F" )
-				nibble = 10 + ( ch.ToInt() - "A".ToInt() );
-			else
-				return false;
-
-			value = ( value << 4 ) | nibble;
-		}
-
-		// Promote RRGGBB -> AARRGGBB with full opacity
-		if ( s.Length() == 6 )
-			color = 0xFF000000 | value;
-		else
-			color = value;
-
-		return true;
-	}
-
-	private void UpdatePreview()
-	{
-		if ( m_Preview )
-			m_Preview.SetColor( m_Color );
-	}
-
-	private void UpdateHexBox()
-	{
-		if ( !m_HexBox )
-			return;
-
-		int a = ( m_Color >> 24 ) & 0xFF;
-		int r = ( m_Color >> 16 ) & 0xFF;
-		int g = ( m_Color >>  8 ) & 0xFF;
-		int b =   m_Color         & 0xFF;
-
-		string hex;
-		if ( a == 255 )
-			hex = string.Format( "%1%2%3", ToHex2(r), ToHex2(g), ToHex2(b) );
-		else
-			hex = string.Format( "%1%2%3%4", ToHex2(a), ToHex2(r), ToHex2(g), ToHex2(b) );
-
-		m_HexBox.SetText( hex );
-		m_PreviousText = hex;
-	}
-
-	private string ToHex2( int v )
-	{
-		string chars = "0123456789ABCDEF";
-		return "" + chars.Get( ( v >> 4 ) & 0xF ) + chars.Get( v & 0xF );
-	}
-
-	// =========================================================================
-	//  ARGB popup
-	// =========================================================================
-
-	//! Channel slider colours, so a glance at the popup says which row is which.
-	static const int COLOR_CHANNEL_A = 0xFFAAB0BB;
-	static const int COLOR_CHANNEL_R = 0xFFE05555;
-	static const int COLOR_CHANNEL_G = 0xFF55C46E;
-	static const int COLOR_CHANNEL_B = 0xFF5588FF;
-
-	private void EnsurePopup()
-	{
-		if ( m_Popup )
-			return;
-
-		if ( !layoutRoot )
-			return;
-
-		// Float the popup in the same full-screen container the windows live in,
-		// so no window can clip it and it always draws over them. Fall back to
-		// the largest ancestor that still has a parent (one below the workspace
-		// root) if the container does not exist.
-		m_Anchor = JMStatics.WINDOWS_CONTAINER;
-
-		if ( !m_Anchor )
-		{
-			m_Anchor = layoutRoot;
-			Widget parent = m_Anchor.GetParent();
-			while ( parent && parent.GetParent() )
-			{
-				m_Anchor = parent;
-				parent = m_Anchor.GetParent();
-			}
-		}
-
-		m_Popup = g_Game.GetWorkspace().CreateWidgets( POPUP_LAYOUT, m_Anchor );
-		if ( !m_Popup )
-			return;
-
-		m_Popup.Show( false );
-		m_Popup.SetHandler( this );
-
-		// Sitting outside the window means COTModule's "was this click on COT
-		// UI?" ancestor walk cannot find a window above us; without this the
-		// click is treated as a world click and the game takes the mouse back,
-		// which turns the camera while a slider is being dragged.
-		JMStatics.RegisterOverlay( m_Popup );
-
-		m_PopupSwatch = m_Popup.FindAnyWidget( "popup_swatch" );
-
-		Widget content = m_Popup.FindAnyWidget( "popup_content" );
-		if ( !content )
-			return;
-
-		m_SliderA = CreateChannelSlider( content, "A", COLOR_CHANNEL_A );
-		m_SliderR = CreateChannelSlider( content, "R", COLOR_CHANNEL_R );
-		m_SliderG = CreateChannelSlider( content, "G", COLOR_CHANNEL_G );
-		m_SliderB = CreateChannelSlider( content, "B", COLOR_CHANNEL_B );
-
-		SyncSlidersFromColor();
-		UpdatePopupSwatch();
-	}
-
-	private UIActionSlider CreateChannelSlider( notnull Widget content, string label, int color )
-	{
-		UIActionSlider slider = UIActionManager.CreateSlider( content, label, 0, 255, this, "OnChange_Channel" );
-		if ( !slider )
-			return null;
-
-		slider.SetStepValue( 1 );
-		slider.SetFormat( "%1" );
-		slider.SetColor( color );
-
-		return slider;
 	}
 
 	bool IsOpen()
@@ -329,54 +126,7 @@ class UIActionColorPicker: UIActionBase
 		return m_Open;
 	}
 
-	//! The base class's IsVisible() reads layoutRoot, which here is the always-
-	//! shown swatch chip, not the ARGB popup - m_Open tracks the popup itself,
-	//! which is what the Escape priority chain needs to know about.
-	override bool IsVisible()
-	{
-		return m_Open;
-	}
-
-	//! Position the popup against `w` rather than this control's own swatch.
-	//! Pass NULL to go back to the swatch.
-	void SetPopupAnchorWidget( Widget w )
-	{
-		m_PopupAnchorWidget = w;
-	}
-
-	//! The widget the popup hangs off. Never null once OnInit has run unless
-	//! the layout is broken.
-	protected Widget PopupReference()
-	{
-		if ( m_PopupAnchorWidget )
-			return m_PopupAnchorWidget;
-
-		return m_PreviewButton;
-	}
-
-	//! Raise the popup without a click on the swatch, for a host driving this
-	//! picker from its own button.
-	void Open()
-	{
-		SetOpen( true );
-	}
-
-	//! Part of the COT_ScriptedWidgetEventHandler overlay contract: JMFormBase
-	//! sweeps every registered overlay on a tab change and on hide. Without
-	//! this the ARGB popup outlived the tab it was opened from.
-	override void Close()
-	{
-		if ( m_Open )
-			SetOpen( false );
-	}
-
-	override void OnHide()
-	{
-		if ( m_Open )
-			SetOpen( false );
-	}
-
-	private void SetOpen( bool open )
+	protected void SetOpen( bool open )
 	{
 		if ( open )
 			EnsurePopup();
@@ -417,11 +167,277 @@ class UIActionColorPicker: UIActionBase
 		}
 	}
 
+	//! Position the popup against `w` rather than this control's own swatch.
+	//! Pass NULL to go back to the swatch.
+	void SetPopupAnchorWidget( Widget w )
+	{
+		m_PopupAnchorWidget = w;
+	}
+
+	override void OnInit()
+	{
+		super.OnInit();
+
+		Class.CastTo( m_Label,   layoutRoot.FindAnyWidget( "action_label"   ) );
+		Class.CastTo( m_HexBox,  layoutRoot.FindAnyWidget( "action"         ) );
+		Class.CastTo( m_Preview, layoutRoot.FindAnyWidget( "action_preview" ) );
+		Class.CastTo( m_PreviewButton, layoutRoot.FindAnyWidget( "action_preview_button" ) );
+
+		m_Color = ARGB( 255, 255, 255, 255 );
+		m_PreviousText = "";
+		m_Open = false;
+		m_OpenDelay = 0;
+		UpdatePreview();
+	}
+
+	override void SetLabel( string text )
+	{
+		text = Widget.TranslateString( text );
+		if ( m_Label )
+			m_Label.SetText( text );
+	}
+
+	//! Set color from ARGB int - updates both preview and hex field.
+	override void SetColor( int color )
+	{
+		m_Color = color;
+		UpdatePreview();
+		UpdateHexBox();
+		SyncSlidersFromColor();
+	}
+
+	override bool IsFocusWidget( Widget widget )
+	{
+		if ( widget == m_HexBox )        return true;
+		if ( widget == m_PreviewButton ) return true;
+
+		if ( m_PopupAnchorWidget && IsInsideAnchor( widget ) )
+			return true;
+
+		return IsInsidePopup( widget );
+	}
+
+	override bool OnClick( Widget w, int x, int y, int button )
+	{
+		if ( w == m_PreviewButton )
+		{
+			SetOpen( !m_Open );
+			return true;
+		}
+
+		if ( w == m_HexBox )
+		{
+			SetFocus( m_HexBox );
+			return false;
+		}
+		return false;
+	}
+
+	override bool OnChange( Widget w, int x, int y, bool finished )
+	{
+		if ( w != m_HexBox || !finished )
+			return false;
+
+		string text = m_HexBox.GetText();
+		if ( text == m_PreviousText )
+			return false;
+
+		int parsed;
+		if ( TryParseHex( text, parsed ) )
+		{
+			m_Color        = parsed;
+			m_PreviousText = text;
+			UpdatePreview();
+			SyncSlidersFromColor();
+			CallEvent( UIEvent.CHANGE );
+		}
+
+		return true;
+	}
+
+	protected bool TryParseHex( string input, out int color )
+	{
+		string s = input;
+
+		// Strip leading '#'
+		if ( s.Length() > 0 && s.Get(0) == "#" )
+			s = s.Substring( 1, s.Length() - 1 );
+
+		// Must be 6 (RRGGBB) or 8 (AARRGGBB) hex chars
+		if ( s.Length() != 6 && s.Length() != 8 )
+			return false;
+
+		s.ToUpper();
+
+		int value = 0;
+		int nibble;
+		string ch;
+		for ( int i = 0; i < s.Length(); i++ )
+		{
+			ch = s.Get( i );
+
+			if ( ch >= "0" && ch <= "9" )
+				nibble = ch.ToInt();
+			else if ( ch >= "A" && ch <= "F" )
+				nibble = 10 + ( ch.ToInt() - "A".ToInt() );
+			else
+				return false;
+
+			value = ( value << 4 ) | nibble;
+		}
+
+		// Promote RRGGBB -> AARRGGBB with full opacity
+		if ( s.Length() == 6 )
+			color = 0xFF000000 | value;
+		else
+			color = value;
+
+		return true;
+	}
+
+	protected void UpdatePreview()
+	{
+		if ( m_Preview )
+			m_Preview.SetColor( m_Color );
+	}
+
+	protected void UpdateHexBox()
+	{
+		if ( !m_HexBox )
+			return;
+
+		int a = ( m_Color >> 24 ) & 0xFF;
+		int r = ( m_Color >> 16 ) & 0xFF;
+		int g = ( m_Color >>  8 ) & 0xFF;
+		int b =   m_Color         & 0xFF;
+
+		string hex;
+		if ( a == 255 )
+			hex = string.Format( "%1%2%3", ToHex2(r), ToHex2(g), ToHex2(b) );
+		else
+			hex = string.Format( "%1%2%3%4", ToHex2(a), ToHex2(r), ToHex2(g), ToHex2(b) );
+
+		m_HexBox.SetText( hex );
+		m_PreviousText = hex;
+	}
+
+	protected string ToHex2( int v )
+	{
+		string chars = "0123456789ABCDEF";
+		return "" + chars.Get( ( v >> 4 ) & 0xF ) + chars.Get( v & 0xF );
+	}
+
+	protected void EnsurePopup()
+	{
+		if ( m_Popup )
+			return;
+
+		if ( !layoutRoot )
+			return;
+
+		// Float the popup in the same full-screen container the windows live in,
+		// so no window can clip it and it always draws over them. Fall back to
+		// the largest ancestor that still has a parent (one below the workspace
+		// root) if the container does not exist.
+		m_Anchor = JMStatics.WINDOWS_CONTAINER;
+
+		if ( !m_Anchor )
+		{
+			m_Anchor = layoutRoot;
+			Widget parent = m_Anchor.GetParent();
+			while ( parent && parent.GetParent() )
+			{
+				m_Anchor = parent;
+				parent = m_Anchor.GetParent();
+			}
+		}
+
+		m_Popup = g_Game.GetWorkspace().CreateWidgets( POPUP_LAYOUT, m_Anchor );
+		if ( !m_Popup )
+			return;
+
+		m_Popup.Show( false );
+		m_Popup.SetHandler( this );
+
+		// Sitting outside the window means COTModule's "was this click on COT
+		// UI?" ancestor walk cannot find a window above us; without this the
+		// click is treated as a world click and the game takes the mouse back,
+		// which turns the camera while a slider is being dragged.
+		JMStatics.AddOverlay( m_Popup );
+
+		m_PopupSwatch = m_Popup.FindAnyWidget( "popup_swatch" );
+
+		Widget content = m_Popup.FindAnyWidget( "popup_content" );
+		if ( !content )
+			return;
+
+		m_SliderA = CreateChannelSlider( content, "A", COLOR_CHANNEL_A );
+		m_SliderR = CreateChannelSlider( content, "R", COLOR_CHANNEL_R );
+		m_SliderG = CreateChannelSlider( content, "G", COLOR_CHANNEL_G );
+		m_SliderB = CreateChannelSlider( content, "B", COLOR_CHANNEL_B );
+
+		SyncSlidersFromColor();
+		UpdatePopupSwatch();
+	}
+
+	protected UIActionSlider CreateChannelSlider( notnull Widget content, string label, int color )
+	{
+		UIActionSlider slider = UIActionManager.CreateSlider( content, label, 0, 255, this, "OnChange_Channel" );
+		if ( !slider )
+			return null;
+
+		slider.SetStepValue( 1 );
+		slider.SetFormat( "%1" );
+		slider.SetColor( color );
+
+		return slider;
+	}
+
+	//! The base class's IsVisible() reads layoutRoot, which here is the always-
+	//! shown swatch chip, not the ARGB popup - m_Open tracks the popup itself,
+	//! which is what the Escape priority chain needs to know about.
+	override bool IsVisible()
+	{
+		return m_Open;
+	}
+
+	//! The widget the popup hangs off. Never null once OnInit has run unless
+	//! the layout is broken.
+	protected Widget PopupReference()
+	{
+		if ( m_PopupAnchorWidget )
+			return m_PopupAnchorWidget;
+
+		return m_PreviewButton;
+	}
+
+	//! Raise the popup without a click on the swatch, for a host driving this
+	//! picker from its own button.
+	void Open()
+	{
+		SetOpen( true );
+	}
+
+	//! Part of the COT_ScriptedWidgetEventHandler overlay contract: JMFormBase
+	//! sweeps every registered overlay on a tab change and on hide. Without
+	//! this the ARGB popup outlived the tab it was opened from.
+	override void Close()
+	{
+		if ( m_Open )
+			SetOpen( false );
+	}
+
+	override void OnHide()
+	{
+		if ( m_Open )
+			SetOpen( false );
+	}
+
 	//! Keep Update running while the popup is open even though the control that
 	//! owns it is hidden. Only ever touches the queue when this control is NOT
 	//! shown - when it is, Show() has already put Update there and a second
 	//! Insert would tick it twice a frame.
-	private void EnsureTick( bool on )
+	protected void EnsureTick( bool on )
 	{
 		if ( on )
 		{
@@ -442,7 +458,7 @@ class UIActionColorPicker: UIActionBase
 
 	//! Right-align the popup with its anchor, flipping it above when there is
 	//! not enough room below.
-	private void PositionPopup()
+	protected void PositionPopup()
 	{
 		Widget popupRef = PopupReference();
 
@@ -470,24 +486,6 @@ class UIActionColorPicker: UIActionBase
 		m_Popup.SetPos( posX, posY );
 	}
 
-	//! True for the popup itself and anything inside it, so dragging a slider
-	//! is not mistaken for a click outside the popup.
-	private bool IsInsidePopup( Widget widget )
-	{
-		if ( !m_Popup || !widget )
-			return false;
-
-		Widget cur = widget;
-		while ( cur )
-		{
-			if ( cur == m_Popup )
-				return true;
-			cur = cur.GetParent();
-		}
-
-		return false;
-	}
-
 	void OnChange_Channel( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
@@ -510,7 +508,7 @@ class UIActionColorPicker: UIActionBase
 		CallEvent( UIEvent.CHANGE );
 	}
 
-	private void SyncSlidersFromColor()
+	protected void SyncSlidersFromColor()
 	{
 		if ( !m_SliderA || !m_SliderR || !m_SliderG || !m_SliderB )
 			return;
@@ -532,7 +530,7 @@ class UIActionColorPicker: UIActionBase
 		m_SliderB.SetCurrent( b );
 	}
 
-	private void UpdatePopupSwatch()
+	protected void UpdatePopupSwatch()
 	{
 		if ( m_PopupSwatch )
 			m_PopupSwatch.SetColor( m_Color );

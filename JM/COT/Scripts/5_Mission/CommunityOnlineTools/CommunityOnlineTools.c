@@ -10,15 +10,15 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	void CommunityOnlineTools()
 	{
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Read" );
-		GetPermissionsManager().RegisterPermission( "Admin.Roles.Update" );
-		GetPermissionsManager().RegisterPermission("Actions.QuickActions");
+		JMPermissions.Register( JMConstants.PERM_PLAYER_READ );
+		JMPermissions.Register( JMConstants.PERM_ROLES_UPDATE );
+		JMPermissions.Register(JMConstants.PERM_ACTIONS_QUICKACTIONS);
 	}
 
 	void ~CommunityOnlineTools()
 	{
 	}
-	
+
 	override void OnStart()
 	{
 		super.OnStart();
@@ -120,7 +120,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_Active( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Active( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_Active").Add(senderRPC);
@@ -140,7 +140,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		//! activation that never happened - forged audit entries and a flooded
 		//! Discord endpoint in the same call.
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermissionRPC( "COT.View", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC, instance ) )
 			return;
 
 		if ( !instance )
@@ -188,7 +188,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_RefreshClients( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RefreshClients( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_RefreshClients").Add(senderRPC);
@@ -197,7 +197,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Read", senderRPC ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_READ, senderRPC ) )
 			return;
 
 		if ( IsMissionHost() )
@@ -239,7 +239,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_RefreshClientPositions( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RefreshClientPositions( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_RefreshClientPositions").Add(senderRPC);
@@ -248,7 +248,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Position", senderRPC ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_POSITION, senderRPC ) )
 			return;
 
 		if ( IsMissionHost() )
@@ -288,7 +288,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void Client_RemoveClient( string guid )
+	protected void Client_RemoveClient( string guid )
 	{
 		JMPlayerInstance instance;
 		GetPermissionsManager().OnClientDisconnected( guid, instance );
@@ -296,7 +296,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		JM_GetSelected().RemovePlayer( guid );
 	}
 
-	private void RPC_RemoveClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RemoveClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_RemoveClient").Add(senderRPC);
@@ -320,7 +320,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( IsMissionHost() )
 		{
-			Server_UpdateClient( guid, sendTo );
+			Exec_UpdateClient( guid, sendTo );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -329,7 +329,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void Client_UpdateClient( string guid, ParamsReadContext ctx, PlayerBase playerObj )
+	protected void Client_UpdateClient( string guid, ParamsReadContext ctx, PlayerBase playerObj )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Client_UpdateClient").Add(guid).Add(playerObj.ToString());
@@ -338,7 +338,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		GetPermissionsManager().UpdatePlayer( guid, ctx, playerObj );
 	}
 
-	private void Server_UpdateClient( string guid, PlayerIdentity sendTo )
+	protected void Exec_UpdateClient( string guid, PlayerIdentity sendTo )
 	{
 		JMPlayerInstance player = GetPermissionsManager().GetPlayer( guid );
 		if ( !player )
@@ -354,7 +354,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		rpc.Send( NULL, JMClientRPC.UpdateClient, true, sendTo );
 	}
 
-	private void RPC_UpdateClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_UpdateClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdateClient").Add(senderRPC);
@@ -365,14 +365,14 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			if ( !senderRPC )
 				return;
 
-			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Read", senderRPC ) )
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_READ, senderRPC ) )
 				return;
 
 			string guid;
 			if ( !ctx.Read( guid ) )
 				return;
 
-			Server_UpdateClient( guid, senderRPC );
+			Exec_UpdateClient( guid, senderRPC );
 		} else if ( g_Game.IsClient() )
 		{
 			PlayerBase po;
@@ -387,7 +387,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_UpdateClientPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_UpdateClientPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdateClientPosition").Add(senderRPC);
@@ -411,7 +411,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	//! Batched reply to RPC_RefreshClients - one player entry per iteration,
 	//! same wire shape RPC_UpdateClient's client branch already reads.
-	private void RPC_UpdateClientBatch( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_UpdateClientBatch( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdateClientBatch").Add(senderRPC);
@@ -441,7 +441,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	//! Batched reply to RPC_RefreshClientPositions. A guid this client does
 	//! not know yet still has its position bytes read and discarded, so the
 	//! stream stays aligned for the remaining entries in the same message.
-	private void RPC_UpdateClientPositionBatch( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_UpdateClientPositionBatch( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdateClientPositionBatch").Add(senderRPC);
@@ -487,7 +487,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			Client_SetClient( player.GetGUID(), rwctx.GetReadContext() );
 		} else if ( IsMissionHost() )
 		{
-			Server_SetClient( player );
+			Exec_SetClient( player );
 		}
 	}
 
@@ -505,11 +505,11 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			Client_SetClient( player.GetGUID(), rwctx.GetReadContext() );
 		} else if ( IsMissionHost() )
 		{
-			Server_SetClient( player, identity );
+			Exec_SetClient( player, identity );
 		}
 	}
 
-	private void Client_SetClient( string guid, ParamsReadContext ctx )
+	protected void Client_SetClient( string guid, ParamsReadContext ctx )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Client_SetClient").Add(guid);
@@ -522,10 +522,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		GetModuleManager().OnClientPermissionsUpdated();
 	}
 
-	private void Server_SetClient( JMPlayerInstance player )
+	protected void Exec_SetClient( JMPlayerInstance player )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_1(this, "Server_SetClient").Add(player.GetGUID());
+		auto trace = CF_Trace_1(this, "Exec_SetClient").Add(player.GetGUID());
 		#endif
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -536,7 +536,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		rpc.Send( NULL, JMClientRPC.SetClient, true, player.PlayerObject.GetIdentity() );
 	}
 
-	private void Server_SetClient( JMPlayerInstance player, PlayerIdentity identity )
+	protected void Exec_SetClient( JMPlayerInstance player, PlayerIdentity identity )
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
@@ -546,7 +546,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		rpc.Send( NULL, JMClientRPC.SetClient, true, identity );
 	}
 
-	private void RPC_SetClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_SetClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_SetClient").Add(senderRPC);
@@ -570,11 +570,11 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( IsMissionHost() )
 		{
-			Server_UpdateRole( role, toSendTo );
+			Exec_UpdateRole( role, toSendTo );
 		}
 	}
 
-	private void Client_UpdateRole( string roleName, ParamsReadContext ctx )
+	protected void Client_UpdateRole( string roleName, ParamsReadContext ctx )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Client_UpdateRole").Add(roleName);
@@ -597,10 +597,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		GetModuleManager().OnClientPermissionsUpdated();
 	}
 
-	private void Server_UpdateRole( JMRole role, PlayerIdentity toSendTo )
+	protected void Exec_UpdateRole( JMRole role, PlayerIdentity toSendTo )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_2(this, "Server_UpdateRole").Add(role.Name).Add(toSendTo.GetId());
+		auto trace = CF_Trace_2(this, "Exec_UpdateRole").Add(role.Name).Add(toSendTo.GetId());
 		#endif
 
 		if ( g_Game.IsServer() )
@@ -617,7 +617,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_UpdateRole( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_UpdateRole( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "RPC_UpdateRole");

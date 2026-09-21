@@ -1,9 +1,8 @@
 modded class CarScript
 {
 	static ref CF_DoublyLinkedNodes_WeakRef<CarScript> s_JM_AllCars = new CF_DoublyLinkedNodes_WeakRef<CarScript>();
-
 	ref CF_DoublyLinkedNode_WeakRef<CarScript> s_JM_Node;
-	private bool m_JM_WasDestroyed = false;
+	protected bool m_JM_WasDestroyed = false;
 
 	// Tracks the last player who entered the driver seat (non-Expansion fallback)
 	string m_JM_LastDriverUID;
@@ -44,7 +43,7 @@ modded class CarScript
 		}
 	}
 
-	private void CheckAndCreateCompensation()
+	protected void CheckAndCreateCompensation()
 	{
 		string ownerSteamID = "";
 

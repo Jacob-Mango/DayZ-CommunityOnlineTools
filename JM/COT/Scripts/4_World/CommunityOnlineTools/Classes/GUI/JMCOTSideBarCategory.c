@@ -6,7 +6,6 @@ class JMSidebarScrollEntry
 	float       maxOffset;
 	float       pause;
 	bool        scrolling;
-
 	static const float SCROLL_SPEED  = 40.0;
 	static const float PAUSE_SECONDS = 1.2;
 
@@ -78,47 +77,42 @@ class JMSidebarScrollEntry
 
 class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 {
-	private string m_CategoryName;
-	private ref array< JMRenderableModuleBase > m_Modules;
-
-	private Widget m_Root;
-	private ButtonWidget m_CatBtn;
-
-	private Widget m_FlyoutRoot;
-	private Widget m_FlyoutButtons;
+	protected string m_CategoryName;
+	protected ref array< JMRenderableModuleBase > m_Modules;
+	protected Widget m_Root;
+	protected ButtonWidget m_CatBtn;
+	protected Widget m_FlyoutRoot;
+	protected Widget m_FlyoutButtons;
 
 	//! Red hover skin for the category tile itself.
-	private ref UIActionSurfaceSkin m_CatSkin;
+	protected ref UIActionSurfaceSkin m_CatSkin;
 	//! Chevron shown only when this category actually has something to expand.
-	private ImageWidget m_CatArrow;
+	protected ImageWidget m_CatArrow;
 	//! Current and target chevron angle in degrees, eased in OnUpdate.
 	//! Collapsed points down (0); focused turns it left (-90) to point at the
 	//! flyout, which opens on the left-hand side of the sidebar.
-	private float m_ArrowAngle;
-	private float m_ArrowTarget;
-
+	protected float m_ArrowAngle;
+	protected float m_ArrowTarget;
 	static const float ARROW_COLLAPSED_ANGLE = 0.0;
 	static const float ARROW_FOCUSED_ANGLE   = -90.0;
 	//! Degrees per second. 90 degrees in ~0.18s reads as snappy, not floaty.
 	static const float ARROW_TURN_SPEED      = 500.0;
 
 	//! One red hover skin per flyout entry, parallel to m_ButtonRoots.
-	private ref array< ref UIActionSurfaceSkin > m_ButtonSkins;
-	private ref array< Widget >                  m_ButtonRoots;
-
-	private ref array< ref JMSidebarScrollEntry > m_ScrollEntries;
+	protected ref array< ref UIActionSurfaceSkin > m_ButtonSkins;
+	protected ref array< Widget >                  m_ButtonRoots;
+	protected ref array< ref JMSidebarScrollEntry > m_ScrollEntries;
 	// Candidates waiting for deferred overflow measurement (filled during AddModule).
-	private ref array< TextWidget > m_ScrollCandidates;
-	private bool m_ScrollMeasured;
-
-	private bool m_FlyoutVisible;
-	private bool m_MouseOverCategory;
-	private bool m_MouseOverFlyout;
-	private float m_HideTimer;
+	protected ref array< TextWidget > m_ScrollCandidates;
+	protected bool m_ScrollMeasured;
+	protected bool m_FlyoutVisible;
+	protected bool m_MouseOverCategory;
+	protected bool m_MouseOverFlyout;
+	protected float m_HideTimer;
 	static const float HIDE_DELAY = 0.15;
 
 	// Reference back to the sidebar so ShowFlyout can close sibling flyouts
-	private JMCOTSideBar m_SideBar;
+	protected JMCOTSideBar m_SideBar;
 
 	void JMCOTSideBarCategory()
 	{
@@ -139,9 +133,45 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		}
 	}
 
+	string GetCategoryName()
+	{
+		return m_CategoryName;
+	}
+
+	Widget GetRoot()
+	{
+		return m_Root;
+	}
+
+	bool HasModules()
+	{
+		return UpdateModuleVisibility() > 0;
+	}
+
+	protected bool IsChildOf( Widget child, Widget parent )
+	{
+		if ( !child || !parent )
+			return false;
+
+		Widget cur = child.GetParent();
+		while ( cur )
+		{
+			if ( cur == parent )
+				return true;
+			cur = cur.GetParent();
+		}
+
+		return false;
+	}
+
+	void SetSideBar( JMCOTSideBar sideBar )
+	{
+		m_SideBar = sideBar;
+	}
+
 	//! Build the shared red sidebar hover treatment for one row: soft red wash
 	//! behind it, hard red bar down the left edge, red label + icon.
-	private UIActionSurfaceSkin MakeSidebarSkin( Widget frame, TextWidget label, ImageWidget icon )
+	protected UIActionSurfaceSkin MakeSidebarSkin( Widget frame, TextWidget label, ImageWidget icon )
 	{
 		UIActionSurfaceSkin skin = new UIActionSurfaceSkin();
 
@@ -156,11 +186,6 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		skin.SetTextColors( JMUISurfaceStyle.SIDEBAR_TEXT_IDLE, JMUISurfaceStyle.SIDEBAR_TEXT_HOVER );
 
 		return skin;
-	}
-
-	void SetSideBar( JMCOTSideBar sideBar )
-	{
-		m_SideBar = sideBar;
 	}
 
 	void Init( string categoryName, Widget categoryWidget )
@@ -239,16 +264,6 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		}
 	}
 
-	string GetCategoryName()
-	{
-		return m_CategoryName;
-	}
-
-	Widget GetRoot()
-	{
-		return m_Root;
-	}
-
 	// Returns true if w is the flyout root or any descendant of it
 	bool ContainsWidget( Widget w )
 	{
@@ -296,11 +311,6 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		}
 
 		return visibleCount;
-	}
-
-	bool HasModules()
-	{
-		return UpdateModuleVisibility() > 0;
 	}
 
 	void OnUpdate( float timeslice )
@@ -360,7 +370,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 	}
 
 	// Called once after the flyout has been shown and layout has resolved.
-	private void MeasureScrollEntries()
+	protected void MeasureScrollEntries()
 	{
 		m_ScrollMeasured = true;
 		m_ScrollEntries.Clear();
@@ -373,7 +383,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		}
 	}
 
-	private void ShowFlyout()
+	protected void ShowFlyout()
 	{
 		if ( !m_FlyoutRoot || !m_Root )
 			return;
@@ -423,7 +433,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( MeasureScrollEntries, 100, false );
 	}
 
-	private void HideFlyout()
+	protected void HideFlyout()
 	{
 		if ( m_FlyoutRoot )
 			m_FlyoutRoot.Show( false );
@@ -442,7 +452,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 	//! Which flyout entry's skin owns this event widget. Events arrive on the
 	//! inner ButtonWidget "btn", so match its parent row as well as the row
 	//! itself.
-	private UIActionSurfaceSkin SkinForEntry( Widget w )
+	protected UIActionSurfaceSkin SkinForEntry( Widget w )
 	{
 		if ( !w )
 			return NULL;
@@ -459,7 +469,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 	}
 
 	//! Clear every entry's hover, used when the whole flyout goes away.
-	private void ClearEntryHovers()
+	protected void ClearEntryHovers()
 	{
 		foreach ( UIActionSurfaceSkin entrySkin : m_ButtonSkins )
 		{
@@ -470,7 +480,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 
 	//! Aim the chevron. The actual turn is eased in OnUpdate so focusing a
 	//! category visibly rotates the arrow rather than snapping it.
-	private void UpdateArrow()
+	protected void UpdateArrow()
 	{
 		if ( m_FlyoutVisible )
 			m_ArrowTarget = ARROW_FOCUSED_ANGLE;
@@ -479,7 +489,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 	}
 
 	//! Step the chevron toward its target angle.
-	private void AnimateArrow( float timeslice )
+	protected void AnimateArrow( float timeslice )
 	{
 		if ( !m_CatArrow )
 			return;
@@ -588,7 +598,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 
 	// Find which module owns the clicked widget by checking GetMenuButton()
 	// and the root btn_bkg widget (stored as the button widget passed to InitButton)
-	private JMRenderableModuleBase FindModuleForWidget( Widget w )
+	protected JMRenderableModuleBase FindModuleForWidget( Widget w )
 	{
 		foreach ( JMRenderableModuleBase module: m_Modules )
 		{
@@ -606,21 +616,5 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		}
 
 		return NULL;
-	}
-
-	private bool IsChildOf( Widget child, Widget parent )
-	{
-		if ( !child || !parent )
-			return false;
-
-		Widget cur = child.GetParent();
-		while ( cur )
-		{
-			if ( cur == parent )
-				return true;
-			cur = cur.GetParent();
-		}
-
-		return false;
 	}
 }

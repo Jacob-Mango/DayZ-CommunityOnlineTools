@@ -2,11 +2,9 @@ class COTPPERequester_CameraNV: PPERequester_CameraNV
 {
 	static const int COT_OFF = 0;
 	static const int COT_ON  = 1;
-
 	float m_COT_UndergroundPresenceFactorTarget;
 	float m_COT_UndergroundPresenceFactor;
 	float m_COT_UndergroundPresenceFactorVel[1];
-
 	float m_COT_TimeVisibility_Out[6] = {
 		0,
 		0.5,  //! sunrise start
@@ -15,7 +13,6 @@ class COTPPERequester_CameraNV: PPERequester_CameraNV
 		0.5,  //! sunset start
 		0
 	};
-
 	float m_COT_LastDaylightVisibility;
 	
 	override protected void SetNVMode(int mode)

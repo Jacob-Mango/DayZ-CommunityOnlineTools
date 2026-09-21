@@ -27,13 +27,10 @@ class JMFreecam : JMCameraBase
 	static const float SLOW_MULT   = 0.2;   // ctrl
 	static const float MOUSE_SENS  = 0.22;  // deg per pixel
 	static const float PITCH_LIMIT = 85.0;  // degrees
-
 	float m_Yaw;     // rotation around world Z (0..360)
 	float m_Pitch;   // rotation around camera right (clamped)
-
 	vector m_AccumVelocity;  // smooth out per-tick velocity jumps
 	float  m_CurSpeed;       // current m/s
-
 	int    m_PrevMouseX;
 	int    m_PrevMouseY;
 	bool   m_HasPrevMouse;
@@ -51,6 +48,15 @@ class JMFreecam : JMCameraBase
 		m_PrevMouseX = 0;
 		m_PrevMouseY = 0;
 		m_HasPrevMouse = false;
+	}
+
+	// Helper: poll a named input via GetUApi. Returns false on missing input.
+	protected bool IsInputHeld( string inputName )
+	{
+		UAInput inp = GetUApi().GetInputByName( inputName );
+		if ( !inp )
+			return false;
+		return inp.LocalHold();
 	}
 
 	override void EOnFrame( IEntity other, float timeSlice )
@@ -122,14 +128,5 @@ class JMFreecam : JMCameraBase
 		vector orient = Vector( m_Pitch, m_Yaw, 0 );
 		SetOrientation( orient );
 		SetDirection( fwd );
-	}
-
-	// Helper: poll a named input via GetUApi. Returns false on missing input.
-	private bool IsInputHeld( string inputName )
-	{
-		UAInput inp = GetUApi().GetInputByName( inputName );
-		if ( !inp )
-			return false;
-		return inp.LocalHold();
 	}
 }

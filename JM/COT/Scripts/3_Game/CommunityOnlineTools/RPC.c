@@ -55,7 +55,9 @@ enum JMCameraModuleRPC
 
 enum JMVehiclesModuleRPC
 {
-	INVALID = 10180,
+	//! Was 10180: its 20 ids ran into JMItemSetSpawnerModuleRPC (10200). Ranges are
+	//! checked by Workbench/Batchfiles/CheckRPCRanges.ps1.
+	INVALID = 10650,
 	RequestServerVehicles,
 	SendServerVehicles,
 	DeleteVehicle,
@@ -122,7 +124,8 @@ enum JMVehicleSpawnerModuleRPC
 
 enum JMWeatherModuleRPC
 {
-	INVALID = 10280,
+	//! Was 10280: SpecialWeatherStatus landed on 10301 == JMESPModuleRPC.Log.
+	INVALID = 10600,
 	Load,
 	Storm,
 	Fog,
@@ -177,11 +180,6 @@ enum JMESPModuleRPC
 	//! other BaseBuilding_ entries by meaning, but slotting it there would
 	//! renumber every id below it and silently mismatch an older client.
 	BaseBuilding_SetPartHealth,
-
-	//! Parameterless - pop and replay the most recent entry on the shared
-	//! JMActionHistory stack. See JMActionHistory.
-	UndoLastAction,
-	RedoLastAction,
 
 	//! Sent once per move/rotate gesture (not per throttled position/
 	//! orientation update) so the server can push one JMActionHistory entry
@@ -561,6 +559,18 @@ enum JMAntiCheatModuleRPC
 	COUNT
 }
 
+
+// Shared undo/redo stack trigger. Both are parameterless client -> server
+// requests; the server replies through the notification system, not an RPC.
+// (Were JMESPModuleRPC.UndoLastAction / RedoLastAction until the stack got a
+// module of its own - see JMActionHistoryModule.)
+enum JMActionHistoryModuleRPC
+{
+	INVALID = 10960,
+	Undo,
+	Redo,
+	COUNT
+}
 
 // Server performance broadcast - sampled on the server, pushed to admin
 // clients on a timer. No client -> server direction: nothing is requested.

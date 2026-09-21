@@ -1,14 +1,12 @@
 class JMWidgetStore: COT_WidgetHolder
 {
-	private Widget layoutRoot;
-
-	private ref array< TextWidget > textWidgets;
-	private ref array< ButtonWidget > buttonWidgets;
-	private ref array< EditBoxWidget > editBoxWidgets;
-	private ref array< SliderWidget > sliderWidgets;
-	private ref array< TextListboxWidget > textListBoxWidgets;
-
-	private ref array< Widget > allWidgets;
+	protected Widget layoutRoot;
+	protected ref array< TextWidget > textWidgets;
+	protected ref array< ButtonWidget > buttonWidgets;
+	protected ref array< EditBoxWidget > editBoxWidgets;
+	protected ref array< SliderWidget > sliderWidgets;
+	protected ref array< TextListboxWidget > textListBoxWidgets;
+	protected ref array< Widget > allWidgets;
 
 	void JMWidgetStore( Widget root ) 
 	{
@@ -68,6 +66,78 @@ class JMWidgetStore: COT_WidgetHolder
 
 		DestroyWidget(layoutRoot);
 	#endif
+	}
+
+	ButtonWidget GetButtonWidget( string name ) 
+	{
+		foreach( ButtonWidget widget : buttonWidgets ) 
+		{
+			if ( widget.GetName() == name ) 
+			{
+				return widget;
+			}
+		}
+		return null;
+	}
+
+	EditBoxWidget GetEditBoxWidget( string name ) 
+	{
+		foreach( EditBoxWidget widget : editBoxWidgets ) 
+		{
+			if ( widget.GetName() == name ) 
+			{
+				return widget;
+			}
+		}
+		return null;
+	}
+
+	TextListboxWidget GetListboxWidget( string name ) 
+	{
+		foreach( TextListboxWidget widget : textListBoxWidgets ) 
+		{
+			if ( widget.GetName() == name ) 
+			{
+				return widget;
+			}
+		}
+		return null;
+	}
+
+	SliderWidget GetSliderWidget( string name ) 
+	{
+		foreach( SliderWidget widget : sliderWidgets ) 
+		{
+			if ( widget.GetName() == name ) 
+			{
+				return widget;
+			}
+		}
+		return null;
+	}
+
+	TextWidget GetTextWidget( string name ) 
+	{
+		foreach( TextWidget widget : textWidgets ) 
+		{
+			if ( widget.GetName() == name ) 
+			{
+				return widget;
+			}
+		}
+		return null;
+	}
+
+	Widget GetWidget( string name ) 
+	{
+		foreach( Widget widget : allWidgets ) 
+		{
+			if ( widget.GetName() == name ) 
+			{
+				return widget;
+			}
+		}
+		return null;
 	}
 
 	void Init() 
@@ -148,77 +218,5 @@ class JMWidgetStore: COT_WidgetHolder
 		{
 			textListBoxWidgets.Insert( TextListboxWidget.Cast( widget ) );
 		}
-	}
-
-	Widget GetWidget( string name ) 
-	{
-		foreach( Widget widget : allWidgets ) 
-		{
-			if ( widget.GetName() == name ) 
-			{
-				return widget;
-			}
-		}
-		return null;
-	}
-
-	TextWidget GetTextWidget( string name ) 
-	{
-		foreach( TextWidget widget : textWidgets ) 
-		{
-			if ( widget.GetName() == name ) 
-			{
-				return widget;
-			}
-		}
-		return null;
-	}
-
-	ButtonWidget GetButtonWidget( string name ) 
-	{
-		foreach( ButtonWidget widget : buttonWidgets ) 
-		{
-			if ( widget.GetName() == name ) 
-			{
-				return widget;
-			}
-		}
-		return null;
-	}
-
-	EditBoxWidget GetEditBoxWidget( string name ) 
-	{
-		foreach( EditBoxWidget widget : editBoxWidgets ) 
-		{
-			if ( widget.GetName() == name ) 
-			{
-				return widget;
-			}
-		}
-		return null;
-	}
-
-	SliderWidget GetSliderWidget( string name ) 
-	{
-		foreach( SliderWidget widget : sliderWidgets ) 
-		{
-			if ( widget.GetName() == name ) 
-			{
-				return widget;
-			}
-		}
-		return null;
-	}
-
-	TextListboxWidget GetListboxWidget( string name ) 
-	{
-		foreach( TextListboxWidget widget : textListBoxWidgets ) 
-		{
-			if ( widget.GetName() == name ) 
-			{
-				return widget;
-			}
-		}
-		return null;
 	}
 }

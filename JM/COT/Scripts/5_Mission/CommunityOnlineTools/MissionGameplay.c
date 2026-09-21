@@ -1,9 +1,7 @@
 modded class MissionGameplay
 {
 	protected ref JMDebugMonitor m_CDebugMonitor;  //! Legacy, not used, only kept for compatibility with 3rd party mods
-
 	protected JMPlayerInstance m_OfflineInstance;
-
 	protected bool m_COT_DebugMonitorWasVisible;
 
 	//! Global Ctrl+Z/Ctrl+Y - undoes/redoes the shared JMActionHistory stack
@@ -311,17 +309,17 @@ modded class MissionGameplay
 
 		bool ctrl = CTRL();
 
-		JMESPModule espModule;
-		CF_Modules<JMESPModule>.Get( espModule );
+		JMActionHistoryModule historyModule;
+		CF_Modules<JMActionHistoryModule>.Get( historyModule );
 
 		bool undoDown = ctrl && ( KeyState( KeyCode.KC_Z ) > 0 );
-		if ( undoDown && !m_ActionHistoryUndoKeyWasDown && !typing && espModule )
-			espModule.UndoLastAction();
+		if ( undoDown && !m_ActionHistoryUndoKeyWasDown && !typing && historyModule )
+			historyModule.UndoLastAction();
 		m_ActionHistoryUndoKeyWasDown = undoDown;
 
 		bool redoDown = ctrl && ( KeyState( KeyCode.KC_Y ) > 0 );
-		if ( redoDown && !m_ActionHistoryRedoKeyWasDown && !typing && espModule )
-			espModule.RedoLastAction();
+		if ( redoDown && !m_ActionHistoryRedoKeyWasDown && !typing && historyModule )
+			historyModule.RedoLastAction();
 		m_ActionHistoryRedoKeyWasDown = redoDown;
 	}
 

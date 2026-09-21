@@ -9,34 +9,26 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	//! Fraction of the sidebar height taken by the title bar. Must match the
 	//! `size 1 0.04` of TitleBar in sidebar_menu.layout - the module scroller is
 	//! sized to whatever is left between it and the footer.
-	private static const float TITLEBAR_HEIGHT_FRAC = 0.04;
-
-	private Widget m_LayoutRoot;
-	private TextWidget m_TitleBarText;
-	private ScrollWidget m_ButtonsScroller;
-
-	private ref JMCOTSideBarFooter m_Footer;
+	protected static const float TITLEBAR_HEIGHT_FRAC = 0.04;
+	protected Widget m_LayoutRoot;
+	protected TextWidget m_TitleBarText;
+	protected ScrollWidget m_ButtonsScroller;
+	protected ref JMCOTSideBarFooter m_Footer;
 
 	//! Last screen height the scroller was sized against, so the (comparatively
 	//! expensive) resize only runs when the resolution actually changes.
-	private float m_LastScreenHeight;
-
-	private float m_WidthFull;
-	private float m_WidthIcon;
-	private float m_CurrentWidth;
-
-	private bool m_IsAnimatingIn;
-	private bool m_IsAnimatingOut;
-
-	private bool m_IsTargetCompact;
-	private bool m_IsCompact;
-	private bool m_WasCompact;
-
-	private float m_TotalAnimateTime;
-	private float m_AnimateTime;
-
-	private ref array< ref JMCOTSideBarCategory > m_Categories;
-
+	protected float m_LastScreenHeight;
+	protected float m_WidthFull;
+	protected float m_WidthIcon;
+	protected float m_CurrentWidth;
+	protected bool m_IsAnimatingIn;
+	protected bool m_IsAnimatingOut;
+	protected bool m_IsTargetCompact;
+	protected bool m_IsCompact;
+	protected bool m_WasCompact;
+	protected float m_TotalAnimateTime;
+	protected float m_AnimateTime;
+	protected ref array< ref JMCOTSideBarCategory > m_Categories;
 
 	void JMCOTSideBar()
 	{
@@ -64,6 +56,20 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	Widget GetLayoutRoot()
 	{
 		return m_LayoutRoot;
+	}
+
+	//! Where the bar is heading, not where it currently is. The root stays visible
+	//! for the whole slide-out, so IsVisible() answers "open" while the bar is on
+	//! its way off screen - and a re-open arriving in that window would be dropped.
+	bool IsShown()
+	{
+		if ( m_IsAnimatingOut )
+			return false;
+
+		if ( m_IsAnimatingIn )
+			return true;
+
+		return IsVisible();
 	}
 
 	// Returns true if w is the sidebar layout root, any child of it,
@@ -95,20 +101,6 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	override bool IsVisible()
 	{
 		return m_LayoutRoot && m_LayoutRoot.IsVisible();
-	}
-
-	//! Where the bar is heading, not where it currently is. The root stays visible
-	//! for the whole slide-out, so IsVisible() answers "open" while the bar is on
-	//! its way off screen - and a re-open arriving in that window would be dropped.
-	bool IsShown()
-	{
-		if ( m_IsAnimatingOut )
-			return false;
-
-		if ( m_IsAnimatingIn )
-			return true;
-
-		return IsVisible();
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -227,7 +219,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	// Both of those are anchored to their own edge, so the scroller is the only
 	// widget that has to be told how tall it is - and it has to be told again
 	// whenever the resolution changes under it.
-	private void LayoutScroller()
+	protected void LayoutScroller()
 	{
 		if ( !m_ButtonsScroller )
 			return;
@@ -269,7 +261,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		}
 	}
 
-	private void SortModuleArray( array< JMRenderableModuleBase > modules, out array< JMRenderableModuleBase > sorted )
+	protected void SortModuleArray( array< JMRenderableModuleBase > modules, out array< JMRenderableModuleBase > sorted )
 	{
 		string pNames[ 1000 ];
 		int pIndices[ 1000 ];

@@ -12,75 +12,30 @@ class JMTerritoryModule: JMRenderableModuleBase
 {
 	ref array<ref JMTerritoryData> m_Territories = new array<ref JMTerritoryData>();
 
-	void JMTerritoryModule()
+	override void DescribeModule( JMModuleInfo info )
 	{
-		GetPermissionsManager().RegisterPermission("Expansion.Territory");
-		GetPermissionsManager().RegisterPermission("Expansion.Territory.View");
-		GetPermissionsManager().RegisterPermission("Expansion.Territory.SetLevel");
+		super.DescribeModule( info );
+
+		info.Title = "Territories";
+		info.Icon = "land-plot";
+		info.Layout = "JM/COT/GUI/layouts/territory_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_EXPANSION;
+		info.ViewPermission = JMConstants.PERM_EXPANSION_TERRITORY_VIEW;
+		info.WebhookTitle = "Territory Module";
+		info.SetRPCRange( JMTerritoryModuleRPC.INVALID, JMTerritoryModuleRPC.COUNT );
+		info.AddPermission( JMConstants.PERM_EXPANSION_TERRITORY );
+	}
+
+	//! The set-level permission and its webhook type come from the action.
+	override void RegisterActions()
+	{
+		super.RegisterActions();
+
+		DefineAction( JMTerritorySetLevel );
 	}
 
 	override void EnableUpdate()
 	{
-	}
-
-	override bool HasButton()
-	{
-		return true;
-	}
-
-	override bool HasAccess()
-	{
-		return GetPermissionsManager().HasPermission("Expansion.Territory.View");
-	}
-
-	override string GetCategory()
-	{
-		return "Expansion";
-	}
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/territory_form.layout";
-	}
-
-	override string GetTitle()
-	{
-		return "Territories";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "land-plot" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override int GetRPCMin()
-	{
-		return JMTerritoryModuleRPC.INVALID;
-	}
-
-	override int GetRPCMax()
-	{
-		return JMTerritoryModuleRPC.COUNT;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Territory Module";
-	}
-
-	override void GetWebhookTypes( out array<string> types )
-	{
-		types.Insert( "SetLevel" );
 	}
 
 	override void OnMissionLoaded()
@@ -90,7 +45,7 @@ class JMTerritoryModule: JMRenderableModuleBase
 		if (g_Game.IsServer())
 			return;
 
-		if (GetPermissionsManager().HasPermission("Expansion.Territory"))
+		if (JMPermissions.Has(JMConstants.PERM_EXPANSION_TERRITORY))
 			RequestTerritories();
 	}
 
@@ -98,8 +53,13 @@ class JMTerritoryModule: JMRenderableModuleBase
 	{
 		super.OnClientPermissionsUpdated();
 
-		if (GetPermissionsManager().HasPermission("Expansion.Territory"))
+		if (JMPermissions.Has(JMConstants.PERM_EXPANSION_TERRITORY))
 			RequestTerritories();
+	}
+
+	override void RequestData()
+	{
+		RequestTerritories();
 	}
 
 	void RequestTerritories()
@@ -120,7 +80,7 @@ class JMTerritoryModule: JMRenderableModuleBase
 			case JMTerritoryModuleRPC.RequestTerritories:
 			{
 				if (!sender) return;
-				if (!GetPermissionsManager().HasPermissionRPC("Expansion.Territory", sender, instance))
+				if (!JMPermissions.HasRPC(JMConstants.PERM_EXPANSION_TERRITORY, sender, instance))
 					return;
 
 				SendTerritoriesToClient(sender);
@@ -163,31 +123,15 @@ class JMTerritoryModule: JMRenderableModuleBase
 				return;
 			}
 
-			case JMTerritoryModuleRPC.SetLevel:
+			default:
 			{
-				if (!sender) return;
-				if (!GetPermissionsManager().HasPermissionRPC("Expansion.Territory.SetLevel", sender, instance))
-					return;
-
-				int territoryID;
-				int newLevel;
-				if (!ctx.Read(territoryID)) return;
-				if (!ctx.Read(newLevel)) return;
-
-				GetCommunityOnlineToolsBase().Log(sender, "Set territory " + territoryID + " to level " + newLevel);
-
-				ExpansionTerritoryModule territoryModule = ExpansionTerritoryModule.Cast(CF_ModuleCoreManager.Get(ExpansionTerritoryModule));
-				if (territoryModule)
-					territoryModule.Exec_AdminSetTerritoryLevel(territoryID, newLevel, sender);
-
-				SendWebhookColored( "SetLevel", instance, "Set territory " + territoryID + " to level " + newLevel, JMConstants.WEBHOOK_COLOR_WARNING );
-
+				RunAction(sender, rpc_type, ctx);
 				return;
 			}
 		}
 	}
 
-	private void SendTerritoriesToClient(PlayerIdentity recipient)
+	protected void SendTerritoriesToClient(PlayerIdentity recipient)
 	{
 		ExpansionTerritoryModule territoryModule = ExpansionTerritoryModule.Cast(CF_ModuleCoreManager.Get(ExpansionTerritoryModule));
 		if (!territoryModule)
@@ -215,10 +159,10 @@ class JMTerritoryModule: JMRenderableModuleBase
 
 	void SendSetLevel(int territoryID, int newLevel)
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write(territoryID);
-		rpc.Write(newLevel);
-		rpc.Send(null, JMTerritoryModuleRPC.SetLevel, true, null);
+		JMTerritorySetLevel action = new JMTerritorySetLevel();
+		action.TerritoryID = territoryID;
+		action.NewLevel = newLevel;
+		SubmitAction(action);
 	}
 }
 #endif

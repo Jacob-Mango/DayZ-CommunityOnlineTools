@@ -1,6 +1,6 @@
 class JMCommandModule: JMModuleBase
 {
-	private ref map<string, ref map<string, ref JMCommand>> m_CommandMap = new map<string, ref map<string, ref JMCommand>>();
+	protected ref map<string, ref map<string, ref JMCommand>> m_CommandMap = new map<string, ref map<string, ref JMCommand>>();
 
 	void JMCommandModule() 
 	{

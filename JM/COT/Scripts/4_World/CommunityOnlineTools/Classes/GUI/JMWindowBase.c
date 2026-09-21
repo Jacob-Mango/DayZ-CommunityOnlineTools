@@ -19,69 +19,65 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	static int s_JMWindowBaseCount;
 #endif
 
-	private Widget layoutRoot;
-
-	private ButtonWidget m_CloseButton;
-	private ButtonWidget m_MinimizeButton;
-	private ImageWidget  m_MinimizeButtonLabel;
-	private ButtonWidget m_PinButton;
-	private ImageWidget  m_PinButtonLabel;
+	protected Widget layoutRoot;
+	protected ButtonWidget m_CloseButton;
+	protected ButtonWidget m_MinimizeButton;
+	protected ImageWidget  m_MinimizeButtonLabel;
+	protected ButtonWidget m_PinButton;
+	protected ImageWidget  m_PinButtonLabel;
 
 	// Title-bar button chrome: a backdrop behind each icon, shown on hover and
 	// deepened while held. The buttons use style Empty, so without these they
 	// gave no feedback at all.
-	private Widget m_CloseButtonHover;
-	private Widget m_MinimizeButtonHover;
-	private Widget m_PinButtonHover;
-	private ImageWidget m_CloseButtonLabel;
-	private Widget m_PressedButton;
-	private Widget m_TitleWrapper;
-	private TextWidget m_TitleText;
-	private Widget m_TitlePanel;
-	private Widget m_TitleAccent;
-	private Widget m_Background;
-	private Widget m_ContentWidget;
-	private Widget m_ConfirmationPanel;
+	protected Widget m_CloseButtonHover;
+	protected Widget m_MinimizeButtonHover;
+	protected Widget m_PinButtonHover;
+	protected ImageWidget m_CloseButtonLabel;
+	protected Widget m_PressedButton;
+	protected Widget m_TitleWrapper;
+	protected TextWidget m_TitleText;
+	protected Widget m_TitlePanel;
+	protected Widget m_TitleAccent;
+	protected Widget m_Background;
+	protected Widget m_ContentWidget;
+	protected Widget m_ConfirmationPanel;
 
 	// Edge drag handles
-	private Widget m_ResizeDragUp;
-	private Widget m_ResizeDragDown;
-	private Widget m_ResizeDragLeft;
-	private Widget m_ResizeDragRight;
+	protected Widget m_ResizeDragUp;
+	protected Widget m_ResizeDragDown;
+	protected Widget m_ResizeDragLeft;
+	protected Widget m_ResizeDragRight;
 
 	// Corner drag handles
-	private Widget m_ResizeDragTopLeft;
-	private Widget m_ResizeDragTopRight;
-	private Widget m_ResizeDragBotLeft;
-	private Widget m_ResizeDragBotRight;
+	protected Widget m_ResizeDragTopLeft;
+	protected Widget m_ResizeDragTopRight;
+	protected Widget m_ResizeDragBotLeft;
+	protected Widget m_ResizeDragBotRight;
 
 	// Edge hover highlights
-	private Widget m_HighlightUp;
-	private Widget m_HighlightDown;
-	private Widget m_HighlightLeft;
-	private Widget m_HighlightRight;
+	protected Widget m_HighlightUp;
+	protected Widget m_HighlightDown;
+	protected Widget m_HighlightLeft;
+	protected Widget m_HighlightRight;
 
 	// Corner hover highlights
-	private Widget m_HighlightTopLeft;
-	private Widget m_HighlightTopRight;
-	private Widget m_HighlightBotLeft;
-	private Widget m_HighlightBotRight;
-
-	private ref JMFormBase m_Form;
-	private Widget m_FormRoot;
-	private JMRenderableModuleBase m_Module;
-	private JMConfirmationForm m_Confirmation;
-
-	private float m_OffsetX;
-	private float m_OffsetY;
-
-	private EResizeDirection m_ResizeDirection;
-	private float m_StartResizeSizeW;
-	private float m_StartResizeSizeH;
-	private float m_StartResizePositionX;
-	private float m_StartResizePositionY;
-	private float m_StartWindowPosX;
-	private float m_StartWindowPosY;
+	protected Widget m_HighlightTopLeft;
+	protected Widget m_HighlightTopRight;
+	protected Widget m_HighlightBotLeft;
+	protected Widget m_HighlightBotRight;
+	protected ref JMFormBase m_Form;
+	protected Widget m_FormRoot;
+	protected JMRenderableModuleBase m_Module;
+	protected JMConfirmationForm m_Confirmation;
+	protected float m_OffsetX;
+	protected float m_OffsetY;
+	protected EResizeDirection m_ResizeDirection;
+	protected float m_StartResizeSizeW;
+	protected float m_StartResizeSizeH;
+	protected float m_StartResizePositionX;
+	protected float m_StartResizePositionY;
+	protected float m_StartWindowPosX;
+	protected float m_StartWindowPosY;
 
 	//! Minimum content dimensions when resizing
 	static const float RESIZE_MIN_CONTENT_HEIGHT = 55;
@@ -97,25 +93,38 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	static const float MINIMIZE_ANIMATE_TIME = 0.2;
 
 	//! Cached title bar height - read once in Init()
-	private float m_TitleBarHeight;
-
-	private bool m_IsShown;
-	private bool m_HasBeenCentered;
+	protected float m_TitleBarHeight;
+	protected bool m_IsShown;
+	protected bool m_HasBeenCentered;
 
 	//! Pin state - window survives COT close when pinned
-	private bool m_IsPinned;
+	protected bool m_IsPinned;
 
 	//! Minimize state
-	private bool m_IsMinimized;
-	private float m_RestoreWidth;
-	private float m_RestoreHeight;
+	protected bool m_IsMinimized;
+	protected float m_RestoreWidth;
+	protected float m_RestoreHeight;
 
 	//! Minimize animation state
-	private bool m_IsAnimatingMinimize;
-	private bool m_IsAnimatingRestore;
-	private float m_AnimateTime;
-	private float m_AnimateFromH;
-	private float m_AnimateToH;
+	protected bool m_IsAnimatingMinimize;
+	protected bool m_IsAnimatingRestore;
+	protected float m_AnimateTime;
+	protected float m_AnimateFromH;
+	protected float m_AnimateToH;
+
+	// -- Title-bar button chrome ---------------------------------------------
+
+	static const float ICON_ALPHA_REST  = 0.75;
+	static const float ICON_ALPHA_HOVER = 1.0;
+
+	//! Held state deepens the same backdrop instead of swapping colour, so the
+	//! close button keeps its red and the other two stay neutral. These are set
+	//! explicitly rather than via SetAlpha, which clamps at 1.0 and so cannot
+	//! express "more opaque than the hover state".
+	static const int HOVER_NEUTRAL         = 0x2EFFFFFF;
+	static const int HOVER_NEUTRAL_PRESSED = 0x4DFFFFFF;
+	static const int HOVER_CLOSE           = 0x59FF627D;
+	static const int HOVER_CLOSE_PRESSED   = 0x8CFF627D;
 
 	void JMWindowBase()
 	{
@@ -147,7 +156,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			m_Confirmation.Destroy();
 
 		if (m_Form)
+		{
+			m_Form.OnDestruct();
 			m_Form.Destroy();
+		}
 
 		//! @note unlinking the layout root is ABSOLUTELY necessary since destroying the widget handler will NOT do that automatically!
 	#ifdef DAYZ_1_28
@@ -159,6 +171,268 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if (s_JMWindowBaseCount <= 0)
 			CF_Log.Info("JMWindowBase count: " + s_JMWindowBaseCount);
 	#endif
+	}
+
+	JMFormBase GetForm()
+	{
+		return m_Form;
+	}
+
+	protected Widget GetHandleHighlight( Widget w )
+	{
+		if ( w == m_ResizeDragUp )       return m_HighlightUp;
+		if ( w == m_ResizeDragDown )     return m_HighlightDown;
+		if ( w == m_ResizeDragLeft )     return m_HighlightLeft;
+		if ( w == m_ResizeDragRight )    return m_HighlightRight;
+		if ( w == m_ResizeDragTopLeft )  return m_HighlightTopLeft;
+		if ( w == m_ResizeDragTopRight ) return m_HighlightTopRight;
+		if ( w == m_ResizeDragBotLeft )  return m_HighlightBotLeft;
+		if ( w == m_ResizeDragBotRight ) return m_HighlightBotRight;
+		return NULL;
+	}
+
+	Widget GetLayoutRoot()
+	{
+		return layoutRoot;
+	}
+
+	JMRenderableModuleBase GetModule()
+	{
+		return m_Module;
+	}
+
+	protected EResizeDirection GetResizeDirection( Widget w )
+	{
+		if ( w == m_ResizeDragUp )       return EResizeDirection.UP;
+		if ( w == m_ResizeDragDown )     return EResizeDirection.DOWN;
+		if ( w == m_ResizeDragLeft )     return EResizeDirection.LEFT;
+		if ( w == m_ResizeDragRight )    return EResizeDirection.RIGHT;
+		if ( w == m_ResizeDragTopLeft )  return EResizeDirection.TOP_LEFT;
+		if ( w == m_ResizeDragTopRight ) return EResizeDirection.TOP_RIGHT;
+		if ( w == m_ResizeDragBotLeft )  return EResizeDirection.BOT_LEFT;
+		return EResizeDirection.BOT_RIGHT;
+	}
+
+	protected Widget GetTitleButtonHover( Widget w )
+	{
+		if ( w == m_CloseButton    ) return m_CloseButtonHover;
+		if ( w == m_MinimizeButton ) return m_MinimizeButtonHover;
+		if ( w == m_PinButton      ) return m_PinButtonHover;
+
+		return NULL;
+	}
+
+	protected int GetTitleButtonHoverColor( Widget w, bool pressed )
+	{
+		if ( w == m_CloseButton )
+		{
+			if ( pressed )
+				return HOVER_CLOSE_PRESSED;
+			return HOVER_CLOSE;
+		}
+
+		if ( pressed )
+			return HOVER_NEUTRAL_PRESSED;
+
+		return HOVER_NEUTRAL;
+	}
+
+	//! @note kept for callers that use GetWidgetRoot() (e.g. JMMapForm)
+	Widget GetWidgetRoot()
+	{
+		return layoutRoot;
+	}
+
+	//! Escape priority tier 1 (popup), this window's share of it: this
+	//! window's own confirmation dialog, plus its form's registered overlays
+	//! (context menus, dropdowns, value prompts - see JMFormBase.HasOpenOverlay).
+	bool HasOpenPopup()
+	{
+		if ( m_ConfirmationPanel && m_ConfirmationPanel.IsVisible() )
+			return true;
+
+		if ( m_Form && m_Form.HasOpenOverlay() )
+			return true;
+
+		return false;
+	}
+
+	bool IsMinimized()
+	{
+		return m_IsMinimized;
+	}
+
+	bool IsPinned()
+	{
+		return m_IsPinned;
+	}
+
+	protected bool IsResizeHandle( Widget w )
+	{
+		return w == m_ResizeDragUp      || w == m_ResizeDragDown    || w == m_ResizeDragLeft    || w == m_ResizeDragRight    || w == m_ResizeDragTopLeft || w == m_ResizeDragTopRight || w == m_ResizeDragBotLeft || w == m_ResizeDragBotRight;
+	}
+
+	void SetBackgroundColour( float alpha, float r, float g, float b )
+	{
+		m_Background.SetColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
+	}
+
+	void SetModule( JMRenderableModuleBase module )
+	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "SetModule").Add(module.ToString());
+		#endif
+
+		m_Module = module;
+		if ( Assert_Null( m_Module, "No valid RenderableModule supplied." ) )
+			return;
+
+		Widget menu = m_ContentWidget;
+
+		if ( m_Module.GetLayoutRoot() != "" )
+		{
+			menu = g_Game.GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), m_ContentWidget );
+			if ( Assert_Null( menu, "No valid widget supplied." ) )
+				return;
+
+			float width = -1;
+			float height = -1;
+			menu.GetSize( width, height );
+
+			float screenW, screenH;
+			g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
+
+			if ( width > screenW )
+				width = screenW;
+
+			if ( height + m_TitleBarHeight > screenH )
+				height = screenH - m_TitleBarHeight;
+
+			m_ContentWidget.SetSize( width, height );
+			SetSize( width, height );
+
+			menu.GetScript( m_Form );
+		}
+
+		m_FormRoot = menu;
+
+		if ( !m_Form )
+		{
+			m_Form = m_Module.InitForm( menu );
+		}
+
+		if ( Assert_Null( m_Form, "No valid Form supplied." ) )
+			return;
+
+		m_Form.Init( this, m_Module );
+
+		m_TitleText.SetText( m_Module.GetTitle() );
+		GetCOTWindowManager().BringFront( this );
+
+		m_ConfirmationPanel.GetScript( m_Confirmation );
+
+		if ( m_Confirmation )
+			m_Confirmation.Init( this );
+
+		// Notify form of its initial size so it can lay out immediately
+		float winW, winH;
+		layoutRoot.GetSize( winW, winH );
+		m_Form.OnResize( winW, winH - m_TitleBarHeight );
+	}
+
+	void SetPosition( float x, float y )
+	{
+		float screenW, screenH;
+		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
+
+		float winW, winH;
+		layoutRoot.GetSize( winW, winH );
+
+		// Snap flush to screen edges when within threshold
+		if ( x < SNAP_THRESHOLD )                    x = 0;
+		if ( y < SNAP_THRESHOLD )                    y = 0;
+		if ( screenW - ( x + winW ) < SNAP_THRESHOLD ) x = screenW - winW;
+		if ( screenH - ( y + winH ) < SNAP_THRESHOLD ) y = screenH - winH;
+
+		// Hard clamp: keep at least the title bar on screen
+		x = Math.Clamp( x, 0, Math.Max( 0, screenW - winW ) );
+		y = Math.Clamp( y, 0, Math.Max( 0, screenH - m_TitleBarHeight ) );
+
+		layoutRoot.SetPos( x, y, true );
+
+		m_TitleWrapper.SetPos( 0, 0, true );
+	}
+
+	protected void SetResizeHandlesVisible( bool show )
+	{
+		if ( m_ResizeDragUp )       m_ResizeDragUp.Show( show );
+		if ( m_ResizeDragDown )     m_ResizeDragDown.Show( show );
+		if ( m_ResizeDragLeft )     m_ResizeDragLeft.Show( show );
+		if ( m_ResizeDragRight )    m_ResizeDragRight.Show( show );
+		if ( m_ResizeDragTopLeft )  m_ResizeDragTopLeft.Show( show );
+		if ( m_ResizeDragTopRight ) m_ResizeDragTopRight.Show( show );
+		if ( m_ResizeDragBotLeft )  m_ResizeDragBotLeft.Show( show );
+		if ( m_ResizeDragBotRight ) m_ResizeDragBotRight.Show( show );
+
+		if ( !show )
+		{
+			if ( m_HighlightUp )       m_HighlightUp.Show( false );
+			if ( m_HighlightDown )     m_HighlightDown.Show( false );
+			if ( m_HighlightLeft )     m_HighlightLeft.Show( false );
+			if ( m_HighlightRight )    m_HighlightRight.Show( false );
+			if ( m_HighlightTopLeft )  m_HighlightTopLeft.Show( false );
+			if ( m_HighlightTopRight ) m_HighlightTopRight.Show( false );
+			if ( m_HighlightBotLeft )  m_HighlightBotLeft.Show( false );
+			if ( m_HighlightBotRight ) m_HighlightBotRight.Show( false );
+		}
+	}
+
+	//! Set the window size from content dimensions (content height excludes the title bar).
+	//! Keeps m_RestoreWidth/Height in sync when not minimized.
+	void SetSize( float w, float h )
+	{
+		float totalH = h + m_TitleBarHeight;
+		layoutRoot.SetSize( w, totalH );
+
+		if ( !m_IsMinimized )
+		{
+			m_RestoreWidth  = w;
+			m_RestoreHeight = totalH;
+		}
+	}
+
+	protected void SetTitleButtonIconAlpha( Widget w, float alpha )
+	{
+		if ( w == m_CloseButton && m_CloseButtonLabel )
+			m_CloseButtonLabel.SetAlpha( alpha );
+		else if ( w == m_MinimizeButton && m_MinimizeButtonLabel )
+			m_MinimizeButtonLabel.SetAlpha( alpha );
+		else if ( w == m_PinButton && m_PinButtonLabel )
+			m_PinButtonLabel.SetAlpha( alpha );
+	}
+
+	protected void SetTitleButtonPressed( Widget w, bool pressed )
+	{
+		Widget hover = GetTitleButtonHover( w );
+		if ( !hover )
+			return;
+
+		hover.SetColor( GetTitleButtonHoverColor( w, pressed ) );
+
+		if ( pressed )
+		{
+			hover.Show( true );
+			m_PressedButton = w;
+		}
+		else
+		{
+			m_PressedButton = NULL;
+		}
+	}
+
+	void SetTitleColour( float alpha, float r, float g, float b )
+	{
+		m_TitlePanel.SetColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -270,96 +544,12 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_HighlightTopRight )  m_HighlightTopRight.SetPos( 0, m_TitleBarHeight, true );
 	}
 
-	void SetModule( JMRenderableModuleBase module )
-	{
-		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_1(this, "SetModule").Add(module.ToString());
-		#endif
-
-		m_Module = module;
-		if ( Assert_Null( m_Module, "No valid RenderableModule supplied." ) )
-			return;
-
-		Widget menu = m_ContentWidget;
-
-		if ( m_Module.GetLayoutRoot() != "" )
-		{
-			menu = g_Game.GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), m_ContentWidget );
-			if ( Assert_Null( menu, "No valid widget supplied." ) )
-				return;
-
-			float width = -1;
-			float height = -1;
-			menu.GetSize( width, height );
-
-			float screenW, screenH;
-			g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
-
-			if ( width > screenW )
-				width = screenW;
-
-			if ( height + m_TitleBarHeight > screenH )
-				height = screenH - m_TitleBarHeight;
-
-			m_ContentWidget.SetSize( width, height );
-			SetSize( width, height );
-
-			menu.GetScript( m_Form );
-		}
-
-		m_FormRoot = menu;
-
-		if ( !m_Form )
-		{
-			m_Form = m_Module.InitForm( menu );
-		}
-
-		if ( Assert_Null( m_Form, "No valid Form supplied." ) )
-			return;
-
-		m_Form.Init( this, m_Module );
-
-		m_TitleText.SetText( m_Module.GetTitle() );
-		GetCOTWindowManager().BringFront( this );
-
-		m_ConfirmationPanel.GetScript( m_Confirmation );
-
-		if ( m_Confirmation )
-			m_Confirmation.Init( this );
-
-		// Notify form of its initial size so it can lay out immediately
-		float winW, winH;
-		layoutRoot.GetSize( winW, winH );
-		m_Form.OnResize( winW, winH - m_TitleBarHeight );
-	}
-
-	JMRenderableModuleBase GetModule()
-	{
-		return m_Module;
-	}
-
-	JMFormBase GetForm()
-	{
-		return m_Form;
-	}
-
-	Widget GetLayoutRoot()
-	{
-		return layoutRoot;
-	}
-
-	//! @note kept for callers that use GetWidgetRoot() (e.g. JMMapForm)
-	Widget GetWidgetRoot()
-	{
-		return layoutRoot;
-	}
-
 	//! The confirmation scrim is sized in pixels by the open/resize animations,
 	//! so a dialog raised before either has run would still be at the layout's
 	//! default size - and the inner panel centres itself inside whatever this
 	//! is, so getting it wrong puts the dialog off-screen with only the scrim
 	//! visible. Cheap enough to just re-derive on every raise.
-	private void SyncConfirmationPanel()
+	protected void SyncConfirmationPanel()
 	{
 		if ( !m_ConfirmationPanel )
 			return;
@@ -369,20 +559,6 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		m_ConfirmationPanel.SetPos( 0, m_TitleBarHeight, true );
 		m_ConfirmationPanel.SetSize( w, Math.Max( 0, h - m_TitleBarHeight ), true );
-	}
-
-	//! Escape priority tier 1 (popup), this window's share of it: this
-	//! window's own confirmation dialog, plus its form's registered overlays
-	//! (context menus, dropdowns, value prompts - see JMFormBase.HasOpenOverlay).
-	bool HasOpenPopup()
-	{
-		if ( m_ConfirmationPanel && m_ConfirmationPanel.IsVisible() )
-			return true;
-
-		if ( m_Form && m_Form.HasOpenOverlay() )
-			return true;
-
-		return false;
 	}
 
 	//! Closes whatever popup(s) are open on this window - confirmation first,
@@ -439,32 +615,12 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return m_Confirmation;
 	}
 
-	void SetTitleColour( float alpha, float r, float g, float b )
-	{
-		m_TitlePanel.SetColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
-	}
-
-	void SetBackgroundColour( float alpha, float r, float g, float b )
-	{
-		m_Background.SetColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
-	}
-
 	override bool IsVisible()
 	{
 		if (layoutRoot && layoutRoot.IsVisible())
 			return true;
 
 		return false;
-	}
-
-	bool IsMinimized()
-	{
-		return m_IsMinimized;
-	}
-
-	bool IsPinned()
-	{
-		return m_IsPinned;
 	}
 
 	void TogglePin()
@@ -479,7 +635,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	//! swap stays - it is what makes the state readable at a glance - but the
 	//! glyph now carries it too, so the button is not two identical pins that
 	//! only differ in tint.
-	private void SyncPinIcon()
+	protected void SyncPinIcon()
 	{
 		if ( !m_PinButtonLabel )
 			return;
@@ -505,7 +661,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	//!        Restore() both start an animation and only flip m_IsMinimized when
 	//!        it finishes, so the caller says where it is going rather than
 	//!        letting this read a flag that has not moved yet.
-	private void SyncMinimizeIcon( bool collapsed )
+	protected void SyncMinimizeIcon( bool collapsed )
 	{
 		if ( !m_MinimizeButtonLabel )
 			return;
@@ -787,55 +943,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	// -- Title-bar button chrome ---------------------------------------------
-
-	static const float ICON_ALPHA_REST  = 0.75;
-	static const float ICON_ALPHA_HOVER = 1.0;
-
-	//! Held state deepens the same backdrop instead of swapping colour, so the
-	//! close button keeps its red and the other two stay neutral. These are set
-	//! explicitly rather than via SetAlpha, which clamps at 1.0 and so cannot
-	//! express "more opaque than the hover state".
-	static const int HOVER_NEUTRAL         = 0x2EFFFFFF;
-	static const int HOVER_NEUTRAL_PRESSED = 0x4DFFFFFF;
-	static const int HOVER_CLOSE           = 0x59FF627D;
-	static const int HOVER_CLOSE_PRESSED   = 0x8CFF627D;
-
-	private Widget GetTitleButtonHover( Widget w )
-	{
-		if ( w == m_CloseButton    ) return m_CloseButtonHover;
-		if ( w == m_MinimizeButton ) return m_MinimizeButtonHover;
-		if ( w == m_PinButton      ) return m_PinButtonHover;
-
-		return NULL;
-	}
-
-	private int GetTitleButtonHoverColor( Widget w, bool pressed )
-	{
-		if ( w == m_CloseButton )
-		{
-			if ( pressed )
-				return HOVER_CLOSE_PRESSED;
-			return HOVER_CLOSE;
-		}
-
-		if ( pressed )
-			return HOVER_NEUTRAL_PRESSED;
-
-		return HOVER_NEUTRAL;
-	}
-
-	private void SetTitleButtonIconAlpha( Widget w, float alpha )
-	{
-		if ( w == m_CloseButton && m_CloseButtonLabel )
-			m_CloseButtonLabel.SetAlpha( alpha );
-		else if ( w == m_MinimizeButton && m_MinimizeButtonLabel )
-			m_MinimizeButtonLabel.SetAlpha( alpha );
-		else if ( w == m_PinButton && m_PinButtonLabel )
-			m_PinButtonLabel.SetAlpha( alpha );
-	}
-
-	private void ResetTitleButtonChrome()
+	protected void ResetTitleButtonChrome()
 	{
 		if ( m_CloseButtonHover )    m_CloseButtonHover.Show( false );
 		if ( m_MinimizeButtonHover ) m_MinimizeButtonHover.Show( false );
@@ -846,25 +954,6 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_PinButtonLabel )      m_PinButtonLabel.SetAlpha( ICON_ALPHA_REST );
 
 		m_PressedButton = NULL;
-	}
-
-	private void SetTitleButtonPressed( Widget w, bool pressed )
-	{
-		Widget hover = GetTitleButtonHover( w );
-		if ( !hover )
-			return;
-
-		hover.SetColor( GetTitleButtonHoverColor( w, pressed ) );
-
-		if ( pressed )
-		{
-			hover.Show( true );
-			m_PressedButton = w;
-		}
-		else
-		{
-			m_PressedButton = NULL;
-		}
 	}
 
 	override bool OnDrag( Widget w, int x, int y )
@@ -942,46 +1031,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	//! Set the window size from content dimensions (content height excludes the title bar).
-	//! Keeps m_RestoreWidth/Height in sync when not minimized.
-	void SetSize( float w, float h )
-	{
-		float totalH = h + m_TitleBarHeight;
-		layoutRoot.SetSize( w, totalH );
+	// --- Private helpers --------------------------------------------------------
 
-		if ( !m_IsMinimized )
-		{
-			m_RestoreWidth  = w;
-			m_RestoreHeight = totalH;
-		}
-	}
-
-	void SetPosition( float x, float y )
-	{
-		float screenW, screenH;
-		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
-
-		float winW, winH;
-		layoutRoot.GetSize( winW, winH );
-
-		// Snap flush to screen edges when within threshold
-		if ( x < SNAP_THRESHOLD )                    x = 0;
-		if ( y < SNAP_THRESHOLD )                    y = 0;
-		if ( screenW - ( x + winW ) < SNAP_THRESHOLD ) x = screenW - winW;
-		if ( screenH - ( y + winH ) < SNAP_THRESHOLD ) y = screenH - winH;
-
-		// Hard clamp: keep at least the title bar on screen
-		x = Math.Clamp( x, 0, Math.Max( 0, screenW - winW ) );
-		y = Math.Clamp( y, 0, Math.Max( 0, screenH - m_TitleBarHeight ) );
-
-		layoutRoot.SetPos( x, y, true );
-
-		m_TitleWrapper.SetPos( 0, 0, true );
-	}
-
-	// ??? Private helpers ????????????????????????????????????????????????????????
-
-	private void CenterOnScreen()
+	protected void CenterOnScreen()
 	{
 		float screenW, screenH;
 		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
@@ -995,7 +1047,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		SetPosition( ( screenW - winW ) * 0.5 + cascade, ( screenH - winH ) * 0.5 + cascade );
 	}
 
-	private void UpdateMinimizeAnimation( float timeSlice )
+	protected void UpdateMinimizeAnimation( float timeSlice )
 	{
 		if ( !m_IsAnimatingMinimize && !m_IsAnimatingRestore )
 			return;
@@ -1039,61 +1091,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		}
 	}
 
-	private void SetResizeHandlesVisible( bool show )
-	{
-		if ( m_ResizeDragUp )       m_ResizeDragUp.Show( show );
-		if ( m_ResizeDragDown )     m_ResizeDragDown.Show( show );
-		if ( m_ResizeDragLeft )     m_ResizeDragLeft.Show( show );
-		if ( m_ResizeDragRight )    m_ResizeDragRight.Show( show );
-		if ( m_ResizeDragTopLeft )  m_ResizeDragTopLeft.Show( show );
-		if ( m_ResizeDragTopRight ) m_ResizeDragTopRight.Show( show );
-		if ( m_ResizeDragBotLeft )  m_ResizeDragBotLeft.Show( show );
-		if ( m_ResizeDragBotRight ) m_ResizeDragBotRight.Show( show );
-
-		if ( !show )
-		{
-			if ( m_HighlightUp )       m_HighlightUp.Show( false );
-			if ( m_HighlightDown )     m_HighlightDown.Show( false );
-			if ( m_HighlightLeft )     m_HighlightLeft.Show( false );
-			if ( m_HighlightRight )    m_HighlightRight.Show( false );
-			if ( m_HighlightTopLeft )  m_HighlightTopLeft.Show( false );
-			if ( m_HighlightTopRight ) m_HighlightTopRight.Show( false );
-			if ( m_HighlightBotLeft )  m_HighlightBotLeft.Show( false );
-			if ( m_HighlightBotRight ) m_HighlightBotRight.Show( false );
-		}
-	}
-
-	private bool IsResizeHandle( Widget w )
-	{
-		return w == m_ResizeDragUp      || w == m_ResizeDragDown    || w == m_ResizeDragLeft    || w == m_ResizeDragRight    || w == m_ResizeDragTopLeft || w == m_ResizeDragTopRight || w == m_ResizeDragBotLeft || w == m_ResizeDragBotRight;
-	}
-
-	private EResizeDirection GetResizeDirection( Widget w )
-	{
-		if ( w == m_ResizeDragUp )       return EResizeDirection.UP;
-		if ( w == m_ResizeDragDown )     return EResizeDirection.DOWN;
-		if ( w == m_ResizeDragLeft )     return EResizeDirection.LEFT;
-		if ( w == m_ResizeDragRight )    return EResizeDirection.RIGHT;
-		if ( w == m_ResizeDragTopLeft )  return EResizeDirection.TOP_LEFT;
-		if ( w == m_ResizeDragTopRight ) return EResizeDirection.TOP_RIGHT;
-		if ( w == m_ResizeDragBotLeft )  return EResizeDirection.BOT_LEFT;
-		return EResizeDirection.BOT_RIGHT;
-	}
-
-	private Widget GetHandleHighlight( Widget w )
-	{
-		if ( w == m_ResizeDragUp )       return m_HighlightUp;
-		if ( w == m_ResizeDragDown )     return m_HighlightDown;
-		if ( w == m_ResizeDragLeft )     return m_HighlightLeft;
-		if ( w == m_ResizeDragRight )    return m_HighlightRight;
-		if ( w == m_ResizeDragTopLeft )  return m_HighlightTopLeft;
-		if ( w == m_ResizeDragTopRight ) return m_HighlightTopRight;
-		if ( w == m_ResizeDragBotLeft )  return m_HighlightBotLeft;
-		if ( w == m_ResizeDragBotRight ) return m_HighlightBotRight;
-		return NULL;
-	}
-
-	private void Resize( float x, float y )
+	protected void Resize( float x, float y )
 	{
 		float deltaX = x - m_StartResizePositionX;
 		float deltaY = y - m_StartResizePositionY;

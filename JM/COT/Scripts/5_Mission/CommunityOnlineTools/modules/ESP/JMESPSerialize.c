@@ -10,21 +10,25 @@
 class JMESPSerialize : Managed
 {
 	ref map<string, int> Colours;
-
 	static string m_FileName;
 
-	private void JMESPSerialize()
+	protected void JMESPSerialize()
 	{
 		Colours = new map<string, int>;
 		m_FileName = JMConstants.FILE_ESP;
+	}
+
+	void SetColour( string permission, int colour )
+	{
+		Colours.Set( permission, colour );
+		Save();
 	}
 
 	static JMESPSerialize Load()
 	{
 		JMESPSerialize settings = new JMESPSerialize();
 
-		if ( FileExist( settings.m_FileName ) )
-			JsonFileLoader<JMESPSerialize>.JsonLoadFile( settings.m_FileName, settings );
+		JMJsonFile<JMESPSerialize>.Load( settings.m_FileName, settings );
 
 		//! A file written by an older build can deserialize with a null map.
 		if ( !settings.Colours )
@@ -40,7 +44,7 @@ class JMESPSerialize : Managed
 
 	void Save()
 	{
-		JsonFileLoader<JMESPSerialize>.JsonSaveFile( m_FileName, this );
+		JMJsonFile<JMESPSerialize>.Save( m_FileName, this );
 	}
 
 	//! Push every stored override onto the live view types. A category with no
@@ -52,12 +56,6 @@ class JMESPSerialize : Managed
 			if ( Colours.Contains( viewType.Permission ) )
 				viewType.Colour = Colours.Get( viewType.Permission );
 		}
-	}
-
-	void SetColour( string permission, int colour )
-	{
-		Colours.Set( permission, colour );
-		Save();
 	}
 
 	//! Deleting the entry is the reset: a category with no entry falls back to

@@ -13,6 +13,11 @@
 // =============================================================================
 class UIActionDropdownList: UIActionSearchBox
 {
+	TextListboxWidget GetList()
+	{
+		return null;
+	}
+
 	void SetItems( notnull array<string> items )
 	{
 		SetSuggestions( items );
@@ -22,10 +27,5 @@ class UIActionDropdownList: UIActionSearchBox
 	{
 		if ( parent )
 			InitSuggestionList( parent );
-	}
-
-	TextListboxWidget GetList()
-	{
-		return null;
 	}
 }

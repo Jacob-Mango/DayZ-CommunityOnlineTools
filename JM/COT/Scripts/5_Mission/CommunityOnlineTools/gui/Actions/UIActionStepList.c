@@ -32,8 +32,15 @@ class UIActionStepList: UIActionBase
 {
 	protected TextWidget m_HeaderLabel;
 	protected Widget     m_Rows;
-
 	protected ref array<ref JMStepListRow> m_Items;
+
+	array<string> GetItems()
+	{
+		array<string> result = new array<string>;
+		foreach ( JMStepListRow row : m_Items )
+			result.Insert( row.Label );
+		return result;
+	}
 
 	override void OnInit()
 	{
@@ -96,14 +103,6 @@ class UIActionStepList: UIActionBase
 		CallEvent( UIEvent.CHANGE );
 	}
 
-	array<string> GetItems()
-	{
-		array<string> result = new array<string>;
-		foreach ( JMStepListRow row : m_Items )
-			result.Insert( row.Label );
-		return result;
-	}
-
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		foreach ( int i, JMStepListRow row : m_Items )
@@ -135,7 +134,7 @@ class UIActionStepList: UIActionBase
 		return false;
 	}
 
-	private ref JMStepListRow BuildRow( string label )
+	protected ref JMStepListRow BuildRow( string label )
 	{
 		// Row layout: [index 30px] [label fill] [^ 24px] [v 24px] [x 24px]
 		Widget rowRoot = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/Wrappers/1/GridSpacer5.layout", m_Rows );
@@ -211,7 +210,7 @@ class UIActionStepList: UIActionBase
 		return row;
 	}
 
-	private void RefreshIndices()
+	protected void RefreshIndices()
 	{
 		foreach ( int i, JMStepListRow row : m_Items )
 		{
@@ -220,7 +219,7 @@ class UIActionStepList: UIActionBase
 		}
 	}
 
-	private void RebuildOrder()
+	protected void RebuildOrder()
 	{
 		// Re-sort widgets to match m_Items order using SetSort
 		foreach ( int i, JMStepListRow row : m_Items )

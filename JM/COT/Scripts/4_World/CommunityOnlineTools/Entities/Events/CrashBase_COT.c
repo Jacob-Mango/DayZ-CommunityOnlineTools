@@ -9,7 +9,6 @@
 modded class CrashBase
 {
 	static ref CF_DoublyLinkedNodes_WeakRef<CrashBase> s_JM_COT_AllCrashes = new CF_DoublyLinkedNodes_WeakRef<CrashBase>();
-
 	ref CF_DoublyLinkedNode_WeakRef<CrashBase> s_JM_COT_Node;
 
 	void CrashBase()

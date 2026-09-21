@@ -9,19 +9,12 @@ class JMObjectSpawnerForm: JMFormBase
 	//! Plain buttons in a wrap row, each a FRACTION of the row: the icon grid
 	//! this replaced had to be told a pixel width that stayed in step with the
 	//! chip count, and it rebuilt itself from inside its own click handler.
-	protected ref array<ref UIActionButton> m_RecentButtons;
+	protected ref JMItemCategoryPicker m_Categories;
 
 	//! Categories moved out of a dropdown of their own and behind a filter
 	//! button beside the search box. The dropdown cost a full row of the left
 	//! column permanently for a control that is touched once per search.
 	protected UIActionImageButton m_FilterButton;
-	protected UIActionContextMenu m_CategoryMenu;
-	protected UIActionContextMenu m_CategorySubMenu;
-
-	//! Which group's submenu is up, "" when none.
-	protected string m_CurrentGroup;
-
-	protected ref TStringArray m_RecentIds;
 
 	//! Class name for every row currently in the list.
 	//!
@@ -29,99 +22,14 @@ class JMObjectSpawnerForm: JMFormBase
 	//! on, so a row index resolves through this - which is what spawning, and
 	//! every clipboard export, needs.
 	protected ref TStringArray m_ListClasses;
-
 	protected Widget m_SearchWrapper;
 	protected Widget m_FilterWrapper;
 	protected Widget m_RecentWrapper;
 	protected Widget m_ListWrapper;
-
 	protected UIActionScroller m_RightScroller;
 
-	//! Property rows are rebuilt per selection rather than shown and hidden: a
-	//! hidden child still owns its cell in a GridSpacer, which would leave a
-	//! gap where an inapplicable slider used to be. m_PropsHost stays put so
-	//! the rows keep their place in the card; m_PropsGrid is what gets
-	//! replaced.
-	protected Widget m_PropsHost;
-	protected Widget m_PropsGrid;
-	protected UIActionText m_PropsNone;
-
-	//! Ranges, not single values: the low and high handles are the bounds the
-	//! server rolls between, per spawned entity. Dragging them together is how
-	//! you ask for one exact value.
-	//!
-	//! Both start COLLAPSED to one handle - see m_RangeToggle.
-	protected UIActionSliderRange m_QuantityItem;
-	protected UIActionSliderRange m_HealthItem;
-
-	//! Switches the two spannable rows above between one value and a range.
-	//!
-	//! Off by default: rolling a spawn between two bounds is the advanced case,
-	//! and the pair of handles reads as a range whether or not the admin meant
-	//! one - a full magazine asked for by dragging both ends together is easy
-	//! to leave a round short by accident. With it off the rows keep exactly
-	//! the same look, minus the second handle.
-	//!
-	//! It lives in the card's TITLE BAR rather than in a row of its own: it is
-	//! a mode for the whole card, not a property of the item being spawned, and
-	//! a row would have put it in the same list as quantity and health where it
-	//! reads as one more thing that gets spawned. It also outlives the rows -
-	//! the grid under it is destroyed on every selection, the header is not.
-	protected UIActionImageButton m_RangeToggle;
-	protected bool m_RangesEnabled;
-
-	//! Kept because the header action is created once and the ROWS it governs
-	//! come and go: a class with neither a quantity nor a health bar has
-	//! nothing to switch, and the button is hidden for it.
-	protected UIActionCard m_PropsCard;
-
-	//! Still a single value. Temperature reads back as a NAMED state next to the
-	//! number, and there is no sensible name for a range.
-	protected UIActionSlider m_TemperatureItem;
-
-	//! Cooking state for food.
-	//!
-	//! A dropdown built into a card that is torn down on every selection is only
-	//! safe because UIActionDropdown now unlinks its floating list panel with
-	//! itself - the panel is parented to the FORM root, not to the control, so
-	//! before that it would have been left behind once per rebuild.
-	protected UIActionDropdown m_FoodStage;
-
-	//! FoodStageType for each entry of m_FoodStage, in the same order. Only the
-	//! stages the class actually declares are offered, so the indices are not
-	//! the enum's.
-	protected ref TIntArray m_FoodStageTypes;
-	protected int m_FoodStageValue;
-
-	//! What a liquid container is filled with. The values are liquid-type bits,
-	//! except on a blood container where the module wants a 1-based index into
-	//! the blood types instead - see CollectLiquids.
-	protected UIActionDropdown m_LiquidType;
-	protected ref TIntArray m_LiquidValues;
-	protected int m_LiquidValue;
-
-	//! Which cartridge a magazine is loaded with, as one of its own ammoItems
-	//! classnames. "" leaves it on whatever it is configured to hold.
-	protected UIActionDropdown m_AmmoType;
-	protected ref TStringArray m_AmmoValues;
-	protected string m_AmmoValue;
-
-	//! Rags, bandages and sewing kits spawn either soiled or disinfected.
-	protected UIActionToggleSwitch m_Disinfect;
-	protected bool m_DisinfectValue;
-
-	//! The sliders are destroyed on every rebuild, so what the admin chose has
-	//! to outlive them. Health and quantity are kept as FRACTIONS of their own
-	//! span - the span changes with the class, and 30 rounds of one calibre
-	//! should come back as 30 rounds of the next, not as the number 30 against
-	//! a different maximum. Temperature has a fixed range, so it is absolute.
-	protected float m_HealthLowPct;
-	protected float m_HealthHighPct;
-	protected float m_QuantityLowPct;
-	protected float m_QuantityHighPct;
-	protected float m_TemperatureValue;
-	protected bool  m_TemperatureSet;
-
+	//! The property card - per-class rows and the values the admin picked.
+	protected ref JMObjectSpawnerProperties m_Props;
 	protected UIActionSearchBox m_SearchBox;
 
 	//! Cycle selectors, not checkboxes: both of these choose between two named
@@ -129,7 +37,6 @@ class JMObjectSpawnerForm: JMFormBase
 	//! name" never says what the other state is.
 	protected UIActionSelectBox m_NameModeSelect;
 	protected UIActionSelectBox m_UnsafeSelect;
-
 	protected UIActionDropdown m_SpawnMode;
 	protected UIActionDropdown m_ObjSetupMode;
 
@@ -142,10 +49,9 @@ class JMObjectSpawnerForm: JMFormBase
 	//! enum value; split in two, neither can.
 	protected ref TIntArray m_SpawnModeIds;
 	protected ref TIntArray m_ExportModeIds;
-
 	protected UIActionItemList m_ClassList;
-
 	protected ItemPreviewWidget m_ItemPreview;
+
 	//! The preview's wrapper panel. The preview itself is no longer the layout
 	//! root: it now hangs inside a plainly-styled panel, the way vanilla's own
 	//! previews do, so it never inherits whatever style the engine has
@@ -154,6 +60,7 @@ class JMObjectSpawnerForm: JMFormBase
 	//! preview fills it fractionally.
 	protected Widget m_ItemPreviewPanel;
 	protected EntityAI m_PreviewItem;
+
 	//! Setup mode the current preview entity was built with. The attachments a
 	//! spawn produces depend on it, so a mode change has to rebuild the preview
 	//! exactly like a class change does - an entity that already has its debug
@@ -161,13 +68,11 @@ class JMObjectSpawnerForm: JMFormBase
 	protected int m_PreviewSetupMode;
 	protected vector m_Orientation;
 	protected float m_Distance;
-
 	protected int m_MouseX;
 	protected int m_MouseY;
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMObjectSpawnerModule m_Module;
-
 	protected UIActionButton m_SpawnButton;
 	protected UIActionConfirmInline m_DeleteCursorBtn;
 
@@ -175,13 +80,11 @@ class JMObjectSpawnerForm: JMFormBase
 	//! armed. A second keybind press on the same target confirms; aiming at
 	//! something else re-arms on the new target instead of deleting the old one.
 	protected Object m_PendingDeleteCursorObj;
-
 	protected static int s_ObjSpawnMode   = COT_ObjectSpawnerMode.CURSOR;
 	protected static int s_ObjExportMode  = COT_ObjectSpawnerMode.COPYLISTRAW;
 
 	//! How many recent categories are kept. Small on purpose - this is a
 	//! shortcut back to what was just used, not a second category list.
-	static const int RECENT_MAX = 4;
 
 	//! Height of the preview inside its card.
 	static const int PREVIEW_H = 240;
@@ -196,13 +99,8 @@ class JMObjectSpawnerForm: JMFormBase
 	static const int FILTER_H = 36;
 	static const int RECENT_H = 36;
 
-	//! Sum of the three above. Written out because a static const folded from
-	//! other static consts evaluates to 0 in Enforce - keep the three and this
-	//! in step by hand.
-	static const int LEFT_HEADER_H = 106;
-
 	//! Row splits, as FRACTIONS of the row. Never a measured flex pass and
-	//! never a fraction mixed with fixed pixels - see OnInit.
+	//! never a fraction mixed with fixed pixels - see OnCreate.
 	//!
 	//! A fixed-pixel button beside a fractional field wraps the moment the row
 	//! is narrower than the two of them together, and this window can be
@@ -216,33 +114,52 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		m_PreviewSetupMode = -1;
 
-		m_RecentIds      = new TStringArray;
 		m_ListClasses    = new TStringArray;
-		m_FoodStageTypes = new TIntArray;
-		m_LiquidValues   = new TIntArray;
-		m_AmmoValues     = new TStringArray;
 		m_SpawnModeIds   = new TIntArray;
 		m_ExportModeIds  = new TIntArray;
-		m_RecentButtons  = new array<ref UIActionButton>;
 
-		//! Both ranges open at their full span, so switching ranges ON asks for
-		//! a spawn randomised across everything the class allows until the
-		//! handles are pulled together. Until then only the high handle is
-		//! shown, and it is the one value that spawns.
-		m_HealthLowPct    = 0.0;
-		m_HealthHighPct   = 1.0;
-		m_QuantityLowPct  = 0.0;
-		m_QuantityHighPct = 1.0;
-
-		m_RangesEnabled = false;
-
-		m_TemperatureValue = GameConstants.STATE_NEUTRAL_TEMP;
+		m_Props = new JMObjectSpawnerProperties( this );
 	}
 
 	void ~JMObjectSpawnerForm()
 	{
 		if (m_PreviewItem)
 			g_Game.ObjectDelete(m_PreviewItem);
+	}
+
+	string GetCurrentSelection()
+	{
+		int row = m_ClassList.GetSelectedIndex();
+
+		if ( row < 0 || row >= m_ListClasses.Count() )
+			return "";
+
+		return m_ListClasses[row];
+	}
+
+	//! Sum of the three above. A function rather than a constant because a static const folded
+	//! from other static consts evaluates to 0 in Enforce - and writing the total out by hand
+	//! left it free to drift from the bands it adds up.
+	static int GetLeftHeaderHeight()
+	{
+		return SEARCH_H + FILTER_H + RECENT_H;
+	}
+
+	//! The module this form drives. Public for the property card.
+	JMObjectSpawnerModule GetModule()
+	{
+		return m_Module;
+	}
+
+	//! The entity the preview is showing, for the property card to push values onto.
+	EntityAI GetPreviewItem()
+	{
+		return m_PreviewItem;
+	}
+
+	UIActionScroller GetRightScroller()
+	{
+		return m_RightScroller;
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -270,11 +187,11 @@ class JMObjectSpawnerForm: JMFormBase
 		PinBand( m_FilterWrapper, SEARCH_H, FILTER_H );
 		PinBand( m_RecentWrapper, SEARCH_H + FILTER_H, RECENT_H );
 
-		if ( m_ListWrapper && h > LEFT_HEADER_H )
+		if ( m_ListWrapper && h > GetLeftHeaderHeight() )
 		{
-			float listH = h - LEFT_HEADER_H;
+			float listH = h - GetLeftHeaderHeight();
 
-			PinBand( m_ListWrapper, LEFT_HEADER_H, listH );
+			PinBand( m_ListWrapper, GetLeftHeaderHeight(), listH );
 
 			//! The list is told the height rather than measuring it. Same
 			//! number, one source - and a widget cannot measure itself on the
@@ -319,7 +236,7 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.Show( false );
 	}
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		// ----------------------------------------------------------------------
 		// Two columns, modelled on player_form.layout.
@@ -344,14 +261,9 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ListWrapper   = layoutRoot.FindAnyWidget( "spawner_list_wrapper" );
 
 		// --- Search -----------------------------------------------------------
-		Widget searchRow = UIActionManager.CreateWrapSpacerCompact( m_SearchWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-
-		m_SearchBox = UIActionManager.CreateSearchBox( searchRow, this, "SearchInput_OnChange", "#STR_COT_OBJECT_MODULE_SEARCH" );
-		m_SearchBox.SetWidth( SEARCH_ROW_W );
-
-		m_FilterButton = UIActionManager.CreateIconButton( searchRow, JMConstants.Lucide( "list-filter" ), this, "OnClick_CategoryFilter" );
-		m_FilterButton.SetWidth( FILTER_BTN_W );
-		m_FilterButton.SetTooltip( "#STR_COT_OBJECT_MODULE_CATEGORY_DESC" );
+		JMSearchRow toolbar = UIActionManager.CreateSearchRow( m_SearchWrapper, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange", "OnClick_CategoryFilter", "#STR_COT_OBJECT_MODULE_CATEGORY_DESC", "", SEARCH_ROW_W, FILTER_BTN_W );
+		m_SearchBox = toolbar.Search;
+		m_FilterButton = toolbar.Filter;
 
 		// --- Filters ----------------------------------------------------------
 		Widget filterRow = UIActionManager.CreateWrapSpacerCompact( m_FilterWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
@@ -399,23 +311,14 @@ class JMObjectSpawnerForm: JMFormBase
 		//! A fixed-height panel to hang the preview in. The preview layout is
 		//! fractional, and a fractional height inside a size-to-content card
 		//! resolves against the whole column.
-		Widget previewHost = UIActionManager.CreatePanel( previewCard.GetContent(), 0x00000000, PREVIEW_H );
+		Widget previewHost = UIActionManager.CreateRow( previewCard.GetContent(), PREVIEW_H );
 
 		m_ItemPreviewPanel = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/objectspawner_preview.layout", previewHost );
 
 		if ( m_ItemPreviewPanel )
 			Class.CastTo( m_ItemPreview, m_ItemPreviewPanel.FindAnyWidget( "object_preview" ) );
 
-		m_PropsCard = UIActionManager.CreateCard( rightContent, "#STR_COT_OBJECT_MODULE_PROPERTIES" );
-		m_PropsHost = UIActionManager.CreateGridSpacer( m_PropsCard.GetContent(), 1, 1 );
-
-		//! An icon button, not a toggle switch: the header strip is 30px tall
-		//! and gives its children no label room. The STATE is the tint - accent
-		//! while ranges are on, the plain button fill while they are off - and
-		//! the tooltip names both what it is doing and what a click would do.
-		m_RangeToggle = m_PropsCard.AddCardHeaderAction( JMConstants.Lucide( "arrow-left-right" ), this, "Click_ToggleRanges" );
-
-		PaintRangeToggle();
+		m_Props.Build( rightContent );
 
 		// --- Spawn ------------------------------------------------------------
 		array<string> spawnModes = new array<string>;
@@ -447,7 +350,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_SpawnMode.SetWidth( MODE_ROW_W );
 		m_SpawnMode.SetSelection( IndexOfMode( m_SpawnModeIds, s_ObjSpawnMode ), false );
 		m_SpawnMode.SetTooltip( "#STR_COT_OBJECT_MODULE_MODE_DESC" );
-		RegisterOverlay( m_SpawnMode );
+		AddOverlay( m_SpawnMode );
 
 		array<string> setupOptions = new array<string>;
 		setupOptions.Insert( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG" ) );
@@ -457,14 +360,15 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ObjSetupMode.SetWidth( MODE_ROW_W2 );
 		m_ObjSetupMode.SetSelection( m_Module.m_ObjSetupMode, false );
 		m_ObjSetupMode.SetTooltip( "#STR_COT_OBJECT_MODULE_SETUP_DESC" );
-		RegisterOverlay( m_ObjSetupMode );
+		AddOverlay( m_ObjSetupMode );
 
 		//! Spawn and delete share a row and a width. Both layouts are 30 tall,
 		//! and neither carries a pixel width, so the pair scales together and
 		//! the row cannot wrap however narrow the window gets.
 		Widget spawnRow = UIActionManager.CreateWrapSpacerCompact( spawnBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-		m_SpawnButton = UIActionManager.CreateButton( spawnRow, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
+		m_SpawnButton = UIActionManager.CreateButton( spawnRow, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "" );
+		if ( m_SpawnButton ) m_SpawnButton.SetOnClick( this, "Click_SpawnObject" );
 		m_SpawnButton.SetWidth( MODE_ROW_W );
 		m_SpawnButton.SetColor( JMTheme.SUCCESS_FILL );
 		m_SpawnButton.SetTooltip( "#STR_COT_OBJECT_MODULE_SPAWN_DESC" );
@@ -474,7 +378,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_DeleteCursorBtn.SetWidth( MODE_ROW_W2 );
 		m_DeleteCursorBtn.SetTooltip( "#STR_COT_OBJECT_MODULE_DELETE_DESC" );
 
-		BindPermission( m_DeleteCursorBtn, "Entity.Delete" );
+		BindPermission( m_DeleteCursorBtn, JMConstants.PERM_ENTITY_DELETE );
 
 		// --- Export -----------------------------------------------------------
 		//! Its own card under Spawn. Copying a class list to the clipboard is
@@ -498,16 +402,18 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ExportMode.SetWidth( MODE_ROW_W );
 		m_ExportMode.SetSelection( IndexOfMode( m_ExportModeIds, s_ObjExportMode ), false );
 		m_ExportMode.SetTooltip( "#STR_COT_OBJECT_MODULE_EXPORT_DESC" );
-		RegisterOverlay( m_ExportMode );
+		AddOverlay( m_ExportMode );
 
-		UIActionButton copyBtn = UIActionManager.CreateButton( exportRow, "#STR_COT_GENERIC_COPY", this, "Click_CopyList" );
+		UIActionButton copyBtn = UIActionManager.CreateButton( exportRow, "#STR_COT_GENERIC_COPY", this, "" );
+		if ( copyBtn ) copyBtn.SetOnClick( this, "Click_CopyList" );
 		copyBtn.SetWidth( MODE_ROW_W2 );
 		copyBtn.SetTooltip( "#STR_COT_OBJECT_MODULE_EXPORT_COPY_DESC" );
 
 		// The Spawn button names the destination the dropdown is set to.
 		SyncSpawnButtonLabel();
 
-		RebuildRecentCategories();
+		m_Categories = new JMItemCategoryPicker( this, m_RecentWrapper, JMFilterRegistry.OBJECTS, this, "OnCategoryChanged", m_Module.m_CurrentType );
+		m_Categories.RebuildRecent();
 
 		m_SearchBox.SetText(m_Module.m_SearchText);
 		UpdateList();
@@ -516,651 +422,43 @@ class JMObjectSpawnerForm: JMFormBase
 	}
 
 	// -------------------------------------------------------------------------
-	//  Categories
+	//  Categories - the filter button, its menu and the recent chips are a
+	//  JMItemCategoryPicker, shared with Loot Analysis.
 	// -------------------------------------------------------------------------
 
-	//! Id / icon / label for every category, in dropdown order. The id is the
-	//! config base class the list filters on; "" is everything.
-	//!
-	//! One table, read by both the dropdown and the recent chips, so the two
-	//! can never drift apart.
-	static void CategoryTable( out TStringArray ids, out TStringArray icons, out TStringArray labels )
-	{
-		ids = new TStringArray;
-		icons = new TStringArray;
-		labels = new TStringArray;
-
-		AddCategory( ids, icons, labels, "",               JMConstants.Lucide( "layers" ),    "#STR_COT_OBJECT_CATEGORY_ALL" );
-		AddCategory( ids, icons, labels, "edible_base",    JMConstants.ICON_MEAT,             "#STR_COT_OBJECT_CATEGORY_FOOD" );
-		AddCategory( ids, icons, labels, "bottle_base",    JMConstants.ICON_BEER_BOTTLE,      "#STR_COT_OBJECT_CATEGORY_DRINKS" );
-		AddCategory( ids, icons, labels, "transport",      JMConstants.ICON_JEEP,             "#STR_COT_OBJECT_CATEGORY_VEHICLES" );
-		AddCategory( ids, icons, labels, "weapon_base",    JMConstants.ICON_FAMAS,            "#STR_COT_OBJECT_CATEGORY_FIREARMS" );
-		AddCategory( ids, icons, labels, "meleeweapon",    JMConstants.ICON_GLADIUS,          "#STR_COT_OBJECT_CATEGORY_MELEE" );
-		AddCategory( ids, icons, labels, "magazine_base",  JMConstants.ICON_MACHINE_GUN_MAG,  "#STR_COT_OBJECT_CATEGORY_AMMO" );
-		AddCategory( ids, icons, labels, "clothing_base",  JMConstants.ICON_CLOTHES,          "#STR_COT_OBJECT_CATEGORY_CLOTHING" );
-		AddCategory( ids, icons, labels, "headgear_base",  JMConstants.ICON_STAHLHELM,        "#STR_COT_OBJECT_CATEGORY_HEADGEAR" );
-		AddCategory( ids, icons, labels, "mask_base",      JMConstants.ICON_BALACLAVA,        "#STR_COT_OBJECT_CATEGORY_MASKS" );
-		AddCategory( ids, icons, labels, "glasses_base",   JMConstants.ICON_SUNGLASSES,       "#STR_COT_OBJECT_CATEGORY_GLASSES" );
-		AddCategory( ids, icons, labels, "top_base",       JMConstants.ICON_T_SHIRT,          "#STR_COT_OBJECT_CATEGORY_TOPS" );
-		AddCategory( ids, icons, labels, "pants_base",     JMConstants.ICON_TROUSERS,         "#STR_COT_OBJECT_CATEGORY_PANTS" );
-		AddCategory( ids, icons, labels, "vest_base",      JMConstants.ICON_BELT,             "#STR_COT_OBJECT_CATEGORY_VESTS" );
-		AddCategory( ids, icons, labels, "gloves_base",    JMConstants.ICON_GLOVES,           "#STR_COT_OBJECT_CATEGORY_GLOVES" );
-		AddCategory( ids, icons, labels, "shoes_base",     JMConstants.ICON_TROUSERS,         "#STR_COT_OBJECT_CATEGORY_SHOES" );
-		AddCategory( ids, icons, labels, "backpack_base",  JMConstants.ICON_LIGHT_BACKPACK,   "#STR_COT_OBJECT_CATEGORY_BACKPACKS" );
-		AddCategory( ids, icons, labels, "container_base", JMConstants.ICON_KNAPSACK,         "#STR_COT_OBJECT_CATEGORY_CONTAINERS" );
-		AddCategory( ids, icons, labels, "inventory_base", JMConstants.ICON_FULL_FOLDER,      "#STR_COT_OBJECT_CATEGORY_ITEMS" );
-		AddCategory( ids, icons, labels, "itemmedical",    JMConstants.ICON_MEDICINES,        "#STR_COT_OBJECT_CATEGORY_MEDICAL" );
-		AddCategory( ids, icons, labels, "tool_base",      JMConstants.ICON_SHARP_AXE,        "#STR_COT_OBJECT_CATEGORY_TOOLS" );
-		AddCategory( ids, icons, labels, "trapbase",       JMConstants.ICON_TINKER,           "#STR_COT_OBJECT_CATEGORY_TRAPS" );
-		AddCategory( ids, icons, labels, "electricdevice", JMConstants.ICON_ELECTRIC,         "#STR_COT_OBJECT_CATEGORY_ELECTRONICS" );
-		AddCategory( ids, icons, labels, "tentbase",       JMConstants.ICON_CAMPING_TENT,     "#STR_COT_OBJECT_CATEGORY_TENTS" );
-		AddCategory( ids, icons, labels, "grenade_base",   JMConstants.ICON_UNLIT_BOMB,       "#STR_COT_OBJECT_CATEGORY_EXPLOSIVES" );
-		AddCategory( ids, icons, labels, "house",          JMConstants.ICON_HOME_GARAGE,      "#STR_COT_OBJECT_CATEGORY_BUILDINGS" );
-		AddCategory( ids, icons, labels, "dz_lightai",     JMConstants.ICON_SHAMBLING_ZOMBIE, "#STR_COT_OBJECT_CATEGORY_AI" );
-	}
-
-	//! Categories are presented in groups, each opening a submenu, the way the
-	//! teleport filter is organised. Flat, the 27 rows needed two columns to fit
-	//! the window and still read as a wall of icons.
-	static const string GROUP_GEAR     = "grp_gear";
-	static const string GROUP_WEAPONS  = "grp_weapons";
-	static const string GROUP_SURVIVAL = "grp_survival";
-	static const string GROUP_WORLD    = "grp_world";
-
-	static void CategoryGroupTable( out TStringArray ids, out TStringArray icons, out TStringArray labels )
-	{
-		ids = new TStringArray;
-		icons = new TStringArray;
-		labels = new TStringArray;
-
-		AddCategory( ids, icons, labels, GROUP_GEAR,     JMConstants.ICON_CLOTHES, "#STR_COT_OBJECT_CATEGORY_GROUP_GEAR" );
-		AddCategory( ids, icons, labels, GROUP_WEAPONS,  JMConstants.ICON_FAMAS,   "#STR_COT_OBJECT_CATEGORY_GROUP_WEAPONS" );
-		AddCategory( ids, icons, labels, GROUP_SURVIVAL, JMConstants.ICON_MEAT,    "#STR_COT_OBJECT_CATEGORY_GROUP_SURVIVAL" );
-		AddCategory( ids, icons, labels, GROUP_WORLD,    JMConstants.ICON_JEEP,    "#STR_COT_OBJECT_CATEGORY_GROUP_WORLD" );
-	}
-
-	//! Every id here must also appear in CategoryTable, and between them the four
-	//! groups must cover it entirely - a category in neither place can no longer
-	//! be reached from the filter button at all.
-	static TStringArray CategoryGroupMembers( string groupId )
-	{
-		TStringArray members = new TStringArray;
-
-		if ( groupId == GROUP_GEAR )
-		{
-			members.Insert( "clothing_base" );
-			members.Insert( "headgear_base" );
-			members.Insert( "mask_base" );
-			members.Insert( "glasses_base" );
-			members.Insert( "top_base" );
-			members.Insert( "pants_base" );
-			members.Insert( "vest_base" );
-			members.Insert( "gloves_base" );
-			members.Insert( "shoes_base" );
-			members.Insert( "backpack_base" );
-			return members;
-		}
-
-		if ( groupId == GROUP_WEAPONS )
-		{
-			members.Insert( "weapon_base" );
-			members.Insert( "meleeweapon" );
-			members.Insert( "magazine_base" );
-			members.Insert( "grenade_base" );
-			members.Insert( "trapbase" );
-			return members;
-		}
-
-		if ( groupId == GROUP_SURVIVAL )
-		{
-			members.Insert( "edible_base" );
-			members.Insert( "bottle_base" );
-			members.Insert( "itemmedical" );
-			members.Insert( "tool_base" );
-			members.Insert( "tentbase" );
-			members.Insert( "container_base" );
-			return members;
-		}
-
-		if ( groupId == GROUP_WORLD )
-		{
-			members.Insert( "transport" );
-			members.Insert( "house" );
-			members.Insert( "dz_lightai" );
-			members.Insert( "electricdevice" );
-			members.Insert( "inventory_base" );
-			return members;
-		}
-
-		return members;
-	}
-
-	protected string GroupOfCategory( string categoryId )
-	{
-		TStringArray gids, gicons, glabels;
-		CategoryGroupTable( gids, gicons, glabels );
-
-		for ( int i = 0; i < gids.Count(); i++ )
-		{
-			TStringArray members = CategoryGroupMembers( gids[i] );
-
-			if ( members.Find( categoryId ) >= 0 )
-				return gids[i];
-		}
-
-		return "";
-	}
-
-	static void AddCategory( TStringArray ids, TStringArray icons, TStringArray labels, string id, string icon, string label )
-	{
-		ids.Insert( id );
-		icons.Insert( icon );
-		labels.Insert( label );
-	}
-
-	protected string CategoryLabel( string id )
-	{
-		TStringArray ids, icons, labels;
-		CategoryTable( ids, icons, labels );
-
-		for ( int i = 0; i < ids.Count(); i++ )
-		{
-			if ( ids[i] == id )
-				return labels[i];
-		}
-
-		return "";
-	}
-
-	protected string CategoryIcon( string id )
-	{
-		TStringArray ids, icons, labels;
-		CategoryTable( ids, icons, labels );
-
-		for ( int i = 0; i < ids.Count(); i++ )
-		{
-			if ( ids[i] == id )
-				return icons[i];
-		}
-
-		return JMConstants.Lucide( "layers" );
-	}
-
-	//! The "everything" category is the empty string, which the menu cannot use
-	//! as an id - an empty GetLastClickedId() is also what a menu that has never
-	//! been clicked reports.
-	static const string MENU_ID_ALL = "__all";
-
-	protected string MenuIdFor( string categoryId )
-	{
-		if ( categoryId == "" )
-			return MENU_ID_ALL;
-
-		return categoryId;
-	}
-
-	protected string CategoryIdFor( string menuId )
-	{
-		if ( menuId == MENU_ID_ALL )
-			return "";
-
-		return menuId;
-	}
-
-	//! Open the category list under the filter button, the way the vehicle form
-	//! opens its type filter. A popup rather than a control parked on the form:
-	//! it is needed for one click per search and costs nothing in between.
 	void OnClick_CategoryFilter( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_FilterButton )
-			return;
-
-		if ( !m_CategoryMenu )
-		{
-			if ( !m_Window )
-				return;
-
-			m_CategoryMenu = UIActionManager.CreateContextMenu( layoutRoot, m_Window.GetWidgetRoot(), this, "OnClick_CategoryMenu" );
-
-			if ( !m_CategoryMenu )
-				return;
-
-			RegisterOverlay( m_CategoryMenu );
-			m_CategoryMenu.SetOwnerWidget( m_FilterButton.GetLayoutRoot() );
-
-			//! A press on a group row opens its submenu; closing the parent out
-			//! from under it would take the submenu's anchor with it.
-			m_CategoryMenu.SetCloseOnClick( false );
-		}
-
-		//! A second press on the button puts the menu away instead of reopening
-		//! it in place, which is what a dropdown is expected to do.
-		if ( m_CategoryMenu.IsOpen() )
-		{
-			CloseCategoryMenus();
-			return;
-		}
-
-		RebuildCategoryMenu();
-
-		float fx;
-		float fy;
-		float fw;
-		float fh;
-
-		m_FilterButton.GetLayoutRoot().GetScreenPos( fx, fy );
-		m_FilterButton.GetLayoutRoot().GetScreenSize( fw, fh );
-
-		m_CategoryMenu.ShowAt( fx, fy + fh );
+		if ( eid == UIEvent.CLICK && m_Categories && m_FilterButton )
+			m_Categories.Toggle( m_FilterButton.GetLayoutRoot() );
 	}
 
-	//! Rows are built ONCE. AddItem rebuilds every row it already holds, so
-	//! filling 27 entries on each open would create them 378 times over; the
-	//! selected one is marked by recolouring instead.
-	protected void RebuildCategoryMenu()
+	//! The picker's change callback: "" is everything, otherwise the config base class to filter on.
+	void OnCategoryChanged( string categoryId )
 	{
-		if ( !m_CategoryMenu )
-			return;
-
-		if ( m_CategoryMenu.GetItemCount() == 0 )
-		{
-			m_CategoryMenu.AddItem( MENU_ID_ALL, CategoryLabel( "" ), CategoryIcon( "" ) );
-
-			TStringArray gids, gicons, glabels;
-			CategoryGroupTable( gids, gicons, glabels );
-
-			for ( int i = 0; i < gids.Count(); i++ )
-				m_CategoryMenu.AddItem( gids[i], glabels[i], gicons[i], 0, true );
-		}
-
-		RefreshCategoryMenuColors();
-	}
-
-	protected void RefreshCategoryMenuColors()
-	{
-		if ( !m_CategoryMenu )
-			return;
-
-		//! 0 means "use the menu default", so only the active row names a colour
-		//! of its own. A group is marked when the active category is one of its
-		//! members, which is the only cue while its submenu is shut.
-		int allColor = 0;
-
-		if ( m_Module.m_CurrentType == "" )
-			allColor = JMTheme.ACCENT;
-
-		m_CategoryMenu.SetItemTextColor( MENU_ID_ALL, allColor );
-
-		string activeGroup = GroupOfCategory( m_Module.m_CurrentType );
-
-		TStringArray gids, gicons, glabels;
-		CategoryGroupTable( gids, gicons, glabels );
-
-		for ( int i = 0; i < gids.Count(); i++ )
-		{
-			int color = 0;
-
-			if ( gids[i] == activeGroup )
-				color = JMTheme.ACCENT;
-
-			m_CategoryMenu.SetItemTextColor( gids[i], color );
-		}
-
-		RefreshCategorySubMenuColors();
-	}
-
-	protected void OpenCategorySubMenu( string groupId, float x, float y )
-	{
-		if ( !m_Window )
-			return;
-
-		if ( !m_CategorySubMenu )
-		{
-			m_CategorySubMenu = UIActionManager.CreateContextMenu( layoutRoot, m_Window.GetWidgetRoot(), this, "OnClick_CategorySubMenu" );
-
-			if ( !m_CategorySubMenu )
-				return;
-
-			RegisterOverlay( m_CategorySubMenu );
-		}
-
-		if ( m_CategorySubMenu.IsOpen() && m_CurrentGroup == groupId )
-		{
-			m_CategorySubMenu.Close();
-			m_CurrentGroup = "";
-			return;
-		}
-
-		m_CurrentGroup = groupId;
-
-		RebuildCategorySubMenu();
-
-		m_CategorySubMenu.ShowAt( x, y );
-	}
-
-	protected void RebuildCategorySubMenu()
-	{
-		if ( !m_CategorySubMenu )
-			return;
-
-		m_CategorySubMenu.ClearItems();
-
-		TStringArray members = CategoryGroupMembers( m_CurrentGroup );
-
-		for ( int i = 0; i < members.Count(); i++ )
-			m_CategorySubMenu.AddItem( MenuIdFor( members[i] ), CategoryLabel( members[i] ), CategoryIcon( members[i] ) );
-
-		RefreshCategorySubMenuColors();
-	}
-
-	protected void RefreshCategorySubMenuColors()
-	{
-		if ( !m_CategorySubMenu || m_CurrentGroup == "" )
-			return;
-
-		TStringArray members = CategoryGroupMembers( m_CurrentGroup );
-
-		for ( int i = 0; i < members.Count(); i++ )
-		{
-			int color = 0;
-
-			if ( members[i] == m_Module.m_CurrentType )
-				color = JMTheme.ACCENT;
-
-			m_CategorySubMenu.SetItemTextColor( MenuIdFor( members[i] ), color );
-		}
-	}
-
-	protected void CloseCategoryMenus()
-	{
-		if ( m_CategorySubMenu )
-			m_CategorySubMenu.Close();
-
-		if ( m_CategoryMenu )
-			m_CategoryMenu.Close();
-
-		m_CurrentGroup = "";
-	}
-
-	void OnClick_CategoryMenu( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_CategoryMenu )
-			return;
-
-		string id = m_CategoryMenu.GetLastClickedId();
-
-		if ( id == MENU_ID_ALL )
-		{
-			SelectCategory( "" );
-			CloseCategoryMenus();
-			return;
-		}
-
-		int mx, my;
-		GetMousePos( mx, my );
-
-		OpenCategorySubMenu( id, mx, my );
-	}
-
-	void OnClick_CategorySubMenu( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_CategorySubMenu )
-			return;
-
-		SelectCategory( CategoryIdFor( m_CategorySubMenu.GetLastClickedId() ) );
-		CloseCategoryMenus();
-	}
-
-	//! Which chip was pressed, from the action that fired. The buttons carry no
-	//! id of their own - their position in m_RecentButtons IS their position in
-	//! m_RecentIds, because the two are built in one pass.
-	void OnClick_RecentChip( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		UIActionButton chip;
-
-		if ( !Class.CastTo( chip, action ) )
-			return;
-
-		int index = m_RecentButtons.Find( chip );
-
-		if ( index < 0 || index >= m_RecentIds.Count() )
-			return;
-
-		SelectCategory( m_RecentIds[index] );
-	}
-
-	protected void SelectCategory( string id )
-	{
-		m_Module.m_CurrentType = id;
-
-		//! A chip press must never destroy the strip it landed on. Adding a
-		//! category the strip does not hold yet is the only thing that changes
-		//! its shape, and even then the rebuild is deferred a tick so it cannot
-		//! happen inside the click that caused it - the engine answers a
-		//! vanished press target by recentring the cursor.
-		if ( PushRecentCategory( id ) )
-			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Call( RebuildRecentCategories );
-		else
-			PaintRecentCategories();
-
-		//! The menu marks what is active, so it follows a chip click as well as
-		//! its own.
-		RefreshCategoryMenuColors();
+		m_Module.m_CurrentType = categoryId;
 
 		UpdateList();
 	}
 
-	//! Newest first, capped. Returns whether the strip's contents changed.
-	//!
-	//! Re-picking a category the strip ALREADY holds leaves the order alone.
-	//! Promoting it to the front would slide every other chip sideways under
-	//! the cursor that just pressed one, which is the last thing a shortcut
-	//! bar should do. "All" gets no chip - it is the first row of the menu.
-	protected bool PushRecentCategory( string id )
+	//! DEPRECATED - use JMItemCategoryPicker.CategoryTable().
+	static void CategoryTable( out TStringArray ids, out TStringArray icons, out TStringArray labels )
 	{
-		if ( id == "" )
-			return false;
-
-		if ( m_RecentIds.Find( id ) >= 0 )
-			return false;
-
-		m_RecentIds.InsertAt( id, 0 );
-
-		while ( m_RecentIds.Count() > RECENT_MAX )
-			m_RecentIds.Remove( m_RecentIds.Count() - 1 );
-
-		return true;
+		JMDeprecated.WarnOnce( null, "JMObjectSpawnerForm.CategoryTable() is deprecated. Please use JMItemCategoryPicker.CategoryTable()." );
+		JMItemCategoryPicker.CategoryTable( ids, icons, labels );
 	}
 
-	//! Rebuild the chip strip. Only ever called when the SET of recent
-	//! categories changed - a plain re-selection repaints instead.
-	protected void RebuildRecentCategories()
+	//! DEPRECATED - use JMItemCategoryPicker.CategoryGroupTable().
+	static void CategoryGroupTable( out TStringArray ids, out TStringArray icons, out TStringArray labels )
 	{
-		if ( !m_RecentWrapper )
-			return;
-
-		//! Drop the script references BEFORE the widgets that own them go, so a
-		//! chip is never left alive with a layoutRoot that has been unlinked.
-		m_RecentButtons.Clear();
-
-		Widget child = m_RecentWrapper.GetChildren();
-
-		while ( child )
-		{
-			Widget next = child.GetSibling();
-			child.Unlink();
-			child = next;
-		}
-
-		if ( m_RecentIds.Count() == 0 )
-			return;
-
-		Widget strip = UIActionManager.CreateWrapSpacerCompact( m_RecentWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-
-		//! Each chip takes an equal FRACTION of the row. The icon grid this
-		//! replaced was given an exact pixel width computed from the chip count
-		//! and an authored cell size, which had to stay in step with both and
-		//! spilled out of its band when it did not.
-		float chipW = 0.99 / m_RecentIds.Count();
-
-		for ( int i = 0; i < m_RecentIds.Count(); i++ )
-		{
-			UIActionButton chip = UIActionManager.CreateButton( strip, CategoryLabel( m_RecentIds[i] ), this, "OnClick_RecentChip" );
-
-			if ( !chip )
-				continue;
-
-			chip.SetWidth( chipW );
-			chip.SetIcon( CategoryIcon( m_RecentIds[i] ) );
-
-			m_RecentButtons.Insert( chip );
-		}
-
-		PaintRecentCategories();
+		JMDeprecated.WarnOnce( null, "JMObjectSpawnerForm.CategoryGroupTable() is deprecated. Please use JMItemCategoryPicker.CategoryGroupTable()." );
+		JMItemCategoryPicker.CategoryGroupTable( ids, icons, labels );
 	}
 
-	//! Mark whichever chip matches the active category.
-	protected void PaintRecentCategories()
+	//! DEPRECATED - use JMItemCategoryPicker.CategoryGroupMembers().
+	static TStringArray CategoryGroupMembers( string groupId )
 	{
-		if ( !m_RecentButtons )
-			return;
-
-		for ( int i = 0; i < m_RecentButtons.Count(); i++ )
-		{
-			if ( i >= m_RecentIds.Count() )
-				return;
-
-			//! A WASH rather than the solid accent: UIActionButton has no way to
-			//! recolour its own label, and the default one is unreadable on a
-			//! saturated fill.
-			if ( m_RecentIds[i] == m_Module.m_CurrentType )
-				m_RecentButtons[i].SetColor( JMTheme.ACCENT_WASH_STRONG );
-			else
-				m_RecentButtons[i].SetColor( JMTheme.INK_700 );
-		}
-	}
-
-	//! Dragging a slider must NOT run the full preview refresh: that rebuilds
-	//! the property rows, which destroys the very slider being dragged. Only
-	//! the health the preview entity is wearing is re-applied.
-	void Click_SetHealth( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		CaptureProperties();
-		UpdateHealthItemColor();
-		RefreshPreviewHealth();
-	}
-
-	void Click_SetTemperature( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		CaptureProperties();
-		UpdateTemperatureItemColor();
-	}
-
-	//! Push the health slider onto the entity already being previewed.
-	//!
-	//! Same pass the spawn runs: the value lands on the item, on its damage
-	//! zones, and on every attachment at the same PERCENTAGE of that
-	//! attachment's own max health. Without the cascade a ruined rifle previews
-	//! with a pristine optic and magazine hanging off it.
-	protected void RefreshPreviewHealth()
-	{
-		if ( !m_PreviewItem || !m_HealthItem )
-			return;
-
-		if ( m_PreviewItem.IsTransport() )
-			return;
-
-		m_Module.SetupEntityHealth( m_PreviewItem, m_HealthItem.GetRangeHigh(), -1 );
-	}
-
-	void UpdateHealthItemColor()
-	{
-		//! The row is absent for a class with no health at all, rather than
-		//! present and disabled - see RebuildProperties.
-		if ( !m_HealthItem )
-			return;
-
-		//! The bar is SHADED across itself rather than given one colour: a range
-		//! that runs from ruined to pristine is not any single condition, and
-		//! painting it one colour could only ever describe one end of it.
-		//!
-		//! The ramp is sampled densely rather than handed over as the five
-		//! condition colours, because the vanilla bands are not evenly spaced -
-		//! they break at 30%, 50% and 70% - and evenly spaced stops would put
-		//! the colour changes in the wrong places.
-		TIntArray stops = new TIntArray;
-
-		for ( int i = 0; i < HEALTH_GRADIENT_STOPS; i++ )
-			stops.Insert( HealthColor( ( 1.0 * i ) / ( HEALTH_GRADIENT_STOPS - 1 ) ) );
-
-		m_HealthItem.SetGradient( stops );
-		m_HealthItem.SetAlpha( 1.0 );
-	}
-
-
-	//! Samples taken across the health range to build its gradient. 32 puts
-	//! every band edge within about 3% of where vanilla draws it.
-	static const int HEALTH_GRADIENT_STOPS = 32;
-
-	//! Force a vanilla colour constant opaque.
-	//!
-	//! The condition and temperature constants in Colors are written with an
-	//! alpha byte of ZERO - COLOR_PRISTINE is 0x0040FF00. They are meant for
-	//! text colouring, where the alpha is supplied separately. Handed to
-	//! Widget.SetColor, which reads plain ARGB, every one of them paints a
-	//! fully transparent widget: the colour is applied exactly as asked and
-	//! nothing appears.
-	//!
-	//! The single-value slider hid this by calling SetAlpha(1.0) straight after
-	//! SetColor - but that only reaches the one widget SetAlpha touches, so
-	//! anything else painted from these constants stays invisible.
-	static int Opaque( int color )
-	{
-		return color | 0xFF000000;
-	}
-
-	//! The vanilla condition bands, as a colour.
-	protected int HealthColor( float health01 )
-	{
-		if ( health01 >= 0.7 )
-			return Opaque( Colors.COLOR_PRISTINE );
-
-		if ( health01 >= 0.5 )
-			return Opaque( Colors.COLOR_WORN );
-
-		if ( health01 >= 0.3 )
-			return Opaque( Colors.COLOR_DAMAGED );
-
-		if ( health01 > 0 )
-			return Opaque( Colors.COLOR_BADLY_DAMAGED );
-
-		return Opaque( Colors.COLOR_RUINED );
-	}
-
-	void UpdateTemperatureItemColor()
-	{
-		if ( !m_TemperatureItem )
-			return;
-
-		int value = m_TemperatureItem.GetCurrent();
-
-		//! Same zero-alpha constants as the condition colours - see Opaque.
-		m_TemperatureItem.SetColor( Opaque( ObjectTemperatureState.GetStateData(value).m_Color ) );
-		if (ObjectTemperatureState.GetStateData(value).m_State != GameConstants.STATE_NEUTRAL_TEMP)
-			m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE " + ObjectTemperatureState.GetStateData(value).m_LocalizedName );
-		else
-			m_TemperatureItem.SetFormat("#STR_COT_FORMAT_DEGREE");
-
-		m_TemperatureItem.SetAlpha( 1.0 );
+		JMDeprecated.WarnOnce( null, "JMObjectSpawnerForm.CategoryGroupMembers() is deprecated. Please use JMItemCategoryPicker.CategoryGroupMembers()." );
+		return JMItemCategoryPicker.CategoryGroupMembers( groupId );
 	}
 
 	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )
@@ -1191,14 +489,10 @@ class JMObjectSpawnerForm: JMFormBase
 		UpdateItemPreview();
 	}
 
-	void Click_SpawnObject( UIEvent eid, UIActionBase action )
+	void Click_SpawnObject( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
 		SpawnObject(s_ObjSpawnMode);
 	}
-
 
 	void UpdateRotation( int mouse_x, int mouse_y, bool is_dragging )
 	{
@@ -1264,20 +558,15 @@ class JMObjectSpawnerForm: JMFormBase
 			}
 		}
 
-		RebuildProperties( strSelection );
+		m_Props.Rebuild( strSelection );
 
 		if ( m_PreviewItem )
 		{
-			// Same pass the spawn runs: the value lands on the item, on its
-			// damage zones, and on every attachment at the same PERCENTAGE of
-			// that attachment's own max health. Without the cascade a ruined
-			// rifle previews with a pristine optic and magazine hanging off it.
+			// Same pass the spawn runs - see JMObjectSpawnerProperties.RefreshPreviewHealth.
 			// temp stays -1 - the temperature slider is a spawn-time value and
 			// has nothing to show in the preview.
-			if (m_HealthItem && !m_PreviewItem.IsTransport())
-				m_Module.SetupEntityHealth( m_PreviewItem, m_HealthItem.GetRangeHigh(), -1 );
-
-			RefreshPreviewFoodStage();
+			m_Props.RefreshPreviewHealth();
+			m_Props.RefreshPreviewFoodStage();
 		}
 		else
 		{
@@ -1287,709 +576,6 @@ class JMObjectSpawnerForm: JMFormBase
 		#ifdef COT_DEBUGLOGS
 		Print( "-JMObjectSpawnerForm::UpdateItemPreview" );
 		#endif
-	}
-
-	// -------------------------------------------------------------------------
-	//  Properties
-	// -------------------------------------------------------------------------
-
-	//! Build only the sliders that mean something for this class.
-	//!
-	//! The old form kept all three on screen and called Disable() on whichever
-	//! did not apply - but a disabled UIAction is painted under a 90%-opaque
-	//! panel, so "not applicable" and "unreadable" looked the same. The rows
-	//! are built instead, and a row that does not apply is simply absent.
-	//!
-	//! They are REBUILT rather than shown and hidden because a hidden child
-	//! still owns its cell in a GridSpacer, which would leave a gap exactly
-	//! where the missing slider used to be.
-	protected void RebuildProperties( string classname )
-	{
-		if ( !m_PropsHost )
-			return;
-
-		CaptureProperties();
-
-		//! The food dropdown floats a list panel over the form, and the form is
-		//! what dismisses those. Take it off the overlay register before the
-		//! widget it belongs to stops existing.
-		if ( m_FoodStage )
-		{
-			m_FoodStage.Close();
-			UnregisterOverlay( m_FoodStage );
-		}
-
-		if ( m_LiquidType )
-		{
-			m_LiquidType.Close();
-			UnregisterOverlay( m_LiquidType );
-		}
-
-		if ( m_AmmoType )
-		{
-			m_AmmoType.Close();
-			UnregisterOverlay( m_AmmoType );
-		}
-
-		if ( m_PropsGrid )
-		{
-			m_PropsGrid.Unlink();
-			m_PropsGrid = NULL;
-		}
-
-		m_QuantityItem    = NULL;
-		m_TemperatureItem = NULL;
-		m_HealthItem      = NULL;
-		m_FoodStage       = NULL;
-		m_LiquidType      = NULL;
-		m_AmmoType        = NULL;
-		m_Disinfect       = NULL;
-		m_PropsNone       = NULL;
-
-		float maxHealth = 0;
-
-		if ( classname != "" )
-			maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth( classname );
-
-		bool wantsHealth = ( maxHealth > 0 );
-		bool wantsQuantity = false;
-		bool wantsTemperature = false;
-
-		float quantityMin = 0;
-		float quantityMax = 0;
-		float quantityStep = 1;
-
-		array<string> foodStages = new array<string>;
-		array<string> liquids    = new array<string>;
-		array<string> ammoTypes  = new array<string>;
-
-		bool wantsFoodStage = false;
-		bool wantsDisinfect = false;
-		bool wantsLiquid    = false;
-		bool wantsAmmo      = false;
-
-		ItemBase item = ItemBase.Cast( m_PreviewItem );
-
-		if ( item )
-		{
-			if ( item.IsLiquidContainer() || ( item.HasFoodStage() && item.CanBeCooked() ) )
-				wantsTemperature = true;
-
-			//! Only the stages the class actually declares - offering "Boiled"
-			//! for something with no boiled stage would spawn it unchanged and
-			//! look like the control did nothing.
-			if ( item.HasFoodStage() && item.IsInherited( Edible_Base ) )
-			{
-				CollectFoodStages( classname, foodStages );
-				wantsFoodStage = ( foodStages.Count() > 0 );
-			}
-
-			//! Rags, bandages and sewing kits. The engine already answers which
-			//! ones, so there is no class list to keep in step.
-			wantsDisinfect = item.CanBeDisinfected();
-
-			if ( item.IsLiquidContainer() )
-			{
-				CollectLiquids( classname, item, liquids );
-
-				//! One entry is the "leave it as configured" row on its own,
-				//! which is not worth a control.
-				wantsLiquid = ( liquids.Count() > 1 );
-			}
-
-			//! What a magazine calls quantity is its ammo count, and it has its
-			//! own floor: an ammo pile cannot hold zero rounds and still be a
-			//! pile.
-			Magazine mag;
-
-			if ( Class.CastTo( mag, item ) )
-			{
-				if ( mag.GetAmmoMax() > 0 )
-				{
-					wantsQuantity = true;
-					quantityMax   = mag.GetAmmoMax();
-					quantityStep  = 1;
-
-					if ( mag.IsAmmoPile() && mag.GetAmmoMax() > 1 )
-						quantityMin = 1.0;
-				}
-			}
-			else if ( item.GetQuantityMax() - item.GetQuantityMin() > 0 )
-			{
-				wantsQuantity = true;
-				quantityMin   = item.GetQuantityMin();
-				quantityMax   = item.GetQuantityMax();
-
-				if ( item.IsSplitable() )
-					quantityStep = 1;
-				else
-					quantityStep = 0.1;
-			}
-		}
-
-		//! Which cartridge, for a magazine that lists more than the one.
-		//!
-		//! Read from the class rather than from the preview entity: ammoItems is
-		//! declared on each magazine directly, so the config answers even when
-		//! there is no entity to ask, and a class that is not a magazine simply
-		//! has none.
-		CollectAmmoTypes( classname, ammoTypes );
-		wantsAmmo = ( ammoTypes.Count() > 1 );
-
-		//! The switch is only shown where there is something for it to switch.
-		//! A class with neither a quantity nor a health bar has no spannable
-		//! property at all.
-		bool wantsRanges = ( wantsQuantity || wantsHealth );
-
-		ShowRangeToggle( wantsRanges );
-
-		int rows = 0;
-
-		if ( wantsQuantity )    rows++;
-		if ( wantsHealth )      rows++;
-		if ( wantsTemperature ) rows++;
-		if ( wantsFoodStage )   rows++;
-		if ( wantsLiquid )      rows++;
-		if ( wantsAmmo )        rows++;
-		if ( wantsDisinfect )   rows++;
-
-		if ( rows == 0 )
-		{
-			m_PropsGrid = UIActionManager.CreateGridSpacer( m_PropsHost, 1, 1 );
-			m_PropsNone = UIActionManager.CreateText( m_PropsGrid, "#STR_COT_OBJECT_MODULE_NO_PROPERTIES", "" );
-			return;
-		}
-
-		m_PropsGrid = UIActionManager.CreateGridSpacer( m_PropsHost, rows, 1 );
-
-		if ( wantsQuantity )
-		{
-			m_QuantityItem = UIActionManager.CreateSliderRange( m_PropsGrid, "#STR_COT_OBJECT_MODULE_QUANTITY", quantityMin, quantityMax, this, "Click_SetQuantity" );
-			m_QuantityItem.SetFormat( "#STR_COT_FORMAT_NUMBER" );
-			m_QuantityItem.SetStep( quantityStep );
-			m_QuantityItem.SetRange( quantityMin + m_QuantityLowPct * ( quantityMax - quantityMin ), quantityMin + m_QuantityHighPct * ( quantityMax - quantityMin ) );
-
-			//! After SetRange, never before: collapsing pins the low bound onto
-			//! whatever the high one is at the time.
-			m_QuantityItem.SetSingle( !m_RangesEnabled );
-		}
-
-		if ( wantsHealth )
-		{
-			m_HealthItem = UIActionManager.CreateSliderRange( m_PropsGrid, "#STR_COT_OBJECT_MODULE_HEALTH", 0, maxHealth, this, "Click_SetHealth" );
-			m_HealthItem.SetFormat( "#STR_COT_FORMAT_NUMBER" );
-			m_HealthItem.SetStep( 1 );
-			m_HealthItem.SetRange( m_HealthLowPct * maxHealth, m_HealthHighPct * maxHealth );
-			m_HealthItem.SetSingle( !m_RangesEnabled );
-
-			UpdateHealthItemColor();
-		}
-
-		if ( wantsTemperature )
-		{
-			m_TemperatureItem = UIActionManager.CreateSlider( m_PropsGrid, "#STR_COT_OBJECT_MODULE_TEMPERATURE", GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, this, "Click_SetTemperature" );
-			m_TemperatureItem.SetSliderWidth( 0.6 );
-			m_TemperatureItem.SetStepValue( 1 );
-			m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE" );
-			m_TemperatureItem.SetCurrent( m_TemperatureValue );
-
-			UpdateTemperatureItemColor();
-		}
-
-		if ( wantsFoodStage )
-		{
-			m_FoodStage = UIActionManager.CreateDropdown( m_PropsGrid, "#STR_COT_OBJECT_MODULE_FOODSTAGE", layoutRoot, this, "Click_SetFoodStage", foodStages );
-			m_FoodStage.SetWidth( 1.0 );
-			m_FoodStage.SetTooltip( "#STR_COT_OBJECT_MODULE_FOODSTAGE_DESC" );
-
-			RegisterOverlay( m_FoodStage );
-
-			//! Carry the chosen stage across the rebuild where the next class
-			//! also offers it; fall back to its first stage where it does not.
-			int stageIndex = m_FoodStageTypes.Find( m_FoodStageValue );
-
-			if ( stageIndex < 0 )
-				stageIndex = 0;
-
-			m_FoodStage.SetSelection( stageIndex, false );
-			m_FoodStageValue = m_FoodStageTypes[stageIndex];
-		}
-
-		if ( wantsLiquid )
-		{
-			m_LiquidType = UIActionManager.CreateDropdown( m_PropsGrid, "#STR_COT_OBJECT_MODULE_LIQUID", layoutRoot, this, "Click_SetLiquid", liquids );
-			m_LiquidType.SetWidth( 1.0 );
-			m_LiquidType.SetTooltip( "#STR_COT_OBJECT_MODULE_LIQUID_DESC" );
-
-			RegisterOverlay( m_LiquidType );
-
-			int liquidIndex = m_LiquidValues.Find( m_LiquidValue );
-
-			if ( liquidIndex < 0 )
-				liquidIndex = 0;
-
-			m_LiquidType.SetSelection( liquidIndex, false );
-			m_LiquidValue = m_LiquidValues[liquidIndex];
-		}
-
-		if ( wantsAmmo )
-		{
-			m_AmmoType = UIActionManager.CreateDropdown( m_PropsGrid, "#STR_COT_OBJECT_MODULE_AMMOTYPE", layoutRoot, this, "Click_SetAmmoType", ammoTypes );
-			m_AmmoType.SetWidth( 1.0 );
-			m_AmmoType.SetTooltip( "#STR_COT_OBJECT_MODULE_AMMOTYPE_DESC" );
-
-			RegisterOverlay( m_AmmoType );
-
-			int ammoIndex = m_AmmoValues.Find( m_AmmoValue );
-
-			if ( ammoIndex < 0 )
-				ammoIndex = 0;
-
-			m_AmmoType.SetSelection( ammoIndex, false );
-			m_AmmoValue = m_AmmoValues[ammoIndex];
-		}
-
-		if ( wantsDisinfect )
-		{
-			m_Disinfect = UIActionManager.CreateToggleSwitch( m_PropsGrid, "#STR_COT_OBJECT_MODULE_DISINFECTED", this, "Click_SetDisinfect", m_DisinfectValue );
-			m_Disinfect.SetTooltip( "#STR_COT_OBJECT_MODULE_DISINFECTED_DESC" );
-		}
-
-		if ( m_RightScroller )
-			m_RightScroller.UpdateScroller();
-	}
-
-	//! Fill m_FoodStageTypes and `labels` with the cooking stages `classname`
-	//! declares, in enum order.
-	//!
-	//! A food class lists its stages under Food FoodStages, one subclass per
-	//! stage, and there is no script-side query for them - so the config is the
-	//! only place that knows which of the six a given item has.
-	protected void CollectFoodStages( string classname, out array<string> labels )
-	{
-		m_FoodStageTypes.Clear();
-		labels.Clear();
-
-		if ( classname == "" )
-			return;
-
-		TStringArray configNames = { "Raw", "Baked", "Boiled", "Dried", "Burned", "Rotten" };
-		TIntArray    stageTypes  = { FoodStageType.RAW, FoodStageType.BAKED, FoodStageType.BOILED, FoodStageType.DRIED, FoodStageType.BURNED, FoodStageType.ROTTEN };
-		TStringArray stageLabels = { "#STR_COT_OBJECT_FOODSTAGE_RAW", "#STR_COT_OBJECT_FOODSTAGE_BAKED", "#STR_COT_OBJECT_FOODSTAGE_BOILED", "#STR_COT_OBJECT_FOODSTAGE_DRIED", "#STR_COT_OBJECT_FOODSTAGE_BURNED", "#STR_COT_OBJECT_FOODSTAGE_ROTTEN" };
-
-		for ( int i = 0; i < configNames.Count(); i++ )
-		{
-			if ( !g_Game.ConfigIsExisting( "CfgVehicles " + classname + " Food FoodStages " + configNames[i] ) )
-				continue;
-
-			m_FoodStageTypes.Insert( stageTypes[i] );
-
-			//! The selector prints entry text verbatim, so the key is resolved
-			//! here rather than handed over as a key.
-			labels.Insert( Widget.TranslateString( stageLabels[i] ) );
-		}
-	}
-
-	//! Every liquid the game defines, as bit and name. One table, so the list
-	//! of what a container accepts and the name of what it already holds can
-	//! never disagree.
-	static void LiquidTable( out TIntArray bits, out TStringArray keys )
-	{
-		bits = { LIQUID_WATER, LIQUID_CLEANWATER, LIQUID_FRESHWATER, LIQUID_RIVERWATER, LIQUID_STILLWATER, LIQUID_HOTWATER, LIQUID_SALTWATER, LIQUID_SNOW, LIQUID_VODKA, LIQUID_BEER, LIQUID_GASOLINE, LIQUID_DIESEL, LIQUID_DISINFECTANT, LIQUID_SOLUTION, LIQUID_SALINE, LIQUID_BLOOD_0_P, LIQUID_BLOOD_0_N, LIQUID_BLOOD_A_P, LIQUID_BLOOD_A_N, LIQUID_BLOOD_B_P, LIQUID_BLOOD_B_N, LIQUID_BLOOD_AB_P, LIQUID_BLOOD_AB_N };
-		keys = { "#STR_COT_OBJECT_LIQUID_WATER", "#STR_COT_OBJECT_LIQUID_CLEANWATER", "#STR_COT_OBJECT_LIQUID_FRESHWATER", "#STR_COT_OBJECT_LIQUID_RIVERWATER", "#STR_COT_OBJECT_LIQUID_STILLWATER", "#STR_COT_OBJECT_LIQUID_HOTWATER", "#STR_COT_OBJECT_LIQUID_SALTWATER", "#STR_COT_OBJECT_LIQUID_SNOW", "#STR_COT_OBJECT_LIQUID_VODKA", "#STR_COT_OBJECT_LIQUID_BEER", "#STR_COT_OBJECT_LIQUID_GASOLINE", "#STR_COT_OBJECT_LIQUID_DIESEL", "#STR_COT_OBJECT_LIQUID_DISINFECTANT", "#STR_COT_OBJECT_LIQUID_SOLUTION", "#STR_COT_OBJECT_LIQUID_SALINE", "#STR_COT_OBJECT_LIQUID_BLOOD_0_P", "#STR_COT_OBJECT_LIQUID_BLOOD_0_N", "#STR_COT_OBJECT_LIQUID_BLOOD_A_P", "#STR_COT_OBJECT_LIQUID_BLOOD_A_N", "#STR_COT_OBJECT_LIQUID_BLOOD_B_P", "#STR_COT_OBJECT_LIQUID_BLOOD_B_N", "#STR_COT_OBJECT_LIQUID_BLOOD_AB_P", "#STR_COT_OBJECT_LIQUID_BLOOD_AB_N" };
-	}
-
-	//! Name for one liquid bit; "Empty" for a container that starts with none.
-	protected string LiquidName( int bit )
-	{
-		TIntArray bits;
-		TStringArray keys;
-		LiquidTable( bits, keys );
-
-		for ( int i = 0; i < bits.Count(); i++ )
-		{
-			if ( bits[i] == bit )
-				return Widget.TranslateString( keys[i] );
-		}
-
-		return Widget.TranslateString( "#STR_COT_OBJECT_LIQUID_NONE" );
-	}
-
-	//! "<name> (default)" - the row that changes nothing, named after what the
-	//! class actually spawns with. "As configured" told the admin nothing they
-	//! could act on; the answer to "what do I get if I leave this alone" is the
-	//! whole reason the row is there.
-	protected string DefaultLabel( string name )
-	{
-		return string.Format( Widget.TranslateString( "#STR_COT_OBJECT_DEFAULT_FORMAT" ), name );
-	}
-
-	//! Fill m_LiquidValues and `labels` with what this container can hold.
-	//!
-	//! A container declares its liquids as a BITMASK in liquidContainerType, so
-	//! a canteen is not offered petrol and a jerrycan is not offered water.
-	protected void CollectLiquids( string classname, ItemBase item, out array<string> labels )
-	{
-		m_LiquidValues.Clear();
-		labels.Clear();
-
-		//! 0 is the module's "leave the item state alone", so the first row is
-		//! whatever the class is configured to hold, named. Every list below
-		//! then SKIPS that liquid: picking it explicitly and leaving it alone
-		//! are the same spawn, and one of them is already row zero.
-		int init = item.GetLiquidTypeInit();
-
-		m_LiquidValues.Insert( 0 );
-		labels.Insert( DefaultLabel( LiquidName( init ) ) );
-
-		if ( classname == "" )
-			return;
-
-		//! A blood container is the one case where what travels is NOT the
-		//! liquid bit: the module raises LIQUID_BLOOD_0_P to the power of the
-		//! value it is given, so a blood bag wants a 1-based index instead.
-		if ( item.IsBloodContainer() )
-		{
-			TStringArray bloodKeys = { "#STR_COT_OBJECT_LIQUID_BLOOD_0_P", "#STR_COT_OBJECT_LIQUID_BLOOD_0_N", "#STR_COT_OBJECT_LIQUID_BLOOD_A_P", "#STR_COT_OBJECT_LIQUID_BLOOD_A_N", "#STR_COT_OBJECT_LIQUID_BLOOD_B_P", "#STR_COT_OBJECT_LIQUID_BLOOD_B_N", "#STR_COT_OBJECT_LIQUID_BLOOD_AB_P", "#STR_COT_OBJECT_LIQUID_BLOOD_AB_N", "#STR_COT_OBJECT_LIQUID_SALINE" };
-
-			for ( int b = 0; b < bloodKeys.Count(); b++ )
-			{
-				//! The module reads a blood value as an exponent, so index b
-				//! stands for the bit LIQUID_BLOOD_0_P << b.
-				if ( Math.Pow( 2, b ) == init )
-					continue;
-
-				m_LiquidValues.Insert( b + 1 );
-				labels.Insert( Widget.TranslateString( bloodKeys[b] ) );
-			}
-
-			return;
-		}
-
-		//! From the ITEM, never from "CfgVehicles <class> liquidContainerType".
-		//!
-		//! That absolute path answers 0 for every container in the game -
-		//! measured, not assumed - because liquidContainerType is declared on a
-		//! base class and g_Game.ConfigGetInt does not walk the inheritance
-		//! chain. The entity's own relative lookup does, and GetLiquidContainerMask
-		//! is the result of it.
-		int mask = item.GetLiquidContainerMask();
-
-		if ( mask == 0 )
-			return;
-
-		TIntArray bits;
-		TStringArray keys;
-		LiquidTable( bits, keys );
-
-		for ( int i = 0; i < bits.Count(); i++ )
-		{
-			if ( ( mask & bits[i] ) == 0 )
-				continue;
-
-			if ( bits[i] == init )
-				continue;
-
-			m_LiquidValues.Insert( bits[i] );
-			labels.Insert( Widget.TranslateString( keys[i] ) );
-		}
-	}
-
-	//! Display name for one ammo pile class, falling back to the classname.
-	protected string AmmoPileName( string pile )
-	{
-		string display;
-
-		if ( g_Game.ConfigGetText( CFG_MAGAZINESPATH + " " + pile + " displayName", display ) && display != "" )
-			return Widget.TranslateString( display );
-
-		return pile;
-	}
-
-	//! Fill m_AmmoValues and `labels` with the ammo piles this magazine accepts.
-	//!
-	//! ammoItems is a flat config array, so it has to be read with
-	//! ConfigGetTextArray - ConfigGetChildrenCount answers 0 for one of those.
-	protected void CollectAmmoTypes( string classname, out array<string> labels )
-	{
-		m_AmmoValues.Clear();
-		labels.Clear();
-
-		TStringArray ammoItems = new TStringArray;
-
-		if ( classname != "" )
-			g_Game.ConfigGetTextArray( CFG_MAGAZINESPATH + " " + classname + " ammoItems", ammoItems );
-
-		//! What the magazine loads itself with is a CfgAmmo cartridge, while
-		//! everything the admin can pick is an ammo PILE. Match the two up by
-		//! the cartridge each pile names, so the first row can say which of the
-		//! offered rounds is already the default rather than "as configured".
-		string defaultCartridge;
-
-		if ( classname != "" )
-			g_Game.ConfigGetText( CFG_MAGAZINESPATH + " " + classname + " ammo", defaultCartridge );
-
-		string defaultName = "";
-		string defaultPile = "";
-
-		for ( int d = 0; d < ammoItems.Count(); d++ )
-		{
-			string pileCartridge;
-
-			if ( !g_Game.ConfigGetText( CFG_MAGAZINESPATH + " " + ammoItems[d] + " ammo", pileCartridge ) )
-				continue;
-
-			if ( pileCartridge != defaultCartridge || pileCartridge == "" )
-				continue;
-
-			defaultPile = ammoItems[d];
-			defaultName = AmmoPileName( defaultPile );
-			break;
-		}
-
-		//! No pile claims the configured cartridge - name the first one it
-		//! accepts, which is what it will be loaded with anyway.
-		if ( defaultName == "" && ammoItems.Count() > 0 )
-		{
-			defaultPile = ammoItems[0];
-			defaultName = AmmoPileName( defaultPile );
-		}
-
-		if ( defaultName == "" )
-			defaultName = Widget.TranslateString( "#STR_COT_OBJECT_AMMO_NONE" );
-
-		m_AmmoValues.Insert( "" );
-		labels.Insert( DefaultLabel( defaultName ) );
-
-		for ( int i = 0; i < ammoItems.Count(); i++ )
-		{
-			string pile = ammoItems[i];
-
-			if ( pile == "" )
-				continue;
-
-			//! Already row zero, under its own name.
-			if ( pile == defaultPile )
-				continue;
-
-			m_AmmoValues.Insert( pile );
-			labels.Insert( AmmoPileName( pile ) );
-		}
-	}
-
-	void Click_SetLiquid( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		CaptureProperties();
-	}
-
-	void Click_SetAmmoType( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		CaptureProperties();
-	}
-
-	void Click_SetFoodStage( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		CaptureProperties();
-		RefreshPreviewFoodStage();
-	}
-
-	void Click_SetDisinfect( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		//! Nothing to preview - cleanness has no model of its own.
-		m_DisinfectValue = action.IsChecked();
-	}
-
-	//! Cook the preview entity to the chosen stage so the model in the card is
-	//! the model that will be spawned - a burned steak does not look like a raw
-	//! one, and that is most of the reason to pick a stage at all.
-	protected void RefreshPreviewFoodStage()
-	{
-		if ( !m_PreviewItem || m_FoodStageValue == 0 )
-			return;
-
-		Edible_Base food;
-
-		if ( !Class.CastTo( food, m_PreviewItem ) )
-			return;
-
-		if ( !food.GetFoodStage() )
-			return;
-
-		food.ChangeFoodStage( m_FoodStageValue );
-		food.GetFoodStage().UpdateVisualsEx( true );
-	}
-
-	//! Remember what the sliders were set to before they are destroyed.
-	//!
-	//! Health and quantity are kept as a fraction of their own range: the range
-	//! is a property of the class, so a full magazine stays full when the next
-	//! class holds a different number of rounds.
-	protected void CaptureProperties()
-	{
-		//! While a slider is collapsed its low bound is PINNED to the value, so
-		//! capturing it would overwrite where the range's low handle was last
-		//! left - and switching ranges back on could then only ever reopen the
-		//! span onto the value itself.
-		if ( m_HealthItem && m_HealthItem.GetMax() > 0 )
-		{
-			if ( !m_HealthItem.IsSingle() )
-				m_HealthLowPct = m_HealthItem.GetRangeLow() / m_HealthItem.GetMax();
-
-			m_HealthHighPct = m_HealthItem.GetRangeHigh() / m_HealthItem.GetMax();
-		}
-
-		if ( m_QuantityItem )
-		{
-			float range = m_QuantityItem.GetMax() - m_QuantityItem.GetMin();
-
-			if ( range > 0 )
-			{
-				if ( !m_QuantityItem.IsSingle() )
-					m_QuantityLowPct = ( m_QuantityItem.GetRangeLow() - m_QuantityItem.GetMin() ) / range;
-
-				m_QuantityHighPct = ( m_QuantityItem.GetRangeHigh() - m_QuantityItem.GetMin() ) / range;
-			}
-		}
-
-		if ( m_TemperatureItem )
-		{
-			m_TemperatureValue = m_TemperatureItem.GetCurrent();
-			m_TemperatureSet   = true;
-		}
-
-		if ( m_FoodStage )
-		{
-			int stageIndex = m_FoodStage.GetSelection();
-
-			if ( stageIndex >= 0 && stageIndex < m_FoodStageTypes.Count() )
-				m_FoodStageValue = m_FoodStageTypes[stageIndex];
-		}
-
-		if ( m_LiquidType )
-		{
-			int liquidIndex = m_LiquidType.GetSelection();
-
-			if ( liquidIndex >= 0 && liquidIndex < m_LiquidValues.Count() )
-				m_LiquidValue = m_LiquidValues[liquidIndex];
-		}
-
-		if ( m_AmmoType )
-		{
-			int ammoIndex = m_AmmoType.GetSelection();
-
-			if ( ammoIndex >= 0 && ammoIndex < m_AmmoValues.Count() )
-				m_AmmoValue = m_AmmoValues[ammoIndex];
-		}
-
-		if ( m_Disinfect )
-			m_DisinfectValue = m_Disinfect.IsChecked();
-	}
-
-	void Click_SetQuantity( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		CaptureProperties();
-	}
-
-	//! Switch the two spannable rows between one value and a range.
-	//!
-	//! An icon button carries no checked state of its own, so the mode is held
-	//! here and the button is repainted from it.
-	void Click_ToggleRanges( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		m_RangesEnabled = !m_RangesEnabled;
-
-		PaintRangeToggle();
-		ApplyRangeMode();
-	}
-
-	//! Tint and label the header switch for the mode it is in.
-	protected void PaintRangeToggle()
-	{
-		if ( !m_RangeToggle )
-			return;
-
-		if ( m_RangesEnabled )
-		{
-			m_RangeToggle.SetColor( JMTheme.ACCENT );
-			m_RangeToggle.SetTooltip( "#STR_COT_OBJECT_MODULE_USE_RANGE_ON" );
-		}
-		else
-		{
-			m_RangeToggle.SetColor( JMTheme.BUTTON_FILL );
-			m_RangeToggle.SetTooltip( "#STR_COT_OBJECT_MODULE_USE_RANGE_OFF" );
-		}
-	}
-
-	//! Hide the header switch for a class with nothing to switch.
-	//!
-	//! Hidden rather than disabled: a disabled UIAction is painted under a
-	//! 90%-opaque panel, which in a 30px title bar is a grey smudge that reads
-	//! as a broken icon rather than as an inapplicable one.
-	protected void ShowRangeToggle( bool show )
-	{
-		if ( !m_RangeToggle )
-			return;
-
-		m_RangeToggle.GetLayoutRoot().Show( show );
-	}
-
-	//! Put the quantity and health rows into whichever mode the switch is in.
-	//!
-	//! The rows are changed IN PLACE rather than rebuilt: RebuildProperties
-	//! destroys every row in the card, and one of them is the switch that was
-	//! just clicked - the engine answers a vanished press target by recentring
-	//! the cursor, which is the same reason dragging a slider does not refresh
-	//! the preview.
-	//!
-	//! Reopening a span has to put the low handle BACK: collapsing pinned it
-	//! onto the value, and the fraction it was left at is the only record of
-	//! where the admin had it.
-	protected void ApplyRangeMode()
-	{
-		if ( m_QuantityItem )
-		{
-			m_QuantityItem.SetSingle( !m_RangesEnabled );
-
-			if ( m_RangesEnabled )
-			{
-				float quantitySpan = m_QuantityItem.GetMax() - m_QuantityItem.GetMin();
-				float quantityLow  = m_QuantityItem.GetMin() + m_QuantityLowPct * quantitySpan;
-
-				m_QuantityItem.SetRange( quantityLow, m_QuantityItem.GetRangeHigh() );
-			}
-		}
-
-		if ( m_HealthItem )
-		{
-			m_HealthItem.SetSingle( !m_RangesEnabled );
-
-			if ( m_RangesEnabled )
-			{
-				float healthLow = m_HealthLowPct * m_HealthItem.GetMax();
-
-				m_HealthItem.SetRange( healthLow, m_HealthItem.GetRangeHigh() );
-			}
-		}
-
-		CaptureProperties();
 	}
 
 	override void OnFocus()
@@ -2141,11 +727,8 @@ class JMObjectSpawnerForm: JMFormBase
 		s_ObjExportMode = mode;
 	}
 
-	void Click_CopyList( UIEvent eid, UIActionBase action )
+	void Click_CopyList( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
 		ExportList( s_ObjExportMode );
 	}
 
@@ -2171,7 +754,7 @@ class JMObjectSpawnerForm: JMFormBase
 				for ( int i = 0; i < m_ListClasses.Count(); i++ )
 					clipboardOutput += m_ListClasses[i] + "\n";
 
-				g_Game.CopyToClipboard( clipboardOutput );
+				COTFeedback.Copy( clipboardOutput );
 				break;
 
 			case COT_ObjectSpawnerMode.COPYLISTTYPES:
@@ -2193,7 +776,7 @@ class JMObjectSpawnerForm: JMFormBase
 				}
 
 				clipboardOutput += "</types>";
-				g_Game.CopyToClipboard( clipboardOutput );
+				COTFeedback.Copy( clipboardOutput );
 				break;
 
 		#ifdef DZ_Expansion_Market
@@ -2213,7 +796,7 @@ class JMObjectSpawnerForm: JMFormBase
 				string errorMsg;
 
 				if ( JsonFileLoader<ExpansionMarketCategory>.MakeData( category, categoryJSON, errorMsg ) )
-					g_Game.CopyToClipboard( categoryJSON );
+					COTFeedback.Copy( categoryJSON );
 				else
 					COTCreateLocalAdminNotification( new StringLocaliser( errorMsg ) );
 				break;
@@ -2238,32 +821,11 @@ class JMObjectSpawnerForm: JMFormBase
 		//! high end as module state alongside the setup mode. The server rolls
 		//! between them once per entity, so one call that fills five inventories
 		//! produces five different results.
-		float health   = RangeLowOr( m_HealthItem, -1 );
-		float temp     = SliderValueOr( m_TemperatureItem, -1 );
-		float quantity = RangeLowOr( m_QuantityItem, -1 );
-
-		m_Module.m_SpawnHealthMax   = RangeHighOr( m_HealthItem, -1 );
-		m_Module.m_SpawnQuantityMax = RangeHighOr( m_QuantityItem, -1 );
-
-		//! 0 is the module's "leave the item state alone". The three things it
-		//! can mean - liquid type, cooking stage, cleanness - are mutually
-		//! exclusive per class, and only one control for it is ever built.
-		int itemState = 0;
-
-		if ( m_FoodStage )
-			itemState = m_FoodStageValue;
-		else if ( m_LiquidType )
-			itemState = m_LiquidValue;
-		else if ( m_Disinfect && m_Disinfect.IsChecked() )
-			itemState = 1;
-
-		//! Module state rather than another parameter, the same way the setup
-		//! mode travels. Cleared when the class has no ammo to choose, or a
-		//! magazine picked earlier would follow every later spawn.
-		if ( m_AmmoType )
-			m_Module.m_SpawnAmmoType = m_AmmoValue;
-		else
-			m_Module.m_SpawnAmmoType = "";
+		float health;
+		float temp;
+		float quantity;
+		int itemState;
+		m_Props.ReadSpawnValues( health, temp, quantity, itemState );
 
 		switch (mode)
 		{
@@ -2397,16 +959,12 @@ class JMObjectSpawnerForm: JMFormBase
 		array<string> rowLabels = new array<string>;
 		array<string> rowSubs   = new array<string>;
 
-		string closestMatch;
-
 		TStringArray configs = new TStringArray;
 		configs.Insert( CFG_VEHICLESPATH );
 		configs.Insert( CFG_WEAPONSPATH );
 		configs.Insert( CFG_MAGAZINESPATH );
 
-		COT_String strSearch = m_Module.m_SearchText;
-		bool requireAllKeywords;
-		TStringArray keywords = strSearch.KeywordSearch_Prepare(requireAllKeywords);
+		JMSearchMatcher matcher = new JMSearchMatcher(m_Module.m_SearchText);
 
 		for ( int nConfig; nConfig < configs.Count(); nConfig++ )
 		{
@@ -2448,7 +1006,7 @@ class JMObjectSpawnerForm: JMFormBase
 						strNameSearch.ToLower();
 					}
 
-					if ( strSearch != "" && !strNameSearch.KeywordSearchImplEx(strSearch, keywords, requireAllKeywords, closestMatch) )
+					if ( !matcher.Matches(strNameSearch) )
 						continue;
 
 					// Display-name mode changes what the row SHOWS, not what it
@@ -2477,47 +1035,13 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ClassList.SetItems( rowLabels, rowSubs );
 
 		//if ( strSearch != "" && m_ListClasses.Count() == 0 )
-			ReportExactClassRejection( strSearch, configs );
+			ReportExactClassRejection( matcher.GetSearch(), configs );
 
 	#ifdef DIAG
 		float elapsed = TickCount(ticks) * 0.0001;
 		PrintFormat("UpdateList %1 %2 ms", m_Module.m_SearchText, elapsed);
 	#endif
 
-		m_SearchBox.SetTextPreview(closestMatch);
-	}
-
-	protected float SliderValueOr( UIActionSlider slider, float fallback )
-	{
-		if ( !slider )
-			return fallback;
-
-		return slider.GetCurrent();
-	}
-
-	protected float RangeLowOr( UIActionSliderRange slider, float fallback )
-	{
-		if ( !slider )
-			return fallback;
-
-		return slider.GetRangeLow();
-	}
-
-	protected float RangeHighOr( UIActionSliderRange slider, float fallback )
-	{
-		if ( !slider )
-			return fallback;
-
-		return slider.GetRangeHigh();
-	}
-
-	string GetCurrentSelection()
-	{
-		int row = m_ClassList.GetSelectedIndex();
-
-		if ( row < 0 || row >= m_ListClasses.Count() )
-			return "";
-
-		return m_ListClasses[row];
+		m_SearchBox.SetTextPreview(matcher.GetClosestMatch());
 	}
 }

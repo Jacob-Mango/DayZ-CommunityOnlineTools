@@ -35,7 +35,6 @@
 class UIActionFoldPanel: UIActionBase
 {
 	protected Widget m_Content;
-
 	protected bool  m_Expanded;
 
 	//! Height of the content as last measured. Held across frames because
@@ -45,21 +44,7 @@ class UIActionFoldPanel: UIActionBase
 	//! 0 = shut, 1 = fully open. The panel's height is this times m_FullHeight,
 	//! so a content change mid-open is picked up without restarting anything.
 	protected ref JMAnimFloat m_Anim;
-
 	static const float ANIM_SPEED = 14.0;
-
-	override void OnInit()
-	{
-		super.OnInit();
-
-		m_Content = layoutRoot.FindAnyWidget( "action_content" );
-
-		m_Expanded   = true;
-		m_FullHeight = 0;
-
-		m_Anim = new JMAnimFloat();
-		m_Anim.Set( 1.0 );
-	}
 
 	//! The widget rows go into.
 	Widget GetContent()
@@ -67,14 +52,14 @@ class UIActionFoldPanel: UIActionBase
 		return m_Content;
 	}
 
-	bool IsExpanded()
-	{
-		return m_Expanded;
-	}
-
 	bool IsAnimating()
 	{
 		return m_Anim.IsAnimating();
+	}
+
+	bool IsExpanded()
+	{
+		return m_Expanded;
 	}
 
 	//! `animate` false snaps, for setting up a fold that is being rebuilt in a
@@ -98,6 +83,19 @@ class UIActionFoldPanel: UIActionBase
 
 		m_Anim.Set( target );
 		ApplyHeight();
+	}
+
+	override void OnInit()
+	{
+		super.OnInit();
+
+		m_Content = layoutRoot.FindAnyWidget( "action_content" );
+
+		m_Expanded   = true;
+		m_FullHeight = 0;
+
+		m_Anim = new JMAnimFloat();
+		m_Anim.Set( 1.0 );
 	}
 
 	void Toggle()

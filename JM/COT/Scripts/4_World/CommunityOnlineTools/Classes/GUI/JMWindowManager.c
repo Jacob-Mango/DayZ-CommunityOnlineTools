@@ -1,15 +1,65 @@
 #ifndef CF_WINDOWS
 class JMWindowManager
 {
-	private ref array< JMWindowBase > m_Windows;
-	private ref array< JMWindowBase > m_WindowsPendingDeletion;
-
-	private ImageWidget m_MainCursorWidget;
+	protected ref array< JMWindowBase > m_Windows;
+	protected ref array< JMWindowBase > m_WindowsPendingDeletion;
+	protected ImageWidget m_MainCursorWidget;
 
 	void JMWindowManager()
 	{
 		m_Windows = new array< JMWindowBase >;
 		m_WindowsPendingDeletion = new array< JMWindowBase >;
+	}
+
+	JMWindowBase Get( int index )
+	{
+		return m_Windows[index];
+	}
+
+	//! Escape priority tier 2 (module menu): the frontmost visible window, if
+	//! any. BringFront() keeps m_Windows ordered front-to-back (index 0 is
+	//! last-focused), so the first visible entry is the one on top.
+	JMWindowBase GetTopActive()
+	{
+		foreach (JMWindowBase window: m_Windows)
+		{
+			if ( window.IsVisible() )
+				return window;
+		}
+		return NULL;
+	}
+
+	JMWindowBase GetWindowFromWidget( notnull Widget w )
+	{  
+		for ( int i = 0; i < m_Windows.Count(); i++ )
+		{
+			if ( w == m_Windows[i].GetLayoutRoot() )
+			{
+				return m_Windows[i];
+			}
+		}
+
+		return NULL;
+	}
+
+	bool HasAnyActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+		{
+			if ( window.IsVisible() )
+				return true;
+		}
+		return false;
+	}
+
+	bool HasAnyUnpinnedActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+		{
+			if ( window.IsVisible() && !window.IsPinned() )
+				return true;
+		}
+		return false;
 	}
 
 	JMWindowBase Create()
@@ -57,39 +107,6 @@ class JMWindowManager
 		}
 	}
 
-	bool HasAnyActive()
-	{
-		foreach(JMWindowBase window: m_Windows)
-		{
-			if ( window.IsVisible() )
-				return true;
-		}
-		return false;
-	}
-
-	//! Escape priority tier 2 (module menu): the frontmost visible window, if
-	//! any. BringFront() keeps m_Windows ordered front-to-back (index 0 is
-	//! last-focused), so the first visible entry is the one on top.
-	JMWindowBase GetTopActive()
-	{
-		foreach (JMWindowBase window: m_Windows)
-		{
-			if ( window.IsVisible() )
-				return window;
-		}
-		return NULL;
-	}
-
-	bool HasAnyUnpinnedActive()
-	{
-		foreach(JMWindowBase window: m_Windows)
-		{
-			if ( window.IsVisible() && !window.IsPinned() )
-				return true;
-		}
-		return false;
-	}
-
 	int Count()
 	{
 		return m_Windows.Count();
@@ -98,11 +115,6 @@ class JMWindowManager
 	int PendingDeletionCount()
 	{
 		return m_WindowsPendingDeletion.Count();
-	}
-
-	JMWindowBase Get( int index )
-	{
-		return m_Windows[index];
 	}
 
 	void RemoveWindow( JMWindowBase window )
@@ -178,19 +190,6 @@ class JMWindowManager
 		}
 
 		window.Focus();
-	}
-
-	JMWindowBase GetWindowFromWidget( notnull Widget w )
-	{  
-		for ( int i = 0; i < m_Windows.Count(); i++ )
-		{
-			if ( w == m_Windows[i].GetLayoutRoot() )
-			{
-				return m_Windows[i];
-			}
-		}
-
-		return NULL;
 	}
 
 	void DestroyAllWindows()

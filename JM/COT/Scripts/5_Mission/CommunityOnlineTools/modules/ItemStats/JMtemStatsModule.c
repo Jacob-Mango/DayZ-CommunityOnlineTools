@@ -1,7 +1,7 @@
 class JMItemStatsModule: JMRenderableModuleBase
 {
 	//! Items that are unfinished may not work or show properly or may even cause the game to segfault
-	private ref array< string > m_UnfinishedItems =
+	protected ref array< string > m_UnfinishedItems =
 	{
 		"quickiebow",
 		"recurvebow",
@@ -35,8 +35,7 @@ class JMItemStatsModule: JMRenderableModuleBase
 		"leatherbelt_black",
 		"leatherknifesheath"
 	};
-
-	private ref array< string > m_RestrictedClassNames =
+	protected ref array< string > m_RestrictedClassNames =
 	{
 		"placing",
 		"debug",
@@ -44,35 +43,6 @@ class JMItemStatsModule: JMRenderableModuleBase
 		"land_",
 		"staticobj_"
 	};
-
-	void JMItemStatsModule()
-	{
-		GetPermissionsManager().RegisterPermission( "ItemStats.View" );
-	}
-
-	override bool HasAccess()
-	{
-		return GetPermissionsManager().HasPermission( "ItemStats.View" );
-	}
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/ItemStatsForm.layout";
-	}
-
-	override string GetTitle()
-	{
-		return "ItemStats";
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "ItemStats Module";
-	}
-
-	override void GetWebhookTypes( out array<string> types )
-	{
-	}
 
 	bool IsExcludedClassName( string className )
 	{
@@ -87,4 +57,15 @@ class JMItemStatsModule: JMRenderableModuleBase
 
 		return false;
 	}
+
+	override void DescribeModule( JMModuleInfo info )
+	{
+		super.DescribeModule( info );
+
+		info.Title = "ItemStats";
+		info.WebhookTitle = "ItemStats Module";
+		info.Layout = "JM/COT/GUI/layouts/ItemStatsForm.layout";
+		info.ViewPermission = JMConstants.PERM_ITEMSTATS_VIEW;
+	}
+
 }

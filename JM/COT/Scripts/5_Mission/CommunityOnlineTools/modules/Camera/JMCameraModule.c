@@ -18,7 +18,6 @@ class JMCameraModule: JMRenderableModuleBase
 	float m_FocalNear;
 	float m_Exposure;
 	float m_Vignette;
-
 	bool m_EnableFullmapCamera;
 	bool m_HideGrass;
 	int m_GrassPatchX;
@@ -40,8 +39,6 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void JMCameraModule()
 	{
-		GetPermissionsManager().RegisterPermission( "Camera.View" );
-
 		m_Waypoints = new array< ref JMCameraWaypoint >;
 
 		m_CurrentSmoothBlur = 0.0;
@@ -53,55 +50,87 @@ class JMCameraModule: JMRenderableModuleBase
 		#endif
 	}
 
-	override bool HasAccess()
+	TStringArray GetBookmarkNames()
 	{
-		return GetPermissionsManager().HasPermission( "Camera.View" );
+		if ( m_CameraData )
+			return m_CameraData.GetBookmarkNames();
+
+		return new TStringArray;
 	}
 
-	override string GetInputToggle()
+	Camera GetCamera()
 	{
-		return "UACOTToggleCamera";
+		return CurrentActiveCamera;
 	}
 
-	override string GetLayoutRoot()
+	TStringArray GetPathNames()
 	{
-		return "JM/COT/GUI/layouts/camera_form.layout";
+		if ( m_CameraData )
+			return m_CameraData.GetPathNames();
+
+		return new TStringArray;
 	}
 
-	override string GetCategory()
+	Object GetTargetObject()
 	{
-		return "World";
+		if ( !CurrentActiveCamera )
+			return NULL;
+
+		return CurrentActiveCamera.SelectedTarget;
 	}
 
-	override string GetTitle()
+	vector GetTargetPos()
 	{
-		return "#STR_COT_CAMERA_MODULE_NAME";
+		if ( !CurrentActiveCamera )
+			return "0 0 0";
+
+		return CurrentActiveCamera.TargetPosition;
 	}
 
-	override string GetWebhookTitle()
+	bool IsTravelPaused()
 	{
-		return "Camera Module";
+		JMCinematicCamera cine;
+		if ( Class.CastTo(cine, CurrentActiveCamera) )
+			return cine.IsPaused();
+		return false;
 	}
 
-	override void GetWebhookTypes( out array<string> types )
+	static void SetFreezeCam( bool freeze )
 	{
-		types.Insert( "Enter" );
-		types.Insert( "Leave" );
+		if ( !CurrentActiveCamera )
+			return;
+
+		CurrentActiveCamera.MoveFreeze = freeze;
 	}
 
-	override string GetIconName()
+	static void SetFreezeMouse( bool freeze )
 	{
-		return JMConstants.Lucide( "video" );
+		if ( !CurrentActiveCamera )
+			return;
+
+		CurrentActiveCamera.LookFreeze = freeze;
 	}
 
-	override bool ImageIsIcon()
+	void SetTargetFOV( float fov )
 	{
-		return true;
+		m_TargetFOV = fov;
 	}
 
-	override bool ImageHasPath()
+	override void DescribeModule( JMModuleInfo info )
 	{
-		return true;
+		super.DescribeModule( info );
+
+		info.Title = "#STR_COT_CAMERA_MODULE_NAME";
+		info.WebhookTitle = "Camera Module";
+		info.Icon = "video";
+		info.Layout = "JM/COT/GUI/layouts/camera_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_WORLD;
+		info.ViewPermission = JMConstants.PERM_CAMERA_VIEW;
+		info.InputToggle = "UACOTToggleCamera";
+		info.SetRPCRange( JMCameraModuleRPC.INVALID, JMCameraModuleRPC.COUNT );
+
+		info.AddWebhookType( "Enter" );
+		info.AddWebhookType( "Leave" );
 	}
 
 	#ifdef SERVER
@@ -265,21 +294,6 @@ class JMCameraModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "RightShoulder",		"UALeanRight",	true 	) );
 	}
 
-	Camera GetCamera()
-	{
-		return CurrentActiveCamera;
-	}
-
-	override int GetRPCMin()
-	{
-		return JMCameraModuleRPC.INVALID;
-	}
-
-	override int GetRPCMax()
-	{
-		return JMCameraModuleRPC.COUNT;
-	}
-
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
 		switch ( rpc_type )
@@ -311,7 +325,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Server_Enter(NULL, g_Game.GetPlayer(), g_Game.GetCurrentCameraPosition());
+			Exec_Enter(NULL, g_Game.GetPlayer(), g_Game.GetCurrentCameraPosition());
 		} else if ( IsMissionClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -320,7 +334,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Client_Enter()
+	protected void Client_Enter()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Client_Enter");
@@ -341,23 +355,25 @@ class JMCameraModule: JMRenderableModuleBase
 			Human player = g_Game.GetPlayer();
 			if ( player )
 			{
+				//! The head bone's own transform is model-space and does not
+				//! track camera pitch (looking up/down) the way the player's
+				//! actual view does - g_Game.GetCurrentCameraDirection() is
+				//! the same call this file already uses for raycasting from
+				//! the player's view (see LookAtSelection), so it is the
+				//! proven source for "where the player is actually looking".
 				if (!COT_PreviousActiveCamera)
-				{
-					vector headTransform[4];
-					player.GetBoneTransformWS(player.GetBoneIndexByName( "Head" ), headTransform);
-					CurrentActiveCamera.SetDirection(headTransform[1]);
-				}
+					CurrentActiveCamera.SetDirection(g_Game.GetCurrentCameraDirection());
 
 				player.GetInputController().SetDisabled( true );
 			}
 		}
 	}
 
-	[Obsolete("Use Server_Enter(sender, target, position)")]
-	private void Server_Enter( PlayerIdentity sender, Object target )
+	[Obsolete("Use Exec_Enter(sender, target, position)")]
+	protected void Exec_Enter( PlayerIdentity sender, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_2(this, "Server_Enter").Add(sender).Add(target.ToString());
+		auto trace = CF_Trace_2(this, "Exec_Enter").Add(sender).Add(target.ToString());
 		#endif
 
 		vector transform[4];
@@ -377,10 +393,10 @@ class JMCameraModule: JMRenderableModuleBase
 
 		position = transform[3];
 
-		Server_Enter(sender, target, position);
+		Exec_Enter(sender, target, position);
 	}
 
-	private void Server_Enter(PlayerIdentity sender, Object target, vector position)
+	protected void Exec_Enter(PlayerIdentity sender, Object target, vector position)
 	{
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
@@ -414,7 +430,7 @@ class JMCameraModule: JMRenderableModuleBase
 		SendWebhookColored( "Enter", enterInst, "Entered free camera", JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
-	private void RPC_Enter( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Enter( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_Enter").Add(senderRPC).Add(target.ToString());
@@ -423,14 +439,14 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 		{
 			if ( !senderRPC ) return;
-			if ( !GetPermissionsManager().HasPermissionRPC( "Camera.View", senderRPC ) )
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_CAMERA_VIEW, senderRPC ) )
 				return;
 
 			vector position;
 			if (!ctx.Read(position))
 				return;
 
-			Server_Enter( senderRPC, target, position );
+			Exec_Enter( senderRPC, target, position );
 		} else
 		{
 			// RPC was sent from the server, permission would've been verified there.
@@ -446,7 +462,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Server_Leave( NULL, g_Game.GetPlayer() );
+			Exec_Leave( NULL, g_Game.GetPlayer() );
 		} else if ( IsMissionClient() )
 		{
 			SetFreezeMouse( false );
@@ -456,7 +472,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Client_Leave(int waitForPlayerIdleTimeout = 0)
+	protected void Client_Leave(int waitForPlayerIdleTimeout = 0)
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Client_Leave");
@@ -531,10 +547,10 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Server_Leave( PlayerIdentity sender, Object target )
+	protected void Exec_Leave( PlayerIdentity sender, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_2(this, "Server_Leave").Add(sender).Add(target.ToString());
+		auto trace = CF_Trace_2(this, "Exec_Leave").Add(sender).Add(target.ToString());
 		#endif
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
@@ -577,7 +593,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_Leave( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Leave( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_Leave").Add(senderRPC).Add(target.ToString());
@@ -585,10 +601,10 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 		{
 			if ( !senderRPC ) return;
-			if ( !GetPermissionsManager().HasPermissionRPC( "Camera.View", senderRPC ) )
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_CAMERA_VIEW, senderRPC ) )
 				return;
 
-			Server_Leave( senderRPC, target );
+			Exec_Leave( senderRPC, target );
 		} else
 		{
 			// RPC was sent from the server, permission would've been verified there.
@@ -601,13 +617,13 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_Leave_Finish( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Leave_Finish( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_Leave_Finish").Add(senderRPC).Add(target);
 #endif
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Camera.View", senderRPC ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_CAMERA_VIEW, senderRPC ) )
 			return;
 
 		PlayerBase player;
@@ -617,7 +633,7 @@ class JMCameraModule: JMRenderableModuleBase
 		g_Game.SelectPlayer(senderRPC, player);
 	}
 
-	private void RPC_UpdatePosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_UpdatePosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdatePosition").Add(senderRPC);
@@ -626,7 +642,7 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( g_Game.IsDedicatedServer() )
 		{
 			if ( !senderRPC ) return;
-			if ( !GetPermissionsManager().HasPermissionRPC( "Camera.View", senderRPC ) )
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_CAMERA_VIEW, senderRPC ) )
 				return;
 
 			vector position;
@@ -787,46 +803,6 @@ class JMCameraModule: JMRenderableModuleBase
 			cine.TogglePause();
 	}
 
-	bool IsTravelPaused()
-	{
-		JMCinematicCamera cine;
-		if ( Class.CastTo(cine, CurrentActiveCamera) )
-			return cine.IsPaused();
-		return false;
-	}
-
-	Object GetTargetObject()
-	{
-		if ( !CurrentActiveCamera )
-			return NULL;
-
-		return CurrentActiveCamera.SelectedTarget;
-	}
-
-	vector GetTargetPos()
-	{
-		if ( !CurrentActiveCamera )
-			return "0 0 0";
-
-		return CurrentActiveCamera.TargetPosition;
-	}
-
-	static void SetFreezeCam( bool freeze )
-	{
-		if ( !CurrentActiveCamera )
-			return;
-
-		CurrentActiveCamera.MoveFreeze = freeze;
-	}
-
-	static void SetFreezeMouse( bool freeze )
-	{
-		if ( !CurrentActiveCamera )
-			return;
-
-		CurrentActiveCamera.LookFreeze = freeze;
-	}
-
 	void Toggle3rdPerson( UAInput input )
 	{
 		if ( input.LocalPress() && CurrentActiveCamera )
@@ -863,11 +839,6 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		if ( input.LocalPress() && CurrentActiveCamera )
 			CurrentActiveCamera.m_JM_LeftShoulder = false;
-	}
-
-	void SetTargetFOV( float fov )
-	{
-		m_TargetFOV = fov;
 	}
 
 	// ----------------------------------------------------------------
@@ -924,14 +895,6 @@ class JMCameraModule: JMRenderableModuleBase
 			m_CameraData.DeletePath( name );
 	}
 
-	TStringArray GetPathNames()
-	{
-		if ( m_CameraData )
-			return m_CameraData.GetPathNames();
-
-		return new TStringArray;
-	}
-
 	// ----------------------------------------------------------------
 	//  Feature 5 - Named position bookmarks
 	// ----------------------------------------------------------------
@@ -967,13 +930,5 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		if ( m_CameraData )
 			m_CameraData.DeleteBookmark( name );
-	}
-
-	TStringArray GetBookmarkNames()
-	{
-		if ( m_CameraData )
-			return m_CameraData.GetBookmarkNames();
-
-		return new TStringArray;
 	}
 }

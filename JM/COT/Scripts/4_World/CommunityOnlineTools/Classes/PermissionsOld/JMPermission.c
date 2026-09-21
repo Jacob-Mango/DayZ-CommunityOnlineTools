@@ -3,19 +3,12 @@ class JMPermission : Managed
 {
 	JMPermission Root;
 	JMPermission Parent;
-
 	ref array< ref JMPermission > Children;
-
 	string Name;
-
-	private string m_SerializedFullName;
-
+	protected string m_SerializedFullName;
 	JMPermissionType Type;
-
 	Widget View;
-
 	string Indent;
-
 	bool m_Sync;  //! This will be set to true on the root permission if any added permission is not INHERIT. NOTE: Once set to true, may NEVER be set to false in same session!
 	bool m_Sorted;
 
@@ -38,6 +31,93 @@ class JMPermission : Managed
 		Children = new array< ref JMPermission >;
 
 		UpdateFullName();
+	}
+
+	protected JMPermission Get( array<string> tokens, int depth )
+	{
+		if ( depth < tokens.Count() )
+		{
+			JMPermission nChild = NULL;
+
+			for ( int i = 0; i < Children.Count(); i++ )
+			{
+				if ( Children[i].Name == tokens[depth] )
+				{
+					nChild = Children[i]; 
+				}
+			}
+
+			if ( nChild )
+			{
+				return nChild.Get( tokens, depth + 1 );
+			}
+		}
+
+		return this;
+	}
+
+	string GetFullName()
+	{
+		return m_SerializedFullName;
+	}
+
+	JMPermission GetPermission( string inp )
+	{
+		array<string> tokens = new array<string>;
+		inp.Split( ".", tokens );
+		
+		int depth = tokens.Find(Name);
+
+		if ( depth > -1 )
+		{
+			return Get( tokens, depth + 1 );
+		} else 
+		{
+			return Get( tokens, 0 );
+		}
+	}
+
+	bool HasPermission( string inp, out JMPermissionType permType )
+	{
+		array<string> tokens = new array<string>;
+		inp.Split( ".", tokens );
+
+		if ( tokens.Count() == 0 )
+			return false;
+		
+		int depth = tokens.Find( Name );
+
+		bool parentDisallowed = false;
+
+		if ( Type == JMPermissionType.DISALLOW )
+		{
+			parentDisallowed = true;
+		} else if ( Type == JMPermissionType.INHERIT )
+		{
+			JMPermission parent = Parent;
+			while ( parent != NULL )
+			{
+				if ( parent.Type != JMPermissionType.INHERIT )
+				{
+					if ( parent.Type == JMPermissionType.DISALLOW )
+					{
+						parentDisallowed = true;
+					}
+
+					break;
+				}
+				
+				parent = parent.Parent;
+			}
+		}
+		
+		if ( depth > -1 )
+		{
+			return Check( tokens, depth + 1, parentDisallowed, permType );
+		} else 
+		{
+			return Check( tokens, 0, parentDisallowed, permType );
+		}
 	}
 
 	void CopyPermissions(JMPermission from)
@@ -72,11 +152,6 @@ class JMPermission : Managed
 			m_SerializedFullName = parent.Name + "." +  m_SerializedFullName;
 			parent = parent.Parent;
 		}
-	}
-
-	string GetFullName()
-	{
-		return m_SerializedFullName;
 	}
 
 	void AddPermission( string inp, JMPermissionType permType = JMPermissionType.INHERIT, bool requireRegistered = true )
@@ -123,7 +198,7 @@ class JMPermission : Managed
 		}
 	}
 
-	private void AddPermissionInternal( array<string> tokens, int depth, JMPermissionType value, bool requireRegistered = true )
+	protected void AddPermissionInternal( array<string> tokens, int depth, JMPermissionType value, bool requireRegistered = true )
 	{
 		if ( depth < tokens.Count() )
 		{
@@ -141,7 +216,7 @@ class JMPermission : Managed
 		}
 	}
 
-	private JMPermission VerifyAddPermission( string name, bool requireRegistered = false )
+	protected JMPermission VerifyAddPermission( string name, bool requireRegistered = false )
 	{
 		JMPermission nChild = NULL;
 
@@ -163,88 +238,6 @@ class JMPermission : Managed
 		}
 
 		return nChild;
-	}
-
-	JMPermission GetPermission( string inp )
-	{
-		array<string> tokens = new array<string>;
-		inp.Split( ".", tokens );
-		
-		int depth = tokens.Find(Name);
-
-		if ( depth > -1 )
-		{
-			return Get( tokens, depth + 1 );
-		} else 
-		{
-			return Get( tokens, 0 );
-		}
-	}
-
-	private JMPermission Get( array<string> tokens, int depth )
-	{
-		if ( depth < tokens.Count() )
-		{
-			JMPermission nChild = NULL;
-
-			for ( int i = 0; i < Children.Count(); i++ )
-			{
-				if ( Children[i].Name == tokens[depth] )
-				{
-					nChild = Children[i]; 
-				}
-			}
-
-			if ( nChild )
-			{
-				return nChild.Get( tokens, depth + 1 );
-			}
-		}
-
-		return this;
-	}
-
-	bool HasPermission( string inp, out JMPermissionType permType )
-	{
-		array<string> tokens = new array<string>;
-		inp.Split( ".", tokens );
-
-		if ( tokens.Count() == 0 )
-			return false;
-		
-		int depth = tokens.Find( Name );
-
-		bool parentDisallowed = false;
-
-		if ( Type == JMPermissionType.DISALLOW )
-		{
-			parentDisallowed = true;
-		} else if ( Type == JMPermissionType.INHERIT )
-		{
-			JMPermission parent = Parent;
-			while ( parent != NULL )
-			{
-				if ( parent.Type != JMPermissionType.INHERIT )
-				{
-					if ( parent.Type == JMPermissionType.DISALLOW )
-					{
-						parentDisallowed = true;
-					}
-
-					break;
-				}
-				
-				parent = parent.Parent;
-			}
-		}
-		
-		if ( depth > -1 )
-		{
-			return Check( tokens, depth + 1, parentDisallowed, permType );
-		} else 
-		{
-			return Check( tokens, 0, parentDisallowed, permType );
-		}
 	}
 
 	bool Check( array<string> tokens, int depth, bool parentDisallowed, out JMPermissionType permType )

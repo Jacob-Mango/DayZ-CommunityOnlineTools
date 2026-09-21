@@ -1,18 +1,15 @@
 class JMWebhookForm: JMFormBase
 {
 	protected static const float           HEADER_HEIGHT = 35;
-
 	protected Widget                       m_Panel;
 	protected UIActionScroller             m_Scroller;
 	protected Widget                       m_ActionsWrapper;
 	protected UIActionText                 m_HeaderTitle;
-
 	protected ref map< string, ref JMWebhookSection > m_Sections;
 	protected ref array< string >          m_Types;
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMWebhookCOTModule         m_Module;
-
 	protected string                       m_PendingName;
 
 	void JMWebhookForm()
@@ -28,12 +25,12 @@ class JMWebhookForm: JMFormBase
 		return Class.CastTo( m_Module, mdl );
 	}
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		// ----------------------------------------------------------------------
 		// Webhook form layout map (400 x 350 px)
 		// ----------------------------------------------------------------------
-		// HEADER (35 px):   "Webhooks (N)" ????????????? [+ Add Webhook]
+		// HEADER (35 px):   "Webhooks (N)" ------------- [+ Add Webhook]
 		// PANEL  (315 px):  scrollable list of JMWebhookSection blocks.
 		// ----------------------------------------------------------------------
 
@@ -44,15 +41,16 @@ class JMWebhookForm: JMFormBase
 		m_HeaderTitle.SetWidth( 0.59 );
 		m_HeaderTitle.SetLabelVAlign( UIActionVAlign.CENTER );
 
-		UIActionButton addBtn = UIActionManager.CreateButton( headerRow, "#STR_COT_WEBHOOK_ADD_WEBHOOK", this, "Action_AddWebhook" );
+		UIActionButton addBtn = UIActionManager.CreateButton( headerRow, "#STR_COT_WEBHOOK_ADD_WEBHOOK", this, "" );
+		if ( addBtn ) addBtn.SetOnClick( this, "Action_AddWebhook" );
 		addBtn.SetWidth( 0.4 );
 		addBtn.SetColor( JMTheme.SUCCESS_FILL );
-		addBtn.SetTooltip( "Create a new Discord webhook configuration" );
+		addBtn.SetTooltip( "#STR_COT_WEBHOOK_CREATE_A_NEW_DISCORD_WEBHOOK_CONFIGURATI" );
 
 		//! Matches the key RPC_AddConnectionGroup enforces server-side. The
 		//! per-webhook controls are gated in JMWebhookSection, which rebuilds
 		//! them whenever the settings change.
-		BindPermission( addBtn, "Webhook.Manage.URL.Add" );
+		BindPermission( addBtn, JMConstants.PERM_WEBHOOK_MANAGE_URL_ADD );
 
 		// Scrollable content area
 		m_Panel         = layoutRoot.FindAnyWidget( "panel" );
@@ -123,21 +121,15 @@ class JMWebhookForm: JMFormBase
 		}
 	}
 
-	private void RebuildAllSections( array< ref JMWebhookConnectionGroup > groups )
+	protected void RebuildAllSections( array< ref JMWebhookConnectionGroup > groups )
 	{
 		m_Sections.Clear();
 
-		Widget child = m_ActionsWrapper.GetChildren();
-		while ( child )
-		{
-			Widget next = child.GetSibling();
-			child.Unlink();
-			child = next;
-		}
+		UIActionManager.ClearChildren( m_ActionsWrapper );
 
 		if ( groups.Count() == 0 )
 		{
-			UIActionManager.CreateText( m_ActionsWrapper, "No webhooks configured. Click 'Add Webhook' to create one." );
+			UIActionManager.CreateText( m_ActionsWrapper, "#STR_COT_WEBHOOK_NO_WEBHOOKS_CONFIGURED_CLICK_ADD_WEBHOOK" );
 		}
 		else
 		{
@@ -157,12 +149,9 @@ class JMWebhookForm: JMFormBase
 	//  Add Webhook - two-step: name then URL
 	// -------------------------------------------------------------------------
 
-	void Action_AddWebhook( UIEvent eid, UIActionBase action )
+	void Action_AddWebhook( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "Add Webhook", "Enter a name for this webhook:", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "Action_AddWebhook_GotName" );
+		PromptInput( "#STR_COT_WEBHOOK_ADD_WEBHOOK_2", "#STR_COT_WEBHOOK_ENTER_A_NAME_FOR_THIS_WEBHOOK", "Action_AddWebhook_GotName" );
 	}
 
 	void Action_AddWebhook_GotName( JMConfirmation confirmation )
@@ -174,7 +163,7 @@ class JMWebhookForm: JMFormBase
 
 		m_PendingName = name;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "Add Webhook", "Enter the Discord webhook URL for '" + name + "':", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "Action_AddWebhook_GotURL" );
+		PromptInput( "#STR_COT_WEBHOOK_ADD_WEBHOOK_2", "Enter the Discord webhook URL for '" + name + "':", "Action_AddWebhook_GotURL" );
 	}
 
 	void Action_AddWebhook_GotURL( JMConfirmation confirmation )

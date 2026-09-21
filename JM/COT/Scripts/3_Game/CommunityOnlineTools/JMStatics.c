@@ -2,7 +2,6 @@ class JMStatics
 {
 	static Widget ESP_CONTAINER;
 	static Widget COT_MENU;
-
 	static Widget WINDOWS_CONTAINER;
 
 	//! Floating overlays: popups that live outside the window they belong to
@@ -14,7 +13,15 @@ class JMStatics
 	//! Registering the overlay's root makes that walk recognise it.
 	static ref array<Widget> OVERLAY_WIDGETS;
 
-	static void RegisterOverlay( Widget w )
+	static bool IsOverlay( Widget w )
+	{
+		if ( !w || !OVERLAY_WIDGETS )
+			return false;
+
+		return OVERLAY_WIDGETS.Find( w ) != -1;
+	}
+
+	static void AddOverlay( Widget w )
 	{
 		if ( !w )
 			return;
@@ -26,7 +33,7 @@ class JMStatics
 			OVERLAY_WIDGETS.Insert( w );
 	}
 
-	static void UnregisterOverlay( Widget w )
+	static void RemoveOverlay( Widget w )
 	{
 		if ( !w || !OVERLAY_WIDGETS )
 			return;
@@ -36,12 +43,18 @@ class JMStatics
 			OVERLAY_WIDGETS.RemoveOrdered( idx );
 	}
 
-	static bool IsOverlay( Widget w )
+	//! DEPRECATED - use AddOverlay
+	static void RegisterOverlay( Widget w )
 	{
-		if ( !w || !OVERLAY_WIDGETS )
-			return false;
+		JMDeprecated.WarnOnce( null, "JMStatics.RegisterOverlay() is deprecated. Please use AddOverlay()." );
+		AddOverlay( w );
+	}
 
-		return OVERLAY_WIDGETS.Find( w ) != -1;
+	//! DEPRECATED - use RemoveOverlay
+	static void UnregisterOverlay( Widget w )
+	{
+		JMDeprecated.WarnOnce( null, "JMStatics.UnregisterOverlay() is deprecated. Please use RemoveOverlay()." );
+		RemoveOverlay( w );
 	}
 
 	static void SortStringArray( out array< string > arr )

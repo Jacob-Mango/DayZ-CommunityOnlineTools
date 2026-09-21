@@ -1,20 +1,87 @@
 class UIActionEditableRichText: UIActionBase 
 {
 	static ref TStringArray VALID_NUMBERS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_Text;
 	//! Visible field wrapper - see UIActionEditableText.SetEditBoxWidth.
 	protected Widget m_Chrome;
 	protected ButtonWidget m_Button;
 	protected TextWidget m_ButtonText;
-
 	protected bool m_OnlyNumbers;
 	protected bool m_OnlyIntegers;
-
 	protected string m_PreviousText;
-
 	protected bool m_Edited;
+
+	ButtonWidget GetButtonWidget()
+	{
+		return m_Button;
+	}
+
+	EditBoxWidget GetEditBoxWidget()
+	{
+		return m_Text;
+	}
+
+	TextWidget GetLabelWidget()
+	{
+		return m_Label;
+	}
+
+	bool IsEdited()
+	{
+		return m_Edited;
+	}
+
+	bool IsOnlyNumbers()
+	{
+		return m_OnlyNumbers;
+	}
+
+	void SetEditBoxHeight( float height )
+	{
+		float w;
+		float h;
+		
+		m_Text.GetSize( w, height );
+		m_Text.SetSize( w, height );
+		m_Text.Update();
+	}
+
+	void SetEditBoxWidth( float width )
+	{
+		// Resize the visible field, not the edit box inside it - see
+		// UIActionEditableText.SetEditBoxWidth.
+		if ( m_Chrome )
+		{
+			SetWidgetWidth( m_Chrome, width );
+			return;
+		}
+
+		SetWidgetWidth( m_Text, width );
+	}
+
+	void SetEdited(bool edited)
+	{
+		m_Edited = edited;
+	}
+
+	void SetOnlyNumbers( bool onlyNumbers, bool onlyInts = false )
+	{
+		m_OnlyNumbers = onlyNumbers;
+
+		if ( m_OnlyNumbers )
+		{
+			m_OnlyIntegers = onlyInts;
+		} else
+		{
+			m_OnlyIntegers = false;
+		}
+	}
+
+	void SetText( float num )
+	{
+		SetText( "" + num );
+	}
 
 	override void OnInit() 
 	{
@@ -38,31 +105,11 @@ class UIActionEditableRichText: UIActionBase
 	{
 	}
 
-	TextWidget GetLabelWidget()
-	{
-		return m_Label;
-	}
-
-	EditBoxWidget GetEditBoxWidget()
-	{
-		return m_Text;
-	}
-
-	ButtonWidget GetButtonWidget()
-	{
-		return m_Button;
-	}
-
 	override void SetLabel( string text )
 	{
 		text = Widget.TranslateString( text );
 
 		m_Label.SetText( text );
-	}
-
-	void SetText( float num )
-	{
-		SetText( "" + num );
 	}
 
 	override bool IsFocusWidget( Widget widget )
@@ -171,24 +218,6 @@ class UIActionEditableRichText: UIActionBase
 		return true;
 	}
 
-	void SetOnlyNumbers( bool onlyNumbers, bool onlyInts = false )
-	{
-		m_OnlyNumbers = onlyNumbers;
-
-		if ( m_OnlyNumbers )
-		{
-			m_OnlyIntegers = onlyInts;
-		} else
-		{
-			m_OnlyIntegers = false;
-		}
-	}
-
-	bool IsOnlyNumbers()
-	{
-		return m_OnlyNumbers;
-	}
-
 	override void SetButton( string text )
 	{
 		text = Widget.TranslateString( text );
@@ -201,16 +230,6 @@ class UIActionEditableRichText: UIActionBase
 		m_Edited = true;
 
 		return super.OnKeyPress( w, x, y, key );
-	}
-
-	void SetEdited(bool edited)
-	{
-		m_Edited = edited;
-	}
-
-	bool IsEdited()
-	{
-		return m_Edited;
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
@@ -247,28 +266,5 @@ class UIActionEditableRichText: UIActionBase
 		}
 
 		return ret;
-	}
-
-	void SetEditBoxWidth( float width )
-	{
-		// Resize the visible field, not the edit box inside it - see
-		// UIActionEditableText.SetEditBoxWidth.
-		if ( m_Chrome )
-		{
-			SetWidgetWidth( m_Chrome, width );
-			return;
-		}
-
-		SetWidgetWidth( m_Text, width );
-	}
-
-	void SetEditBoxHeight( float height )
-	{
-		float w;
-		float h;
-		
-		m_Text.GetSize( w, height );
-		m_Text.SetSize( w, height );
-		m_Text.Update();
 	}
 }

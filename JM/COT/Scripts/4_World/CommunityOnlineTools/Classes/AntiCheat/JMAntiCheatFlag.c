@@ -33,7 +33,6 @@ class JMAntiCheatFlag
 	//! Session-relative, deliberately NOT persisted in any meaningful way: an
 	//! auto-kick cooldown from before a restart is not a cooldown any more.
 	int LastActionTimeMs;
-
 	ref array< string > RecentEvents;
 
 	void JMAntiCheatFlag()

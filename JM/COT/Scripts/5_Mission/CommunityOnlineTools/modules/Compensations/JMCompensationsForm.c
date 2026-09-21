@@ -1,46 +1,54 @@
 class JMCompensationsForm: JMFormBase
 {
-	private UIActionScroller m_sclr_MainActions;
-	private Widget m_ContentWrapper;
-	private Widget m_ActionsWrapper;
-
+	protected UIActionScroller m_sclr_MainActions;
+	protected Widget m_ContentWrapper;
+	protected Widget m_ActionsWrapper;
 	protected UIActionDropdown m_SpawnModeDropdown;
 	protected ref array< string > m_SpawnModeText =
 	{
 		"#STR_COT_OBJECT_MODULE_CROSSHAIR",
 		"#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS"
 	};
-
 	protected UIActionSearchBox m_SearchBox;
 	protected string m_SearchFilter = "";
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMCompensationsModule m_Module;
-	private ref array< ref JMCompensationEntry > m_Compensations;
-	private ref JMCompensationButtonData m_TempData;
+	protected ref array< ref JMCompensationEntry > m_Compensations;
+	protected ref JMCompensationButtonData m_TempData;
+
+	protected string GetPlayerNameFromSteamID( string steamID )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+		foreach ( JMPlayerInstance player: players )
+		{
+			if ( player.GetSteam64ID() == steamID )
+				return player.GetName();
+		}
+		return steamID;
+	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
 	}
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
 		m_ContentWrapper = m_sclr_MainActions.GetContentWidget();
 
-		UIActionCard topCard = UIActionManager.CreateCard( m_ContentWrapper, "Compensation Controls" );
+		UIActionCard topCard = UIActionManager.CreateCard( m_ContentWrapper, "#STR_COT_COMPENSATIONS_COMPENSATION_CONTROLS" );
 		Widget topBody = topCard.GetContent();
 
 		Widget toolbar = UIActionManager.CreateWrapSpacer( topBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
 		UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( toolbar, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
-		refreshBtn.SetFixedSize( 30, 30 );
 
 		m_SpawnModeDropdown = UIActionManager.CreateDropdown( toolbar, "", layoutRoot, this, "OnClick_SpawnMode", m_SpawnModeText );
 		m_SpawnModeDropdown.SetWidth( 0.85 );
 		m_SpawnModeDropdown.SetSelection( 0, false );
-		RegisterOverlay( m_SpawnModeDropdown );
+		AddOverlay( m_SpawnModeDropdown );
 
 		m_SearchBox = UIActionManager.CreateSearchBox( topBody, this, "OnSearchChanged", "Search by name or Steam ID" );
 
@@ -51,11 +59,6 @@ class JMCompensationsForm: JMFormBase
 	{
 		if ( m_sclr_MainActions )
 			m_sclr_MainActions.UpdateScroller();
-	}
-
-	override void OnShow()
-	{
-		m_Module.Load();
 	}
 
 	void OnSearchChanged( UIEvent eid, UIActionBase action )
@@ -80,7 +83,7 @@ class JMCompensationsForm: JMFormBase
 
 		if ( !m_Compensations || m_Compensations.Count() < 1 )
 		{
-			UIActionManager.CreateText( m_ActionsWrapper, "No compensation backups found" );
+			UIActionManager.CreateText( m_ActionsWrapper, "#STR_COT_COMPENSATIONS_NO_COMPENSATION_BACKUPS_FOUND" );
 			m_sclr_MainActions.UpdateScroller();
 			return;
 		}
@@ -94,19 +97,12 @@ class JMCompensationsForm: JMFormBase
 		Widget cardBody;
 		int visibleCount = 0;
 
+		JMSearchMatcher matcher = new JMSearchMatcher( m_SearchFilter );
+
 		foreach ( JMCompensationEntry entry: m_Compensations )
 		{
-			if ( m_SearchFilter != "" )
-			{
-				string steamIDLower = entry.m_SteamID;
-				steamIDLower.ToLower();
-
-				playerName = GetPlayerNameFromSteamID( entry.m_SteamID );
-				playerName.ToLower();
-
-				if ( steamIDLower.IndexOf( m_SearchFilter ) == -1 && playerName.IndexOf( m_SearchFilter ) == -1 )
-					continue;
-			}
+			if ( !matcher.Matches( entry.m_SteamID ) && !matcher.Matches( GetPlayerNameFromSteamID( entry.m_SteamID ) ) )
+				continue;
 
 			visibleCount++;
 
@@ -121,17 +117,11 @@ class JMCompensationsForm: JMFormBase
 
 			Widget row = UIActionManager.CreateWrapSpacer( cardBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-			UIActionConfirmInline delbttn = UIActionManager.CreateConfirmInline( row, "", this, "OnClick_Delete" );
-			UIActionIconGrid.ApplyDeletePreset( delbttn );
-			delbttn.SetButton( "" );
-			delbttn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
-			delbttn.CenterIcon( ICON_BUTTON_PX, 16 );
-			delbttn.SetConfirmLabel( "O" );
-			delbttn.SetCancelLabel( "X" );
-			delbttn.SetTooltip( "Delete this compensation entry" );
+			UIActionConfirmInline delbttn = UIActionManager.CreateDeleteConfirmIcon( row, this, "OnClick_Delete" );
+			delbttn.SetTooltip( "#STR_COT_COMPENSATIONS_DELETE_THIS_COMPENSATION_ENTRY" );
 			delbttn.SetData( new JMCompensationButtonData( entry.m_SteamID, entry.m_Timestamp ) );
 
-			UIActionButton spwnbttn = UIActionManager.CreateButton( row, "Spawn", this, "OnClick_Spawn" );
+			UIActionButton spwnbttn = UIActionManager.CreateButton( row, "#STR_COT_GENERIC_SPAWN", this, "OnClick_Spawn" );
 			spwnbttn.SetData( new JMCompensationButtonData( entry.m_SteamID, entry.m_Timestamp ) );
 			spwnbttn.SetWidth( 0.22 );
 
@@ -139,33 +129,22 @@ class JMCompensationsForm: JMFormBase
 			//! rebuilt from scratch on every refresh, so a permanent binding
 			//! would leave the form's map full of destroyed widgets. Matches
 			//! what JMCompensationsModule's RPC handlers already enforce.
-			UpdatePermission( delbttn,  "Compensations.Delete" );
-			UpdatePermission( spwnbttn, "Compensations.Spawn" );
+			UpdatePermission( delbttn,  JMConstants.PERM_COMPENSATIONS_DELETE );
+			UpdatePermission( spwnbttn, JMConstants.PERM_COMPENSATIONS_SPAWN );
 
 			UIActionText tsText = UIActionManager.CreateText( row, "", entry.m_Timestamp );
 			tsText.SetWidth( 0.68 );
 			tsText.SetTextVAlign( UIActionVAlign.CENTER );
 
-			UIActionManager.CreatePanel( cardBody, 0x22FFFFFF, 1 );
+			UIActionManager.CreateRowDivider( cardBody );
 		}
 
 		if ( visibleCount == 0 )
 		{
-			UIActionManager.CreateText( m_ActionsWrapper, "No compensations match your search" );
+			UIActionManager.CreateText( m_ActionsWrapper, "#STR_COT_COMPENSATIONS_NO_COMPENSATIONS_MATCH_YOUR_SEARCH" );
 		}
 
 		m_sclr_MainActions.UpdateScroller();
-	}
-
-	private string GetPlayerNameFromSteamID( string steamID )
-	{
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
-		foreach ( JMPlayerInstance player: players )
-		{
-			if ( player.GetSteam64ID() == steamID )
-				return player.GetName();
-		}
-		return steamID;
 	}
 
 	void OnClick_Delete( UIEvent eid, UIActionBase action )
@@ -220,7 +199,7 @@ class JMCompensationsForm: JMFormBase
 			array< string > selectedPlayers = JM_GetSelected().GetPlayersOrSelf();
 			if ( selectedPlayers.Count() == 0 )
 			{
-				CreateConfirmation_One( JMConfirmationType.INFO, "No players selected", "Please select at least one player from the player list.", "#STR_COT_GENERIC_OK", "" );
+				ShowNotice( "#STR_COT_COMPENSATIONS_NO_PLAYERS_SELECTED", "#STR_COT_COMPENSATIONS_PLEASE_SELECT_AT_LEAST_ONE_PLAYER" );
 				return;
 			}
 
@@ -255,12 +234,12 @@ class JMCompensationsForm: JMFormBase
 
 			m_TempData = data;
 			string confirmMsg = string.Format( "Spawn compensation for %1 (%2) on:\n%3", data.m_SteamID, data.m_Timestamp, playerNames );
-			CreateConfirmation_Two( JMConfirmationType.INFO, "Confirm Spawn", confirmMsg, "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_YES", "OnConfirmation_SpawnPlayers" );
+			ConfirmAction( "#STR_COT_COMPENSATIONS_CONFIRM_SPAWN", confirmMsg, "OnConfirmation_SpawnPlayers", "#STR_COT_GENERIC_YES" );
 			break;
 		default:
 			// Unknown mode (shouldn't happen - the dropdown only has 2 entries).
 			// Surface it instead of silently doing nothing.
-			CreateConfirmation_One( JMConfirmationType.INFO, "Unknown spawn mode", "Selected spawn mode is not handled. Re-select the mode and try again.", "#STR_COT_GENERIC_OK", "" );
+			ShowNotice( "#STR_COT_COMPENSATIONS_UNKNOWN_SPAWN_MODE", "#STR_COT_COMPENSATIONS_SELECTED_SPAWN_MODE_IS_NOT_HANDLED" );
 			break;
 		}
 	}
@@ -278,10 +257,6 @@ class JMCompensationsForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
-
-		UIActionButton btn;
-		if ( Class.CastTo( btn, action ) )
-			btn.TriggerSpin( 2 );
 
 		m_Module.Load();
 	}

@@ -1,34 +1,62 @@
 //! Enforce compiles GameLib/Game/World/Mission as SEPARATE modules - a
 //! #define in a 3_Game file (see StaticFunctions.c) is invisible here. Kept
 //! in exact sync with that file's block; both must change together.
-//!
-//! Bug history: this comment used to claim "DAYZ_1_30 is already true
-//! engine-wide for 1.30 builds, no local copy needed here" and left it
-//! undefined on that assumption. False - confirmed against Bohemia's actual
-//! predefined set (SERVER/CLIENT/WORKBENCH/DAYZ/PLATFORM_WINDOWS only, no
-//! per-version symbols) - so every #ifdef DAYZ_1_30 in the mod (ragdoll's
-//! menu item, RPC, permission, and PhysicsSetRagdoll call) silently compiled
-//! out on every build regardless of the real engine version. This class
-//! now also gates SetLockWheels' Motorbike branch on it, so it needs its own
-//! copy too - see PlayerBase.c / JMPlayerModule.c / JMPlayerForm.c /
-//! JMESPModule.c / JMESPActionMenu.c, which do the same.
 #define COT_DEBUGLOGS
 
 class CommunityOnlineToolsBase
 {
 	static string s_HypeTrain_Loco_ClsName = "HypeTrain_LocomotiveBase";
 	static typename s_HypeTrain_Loco_Type = s_HypeTrain_Loco_ClsName.ToType();
-
-	private bool m_Loaded;
-
-	private bool m_IsActive;
-	private bool m_IsOpen;
-
-	private string m_FileLogName;
-
+	protected bool m_Loaded;
+	protected bool m_IsActive;
+	protected bool m_IsOpen;
+	protected string m_FileLogName;
 	protected JMWebhookModule m_Webhook;
-
 	protected ref map<string, bool> m_ActiveGUIDs = new map<string, bool>;
+
+	//! Below this gap between two accepted SetOpen() calls, a new request is
+	//! dropped instead of applied. Two independent input bindings reach this
+	//! method - ToggleMenu ("Toggle
+	//! Sidebar") and CloseCOT (vanilla UI-back) - and a real repro showed
+	//! SetOpen(true)/SetOpen(false) alternating multiple times with no gap
+	//! at all in the log between them (no unrelated engine/script lines
+	//! interleaved), each full cycle playing the sidebar's slide-open and
+	//! slide-closed animation back to back - the "open close open close"
+	//! flicker. Whatever combination of bindings/held keys produces that
+	//! burst, a plain minimum-interval debounce on the single chokepoint
+	//! both paths already go through stops it outright, and 250ms is far
+	//! below anything a deliberate toggle-close-toggle sequence would need.
+	protected static const int MIN_TOGGLE_INTERVAL_MS = 250;
+	protected int m_LastOpenChangeMs;
+
+	//! Anything a client sends as a position, orientation or scale has to pass
+	//! through here before it reaches an entity.
+	//!
+	//! A permission says an admin may move things. It does not say the numbers
+	//! arrived intact - and a hand-written packet, or a mod sending garbage,
+	//! can carry NaN or an astronomical coordinate. Those do not fail loudly:
+	//! they put an entity somewhere physics cannot resolve, which desyncs or
+	//! crashes the clients that stream it in, not the sender.
+	//!
+	//! NaN needs its own test. Every comparison against NaN is false, so a
+	//! plain range check passes it - the value is neither below the floor nor
+	//! above the ceiling. Only "is it equal to itself" catches it.
+	static const float COT_SANE_MAGNITUDE = 1000000000;
+
+	//! A position the map can actually hold.
+	//!
+	//! The margin is generous on purpose - offshore boats, objects staged past
+	//! the coastline and modded maps that spawn outside their own bounds are
+	//! all legitimate. This rejects the impossible, not the unusual.
+	static const float COT_WORLD_MARGIN = 5000;
+	static const float COT_WORLD_FLOOR = -2000;
+	static const float COT_WORLD_CEILING = 20000;
+
+	//! Scale is sent by the client and applied to a spawned object. A zero or
+	//! a negative inverts or collapses the model, and a huge one covers the map
+	//! in geometry every nearby client then has to render.
+	static const float COT_SCALE_MIN = 0.01;
+	static const float COT_SCALE_MAX = 10.0;
 
 	void CommunityOnlineToolsBase()
 	{
@@ -49,6 +77,288 @@ class CommunityOnlineToolsBase
 		}
 
 		GetDayZGame().Event_OnRPC.Remove( OnRPC );
+	}
+
+	//! The read side of SetFuel01: fuel as a fraction of the tank, or -1 for an
+	//! object whose tank this cannot read (a train keeps its fuel as a liquid
+	//! quantity rather than a vehicle fluid, and has no fraction to hand back).
+	static float GetFuel01(Object obj)
+	{
+		CarScript car;
+		BoatScript boat;
+	#ifndef DAYZ_1_29
+		MotorbikeScript bike;
+	#endif
+		if (Class.CastTo(car, obj))
+			return car.GetFluidFraction(CarFluid.FUEL);
+
+		if (Class.CastTo(boat, obj))
+			return boat.GetFluidFraction(BoatFluid.FUEL);
+
+	#ifndef DAYZ_1_29
+		if (Class.CastTo(bike, obj))
+			return bike.GetFluidFraction(MotorbikeFluid.FUEL);
+	#endif
+
+		return -1;
+	}
+
+	void GetHeadTransform(Object obj, out vector transform[4], bool includeOffset = false)
+	{
+		vector transform[4];
+		vector position;
+		float offset;
+
+		Human human;
+		DayZCreature creature;
+
+		if (Class.CastTo(human, obj))
+			human.GetBoneTransformWS(human.GetBoneIndexByName("Head"), transform);
+		else if (Class.CastTo(creature, obj))
+			creature.GetBoneTransformWS(creature.GetBoneIndexByName("Head"), transform);
+		else
+			obj.GetTransform(transform);
+
+		position = transform[3];
+
+		if (human || creature)
+		{
+			offset = 0.12;
+		}
+		else
+		{
+			vector minMax[2];
+
+			if (obj.GetCollisionBox(minMax))
+				offset = -vector.Distance(minMax[0], minMax[1]) * 0.5;
+			else
+				offset = -obj.ClippingInfo(minMax);
+
+			float height = minMax[1][1];
+			position[1] = position[1] + height;
+
+			includeOffset = true;
+		}
+
+		if (includeOffset)
+			position = position + obj.GetDirection() * offset;
+
+		transform[3] = position;
+	}
+
+	bool IsActive()
+	{
+		return m_IsActive;
+	}
+
+	bool IsActive(Man player)
+	{
+		return IsActive(player.GetIdentity());
+	}
+
+	bool IsActive(PlayerIdentity identity)
+	{
+		return IsActive(identity.GetId());
+	}
+
+	bool IsActive(string guid)
+	{
+	#ifdef SERVER
+		return m_ActiveGUIDs[guid];
+	#else
+		return IsActive();
+	#endif
+	}
+
+	static bool IsFiniteFloat(float value)
+	{
+		if (value != value)
+			return false;
+
+		if (value > COT_SANE_MAGNITUDE || value < -COT_SANE_MAGNITUDE)
+			return false;
+
+		return true;
+	}
+
+	static bool IsFiniteVector(vector value)
+	{
+		if (!IsFiniteFloat(value[0]) || !IsFiniteFloat(value[1]) || !IsFiniteFloat(value[2]))
+			return false;
+
+		return true;
+	}
+
+	static bool IsHypeTrain(Object obj)
+	{
+		if (s_HypeTrain_Loco_Type && obj.IsInherited(s_HypeTrain_Loco_Type))
+			return true;
+
+		return false;
+	}
+
+	bool IsOpen()
+	{
+		return m_IsOpen;
+	}
+
+	static bool IsValidWorldPosition(vector pos)
+	{
+		if (!IsFiniteVector(pos))
+			return false;
+
+		float worldSize = 15360;
+
+		if (g_Game.GetWorld())
+			worldSize = g_Game.GetWorld().GetWorldSize();
+
+		if (pos[0] < -COT_WORLD_MARGIN || pos[0] > worldSize + COT_WORLD_MARGIN)
+			return false;
+
+		if (pos[2] < -COT_WORLD_MARGIN || pos[2] > worldSize + COT_WORLD_MARGIN)
+			return false;
+
+		if (pos[1] < COT_WORLD_FLOOR || pos[1] > COT_WORLD_CEILING)
+			return false;
+
+		return true;
+	}
+
+	void SetActive( bool active )
+	{
+		#ifdef COT_DEBUGLOGS
+		Print("[COT_DBG] SetActive(" + active.ToString() + ") - IsOpen()=" + m_IsOpen.ToString() + " (SetOpen(true) refuses to open while inactive, but does not itself close an already-open sidebar)");
+		#endif
+
+		m_IsActive = active;
+
+		OnCOTActiveChanged( m_IsActive );
+	}
+
+	void SetClient( JMPlayerInstance player )
+	{
+	}
+
+	void SetClient( JMPlayerInstance player, PlayerIdentity identity )
+	{
+	}
+
+	//! Coolant - a radiator fluid found on cars. Motorbike has no coolant
+	//! tank (see MotorbikeScript.c's COT_Refuel note).
+	static void SetCoolant01(Object obj, float fraction)
+	{
+		CarScript car;
+		if (Class.CastTo(car, obj))
+		{
+			car.COT_SetCarFluid01(CarFluid.COOLANT, fraction);
+		}
+	}
+
+	//! Fuel as a fraction of the tank rather than "fill it up".
+	//!
+	//! A train carries its fuel as a liquid quantity instead of a vehicle
+	//! fluid, so it is set through the same scripted call Refuel uses.
+	static void SetFuel01(Object obj, float fraction)
+	{
+		CarScript car;
+		BoatScript boat;
+	#ifndef DAYZ_1_29
+		MotorbikeScript bike;
+	#endif
+		if (Class.CastTo(car, obj))
+		{
+			car.COT_SetCarFluid01(CarFluid.FUEL, fraction);
+		}
+		else if (Class.CastTo(boat, obj))
+		{
+			boat.COT_SetBoatFluid01(BoatFluid.FUEL, fraction);
+		}
+	#ifndef DAYZ_1_29
+		else if (Class.CastTo(bike, obj))
+		{
+			bike.COT_SetBikeFluid01(MotorbikeFluid.FUEL, fraction);
+		}
+	#endif
+		else if (IsHypeTrain(obj))
+		{
+			int fuelQuantityMax;
+			g_Game.GameScript.CallFunction(obj, "GetLiquidQuantityMax", fuelQuantityMax, null);
+			g_Game.GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax * Math.Clamp(fraction, 0.0, 1.0));
+		}
+	}
+
+	static void SetLockWheels(Object obj, bool lockState)
+	{
+		CarScript car;
+		if (Class.CastTo(car, obj))
+		{
+			car.COT_SetLockWheels(lockState);
+			return;
+		}
+
+	#ifndef DAYZ_1_29
+		MotorbikeScript bike;
+		if (Class.CastTo(bike, obj))
+		{
+			bike.COT_SetLockWheels(lockState);
+		}
+	#endif
+	}
+
+	void SetOpen( bool open )
+	{
+		#ifdef COT_DEBUGLOGS
+		Print("[COT_DBG] SetOpen(" + open.ToString() + ") requested, current=" + m_IsOpen.ToString());
+		string cotDbgStack;
+		DumpStackString(cotDbgStack);
+		Print("[COT_DBG] SetOpen call stack:\n" + cotDbgStack);
+		#endif
+
+		if ( open == m_IsOpen )
+			return;
+
+		int nowMs = g_Game.GetTime();
+		if ( nowMs - m_LastOpenChangeMs < MIN_TOGGLE_INTERVAL_MS )
+		{
+			#ifdef COT_DEBUGLOGS
+			Print("[COT_DBG] SetOpen(" + open.ToString() + ") dropped - debounce, dt=" + (nowMs - m_LastOpenChangeMs));
+			#endif
+			return;
+		}
+
+		if ( open )
+		{
+			if ( g_Game.GetUIManager().GetMenu() )
+			{
+				#ifdef COT_DEBUGLOGS
+				Print("[COT_DBG] SetOpen(true) blocked - UIManager has an active menu");
+				#endif
+				return;
+			}
+
+			if ( !JMPermissions.Has( JMConstants.PERM_COT_VIEW ) )
+				return;
+
+			if ( !GetCommunityOnlineToolsBase().IsActive() )
+			{
+				ShowInactiveNotification( "STR_COT_INPUT_TOGGLE_SIDEBAR" );
+				return;
+			}
+		}
+
+		m_LastOpenChangeMs = nowMs;
+		m_IsOpen = open;
+
+		#ifdef COT_DEBUGLOGS
+		Print("[COT_DBG] SetOpen(" + open.ToString() + ") applied, invoking COT_ON_OPEN");
+		#endif
+
+		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
+
+		if ( !m_IsOpen )
+		{
+			JMScriptInvokers.COT_ON_CLOSE.Invoke();
+		}
 	}
 
 	void CreateNewLog()
@@ -124,41 +434,6 @@ class CommunityOnlineToolsBase
 		}
 	}
 
-	bool IsActive()
-	{
-		return m_IsActive;
-	}
-
-	bool IsActive(Man player)
-	{
-		return IsActive(player.GetIdentity());
-	}
-
-	bool IsActive(PlayerIdentity identity)
-	{
-		return IsActive(identity.GetId());
-	}
-
-	bool IsActive(string guid)
-	{
-	#ifdef SERVER
-		return m_ActiveGUIDs[guid];
-	#else
-		return IsActive();
-	#endif
-	}
-
-	void SetActive( bool active )
-	{
-		#ifdef COT_DEBUGLOGS
-		Print("[COT_DBG] SetActive(" + active.ToString() + ") - IsOpen()=" + m_IsOpen.ToString() + " (SetOpen(true) refuses to open while inactive, but does not itself close an already-open sidebar)");
-		#endif
-
-		m_IsActive = active;
-
-		OnCOTActiveChanged( m_IsActive );
-	}
-
 	void ToggleActive()
 	{
 		#ifdef COT_DEBUGLOGS
@@ -172,82 +447,6 @@ class CommunityOnlineToolsBase
 
 	void OnCOTActiveChanged( bool active )
 	{
-	}
-
-	bool IsOpen()
-	{
-		return m_IsOpen;
-	}
-
-	//! Below this gap between two accepted SetOpen() calls, a new request is
-	//! dropped instead of applied. Two independent input bindings reach this
-	//! method - ToggleMenu ("Toggle
-	//! Sidebar") and CloseCOT (vanilla UI-back) - and a real repro showed
-	//! SetOpen(true)/SetOpen(false) alternating multiple times with no gap
-	//! at all in the log between them (no unrelated engine/script lines
-	//! interleaved), each full cycle playing the sidebar's slide-open and
-	//! slide-closed animation back to back - the "open close open close"
-	//! flicker. Whatever combination of bindings/held keys produces that
-	//! burst, a plain minimum-interval debounce on the single chokepoint
-	//! both paths already go through stops it outright, and 250ms is far
-	//! below anything a deliberate toggle-close-toggle sequence would need.
-	private static const int MIN_TOGGLE_INTERVAL_MS = 250;
-	private int m_LastOpenChangeMs;
-
-	void SetOpen( bool open )
-	{
-		#ifdef COT_DEBUGLOGS
-		Print("[COT_DBG] SetOpen(" + open.ToString() + ") requested, current=" + m_IsOpen.ToString());
-		string cotDbgStack;
-		DumpStackString(cotDbgStack);
-		Print("[COT_DBG] SetOpen call stack:\n" + cotDbgStack);
-		#endif
-
-		if ( open == m_IsOpen )
-			return;
-
-		int nowMs = g_Game.GetTime();
-		if ( nowMs - m_LastOpenChangeMs < MIN_TOGGLE_INTERVAL_MS )
-		{
-			#ifdef COT_DEBUGLOGS
-			Print("[COT_DBG] SetOpen(" + open.ToString() + ") dropped - debounce, dt=" + (nowMs - m_LastOpenChangeMs));
-			#endif
-			return;
-		}
-
-		if ( open )
-		{
-			if ( g_Game.GetUIManager().GetMenu() )
-			{
-				#ifdef COT_DEBUGLOGS
-				Print("[COT_DBG] SetOpen(true) blocked - UIManager has an active menu");
-				#endif
-				return;
-			}
-
-			if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
-				return;
-
-			if ( !GetCommunityOnlineToolsBase().IsActive() )
-			{
-				ShowInactiveNotification( "STR_COT_INPUT_TOGGLE_SIDEBAR" );
-				return;
-			}
-		}
-
-		m_LastOpenChangeMs = nowMs;
-		m_IsOpen = open;
-
-		#ifdef COT_DEBUGLOGS
-		Print("[COT_DBG] SetOpen(" + open.ToString() + ") applied, invoking COT_ON_OPEN");
-		#endif
-
-		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
-
-		if ( !m_IsOpen )
-		{
-			JMScriptInvokers.COT_ON_CLOSE.Invoke();
-		}
 	}
 
 	void ShowInactiveNotification(string inputLoc)
@@ -387,57 +586,6 @@ class CommunityOnlineToolsBase
 	{
 	}
 
-	void SetClient( JMPlayerInstance player )
-	{
-	}
-
-	void SetClient( JMPlayerInstance player, PlayerIdentity identity )
-	{
-	}
-
-	void GetHeadTransform(Object obj, out vector transform[4], bool includeOffset = false)
-	{
-		vector transform[4];
-		vector position;
-		float offset;
-
-		Human human;
-		DayZCreature creature;
-
-		if (Class.CastTo(human, obj))
-			human.GetBoneTransformWS(human.GetBoneIndexByName("Head"), transform);
-		else if (Class.CastTo(creature, obj))
-			creature.GetBoneTransformWS(creature.GetBoneIndexByName("Head"), transform);
-		else
-			obj.GetTransform(transform);
-
-		position = transform[3];
-
-		if (human || creature)
-		{
-			offset = 0.12;
-		}
-		else
-		{
-			vector minMax[2];
-
-			if (obj.GetCollisionBox(minMax))
-				offset = -vector.Distance(minMax[0], minMax[1]) * 0.5;
-			else
-				offset = -obj.ClippingInfo(minMax);
-
-			float height = minMax[1][1];
-			position[1] = position[1] + height;
-
-			includeOffset = true;
-		}
-
-		if (includeOffset)
-			position = position + obj.GetDirection() * offset;
-
-		transform[3] = position;
-	}
-
 	static void ForceDisableInputs(bool state, inout TIntArray skipIDs = null)
 	{
 		if (!skipIDs)
@@ -538,90 +686,12 @@ class CommunityOnlineToolsBase
 		}
 	}
 
-	//! Anything a client sends as a position, orientation or scale has to pass
-	//! through here before it reaches an entity.
-	//!
-	//! A permission says an admin may move things. It does not say the numbers
-	//! arrived intact - and a hand-written packet, or a mod sending garbage,
-	//! can carry NaN or an astronomical coordinate. Those do not fail loudly:
-	//! they put an entity somewhere physics cannot resolve, which desyncs or
-	//! crashes the clients that stream it in, not the sender.
-	//!
-	//! NaN needs its own test. Every comparison against NaN is false, so a
-	//! plain range check passes it - the value is neither below the floor nor
-	//! above the ceiling. Only "is it equal to itself" catches it.
-	static const float COT_SANE_MAGNITUDE = 1000000000;
-
-	static bool IsFiniteFloat(float value)
-	{
-		if (value != value)
-			return false;
-
-		if (value > COT_SANE_MAGNITUDE || value < -COT_SANE_MAGNITUDE)
-			return false;
-
-		return true;
-	}
-
-	static bool IsFiniteVector(vector value)
-	{
-		if (!IsFiniteFloat(value[0]) || !IsFiniteFloat(value[1]) || !IsFiniteFloat(value[2]))
-			return false;
-
-		return true;
-	}
-
-	//! A position the map can actually hold.
-	//!
-	//! The margin is generous on purpose - offshore boats, objects staged past
-	//! the coastline and modded maps that spawn outside their own bounds are
-	//! all legitimate. This rejects the impossible, not the unusual.
-	static const float COT_WORLD_MARGIN = 5000;
-	static const float COT_WORLD_FLOOR = -2000;
-	static const float COT_WORLD_CEILING = 20000;
-
-	static bool IsValidWorldPosition(vector pos)
-	{
-		if (!IsFiniteVector(pos))
-			return false;
-
-		float worldSize = 15360;
-
-		if (g_Game.GetWorld())
-			worldSize = g_Game.GetWorld().GetWorldSize();
-
-		if (pos[0] < -COT_WORLD_MARGIN || pos[0] > worldSize + COT_WORLD_MARGIN)
-			return false;
-
-		if (pos[2] < -COT_WORLD_MARGIN || pos[2] > worldSize + COT_WORLD_MARGIN)
-			return false;
-
-		if (pos[1] < COT_WORLD_FLOOR || pos[1] > COT_WORLD_CEILING)
-			return false;
-
-		return true;
-	}
-
-	//! Scale is sent by the client and applied to a spawned object. A zero or
-	//! a negative inverts or collapses the model, and a huge one covers the map
-	//! in geometry every nearby client then has to render.
-	static const float COT_SCALE_MIN = 0.01;
-	static const float COT_SCALE_MAX = 10.0;
-
 	static float SanitizeScale(float scale)
 	{
 		if (!IsFiniteFloat(scale))
 			return 1.0;
 
 		return Math.Clamp(scale, COT_SCALE_MIN, COT_SCALE_MAX);
-	}
-
-	static bool IsHypeTrain(Object obj)
-	{
-		if (s_HypeTrain_Loco_Type && obj.IsInherited(s_HypeTrain_Loco_Type))
-			return true;
-
-		return false;
 	}
 
 	static void Refuel(Object obj)
@@ -655,50 +725,6 @@ class CommunityOnlineToolsBase
 		}
 	}
 
-	//! Fuel as a fraction of the tank rather than "fill it up".
-	//!
-	//! A train carries its fuel as a liquid quantity instead of a vehicle
-	//! fluid, so it is set through the same scripted call Refuel uses.
-	static void SetFuel01(Object obj, float fraction)
-	{
-		CarScript car;
-		BoatScript boat;
-	#ifndef DAYZ_1_29
-		MotorbikeScript bike;
-	#endif
-		if (Class.CastTo(car, obj))
-		{
-			car.COT_SetCarFluid01(CarFluid.FUEL, fraction);
-		}
-		else if (Class.CastTo(boat, obj))
-		{
-			boat.COT_SetBoatFluid01(BoatFluid.FUEL, fraction);
-		}
-	#ifndef DAYZ_1_29
-		else if (Class.CastTo(bike, obj))
-		{
-			bike.COT_SetBikeFluid01(MotorbikeFluid.FUEL, fraction);
-		}
-	#endif
-		else if (IsHypeTrain(obj))
-		{
-			int fuelQuantityMax;
-			g_Game.GameScript.CallFunction(obj, "GetLiquidQuantityMax", fuelQuantityMax, null);
-			g_Game.GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax * Math.Clamp(fraction, 0.0, 1.0));
-		}
-	}
-
-	//! Coolant - a radiator fluid found on cars. Motorbike has no coolant
-	//! tank (see MotorbikeScript.c's COT_Refuel note).
-	static void SetCoolant01(Object obj, float fraction)
-	{
-		CarScript car;
-		if (Class.CastTo(car, obj))
-		{
-			car.COT_SetCarFluid01(CarFluid.COOLANT, fraction);
-		}
-	}
-
 	//! Delete everything in an object's cargo, the object itself kept.
 	//!
 	//! The traversal walks nested containers too, so a backpack inside a tent
@@ -729,24 +755,6 @@ class CommunityOnlineToolsBase
 		}
 
 		return count;
-	}
-
-	static void SetLockWheels(Object obj, bool lockState)
-	{
-		CarScript car;
-		if (Class.CastTo(car, obj))
-		{
-			car.COT_SetLockWheels(lockState);
-			return;
-		}
-
-	#ifndef DAYZ_1_29
-		MotorbikeScript bike;
-		if (Class.CastTo(bike, obj))
-		{
-			bike.COT_SetLockWheels(lockState);
-		}
-	#endif
 	}
 
 	static bool AreWheelsLocked(Object obj)

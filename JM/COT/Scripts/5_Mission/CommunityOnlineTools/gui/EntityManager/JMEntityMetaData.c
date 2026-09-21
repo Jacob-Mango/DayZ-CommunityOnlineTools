@@ -45,18 +45,18 @@ class JMEntityMetaData
 		m_Extra     = new map<string, string>;
 	}
 
-	void SetExtra( string key, string value )
-	{
-		if ( !m_Extra.Contains( key ) )
-			m_ExtraKeys.Insert( key );
-		m_Extra.Set( key, value );
-	}
-
 	string GetExtra( string key )
 	{
 		if ( m_Extra.Contains( key ) )
 			return m_Extra.Get( key );
 		return "";
+	}
+
+	void SetExtra( string key, string value )
+	{
+		if ( !m_Extra.Contains( key ) )
+			m_ExtraKeys.Insert( key );
+		m_Extra.Set( key, value );
 	}
 
 	void Write( ParamsWriteContext ctx )

@@ -3,12 +3,9 @@ class JMPermissionManager
 {
 	ref map< string, ref JMPlayerInstance > Players;
 	ref map< string, ref JMRole > Roles;
-
 	ref map< string, string > SteamToGUID;
-
 	ref JMPermission RootPermission;
-
-	private string m_ClientGUID;
+	protected string m_ClientGUID;
 
 	//! protected, not private: DayZ-Expansion's `modded class JMPermissionManager`
 	//! reads this in its Expansion_RegisterPermission override. A modded class
@@ -17,9 +14,14 @@ class JMPermissionManager
 	protected bool m_MissionLoaded;
 
 	//! DIAG test roster only - see CreateFakePlayers.
-	private bool m_FakePlayersCreated;
-	private ref TStringArray m_FakeNamesUsed;
-	private static int s_FakePlayerSeq;
+	protected bool m_FakePlayersCreated;
+	protected ref TStringArray m_FakeNamesUsed;
+	protected static int s_FakePlayerSeq;
+
+	//! Bumped whenever Players gains/loses an entry or a role assignment
+	//! changes, so UI consumers can skip a rebuild when the roster hasn't
+	//! actually changed since their last poll.
+	protected int m_RosterVersion;
 
 	void JMPermissionManager()
 	{
@@ -46,16 +48,19 @@ class JMPermissionManager
 		Assert_Null( RootPermission );
 	}
 
-	void GetRolesAsList( out array< JMRole > roles )
+	string GetClientGUID()
 	{
-		Assert_Null( Roles );
+		return m_ClientGUID;
+	}
 
-		if ( roles == NULL )
-			roles = new array< JMRole >();
+	JMPlayerInstance GetClientPlayer()
+	{
+		return Players.Get( m_ClientGUID );
+	}
 
-		roles.Copy( Roles.GetValueArray() );
-
-		roles.Debug();
+	string GetGUIDForSteam( string uid )
+	{
+		return SteamToGUID.Get( uid );
 	}
 
 	void GetPermissionsAsList( out array< JMPermission > permissions )
@@ -78,7 +83,7 @@ class JMPermissionManager
 		GetPermissionsAsList( permission, "", permissions );
 	}
 
-	private void GetPermissionsAsList( JMPermission permission, string indent, inout array< JMPermission > permissions, bool last = false )
+	protected void GetPermissionsAsList( JMPermission permission, string indent, inout array< JMPermission > permissions, bool last = false )
 	{
 		Assert_Null( RootPermission );
 		Assert_Null( permission );
@@ -105,9 +110,233 @@ class JMPermissionManager
 		}
 	}
 
-	string GetClientGUID()
+	JMPlayerInstance GetPlayer( string guid )
 	{
-		return m_ClientGUID;
+		Assert_Null( Players );
+
+		return Players.Get( guid );
+	}
+
+	/**
+	 * This uses GUIDs now.
+	 */
+	array< JMPlayerInstance > GetPlayers( array< string > guidsGetPlayers = NULL )
+	{
+		Assert_Null( Players );
+		
+		if ( guidsGetPlayers == NULL || !g_Game.IsMultiplayer() )
+			return Players.GetValueArray();
+
+		array< JMPlayerInstance > players = new array< JMPlayerInstance >;
+
+		for ( int i = 0; i < guidsGetPlayers.Count(); i++ )
+		{
+			JMPlayerInstance instance = Players.Get( guidsGetPlayers[i] );
+			if ( instance )
+				players.Insert( instance );
+		}
+
+		return players;
+	}
+
+	JMRole GetRole( string name )
+	{
+		Assert_Null( Roles );
+
+		return Roles.Get( name );
+	}
+
+	void GetRolesAsList( out array< JMRole > roles )
+	{
+		Assert_Null( Roles );
+
+		if ( roles == NULL )
+			roles = new array< JMRole >();
+
+		roles.Copy( Roles.GetValueArray() );
+
+		roles.Debug();
+	}
+
+	JMPermission GetRootPermission()
+	{
+		Assert_Null( RootPermission );
+
+		return RootPermission;
+	}
+
+	int GetRosterVersion()
+	{
+		return m_RosterVersion;
+	}
+
+	bool HasPermission( string permission, out JMPlayerInstance instance = null )
+	{
+		if ( IsMissionClient() ) 
+		{
+			instance = GetClientPlayer();
+
+			if ( IsMissionHost() )
+				return true;
+			
+			if ( !instance )
+				return false;
+
+			return instance.HasPermission( permission );
+		}
+
+		//! A dedicated server has no "own" player to check. Answer false (never
+		//! grant on a wrong call) and say so once, instead of raising a script
+		//! Error on every RPC that forgot to pass the sender's PlayerIdentity.
+		JMDeprecated.WarnOnce( this, "HasPermission( permission ) was called on a server - pass the sender: HasPermission( permission, sender ). Permission: " + permission );
+
+		return false;
+	}
+
+	bool HasPermission( string permission, PlayerIdentity ihp )
+	{
+		if ( IsTrustedLocalHost() )
+			return true;
+
+		JMPlayerInstance instance;
+		return HasPermission( permission, ihp, instance );
+	}
+
+	bool HasPermission( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
+	{		
+		if ( IsMissionClient() ) 
+		{
+			instance = GetClientPlayer();
+
+			if ( IsMissionHost() )
+				return true;
+			else if ( Assert_Null( instance ) )
+				return false;
+
+			return instance.HasPermission( permission );
+		}
+
+		instance = Players.Get( identity.GetId() );
+		if ( Assert_Null( instance ) )
+		{
+			Print( "JMPlayerInstance does not exist for " + identity.GetId() );
+			return false;
+		}
+
+		bool allowed = instance.HasPermission( permission );
+
+		return allowed;
+	}
+
+	/**
+	 * @brief check permission when it's related to an RPC received on server
+	 *
+	 * This overload is the single choke point every incoming COT RPC goes
+	 * through on the server, and a refusal here means a client asked for
+	 * something its own UI never offers it. That is close to the strongest
+	 * signal available from inside a mod: a legitimate client cannot
+	 * produce it by accident. Reported, not acted on - the anti-cheat
+	 * module decides whether a burst of these is worth a flag.
+	 */
+	bool HasPermissionRPC( string permission, PlayerIdentity ihp )
+	{
+		if ( IsTrustedLocalHost() )
+			return true;
+
+		JMPlayerInstance instance;
+		return HasPermissionRPC( permission, ihp, instance );
+	}
+
+	bool HasPermissionRPC( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
+	{
+		bool allowed = HasPermission(permission, identity, instance);
+
+	#ifdef SERVER
+		if ( !allowed )
+			JMAntiCheatSignals.ReportDeniedRpc( identity.GetId(), permission );
+	#endif
+
+		return allowed;
+	}
+
+	bool HasPermissions( TStringArray permissions, PlayerIdentity identity, out JMPlayerInstance instance, bool requireAll = true )
+	{
+		foreach (string permission: permissions)
+		{
+			if (HasPermission(permission, identity, instance))
+			{
+				if (!requireAll)
+					return true;
+			}
+			else if (requireAll)
+			{
+				return false;
+			}
+		}
+
+		//! Reached only when nothing decided early: with requireAll every
+		//! permission was held, without it none was. Returning true here for
+		//! "any of" granted access to a caller holding none of them.
+		return requireAll;
+	}
+
+	bool HasQuickActionAccess(PlayerBase player)
+	{
+	#ifdef SERVER
+		PlayerIdentity identity = player.GetIdentity();
+		if (identity && GetCommunityOnlineToolsBase().IsActive(identity) && HasPermission(JMConstants.PERM_ACTIONS_QUICKACTIONS, identity))
+	#else
+		if (GetCommunityOnlineToolsBase().IsActive() && HasPermission(JMConstants.PERM_ACTIONS_QUICKACTIONS))
+	#endif
+			return true;
+
+		return false;
+	}
+
+	//! Mod-compat: DayZ-Expansion calls GetPermissionsManager().IsAdminToolsToggledOn()
+	//! from ~25 sites across BaseBuilding / Core (recipes, user actions, territory).
+	//! Expansion supplies this via `modded class JMPermissionManager` when JM_COT is
+	//! defined, but defining it here means the symbol resolves even if Expansion's
+	//! modded class is absent, load-ordered differently, or its COT block is compiled
+	//! out. Expansion's modded override returns the same value, so behaviour is
+	//! identical whichever definition wins.
+	bool IsAdminToolsToggledOn()
+	{
+		return GetCommunityOnlineToolsBase().IsActive();
+	}
+
+	bool IsRole( string role )
+	{
+		return Roles.Contains( role );
+	}
+
+	/**
+	 * @brief true when this process is the sole authority over the session
+	 *
+	 * Covers true Offline/SP as well as a listen server hosted locally
+	 * (host is admin of their own game, not just IsMissionOffline() - a
+	 * dedicated server is never trusted this way).
+	 */
+	protected bool IsTrustedLocalHost()
+	{
+		return IsMissionOffline() || ( IsMissionHost() && !g_Game.IsDedicatedServer() );
+	}
+
+	protected bool IsValidFolderForRoles( string name, FileAttr attributes )
+	{
+		string extenstion = ".txt";
+		int strLength = name.Length();
+
+		if ( name == extenstion )
+			return false;
+
+		if ( attributes & FileAttr.DIRECTORY )
+			return false;
+
+		if ( name == "" )
+			return false;
+
+		return true;
 	}
 
 	void SetClientGUID( string guid )
@@ -115,9 +344,9 @@ class JMPermissionManager
 		m_ClientGUID = guid;
 	}
 
-	JMPlayerInstance GetClientPlayer()
+	void SetMissionLoaded()
 	{
-		return Players.Get( m_ClientGUID );
+		m_MissionLoaded = true;
 	}
 
 	void ResetMission()
@@ -173,7 +402,7 @@ class JMPermissionManager
 		m_FakeNamesUsed = NULL;
 	}
 
-	private EntityAI CreateItemWithRandomHealth( EntityAI parent, string classname )
+	protected EntityAI CreateItemWithRandomHealth( EntityAI parent, string classname )
 	{
 		if ( !parent || classname == "" )
 			return NULL;
@@ -213,7 +442,7 @@ class JMPermissionManager
 		return item;
 	}
 
-	private void CreateWeaponForSurvivor( PlayerBase survivor )
+	protected void CreateWeaponForSurvivor( PlayerBase survivor )
 	{
 		array<string> firearms = { "M4A1", "AKM", "MakarovIJ70", "FNX45", "MP5K", "Mosina", "SVD", "UMP45" };
 		array<string> meleeWeapons = { "FirefighterAxe", "Hatchet", "Machete", "BaseballBat", "Pitchfork", "HuntingKnife", "Crowbar" };
@@ -289,7 +518,7 @@ class JMPermissionManager
 		}
 	}
 
-	private void CreateFakePlayer( int i, vector basePos )
+	protected void CreateFakePlayer( int i, vector basePos )
 	{
 		array<string> firstNames = { "Adam", "Alex", "Alice", "Arthur", "Ben", "Charlie", "Chloe", "Daniel", "David", "Emma", "Ethan", "Fiona", "George", "Hannah", "Ian", "Jack", "Julia", "Kevin", "Laura", "Liam", "Lucas", "Marcus", "Mia", "Noah", "Oliver", "Rachel", "Sam", "Sophie", "Victor", "Zack" };
 		array<string> lastNames = { "Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis", "Wilson", "Taylor", "Anderson", "Thomas", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson", "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "Hernandez", "King", "Wright", "Lopez" };
@@ -416,28 +645,6 @@ class JMPermissionManager
 		Players.Insert( instance.GetGUID(), instance );
 	}
 
-	/**
-	 * This uses GUIDs now.
-	 */
-	array< JMPlayerInstance > GetPlayers( array< string > guidsGetPlayers = NULL )
-	{
-		Assert_Null( Players );
-		
-		if ( guidsGetPlayers == NULL || !g_Game.IsMultiplayer() )
-			return Players.GetValueArray();
-
-		array< JMPlayerInstance > players = new array< JMPlayerInstance >;
-
-		for ( int i = 0; i < guidsGetPlayers.Count(); i++ )
-		{
-			JMPlayerInstance instance = Players.Get( guidsGetPlayers[i] );
-			if ( instance )
-				players.Insert( instance );
-		}
-
-		return players;
-	}
-
 	void RegisterPermission( string permission )
 	{
 		RegisterPermission( permission, JMPermissionType.INHERIT );
@@ -519,130 +726,6 @@ class JMPermissionManager
 		return data;
 	}
 
-	JMPermission GetRootPermission()
-	{
-		Assert_Null( RootPermission );
-
-		return RootPermission;
-	}
-
-	bool HasPermission( string permission, out JMPlayerInstance instance = null )
-	{
-		if ( IsMissionClient() ) 
-		{
-			instance = GetClientPlayer();
-
-			if ( IsMissionHost() )
-				return true;
-			
-			if ( !instance )
-				return false;
-
-			return instance.HasPermission( permission );
-		}
-
-		Error( "JMPermissionManager::HasPermission( permission = " + permission + " ) bool; was called on server!" );
-
-		return false;
-	}
-
-	bool HasPermission( string permission, PlayerIdentity ihp )
-	{
-		if ( IsMissionOffline() )
-			return true;
-
-		JMPlayerInstance instance;
-		return HasPermission( permission, ihp, instance );
-	}
-
-	bool HasPermission( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
-	{		
-		if ( IsMissionClient() ) 
-		{
-			instance = GetClientPlayer();
-
-			if ( IsMissionHost() )
-				return true;
-			else if ( Assert_Null( instance ) )
-				return false;
-
-			return instance.HasPermission( permission );
-		}
-
-		instance = Players.Get( identity.GetId() );
-		if ( Assert_Null( instance ) )
-		{
-			Print( "JMPlayerInstance does not exist for " + identity.GetId() );
-			return false;
-		}
-
-		bool allowed = instance.HasPermission( permission );
-
-		return allowed;
-	}
-
-	/**
-	 * @brief check permission when it's related to an RPC received on server
-	 *
-	 * This overload is the single choke point every incoming COT RPC goes
-	 * through on the server, and a refusal here means a client asked for
-	 * something its own UI never offers it. That is close to the strongest
-	 * signal available from inside a mod: a legitimate client cannot
-	 * produce it by accident. Reported, not acted on - the anti-cheat
-	 * module decides whether a burst of these is worth a flag.
-	 */
-	bool HasPermissionRPC( string permission, PlayerIdentity ihp )
-	{
-		if ( IsMissionOffline() )
-			return true;
-
-		JMPlayerInstance instance;
-		return HasPermissionRPC( permission, ihp, instance );
-	}
-
-	bool HasPermissionRPC( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
-	{
-		bool allowed = HasPermission(permission, identity, instance);
-
-	#ifdef SERVER
-		if ( !allowed )
-			JMAntiCheatSignals.ReportDeniedRpc( identity.GetId(), permission );
-	#endif
-
-		return allowed;
-	}
-
-	bool HasPermissions( TStringArray permissions, PlayerIdentity identity, out JMPlayerInstance instance, bool requireAll = true )
-	{
-		foreach (string permission: permissions)
-		{
-			if (HasPermission(permission, identity, instance))
-			{
-				if (!requireAll)
-					return true;
-			}
-			else if (requireAll)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	bool HasQuickActionAccess(PlayerBase player)
-	{
-	#ifdef SERVER
-		PlayerIdentity identity = player.GetIdentity();
-		if (identity && GetCommunityOnlineToolsBase().IsActive(identity) && HasPermission("Actions.QuickActions", identity))
-	#else
-		if (GetCommunityOnlineToolsBase().IsActive() && HasPermission("Actions.QuickActions"))
-	#endif
-			return true;
-
-		return false;
-	}
-
 	bool OnClientConnected( PlayerIdentity ident, out JMPlayerInstance inst )
 	{
 		Assert_Null( RootPermission );
@@ -675,6 +758,7 @@ class JMPermissionManager
 		inst.Load();
 
 		Players.Insert( guid, inst );
+		m_RosterVersion++;
 
 		// PMPrint();
 
@@ -689,6 +773,7 @@ class JMPermissionManager
 		if ( inst )
 		{
 			Players.Remove( guid );
+			m_RosterVersion++;
 
 			RemoveSyncedToClient(guid);
 
@@ -700,7 +785,7 @@ class JMPermissionManager
 		}
 	}
 
-	private void RemoveSyncedToClient(string guid)
+	protected void RemoveSyncedToClient(string guid)
 	{
 		foreach (JMPlayerInstance player: Players)
 		{
@@ -721,18 +806,6 @@ class JMPermissionManager
 		}
 	}
 
-	string GetGUIDForSteam( string uid )
-	{
-		return SteamToGUID.Get( uid );
-	}
-
-	JMPlayerInstance GetPlayer( string guid )
-	{
-		Assert_Null( Players );
-
-		return Players.Get( guid );
-	}
-
 	JMPlayerInstance UpdatePlayer( string guid, ParamsReadContext ctx, PlayerBase playerUpdatePlayer = NULL )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -748,6 +821,7 @@ class JMPermissionManager
 
 			instance = new JMPlayerInstance( NULL, guid );
 			Players.Insert( guid, instance );
+			m_RosterVersion++;
 		}
 
 		instance.OnRecieve( ctx );
@@ -763,23 +837,6 @@ class JMPermissionManager
 		return instance;
 	}
 
-	protected bool IsValidFolderForRoles( string name, FileAttr attributes )
-	{
-		string extenstion = ".txt";
-		int strLength = name.Length();
-
-		if ( name == extenstion )
-			return false;
-
-		if ( attributes & FileAttr.DIRECTORY )
-			return false;
-
-		if ( name == "" )
-			return false;
-
-		return true;
-	}
-	
 	JMRole CreateRole( string name, array< string > data )
 	{
 		Assert_Null( Roles );
@@ -849,23 +906,6 @@ class JMPermissionManager
 	bool RoleExists( string role )
 	{
 		return Roles.Contains( role );
-	}
-
-	bool IsRole( string role )
-	{
-		return Roles.Contains( role );
-	}
-
-	JMRole GetRole( string name )
-	{
-		Assert_Null( Roles );
-
-		return Roles.Get( name );
-	}
-
-	void SetMissionLoaded()
-	{
-		m_MissionLoaded = true;
 	}
 }
 

@@ -2,9 +2,7 @@
 class JMRole : Managed
 {
 	ref JMPermission RootPermission;
-
 	string Name;
-
 	ref array< string > SerializedData;
 
 	void JMRole( string name )
@@ -15,6 +13,11 @@ class JMRole : Managed
 		RootPermission.CopyPermissions(GetPermissionsManager().RootPermission);
 		
 		SerializedData = new array< string >;
+	}
+
+	bool HasPermission( string permission, out JMPermissionType permType )
+	{
+		return RootPermission.HasPermission( permission, permType );
 	}
 
 	void CopyPermissions( JMPermission copy )
@@ -36,11 +39,6 @@ class JMRole : Managed
 		#endif
 
 		RootPermission.AddPermission( permission, type );
-	}
-
-	bool HasPermission( string permission, out JMPermissionType permType )
-	{
-		return RootPermission.HasPermission( permission, permType );
 	}
 
 	array< string > Serialize()

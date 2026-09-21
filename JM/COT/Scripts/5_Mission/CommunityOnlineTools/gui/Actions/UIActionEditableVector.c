@@ -14,6 +14,16 @@ class UIActionEditableVector: UIActionBase
 	//! without discarding what was typed into it.
 	protected bool m_Edited;
 
+	bool IsEdited()
+	{
+		return m_Edited;
+	}
+
+	void SetEdited( bool edited )
+	{
+		m_Edited = edited;
+	}
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -96,16 +106,6 @@ class UIActionEditableVector: UIActionBase
 		m_Edited = true;
 
 		CallEvent( UIEvent.MOUSEWHEEL );
-	}
-
-	void SetEdited( bool edited )
-	{
-		m_Edited = edited;
-	}
-
-	bool IsEdited()
-	{
-		return m_Edited;
 	}
 
 	override bool OnKeyPress( Widget w, int x, int y, int key )

@@ -30,36 +30,35 @@ class JMServerStatsModule : JMModuleBase
 {
 	//! Seconds between broadcasts. Short enough that the average tracks a live
 	//! server, long enough that the packet is noise next to normal traffic.
-	private static const float BROADCAST_INTERVAL = 2.0;
+	protected static const float BROADCAST_INTERVAL = 2.0;
 
 	//! Frame times kept for the percentile window. At a 45 fps server this is
 	//! about 23 seconds of history, which is the timescale a one-percent figure
 	//! is meaningful over - a 2 second window would hold one frame in its tail.
-	private static const int SAMPLE_WINDOW = 1024;
+	protected static const int SAMPLE_WINDOW = 1024;
 
 	//! Upper bound on how many frames the one-percent tails average over. Caps
 	//! the per-broadcast selection cost, and covers windows up to 3200 frames.
-	private static const int TAIL_MAX = 32;
+	protected static const int TAIL_MAX = 32;
 
 	//! Ignore absurd deltas. The first tick after mission load, and the tick
 	//! after the server has been paused by the debugger, are not stutters worth
 	//! reporting - they would pin the one-percent low at ~0 for a whole window.
-	private static const float FRAME_TIME_MAX = 1.0;
+	protected static const float FRAME_TIME_MAX = 1.0;
 
 	//! Server-side ring buffer of frame times in seconds.
-	private ref array< float > m_Samples;
-	private int m_SampleNext;
-	private bool m_SampleWrapped;
-
-	private float m_BroadcastAccumulator;
+	protected ref array< float > m_Samples;
+	protected int m_SampleNext;
+	protected bool m_SampleWrapped;
+	protected float m_BroadcastAccumulator;
 
 	//! Frame cap read once from serverDZ.cfg, 0 when the server is uncapped.
-	private int m_MaxFPS;
+	protected int m_MaxFPS;
 
 	#ifdef DIAG
 	//! Publishes between diagnostic log lines - see Publish.
-	private static const int DIAG_PRINT_EVERY = 10;
-	private int m_DiagCounter;
+	protected static const int DIAG_PRINT_EVERY = 10;
+	protected int m_DiagCounter;
 	#endif
 
 	void JMServerStatsModule()
@@ -67,14 +66,37 @@ class JMServerStatsModule : JMModuleBase
 		m_Samples = new array< float >;
 	}
 
-	override int GetRPCMin()
+	//! 0 when the anti-cheat module is absent or this is not the host - the
+	//! count only exists server-side, and a client reading its own empty table
+	//! would publish a badge that says "all clear" on no evidence.
+	protected void GetAntiCheatFlagged( out array< string > guids )
 	{
-		return JMServerStatsModuleRPC.INVALID;
+		guids.Clear();
+
+		if ( !IsMissionHost() )
+			return;
+
+		JMAntiCheatModule antiCheat = CF_Modules<JMAntiCheatModule>.Get();
+		if ( !antiCheat )
+			return;
+
+		antiCheat.GetFlaggedGuids( guids );
 	}
 
-	override int GetRPCMax()
+	//! How many samples the ring currently holds.
+	protected int GetSampleCount()
 	{
-		return JMServerStatsModuleRPC.COUNT;
+		if ( m_SampleWrapped )
+			return SAMPLE_WINDOW;
+
+		return m_SampleNext;
+	}
+
+	override void DescribeModule( JMModuleInfo info )
+	{
+		super.DescribeModule( info );
+
+		info.SetRPCRange( JMServerStatsModuleRPC.INVALID, JMServerStatsModuleRPC.COUNT );
 	}
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
@@ -107,7 +129,7 @@ class JMServerStatsModule : JMModuleBase
 		m_MaxFPS = g_Game.ServerConfigGetInt( "limitFPS" );
 	}
 
-	private void ResetSamples()
+	protected void ResetSamples()
 	{
 		m_Samples.Clear();
 		m_SampleNext = 0;
@@ -141,7 +163,7 @@ class JMServerStatsModule : JMModuleBase
 		Publish();
 	}
 
-	private void RecordFrame( float timeslice )
+	protected void RecordFrame( float timeslice )
 	{
 		if ( timeslice <= 0 || timeslice > FRAME_TIME_MAX )
 			return;
@@ -164,15 +186,6 @@ class JMServerStatsModule : JMModuleBase
 		m_SampleWrapped = true;
 	}
 
-	//! How many samples the ring currently holds.
-	private int GetSampleCount()
-	{
-		if ( m_SampleWrapped )
-			return SAMPLE_WINDOW;
-
-		return m_SampleNext;
-	}
-
 	// -------------------------------------------------------------------------
 	//  Percentiles
 	//
@@ -182,7 +195,7 @@ class JMServerStatsModule : JMModuleBase
 	//  compare for the overwhelming majority of samples, an O(TAIL) insert for
 	//  the few that make the cut.
 	// -------------------------------------------------------------------------
-	private void Publish()
+	protected void Publish()
 	{
 		int count = GetSampleCount();
 
@@ -238,7 +251,7 @@ class JMServerStatsModule : JMModuleBase
 	}
 
 	//! Keep the `limit` largest values, largest first.
-	private void InsertDescending( array< float > list, float value, int limit )
+	protected void InsertDescending( array< float > list, float value, int limit )
 	{
 		int count = list.Count();
 
@@ -262,7 +275,7 @@ class JMServerStatsModule : JMModuleBase
 	}
 
 	//! Keep the `limit` smallest values, smallest first.
-	private void InsertAscending( array< float > list, float value, int limit )
+	protected void InsertAscending( array< float > list, float value, int limit )
 	{
 		int count = list.Count();
 
@@ -289,7 +302,7 @@ class JMServerStatsModule : JMModuleBase
 	//! out-of-bounds write, not a script error. Both callers compute "at" as a
 	//! sorted position that is legitimately Count() when the value belongs on
 	//! the end, so that case has to go through Insert instead.
-	private void InsertSorted( array< float > list, float value, int at )
+	protected void InsertSorted( array< float > list, float value, int at )
 	{
 		if ( at >= list.Count() )
 		{
@@ -303,7 +316,7 @@ class JMServerStatsModule : JMModuleBase
 	//! Mean frame rate of a set of frame times. Averaging the times and then
 	//! inverting is the correct order - averaging the individual rates would
 	//! weight a single fast frame the same as a single 200ms hitch.
-	private float FrameTimesToFPS( array< float > frameTimes )
+	protected float FrameTimesToFPS( array< float > frameTimes )
 	{
 		int count = frameTimes.Count();
 		if ( count == 0 )
@@ -327,7 +340,7 @@ class JMServerStatsModule : JMModuleBase
 
 	//! Sent only to clients that can open COT. Everyone else has no use for it,
 	//! and server performance is not something to hand every connected player.
-	private void Broadcast( float average, float low, float high )
+	protected void Broadcast( float average, float low, float high )
 	{
 		int maxFPS = m_MaxFPS;
 
@@ -352,14 +365,14 @@ class JMServerStatsModule : JMModuleBase
 				if ( !identity )
 					continue;
 
-				if ( !GetPermissionsManager().HasPermission( "COT.View", identity ) )
+				if ( !JMPermissions.Has( JMConstants.PERM_COT_VIEW, identity ) )
 					continue;
 
 				//! Seeing COT is not the same as being allowed to know the
 				//! server has flagged someone, so this field is gated on its
 				//! own permission and sent as 0 to everyone else.
 				int flaggedForThem = 0;
-				if ( GetPermissionsManager().HasPermission( "Admin.AntiCheat.View", identity ) )
+				if ( JMPermissions.Has( JMConstants.PERM_ANTICHEAT_VIEW, identity ) )
 					flaggedForThem = flagged;
 
 				ScriptRPC rpc = new ScriptRPC();
@@ -391,24 +404,7 @@ class JMServerStatsModule : JMModuleBase
 		}
 	}
 
-	//! 0 when the anti-cheat module is absent or this is not the host - the
-	//! count only exists server-side, and a client reading its own empty table
-	//! would publish a badge that says "all clear" on no evidence.
-	private void GetAntiCheatFlagged( out array< string > guids )
-	{
-		guids.Clear();
-
-		if ( !IsMissionHost() )
-			return;
-
-		JMAntiCheatModule antiCheat = CF_Modules<JMAntiCheatModule>.Get();
-		if ( !antiCheat )
-			return;
-
-		antiCheat.GetFlaggedGuids( guids );
-	}
-
-	private void RPC_Stats( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	protected void RPC_Stats( ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		if ( !IsMissionClient() )
 			return;

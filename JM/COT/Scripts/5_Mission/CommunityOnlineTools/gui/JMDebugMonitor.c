@@ -6,16 +6,16 @@ class JMDebugMonitor
 	protected TextListboxWidget NamesListboxWidget;
 	protected TextListboxWidget ValuesListboxWidget;
 	protected MultilineTextWidget ModifiersMultiTextWidget;
-	
-	void Init();
+
+	void SetBlood(float value);
 
 	void SetHealth(float value);
 
-	void SetBlood(float value);
-	
 	void SetLastDamage(string value);
-	
+
 	void SetPosition(vector value);
+
+	void Init();
 
 	void Hide();
 

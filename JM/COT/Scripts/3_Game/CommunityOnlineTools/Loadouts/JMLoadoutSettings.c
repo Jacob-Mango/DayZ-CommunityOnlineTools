@@ -114,7 +114,7 @@ class JMLoadoutSettings
 
 	// Writes to a .tmp file first, then renames over the target so a crash
 	// mid-write never leaves a corrupted JSON file behind.
-	private static void AtomicSave(string filepath, JMLoadout data)
+	protected static void AtomicSave(string filepath, JMLoadout data)
 	{
 		string tmpPath = filepath + ".tmp";
 

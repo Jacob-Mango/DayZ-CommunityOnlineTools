@@ -7,15 +7,6 @@ class UIActionEditableTextPreview: UIActionEditableText
 		return m_TextPreview;
 	}
 
-	override void OnInit()
-	{
-		super.OnInit();
-
-		Class.CastTo( m_TextPreview, layoutRoot.FindAnyWidget( "action_preview" ) );
-		m_TextPreview.SetText("");
-		m_TextPreview.SetAlpha(0.5);
-	}
-
 	string GetTextPreview()
 	{		
 		return m_TextPreview.GetText();
@@ -26,6 +17,15 @@ class UIActionEditableTextPreview: UIActionEditableText
 		text = Widget.TranslateString( text );
 		
 		m_TextPreview.SetText( text );
+	}
+
+	override void OnInit()
+	{
+		super.OnInit();
+
+		Class.CastTo( m_TextPreview, layoutRoot.FindAnyWidget( "action_preview" ) );
+		m_TextPreview.SetText("");
+		m_TextPreview.SetAlpha(0.5);
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )

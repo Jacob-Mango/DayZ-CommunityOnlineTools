@@ -1,26 +1,26 @@
 #ifdef JM_CommunityOnlineTools
-// Example: Adding tooltips and hints to UI controls
+// Example: tooltips. SetTooltip takes plain text or a #STR_ stringtable key,
+// on any control.
 modded class JMPlayerForm
 {
-	protected void InitControlsWithTooltips( Widget parent )
+	override void OnCreate()
 	{
-		UIActionButton button = UIActionManager.CreateButton( parent, "Action Button", this, "OnClick_DemoTooltip" );
+		super.OnCreate();
 
-		// 1. Static tooltip string
-		button.SetTooltip( "Click this button to trigger a sub-mod action." );
-
-		UIActionText textControl = UIActionManager.CreateText( parent, "Info Label", "Hover over me" );
-
-		// 2. Localization stringtable key for tooltip
-		textControl.SetTooltip( "#STR_COT_GENERIC_SEARCH" );
+		AddTab( "Tips", JMConstants.Lucide( "info" ), "BuildTooltipTab" );
 	}
 
-	void OnClick_DemoTooltip( UIEvent eid, UIActionBase action )
+	void BuildTooltipTab( Widget parentPanel )
 	{
-		if ( eid != UIEvent.CLICK )
+		Widget body = UIActionManager.CreateSection( parentPanel, "Tooltips" );
+		if ( !body )
 			return;
 
-		action.AnimateFeedback();
+		UIActionButton button = UIActionManager.CreateButton( body, "Hover me", null, "" );
+		button.SetTooltip( "Plain text tooltip." );
+
+		UIActionText text = UIActionManager.CreateText( body, "Info:", "Hover me too" );
+		text.SetTooltip( "#STR_COT_GENERIC_SEARCH" );
 	}
 }
 #endif

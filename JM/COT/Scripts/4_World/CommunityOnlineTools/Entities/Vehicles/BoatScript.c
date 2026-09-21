@@ -1,9 +1,8 @@
 modded class BoatScript
 {
 	static ref CF_DoublyLinkedNodes_WeakRef<BoatScript> s_JM_AllBoats = new CF_DoublyLinkedNodes_WeakRef<BoatScript>();
-
 	ref CF_DoublyLinkedNode_WeakRef<BoatScript> s_JM_Node;
-	private bool m_JM_WasDestroyed = false;
+	protected bool m_JM_WasDestroyed = false;
 
 	// Tracks the last player who entered the driver seat (non-Expansion fallback)
 	string m_JM_LastDriverUID;
@@ -44,7 +43,7 @@ modded class BoatScript
 		}
 	}
 
-	private void CheckAndCreateCompensation()
+	protected void CheckAndCreateCompensation()
 	{
 		string ownerSteamID = "";
 

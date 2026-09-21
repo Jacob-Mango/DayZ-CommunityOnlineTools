@@ -18,7 +18,6 @@ class JMAntiCheatKillStats
 {
 	string PlayerName;
 	string Guid;
-
 	int TotalKills;
 	int TotalMisses;        // hits registered but the attack didn't connect (defender survived)
 	int BodyHead;
@@ -28,11 +27,9 @@ class JMAntiCheatKillStats
 	int BodyLeftLeg;
 	int BodyRightLeg;
 	int BodyFeet;            // DayZ combines Foot+Hand under Feet in some paths
-
 	float DistanceSum;
 	int   DistanceCount;
 	float DistanceMax;
-
 	ref array< string > RecentKills;  // formatted "[dist] killed <name> via <bodypart>"
 
 	void JMAntiCheatKillStats()
@@ -54,6 +51,13 @@ class JMAntiCheatKillStats
 		RecentKills = new array< string >;
 	}
 
+	float GetAvgDistance()
+	{
+		if ( DistanceCount == 0 )
+			return 0;
+		return DistanceSum / DistanceCount;
+	}
+
 	// Hit/miss ratio as a 0..1 float. -1 if no shots yet.
 	float GetHitRatio()
 	{
@@ -64,13 +68,6 @@ class JMAntiCheatKillStats
 		// Both operands are ints, so without the cast this is integer division
 		// and the ratio can only ever come out as 0 or 1.
 		return TotalKills / (float)total;
-	}
-
-	float GetAvgDistance()
-	{
-		if ( DistanceCount == 0 )
-			return 0;
-		return DistanceSum / DistanceCount;
 	}
 
 	void RecordHit( string victimName, string bodyPart, float distance, int nowMs )

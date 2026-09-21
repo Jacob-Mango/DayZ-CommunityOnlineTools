@@ -24,58 +24,87 @@ class JMEntityManagerForm: JMFormBase
 	protected ref array<ref UIActionBase> m_BulkButtons;
 	protected ref array<ref UIActionButton> m_FilterButtons;
 	protected ref array<string> m_FilterLabels;
-
 	protected UIActionTabs m_Tabs;
 
-	static const int TAB_MAP     = 0;
-	static const int TAB_ACTIONS = 1;
-	static const int TAB_INFO    = 2;
+	//! Tab ids as the tab strip handed them out from AddTab() - never numbered here.
+	protected int m_TabIdMap     = -1;
+	protected int m_TabIdActions = -1;
+	protected int m_TabIdInfo    = -1;
 
-	// Right panel
+	// Right panel - the layout panels the three tabs live in. Each tab's widgets
+	// are owned by its own class: JMEntityManagerFormTabMap / Actions / Info.
 	protected Widget m_MapWidgetPanel;
-	protected MapWidget m_MapWidget;
-
 	protected Widget m_OptionsPanel;
-	protected UIActionScroller m_OptionsScroller;
-	protected ref map<string, UIActionBase> m_ActionButtons;
-	protected UIActionButton m_ReturnButton;
-
 	protected Widget m_InfoPanel;
-	protected UIActionScroller m_InfoScroller;
-	protected UIActionText m_InfoName;
-	protected UIActionText m_InfoClassName;
-	protected UIActionText m_InfoStatus;
-	protected UIActionText m_InfoPosition;
-	protected ref array<ref UIActionText> m_ExtraRows;
-	protected ref array<Widget> m_DynamicWidgets;  // widgets added each SetEntityInfo call
+	ref JMEntityManagerFormTabMap     m_TabMap;
+	ref JMEntityManagerFormTabActions m_TabActions;
+	ref JMEntityManagerFormTabInfo    m_TabInfo;
 
 	// Keep action descriptors alive so UserData weak refs stay valid.
 	protected ref array<ref JMEntityAction> m_Actions;
 
 	// State
-	protected ref array<ref JMEntityManagerMapMarker> m_MapMarkers;
 	protected ref array<ref JMEntityManagerListEntry> m_ListEntries;
 	protected JMEntityMetaData m_CurrentEntity;
 	protected bool   m_IsInEntityInfo = false;
 	protected string m_SearchFilter;
 	protected int    m_FilterIndex = 0;
 
-	// Consolidated 20 Hz marker reposition tick (replaces per-marker timers).
-	protected ref Timer m_MarkerTickTimer;
-
-	static const float MARKER_TICK_INTERVAL = 0.05;
-
 	void JMEntityManagerForm()
 	{
-		m_MapMarkers    = new array<ref JMEntityManagerMapMarker>;
 		m_ListEntries   = new array<ref JMEntityManagerListEntry>;
 		m_BulkButtons   = new array<ref UIActionBase>;
-		m_ActionButtons = new map<string, UIActionBase>;
-		m_ExtraRows     = new array<ref UIActionText>;
 		m_Actions       = new array<ref JMEntityAction>;
 		m_FilterButtons = new array<ref UIActionButton>;
 		m_FilterLabels  = new array<string>;
-		m_DynamicWidgets = new array<Widget>;
+	}
+
+	//! The adapter's action descriptors. Public for the Actions tab.
+	array<ref JMEntityAction> GetActions()
+	{
+		return m_Actions;
+	}
+
+	//! Public for the tab classes.
+	JMEntityManagerAdapter GetAdapter()
+	{
+		if ( m_Module )
+			return m_Module.GetAdapter();
+		return null;
+	}
+
+	JMEntityMetaData GetCurrentEntity()
+	{
+		return m_CurrentEntity;
+	}
+
+	//! Public for the tab classes, which run their commands through the module.
+	JMEntityManagerModule GetModule()
+	{
+		return m_Module;
+	}
+
+	void SetEntityInfo( JMEntityMetaData entity )
+	{
+		m_IsInEntityInfo = true;
+		m_CurrentEntity  = entity;
+
+		// Picking an entity moves to its actions; the markers stay on the map
+		// tab either way.
+		if ( m_Tabs && GetActiveTabIndex() == m_TabIdMap )
+			m_Tabs.SetSelection( m_TabIdActions );
+
+		UpdateUI();
+
+		// The Info tab may not have been built yet - it fills itself in from
+		// m_CurrentEntity when it is.
+		if ( !m_TabInfo || !m_TabInfo.IsBuilt() )
+			return;
+
+		m_TabInfo.ShowEntity( entity );
+
+		if ( m_TabActions )
+			m_TabActions.UpdateScroller();
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -83,14 +112,7 @@ class JMEntityManagerForm: JMFormBase
 		return Class.CastTo( m_Module, mdl );
 	}
 
-	protected JMEntityManagerAdapter GetAdapter()
-	{
-		if ( m_Module )
-			return m_Module.GetAdapter();
-		return null;
-	}
-
-	override void OnInit()
+	override void OnCreate()
 	{
 		m_LeftPanel         = layoutRoot.FindAnyWidget( "panel_left" );
 		m_RightPanel        = layoutRoot.FindAnyWidget( "panel_right" );
@@ -125,25 +147,14 @@ class JMEntityManagerForm: JMFormBase
 
 		// Grid: search/refresh row + N bulk + optional filter row
 		Widget grid = UIActionManager.CreateGridSpacer( listButtons, 1 + bulkCount + filterRows, 1 );
-			m_SearchRow = UIActionManager.CreateFlexRow( grid, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-			Widget searchRow = m_SearchRow.GetContent();
+			JMSearchRow searchToolbar = UIActionManager.CreateSearchFlexRow( grid, "Search", this, "OnChange_Search", "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH", 30 );
 
-			m_RefreshButton = UIActionManager.CreateRefreshButton( searchRow, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
-			if ( m_RefreshButton )
-			{
-				m_RefreshButton.SetFixedSize( 30, 30 );
-				m_SearchRow.Add( m_RefreshButton );
-			}
+			m_SearchRow = searchToolbar.Row;
+			m_RefreshButton = searchToolbar.Refresh;
 
-			m_SearchBar = UIActionManager.CreateSearchBox( searchRow, this, "OnChange_Search", "Search" );
+			m_SearchBar = searchToolbar.Search;
 			if ( m_SearchBar )
-			{
-				m_SearchBar.SetFlex( 1.0, 60 );
-				m_SearchBar.SetTooltip( "Filter the list by name" );
-				m_SearchRow.Add( m_SearchBar );
-			}
-
-			m_SearchRow.SetGap( 14 );
+				m_SearchBar.SetTooltip( "#STR_COT_ENTITYMANAGER_FILTER_THE_LIST_BY_NAME" );
 
 			foreach ( JMEntityAction bulkAct: actions )
 			{
@@ -179,7 +190,7 @@ class JMEntityManagerForm: JMFormBase
 				int filterCols = 1 + m_FilterLabels.Count();
 				Widget filterRow = UIActionManager.CreateGridSpacer( grid, 1, filterCols );
 
-				UIActionButton fAll = UIActionManager.CreateButton( filterRow, "All", this, "OnFilterClick" );
+				UIActionButton fAll = UIActionManager.CreateButton( filterRow, "#STR_COT_GENERIC_ALL", this, "OnFilterClick" );
 				fAll.SetUserData( new JMIntBox( 0 ) );
 				m_FilterButtons.Insert( fAll );
 
@@ -205,38 +216,45 @@ class JMEntityManagerForm: JMFormBase
 	protected void InitWidgetsRight()
 	{
 		m_MapWidgetPanel = Widget.Cast( layoutRoot.FindAnyWidget( "entity_map_panel" ) );
-		m_MapWidget      = MapWidget.Cast( layoutRoot.FindAnyWidget( "entity_map" ) );
 
 		m_OptionsPanel = Widget.Cast( layoutRoot.FindAnyWidget( "entity_options_panel" ) );
 		m_InfoPanel    = Widget.Cast( layoutRoot.FindAnyWidget( "entity_info_panel" ) );
 
-		ref array<string> tabLabels = { "#STR_COT_VEHICLE_TAB_MAP", "#STR_COT_VEHICLE_TAB_ACTIONS", "#STR_COT_VEHICLE_TAB_INFO" };
-		ref array<string> tabIcons  = { JMConstants.Lucide( "map" ), JMConstants.Lucide( "zap" ), JMConstants.Lucide( "info" ) };
 
-		m_Tabs = UIActionManager.CreateTabs( m_RightTabStrip, tabLabels, tabIcons, this, "OnChange_Tab" );
+		m_Tabs = UIActionManager.CreateTabStrip( m_RightTabStrip, this, "OnChange_Tab" );
 
-		m_Tabs.AddContent( m_MapWidgetPanel );
-		m_Tabs.AddContent( m_OptionsPanel );
-		m_Tabs.AddContent( m_InfoPanel );
+		m_TabIdMap = m_Tabs.AddTab( "#STR_COT_VEHICLE_TAB_MAP", JMConstants.Lucide( "map" ), m_MapWidgetPanel );
+		m_TabIdActions = m_Tabs.AddTab( "#STR_COT_VEHICLE_TAB_ACTIONS", JMConstants.Lucide( "zap" ), m_OptionsPanel );
+		m_TabIdInfo = m_Tabs.AddTab( "#STR_COT_VEHICLE_TAB_INFO", JMConstants.Lucide( "info" ), m_InfoPanel );
 
-		InitTabState( 3 );
+		DeclareTabs( 3 );
 
-		m_Tabs.SetSelection( TAB_MAP, false );
+		m_Tabs.SetSelection( m_TabIdMap, false );
 
-		BuildTabIfNeeded( TAB_MAP );
+		InitTabFocus( m_TabIdMap );
 
 		UpdateUI();
 	}
 
-	private void BuildTabIfNeeded( int tabIdx )
+	override protected void OnTabCreate( int tab, Widget panel )
 	{
-		if ( !ShouldBuildTab( tabIdx ) )
-			return;
-
-		switch ( tabIdx )
+		if ( tab == m_TabIdMap )
 		{
-			case TAB_ACTIONS: InitWidgetsActions(); break;
-			case TAB_INFO:    InitWidgetsInfo();    break;
+			m_TabMap = new JMEntityManagerFormTabMap( this );
+			RegisterTab( m_TabIdMap, m_TabMap );
+			m_TabMap.OnCreate( panel );
+		}
+		else if ( tab == m_TabIdActions )
+		{
+			m_TabActions = new JMEntityManagerFormTabActions( this );
+			RegisterTab( m_TabIdActions, m_TabActions );
+			m_TabActions.OnCreate( panel );
+		}
+		else if ( tab == m_TabIdInfo )
+		{
+			m_TabInfo = new JMEntityManagerFormTabInfo( this );
+			RegisterTab( m_TabIdInfo, m_TabInfo );
+			m_TabInfo.OnCreate( panel );
 		}
 
 		// A tab built after an entity was already picked has missed the pass
@@ -245,95 +263,20 @@ class JMEntityManagerForm: JMFormBase
 			SetEntityInfo( m_CurrentEntity );
 	}
 
-	override int GetActiveTabIndex()
+	protected override COT_ScriptedWidgetEventHandler GetTabStrip()
 	{
-		if ( !m_Tabs )
-			return -1;
-
-		return m_Tabs.GetSelection();
-	}
-
-	protected void InitWidgetsActions()
-	{
-		// m_Actions was filled in OnInit and the bulk buttons hold weak UserData
-		// refs into it - do not clear or refetch it here.
-		array<ref JMEntityAction> actions = m_Actions;
-
-		m_OptionsScroller = UIActionManager.CreateScroller( m_OptionsPanel );
-		Widget optContent = m_OptionsScroller.GetContentWidget();
-
-		int perEntityCount = 0;
-		foreach ( JMEntityAction ca: actions )
-		{
-			if ( !ca.m_IsBulk ) perEntityCount++;
-		}
-
-		UIActionCard optCard = UIActionManager.CreateCard( optContent, "#STR_COT_VEHICLE_OPTIONS" );
-		Widget optGrid = UIActionManager.CreateGridSpacer( optCard.GetContent(), perEntityCount + 1, 1 );
-		foreach ( JMEntityAction act: actions )
-		{
-			if ( act.m_IsBulk )
-				continue;
-
-			//! Every adapter's actions carry their own permission key, and the
-			//! server already refuses one the caller does not hold
-			//! (JMEntityManagerModule). Binding here means the button reflects
-			//! that instead of failing silently on click. An empty key means
-			//! the action is deliberately ungated - do not bind it, or
-			//! HasPermission("") would disable it for everyone.
-			if ( act.m_IsDestructive )
-			{
-				UIActionConfirmInline btn = UIActionManager.CreateConfirmInline( optGrid, act.m_Label, this, "OnEntityClick" );
-				UIActionIconGrid.ApplyDeletePreset( btn );
-				btn.SetUserData( act );
-				if ( act.m_Tooltip != "" )
-					btn.SetTooltip( act.m_Tooltip );
-				if ( act.m_Permission != "" )
-					UpdatePermission( btn, act.m_Permission );
-				m_ActionButtons.Set( act.m_Id, btn );
-			}
-			else
-			{
-				UIActionButton btn2 = UIActionManager.CreateButton( optGrid, act.m_Label, this, "OnEntityClick" );
-				btn2.SetUserData( act );
-				if ( act.m_Tooltip != "" )
-					btn2.SetTooltip( act.m_Tooltip );
-				if ( act.m_Permission != "" )
-					UpdatePermission( btn2, act.m_Permission );
-				m_ActionButtons.Set( act.m_Id, btn2 );
-			}
-		}
-
-		Widget retGrid = UIActionManager.CreateGridSpacer( optCard.GetContent(), 1, 1 );
-		m_ReturnButton = UIActionManager.CreateButton( retGrid, "Return", this, "OnClick_Return" );
-		m_ReturnButton.SetTooltip( "Go back to the map" );
-
-		m_OptionsScroller.UpdateScroller();
-	}
-
-	protected void InitWidgetsInfo()
-	{
-		m_InfoScroller = UIActionManager.CreateScroller( m_InfoPanel );
-		Widget infoContent = m_InfoScroller.GetContentWidget();
-
-		UIActionCard infoCard = UIActionManager.CreateCard( infoContent, "#STR_COT_VEHICLE_INFORMATION_TITLE" );
-		Widget infoGrid = UIActionManager.CreateGridSpacer( infoCard.GetContent(), 4, 1 );
-			m_InfoName      = UIActionManager.CreateText( infoGrid, "Name:", "" );
-			m_InfoClassName = UIActionManager.CreateText( infoGrid, "ClassName:", "" );
-			m_InfoStatus    = UIActionManager.CreateText( infoGrid, "Status:", "" );
-			m_InfoPosition  = UIActionManager.CreateText( infoGrid, "Position:", "" );
-
-		m_InfoScroller.UpdateScroller();
+		return m_Tabs;
 	}
 
 	void OnChange_Tab( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
-			return;
+		if ( eid == UIEvent.CHANGE )
+			HandleTabChange();
+	}
 
-		CloseAllOverlays();
-
-		BuildTabIfNeeded( GetActiveTabIndex() );
+	override protected void OnTabUpdate( int tab )
+	{
+		super.OnTabUpdate( tab );
 
 		UpdateUI();
 	}
@@ -344,10 +287,10 @@ class JMEntityManagerForm: JMFormBase
 	{
 		int sel = GetActiveTabIndex();
 
-		if ( !m_CurrentEntity && ( sel == TAB_ACTIONS || sel == TAB_INFO ) )
-			HideUI();
+		if ( !m_CurrentEntity && ( sel == m_TabIdActions || sel == m_TabIdInfo ) )
+			SetPanelEnabled( false );
 		else
-			ShowUI();
+			SetPanelEnabled( true );
 	}
 
 	void LoadEntities()
@@ -358,7 +301,9 @@ class JMEntityManagerForm: JMFormBase
 		if ( m_IsInEntityInfo )
 			return;
 
-		m_MapMarkers.Clear();
+		if ( m_TabMap )
+			m_TabMap.ClearMarkers();
+
 		m_ListEntries.Clear();
 
 		if ( !m_Module )
@@ -383,11 +328,8 @@ class JMEntityManagerForm: JMFormBase
 			if ( adapter && !adapter.MatchesFilter( e, m_FilterIndex ) )
 				continue;
 
-			if ( !m_IsInEntityInfo )
-			{
-				JMEntityManagerMapMarker m = new JMEntityManagerMapMarker( m_MapWidgetPanel, m_MapWidget, e, this );
-				m_MapMarkers.Insert( m );
-			}
+			if ( !m_IsInEntityInfo && m_TabMap )
+				m_TabMap.AddEntityMarker( e );
 
 			JMEntityManagerListEntry le = new JMEntityManagerListEntry( m_ListContent, this, e );
 			m_ListEntries.Insert( le );
@@ -432,10 +374,8 @@ class JMEntityManagerForm: JMFormBase
 		{
 			// Swap pointer so future actions use the updated data.
 			m_CurrentEntity = fresh;
-			m_InfoName.SetText( fresh.m_DisplayName );
-			m_InfoClassName.SetText( fresh.m_ClassName );
-			m_InfoStatus.SetText( fresh.m_StatusText );
-			m_InfoPosition.SetText( fresh.m_Position.ToString() );
+			if ( m_TabInfo )
+				m_TabInfo.UpdateFields( fresh );
 			return;
 		}
 
@@ -458,74 +398,12 @@ class JMEntityManagerForm: JMFormBase
 			LoadEntities();
 	}
 
-	void SetEntityInfo( JMEntityMetaData entity )
-	{
-		m_IsInEntityInfo = true;
-		m_CurrentEntity  = entity;
-
-		// Picking an entity moves to its actions; the markers stay on the map
-		// tab either way.
-		if ( m_Tabs && GetActiveTabIndex() == TAB_MAP )
-			m_Tabs.SetSelection( TAB_ACTIONS );
-
-		UpdateUI();
-
-		// The Info tab may not have been built yet - it fills itself in from
-		// m_CurrentEntity when it is.
-		if ( !m_InfoName || !m_InfoScroller )
-			return;
-
-		m_InfoName.SetText( entity.m_DisplayName );
-		m_InfoClassName.SetText( entity.m_ClassName );
-		m_InfoStatus.SetText( entity.m_StatusText );
-		m_InfoPosition.SetText( entity.m_Position.ToString() );
-
-		// Tear down any widgets we added on the previous entity click.
-		ClearDynamicWidgets();
-
-		Widget infoContent = m_InfoScroller.GetContentWidget();
-
-		JMEntityManagerAdapter adapter = GetAdapter();
-		array<string> keys = new array<string>;
-		map<string, string> vals = new map<string, string>;
-		if ( adapter )
-			adapter.GetInfoRows( entity, keys, vals );
-
-		if ( keys && keys.Count() > 0 )
-		{
-			Widget extraGrid = UIActionManager.CreateGridSpacer( infoContent, keys.Count(), 1 );
-			m_DynamicWidgets.Insert( extraGrid );
-			foreach ( string k: keys )
-			{
-				UIActionText t = UIActionManager.CreateText( extraGrid, k + ":", vals.Get( k ) );
-				m_ExtraRows.Insert( t );
-			}
-		}
-
-		if ( adapter )
-			adapter.OnBuildInfoExtras( infoContent, entity, this );
-
-		m_InfoScroller.UpdateScroller();
-		m_OptionsScroller.UpdateScroller();
-	}
-
 	// Adapters can register widgets they create in OnBuildInfoExtras so they
 	// get torn down when the user picks a different entity.
 	void TrackDynamicWidget( Widget w )
 	{
-		if ( w )
-			m_DynamicWidgets.Insert( w );
-	}
-
-	protected void ClearDynamicWidgets()
-	{
-		m_ExtraRows.Clear();
-		foreach ( Widget w: m_DynamicWidgets )
-		{
-			if ( w )
-				w.Unlink();
-		}
-		m_DynamicWidgets.Clear();
+		if ( m_TabInfo )
+			m_TabInfo.TrackDynamicWidget( w );
 	}
 
 	void SyncAndRefresh()
@@ -536,14 +414,14 @@ class JMEntityManagerForm: JMFormBase
 
 	void ShowMapMarkers()
 	{
-		for ( int i = 0; i < m_MapMarkers.Count(); i++ )
-			m_MapMarkers.Get( i ).ShowMarker();
+		if ( m_TabMap )
+			m_TabMap.ShowMapMarkers();
 	}
 
 	void HideMapMarkers()
 	{
-		for ( int i = 0; i < m_MapMarkers.Count(); i++ )
-			m_MapMarkers.Get( i ).HideMarker();
+		if ( m_TabMap )
+			m_TabMap.HideMapMarkers();
 	}
 
 	void BackToList()
@@ -551,10 +429,11 @@ class JMEntityManagerForm: JMFormBase
 		m_IsInEntityInfo = false;
 		m_CurrentEntity  = NULL;
 
-		ClearDynamicWidgets();
+		if ( m_TabInfo )
+			m_TabInfo.ClearDynamicWidgets();
 
 		if ( m_Tabs )
-			m_Tabs.SetSelection( TAB_MAP );
+			m_Tabs.SetSelection( m_TabIdMap );
 
 		ShowMapMarkers();
 
@@ -579,16 +458,7 @@ class JMEntityManagerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_RefreshButton.TriggerSpin( 2 );
 		SyncAndRefresh();
-	}
-
-	void OnClick_Return( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		BackToList();
 	}
 
 	void OnFilterClick( UIEvent eid, UIActionBase action )
@@ -605,32 +475,6 @@ class JMEntityManagerForm: JMFormBase
 
 		m_FilterIndex = box.Value;
 		LoadEntities();
-	}
-
-	// Dispatched from every per-entity action button.
-	void OnEntityClick( UIEvent eid, UIActionBase action )
-	{
-		Class data;
-		action.GetUserData( data );
-
-		JMEntityAction act;
-		if ( !Class.CastTo( act, data ) )
-			return;
-
-		// Destructive = ConfirmInline fires CHANGE on confirm; others fire CLICK.
-		if ( act.m_IsDestructive && eid != UIEvent.CHANGE )
-			return;
-		if ( !act.m_IsDestructive && eid != UIEvent.CLICK )
-			return;
-
-		if ( !m_CurrentEntity )
-			return;
-
-		m_Module.RequestAction( act.m_Id, m_CurrentEntity );
-
-		// Destructive actions return to list by default.
-		if ( act.m_IsDestructive )
-			BackToList();
 	}
 
 	// Dispatched from every bulk action button (header row).
@@ -658,11 +502,7 @@ class JMEntityManagerForm: JMFormBase
 		if ( m_ListScroller )
 			m_ListScroller.UpdateScroller();
 
-		if ( m_OptionsScroller )
-			m_OptionsScroller.UpdateScroller();
-
-		if ( m_InfoScroller )
-			m_InfoScroller.UpdateScroller();
+		ResizeTabs( w, h );
 	}
 
 	override void OnShow()
@@ -671,7 +511,7 @@ class JMEntityManagerForm: JMFormBase
 
 		SyncAndRefresh();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
+		DeferCall( "UpdateMapPosition", 34, false, new Param2< bool, vector >( true, vector.Zero ) );
 
 		StartMarkerTick();
 	}
@@ -684,47 +524,19 @@ class JMEntityManagerForm: JMFormBase
 
 	protected void StartMarkerTick()
 	{
-		if ( !m_MarkerTickTimer )
-			m_MarkerTickTimer = new Timer( CALL_CATEGORY_GUI );
-
-		if ( !m_MarkerTickTimer.IsRunning() )
-			m_MarkerTickTimer.Run( MARKER_TICK_INTERVAL, this, "TickMarkers", NULL, true );
+		if ( m_TabMap )
+			m_TabMap.StartMarkerTick();
 	}
 
 	protected void StopMarkerTick()
 	{
-		if ( m_MarkerTickTimer && m_MarkerTickTimer.IsRunning() )
-			m_MarkerTickTimer.Stop();
-	}
-
-	void TickMarkers()
-	{
-		for ( int i = 0; i < m_MapMarkers.Count(); i++ )
-		{
-			JMEntityManagerMapMarker m = m_MapMarkers[i];
-			if ( m )
-				m.UpdatePosition();
-		}
+		if ( m_TabMap )
+			m_TabMap.StopMarkerTick();
 	}
 
 	void UpdateMapPosition( bool usePlayerPosition, vector mapPosition = vector.Zero )
 	{
-		if ( !m_MapWidget )
-			return;
-
-		if ( usePlayerPosition )
-		{
-			PlayerBase player;
-			float scale;
-			if ( Class.CastTo( player, GetGame().GetPlayer() ) && !player.GetLastMapInfo( scale, mapPosition ) )
-			{
-				scale = 0.33;
-				mapPosition = player.GetWorldPosition();
-			}
-
-			m_MapWidget.SetScale( scale );
-		}
-
-		m_MapWidget.SetMapPos( mapPosition );
+		if ( m_TabMap )
+			m_TabMap.UpdateMapPosition( usePlayerPosition, mapPosition );
 	}
 }

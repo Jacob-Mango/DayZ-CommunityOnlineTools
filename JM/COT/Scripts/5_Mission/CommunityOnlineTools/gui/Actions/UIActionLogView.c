@@ -26,13 +26,23 @@ class UIActionLogView: UIActionBase
 	protected Widget            m_Background;
 	protected GridSpacerWidget  m_Lines;
 	protected ScrollWidget      m_Scroll;
-
 	protected ref array<ref JMLogLine> m_Buffer;
 	protected int  m_MaxLines;
 	protected bool m_AutoScroll;
-
 	static const int DEFAULT_LINE_COLOR = JMTheme.TEXT_SECONDARY;
 	static const int LINE_HEIGHT        = 18;
+
+	int GetLineCount()
+	{
+		return m_Buffer.Count();
+	}
+
+	//! Maximum number of lines kept in memory (oldest are dropped).
+	void SetMaxLines( int max )
+	{
+		m_MaxLines = Math.Max( 1, max );
+		TrimBuffer();
+	}
 
 	override void OnInit()
 	{
@@ -45,13 +55,6 @@ class UIActionLogView: UIActionBase
 		m_Buffer     = new array<ref JMLogLine>;
 		m_MaxLines   = 200;
 		m_AutoScroll = true;
-	}
-
-	//! Maximum number of lines kept in memory (oldest are dropped).
-	void SetMaxLines( int max )
-	{
-		m_MaxLines = Math.Max( 1, max );
-		TrimBuffer();
 	}
 
 	//! Append a line of text with optional color.
@@ -98,12 +101,7 @@ class UIActionLogView: UIActionBase
 		m_Buffer.Clear();
 	}
 
-	int GetLineCount()
-	{
-		return m_Buffer.Count();
-	}
-
-	private void TrimBuffer()
+	protected void TrimBuffer()
 	{
 		while ( m_Buffer.Count() > m_MaxLines )
 		{

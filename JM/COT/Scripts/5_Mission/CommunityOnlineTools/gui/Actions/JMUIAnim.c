@@ -73,11 +73,9 @@ class JMAnimFloat
 		Dirty  = false;
 	}
 
-	void Set( float v )
+	bool IsAnimating()
 	{
-		Value  = v;
-		Target = v;
-		Dirty  = false;
+		return Dirty;
 	}
 
 	void SetTarget( float target, float speed = 8.0 )
@@ -85,6 +83,13 @@ class JMAnimFloat
 		Target = target;
 		Speed  = speed;
 		Dirty  = ( Value != Target );
+	}
+
+	void Set( float v )
+	{
+		Value  = v;
+		Target = v;
+		Dirty  = false;
 	}
 
 	bool Step( float timeSlice )
@@ -106,11 +111,6 @@ class JMAnimFloat
 		}
 
 		return true;
-	}
-
-	bool IsAnimating()
-	{
-		return Dirty;
 	}
 }
 
@@ -134,12 +134,9 @@ class JMAnimColor
 		Speed  = 6.0;
 	}
 
-	void Set( int color )
+	bool IsAnimating()
 	{
-		Value  = color;
-		From   = color;
-		Target = color;
-		T      = 1.0;
+		return T < 1.0;
 	}
 
 	void SetTarget( int target, float speed = 6.0 )
@@ -153,6 +150,14 @@ class JMAnimColor
 		Speed  = speed;
 	}
 
+	void Set( int color )
+	{
+		Value  = color;
+		From   = color;
+		Target = color;
+		T      = 1.0;
+	}
+
 	bool Step( float timeSlice )
 	{
 		if ( T >= 1.0 )
@@ -164,10 +169,5 @@ class JMAnimColor
 
 		Value = JMUIAnim.LerpColor( From, Target, JMUIAnim.EaseOut( T ) );
 		return true;
-	}
-
-	bool IsAnimating()
-	{
-		return T < 1.0;
 	}
 }

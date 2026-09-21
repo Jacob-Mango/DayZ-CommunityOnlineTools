@@ -23,11 +23,10 @@ enum JMPlayerVariables
 #ifndef CF_MODULE_PERMISSIONS
 class JMPlayerInstance : Managed
 {
-	private ref JMPermission m_RootPermission;
-	private ref array< string > m_Roles;
-	private ref map<string, string> m_RoleNameRestrictions;
-	private ref map<string, bool> m_SyncedToClient;
-
+	protected ref JMPermission m_RootPermission;
+	protected ref array< string > m_Roles;
+	protected ref map<string, string> m_RoleNameRestrictions;
+	protected ref map<string, bool> m_SyncedToClient;
 	PlayerBase PlayerObject;
 
 	//! protected, not private: DayZ-Expansion's `modded class JMPlayerInstance`
@@ -37,39 +36,28 @@ class JMPlayerInstance : Managed
 	//! variant of JMPlayerInstance already declares this protected - keep the two
 	//! in sync so mods compile against either.
 	protected int m_DataLastUpdated;
-
-	private string m_Name;
-	private string m_GUID;
-	private string m_Steam64ID;
-	
-	private int m_PingMax;
-	private int m_PingMin;
-	private int m_PingAvg;
-
-	private vector m_Position;
-	private vector m_Orientation;
-
-	private float m_Health;
-	private float m_Blood;
-	private float m_Shock;
-
-	private int m_BloodStatType;
-
-	private float m_Energy;
-	private float m_Water;
-
-	private float m_HeatComfort;
-	private float m_HeatBuffer;
-
-	private float m_Wet;
-	private float m_Tremor;
-	private float m_Stamina;
-
-	private int m_LifeSpanState;
-
-	private ref map<int, bool> m_PlayerVars;
-
-	private ref JMPlayerSerialize m_PlayerFile;
+	protected string m_Name;
+	protected string m_GUID;
+	protected string m_Steam64ID;
+	protected int m_PingMax;
+	protected int m_PingMin;
+	protected int m_PingAvg;
+	protected vector m_Position;
+	protected vector m_Orientation;
+	protected float m_Health;
+	protected float m_Blood;
+	protected float m_Shock;
+	protected int m_BloodStatType;
+	protected float m_Energy;
+	protected float m_Water;
+	protected float m_HeatComfort;
+	protected float m_HeatBuffer;
+	protected float m_Wet;
+	protected float m_Tremor;
+	protected float m_Stamina;
+	protected int m_LifeSpanState;
+	protected ref map<int, bool> m_PlayerVars;
+	protected ref JMPlayerSerialize m_PlayerFile;
 
 	void JMPlayerInstance( PlayerIdentity identity, string guid = JMConstants.OFFLINE_GUID )
 	{
@@ -96,6 +84,316 @@ class JMPlayerInstance : Managed
 		m_RoleNameRestrictions = new map<string, string>();
 		m_SyncedToClient = new map<string, bool>();
 		m_PlayerFile = new JMPlayerSerialize();
+	}
+
+	int GetAvgPing()
+	{
+		return m_PingAvg;
+	}
+
+	float GetBlood()
+	{
+		return m_Blood;
+	}
+
+	int GetBloodStatType()
+	{
+		return m_BloodStatType;
+	}
+
+	bool GetCannotBeTargetedByAI()
+	{
+		return m_PlayerVars[JMPlayerVariables.CANNOT_BE_TARGETED_BY_AI];
+	}
+
+	int GetDataLastUpdatedTime()
+	{
+		return m_DataLastUpdated;
+	}
+
+	float GetEnergy()
+	{
+		return m_Energy;
+	}
+
+	string GetGUID()
+	{
+		return m_GUID;
+	}
+
+	float GetHealth()
+	{
+		return m_Health;
+	}
+
+	float GetHeatBuffer()
+	{
+		return m_HeatBuffer;
+	}
+
+	float GetHeatComfort()
+	{
+		return m_HeatComfort;
+	}
+
+	int GetLifeSpanState()
+	{
+		return m_LifeSpanState;
+	}
+
+	int GetMaxPing()
+	{
+		return m_PingMax;
+	}
+
+	int GetMinPing()
+	{
+		return m_PingMin;
+	}
+
+	string GetName()
+	{
+		return m_Name;
+	}
+
+	vector GetOrientation()
+	{
+		return m_Orientation;
+	}
+
+	JMPermission GetPermissions()
+	{
+		return m_RootPermission;
+	}
+
+	vector GetPosition()
+	{
+		return m_Position;
+	}
+
+	// doesn't check through roles.
+	JMPermissionType GetRawPermissionType( string permission )
+	{
+		Assert_Null( m_RootPermission );
+
+		JMPermissionType permType;
+		m_RootPermission.HasPermission( permission, permType );
+		return permType;
+	}
+
+	bool GetReceiveDmgDealt()
+	{
+		return m_PlayerVars[JMPlayerVariables.RECEIVE_DMG_DEALT];
+	}
+
+	bool GetRemoveCollision()
+	{
+		return m_PlayerVars[JMPlayerVariables.REMOVE_COLLISION];
+	}
+
+	string GetRoleNameRestriction( string role )
+	{
+		string val;
+		m_RoleNameRestrictions.Find( role, val );
+		return val;
+	}
+
+	array< string > GetRoles()
+	{
+		return m_Roles;
+	}
+
+	float GetShock()
+	{
+		return m_Shock;
+	}
+
+	float GetStamina()
+	{
+		return m_Stamina;
+	}
+
+	//! The stats block for this player, creating it on first use. Server-side
+	//! only - the client copy of an instance has no player file.
+	JMPlayerStats GetStats()
+	{
+		if ( !m_PlayerFile )
+			return NULL;
+
+		if ( !m_PlayerFile.Stats )
+			m_PlayerFile.Stats = new JMPlayerStats();
+
+		return m_PlayerFile.Stats;
+	}
+
+	string GetSteam64ID()
+	{
+		return m_Steam64ID;
+	}
+
+	float GetTremor()
+	{
+		return m_Tremor;
+	}
+
+	float GetWater()
+	{
+		return m_Water;
+	}
+
+	float GetWet()
+	{
+		return m_Wet;
+	}
+
+	bool HasAdminNVG()
+	{
+		return m_PlayerVars[JMPlayerVariables.ADMIN_NVG];
+	}
+
+	bool HasBloodyHands()
+	{
+		return m_PlayerVars[JMPlayerVariables.BLOODY_HANDS];
+	}
+
+	bool HasBrokenLegs()
+	{
+		return m_PlayerVars[JMPlayerVariables.BROKEN_LEGS];
+	}
+
+	bool HasGodMode()
+	{
+		return m_PlayerVars[JMPlayerVariables.GODMODE];
+	}
+
+	bool HasInvisibility()
+	{
+		return m_PlayerVars[JMPlayerVariables.INVISIBILITY];
+	}
+
+	//! Does this player hold `permission` in their OWN tree, with no role
+	//! involved? HasPermission() below falls back to every role the player is
+	//! in; this deliberately does not, so a caller can tell "granted to this
+	//! person" apart from "comes with the role they are in".
+	bool HasOwnPermission( string permission )
+	{
+		Assert_Null( m_RootPermission );
+
+		JMPermissionType ownPermType;
+		return m_RootPermission.HasPermission( permission, ownPermType );
+	}
+
+	bool HasPermission( string permission )
+	{
+		Assert_Null( m_RootPermission );
+		
+		JMPermissionType permType;
+		bool hasPermission = m_RootPermission.HasPermission( permission, permType );
+		
+		// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
+		if ( hasPermission )
+			return true;
+
+		// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
+		if ( permType == JMPermissionType.DISALLOW )
+			return false;
+
+		for ( int j = 0; j < m_Roles.Count(); j++ )
+		{
+			// Skip this role if a name restriction is set and the current name doesn't match
+			string requiredName;
+			if ( m_RoleNameRestrictions.Find( m_Roles[j], requiredName ) && requiredName != "" && m_Name != requiredName )
+				continue;
+
+			JMRole role = GetPermissionsManager().GetRole( m_Roles[j] );
+			if ( !role )
+				continue;
+
+			hasPermission = role.HasPermission( permission, permType );
+
+			// Print( "JMPlayerInstance::HasPermission - role[" + j + "]=" + Roles[j] );
+			// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
+			// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
+
+			if ( hasPermission )
+				return true;
+		}
+
+		return false;
+	}
+
+	bool HasRole( string role )
+	{
+		return m_Roles.Find( role ) >= 0;
+	}
+
+	//! True when this player has session history worth persisting.
+	bool HasStats()
+	{
+		if ( !m_PlayerFile || !m_PlayerFile.Stats )
+			return false;
+
+		return !m_PlayerFile.Stats.IsEmpty();
+	}
+
+	bool HasUnlimitedAmmo()
+	{
+		return m_PlayerVars[JMPlayerVariables.UNLIMITED_AMMO];
+	}
+
+	bool HasUnlimitedStamina()
+	{
+		return m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA];
+	}
+
+	bool IsBleeding()
+	{
+		return m_PlayerVars[JMPlayerVariables.BLEEDING];
+	}
+
+	bool IsDead()
+	{
+		return m_Health <= 0 || m_PlayerVars[JMPlayerVariables.DEAD];
+	}
+
+	// Returns true when the player has no customisation: only the "everyone" role and no
+	// explicitly set permissions.  Files should not be written in this state.
+	bool IsDefaultState()
+	{
+		if ( m_Roles.Count() != 1 || m_Roles[0] != "everyone" )
+			return false;
+
+		// m_Sync is set true as soon as any non-INHERIT permission is added to the tree.
+		if ( m_RootPermission.m_Sync )
+			return false;
+
+		// Session history counts as state worth keeping. Without this an
+		// ordinary player - default roles, no explicit permissions - has their
+		// file deleted on the very next save, taking their playtime with it.
+		if ( HasStats() )
+			return false;
+
+		return true;
+	}
+
+	bool IsFrozen()
+	{
+		return m_PlayerVars[JMPlayerVariables.FROZEN];
+	}
+
+	bool IsRagdoll()
+	{
+		return m_PlayerVars[JMPlayerVariables.RAGDOLL];
+	}
+
+	bool IsSick()
+	{
+		return m_PlayerVars[JMPlayerVariables.SICK];
+	}
+
+	bool IsUnconscious()
+	{
+		return m_PlayerVars[JMPlayerVariables.UNCONSCIOUS];
 	}
 
 	void MakeFake( string gid, string sid, string nid )
@@ -225,90 +523,12 @@ class JMPlayerInstance : Managed
 		m_SyncedToClient.Clear();
 	}
 
-	bool HasRole( string role )
-	{
-		return m_Roles.Find( role ) >= 0;
-	}
-
-	array< string > GetRoles()
-	{
-		return m_Roles;
-	}
-
-	string GetRoleNameRestriction( string role )
-	{
-		string val;
-		m_RoleNameRestrictions.Find( role, val );
-		return val;
-	}
-
-	// doesn't check through roles.
-	JMPermissionType GetRawPermissionType( string permission )
-	{
-		Assert_Null( m_RootPermission );
-
-		JMPermissionType permType;
-		m_RootPermission.HasPermission( permission, permType );
-		return permType;
-	}
-
 	void ClearRoles()
 	{
 		m_Roles.Clear();
 		m_RoleNameRestrictions.Clear();
 
 		AddRole( "everyone" );
-	}
-
-	//! Does this player hold `permission` in their OWN tree, with no role
-	//! involved? HasPermission() below falls back to every role the player is
-	//! in; this deliberately does not, so a caller can tell "granted to this
-	//! person" apart from "comes with the role they are in".
-	bool HasOwnPermission( string permission )
-	{
-		Assert_Null( m_RootPermission );
-
-		JMPermissionType ownPermType;
-		return m_RootPermission.HasPermission( permission, ownPermType );
-	}
-
-	bool HasPermission( string permission )
-	{
-		Assert_Null( m_RootPermission );
-		
-		JMPermissionType permType;
-		bool hasPermission = m_RootPermission.HasPermission( permission, permType );
-		
-		// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
-		if ( hasPermission )
-			return true;
-
-		// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
-		if ( permType == JMPermissionType.DISALLOW )
-			return false;
-
-		for ( int j = 0; j < m_Roles.Count(); j++ )
-		{
-			// Skip this role if a name restriction is set and the current name doesn't match
-			string requiredName;
-			if ( m_RoleNameRestrictions.Find( m_Roles[j], requiredName ) && requiredName != "" && m_Name != requiredName )
-				continue;
-
-			JMRole role = GetPermissionsManager().GetRole( m_Roles[j] );
-			if ( !role )
-				continue;
-
-			hasPermission = role.HasPermission( permission, permType );
-
-			// Print( "JMPlayerInstance::HasPermission - role[" + j + "]=" + Roles[j] );
-			// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
-			// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
-
-			if ( hasPermission )
-				return true;
-		}
-
-		return false;
 	}
 
 	void OnSend( ParamsWriteContext ctx, string sendToGUID = JMConstants.OFFLINE_GUID )
@@ -404,7 +624,7 @@ class JMPlayerInstance : Managed
 		for ( int j = 0; j < roles.Count(); j++ )
 			AddRole( roles[j] );
 	}
-	
+
 	void OnSendPosition( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Position );
@@ -414,7 +634,7 @@ class JMPlayerInstance : Managed
 	{
 		ctx.Read( m_Position );
 	}
-	
+
 	void OnSendOrientation( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Orientation );
@@ -424,7 +644,7 @@ class JMPlayerInstance : Managed
 	{
 		ctx.Read( m_Orientation );
 	}
-	
+
 	void OnSendHealth( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Health );
@@ -473,48 +693,6 @@ class JMPlayerInstance : Managed
 			int value = EnumTools.GetEnumValue(JMPlayerVariables, i);
 			m_PlayerVars[value] = (bitmask & value) == value;
 		}
-	}
-
-	// Returns true when the player has no customisation: only the "everyone" role and no
-	// explicitly set permissions.  Files should not be written in this state.
-	bool IsDefaultState()
-	{
-		if ( m_Roles.Count() != 1 || m_Roles[0] != "everyone" )
-			return false;
-
-		// m_Sync is set true as soon as any non-INHERIT permission is added to the tree.
-		if ( m_RootPermission.m_Sync )
-			return false;
-
-		// Session history counts as state worth keeping. Without this an
-		// ordinary player - default roles, no explicit permissions - has their
-		// file deleted on the very next save, taking their playtime with it.
-		if ( HasStats() )
-			return false;
-
-		return true;
-	}
-
-	//! True when this player has session history worth persisting.
-	bool HasStats()
-	{
-		if ( !m_PlayerFile || !m_PlayerFile.Stats )
-			return false;
-
-		return !m_PlayerFile.Stats.IsEmpty();
-	}
-
-	//! The stats block for this player, creating it on first use. Server-side
-	//! only - the client copy of an instance has no player file.
-	JMPlayerStats GetStats()
-	{
-		if ( !m_PlayerFile )
-			return NULL;
-
-		if ( !m_PlayerFile.Stats )
-			m_PlayerFile.Stats = new JMPlayerStats();
-
-		return m_PlayerFile.Stats;
 	}
 
 	void Save()
@@ -666,199 +844,9 @@ class JMPlayerInstance : Managed
 		m_RootPermission.DebugPrint( 2 );
 	}
 
-	int GetDataLastUpdatedTime()
-	{
-		return m_DataLastUpdated;
-	}
-
-	string GetGUID()
-	{
-		return m_GUID;
-	}
-
-	string GetSteam64ID()
-	{
-		return m_Steam64ID;
-	}
-
-	string GetName()
-	{
-		return m_Name;
-	}
-
 	string FormatSteamWebhook()
 	{
 		return "[" + m_Name + "](https://steamcommunity.com/profiles/" + m_Steam64ID + ")";
-	}
-
-	int GetMaxPing()
-	{
-		return m_PingMax;
-	}
-
-	int GetMinPing()
-	{
-		return m_PingMin;
-	}
-
-	int GetAvgPing()
-	{
-		return m_PingAvg;
-	}
-
-	JMPermission GetPermissions()
-	{
-		return m_RootPermission;
-	}
-
-	vector GetPosition()
-	{
-		return m_Position;
-	}
-
-	vector GetOrientation()
-	{
-		return m_Orientation;
-	}
-
-	float GetHealth()
-	{
-		return m_Health;
-	}
-
-	float GetBlood()
-	{
-		return m_Blood;
-	}
-
-	float GetShock()
-	{
-		return m_Shock;
-	}
-
-	int GetBloodStatType()
-	{
-		return m_BloodStatType;
-	}
-
-	float GetEnergy()
-	{
-		return m_Energy;
-	}
-
-	float GetWater()
-	{
-		return m_Water;
-	}
-
-	float GetHeatComfort()
-	{
-		return m_HeatComfort;
-	}
-
-	float GetHeatBuffer()
-	{
-		return m_HeatBuffer;
-	}
-
-	float GetWet()
-	{
-		return m_Wet;
-	}
-
-	float GetTremor()
-	{
-		return m_Tremor;
-	}
-
-	float GetStamina()
-	{
-		return m_Stamina;
-	}
-
-	int GetLifeSpanState()
-	{
-		return m_LifeSpanState;
-	}
-
-	bool IsUnconscious()
-	{
-		return m_PlayerVars[JMPlayerVariables.UNCONSCIOUS];
-	}
-
-	bool HasBloodyHands()
-	{
-		return m_PlayerVars[JMPlayerVariables.BLOODY_HANDS];
-	}
-
-	bool HasGodMode()
-	{
-		return m_PlayerVars[JMPlayerVariables.GODMODE];
-	}
-
-	bool IsFrozen()
-	{
-		return m_PlayerVars[JMPlayerVariables.FROZEN];
-	}
-
-	bool IsRagdoll()
-	{
-		return m_PlayerVars[JMPlayerVariables.RAGDOLL];
-	}
-
-	bool HasInvisibility()
-	{
-		return m_PlayerVars[JMPlayerVariables.INVISIBILITY];
-	}
-
-	bool HasUnlimitedAmmo()
-	{
-		return m_PlayerVars[JMPlayerVariables.UNLIMITED_AMMO];
-	}
-
-	bool HasUnlimitedStamina()
-	{
-		return m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA];
-	}
-
-	bool HasAdminNVG()
-	{
-		return m_PlayerVars[JMPlayerVariables.ADMIN_NVG];
-	}
-
-	bool HasBrokenLegs()
-	{
-		return m_PlayerVars[JMPlayerVariables.BROKEN_LEGS];
-	}
-
-	bool GetReceiveDmgDealt()
-	{
-		return m_PlayerVars[JMPlayerVariables.RECEIVE_DMG_DEALT];
-	}
-
-	bool GetCannotBeTargetedByAI()
-	{
-		return m_PlayerVars[JMPlayerVariables.CANNOT_BE_TARGETED_BY_AI];
-	}
-
-	bool GetRemoveCollision()
-	{
-		return m_PlayerVars[JMPlayerVariables.REMOVE_COLLISION];
-	}
-
-	bool IsSick()
-	{
-		return m_PlayerVars[JMPlayerVariables.SICK];
-	}
-
-	bool IsBleeding()
-	{
-		return m_PlayerVars[JMPlayerVariables.BLEEDING];
-	}
-
-	bool IsDead()
-	{
-		return m_Health <= 0 || m_PlayerVars[JMPlayerVariables.DEAD];
 	}
 }
 #endif

@@ -19,13 +19,11 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 	// gets GC'd the moment CreateTooltip() returns and tooltips die everywhere.
 	static ref UIActionTooltip s_InstanceRef;
 	static UIActionTooltip s_Instance;
-
 	protected Widget          m_Root;
 	protected RichTextWidget  m_Text;
 	protected Widget          m_TextContainer;
 	protected ImageWidget     m_Icon;
 	protected Widget          m_Swatch;
-
 	protected bool m_Visible;
 	protected int  m_TooltipW;
 
@@ -39,7 +37,6 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 	// The widget that triggered the current (or pending) tooltip - used to auto-hide
 	// when the source widget's form is hidden.
 	protected Widget m_SourceWidget;
-
 	static const float HOVER_DELAY_S = 1.0;
 
 	void UIActionTooltip( notnull Widget anchor )

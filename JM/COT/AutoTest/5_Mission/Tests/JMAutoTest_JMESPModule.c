@@ -106,14 +106,6 @@ static void JMAutoTest_JMESPModule_Sweep(JMESPModule mod)
 	JMAutoTest_Canary("JMESPModuleRPC.ObjectActionResult");
 
 	JMAutoTest_ExpectCanary();
-	mod.OnRPC(NULL, NULL, JMESPModuleRPC.UndoLastAction, JMAutoTest_EmptyReadContext());
-	JMAutoTest_Canary("JMESPModuleRPC.UndoLastAction");
-
-	JMAutoTest_ExpectCanary();
-	mod.OnRPC(NULL, NULL, JMESPModuleRPC.RedoLastAction, JMAutoTest_EmptyReadContext());
-	JMAutoTest_Canary("JMESPModuleRPC.RedoLastAction");
-
-	JMAutoTest_ExpectCanary();
 	mod.OnRPC(NULL, NULL, JMESPModuleRPC.RecordTransformHistory, JMAutoTest_EmptyReadContext());
 	JMAutoTest_Canary("JMESPModuleRPC.RecordTransformHistory");
 }

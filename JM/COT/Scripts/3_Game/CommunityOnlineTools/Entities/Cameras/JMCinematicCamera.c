@@ -8,49 +8,45 @@ enum JMTravelMode
 class JMCinematicCamera: JMCameraBase
 {
 	static JMCinematicCamera s_COT_CinematicCamera;
-
 	vector linearVelocity;
 	vector angularVelocity;
-
 	vector orientation;
-
 	vector positionOffset;
 
 	// Traveling
 	ref array< ref JMCameraWaypoint > travelWaypoints;
-
-	private int   currentTargetIndex;
-	private float currentTime;
-	private bool  shouldTravel;
-	private bool  m_TravelPaused;
-	private int   m_TravelDirection = 1;  // +1 forward, -1 pingpong reverse
+	protected int   currentTargetIndex;
+	protected float currentTime;
+	protected bool  shouldTravel;
+	protected bool  m_TravelPaused;
+	protected int   m_TravelDirection = 1;  // +1 forward, -1 pingpong reverse
 
 	// Hold state
-	private bool  m_Holding;
-	private float m_HoldTimer;
+	protected bool  m_Holding;
+	protected float m_HoldTimer;
 
 	// Segment start/end cache (rebuilt each segment transition)
-	private vector startPosition;
-	private vector endPosition;
-	private vector startOrientation;
-	private vector endOrientation;
-	private bool   m_InterpolateOrientation;  // true only when both endpoints have captured orientation
-	private float  targetTime;
-	private bool   targetCatmull;
-	private JMCameraEasing targetEasing;
-	private int    m_FromIdx;   // cached from-waypoint index for effects interpolation
-	private int    m_ToIdx;     // cached to-waypoint index for effects interpolation
+	protected vector startPosition;
+	protected vector endPosition;
+	protected vector startOrientation;
+	protected vector endOrientation;
+	protected bool   m_InterpolateOrientation;  // true only when both endpoints have captured orientation
+	protected float  targetTime;
+	protected bool   targetCatmull;
+	protected JMCameraEasing targetEasing;
+	protected int    m_FromIdx;   // cached from-waypoint index for effects interpolation
+	protected int    m_ToIdx;     // cached to-waypoint index for effects interpolation
 
 	// Speed-based travel (smooth speed transitions between waypoints)
-	private float  m_CurrentSpeed;    // actual instantaneous speed (m/s), lerped each frame
-	private float  m_TargetSpeed;     // destination speed for this segment (from waypoint)
-	private float  m_SegmentLength;   // arc length of current segment (metres)
-	private float  m_TravelDistance;  // distance traveled in current segment (metres)
-	private bool   m_UseSpeedTravel;  // true when the current segment uses speed-based travel
+	protected float  m_CurrentSpeed;    // actual instantaneous speed (m/s), lerped each frame
+	protected float  m_TargetSpeed;     // destination speed for this segment (from waypoint)
+	protected float  m_SegmentLength;   // arc length of current segment (metres)
+	protected float  m_TravelDistance;  // distance traveled in current segment (metres)
+	protected bool   m_UseSpeedTravel;  // true when the current segment uses speed-based travel
 
 	// Arc-length reparameterization lookup table (per segment, 20 samples)
-	private static const int ARC_SAMPLES = 20;
-	private ref array< float > m_ArcTable;  // normalized cumulative arc lengths [0..1]
+	protected static const int ARC_SAMPLES = 20;
+	protected ref array< float > m_ArcTable;  // normalized cumulative arc lengths [0..1]
 
 	// Interpolated travel effects - read by JMCameraModule.OnUpdate
 	float m_TravelExposure;
@@ -64,19 +60,14 @@ class JMCinematicCamera: JMCameraBase
 	JMTravelMode m_TravelMode   = JMTravelMode.ONCE;
 	float        m_SpeedMult    = 1.0;  // > 1 = faster, < 1 = slower
 
-	bool IsTraveling()  { return shouldTravel; }
-	bool IsPaused()     { return m_TravelPaused; }
-
 	// Camera shake (set by module or by travel)
 	float m_ShakeIntensity;
 	float m_ShakeFrequency;
-	private float m_ShakeTime;
-
+	protected float m_ShakeTime;
 	autoptr TStringArray m_PossibleInputExcludes = {"menu", "inventory", "map"};
-
-	private float m_Strafe;
-	private float m_Altitude;
-	private float m_Forward;
+	protected float m_Strafe;
+	protected float m_Altitude;
+	protected float m_Forward;
 
 	void JMCinematicCamera()
 	{
@@ -88,6 +79,30 @@ class JMCinematicCamera: JMCameraBase
 
 		s_COT_CinematicCamera = this;
 	}
+
+	// ----------------------------------------------------------------
+	//  Travel helpers
+	// ----------------------------------------------------------------
+
+	// Returns the waypoint index at the current segment end (accounting for direction)
+	protected int GetCurrentEndIndex()
+	{
+		return m_ToIdx;
+	}
+
+	bool IsAnyInputExcludeActive()
+	{
+		foreach (string exclude: m_PossibleInputExcludes)
+		{
+			if (g_Game.GetMission().IsInputExcludeActive(exclude))
+				return true;
+		}
+		return false;
+	}
+
+	bool IsPaused()     { return m_TravelPaused; }
+
+	bool IsTraveling()  { return shouldTravel; }
 
 	// ----------------------------------------------------------------
 	//  Public controls
@@ -309,18 +324,8 @@ class JMCinematicCamera: JMCameraBase
 		}
 	}
 
-	// ----------------------------------------------------------------
-	//  Travel helpers
-	// ----------------------------------------------------------------
-
-	// Returns the waypoint index at the current segment end (accounting for direction)
-	private int GetCurrentEndIndex()
-	{
-		return m_ToIdx;
-	}
-
 	// Shortest-arc lerp for a single angle (degrees), handles wrap at +/-180
-	private float LerpAngle( float a, float b, float t )
+	protected float LerpAngle( float a, float b, float t )
 	{
 		float diff = b - a;
 		// Wrap diff into (-180, 180]
@@ -329,7 +334,7 @@ class JMCinematicCamera: JMCameraBase
 		return a + diff * t;
 	}
 
-	private void ApplyTravelOrientation( float t )
+	protected void ApplyTravelOrientation( float t )
 	{
 		if ( !m_InterpolateOrientation )
 			return;
@@ -343,7 +348,7 @@ class JMCinematicCamera: JMCameraBase
 		SetOrientation(orientation);
 	}
 
-	private void ApplyTravelPosition( float t )
+	protected void ApplyTravelPosition( float t )
 	{
 		float tInterp;
 		vector pos;
@@ -367,7 +372,7 @@ class JMCinematicCamera: JMCameraBase
 		SetPosition(pos + positionOffset);
 	}
 
-	private void ApplyTravelEffectsAtT( float t, float timeslice )
+	protected void ApplyTravelEffectsAtT( float t, float timeslice )
 	{
 		JMCameraWaypoint wpStart = travelWaypoints[m_FromIdx];
 		JMCameraWaypoint wpEnd   = travelWaypoints[m_ToIdx];
@@ -394,7 +399,7 @@ class JMCinematicCamera: JMCameraBase
 	}
 
 	// Advance to the next segment (or loop/pingpong)
-	private void AdvanceSegment()
+	protected void AdvanceSegment()
 	{
 		int nextIdx = currentTargetIndex + m_TravelDirection;
 
@@ -479,7 +484,7 @@ class JMCinematicCamera: JMCameraBase
 		LoadSegment(1);
 	}
 
-	private void LoadSegment( int idx )
+	protected void LoadSegment( int idx )
 	{
 		currentTime   = 0.0;
 		targetEasing  = travelWaypoints[idx].m_Easing;
@@ -554,7 +559,7 @@ class JMCinematicCamera: JMCameraBase
 	//  Arc-length reparameterization (Catmull-Rom constant speed)
 	// ----------------------------------------------------------------
 
-	private void BuildArcTable( int idx )
+	protected void BuildArcTable( int idx )
 	{
 		m_ArcTable.Clear();
 
@@ -586,7 +591,7 @@ class JMCinematicCamera: JMCameraBase
 	}
 
 	// Map uniform t -> arc-parameterized t using the lookup table
-	private float CatmullArcLengthRemap( float t )
+	protected float CatmullArcLengthRemap( float t )
 	{
 		if ( m_ArcTable.Count() < 2 )
 			return t;
@@ -624,7 +629,7 @@ class JMCinematicCamera: JMCameraBase
 	//  Easing
 	// ----------------------------------------------------------------
 
-	private float ApplyEasing( float t, JMCameraEasing easing )
+	protected float ApplyEasing( float t, JMCameraEasing easing )
 	{
 		switch ( easing )
 		{
@@ -673,7 +678,7 @@ class JMCinematicCamera: JMCameraBase
 	//  Math helpers
 	// ----------------------------------------------------------------
 
-	private vector CatmullRom( vector p0, vector p1, vector p2, vector p3, float t )
+	protected vector CatmullRom( vector p0, vector p1, vector p2, vector p3, float t )
 	{
 		float t2 = t * t;
 		float t3 = t2 * t;
@@ -695,24 +700,14 @@ class JMCinematicCamera: JMCameraBase
 		return result;
 	}
 
-	private float SmoothStep(float t)
+	protected float SmoothStep(float t)
 	{
 		return t * t * (3 - 2 * t);
 	}
 
-	private float SmootherStep(float t)
+	protected float SmootherStep(float t)
 	{
 		return t * t * t * (t * (6 * t - 15) + 10);
-	}
-
-	bool IsAnyInputExcludeActive()
-	{
-		foreach (string exclude: m_PossibleInputExcludes)
-		{
-			if (g_Game.GetMission().IsInputExcludeActive(exclude))
-				return true;
-		}
-		return false;
 	}
 
 	void AngleToQuat( float angle, vector dir, out float d[4] )

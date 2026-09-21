@@ -6,7 +6,7 @@
 //
 //  Unlike the lazy-tab-container forms elsewhere in COT, this one has no
 //  per-mode content panel: Roles and Players share the same two containers
-//  (m_ListWrapper / m_EditorWrapper below) and SetMode() tears down and
+//  (m_ListWrapper / m_EditorWrapper below) and the tab focus hook tears down and
 //  rebuilds whichever is active. JMRoleManagerFormTabRoles.c and
 //  JMRoleManagerFormTabPlayers.c each own one mode's rebuild logic and
 //  state; this form owns the containers, the mode switch, and the
@@ -19,14 +19,16 @@
 
 class JMRoleManagerForm : JMFormBase
 {
+	//! Tab indices - what the strip's AddTab() returned for each tab, never written as numbers.
+	protected int m_TabIdRoles   = -1;
+	protected int m_TabIdPlayers = -1;
+
 	// -------------------------------------------------------------------------
 	//  Mode state
 	// -------------------------------------------------------------------------
 
 	protected bool                        m_PlayerMode = false; // false = Roles, true = Players
 
-	static const int TAB_ROLES            = 0;
-	static const int TAB_PLAYERS          = 1;
 
 	//! Height of the roster toolbar block pinned above the list.
 	static const int LEFT_TOOLBAR_HEIGHT  = 75;
@@ -40,7 +42,6 @@ class JMRoleManagerForm : JMFormBase
 	//! these through their back-reference.
 	UIActionScroller            m_LeftScroller;
 	Widget                      m_LeftContent;
-
 	UIActionScroller            m_RightScroller;
 	Widget                      m_RightScrollContent;
 
@@ -61,13 +62,13 @@ class JMRoleManagerForm : JMFormBase
 
 	//! One class per mode, in its own file - built once at init (this form
 	//! has no lazy content container to hang a Build() on - see file header),
-	//! then dispatched to from SetMode()/PopulateRoleList()/OpenPlayer().
+	//! then dispatched to from OnTabFocus()/PopulateRoleList()/OpenPlayer().
 	ref JMRoleManagerFormTabRoles   m_TabRoles;
 	ref JMRoleManagerFormTabPlayers m_TabPlayers;
 
 	//! A role list arrives from the server every time the tab is reopened, not
 	//! just when the admin clicks Refresh - JMRoleManagerModule.RequestRoleList()
-	//! is called from OnShow() and from the Player Manager deep link too. That
+	//! is called from OnShow() (through RequestData()) and from the Player Manager deep link too. That
 	//! response must not blow away an editor the admin is mid-edit in, so
 	//! PopulateRoleList() only forces a full editor rebuild when this is set -
 	//! i.e. right before a call that came from an explicit Refresh click.
@@ -88,10 +89,10 @@ class JMRoleManagerForm : JMFormBase
 	}
 
 	// -------------------------------------------------------------------------
-	//  OnInit
+	//  OnCreate
 	// -------------------------------------------------------------------------
 
-	override void OnInit()
+	override void OnCreate()
 	{
 		m_TabRoles   = new JMRoleManagerFormTabRoles( this );
 		m_TabPlayers = new JMRoleManagerFormTabPlayers( this );
@@ -109,6 +110,14 @@ class JMRoleManagerForm : JMFormBase
 		InitWidgetsLeft();
 		InitWidgetsRight();
 
+		//! Each mode is a JMFormTab: entering one focuses it, leaving one unfocuses it
+		//! (which drops its selection). There is no per-tab content panel, so nothing is
+		//! created lazily and DeclareTabs() is not used - see the file header.
+		RegisterTab( m_TabIdRoles, m_TabRoles );
+		RegisterTab( m_TabIdPlayers, m_TabPlayers );
+
+		InitTabFocus( m_TabIdRoles );
+
 		UpdateUI();
 	}
 
@@ -118,13 +127,16 @@ class JMRoleManagerForm : JMFormBase
 		//! content panels are registered with UIActionTabs here.
 		if ( m_LeftTabStrip )
 		{
-			ref array<string> tabLabels = { "#STR_COT_ROLEMANAGER_MODULE_TAB_ROLES", "#STR_COT_ROLEMANAGER_MODULE_TAB_PLAYERS" };
-			ref array<string> tabIcons  = { JMConstants.Lucide( "shield" ), JMConstants.Lucide( "users" ) };
-
-			m_Tabs = UIActionManager.CreateTabs( m_LeftTabStrip, tabLabels, tabIcons, this, "OnChange_Tab" );
+			m_Tabs = UIActionManager.CreateTabStrip( m_LeftTabStrip, this, "OnChange_Tab" );
 
 			if ( m_Tabs )
-				m_Tabs.SetSelection( TAB_ROLES, false );
+			{
+				//! No content panels: the mode's list and editor are rebuilt into shared containers.
+				m_TabIdRoles   = m_Tabs.AddTab( "#STR_COT_ROLEMANAGER_MODULE_TAB_ROLES", JMConstants.Lucide( "shield" ) );
+				m_TabIdPlayers = m_Tabs.AddTab( "#STR_COT_ROLEMANAGER_MODULE_TAB_PLAYERS", JMConstants.Lucide( "users" ) );
+
+				m_Tabs.SetSelection( m_TabIdRoles, false );
+			}
 		}
 
 		m_TabPlayers.BuildToolbar( m_LeftToolbar );
@@ -185,9 +197,9 @@ class JMRoleManagerForm : JMFormBase
 			hasSelection = m_TabPlayers && m_TabPlayers.HasSelection();
 
 		if ( hasSelection )
-			ShowUI();
+			SetPanelEnabled( true );
 		else
-			HideUI();
+			SetPanelEnabled( false );
 	}
 
 	override void OnResize( float w, float h )
@@ -207,14 +219,6 @@ class JMRoleManagerForm : JMFormBase
 		if ( m_RightScroller ) m_RightScroller.UpdateScroller();
 	}
 
-	override void OnShow()
-	{
-		super.OnShow();
-
-		if ( m_Module )
-			m_Module.RequestRoleList();
-	}
-
 	override void OnClientPermissionsUpdated()
 	{
 		super.OnClientPermissionsUpdated();
@@ -222,12 +226,9 @@ class JMRoleManagerForm : JMFormBase
 		UpdateUI();
 	}
 
-	override int GetActiveTabIndex()
+	protected override COT_ScriptedWidgetEventHandler GetTabStrip()
 	{
-		if ( !m_Tabs )
-			return -1;
-
-		return m_Tabs.GetSelection();
+		return m_Tabs;
 	}
 
 	override void OnHide()
@@ -244,34 +245,33 @@ class JMRoleManagerForm : JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		UIActionTabs tabs;
-		if ( !Class.CastTo( tabs, action ) )
+		//! Clicking the tab that is already showing is not a mode change.
+		if ( IsTabFocused( m_Tabs.GetSelection() ) )
 			return;
 
-		SetMode( tabs.GetSelection() == TAB_PLAYERS );
+		HandleTabChange();
 	}
 
-	protected void SetMode( bool playerMode )
+	//! A mode switch: the other mode's selection is dropped by its JMFormTab.OnUnfocus,
+	//! then this mode's roster and an empty editor are built.
+	override protected void OnTabFocus( int tab )
 	{
-		if ( m_PlayerMode == playerMode )
-			return;
-
-		m_PlayerMode = playerMode;
+		m_PlayerMode = ( tab == m_TabIdPlayers );
 
 		ApplyModeToolbars();
 
 		if ( m_PlayerMode )
 		{
-			m_TabRoles.SelectNone();
 			m_TabPlayers.RebuildPlayerList();
 			RebuildEditorEmpty( "#STR_COT_ROLEMANAGER_MODULE_SELECT_PLAYER_PROMPT" );
 		}
 		else
 		{
-			m_TabPlayers.SelectNone();
 			m_TabRoles.RebuildRoleList();
 			RebuildEditorEmpty( "#STR_COT_ROLEMANAGER_MODULE_SELECT_ROLE_PROMPT" );
 		}
+
+		super.OnTabFocus( tab );
 	}
 
 	// -------------------------------------------------------------------------
@@ -295,21 +295,14 @@ class JMRoleManagerForm : JMFormBase
 	//! Deep link from another form - the Player Manager's identity card sends
 	//! the admin here to change the role they are looking at.
 	//!
-	//! SetMode() is deliberately not used: it returns early when the form is
-	//! already in Players mode, which is the common case for a second jump, and
-	//! it would then leave the previous player selected.
+	//! Switches to the Players tab if needed (a no-op when it is already up, the
+	//! common case for a second jump), then selects the player.
 	void OpenPlayer( string guid )
 	{
 		if ( guid == "" )
 			return;
 
-		if ( m_Tabs )
-			m_Tabs.SetSelection( TAB_PLAYERS, false );
-
-		m_PlayerMode = true;
-		m_TabRoles.SelectNone();
-
-		ApplyModeToolbars();
+		SetTabFocused( m_TabIdPlayers, true );
 
 		m_TabPlayers.OpenPlayer( guid );
 
@@ -337,7 +330,7 @@ class JMRoleManagerForm : JMFormBase
 		return m_EditorWrapper;
 	}
 
-	private void RebuildEditorEmpty( string msg )
+	protected void RebuildEditorEmpty( string msg )
 	{
 		ClearEditorContainer();
 
@@ -429,7 +422,6 @@ class JMPermTreeNode : UIActionData
 {
 	JMPermission          Perm;
 	string                FullName;
-
 	UIActionToggleSwitch  Toggle;
 	//! Branch only - the flat row that folds the subtree.
 	UIActionButton        NodeButton;
@@ -437,7 +429,6 @@ class JMPermTreeNode : UIActionData
 	UIActionText          LeafText;
 	//! Branch only - holds this node's subtree and animates it open and shut.
 	UIActionFoldPanel     Fold;
-
 	ref array< ref JMPermTreeNode > Children;
 
 	void JMPermTreeNode()

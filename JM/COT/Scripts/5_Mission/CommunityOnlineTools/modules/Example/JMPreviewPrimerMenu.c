@@ -40,14 +40,22 @@ class JMPreviewPrimerMenu extends UIScriptedMenu
 
 	//! Edge length in pixels of the primer widgets. T13 steps through these.
 	static const ref array<int> SIZE_STEPS = { 512, 256, 64, 16, 4 };
-
 	static int s_SizeStep = 0;
-
 	static JMPreviewPrimerMenu s_Instance;
-
 	protected ItemPreviewWidget m_Preview;
 	protected MapWidget         m_Map;
 	protected EntityAI          m_Item;
+
+	void ~JMPreviewPrimerMenu()
+	{
+		if ( g_Game && m_Item )
+			g_Game.ObjectDelete( m_Item );
+	}
+
+	static bool IsOpen()
+	{
+		return s_Instance != NULL;
+	}
 
 	override Widget Init()
 	{
@@ -157,16 +165,5 @@ class JMPreviewPrimerMenu extends UIScriptedMenu
 			return;
 
 		s_Instance.Close();
-	}
-
-	static bool IsOpen()
-	{
-		return s_Instance != NULL;
-	}
-
-	void ~JMPreviewPrimerMenu()
-	{
-		if ( g_Game && m_Item )
-			g_Game.ObjectDelete( m_Item );
 	}
 }

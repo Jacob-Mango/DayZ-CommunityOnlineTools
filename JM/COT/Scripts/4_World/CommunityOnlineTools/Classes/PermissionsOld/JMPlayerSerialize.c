@@ -3,7 +3,6 @@ class JMPlayerSerialize : Managed
 {
 	[NonSerialized()]
 	string m_FileName;
-
 	ref array< string > Roles;
 
 	// Optional per-role name restriction: role name -> required exact in-game name.

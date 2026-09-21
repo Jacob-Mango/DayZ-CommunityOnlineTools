@@ -8,59 +8,72 @@ enum JMInvisibilityType
 modded class PlayerBase
 {
 #ifndef CF_MODULE_PERMISSIONS
-	private JMPlayerInstance m_AuthenticatedPlayer;
+	protected JMPlayerInstance m_AuthenticatedPlayer;
 #endif
 
-	private bool m_COT_GodMode;
-	private bool m_COT_GodMode_Preference;
-
-	private int m_JMIsInvisible;
-	private int m_JMIsInvisibleRemoteSynch;
-	private int m_COT_Invisibility_Preference;
+	protected bool m_COT_GodMode;
+	protected bool m_COT_GodMode_Preference;
+	protected int m_JMIsInvisible;
+	protected int m_JMIsInvisibleRemoteSynch;
+	protected int m_COT_Invisibility_Preference;
 	protected ref Timer m_COT_InvisibilityUpdateTimer;
-	private bool m_COT_WasSpeaking;
-
-	private bool m_JMIsFrozen;
-	private bool m_JMIsFrozenRemoteSynch;
-
-	private bool m_JMIsRagdoll;
-	private bool m_JMIsRagdollRemoteSynch;
-
-	private vector m_JMLastPosition;
-	private bool m_JMHasLastPosition;
-
-	private bool m_JMHasUnlimitedAmmo;
-	private bool m_JMHasUnlimitedStamina;
-	
-	private bool m_JMHasCustomScale;
-	private float m_JMScaleValue;
-
-	private bool m_JMHasAdminNVG;
-	private bool m_JMHasAdminNVGRemoteSynch;
-
-	private ref map<int, bool> m_COT_PlayerVars;
-	private int m_COT_PlayerVarsBitmask;
-
+	protected bool m_COT_WasSpeaking;
+	protected bool m_JMIsFrozen;
+	protected bool m_JMIsFrozenRemoteSynch;
+	protected bool m_JMIsRagdoll;
+	protected bool m_JMIsRagdollRemoteSynch;
+	protected vector m_JMLastPosition;
+	protected bool m_JMHasLastPosition;
+	protected bool m_JMHasUnlimitedAmmo;
+	protected bool m_JMHasUnlimitedStamina;
+	protected bool m_JMHasCustomScale;
+	protected float m_JMScaleValue;
+	protected bool m_JMHasAdminNVG;
+	protected bool m_JMHasAdminNVGRemoteSynch;
+	protected ref map<int, bool> m_COT_PlayerVars;
+	protected int m_COT_PlayerVarsBitmask;
 	Object m_JM_SpectatedObject;
 	vector m_JM_CameraPosition;
-	private bool m_COT_SpectateStatsSaved;
-	private float m_COT_SavedHealth;
-	private float m_COT_SavedBlood;
-	private float m_COT_SavedShock;
-	private float m_COT_SavedEnergy;
-	private float m_COT_SavedWater;
-	private float m_COT_SavedStamina;
-	private float m_COT_SavedHeatComfort;
-	private bool m_COT_EdgeTick;
+	protected bool m_COT_SpectateStatsSaved;
+	protected float m_COT_SavedHealth;
+	protected float m_COT_SavedBlood;
+	protected float m_COT_SavedShock;
+	protected float m_COT_SavedEnergy;
+	protected float m_COT_SavedWater;
+	protected float m_COT_SavedStamina;
+	protected float m_COT_SavedHeatComfort;
+	protected bool m_COT_EdgeTick;
+	protected bool m_COT_ReceiveDamageDealt;
+	protected bool m_COT_CannotBeTargetedByAI;
+	protected bool m_COT_CannotBeTargetedByAI_Preference;
+	protected bool m_COT_RemoveCollision;
+	protected bool m_COT_RemoveCollision_Preference;
+	protected bool m_COT_IsBeingKicked;
+	protected bool m_COT_IsLeavingFreeCam;
+	protected bool m_COT_TempDisableOnSelectPlayer;
 
-	private bool m_COT_ReceiveDamageDealt;
-	private bool m_COT_CannotBeTargetedByAI;
-	private bool m_COT_CannotBeTargetedByAI_Preference;
-	private bool m_COT_RemoveCollision;
-	private bool m_COT_RemoveCollision_Preference;
+	// ========================================================================
+	//  COT kill-tracking hooks
+	//
+	//  Two events fire on the entity by the engine:
+	//    EEHitBy  -- every damage hit from a real source; we record body-part
+	//                and approximate hit/miss by checking if the source was
+	//                a real player vs the world
+	//    EEKilled  -- final death; killer is the entity that landed the
+	//                killing blow.  Body-part + distance captured here.
+	//
+	//  The static methods on JMAntiCheatKillHook (defined in this same file)
+	//  forward the events to the anti-cheat module.  A static forwarder
+	//  avoids a cross-file class reference that the Mission module's compile
+	//  scope has to keep clean.
+	// ========================================================================
 
-	private bool m_COT_IsBeingKicked;
-	private bool m_COT_IsLeavingFreeCam;
+	//! State of the last hit this player took, captured while it is still
+	//! accurate. EEKilled can fire minutes later (bleed-out, shock) by which
+	//! time the weapon is holstered, the explosive deleted, and both players
+	//! moved -- so a distance computed there is meaningless.
+	protected ref JMAntiCheatKillEvent m_COT_LastHitSnapshot;
+	protected int m_COT_LastHitTime;
 
 	//private Transport m_COT_TransportCache;
 	//private int m_COT_TransportCache_CrewIndex;
@@ -74,13 +87,67 @@ modded class PlayerBase
 		m_COT_PlayerVars = new map<int, bool>;
 	}
 
-	
 	void ~PlayerBase()
 	{
 		if (g_Game && g_Game.IsClient())
 		{
 			ClearEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
 		}
+	}
+
+	vector GetLastPosition()
+	{
+		return m_JMLastPosition;
+	}
+
+	bool HasLastPosition()
+	{
+		return m_JMHasLastPosition;
+	}
+
+	void SetLastPosition(bool force = false)
+	{
+		if ( g_Game.IsServer() && (force || (!m_JM_SpectatedObject && m_JM_CameraPosition == vector.Zero)))
+		{
+			vector trans[4];
+			GetTransform( trans );
+			m_JMLastPosition = trans[3];
+
+			m_JMHasLastPosition = true;
+		}
+	}
+
+	void SetWorldPosition(vector position)
+	{
+		Object parent;
+		if (Class.CastTo(parent, GetParent()))
+		{
+			Transport transport;
+			if (Class.CastTo(transport, parent))
+			{
+				if (transport.CrewMemberIndex(this) != -1)
+				{
+					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(transport, position);
+					
+					return;
+				}
+			}
+
+			SetPosition(parent.WorldToModel(position));
+		}
+		else
+		{
+			SetPosition(position);
+		}
+
+		if (m_JM_CameraPosition != vector.Zero || m_JM_SpectatedObject)
+			SetLastPosition(true);
+
+		//! Every path into here is somebody being moved rather than moving:
+		//! an admin teleport, a spectate exit, a vehicle unstuck. Tell the
+		//! anti-cheat so the next position sample is discarded instead of
+		//! being read as a several-kilometre jump.
+		COT_ReportEngineMove();
 	}
 
 	override void Init()
@@ -200,8 +267,6 @@ modded class PlayerBase
 			UpdateDelete();
 		}
 	}
-
-	protected bool m_COT_TempDisableOnSelectPlayer;
 
 	void COT_TempDisableOnSelectPlayer(bool disable = true)
 	{
@@ -525,7 +590,7 @@ modded class PlayerBase
 				//! If this instance of a character *is* controlled by the client player (ie. *not* a remote player),
 				//! pretend restrained if COT is *not* active _or_ the client player *doesn't* have AccessInventory permission
 				//! (thus preventing access for this character to their own inventory)
-				if (!GetCommunityOnlineToolsBase().IsActive() || !GetPermissionsManager().HasPermission("Admin.Player.AccessInventory"))
+				if (!GetCommunityOnlineToolsBase().IsActive() || !JMPermissions.Has(JMConstants.PERM_PLAYER_ACCESSINVENTORY))
 					return true;
 			}
 			else
@@ -533,7 +598,7 @@ modded class PlayerBase
 				//! If this instance of a character is *not* controlled by the client player (ie. a remote player),
 				//! pretend restrained if COT *is* active _and_ the client player *does* have AccessInventory permission
 				//! (thus allowing access to this character's inventory for an admin with appropriate permissions)
-				if (GetCommunityOnlineToolsBase().IsActive() && GetPermissionsManager().HasPermission("Admin.Player.AccessInventory"))
+				if (GetCommunityOnlineToolsBase().IsActive() && JMPermissions.Has(JMConstants.PERM_PLAYER_ACCESSINVENTORY))
 					return true;
 			}
 		}
@@ -554,61 +619,6 @@ modded class PlayerBase
 		}
 
 		return true;
-	}
-
-	bool HasLastPosition()
-	{
-		return m_JMHasLastPosition;
-	}
-
-	vector GetLastPosition()
-	{
-		return m_JMLastPosition;
-	}
-
-	void SetLastPosition(bool force = false)
-	{
-		if ( g_Game.IsServer() && (force || (!m_JM_SpectatedObject && m_JM_CameraPosition == vector.Zero)))
-		{
-			vector trans[4];
-			GetTransform( trans );
-			m_JMLastPosition = trans[3];
-
-			m_JMHasLastPosition = true;
-		}
-	}
-
-	void SetWorldPosition(vector position)
-	{
-		Object parent;
-		if (Class.CastTo(parent, GetParent()))
-		{
-			Transport transport;
-			if (Class.CastTo(transport, parent))
-			{
-				if (transport.CrewMemberIndex(this) != -1)
-				{
-					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(transport, position);
-					
-					return;
-				}
-			}
-
-			SetPosition(parent.WorldToModel(position));
-		}
-		else
-		{
-			SetPosition(position);
-		}
-
-		if (m_JM_CameraPosition != vector.Zero || m_JM_SpectatedObject)
-			SetLastPosition(true);
-
-		//! Every path into here is somebody being moved rather than moving:
-		//! an admin teleport, a spectate exit, a vehicle unstuck. Tell the
-		//! anti-cheat so the next position sample is discarded instead of
-		//! being read as a several-kilometre jump.
-		COT_ReportEngineMove();
 	}
 
 	//! Excuse the next movement samples for this player. Safe to call from any
@@ -668,7 +678,7 @@ modded class PlayerBase
 		return m_AuthenticatedPlayer;
 	}
 
-	private void Safe_SetAuthenticatedPlayer()
+	protected void Safe_SetAuthenticatedPlayer()
 	{
 		if ( m_AuthenticatedPlayer || !GetIdentity() )
 			return;
@@ -791,7 +801,7 @@ modded class PlayerBase
         if ( !COTHasGodMode() )
 			super.ProcessHandDamage(delta_time, pState);
 	}
-	
+
 	override void ProcessFeetDamageServer(int pUserInt)
 	{
         if ( !COTHasGodMode() )
@@ -1244,7 +1254,7 @@ modded class PlayerBase
 	{
 		return m_COT_IsLeavingFreeCam;
 	}
-	
+
 	override void SetActions(out TInputActionMap InputActionMap)
 	{
 		super.SetActions(InputActionMap);
@@ -1339,7 +1349,7 @@ modded class PlayerBase
 
 		super.OnCommandSwimStart();
 	}
-	
+
 	override void OnCommandLadderStart()
 	{
 		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
@@ -1349,7 +1359,7 @@ modded class PlayerBase
 
 		super.OnCommandLadderStart();
 	}
-	
+
 	override void OnCommandFallStart()
 	{
 		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
@@ -1359,7 +1369,7 @@ modded class PlayerBase
 
 		super.OnCommandFallStart();
 	}
-	
+
 	override void OnCommandClimbStart()
 	{
 		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
@@ -1369,7 +1379,7 @@ modded class PlayerBase
 
 		super.OnCommandClimbStart();
 	}
-	
+
 	override void OnCommandVehicleStart()
 	{
 		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
@@ -1429,29 +1439,6 @@ modded class PlayerBase
 			//m_COT_TransportCache = null;
 		//}
 	}
-
-	// ========================================================================
-	//  COT kill-tracking hooks
-	//
-	//  Two events fire on the entity by the engine:
-	//    EEHitBy  -- every damage hit from a real source; we record body-part
-	//                and approximate hit/miss by checking if the source was
-	//                a real player vs the world
-	//    EEKilled  -- final death; killer is the entity that landed the
-	//                killing blow.  Body-part + distance captured here.
-	//
-	//  The static methods on JMAntiCheatKillHook (defined in this same file)
-	//  forward the events to the anti-cheat module.  A static forwarder
-	//  avoids a cross-file class reference that the Mission module's compile
-	//  scope has to keep clean.
-	// ========================================================================
-
-	//! State of the last hit this player took, captured while it is still
-	//! accurate. EEKilled can fire minutes later (bleed-out, shock) by which
-	//! time the weapon is holstered, the explosive deleted, and both players
-	//! moved -- so a distance computed there is meaningless.
-	protected ref JMAntiCheatKillEvent m_COT_LastHitSnapshot;
-	protected int m_COT_LastHitTime;
 
 	void COT_SetLastHitSnapshot(JMAntiCheatKillEvent evt, int timeMs)
 	{

@@ -22,28 +22,20 @@ class JMSpectatorCamera: JMCameraBase
 	static const int DOLLY_CAM_PATH_LIMIT = 200;
 	static const float RAISED_TIME_THRESHOLD = 1.0;
 	static const float RAISED_TIMEOUT = 5.0;
-
 	static JMSpectatorCamera s_COT_SpectatorCamera;
 	static bool s_DbgDraw;
-
 	vector linearVelocity;
 	vector angularVelocity;
-
 	vector orientation;
 	bool m_COT_IsInFreeLook;
-
 	vector m_JM_CameraPosMS;
-	
-	private float m_COT_SmoothVelDir0[1];
-	private float m_COT_SmoothVelDir1[1];
-	private float m_COT_SmoothVelDir2[1];
-	
-	private float m_COT_SmoothVelPos0[1];
-	private float m_COT_SmoothVelPos1[1];
-	private float m_COT_SmoothVelPos2[1];
-
+	protected float m_COT_SmoothVelDir0[1];
+	protected float m_COT_SmoothVelDir1[1];
+	protected float m_COT_SmoothVelDir2[1];
+	protected float m_COT_SmoothVelPos0[1];
+	protected float m_COT_SmoothVelPos1[1];
+	protected float m_COT_SmoothVelPos2[1];
 	protected vector m_COT_LastObjectPos;
-
 	vector m_COT_DollyCamPath[200];
 	int m_COT_DollyCamPathNextIdx;
 	int m_COT_DollyCamPathIdx;
@@ -91,7 +83,46 @@ class JMSpectatorCamera: JMCameraBase
 		if (g_Game)
 			COT_RemoveMarker();
 	}
-	
+
+	bool IsUnderRoofBuilding(DayZPlayerImplement player)
+	{
+		float hitFraction;
+		vector hitPosition, hitNormal;
+		vector from;
+		vector to;
+		Object hitObject;
+		PhxInteractionLayers collisionLayerMask = PhxInteractionLayers.ITEM_LARGE|PhxInteractionLayers.BUILDING|PhxInteractionLayers.VEHICLE;
+		
+		if (player)
+		{
+			//! if inside vehicle return immediately
+			if (player.IsInVehicle())
+				return false;
+
+			//! XXX: Somehow this doesn't work reliably?
+			IEntity floorEntity = player.PhysicsGetFloorEntity();
+			if (floorEntity && floorEntity.IsInherited(House))
+				return true;
+
+			//! Player position raycast
+			from = player.GetPosition();
+			to = from + "0 25 0";
+
+			DayZPhysics.RayCastBullet(from, to, collisionLayerMask, null, hitObject, hitPosition, hitNormal, hitFraction);
+
+			if (hitObject && hitObject.IsInherited(House))
+				return true;
+		}
+
+		//! Camera position raycast
+		from = GetPosition();
+		to = from + "0 25 0";
+		
+		DayZPhysics.RayCastBullet(from, to, collisionLayerMask, null, hitObject, hitPosition, hitNormal, hitFraction);
+
+		return hitObject && hitObject.IsInherited(House);
+	}
+
 	override void OnTargetSelected( Object target )
 	{
 		m_JM_CameraPosMS = vector.Zero;
@@ -1169,45 +1200,6 @@ class JMSpectatorCamera: JMCameraBase
 		}
 	}
 
-	bool IsUnderRoofBuilding(DayZPlayerImplement player)
-	{
-		float hitFraction;
-		vector hitPosition, hitNormal;
-		vector from;
-		vector to;
-		Object hitObject;
-		PhxInteractionLayers collisionLayerMask = PhxInteractionLayers.ITEM_LARGE|PhxInteractionLayers.BUILDING|PhxInteractionLayers.VEHICLE;
-		
-		if (player)
-		{
-			//! if inside vehicle return immediately
-			if (player.IsInVehicle())
-				return false;
-
-			//! XXX: Somehow this doesn't work reliably?
-			IEntity floorEntity = player.PhysicsGetFloorEntity();
-			if (floorEntity && floorEntity.IsInherited(House))
-				return true;
-
-			//! Player position raycast
-			from = player.GetPosition();
-			to = from + "0 25 0";
-
-			DayZPhysics.RayCastBullet(from, to, collisionLayerMask, null, hitObject, hitPosition, hitNormal, hitFraction);
-
-			if (hitObject && hitObject.IsInherited(House))
-				return true;
-		}
-
-		//! Camera position raycast
-		from = GetPosition();
-		to = from + "0 25 0";
-		
-		DayZPhysics.RayCastBullet(from, to, collisionLayerMask, null, hitObject, hitPosition, hitNormal, hitFraction);
-
-		return hitObject && hitObject.IsInherited(House);
-	}
-
 	void COT_RemoveMarker()
 	{
 		if (m_COT_TargetMarker)
@@ -1226,7 +1218,7 @@ class JMSpectatorCamera: JMCameraBase
 			m_COT_TargetLight = null;
 		}
 	}
-	
+
 	static Shape DrawCube(vector pos, float size = 1, int color = 0x1fff7f7f)
 	{
 		vector min = pos;

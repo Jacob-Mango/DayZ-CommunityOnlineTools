@@ -1,8 +1,8 @@
 class JMWebhookConstructor : Managed
 {
-	private ref array< string > m_Types;
+	protected ref array< string > m_Types;
 
-	private void JMWebhookConstructor()
+	protected void JMWebhookConstructor()
 	{
 		m_Types = new array< string >();
 	}

@@ -8,11 +8,9 @@ class JMItemStatsFirearmData: JMItemStatsBaseData
     vector m_RecoilModifier;
     vector m_SwayModifier;
     float m_ShoulderDistance;
-
     ref TStringArray m_Magazines;
     ref TStringArray m_ChamberableFrom;
     ref TStringArray m_Modes;
-
     ref JMItemStatsFireModeData m_FireSemi;
     ref JMItemStatsFireModeData m_FireBurst;
     ref JMItemStatsFireModeData m_FireAuto;
@@ -157,19 +155,6 @@ class JMItemStatsFireModeData
 		m_Burst = g_Game.ConfigGetInt(path + " burst");
 	}
 
-	string GetExportHeaderData(string name)
-	{
-		string result;
-
-		result += name +" ReloadTime";
-        result += ", ";
-		result += name +" Dispersion";
-        result += ", ";
-		result += name +" Burst";
-
-		return result;
-	}
-
 	string GetExportData()
 	{
 		string result;
@@ -179,6 +164,19 @@ class JMItemStatsFireModeData
 		result += m_Dispersion.ToString();
         result += ", ";
 		result += m_Burst.ToString();
+
+		return result;
+	}
+
+	string GetExportHeaderData(string name)
+	{
+		string result;
+
+		result += name +" ReloadTime";
+        result += ", ";
+		result += name +" Dispersion";
+        result += ", ";
+		result += name +" Burst";
 
 		return result;
 	}
@@ -199,19 +197,6 @@ class JMItemStatsOpticsInfoData
 		g_Game.ConfigGetIntArray(path + " discreteDistance", m_DiscreteDistance);
 	}
 
-	string GetExportHeaderData()
-	{
-		string result;
-
-		result += "OpticsInfo DistanceZoomMin";
-        result += ", ";
-		result += "OpticsInfo DistanceZoomMax";
-        result += ", ";
-		result += "OpticsInfo DiscreteDistance";
-
-		return result;
-	}
-
 	string GetExportData()
 	{
 		string result;
@@ -229,6 +214,19 @@ class JMItemStatsOpticsInfoData
 
 		return result;
 	}
+
+	string GetExportHeaderData()
+	{
+		string result;
+
+		result += "OpticsInfo DistanceZoomMin";
+        result += ", ";
+		result += "OpticsInfo DistanceZoomMax";
+        result += ", ";
+		result += "OpticsInfo DiscreteDistance";
+
+		return result;
+	}
 }
 
 class JMItemStatsNoiseShootData
@@ -240,20 +238,20 @@ class JMItemStatsNoiseShootData
 		m_Strength = g_Game.ConfigGetInt(path + " strength");
 	}
 
-	string GetExportHeaderData()
-	{
-		string result;
-
-		result += "NoiseShoot Strength";
-
-		return result;
-	}
-
 	string GetExportData()
 	{
 		string result;
 
 		result += m_Strength.ToString();
+
+		return result;
+	}
+
+	string GetExportHeaderData()
+	{
+		string result;
+
+		result += "NoiseShoot Strength";
 
 		return result;
 	}

@@ -32,7 +32,6 @@ class JMUIColors
 	static const float TITLE_FOCUSED_R   = 0.04;
 	static const float TITLE_FOCUSED_G   = 0.04;
 	static const float TITLE_FOCUSED_B   = 0.12;
-
 	static const float TITLE_UNFOCUSED_A = 0.72;
 	static const float TITLE_UNFOCUSED_R = 0.02;
 	static const float TITLE_UNFOCUSED_G = 0.02;
@@ -195,6 +194,19 @@ class JMUISurfaceStyle
 	static const int ROW_HOVER    = JMTheme.ACCENT_WASH;
 	static const int ROW_SELECTED = JMTheme.Alpha( JMTheme.BLUE_600, 0x66 );
 
+	//! True when the role reacts to the cursor at all.
+	static bool IsInteractive( int role )
+	{
+		return role != ROLE_SURFACE && role != ROLE_HEADER;
+	}
+
+	//! True when the role's bevel runs lit-top / sunk-bottom (raised). Inputs
+	//! invert it so the field reads as a hole punched into the form.
+	static bool IsRaised( int role )
+	{
+		return role == ROLE_BUTTON || role == ROLE_HEADER;
+	}
+
 	// -------------------------------------------------------------------------
 	//  Blend - linear interpolate every channel (alpha included) of two ARGB
 	//  colours. t = 0 returns color, t = 1 returns target.
@@ -269,18 +281,5 @@ class JMUISurfaceStyle
 		if ( role == ROLE_HEADER )
 			return FILL_HEADER;
 		return FILL_DEFAULT;
-	}
-
-	//! True when the role's bevel runs lit-top / sunk-bottom (raised). Inputs
-	//! invert it so the field reads as a hole punched into the form.
-	static bool IsRaised( int role )
-	{
-		return role == ROLE_BUTTON || role == ROLE_HEADER;
-	}
-
-	//! True when the role reacts to the cursor at all.
-	static bool IsInteractive( int role )
-	{
-		return role != ROLE_SURFACE && role != ROLE_HEADER;
 	}
 }

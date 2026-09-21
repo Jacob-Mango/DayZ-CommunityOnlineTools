@@ -2,21 +2,6 @@ class UIActionImage: UIActionBase
 {
 	protected ImageWidget m_Label;
 
-	override void OnInit() 
-	{
-		super.OnInit();
-		
-		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
-	}
-
-	override void OnShow()
-	{
-	}
-
-	override void OnHide() 
-	{
-	}
-
 	//! LoadImageFile only fills slot 0; SetImage picks it. Without the second
 	//! call the widget can keep drawing nothing at all, which is invisible
 	//! rather than obviously broken.
@@ -44,7 +29,7 @@ class UIActionImage: UIActionBase
 			break;
 		}
 	}
-	
+
 	void SetLabelVAlign( UIActionVAlign type )
 	{
 		switch ( type )
@@ -59,5 +44,20 @@ class UIActionImage: UIActionBase
 			// m_Label.SetFlags( m_Label.GetFlags() | WidgetFlags.RALIGN );
 			break;
 		}
+	}
+
+	override void OnInit() 
+	{
+		super.OnInit();
+		
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+	}
+
+	override void OnShow()
+	{
+	}
+
+	override void OnHide() 
+	{
 	}
 }

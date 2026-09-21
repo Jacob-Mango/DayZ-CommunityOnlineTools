@@ -1,80 +1,9 @@
 class JMWebhookCOTModule: JMRenderableModuleBase
 {
-	private JMWebhookSerialize m_Settings;
-
-	void JMWebhookCOTModule()
-	{
-		GetPermissionsManager().RegisterPermission( "Webhook.View" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage.URL" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage.URL.Add" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage.URL.Remove" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage.URL.Edit" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage.Type" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage.Type.Add" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage.Type.Remove" );
-		GetPermissionsManager().RegisterPermission( "Webhook.Manage.Type.State" );
-	}
+	protected JMWebhookSerialize m_Settings;
 
 	void ~JMWebhookCOTModule()
 	{
-	}
-
-	override void EnableUpdate()
-	{
-	}
-
-	override bool HasAccess()
-	{
-		return GetPermissionsManager().HasPermission( "Webhook.View" );
-	}
-
-	override string GetInputToggle()
-	{
-		return "UACOTToggleWebhook";
-	}
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/webhook_form.layout";
-	}
-
-	override string GetCategory()
-	{
-		return "Server";
-	}
-
-	override string GetTitle()
-	{
-		return "#STR_COT_WEBHOOK_MODULE_NAME";
-	}
-
-	override string GetIconName()
-	{
-		return JMConstants.Lucide( "webhook" );
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-
-	override bool ImageHasPath()
-	{
-		return true;
-	}
-
-	override string GetWebhookTitle()
-	{
-		return "Manage Webhooks";
-	}
-
-	override void GetWebhookTypes( out array< string > types )
-	{
-		types.Insert( "URL" );
-		types.Insert( "URLSensitive" );
-		types.Insert( "Type" );
-		types.Insert( "TypeSensitive" );
 	}
 
 	array< ref JMWebhookConnectionGroup > GetConnections()
@@ -82,6 +11,40 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		if ( !m_Settings )
 			return new array< ref JMWebhookConnectionGroup >();
 		return m_Settings.Connections;
+	}
+
+	override void DescribeModule( JMModuleInfo info )
+	{
+		super.DescribeModule( info );
+
+		info.Title = "#STR_COT_WEBHOOK_MODULE_NAME";
+		info.WebhookTitle = "Manage Webhooks";
+		info.Icon = "webhook";
+		info.Layout = "JM/COT/GUI/layouts/webhook_form.layout";
+		info.Category = JMSideBarConfig.CATEGORY_SERVER;
+		info.ViewPermission = JMConstants.PERM_WEBHOOK_VIEW;
+		info.InputToggle = "UACOTToggleWebhook";
+		info.SetRPCRange( JMWebhookCOTModuleRPC.INVALID, JMWebhookCOTModuleRPC.COUNT );
+
+		//! Called on both client and server as the module registers, before the mission loads.
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE );
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE_URL );
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE_URL_ADD );
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE_URL_REMOVE );
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE_URL_EDIT );
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE_TYPE );
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_ADD );
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_REMOVE );
+		info.AddPermission( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_STATE );
+
+		info.AddWebhookType( "URL" );
+		info.AddWebhookType( "URLSensitive" );
+		info.AddWebhookType( "Type" );
+		info.AddWebhookType( "TypeSensitive" );
+	}
+
+	override void EnableUpdate()
+	{
 	}
 
 	override void OnMissionStart()
@@ -101,7 +64,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	}
 
 	//! The OnMissionStart request can be denied because the server has not
-	//! registered this player yet - see Server_Load. Permissions arriving is
+	//! registered this player yet - see Exec_Load. Permissions arriving is
 	//! exactly the point at which that request would now succeed, so ask again.
 	override void OnClientPermissionsUpdated()
 	{
@@ -110,7 +73,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Webhook.View" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_WEBHOOK_VIEW ) )
 			return;
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -122,16 +85,6 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		super.OnMissionFinish();
 
 		m_Settings = NULL;
-	}
-
-	override int GetRPCMin()
-	{
-		return JMWebhookCOTModuleRPC.INVALID;
-	}
-
-	override int GetRPCMax()
-	{
-		return JMWebhookCOTModuleRPC.COUNT;
 	}
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
@@ -168,7 +121,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 	//! These settings carry the Discord webhook URLs, which are secrets - anyone
 	//! holding one can post to the server's Discord. So this is permission
-	//! gated like every other module's Server_Load (Weather, Compensations,
+	//! gated like every other module's Exec_Load (Weather, Compensations,
 	//! Loadout, Teleport all do the same).
 	//!
 	//! This used to skip the check because the client requests Load from
@@ -177,12 +130,12 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	//! Denying is the right answer there; the fix for the race is to ask again
 	//! rather than to hand the URLs to everyone. See OnClientPermissionsUpdated
 	//! below, which re-requests once permissions actually arrive.
-	private void Server_Load( notnull PlayerIdentity ident )
+	protected void Exec_Load( notnull PlayerIdentity ident )
 	{
 		if ( !GetPermissionsManager().GetPlayer( ident.GetId() ) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Webhook.View", ident ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_WEBHOOK_VIEW, ident ) )
 			return;
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -190,13 +143,13 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, ident );
 	}
 
-	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( g_Game.IsDedicatedServer() )
 		{
 			if ( !senderRPC )
 				return;
-			Server_Load( senderRPC );
+			Exec_Load( senderRPC );
 		}
 		else
 		{
@@ -222,7 +175,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.AddConnectionGroup, true, NULL );
 	}
 
-	private void Exec_AddConnectionGroup( string name, string url )
+	protected void Exec_AddConnectionGroup( string name, string url )
 	{
 		JMWebhookConnectionGroup connection = m_Settings.Get( name );
 		connection.ContextURL = "https://discordapp.com/api/webhooks/";
@@ -230,7 +183,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_AddConnectionGroup( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_AddConnectionGroup( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
@@ -245,12 +198,12 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.URL.Add", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_URL_ADD, senderRPC, instance ) )
 			return;
 
 		Exec_AddConnectionGroup( name, url );
 
-		Server_Load( senderRPC );
+		Exec_Load( senderRPC );
 	}
 
 	// -------------------------------------------------------------------------
@@ -267,13 +220,13 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.RemoveConnectionGroup, true, NULL );
 	}
 
-	private void Exec_RemoveConnectionGroup( string name )
+	protected void Exec_RemoveConnectionGroup( string name )
 	{
 		m_Settings.Remove( name );
 		m_Settings.Save();
 	}
 
-	private void RPC_RemoveConnectionGroup( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RemoveConnectionGroup( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
@@ -284,12 +237,12 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.URL.Remove", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_URL_REMOVE, senderRPC, instance ) )
 			return;
 
 		Exec_RemoveConnectionGroup( name );
 
-		Server_Load( senderRPC );
+		Exec_Load( senderRPC );
 	}
 
 	// -------------------------------------------------------------------------
@@ -310,7 +263,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.EditConnectionGroup, true, NULL );
 	}
 
-	private void Exec_EditConnectionGroup( string oldName, string newName, string newUrl, string filterGUID, string filterRole )
+	protected void Exec_EditConnectionGroup( string oldName, string newName, string newUrl, string filterGUID, string filterRole )
 	{
 		JMWebhookConnectionGroup group = m_Settings.Get( oldName );
 		if ( !group )
@@ -325,7 +278,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_EditConnectionGroup( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_EditConnectionGroup( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
@@ -352,12 +305,12 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.URL.Edit", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_URL_EDIT, senderRPC, instance ) )
 			return;
 
 		Exec_EditConnectionGroup( oldName, newName, newUrl, filterGUID, filterRole );
 
-		Server_Load( senderRPC );
+		Exec_Load( senderRPC );
 	}
 
 	// -------------------------------------------------------------------------
@@ -376,7 +329,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.AddType, true, NULL );
 	}
 
-	private void Exec_AddType( string name, string group, bool enabled )
+	protected void Exec_AddType( string name, string group, bool enabled )
 	{
 		JMWebhookConnectionGroup conn = m_Settings.Get( group );
 		if ( conn )
@@ -385,7 +338,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_AddType( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_AddType( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
@@ -404,12 +357,12 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.Type.Add", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_ADD, senderRPC, instance ) )
 			return;
 
 		Exec_AddType( name, group, enabled );
 
-		Server_Load( senderRPC );
+		Exec_Load( senderRPC );
 	}
 
 	// -------------------------------------------------------------------------
@@ -427,7 +380,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.RemoveType, true, NULL );
 	}
 
-	private void Exec_RemoveType( string name, string group )
+	protected void Exec_RemoveType( string name, string group )
 	{
 		JMWebhookConnectionGroup conn = m_Settings.Get( group );
 		if ( conn )
@@ -436,7 +389,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_RemoveType( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_RemoveType( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
@@ -451,12 +404,12 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.Type.Remove", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_REMOVE, senderRPC, instance ) )
 			return;
 
 		Exec_RemoveType( name, group );
 
-		Server_Load( senderRPC );
+		Exec_Load( senderRPC );
 	}
 
 	// -------------------------------------------------------------------------
@@ -475,7 +428,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.TypeState, true, NULL );
 	}
 
-	private void Exec_TypeState( string name, string group, bool enabled )
+	protected void Exec_TypeState( string name, string group, bool enabled )
 	{
 		JMWebhookConnectionGroup conn = m_Settings.Get( group );
 		if ( conn )
@@ -484,7 +437,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_TypeState( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_TypeState( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
 			return;
@@ -503,11 +456,11 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.Type.State", senderRPC, instance ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_STATE, senderRPC, instance ) )
 			return;
 
 		Exec_TypeState( name, group, enabled );
 
-		Server_Load( senderRPC );
+		Exec_Load( senderRPC );
 	}
 }

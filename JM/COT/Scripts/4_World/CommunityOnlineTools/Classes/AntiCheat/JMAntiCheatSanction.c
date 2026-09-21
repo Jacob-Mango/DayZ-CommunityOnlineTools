@@ -61,6 +61,20 @@ class JMAntiCheatSanction
 	//! a loop, and for guids that disconnect mid-window.
 	static const int MAX_ENTRIES = 1024;
 
+	//! True while a sanctioned action of this kind is still covering the
+	//! player. Expired entries are dropped as they are read, so a rule that
+	//! keeps asking keeps the map clean by itself.
+	static bool IsActive( string guid, string bucket )
+	{
+		if ( guid == "" )
+			return false;
+
+		if ( Check( guid + "|" + ALL ) )
+			return true;
+
+		return Check( guid + "|" + bucket );
+	}
+
 	// -------------------------------------------------------------------------
 
 	//! Declare that the server is about to do something to this player that a
@@ -87,20 +101,6 @@ class JMAntiCheatSanction
 			return;
 
 		Windows.Set( key, expiry );
-	}
-
-	//! True while a sanctioned action of this kind is still covering the
-	//! player. Expired entries are dropped as they are read, so a rule that
-	//! keeps asking keeps the map clean by itself.
-	static bool IsActive( string guid, string bucket )
-	{
-		if ( guid == "" )
-			return false;
-
-		if ( Check( guid + "|" + ALL ) )
-			return true;
-
-		return Check( guid + "|" + bucket );
 	}
 
 	//! Drop every window for one player - on disconnect, or when an admin
@@ -143,7 +143,7 @@ class JMAntiCheatSanction
 			Windows.Remove( dead );
 	}
 
-	private static bool Check( string key )
+	protected static bool Check( string key )
 	{
 		if ( !Windows.Contains( key ) )
 			return false;

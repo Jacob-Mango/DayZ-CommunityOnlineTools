@@ -35,7 +35,6 @@ class JMTeleportHistory
 	//! the whole history fills with one spot and buries the position that was
 	//! actually worth going back to.
 	static const float SAME_PLACE_SQ = 4.0;
-
 	protected static ref map<string, ref array<ref JMTeleportHistoryEntry>> s_Targets;
 
 	//! Where an undone step was going, so it can be put back.
@@ -54,6 +53,11 @@ class JMTeleportHistory
 	//! record the position it is undoing FROM and the stack could never get
 	//! shorter.
 	protected static bool s_Applying;
+
+	static bool HasRedo( string key )
+	{
+		return RedoCount( key ) > 0;
+	}
 
 	protected static map<string, ref array<ref JMTeleportHistoryEntry>> Targets()
 	{
@@ -417,11 +421,6 @@ class JMTeleportHistory
 		return entries.Count();
 	}
 
-	static bool HasRedo( string key )
-	{
-		return RedoCount( key ) > 0;
-	}
-
 	static JMTeleportHistoryEntry RedoEntryAt( string key, int index )
 	{
 		array<ref JMTeleportHistoryEntry> entries = RedoEntries( key );
@@ -451,7 +450,7 @@ class JMTeleportHistory
 		if ( guid == "" )
 			return false;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_POSITION ) )
 			return false;
 
 		JMPlayerModule playerModule;
@@ -479,7 +478,7 @@ class JMTeleportHistory
 		if ( guid == "" )
 			return false;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_POSITION ) )
 			return false;
 
 		JMPlayerModule playerModule;
@@ -532,7 +531,7 @@ class JMTeleportHistory
 		if ( !object )
 			return false;
 
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_SETPOSITION ) )
 			return false;
 
 		JMESPModule espModule;
@@ -556,7 +555,7 @@ class JMTeleportHistory
 		if ( !object )
 			return false;
 
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_SETPOSITION ) )
 			return false;
 
 		JMESPModule espModule;

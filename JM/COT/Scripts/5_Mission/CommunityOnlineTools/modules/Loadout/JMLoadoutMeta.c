@@ -2,7 +2,7 @@ class JMLoadoutMeta
 {
 	ref array< string > Loadouts;
 
-	private void JMLoadoutMeta()
+	protected void JMLoadoutMeta()
 	{
 		Loadouts = new array< string >;
 	}

@@ -23,6 +23,7 @@ modded class JMModuleConstructor
 		modules.Insert( JMLootAnalysisModule );
 		modules.Insert( JMEventsModule );
 		modules.Insert( JMServerStatsModule );
+		modules.Insert( JMActionHistoryModule );
 
 
 #ifdef DIAG

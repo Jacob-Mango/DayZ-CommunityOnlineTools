@@ -1,39 +1,61 @@
 #ifdef JM_CommunityOnlineTools
-// Example: Creating and managing popups (ValuePrompt & ContextMenu Overlays)
+// Example: popups owned by a form - a slider prompt and a menu opened at the cursor.
+// CreateOverlayPrompt / CreateOverlayMenu build the popup anchored to the window and register
+// it as an overlay, so switching tab or closing the form dismisses it. Never call InitPrompt().
 modded class JMPlayerForm
 {
-	protected UIActionValuePrompt m_CustomValuePrompt;
+	protected UIActionValuePrompt m_ExPrompt;
+	protected UIActionContextMenu m_ExMenu;
 
-	protected void InitCustomPopups()
+	override void OnCreate()
 	{
-		// Create a floating value prompt anchored to the window root
-		m_CustomValuePrompt = UIActionManager.CreateValuePrompt( layoutRoot, m_Window.GetWidgetRoot(), this, "OnConfirm_CustomValuePrompt" );
+		super.OnCreate();
 
-		// Must be built once before either Show, and anchored the same as the panel
-		m_CustomValuePrompt.InitPrompt( m_Window.GetWidgetRoot() );
-
-		// Register overlay so OnChange_Tab and OnHide automatically dismiss it
-		RegisterOverlay( m_CustomValuePrompt );
+		AddTab( "Popups", JMConstants.Lucide( "message-square" ), "BuildPopupsTab" );
 	}
 
-	void OpenCustomPrompt()
+	void BuildPopupsTab( Widget parentPanel )
 	{
-		if ( !m_CustomValuePrompt )
+		Widget body = UIActionManager.CreateSection( parentPanel, "Popups" );
+		if ( !body )
 			return;
 
-		m_CustomValuePrompt.ShowSlider( "submod_value", "Set Custom Value", "Value", 1, 100, 50 );
+		UIActionManager.CreateButton( body, "Open slider prompt", null, "" ).SetOnClick( this, "OnExOpenPrompt" );
+		UIActionManager.CreateButton( body, "Open menu", null, "" ).SetOnClick( this, "OnExOpenMenu" );
+
+		m_ExPrompt = UIActionManager.CreateOverlayPrompt( this, this, "OnExPromptConfirm" );
+		m_ExMenu = UIActionManager.CreateOverlayMenu( this, this, "OnExMenuPick" );
 	}
 
-	void OnConfirm_CustomValuePrompt( UIEvent eid, UIActionBase action )
+	void OnExOpenPrompt( UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_CustomValuePrompt )
+		if ( m_ExPrompt )
+			m_ExPrompt.OpenSlider( "ex_value", "Set Custom Value", "Value", 1, 100, 50 );
+	}
+
+	void OnExPromptConfirm( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK || m_ExPrompt.GetPromptId() != "ex_value" )
 			return;
 
-		if ( m_CustomValuePrompt.GetPromptId() != "submod_value" )
+		COTCreateLocalAdminNotification( new StringLocaliser( "Chosen value: " + m_ExPrompt.GetSliderValue() ), JMConstants.Lucide( "check" ) );
+	}
+
+	void OnExOpenMenu( UIActionBase action )
+	{
+		if ( !m_ExMenu )
 			return;
 
-		float chosenValue = m_CustomValuePrompt.GetSliderValue();
-		// Process confirmed value...
+		m_ExMenu.ClearItems();
+		m_ExMenu.AddItem( "grant", "Grant", JMConstants.Lucide( "star" ) );
+		m_ExMenu.AddItem( "revoke", "Revoke", JMConstants.Lucide( "ban" ), JMTheme.DANGER );
+		m_ExMenu.OpenAtMouse();
+	}
+
+	void OnExMenuPick( UIEvent eid, UIActionBase action )
+	{
+		if ( eid == UIEvent.CLICK )
+			COTCreateLocalAdminNotification( new StringLocaliser( "Picked: " + m_ExMenu.GetLastClickedId() ), JMConstants.Lucide( "check" ) );
 	}
 }
 #endif

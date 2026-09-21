@@ -13,21 +13,6 @@ class JMItemStatsArmorData
 		m_FragGrenade = new JMItemStatsHealthData(path + " FragGrenade");
 	}
 
-	string GetExportHeaderData()
-	{
-		string result;
-
-		result += m_Projectile.GetExportHeaderData("Projectile");
-		result += ", ";
-		result += m_Melee.GetExportHeaderData("Melee");
-		result += ", ";
-		result += m_Infected.GetExportHeaderData("Infected");
-		result += ", ";
-		result += m_FragGrenade.GetExportHeaderData("FragGrenade");
-
-		return result;
-	}
-
 	string GetExportData()
 	{
 		string result;
@@ -39,6 +24,21 @@ class JMItemStatsArmorData
 		result += m_Infected.GetExportData();
 		result += ", ";
 		result += m_FragGrenade.GetExportData();
+
+		return result;
+	}
+
+	string GetExportHeaderData()
+	{
+		string result;
+
+		result += m_Projectile.GetExportHeaderData("Projectile");
+		result += ", ";
+		result += m_Melee.GetExportHeaderData("Melee");
+		result += ", ";
+		result += m_Infected.GetExportHeaderData("Infected");
+		result += ", ";
+		result += m_FragGrenade.GetExportHeaderData("FragGrenade");
 
 		return result;
 	}
@@ -56,17 +56,6 @@ class JMItemStatsProtectionData
 		m_Chemical = g_Game.ConfigGetFloat(path + " chemical");
 	}
 
-	string GetExportHeaderData()
-	{
-		string result;
-
-		result += "Protection Biological";
-		result += ", ";
-		result += "Protection Chemical";
-
-		return result;
-	}
-
 	string GetExportData()
 	{
 		string result;
@@ -74,6 +63,17 @@ class JMItemStatsProtectionData
 		result += m_Biological.ToString();
 		result += ", ";
 		result += m_Chemical.ToString();
+
+		return result;
+	}
+
+	string GetExportHeaderData()
+	{
+		string result;
+
+		result += "Protection Biological";
+		result += ", ";
+		result += "Protection Chemical";
 
 		return result;
 	}
@@ -92,19 +92,6 @@ class JMItemStatsHealthData
 		m_Shock = g_Game.ConfigGetFloat(path + " Shock damage");
 	}
 
-	string GetExportHeaderData(string name)
-	{
-		string result;
-
-		result += "GlobalArmor " + name + " Health";
-		result += ", ";
-		result += "GlobalArmor " + name + " Blood";
-		result += ", ";
-		result += "GlobalArmor " + name + " Shock";
-
-		return result;
-	}
-
 	string GetExportData()
 	{
 		string result;
@@ -114,6 +101,19 @@ class JMItemStatsHealthData
 		result += m_Blood.ToString();
 		result += ", ";
 		result += m_Shock.ToString();
+
+		return result;
+	}
+
+	string GetExportHeaderData(string name)
+	{
+		string result;
+
+		result += "GlobalArmor " + name + " Health";
+		result += ", ";
+		result += "GlobalArmor " + name + " Blood";
+		result += ", ";
+		result += "GlobalArmor " + name + " Shock";
 
 		return result;
 	}
@@ -136,23 +136,6 @@ class JMItemStatsNutritionData
 		m_Toxicity = g_Game.ConfigGetFloat(path + " toxicity");
 	}
 
-	string GetExportHeaderData()
-	{
-		string result;
-
-		result += "Nutrition FullnessIndex";
-		result += ", ";
-		result += "Nutrition Energy";
-		result += ", ";
-		result += "Nutrition Water";
-		result += ", ";
-		result += "Nutrition NutritionalIndex";
-		result += ", ";
-		result += "Nutrition Toxicity";
-
-		return result;
-	}
-
 	string GetExportData()
 	{
 		string result;
@@ -166,6 +149,23 @@ class JMItemStatsNutritionData
 		result += m_NutritionalIndex.ToString();
 		result += ", ";
 		result += m_Toxicity.ToString();
+
+		return result;
+	}
+
+	string GetExportHeaderData()
+	{
+		string result;
+
+		result += "Nutrition FullnessIndex";
+		result += ", ";
+		result += "Nutrition Energy";
+		result += ", ";
+		result += "Nutrition Water";
+		result += ", ";
+		result += "Nutrition NutritionalIndex";
+		result += ", ";
+		result += "Nutrition Toxicity";
 
 		return result;
 	}

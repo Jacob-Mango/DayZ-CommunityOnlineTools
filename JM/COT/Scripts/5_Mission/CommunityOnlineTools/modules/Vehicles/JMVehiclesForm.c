@@ -30,7 +30,6 @@ class JMVehiclesForm: JMFormBase
 {
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMVehiclesModule m_Module;
-
 	protected UIActionScroller m_ListScroller;
 
 	// Left panel geometry - toolbar block pinned above the roster.
@@ -39,28 +38,32 @@ class JMVehiclesForm: JMFormBase
 
 	//! Search row plus one row per bulk delete action.
 	static const int TOOLBAR_ROWS   = 4;
+
 	//! Drawn height of a toolbar row: the 30px control plus its margin.
 	static const int TOOLBAR_ROW_PX = 44;
+
 	//! Height every control in the toolbar is drawn at. The search box layout
 	//! is authored at 30, so anything sitting on the same row matches it.
 	static const int TOOLBAR_CONTROL_PX = 30;
+
 	//! Gutter kept between the roster block and the window frame, as a fraction
 	//! of the left panel's width, plus the equivalent bottom trim in pixels.
 	static const float LEFT_GUTTER    = 0.02;
 	static const float LEFT_GUTTER_PX = 10;
+
 	//! Width reserved per gap between the toolbar row's children. Generous on
 	//! purpose - see the note where it is applied.
 	static const float TOOLBAR_GAP_PX = 14;
 	protected Widget m_VehiclesListContent;
-
 	protected UIActionTabs m_Tabs;
 	protected Widget m_TabMapContent;
 	protected Widget m_TabActionsContent;
 	protected Widget m_TabInfoContent;
 
-	static const int TAB_MAP     = 0;
-	static const int TAB_ACTIONS = 1;
-	static const int TAB_INFO    = 2;
+	//! Tab indices - what the strip's AddTab() returned for each tab, never written as numbers.
+	protected int m_TabIdMap;
+	protected int m_TabIdActions;
+	protected int m_TabIdInfo;
 
 	//! Refresh button + search field. Flex so the field ends on the same right
 	//! edge as the full-width delete buttons below it.
@@ -70,114 +73,82 @@ class JMVehiclesForm: JMFormBase
 	protected UIActionConfirmInline m_DeleteDestroyedButton;
 	protected UIActionConfirmInline m_DeleteUnclaimedButton;
 
-	//! The map itself - UIActionMap, the shared component this form's own
-	//! markers/hover/selection-ring were the model for. See UIActionMap and
-	//! JMUIActionMapMarker.
-	protected UIActionMap m_Map;
+	//! Layout panel the Map tab's MapWidget lives in - a MapWidget cannot be
+	//! created from script. Owned by JMVehiclesFormTabMap.
 	protected Widget m_MapWidgetPanel;
 
-	// Right panel - options (left half of map area)
+	// Right panel - options (left half of map area). Owned by JMVehiclesFormTabActions.
 	protected Widget m_VehicleOptionsPanel;
-	protected UIActionScroller m_VehicleOptionsScroller;
-	protected UIActionConfirmInline m_DeleteVehicleButton;
-	protected UIActionButton m_RepairVehicleButton;
-	protected UIActionButton m_RefuelVehicleButton;
-	protected UIActionButton m_UnstuckVehicleButton;
-	protected UIActionButton m_CoverVehicleButton;
-	protected UIActionButton m_LockVehicleButton;
-	protected UIActionButton m_UnPairVehicleButton;
-	protected UIActionButton m_TeleportVehicleButton;
-	protected UIActionButton m_TeleportMeButton;
 
 	// Right panel - info (right half of map area). Owned by JMVehiclesFormTabInfo.
 	protected Widget m_VehicleInfoPanel;
 
-	//! One class per tab, in its own file. Not private: SetVehicleInfo() and
-	//! OnResize() forward into it.
-	ref JMVehiclesFormTabInfo m_TabInfo;
-
+	//! One class per tab, in its own file. Not private: SetVehicleInfo(),
+	//! OnResize() and the roster forward into them.
+	ref JMVehiclesFormTabMap     m_TabMap;
+	ref JMVehiclesFormTabActions m_TabActions;
+	ref JMVehiclesFormTabInfo    m_TabInfo;
 	protected UIActionSearchBox m_SearchBar;
 
-	//! Type filter: the toolbar button, its dropdown, and the bitmask of the
-	//! JMVT_* types the roster and the map are currently showing.
-	protected UIActionImageButton m_FilterButton;
-	protected UIActionContextMenu m_FilterMenu;
-	protected int m_TypeFilter = JMVT_ALL;
-	//! Anything whose type carries none of the known bits - modded vehicles the
-	//! module could not classify. Its own row so it can be hidden on its own.
-	protected bool m_FilterShowOther = true;
+	//! The toolbar's vehicle type filter - button, dropdown and the shown-types bitmask.
+	protected ref JMVehiclesTypeFilter m_TypeFilter;
 
-	static const string TYPE_FILTER_CAR   = "type_car";
-	static const string TYPE_FILTER_BOAT  = "type_boat";
-	static const string TYPE_FILTER_HELI  = "type_heli";
-	static const string TYPE_FILTER_PLANE = "type_plane";
-	static const string TYPE_FILTER_BIKE  = "type_bike";
-	static const string TYPE_FILTER_OTHER = "type_other";
-
-	//! Vehicle behind each live marker id, by id ("veh_" + netLow + "_" +
-	//! netHigh) - UIActionMap owns the marker widgets themselves; this is only
-	//! what a hover/click callback needs to get back to the JMVehicleMetaData
-	//! it was raised for.
-	protected ref map<string, ref JMVehicleMetaData> m_VehicleByMarkerId;
+	//! One roster row per vehicle passing the filters. The map's markers are
+	//! owned by JMVehiclesFormTabMap.
 	protected ref array<ref JMVehiclesListEntry> m_VehicleEntries;
-
-	//! Hover readout for map markers. Built on first hover, then reused - it
-	//! keeps a local preview entity alive between hovers of the same class.
-	protected ref JMVehiclesHoverInfo m_HoverInfo;
-
-	//! The marker the cursor is on, and when its live state is next re-fetched.
-	//! Health, fuel, speed and crew are only as fresh as the last sync, and the
-	//! panel exists to show exactly those, so the hovered vehicle - and only
-	//! the hovered vehicle - is polled while the panel is up.
-	protected bool m_HoverActive;
-	protected int  m_HoverNetLow;
-	protected int  m_HoverNetHigh;
-	protected int  m_HoverNextPollAt;
-
-	static const int HOVER_POLL_MS = 1000;
-
-	//! Right-click popup for map markers, plus the vehicle the open menu was
-	//! raised on. Built on first use - most sessions never open it.
-	protected UIActionContextMenu m_MarkerMenu;
-	protected ref JMVehicleMetaData m_MarkerMenuVehicle;
-
-	static const string MK_MENU_SELECT  = "select";
-	static const string MK_MENU_TP_TO   = "tp_to";
-	static const string MK_MENU_TP_HERE = "tp_here";
-	static const string MK_MENU_TP_UNDO = "tp_undo";
-	static const string MK_MENU_TP_REDO = "tp_redo";
-	static const string MK_MENU_COPYPOS = "copy_pos";
-	static const string MK_MENU_FOCUS   = "focus";
-	static const string MK_MENU_CARGO   = "clear_cargo";
-	static const string MK_MENU_KEY     = "spawn_key";
-	static const string MK_MENU_REPAIR  = "repair";
-	static const string MK_MENU_REFUEL  = "refuel";
-	static const string MK_MENU_UNSTUCK = "unstuck";
-	static const string MK_MENU_COVER   = "cover";
-	static const string MK_MENU_LOCK    = "lock";
-	static const string MK_MENU_UNPAIR  = "unpair";
-	static const string MK_MENU_DELETE  = "delete";
-
 	protected JMVehicleMetaData m_CurrentVehicle;
 	protected bool m_IsInVehicleInfo = false;
 	protected int m_PendingDeleteLow;
 	protected int m_PendingDeleteHigh;
-
-	JMVehicleMetaData GetCurrentVehicle() { return m_CurrentVehicle; }
 	protected string m_SearchFilter;
+
+	//! The search box's needle, prepared once per change instead of once per vehicle - PassesSearchFilter
+	//! runs for every vehicle on every roster and map refresh.
+	protected ref JMSearchMatcher m_SearchMatcher;
+	protected string m_SearchMatcherFor;
 
 	void JMVehiclesForm()
 	{
-		m_VehicleByMarkerId = new map<string, ref JMVehicleMetaData>;
-		m_VehicleEntries    = new array<ref JMVehiclesListEntry>;
+		m_VehicleEntries = new array<ref JMVehiclesListEntry>;
+		m_TypeFilter = new JMVehiclesTypeFilter( this );
+	}
 
-		//! Every filter starts open, so the form shows the whole server the
-		//! moment it is opened. Assigned here as well as at the declaration:
-		//! JMVT_ALL is a global const folded from other global consts, and a
-		//! member initialiser that resolved it to 0 would open the form with
-		//! every vehicle type hidden and no visible reason why.
-		m_TypeFilter      = JMVT_ALL;
-		m_FilterShowOther = true;
+	JMVehicleMetaData GetCurrentVehicle() { return m_CurrentVehicle; }
+
+	//! The module this form drives. Public for the tab classes, which run the
+	//! per-vehicle commands through it.
+	JMVehiclesModule GetModule()
+	{
+		return m_Module;
+	}
+
+	//! selectTab false repaints the panels for a vehicle that is ALREADY the
+	//! selected one - a delta refresh, not a pick. Without it the hover panel's
+	//! poll would drag an admin off the map tab once a second for as long as
+	//! the cursor rested on the marker they had selected.
+	void SetVehicleInfo( JMVehicleMetaData vehicle, bool selectTab = false, bool refocusMap = false )
+	{
+		m_IsInVehicleInfo = true;
+		m_CurrentVehicle  = vehicle;
+
+		if ( selectTab && m_Tabs && GetActiveTabIndex() == m_TabIdMap )
+			m_Tabs.SetSelection( m_TabIdActions );
+
+		if ( refocusMap && vehicle && m_TabMap )
+			m_TabMap.UpdateMapPosition( false, vehicle.m_Position );
+
+		if ( m_TabMap )
+			m_TabMap.ApplySelectionRing();
+
+		UpdateUI();
+
+		// The Info tab may not have been built yet - it fills itself in from
+		// m_CurrentVehicle when it is.
+		if ( m_TabInfo )
+			m_TabInfo.PopulateInfo( vehicle );
+
+		if ( m_TabActions )
+			m_TabActions.UpdateScroller();
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -185,10 +156,9 @@ class JMVehiclesForm: JMFormBase
 		return Class.CastTo( m_Module, mdl );
 	}
 
-	override void OnInit()
+	override void OnCreate()
 	{
-		m_TypeFilter      = JMVT_ALL;
-		m_FilterShowOther = true;
+		m_TypeFilter.Reset();
 
 		m_LeftPanel         = layoutRoot.FindAnyWidget( "panel_left" );
 		m_RightPanel        = layoutRoot.FindAnyWidget( "panel_right" );
@@ -221,34 +191,20 @@ class JMVehiclesForm: JMFormBase
 		// refresh button in front of it always pushed the field short of the
 		// edge. Here the button is reserved at its fixed width and the field
 		// takes whatever is left.
-		m_SearchRow = UIActionManager.CreateFlexRow( toolbar, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+		//! Every control on this toolbar is drawn at the same height, which
+		//! is the height the search box layout is authored at.
+		JMSearchRow searchToolbar = UIActionManager.CreateSearchFlexRow( toolbar, "Search", this, "OnChange_Search", "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH", TOOLBAR_CONTROL_PX );
+
+		m_SearchRow = searchToolbar.Row;
 		Widget searchRow = m_SearchRow.GetContent();
 
-			m_RefreshButton = UIActionManager.CreateRefreshButton( searchRow, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
+			m_RefreshButton = searchToolbar.Refresh;
 
-			//! Every control on this toolbar is drawn at the same height, which
-			//! is the height the search box layout is authored at.
-			if ( m_RefreshButton )
-			{
-				m_RefreshButton.SetFixedSize( TOOLBAR_CONTROL_PX, TOOLBAR_CONTROL_PX );
-				m_SearchRow.Add( m_RefreshButton );
-			}
-
-			m_SearchBar = UIActionManager.CreateSearchBox( searchRow, this, "OnChange_Search", "Search" );
+			m_SearchBar = searchToolbar.Search;
 			if ( m_SearchBar )
-			{
-				m_SearchBar.SetFlex( 1.0, 60 );
-				m_SearchBar.SetTooltip( "Filter the list by vehicle name" );
-				m_SearchRow.Add( m_SearchBar );
-			}
+				m_SearchBar.SetTooltip( "#STR_COT_VEHICLES_FILTER_THE_LIST_BY_VEHICLE_NAME" );
 
-			m_FilterButton = UIActionManager.CreateIconButton( searchRow, JMConstants.Lucide( "list-filter" ), this, "OnClick_TypeFilters" );
-			if ( m_FilterButton )
-			{
-				m_FilterButton.SetFixedSize( TOOLBAR_CONTROL_PX, TOOLBAR_CONTROL_PX );
-				m_FilterButton.SetTooltip( "Filter the list and the map by vehicle type" );
-				m_SearchRow.Add( m_FilterButton );
-			}
+			m_TypeFilter.Build( searchRow, m_SearchRow );
 
 			//! The wrap spacer inserts its own padding between children on top
 			//! of the widths the flex pass applies. Under-reserving it by even a
@@ -259,17 +215,17 @@ class JMVehiclesForm: JMFormBase
 		// Rows 2-4 - destructive bulk actions, one button per row (mirrors the
 		// event manager layout: each action gets its own row at full width, so
 		// labels stay legible even on narrow panels).
-			m_DeleteAllButton       = UIActionManager.CreateConfirmInline( toolbar, "Delete All",       this, "OnClick_DeleteVehicleAll"       );
-			m_DeleteDestroyedButton = UIActionManager.CreateConfirmInline( toolbar, "Delete Destroyed", this, "OnClick_DeleteVehicleDestroyed" );
-			m_DeleteUnclaimedButton = UIActionManager.CreateConfirmInline( toolbar, "Delete Unclaimed", this, "OnClick_DeleteVehicleUnclaimed" );
+			m_DeleteAllButton       = UIActionManager.CreateConfirmInline( toolbar, "#STR_COT_VEHICLES_DELETE_ALL",       this, "OnClick_DeleteVehicleAll"       );
+			m_DeleteDestroyedButton = UIActionManager.CreateConfirmInline( toolbar, "#STR_COT_VEHICLES_DELETE_DESTROYED", this, "OnClick_DeleteVehicleDestroyed" );
+			m_DeleteUnclaimedButton = UIActionManager.CreateConfirmInline( toolbar, "#STR_COT_VEHICLES_DELETE_UNCLAIMED", this, "OnClick_DeleteVehicleUnclaimed" );
 
 			UIActionIconGrid.ApplyDeletePreset( m_DeleteAllButton );
 			UIActionIconGrid.ApplyDeletePreset( m_DeleteDestroyedButton );
 			UIActionIconGrid.ApplyDeletePreset( m_DeleteUnclaimedButton );
 
-			m_DeleteAllButton.SetTooltip( "Delete every vehicle on the server" );
-			m_DeleteDestroyedButton.SetTooltip( "Delete every destroyed / exploded vehicle" );
-			m_DeleteUnclaimedButton.SetTooltip( "Delete vehicles with no keys or registered owner" );
+			m_DeleteAllButton.SetTooltip( "#STR_COT_VEHICLES_DELETE_EVERY_VEHICLE_ON_THE_SERVER" );
+			m_DeleteDestroyedButton.SetTooltip( "#STR_COT_VEHICLES_DELETE_EVERY_DESTROYED_EXPLODED_VEHICLE" );
+			m_DeleteUnclaimedButton.SetTooltip( "#STR_COT_VEHICLES_DELETE_VEHICLES_WITH_NO_KEYS_OR" );
 
 		BindPermission( m_DeleteAllButton,       JMConstants.PERM_VEHICLES_DELETE_ALL );
 		BindPermission( m_DeleteDestroyedButton, JMConstants.PERM_VEHICLES_DELETE_DESTROYED );
@@ -287,44 +243,45 @@ class JMVehiclesForm: JMFormBase
 	protected void InitWidgetsRight()
 	{
 		m_MapWidgetPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_map_panel" ) );
-		m_Map            = UIActionManager.CreateMapFill( m_MapWidgetPanel, this, "OnClick_Map" );
 
 		m_VehicleOptionsPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_actions_panel" ) );
 		m_VehicleInfoPanel    = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_info_panel" ) );
 
-		ref array<string> tabLabels = { "#STR_COT_VEHICLE_TAB_MAP", "#STR_COT_VEHICLE_TAB_ACTIONS", "#STR_COT_VEHICLE_TAB_INFO" };
-		ref array<string> tabIcons  = { JMConstants.Lucide( "map" ), JMConstants.Lucide( "zap" ), JMConstants.Lucide( "info" ) };
 
-		m_Tabs = UIActionManager.CreateTabs( m_RightTabStrip, tabLabels, tabIcons, this, "OnChange_Tab" );
+		m_Tabs = UIActionManager.CreateTabStrip( m_RightTabStrip, this, "OnChange_Tab" );
 
-		m_Tabs.AddContent( m_MapWidgetPanel );
-		m_Tabs.AddContent( m_VehicleOptionsPanel );
-		m_Tabs.AddContent( m_VehicleInfoPanel );
+		m_TabIdMap = m_Tabs.AddTab( "#STR_COT_VEHICLE_TAB_MAP", JMConstants.Lucide( "map" ), m_MapWidgetPanel );
+		m_TabIdActions = m_Tabs.AddTab( "#STR_COT_VEHICLE_TAB_ACTIONS", JMConstants.Lucide( "zap" ), m_VehicleOptionsPanel );
+		m_TabIdInfo = m_Tabs.AddTab( "#STR_COT_VEHICLE_TAB_INFO", JMConstants.Lucide( "info" ), m_VehicleInfoPanel );
 
-		InitTabState( 3 );
+		DeclareTabs( 3 );
 
-		m_Tabs.SetSelection( TAB_MAP, false );
+		m_Tabs.SetSelection( m_TabIdMap, false );
 
-		BuildTabIfNeeded( TAB_MAP );
+		InitTabFocus( m_TabIdMap );
 
 		UpdateUI();
 	}
 
-	private void BuildTabIfNeeded( int tabIdx )
+	override protected void OnTabCreate( int tab, Widget panel )
 	{
-		if ( !ShouldBuildTab( tabIdx ) )
-			return;
-
-		switch ( tabIdx )
+		if ( tab == m_TabIdMap )
 		{
-			case TAB_ACTIONS:
-				InitWidgetsActions();
-				break;
-
-			case TAB_INFO:
-				m_TabInfo = new JMVehiclesFormTabInfo( this );
-				m_TabInfo.Build( m_VehicleInfoPanel );
-				break;
+			m_TabMap = new JMVehiclesFormTabMap( this );
+			RegisterTab( m_TabIdMap, m_TabMap );
+			m_TabMap.OnCreate( panel );
+		}
+		else if ( tab == m_TabIdActions )
+		{
+			m_TabActions = new JMVehiclesFormTabActions( this );
+			RegisterTab( m_TabIdActions, m_TabActions );
+			m_TabActions.OnCreate( panel );
+		}
+		else if ( tab == m_TabIdInfo )
+		{
+			m_TabInfo = new JMVehiclesFormTabInfo( this );
+			RegisterTab( m_TabIdInfo, m_TabInfo );
+			m_TabInfo.OnCreate( panel );
 		}
 
 		// A tab built after a vehicle was already picked has missed the pass
@@ -333,59 +290,9 @@ class JMVehiclesForm: JMFormBase
 			SetVehicleInfo( m_CurrentVehicle );
 	}
 
-	override int GetActiveTabIndex()
+	protected override COT_ScriptedWidgetEventHandler GetTabStrip()
 	{
-		if ( !m_Tabs )
-			return -1;
-
-		return m_Tabs.GetSelection();
-	}
-
-	protected void InitWidgetsActions()
-	{
-		m_VehicleOptionsScroller = UIActionManager.CreateScroller( m_VehicleOptionsPanel );
-		Widget optContent = m_VehicleOptionsScroller.GetContentWidget();
-
-		UIActionCard card = UIActionManager.CreateCard( optContent, "#STR_COT_VEHICLE_OPTIONS" );
-		Widget gridOptA = UIActionManager.CreateGridSpacer( card.GetContent(), 9, 1 );
-			m_DeleteVehicleButton = UIActionManager.CreateConfirmInline( gridOptA, "Delete", this, "OnClick_DeleteVehicle" );
-			UIActionIconGrid.ApplyDeletePreset( m_DeleteVehicleButton );
-			m_DeleteVehicleButton.SetTooltip( "Remove this vehicle from the world" );
-			m_RepairVehicleButton   = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_REPAIR", this, "OnClick_RepairVehicle" );
-			m_RepairVehicleButton.SetTooltip( "Restore health and replace missing attachments" );
-			m_RefuelVehicleButton   = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_REFUEL", this, "OnClick_RefuelVehicle" );
-			m_RefuelVehicleButton.SetTooltip( "Fill fuel, oil, brake and coolant to full" );
-			m_UnstuckVehicleButton  = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_UNSTUCK", this, "OnClick_UnstuckVehicle" );
-			m_UnstuckVehicleButton.SetTooltip( "Lift 1.5 m and drop back onto the ground" );
-			m_CoverVehicleButton    = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_COVER_UNCOVER", this, "OnClick_CoverVehicle" );
-			m_CoverVehicleButton.SetTooltip( "Toggle Expansion vehicle cover" );
-			m_LockVehicleButton     = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_LOCK_UNLOCK", this, "OnClick_LockVehicle" );
-			m_LockVehicleButton.SetTooltip( "Toggle the key lock state" );
-			m_UnPairVehicleButton   = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_UNPAIR_KEYS", this, "OnClick_UnPairVehicle" );
-			m_UnPairVehicleButton.SetTooltip( "Detach all paired keys from this vehicle" );
-			m_TeleportVehicleButton = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_TELEPORT_TO_VEHICLE", this, "OnClick_TeleportToVehicle" );
-			m_TeleportVehicleButton.SetTooltip( "Teleport yourself to this vehicle's location" );
-			m_TeleportMeButton      = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_TELEPORT_VEHICLE_TO_ME", this, "OnClick_TeleportVehicleToMe" );
-			m_TeleportMeButton.SetTooltip( "Move this vehicle to your current position" );
-
-		BindPermission( m_DeleteVehicleButton,   JMConstants.PERM_VEHICLES_DELETE );
-		BindPermission( m_RepairVehicleButton,   JMConstants.PERM_VEHICLES_REPAIR );
-		BindPermission( m_RefuelVehicleButton,   JMConstants.PERM_VEHICLES_REFUEL );
-		BindPermission( m_UnstuckVehicleButton,  JMConstants.PERM_VEHICLES_UNSTUCK );
-		BindPermission( m_CoverVehicleButton,    JMConstants.PERM_VEHICLES_COVER );
-		BindPermission( m_LockVehicleButton,     JMConstants.PERM_VEHICLES_LOCK );
-		BindPermission( m_UnPairVehicleButton,   JMConstants.PERM_VEHICLES_UNPAIR );
-		BindPermission( m_TeleportVehicleButton, JMConstants.PERM_VEHICLES_TELEPORT );
-		BindPermission( m_TeleportMeButton,      JMConstants.PERM_VEHICLES_TELEPORT );
-
-	#ifndef EXPANSIONMODVEHICLE
-		// Cover, Lock, UnPair are Expansion-only - disable them when Expansion is not loaded
-		if ( m_CoverVehicleButton   ) m_CoverVehicleButton.SetEnabled( false );
-		if ( m_LockVehicleButton    ) m_LockVehicleButton.SetEnabled( false );
-		if ( m_UnPairVehicleButton  ) m_UnPairVehicleButton.SetEnabled( false );
-	#endif
-
-		m_VehicleOptionsScroller.UpdateScroller();
+		return m_Tabs;
 	}
 
 	override void OnResize( float w, float h )
@@ -401,11 +308,7 @@ class JMVehiclesForm: JMFormBase
 		if ( m_ListScroller )
 			m_ListScroller.UpdateScroller();
 
-		if ( m_VehicleOptionsScroller )
-			m_VehicleOptionsScroller.UpdateScroller();
-
-		if ( m_TabInfo )
-			m_TabInfo.OnResize();
+		ResizeTabs( w, h );
 	}
 
 	//! PinStripGeometry pins both left-hand blocks to x=0 / width=1 every time
@@ -447,16 +350,13 @@ class JMVehiclesForm: JMFormBase
 
 	void OnChange_Tab( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
-			return;
+		if ( eid == UIEvent.CHANGE )
+			HandleTabChange();
+	}
 
-		CloseAllOverlays();
-
-		//! The hover panel is anchored to the window root, not to the map tab,
-		//! so switching tabs does not hide it on its own.
-		HideHoverInfo();
-
-		BuildTabIfNeeded( GetActiveTabIndex() );
+	override protected void OnTabUpdate( int tab )
+	{
+		super.OnTabUpdate( tab );
 
 		UpdateUI();
 	}
@@ -470,40 +370,21 @@ class JMVehiclesForm: JMFormBase
 
 		if ( m_Tabs )
 		{
-			m_Tabs.SetTabEnabled( TAB_ACTIONS, hasVehicle );
-			m_Tabs.SetTabEnabled( TAB_INFO, hasVehicle );
+			m_Tabs.SetTabEnabled( m_TabIdActions, hasVehicle );
+			m_Tabs.SetTabEnabled( m_TabIdInfo, hasVehicle );
 		}
 
-		if ( !hasVehicle && ( sel == TAB_ACTIONS || sel == TAB_INFO ) )
-			HideUI();
+		if ( !hasVehicle && ( sel == m_TabIdActions || sel == m_TabIdInfo ) )
+			SetPanelEnabled( false );
 		else
-			ShowUI();
-	}
-
-	//! Layer this form's own vehicle markers live under on the shared map -
-	//! nothing else currently shares JMVehiclesForm's UIActionMap, but a name
-	//! is cheap and ClearLayer needs one.
-	static const string MAP_LAYER = "vehicles";
-
-	protected string MarkerIdFor( JMVehicleMetaData vehicle )
-	{
-		if ( !vehicle )
-			return "";
-
-		return "veh_" + vehicle.m_NetworkIDLow + "_" + vehicle.m_NetworkIDHigh;
+			SetPanelEnabled( true );
 	}
 
 	void LoadVehicles()
 	{
-		//! Every marker is about to be cleared, including whichever one the
-		//! cursor is on - and a cleared marker never raises the hover-leave
-		//! that would take the hover panel down.
-		HideHoverInfo();
+		if ( m_TabMap )
+			m_TabMap.ClearMarkers();
 
-		if ( m_Map )
-			m_Map.ClearLayer( MAP_LAYER );
-
-		m_VehicleByMarkerId.Clear();
 		m_VehicleEntries.Clear();
 
 		if ( !m_Module )
@@ -517,15 +398,8 @@ class JMVehiclesForm: JMFormBase
 			if ( !PassesFilters( currentVehicle ) )
 				continue;
 
-			int color;
-			string marker;
-			GetVehicleTypeInfo( currentVehicle.m_VehicleType, color, marker );
-
-			string markerId = MarkerIdFor( currentVehicle );
-			m_VehicleByMarkerId.Insert( markerId, currentVehicle );
-
-			if ( m_Map )
-				m_Map.AddMarker( markerId, currentVehicle.m_Position, currentVehicle.m_DisplayName, color, marker, MAP_LAYER );
+			if ( m_TabMap )
+				m_TabMap.AddVehicleMarker( currentVehicle );
 
 			JMVehiclesListEntry vehicleListEntry = new JMVehiclesListEntry( m_VehiclesListContent, this, currentVehicle );
 			m_VehicleEntries.Insert( vehicleListEntry );
@@ -553,38 +427,8 @@ class JMVehiclesForm: JMFormBase
 
 		//! Fresh markers start unselected; put the ring back on whichever one
 		//! the Actions tab is still pointed at.
-		ApplySelectionRing();
-	}
-
-	//! Marker glyph per vehicle class. Every entry is a real texture path: the
-	//! old table handed LoadImageFile bare words ("Boat", "Helicopter", ...),
-	//! which resolve to nothing and draw as the engine's magenta placeholder.
-	private void GetVehicleTypeInfo( int type, out int color, out string marker )
-	{
-		switch ( type )
-		{
-			default:
-			case JMVT_CAR:
-				color  = ARGB( 255, 243, 156, 18 );
-				marker = JMConstants.Lucide( "car" );
-			break;
-			case JMVT_BOAT:
-				color  = ARGB( 255, 243, 18, 156 );
-				marker = JMConstants.Lucide( "sailboat" );
-			break;
-			case JMVT_HELICOPTER:
-				color  = ARGB( 255, 18, 156, 243 );
-				marker = JMConstants.Lucide( "helicopter" );
-			break;
-			case JMVT_PLANE:
-				color  = ARGB( 255, 18, 243, 156 );
-				marker = JMConstants.Lucide( "plane" );
-			break;
-			case JMVT_BIKE:
-				color  = ARGB( 255, 243, 156, 100 );
-				marker = JMConstants.Lucide( "bike" );
-			break;
-		}
+		if ( m_TabMap )
+			m_TabMap.ApplySelectionRing();
 	}
 
 	// -------------------------------------------------------------------------
@@ -599,8 +443,8 @@ class JMVehiclesForm: JMFormBase
 
 		// The hover panel is the reason most upserts arrive at all, so it gets
 		// the new figures whatever else this delta turns out to touch.
-		if ( m_HoverInfo )
-			m_HoverInfo.Refresh( fresh );
+		if ( m_TabMap )
+			m_TabMap.RefreshHoverInfo( fresh );
 
 		// If the user is currently looking at this vehicle's detail panel,
 		// refresh it in place with the new data.
@@ -628,22 +472,8 @@ class JMVehiclesForm: JMFormBase
 		if ( !PassesFilters( fresh ) )
 			return false;
 
-		string markerId = MarkerIdFor( fresh );
-		if ( !m_VehicleByMarkerId.Contains( markerId ) )
+		if ( !m_TabMap || !m_TabMap.PatchVehicleMarker( fresh ) )
 			return false;
-
-		m_VehicleByMarkerId.Set( markerId, fresh );
-
-		if ( m_Map )
-		{
-			int color;
-			string marker;
-			GetVehicleTypeInfo( fresh.m_VehicleType, color, marker );
-
-			//! AddMarker replaces the marker already under this id in place -
-			//! this is the delta-refresh path, so the id always already exists.
-			m_Map.AddMarker( markerId, fresh.m_Position, fresh.m_DisplayName, color, marker, MAP_LAYER );
-		}
 
 		foreach ( JMVehiclesListEntry entry: m_VehicleEntries )
 		{
@@ -680,15 +510,8 @@ class JMVehiclesForm: JMFormBase
 	//! to fall back, because the vehicle was never on screen to begin with.
 	protected bool RemoveVehicleInPlace( int netLow, int netHigh )
 	{
-		string markerId = "veh_" + netLow + "_" + netHigh;
-
-		if ( !m_VehicleByMarkerId.Contains( markerId ) )
+		if ( !m_TabMap || !m_TabMap.RemoveVehicleMarker( netLow, netHigh ) )
 			return false;
-
-		m_VehicleByMarkerId.Remove( markerId );
-
-		if ( m_Map )
-			m_Map.RemoveMarker( markerId );
 
 		for ( int i = 0; i < m_VehicleEntries.Count(); i++ )
 		{
@@ -709,33 +532,6 @@ class JMVehiclesForm: JMFormBase
 		return true;
 	}
 
-	//! selectTab false repaints the panels for a vehicle that is ALREADY the
-	//! selected one - a delta refresh, not a pick. Without it the hover panel's
-	//! poll would drag an admin off the map tab once a second for as long as
-	//! the cursor rested on the marker they had selected.
-	void SetVehicleInfo( JMVehicleMetaData vehicle, bool selectTab = false, bool refocusMap = false )
-	{
-		m_IsInVehicleInfo = true;
-		m_CurrentVehicle  = vehicle;
-
-		if ( selectTab && m_Tabs && GetActiveTabIndex() == TAB_MAP )
-			m_Tabs.SetSelection( TAB_ACTIONS );
-
-		if ( refocusMap && vehicle )
-			UpdateMapPosition( false, vehicle.m_Position );
-
-		ApplySelectionRing();
-
-		UpdateUI();
-
-		// The Info tab may not have been built yet - it fills itself in from
-		// m_CurrentVehicle when it is.
-		if ( m_TabInfo )
-			m_TabInfo.PopulateInfo( vehicle );
-
-		m_VehicleOptionsScroller.UpdateScroller();
-	}
-
 	void SyncAndRefreshVehicles()
 	{
 		m_Module.RequestServerVehicles();
@@ -747,478 +543,48 @@ class JMVehiclesForm: JMFormBase
 		m_CurrentVehicle  = NULL;
 
 		if ( m_Tabs )
-			m_Tabs.SetSelection( TAB_MAP );
+			m_Tabs.SetSelection( m_TabIdMap );
 
-		ApplySelectionRing();
+		if ( m_TabMap )
+			m_TabMap.ApplySelectionRing();
 
 		UpdateUI();
 	}
 
-	// -------------------------------------------------------------------------
-	//  Vehicle type filter
-	// -------------------------------------------------------------------------
-
-	//! Open the type filter dropdown under the toolbar button. A context menu
-	//! rather than a strip of checkboxes: it floats over the roster instead of
-	//! costing the toolbar a row it only needs while being changed.
-	void OnClick_TypeFilters( UIEvent eid, UIActionBase action )
+	protected bool PassesSearchFilter( JMVehicleMetaData vehicle )
 	{
-		if ( eid != UIEvent.CLICK || !m_FilterButton )
-			return;
-
-		if ( !m_FilterMenu )
+		if ( !m_SearchMatcher || m_SearchMatcherFor != m_SearchFilter )
 		{
-			if ( !m_Window )
-				return;
-
-			m_FilterMenu = UIActionManager.CreateContextMenu( layoutRoot, m_Window.GetWidgetRoot(), this, "OnClick_TypeFilterMenu" );
-			RegisterOverlay( m_FilterMenu );
-
-			if ( !m_FilterMenu )
-				return;
-
-			//! Every row is a toggle, so a click is never "done with this menu".
-			m_FilterMenu.SetCloseOnClick( false );
-			m_FilterMenu.SetOwnerWidget( m_FilterButton.GetLayoutRoot() );
+			m_SearchMatcher = new JMSearchMatcher( m_SearchFilter );
+			m_SearchMatcherFor = m_SearchFilter;
 		}
 
-		//! A second click on the button puts the menu away rather than
-		//! reopening it in place, which is what a dropdown is expected to do.
-		if ( m_FilterMenu.IsOpen() )
-		{
-			m_FilterMenu.Close();
-			return;
-		}
-
-		RebuildTypeFilterMenu();
-
-		float fx;
-		float fy;
-		float fw;
-		float fh;
-		m_FilterButton.GetLayoutRoot().GetScreenPos( fx, fy );
-		m_FilterButton.GetLayoutRoot().GetScreenSize( fw, fh );
-
-		m_FilterMenu.ShowAt( fx, fy + fh );
-	}
-
-	//! An active type is normal text, a hidden one is dimmed - the row IS the
-	//! checkbox, so there is no separate tick to keep in step.
-	private void RebuildTypeFilterMenu()
-	{
-		if ( !m_FilterMenu )
-			return;
-
-		m_FilterMenu.ClearItems();
-
-		AddTypeFilterItem( TYPE_FILTER_CAR,   "Cars",         "car",        IsTypeShown( JMVT_CAR ) );
-		AddTypeFilterItem( TYPE_FILTER_BOAT,  "Boats",        "sailboat",   IsTypeShown( JMVT_BOAT ) );
-		AddTypeFilterItem( TYPE_FILTER_HELI,  "Helicopters",  "helicopter", IsTypeShown( JMVT_HELICOPTER ) );
-		AddTypeFilterItem( TYPE_FILTER_PLANE, "Planes",       "plane",      IsTypeShown( JMVT_PLANE ) );
-		AddTypeFilterItem( TYPE_FILTER_BIKE,  "Motorbikes",   "bike",       IsTypeShown( JMVT_BIKE ) );
-		AddTypeFilterItem( TYPE_FILTER_OTHER, "Unclassified", "circle-help", m_FilterShowOther );
-	}
-
-	private void AddTypeFilterItem( string id, string label, string icon, bool shown )
-	{
-		m_FilterMenu.AddItem( id, label, JMConstants.Lucide( icon ), TypeFilterItemColor( shown ) );
-	}
-
-	private int TypeFilterItemColor( bool shown )
-	{
-		if ( shown )
-			return JMTheme.TEXT_PRIMARY;
-
-		return JMTheme.TEXT_DISABLED;
-	}
-
-	private bool IsTypeShown( int typeBit )
-	{
-		return ( m_TypeFilter & typeBit ) != 0;
-	}
-
-	//! Repaint the rows in place. Rebuilding them here would destroy the very
-	//! row the click landed on, and the engine answers a vanished press target
-	//! by recentring the cursor.
-	private void RefreshTypeFilterColors()
-	{
-		if ( !m_FilterMenu )
-			return;
-
-		m_FilterMenu.SetItemTextColor( TYPE_FILTER_CAR,   TypeFilterItemColor( IsTypeShown( JMVT_CAR ) ) );
-		m_FilterMenu.SetItemTextColor( TYPE_FILTER_BOAT,  TypeFilterItemColor( IsTypeShown( JMVT_BOAT ) ) );
-		m_FilterMenu.SetItemTextColor( TYPE_FILTER_HELI,  TypeFilterItemColor( IsTypeShown( JMVT_HELICOPTER ) ) );
-		m_FilterMenu.SetItemTextColor( TYPE_FILTER_PLANE, TypeFilterItemColor( IsTypeShown( JMVT_PLANE ) ) );
-		m_FilterMenu.SetItemTextColor( TYPE_FILTER_BIKE,  TypeFilterItemColor( IsTypeShown( JMVT_BIKE ) ) );
-		m_FilterMenu.SetItemTextColor( TYPE_FILTER_OTHER, TypeFilterItemColor( m_FilterShowOther ) );
-	}
-
-	void OnClick_TypeFilterMenu( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_FilterMenu )
-			return;
-
-		string id = m_FilterMenu.GetLastClickedId();
-
-		if ( id == TYPE_FILTER_CAR )
-			m_TypeFilter = m_TypeFilter ^ JMVT_CAR;
-		else if ( id == TYPE_FILTER_BOAT )
-			m_TypeFilter = m_TypeFilter ^ JMVT_BOAT;
-		else if ( id == TYPE_FILTER_HELI )
-			m_TypeFilter = m_TypeFilter ^ JMVT_HELICOPTER;
-		else if ( id == TYPE_FILTER_PLANE )
-			m_TypeFilter = m_TypeFilter ^ JMVT_PLANE;
-		else if ( id == TYPE_FILTER_BIKE )
-			m_TypeFilter = m_TypeFilter ^ JMVT_BIKE;
-		else if ( id == TYPE_FILTER_OTHER )
-			m_FilterShowOther = !m_FilterShowOther;
-		else
-			return;
-
-		RefreshTypeFilterColors();
-		LoadVehicles();
-	}
-
-	//! m_VehicleType is a bitmask, and a vehicle can legitimately carry more
-	//! than one bit, so a match on any shown bit keeps it. A vehicle carrying
-	//! none of the known bits is unclassified and answers to its own toggle.
-	private bool PassesTypeFilter( JMVehicleMetaData vehicle )
-	{
-		if ( ( vehicle.m_VehicleType & JMVT_ALL ) == 0 )
-			return m_FilterShowOther;
-
-		return ( vehicle.m_VehicleType & m_TypeFilter ) != 0;
-	}
-
-	private bool PassesSearchFilter( JMVehicleMetaData vehicle )
-	{
-		if ( m_SearchFilter == "" )
-			return true;
-
-		string displayNameLower = vehicle.m_DisplayName;
-		displayNameLower.ToLower();
-
-		string filterLower = m_SearchFilter;
-		filterLower.ToLower();
-
-		return displayNameLower.IndexOf( filterLower ) != -1;
+		return m_SearchMatcher.Matches( vehicle.m_DisplayName );
 	}
 
 	//! Everything the roster and the map filter on. Shared so a single-vehicle
 	//! delta can ask "does this still belong on screen?" with the same answer
 	//! the full rebuild would give.
-	private bool PassesFilters( JMVehicleMetaData vehicle )
+	protected bool PassesFilters( JMVehicleMetaData vehicle )
 	{
-		return PassesTypeFilter( vehicle ) && PassesSearchFilter( vehicle );
+		return m_TypeFilter.Passes( vehicle ) && PassesSearchFilter( vehicle );
 	}
 
 	// -------------------------------------------------------------------------
-	//  Map events - hover, click, right-click, all funnelled through here from
-	//  UIActionMap's single callback.
+	//  Map - owned by JMVehiclesFormTabMap. What the window and the module reach
+	//  stays here as a thin forward.
 	// -------------------------------------------------------------------------
-
-	void OnClick_Map( UIEvent eid, UIActionBase action )
-	{
-		if ( !m_Map )
-			return;
-
-		if ( eid == UIEvent.MOUSE_ENTER )
-		{
-			string hoveredId = m_Map.GetHoveredMarkerId();
-			if ( m_VehicleByMarkerId.Contains( hoveredId ) )
-				OnMarker_HoverEnter( m_VehicleByMarkerId.Get( hoveredId ) );
-			return;
-		}
-
-		if ( eid == UIEvent.MOUSE_LEAVE )
-		{
-			//! UIActionMap only fires a leave for the marker it currently has
-			//! hovered - a leave for one already superseded by a newer enter
-			//! is swallowed there, so there is no stale-vs-fresh race to sort
-			//! out here the way there was chasing raw widget events by hand.
-			HideHoverInfo();
-			return;
-		}
-
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		string markerId = m_Map.GetLastClickedMarkerId();
-		if ( !m_VehicleByMarkerId.Contains( markerId ) )
-			return;
-
-		JMVehicleMetaData vehicle = m_VehicleByMarkerId.Get( markerId );
-
-		if ( m_Map.GetLastClickButton() == MouseState.RIGHT )
-		{
-			OnMarker_RightClick( vehicle );
-			return;
-		}
-
-		SetVehicleInfo( vehicle );
-	}
-
-	//! Raised via UIActionMap's UIEvent.MOUSE_ENTER (see OnClick_Map). Opens
-	//! the info panel and starts polling that one vehicle's live state.
-	void OnMarker_HoverEnter( JMVehicleMetaData vehicle )
-	{
-		if ( !vehicle || !m_Window )
-			return;
-
-		if ( !m_HoverInfo )
-			m_HoverInfo = new JMVehiclesHoverInfo( m_Window.GetWidgetRoot() );
-
-		int x, y;
-		GetMousePos( x, y );
-
-		m_HoverInfo.ShowAt( vehicle, x, y );
-
-		m_HoverActive  = true;
-		m_HoverNetLow  = vehicle.m_NetworkIDLow;
-		m_HoverNetHigh = vehicle.m_NetworkIDHigh;
-
-		//! The panel is up with whatever the last sync knew; ask for the real
-		//! figures straight away rather than waiting out the first interval.
-		PollHoveredVehicle();
-	}
 
 	void HideHoverInfo()
 	{
-		m_HoverActive = false;
-
-		if ( m_HoverInfo )
-			m_HoverInfo.Hide();
+		if ( m_TabMap )
+			m_TabMap.HideHoverInfo();
 	}
 
-	// -------------------------------------------------------------------------
-	//  Selection ring
-	// -------------------------------------------------------------------------
-
-	//! Point UIActionMap's selection ring at whatever m_CurrentVehicle is now.
-	//! UIActionMap owns the ring widget and spins it itself from TickMarkers()
-	//! (see Update()) - this only has to say which marker it belongs on.
-	protected void ApplySelectionRing()
+	void UpdateMapPosition( bool usePlayerPosition, vector mapPosition = vector.Zero )
 	{
-		if ( !m_Map )
-			return;
-
-		m_Map.SetSelectedMarker( MarkerIdFor( m_CurrentVehicle ) );
-	}
-
-	//! One vehicle, once per HOVER_POLL_MS. The server answers with a normal
-	//! Upsert, which lands in OnDeltaUpsert and repaints the panel.
-	protected void PollHoveredVehicle()
-	{
-		if ( !m_Module )
-			return;
-
-		m_HoverNextPollAt = g_Game.GetTime() + HOVER_POLL_MS;
-
-		m_Module.RequestVehicleUpsert( m_HoverNetLow, m_HoverNetHigh );
-	}
-
-	// -------------------------------------------------------------------------
-	//  Map marker context menu
-	// -------------------------------------------------------------------------
-
-	//! Raised via UIActionMap's right-click CLICK event (see OnClick_Map).
-	//! Offers the same actions as the Actions tab against the marker under the
-	//! cursor, so an admin does not have to select the vehicle and change tab
-	//! first.
-	void OnMarker_RightClick( JMVehicleMetaData vehicle )
-	{
-		if ( !vehicle )
-			return;
-
-		if ( !m_MarkerMenu )
-		{
-			if ( !m_Window )
-				return;
-
-			//! Anchored to the window root, not to the map panel: a menu
-			//! parented to the map would be clipped by it near the edges.
-			m_MarkerMenu = UIActionManager.CreateContextMenu( layoutRoot, m_Window.GetWidgetRoot(), this, "OnClick_MarkerMenu" );
-			RegisterOverlay( m_MarkerMenu );
-
-			if ( !m_MarkerMenu )
-				return;
-		}
-
-		m_MarkerMenuVehicle = vehicle;
-
-		m_MarkerMenu.ClearItems();
-
-		bool isAlreadySelected = ( m_CurrentVehicle && m_CurrentVehicle.m_NetworkIDLow == vehicle.m_NetworkIDLow && m_CurrentVehicle.m_NetworkIDHigh == vehicle.m_NetworkIDHigh );
-		if ( !isAlreadySelected )
-			m_MarkerMenu.AddItem( MK_MENU_SELECT,  "Select",                        JMConstants.Lucide( "mouse-pointer-click" ) );
-
-		m_MarkerMenu.AddItem( MK_MENU_TP_TO,   "Teleport To Vehicle",           JMConstants.Lucide( "footprints" ) );
-		m_MarkerMenu.AddItem( MK_MENU_TP_HERE, "Teleport Vehicle To Me",        JMConstants.Lucide( "move-down-left" ) );
-		m_MarkerMenu.AddItem( MK_MENU_TP_UNDO, "Undo Teleport",                 JMConstants.Lucide( "undo-2" ) );
-		m_MarkerMenu.AddItem( MK_MENU_TP_REDO, "Redo Teleport",                 JMConstants.Lucide( "redo-2" ) );
-		m_MarkerMenu.AddItem( MK_MENU_COPYPOS, "Copy Position",                 JMConstants.Lucide( "copy" ) );
-		m_MarkerMenu.AddItem( MK_MENU_FOCUS,   "Center Map Here",               JMConstants.Lucide( "locate-fixed" ) );
-		m_MarkerMenu.AddItem( MK_MENU_REPAIR,  "Repair",                        JMConstants.Lucide( "wrench" ) );
-		m_MarkerMenu.AddItem( MK_MENU_REFUEL,  "Refuel",                        JMConstants.Lucide( "fuel" ) );
-		m_MarkerMenu.AddItem( MK_MENU_UNSTUCK, "Unstuck",                       JMConstants.Lucide( "arrow-up-from-line" ) );
-		m_MarkerMenu.AddItem( MK_MENU_CARGO,   "Clear Cargo",                   JMConstants.Lucide( "package-x" ), JMTheme.DANGER );
-
-	#ifdef EXPANSIONMODVEHICLE
-		m_MarkerMenu.AddItem( MK_MENU_COVER,  "Cover/Uncover", JMConstants.Lucide( "tent" ) );
-		m_MarkerMenu.AddItem( MK_MENU_LOCK,   "Lock/Unlock",   JMConstants.Lucide( "lock" ) );
-		m_MarkerMenu.AddItem( MK_MENU_UNPAIR, "UnPair Keys",   JMConstants.Lucide( "key-round" ) );
-		m_MarkerMenu.AddItem( MK_MENU_KEY,    "Spawn Key",     JMConstants.Lucide( "key" ) );
-	#endif
-
-		m_MarkerMenu.AddItem( MK_MENU_DELETE, "Delete", JMConstants.ICON_TRASH_CAN, JMTheme.DANGER );
-
-		//! SetItemEnabled on an id the menu is not carrying is a no-op, so the
-		//! Expansion-only entries need no special case here.
-		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_TO,   JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_HERE, JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) );
-
-		//! Greyed rather than dropped when there is nothing recorded: an entry
-		//! that comes and goes moves every row under it between one opening of
-		//! the menu and the next.
-		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_UNDO, JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) && HasTeleportUndo( vehicle ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_REDO, JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) && HasTeleportRedo( vehicle ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_CARGO,   JMPermissions.Has( JMConstants.PERM_VEHICLES_CLEARCARGO ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_KEY,     JMPermissions.Has( JMConstants.PERM_VEHICLES_SPAWNKEY ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_REPAIR,  JMPermissions.Has( JMConstants.PERM_VEHICLES_REPAIR ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_REFUEL,  JMPermissions.Has( JMConstants.PERM_VEHICLES_REFUEL ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_UNSTUCK, JMPermissions.Has( JMConstants.PERM_VEHICLES_UNSTUCK ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_COVER,   JMPermissions.Has( JMConstants.PERM_VEHICLES_COVER ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_LOCK,    JMPermissions.Has( JMConstants.PERM_VEHICLES_LOCK ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_UNPAIR,  JMPermissions.Has( JMConstants.PERM_VEHICLES_UNPAIR ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_DELETE,  JMPermissions.Has( JMConstants.PERM_VEHICLES_DELETE ) );
-
-		int mx, my;
-		GetMousePos( mx, my );
-
-		m_MarkerMenu.ShowAt( mx, my );
-	}
-
-	void OnClick_MarkerMenu( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_MarkerMenu || !m_Module )
-			return;
-
-		JMVehicleMetaData vehicle = m_MarkerMenuVehicle;
-
-		if ( !vehicle )
-			return;
-
-		string id = m_MarkerMenu.GetLastClickedId();
-
-		//! Enforce has no block scope, so this is declared once up here rather
-		//! than inside the delete branch that uses it.
-		bool deletingSelected = false;
-
-		if ( id == MK_MENU_SELECT )
-		{
-			SetVehicleInfo( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_TP_TO )
-		{
-			m_Module.RequestTeleportToVehicle( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_TP_HERE )
-		{
-			m_Module.RequestTeleportVehicleToMe( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_TP_UNDO )
-		{
-			UndoTeleport( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_TP_REDO )
-		{
-			RedoTeleport( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_COPYPOS )
-		{
-			//! Same "<x, y, z>" shape every other copy in COT writes, so it
-			//! pastes into the player manager's coordinate box or an ESP paste.
-			g_Game.CopyToClipboard( "<" + vehicle.m_Position[0] + ", " + vehicle.m_Position[1] + ", " + vehicle.m_Position[2] + ">" );
-			return;
-		}
-
-		if ( id == MK_MENU_FOCUS )
-		{
-			UpdateMapPosition( false, vehicle.m_Position );
-			return;
-		}
-
-		if ( id == MK_MENU_CARGO )
-		{
-			if ( JMPermissions.Has( JMConstants.PERM_VEHICLES_CLEARCARGO ) )
-				m_Module.RequestClearVehicleCargo( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_KEY )
-		{
-			if ( JMPermissions.Has( JMConstants.PERM_VEHICLES_SPAWNKEY ) )
-				m_Module.RequestSpawnVehicleKey( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_REPAIR )
-		{
-			m_Module.RequestRepairVehicle( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_REFUEL )
-		{
-			m_Module.RequestRefuelVehicle( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_UNSTUCK )
-		{
-			m_Module.RequestUnstuckVehicle( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_COVER )
-		{
-			m_Module.RequestCoverVehicle( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_LOCK )
-		{
-			m_Module.RequestLockVehicle( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_UNPAIR )
-		{
-			m_Module.RequestUnPairVehicle( vehicle );
-			return;
-		}
-
-		if ( id == MK_MENU_DELETE )
-		{
-			if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_DELETE ) )
-				return;
-
-			m_PendingDeleteLow  = vehicle.m_NetworkIDLow;
-			m_PendingDeleteHigh = vehicle.m_NetworkIDHigh;
-
-			CreateConfirmation_Two( JMConfirmationType.INFO, "Delete Vehicle", "Are you sure you want to delete " + vehicle.m_DisplayName + "?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ConfirmDeleteVehicle_Yes" );
-			return;
-		}
+		if ( m_TabMap )
+			m_TabMap.UpdateMapPosition( usePlayerPosition, mapPosition );
 	}
 
 	void OnChange_Search( UIEvent eid, UIActionBase action )
@@ -1239,154 +605,20 @@ class JMVehiclesForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		action.AnimateSpin( 2 );
 		SyncAndRefreshVehicles();
 	}
 
-	//! Whether this vehicle has a move of its own this session that can still
-	//! be taken back.
-	protected bool HasTeleportUndo( JMVehicleMetaData vehicle )
+	//! Ask before deleting one vehicle - from the Actions tab or a map marker's
+	//! menu. The answer arrives on ConfirmDeleteVehicle_Yes below.
+	void RequestDeleteVehicle( JMVehicleMetaData vehicle )
 	{
 		if ( !vehicle )
-			return false;
-
-		return JMTeleportHistory.Has( JMTeleportHistory.ObjectKey( vehicle.m_NetworkIDLow, vehicle.m_NetworkIDHigh ) );
-	}
-
-	protected bool HasTeleportRedo( JMVehicleMetaData vehicle )
-	{
-		if ( !vehicle )
-			return false;
-
-		return JMTeleportHistory.HasRedo( JMTeleportHistory.ObjectKey( vehicle.m_NetworkIDLow, vehicle.m_NetworkIDHigh ) );
-	}
-
-	//! Put back a move an undo took away.
-	//!
-	//! Goes out through the same RPC the undo does - the two differ only in
-	//! which stack they read, which is what keeps them exact mirrors.
-	protected void RedoTeleport( JMVehicleMetaData vehicle )
-	{
-		if ( !vehicle || !m_Module )
 			return;
 
-		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) )
-			return;
+		m_PendingDeleteLow  = vehicle.m_NetworkIDLow;
+		m_PendingDeleteHigh = vehicle.m_NetworkIDHigh;
 
-		vector forward = JMTeleportHistory.PopRedo( JMTeleportHistory.ObjectKey( vehicle.m_NetworkIDLow, vehicle.m_NetworkIDHigh ), 0, vehicle.m_Position );
-
-		if ( forward == vector.Zero )
-			return;
-
-		JMTeleportHistory.BeginApply();
-		m_Module.RequestTeleportVehicleTo( vehicle, forward );
-		JMTeleportHistory.EndApply();
-	}
-
-	//! Put the vehicle back where it was before its last move. Each use walks
-	//! one more step back, up to JMTeleportHistory.MAX_ENTRIES.
-	protected void UndoTeleport( JMVehicleMetaData vehicle )
-	{
-		if ( !vehicle || !m_Module )
-			return;
-
-		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) )
-			return;
-
-		vector back = JMTeleportHistory.Pop( JMTeleportHistory.ObjectKey( vehicle.m_NetworkIDLow, vehicle.m_NetworkIDHigh ), 0, vehicle.m_Position );
-
-		if ( back == vector.Zero )
-			return;
-
-		JMTeleportHistory.BeginApply();
-		m_Module.RequestTeleportVehicleTo( vehicle, back );
-		JMTeleportHistory.EndApply();
-	}
-
-	void OnClick_TeleportToVehicle( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( m_CurrentVehicle )
-			m_Module.RequestTeleportToVehicle( m_CurrentVehicle );
-	}
-
-	void OnClick_TeleportVehicleToMe( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( m_CurrentVehicle )
-			m_Module.RequestTeleportVehicleToMe( m_CurrentVehicle );
-	}
-
-	void OnClick_RepairVehicle( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( m_CurrentVehicle )
-			m_Module.RequestRepairVehicle( m_CurrentVehicle );
-	}
-
-	void OnClick_RefuelVehicle( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( m_CurrentVehicle )
-			m_Module.RequestRefuelVehicle( m_CurrentVehicle );
-	}
-
-	void OnClick_UnstuckVehicle( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( m_CurrentVehicle )
-			m_Module.RequestUnstuckVehicle( m_CurrentVehicle );
-	}
-
-	void OnClick_CoverVehicle( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( m_CurrentVehicle )
-			m_Module.RequestCoverVehicle( m_CurrentVehicle );
-	}
-
-	void OnClick_LockVehicle( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( m_CurrentVehicle )
-			m_Module.RequestLockVehicle( m_CurrentVehicle );
-	}
-
-	void OnClick_UnPairVehicle( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( m_CurrentVehicle )
-			m_Module.RequestUnPairVehicle( m_CurrentVehicle );
-	}
-
-	void OnClick_DeleteVehicle( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		if ( m_CurrentVehicle )
-		{
-			m_PendingDeleteLow  = m_CurrentVehicle.m_NetworkIDLow;
-			m_PendingDeleteHigh = m_CurrentVehicle.m_NetworkIDHigh;
-
-			CreateConfirmation_Two( JMConfirmationType.INFO, "Delete Vehicle", "Are you sure you want to delete " + m_CurrentVehicle.m_DisplayName + "?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ConfirmDeleteVehicle_Yes" );
-		}
+		ConfirmAction( "#STR_COT_VEHICLES_DELETE_VEHICLE", "Are you sure you want to delete " + vehicle.m_DisplayName + "?", "ConfirmDeleteVehicle_Yes" );
 	}
 
 	void ConfirmDeleteVehicle_Yes( JMConfirmation confirmation = NULL )
@@ -1406,7 +638,7 @@ class JMVehiclesForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Delete All Vehicles", "Are you sure you want to delete ALL vehicles on the server?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ConfirmDeleteVehicleAll_Yes" );
+		ConfirmAction( "#STR_COT_VEHICLES_DELETE_ALL_VEHICLES", "#STR_COT_VEHICLES_ARE_YOU_SURE_YOU_WANT_TO_3", "ConfirmDeleteVehicleAll_Yes" );
 	}
 
 	void ConfirmDeleteVehicleAll_Yes( JMConfirmation confirmation = NULL )
@@ -1419,7 +651,7 @@ class JMVehiclesForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Delete Destroyed Vehicles", "Are you sure you want to delete all destroyed vehicles?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ConfirmDeleteVehicleDestroyed_Yes" );
+		ConfirmAction( "#STR_COT_VEHICLES_DELETE_DESTROYED_VEHICLES", "#STR_COT_VEHICLES_ARE_YOU_SURE_YOU_WANT_TO_2", "ConfirmDeleteVehicleDestroyed_Yes" );
 	}
 
 	void ConfirmDeleteVehicleDestroyed_Yes( JMConfirmation confirmation = NULL )
@@ -1432,7 +664,7 @@ class JMVehiclesForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Delete Unclaimed Vehicles", "Are you sure you want to delete all unclaimed vehicles?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ConfirmDeleteVehicleUnclaimed_Yes" );
+		ConfirmAction( "#STR_COT_VEHICLES_DELETE_UNCLAIMED_VEHICLES", "#STR_COT_VEHICLES_ARE_YOU_SURE_YOU_WANT_TO", "ConfirmDeleteVehicleUnclaimed_Yes" );
 	}
 
 	void ConfirmDeleteVehicleUnclaimed_Yes( JMConfirmation confirmation = NULL )
@@ -1475,11 +707,11 @@ class JMVehiclesForm: JMFormBase
 
 		SyncAndRefreshVehicles();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
+		DeferCall( "UpdateMapPosition", 34, false, new Param2< bool, vector >( true, vector.Zero ) );
 
 		// OnResize fires before the form is rendered, where GetScreenSize
 		// returns 0 and Layout() no-ops. Re-flow one tick after it is up.
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( _LayoutSearchRow, 34 );
+		DeferCall( "_LayoutSearchRow", 34 );
 	}
 
 	override void OnHide()
@@ -1507,40 +739,7 @@ class JMVehiclesForm: JMFormBase
 	{
 		super.Update();
 
-		//! Ahead of the marker-placement early-out below: the hover poll is
-		//! what keeps the panel's speed and crew readouts honest, and a still
-		//! map is exactly when a vehicle is most likely to be the thing moving.
-		if ( m_HoverActive && g_Game.GetTime() >= m_HoverNextPollAt )
-			PollHoveredVehicle();
-
-		if ( !m_Map )
-			return;
-
-		//! Markers only exist on the map tab; off it there is nothing to place.
-		if ( GetActiveTabIndex() != TAB_MAP )
-			return;
-
-		m_Map.TickMarkers();
-	}
-
-	void UpdateMapPosition( bool usePlayerPosition, vector mapPosition = vector.Zero )
-	{
-		if ( !m_Map )
-			return;
-
-		if ( usePlayerPosition )
-		{
-			PlayerBase player;
-			float scale;
-			if ( Class.CastTo( player, GetGame().GetPlayer() ) && !player.GetLastMapInfo( scale, mapPosition ) )
-			{
-				scale = 0.33;
-				mapPosition = player.GetWorldPosition();
-			}
-
-			m_Map.SetScale( scale );
-		}
-
-		m_Map.SetCenter( mapPosition );
+		if ( m_TabMap )
+			m_TabMap.Tick();
 	}
 };
