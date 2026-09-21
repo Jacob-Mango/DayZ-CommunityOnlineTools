@@ -13,6 +13,12 @@
 //!
 //! Pass the node as a JMConstants.PERM_* constant, never as a literal: a typo in a
 //! literal is not an error, it silently resolves to the nearest registered parent.
+//!
+//! @note if GetPermissionsManager() is NULL in the Has/HasRPC methods,
+//! or ident is NULL in the HasRPC method it's a programming error on the caller's side,
+//! not something that should be caught and silently handled here.
+//! It will fail loudly (exception log) and is intended because that's on the author
+//! of the respective mod code (ident aka sender identity in an RPC received on the server is NEVER null)
 class JMPermissions
 {
 	//! An empty list is not "all of nothing": it answers false, so a caller that
@@ -47,46 +53,22 @@ class JMPermissions
 
 	static bool HasRPC( string permission, PlayerIdentity ident = null )
 	{
-		if ( !GetPermissionsManager() )
-			return false;
-
-		//! A dedicated server has no local player: with no sender there is nobody to check.
-		if ( !ident && g_Game.IsDedicatedServer() )
-			return false;
-
 		return GetPermissionsManager().HasPermissionRPC( permission, ident );
 	}
 
 	static bool HasRPC( string permission, PlayerIdentity ident, out JMPlayerInstance instance )
 	{
-		if ( !GetPermissionsManager() )
-			return false;
-
-		//! A dedicated server has no local player: with no sender there is nobody to check.
-		if ( !ident && g_Game.IsDedicatedServer() )
-			return false;
-
 		return GetPermissionsManager().HasPermissionRPC( permission, ident, instance );
 	}
 
 	static bool Register( string permission )
 	{
-		if ( !GetPermissionsManager() )
-			return false;
-
 		GetPermissionsManager().RegisterPermission( permission );
 		return true;
 	}
 
 	static bool Has( string permission, PlayerIdentity ident = null )
 	{
-		if ( !GetPermissionsManager() )
-			return false;
-
-		//! A dedicated server has no local player: with no sender there is nobody to check.
-		if ( !ident && g_Game.IsDedicatedServer() )
-			return false;
-
 		return GetPermissionsManager().HasPermission( permission, ident );
 	}
 
@@ -94,22 +76,12 @@ class JMPermissions
 	//! admin for a webhook or a log line does not look them up a second time.
 	static bool Has( string permission, PlayerIdentity ident, out JMPlayerInstance instance )
 	{
-		if ( !GetPermissionsManager() )
-			return false;
-
-		//! A dedicated server has no local player: with no sender there is nobody to check.
-		if ( !ident && g_Game.IsDedicatedServer() )
-			return false;
-
 		return GetPermissionsManager().HasPermission( permission, ident, instance );
 	}
 
 	//! Client-side form that only wants the local player's instance back.
 	static bool Has( string permission, out JMPlayerInstance instance )
 	{
-		if ( !GetPermissionsManager() )
-			return false;
-
 		return GetPermissionsManager().HasPermission( permission, instance );
 	}
 }
