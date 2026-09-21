@@ -40,3 +40,5 @@ JM/COT/Workbench/experimental
 JM/COT/Workbench/internal
 JM/COT/Workbench/release
 /JM/COT/docs/audits
+/JM/COT/Workbench/Batchfiles/*.deploy
+/JM/COT/Workbench/Batchfiles/*.success
