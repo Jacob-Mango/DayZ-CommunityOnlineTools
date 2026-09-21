@@ -110,7 +110,7 @@ class UIActionValuePrompt: UIActionBase
 		return m_Slider.GetCurrent();
 	}
 
-	bool IsOpen()
+	override bool IsOpen()
 	{
 		return m_Open;
 	}

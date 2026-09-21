@@ -135,7 +135,7 @@ class UIActionDropdown: UIActionBase
 		return false;
 	}
 
-	bool IsOpen()
+	override bool IsOpen()
 	{
 		return m_Open;
 	}
