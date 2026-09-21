@@ -38,7 +38,7 @@ class JMLocalPreview
 			return;
 
 		if ( health >= 0 )
-			ent.SetHealth( "", "", health );
+			ApplyHealth( ent, health );
 
 		ItemBase asItem;
 		if ( !Class.CastTo( asItem, ent ) )
@@ -50,6 +50,26 @@ class JMLocalPreview
 		Edible_Base asFood;
 		if ( foodStage >= 0 && Class.CastTo( asFood, asItem ) && asFood.GetFoodStage() )
 			asFood.GetFoodStage().ChangeFoodStage( foodStage );
+	}
+
+	protected static void ApplyHealth( EntityAI ent, float health )
+	{
+		ent.SetHealth( "", "", health );
+
+		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth( ent.GetType() );
+		if ( maxHealth <= 0 )
+			maxHealth = ent.GetMaxHealth( "", "" );
+
+		if ( maxHealth <= 0 )
+			return;
+
+		float health01 = Math.Clamp( health / maxHealth, 0, 1 );
+
+		TStringArray zones = new TStringArray;
+		ent.GetDamageZones( zones );
+
+		foreach ( string zone : zones )
+			ent.SetHealth01( zone, "Health", health01 );
 	}
 
 	//! Give `parent` a child copy, with the reported state. A slot id (or -1) is tried first so a

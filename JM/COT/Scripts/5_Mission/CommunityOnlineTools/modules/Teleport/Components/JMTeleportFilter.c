@@ -186,8 +186,11 @@ class JMTeleportFilter
 			if ( m_Form.GetCategories()[i] == JMTeleportForm.CATEGORY_ALL )
 				continue;
 
-			bool shown = !IsCategoryHidden( m_Form.GetCategories()[i] );
-			menu.AddRow( m_Form.GetCategories()[i], m_Form.GetCategories()[i], UIActionFilterMenu.CheckIcon( shown ), UIActionFilterMenu.ToggleTextColor( shown ) );
+			string categoryName = m_Form.GetCategories()[i];
+			bool shown = !IsCategoryHidden( categoryName );
+			string categoryIcon = UIActionFilterMenu.CheckIcon( shown );
+			int categoryColor = UIActionFilterMenu.ToggleTextColor( shown );
+			menu.AddRow( categoryName, categoryName, categoryIcon, categoryColor );
 		}
 	}
 

@@ -338,12 +338,15 @@ class JMItemCategoryPicker
 
 		for ( int i = 0; i < members.Count(); i++ )
 		{
+			string memberId = members[i];
+			string memberLabel = CategoryLabel( memberId );
+			string memberIcon = CategoryIcon( memberId );
 			int color = 0;
 
-			if ( members[i] == m_Current )
+			if ( memberId == m_Current )
 				color = JMTheme.ACCENT;
 
-			menu.AddRow( members[i], CategoryLabel( members[i] ), CategoryIcon( members[i] ), color );
+			menu.AddRow( memberId, memberLabel, memberIcon, color );
 		}
 	}
 
