@@ -1370,10 +1370,12 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	protected void Exec_StartSpectating( string guid, PlayerIdentity ident )
+	//! @note methods meant to only run on server should not be prefixed Exec_,
+	//! that's reserved for methods that can run both on client or server
+	protected void Server_StartSpectating( string guid, PlayerIdentity ident )
 	{
 #ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_2(this, "Exec_StartSpectating").Add(guid).Add(ident);
+		auto trace = CF_Trace_2(this, "Server_StartSpectating").Add(guid).Add(ident);
 #endif
 
 		JMPlayerInstance spectateInstance = GetPermissionsManager().GetPlayer( guid );
@@ -1384,19 +1386,11 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !spectatePlayer )
 			return;
 
-		Exec_StartSpectating(spectatePlayer, ident);
+		Server_StartSpectating(spectatePlayer, ident);
 	}
 
-	protected void Exec_StartSpectating(Object spectateObject, PlayerIdentity ident)
-	{
-		Server_StartSpectating(spectateObject, ident);
-	}
-
-	//! DEPRECATED - override Exec_StartSpectating( spectateObject, ident ) instead.
-	//!
-	//! Old name of the Object overload above; it still holds the body so DayZ-Expansion
-	//! AI's `override Server_StartSpectating` (and its direct call to it) keeps working.
-	//! An override point is not a call, so there is no runtime warning.
+	//! @note methods meant to only run on server should not be prefixed Exec_,
+	//! that's reserved for methods that can run both on client or server
 	protected void Server_StartSpectating(Object spectateObject, PlayerIdentity ident)
 	{
 #ifdef JM_COT_DIAG_LOGGING
@@ -1527,9 +1521,9 @@ class JMPlayerModule: JMRenderableModuleBase
 				return;
 
 			if (!target)
-				Exec_StartSpectating(guid, senderRPC);
+				Server_StartSpectating(guid, senderRPC);
 			else
-				Exec_StartSpectating(target, senderRPC);
+				Server_StartSpectating(target, senderRPC);
 		} else
 		{
 			int networkLow, networkHigh;

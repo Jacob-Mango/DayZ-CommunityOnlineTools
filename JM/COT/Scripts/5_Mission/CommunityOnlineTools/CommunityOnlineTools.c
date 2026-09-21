@@ -320,7 +320,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( IsMissionHost() )
 		{
-			Exec_UpdateClient( guid, sendTo );
+			Server_UpdateClient( guid, sendTo );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -338,7 +338,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		GetPermissionsManager().UpdatePlayer( guid, ctx, playerObj );
 	}
 
-	protected void Exec_UpdateClient( string guid, PlayerIdentity sendTo )
+	//! @note methods that only run on server and have a client equivalent (Server_/Client method pair) should not be prefixed Exec_,
+	//! that's reserved for methods that can run both on client or server
+	protected void Server_UpdateClient( string guid, PlayerIdentity sendTo )
 	{
 		JMPlayerInstance player = GetPermissionsManager().GetPlayer( guid );
 		if ( !player )
@@ -372,7 +374,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			if ( !ctx.Read( guid ) )
 				return;
 
-			Exec_UpdateClient( guid, senderRPC );
+			Server_UpdateClient( guid, senderRPC );
 		} else if ( g_Game.IsClient() )
 		{
 			PlayerBase po;
@@ -487,7 +489,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			Client_SetClient( player.GetGUID(), rwctx.GetReadContext() );
 		} else if ( IsMissionHost() )
 		{
-			Exec_SetClient( player );
+			Server_SetClient( player );
 		}
 	}
 
@@ -505,7 +507,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			Client_SetClient( player.GetGUID(), rwctx.GetReadContext() );
 		} else if ( IsMissionHost() )
 		{
-			Exec_SetClient( player, identity );
+			Server_SetClient( player, identity );
 		}
 	}
 
@@ -522,10 +524,12 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		GetModuleManager().OnClientPermissionsUpdated();
 	}
 
-	protected void Exec_SetClient( JMPlayerInstance player )
+	//! @note methods that only run on server and have a client equivalent (Server_/Client method pair) should not be prefixed Exec_,
+	//! that's reserved for methods that can run both on client or server
+	protected void Server_SetClient( JMPlayerInstance player )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_1(this, "Exec_SetClient").Add(player.GetGUID());
+		auto trace = CF_Trace_1(this, "Server_SetClient").Add(player.GetGUID());
 		#endif
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -536,7 +540,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		rpc.Send( NULL, JMClientRPC.SetClient, true, player.PlayerObject.GetIdentity() );
 	}
 
-	protected void Exec_SetClient( JMPlayerInstance player, PlayerIdentity identity )
+	//! @note methods that only run on server and have a client equivalent (Server_/Client method pair) should not be prefixed Exec_,
+	//! that's reserved for methods that can run both on client or server
+	protected void Server_SetClient( JMPlayerInstance player, PlayerIdentity identity )
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
@@ -562,6 +568,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
+	//! @note methods meant to only run on server should not be prefixed Exec_,
+	//! that's reserved for methods that can run both on client or server
 	override void UpdateRole( JMRole role, PlayerIdentity toSendTo )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -570,7 +578,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( IsMissionHost() )
 		{
-			Exec_UpdateRole( role, toSendTo );
+			Server_UpdateRole( role, toSendTo );
 		}
 	}
 
@@ -597,10 +605,12 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		GetModuleManager().OnClientPermissionsUpdated();
 	}
 
-	protected void Exec_UpdateRole( JMRole role, PlayerIdentity toSendTo )
+	//! @note methods that only run on server and have a client equivalent (Server_/Client method pair) should not be prefixed Exec_,
+	//! that's reserved for methods that can run both on client or server
+	protected void Server_UpdateRole( JMRole role, PlayerIdentity toSendTo )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_2(this, "Exec_UpdateRole").Add(role.Name).Add(toSendTo.GetId());
+		auto trace = CF_Trace_2(this, "Server_UpdateRole").Add(role.Name).Add(toSendTo.GetId());
 		#endif
 
 		if ( g_Game.IsServer() )
