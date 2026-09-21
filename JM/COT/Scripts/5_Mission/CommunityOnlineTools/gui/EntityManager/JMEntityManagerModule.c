@@ -33,6 +33,10 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		}
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	JMEntityManagerAdapter GetAdapter()
 	{
 		return m_Adapter;

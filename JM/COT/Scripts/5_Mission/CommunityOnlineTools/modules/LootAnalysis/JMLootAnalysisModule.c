@@ -95,6 +95,10 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemTypeInfo", this, SingeplayerExecutionType.Both);
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	//! Called on both client and server as the module registers, before the mission loads.
 	override void DeclarePermissions()
 	{

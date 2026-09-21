@@ -41,11 +41,9 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	//  JMRenderableModuleBase overrides
 	// -------------------------------------------------------------------------
 
-#ifndef SERVER
 	override void EnableUpdate()
 	{
 	}
-#endif
 
 	// -------------------------------------------------------------------------
 	//  OnRPC

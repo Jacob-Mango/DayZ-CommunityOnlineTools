@@ -399,6 +399,10 @@ class JMVehiclesModule: JMRenderableModuleBase
 		m_Vehicles = new array<ref JMVehicleMetaData>;
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	array< ref JMVehicleMetaData > GetServerVehicles()
 	{
 		return m_Vehicles;

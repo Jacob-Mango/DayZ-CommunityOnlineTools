@@ -44,6 +44,10 @@ class JMItemStatsModule: JMRenderableModuleBase
 		"staticobj_"
 	};
 
+	override void EnableUpdate()
+	{
+	}
+
 	bool IsExcludedClassName( string className )
 	{
 		if ( m_UnfinishedItems.Find( className ) > -1 )
