@@ -188,7 +188,7 @@ class JMPermissionManager
 		//! A dedicated server has no "own" player to check. Answer false (never
 		//! grant on a wrong call) and say so once, instead of raising a script
 		//! Error on every RPC that forgot to pass the sender's PlayerIdentity.
-		JMDeprecated.WarnOnce( this, "HasPermission( permission ) was called on a server - pass the sender: HasPermission( permission, sender ). Permission: " + permission );
+		Error("HasPermission( permission ) was called on a server - pass the sender: HasPermission( permission, sender ). Permission: " + permission );
 
 		return false;
 	}
