@@ -243,6 +243,7 @@ class JMConstants
 	static const string EXT_WINDOWS_DEFAULT = ".txt";
 	static const string FILE_WEBHOOK 	= DIR_COT + "Webhooks.json";
 	static const string FILE_WEATHER 	= DIR_COT + "Weather.json";
+	static const string FILE_WEATHER_STATE = DIR_COT + "WeatherState.json";
 	static const string FILE_TELEPORT 	= DIR_COT + "Teleports_";
 	static const string FILE_ESP 		= DIR_COT + "ESP.json";
 	static const string DIR_LOGS 		= DIR_COT + "Logs\\";

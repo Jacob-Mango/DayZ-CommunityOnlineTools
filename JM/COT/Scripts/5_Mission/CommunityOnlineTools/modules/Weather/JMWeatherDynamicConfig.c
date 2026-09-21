@@ -6,37 +6,36 @@
 //  means the server never has to merge a half-applied edit - it either takes
 //  the new configuration or keeps the old one.
 //
-//  It carries two things that are edited in two different places:
+//  It carries the master switch, which is global and always applied, and at
+//  most one state, applied according to Op:
 //
-//    - Enabled, the master switch, which is global and always applied.
-//    - One preset's dynamic block, applied only when PresetName names a preset
-//      that actually exists. An empty PresetName is how the master switch is
-//      sent on its own, with no preset selected to speak for.
+//    OP_TOGGLE  Enabled only. How the switch is sent with no state selected.
+//    OP_SAVE    Enabled, plus State written under TargetName (new when the
+//               name is empty; renamed when it differs from State.Name).
+//    OP_REMOVE  Enabled, plus the state named TargetName deleted.
+//
+//  What the server keeps is its own validated copy - see
+//  JMWeatherSerialize.NormalizeState - never the objects that arrived.
 // =============================================================================
 class JMWeatherDynamicConfig
 {
-	bool Enabled;
+	static const int OP_TOGGLE = 0;
+	static const int OP_SAVE   = 1;
+	static const int OP_REMOVE = 2;
 
-	//! "" = update the master switch only.
-	string PresetName;
-	bool InRotation;
-	int DurationMin;
-	int DurationMax;
-	int TransitionMin;
-	int TransitionMax;
-	autoptr array< ref JMWeatherNextState > NextStates;
+	bool Enabled;
+	int Op;
+
+	//! The state being edited, by the name it has now on the server. "" = new.
+	string TargetName;
+
+	autoptr JMWeatherState State;
 
 	void JMWeatherDynamicConfig()
 	{
 		Enabled    = false;
-		PresetName = "";
-		InRotation = true;
-
-		DurationMin   = JMWeatherSerialize.DYNAMIC_DEFAULT_DURATION_MIN;
-		DurationMax   = JMWeatherSerialize.DYNAMIC_DEFAULT_DURATION_MAX;
-		TransitionMin = JMWeatherSerialize.DYNAMIC_DEFAULT_TRANSITION_MIN;
-		TransitionMax = JMWeatherSerialize.DYNAMIC_DEFAULT_TRANSITION_MAX;
-
-		NextStates = new array< ref JMWeatherNextState >;
+		Op         = OP_TOGGLE;
+		TargetName = "";
+		State      = new JMWeatherState;
 	}
 }

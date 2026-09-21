@@ -40,10 +40,16 @@ class JMWeatherBase
 		return "";
 	}
 
-	//! Serialize as the concrete type. The engine writes a class by the type it is
-	//! handed, so the base class cannot do this once for everybody.
+	//! Serialize field by field, in the order ReadFrom reads them.
 	void WriteTo( ParamsWriteContext ctx )
 	{
+	}
+
+	//! The mirror of WriteTo, run on the server against a fresh instance of the class the
+	//! RPC id names. Field by field: ctx.Write( this ) came out empty.
+	bool ReadFrom( ParamsReadContext ctx )
+	{
+		return false;
 	}
 
 	void Apply()
@@ -69,21 +75,57 @@ class JMWeatherStorm: JMWeatherBase
 	float Threshold;
 	float MinTimeBetweenLightning;
 
+	//! High bounds - see JMWeatherRoll.Pick.
+	float DensityHi;
+	float ThresholdHi;
+	float MinTimeBetweenLightningHi;
+
 	override int GetRPC() { return JMWeatherModuleRPC.Storm; }
 
 	override string GetPermission() { return JMConstants.PERM_WEATHER_STORM; }
 
 	override string Describe() { return "Set storm density=" + Density + " threshold=" + Threshold; }
 
-	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+	override void WriteTo( ParamsWriteContext ctx )
+	{
+		ctx.Write( Density );
+		ctx.Write( Threshold );
+		ctx.Write( MinTimeBetweenLightning );
+		ctx.Write( DensityHi );
+		ctx.Write( ThresholdHi );
+		ctx.Write( MinTimeBetweenLightningHi );
+	}
+
+	override bool ReadFrom( ParamsReadContext ctx )
+	{
+		if ( !ctx.Read( Density ) )
+			return false;
+
+		if ( !ctx.Read( Threshold ) )
+			return false;
+
+		if ( !ctx.Read( MinTimeBetweenLightning ) )
+			return false;
+
+		if ( !ctx.Read( DensityHi ) )
+			return false;
+
+		if ( !ctx.Read( ThresholdHi ) )
+			return false;
+
+		if ( !ctx.Read( MinTimeBetweenLightningHi ) )
+			return false;
+
+		return true;
+	}
 
 	override void Apply()
 	{
 		if (Density != -1)
 		{
-			float clampedDensity = Math.Clamp( Density, 0.0, 1.0 );
-			float clampedThreshold = Math.Clamp( Threshold, 0.0, 1.0 );
-			float clampedMinTime = Math.Max( MinTimeBetweenLightning, 0.0 );
+			float clampedDensity = Math.Clamp( JMWeatherRoll.Pick( Density, DensityHi ), 0.0, 1.0 );
+			float clampedThreshold = Math.Clamp( JMWeatherRoll.Pick( Threshold, ThresholdHi ), 0.0, 1.0 );
+			float clampedMinTime = Math.Max( JMWeatherRoll.Pick( MinTimeBetweenLightning, MinTimeBetweenLightningHi ), 0.0 );
 			g_Game.GetWeather().SetStorm( clampedDensity, clampedThreshold, clampedMinTime );
 		}
 	}
@@ -102,6 +144,9 @@ class JMWeatherStorm: JMWeatherBase
 		Density = -1;
 		Threshold = -1;
 		MinTimeBetweenLightning = -1;
+		DensityHi = 0;
+		ThresholdHi = 0;
+		MinTimeBetweenLightningHi = 0;
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -129,13 +174,62 @@ class JMWeatherSandstorm: JMWeatherBase
 	float OvercastValue = -1;
 	float WindMagnitudeValue = -1;
 
+	//! High bounds - see JMWeatherRoll.Pick. 0 = not a range.
+	float DurationHi;
+	float FadeInTimeHi;
+	float OvercastValueHi;
+	float WindMagnitudeValueHi;
+
 	override int GetRPC() { return JMWeatherModuleRPC.Sandstorm; }
 
 	override string GetPermission() { return JMConstants.PERM_WEATHER_SANDSTORM; }
 
 	override string Describe() { return "Set sandstorm enabled=" + Enabled + " duration=" + Duration; }
 
-	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+	override void WriteTo( ParamsWriteContext ctx )
+	{
+		ctx.Write( Enabled );
+		ctx.Write( Duration );
+		ctx.Write( FadeInTime );
+		ctx.Write( OvercastValue );
+		ctx.Write( WindMagnitudeValue );
+		ctx.Write( DurationHi );
+		ctx.Write( FadeInTimeHi );
+		ctx.Write( OvercastValueHi );
+		ctx.Write( WindMagnitudeValueHi );
+	}
+
+	override bool ReadFrom( ParamsReadContext ctx )
+	{
+		if ( !ctx.Read( Enabled ) )
+			return false;
+
+		if ( !ctx.Read( Duration ) )
+			return false;
+
+		if ( !ctx.Read( FadeInTime ) )
+			return false;
+
+		if ( !ctx.Read( OvercastValue ) )
+			return false;
+
+		if ( !ctx.Read( WindMagnitudeValue ) )
+			return false;
+
+		if ( !ctx.Read( DurationHi ) )
+			return false;
+
+		if ( !ctx.Read( FadeInTimeHi ) )
+			return false;
+
+		if ( !ctx.Read( OvercastValueHi ) )
+			return false;
+
+		if ( !ctx.Read( WindMagnitudeValueHi ) )
+			return false;
+
+		return true;
+	}
 
 	override void Apply()
 	{
@@ -148,13 +242,13 @@ class JMWeatherSandstorm: JMWeatherBase
 		if (!g_Game.IsServer())
 			return;
 
-		float clampedDuration = Math.Max( Duration, 0.0 );
+		float clampedDuration = Math.Max( JMWeatherRoll.Pick( Duration, DurationHi ), 0.0 );
 		Weather weather = g_Game.GetWeather();
 		SandstormController sandstorm = weather.GetSandstorm();
 
 		if (Enabled == 1)
 		{
-			float fadeInTime = Math.Max( FadeInTime, 0.0 );
+			float fadeInTime = Math.Max( JMWeatherRoll.Pick( FadeInTime, FadeInTimeHi ), 0.0 );
 
 			vector stormDir = sandstorm.GetDirection();
 			float stormAngle = weather.WindDirectionToAngle( stormDir );
@@ -162,13 +256,13 @@ class JMWeatherSandstorm: JMWeatherBase
 
 			if (OvercastValue != -1)
 			{
-				float overcast = Math.Max( OvercastValue, 0.8 );
+				float overcast = Math.Max( JMWeatherRoll.Pick( OvercastValue, OvercastValueHi ), 0.8 );
 				weather.GetOvercast().Set( overcast, fadeInTime, clampedDuration );
 			}
 
 			if (WindMagnitudeValue != -1)
 			{
-				float windMagnitude = Math.Max( WindMagnitudeValue, 18.0 );
+				float windMagnitude = Math.Max( JMWeatherRoll.Pick( WindMagnitudeValue, WindMagnitudeValueHi ), 18.0 );
 				weather.GetWindMagnitude().Set( windMagnitude, fadeInTime, clampedDuration );
 			}
 
@@ -227,6 +321,10 @@ class JMWeatherSandstorm: JMWeatherBase
 class JMWeatherPhenomenon: JMWeatherBase
 {
 	float Forecast;
+
+	//! High bound of Forecast when it is a range - see JMWeatherRoll.Pick.
+	float ForecastHi;
+
 	float Time;
 	float MinDuration;
 	[NonSerialized()]
@@ -265,7 +363,30 @@ class JMWeatherPhenomenon: JMWeatherBase
 	}
 
 	//! Every phenomenon has the same three fields, so one write covers all of them.
-	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+	override void WriteTo( ParamsWriteContext ctx )
+	{
+		ctx.Write( Forecast );
+		ctx.Write( ForecastHi );
+		ctx.Write( Time );
+		ctx.Write( MinDuration );
+	}
+
+	override bool ReadFrom( ParamsReadContext ctx )
+	{
+		if ( !ctx.Read( Forecast ) )
+			return false;
+
+		if ( !ctx.Read( ForecastHi ) )
+			return false;
+
+		if ( !ctx.Read( Time ) )
+			return false;
+
+		if ( !ctx.Read( MinDuration ) )
+			return false;
+
+		return true;
+	}
 
 	override void Apply()
 	{
@@ -274,7 +395,7 @@ class JMWeatherPhenomenon: JMWeatherBase
 			WeatherPhenomenon phenom = GetPhenomenon();
 			if ( phenom )
 			{
-				float clampedForecast = Forecast;
+				float clampedForecast = JMWeatherRoll.Pick( Forecast, ForecastHi );
 				switch (Type())
 				{
 					case JMWeatherWindMagnitude:
@@ -329,6 +450,7 @@ class JMWeatherPhenomenon: JMWeatherBase
 	override void SetFromWorld()
 	{
 		Forecast = GetPhenomenon().GetForecast();
+		ForecastHi = 0;
 
 		//! NOT GetNextChange(). That is the countdown until the weather
 		//! controller computes its next forecast - up to an hour - and Apply
@@ -413,24 +535,64 @@ class JMWeatherDynamicFog: JMWeatherBase
 	float Bias;
 	float Time;
 
+	//! High bounds - see JMWeatherRoll.Pick.
+	float DistanceHi;
+	float HeightHi;
+	float BiasHi;
+
 	override int GetRPC() { return JMWeatherModuleRPC.DynamicFog; }
 
 	override string GetPermission() { return JMConstants.PERM_WEATHER_FOG_DYNAMIC; }
 
 	override string Describe() { return "Set dynamic fog dist=" + Distance + " height=" + Height; }
 
-	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+	override void WriteTo( ParamsWriteContext ctx )
+	{
+		ctx.Write( Distance );
+		ctx.Write( Height );
+		ctx.Write( Bias );
+		ctx.Write( Time );
+		ctx.Write( DistanceHi );
+		ctx.Write( HeightHi );
+		ctx.Write( BiasHi );
+	}
+
+	override bool ReadFrom( ParamsReadContext ctx )
+	{
+		if ( !ctx.Read( Distance ) )
+			return false;
+
+		if ( !ctx.Read( Height ) )
+			return false;
+
+		if ( !ctx.Read( Bias ) )
+			return false;
+
+		if ( !ctx.Read( Time ) )
+			return false;
+
+		if ( !ctx.Read( DistanceHi ) )
+			return false;
+
+		if ( !ctx.Read( HeightHi ) )
+			return false;
+
+		if ( !ctx.Read( BiasHi ) )
+			return false;
+
+		return true;
+	}
 
 	override void Apply()
 	{
 		if (Distance != -1)
 		{
-			float dist = Math.Clamp( Distance, 0.0, 1.0 );
-			float hgt = Math.Clamp( Height, 0.0, 1.0 );
+			float dist = Math.Clamp( JMWeatherRoll.Pick( Distance, DistanceHi ), 0.0, 1.0 );
+			float hgt = Math.Clamp( JMWeatherRoll.Pick( Height, HeightHi ), 0.0, 1.0 );
 			float t = Math.Max( Time, 0.0 );
 			g_Game.GetWeather().SetDynVolFogDistanceDensity( dist, t );
 			g_Game.GetWeather().SetDynVolFogHeightDensity( hgt, t );
-			g_Game.GetWeather().SetDynVolFogHeightBias( Bias, t );
+			g_Game.GetWeather().SetDynVolFogHeightBias( JMWeatherRoll.Pick( Bias, BiasHi ), t );
 		}
 	}
 
@@ -439,6 +601,9 @@ class JMWeatherDynamicFog: JMWeatherBase
 		Distance = g_Game.GetWeather().GetDynVolFogDistanceDensity();
 		Height = g_Game.GetWeather().GetDynVolFogHeightDensity();
 		Bias = g_Game.GetWeather().GetDynVolFogHeightBias();
+		DistanceHi = 0;
+		HeightHi = 0;
+		BiasHi = 0;
 	}
 
 	override void StopCurrentChangeInProgress()
@@ -498,21 +663,57 @@ class JMWeatherWindFunction: JMWeatherBase
 	float Max;
 	float Speed;
 
+	//! High bounds - see JMWeatherRoll.Pick.
+	float MinHi;
+	float MaxHi;
+	float SpeedHi;
+
 	override int GetRPC() { return JMWeatherModuleRPC.WindFunctionParams; }
 
 	override string GetPermission() { return JMConstants.PERM_WEATHER_WIND_FUNCPARAMS; }
 
 	override string Describe() { return "Set wind function params"; }
 
-	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+	override void WriteTo( ParamsWriteContext ctx )
+	{
+		ctx.Write( Min );
+		ctx.Write( Max );
+		ctx.Write( Speed );
+		ctx.Write( MinHi );
+		ctx.Write( MaxHi );
+		ctx.Write( SpeedHi );
+	}
+
+	override bool ReadFrom( ParamsReadContext ctx )
+	{
+		if ( !ctx.Read( Min ) )
+			return false;
+
+		if ( !ctx.Read( Max ) )
+			return false;
+
+		if ( !ctx.Read( Speed ) )
+			return false;
+
+		if ( !ctx.Read( MinHi ) )
+			return false;
+
+		if ( !ctx.Read( MaxHi ) )
+			return false;
+
+		if ( !ctx.Read( SpeedHi ) )
+			return false;
+
+		return true;
+	}
 
 	override void Apply()
 	{
 		if (Speed != -1)
 		{
-			float minF = Math.Clamp( Min, 0.0, 1.0 );
-			float maxF = Math.Clamp( Max, 0.0, 1.0 );
-			float spd = Math.Max( Speed, 0.0 );
+			float minF = Math.Clamp( JMWeatherRoll.Pick( Min, MinHi ), 0.0, 1.0 );
+			float maxF = Math.Clamp( JMWeatherRoll.Pick( Max, MaxHi ), 0.0, 1.0 );
+			float spd = Math.Max( JMWeatherRoll.Pick( Speed, SpeedHi ), 0.0 );
 			g_Game.GetWeather().SetWindFunctionParams( minF, maxF, spd );
 		}
 	}
@@ -520,6 +721,9 @@ class JMWeatherWindFunction: JMWeatherBase
 	override void SetFromWorld()
 	{
 		g_Game.GetWeather().GetWindFunctionParams( Min, Max, Speed );
+		MinHi = 0;
+		MaxHi = 0;
+		SpeedHi = 0;
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -549,11 +753,40 @@ class JMWeatherDate: JMWeatherBase
 
 	override bool IsPushedToClients() { return true; }
 
-	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+	override void WriteTo( ParamsWriteContext ctx )
+	{
+		ctx.Write( Year );
+		ctx.Write( Month );
+		ctx.Write( Day );
+		ctx.Write( Hour );
+		ctx.Write( Minute );
+	}
+
+	override bool ReadFrom( ParamsReadContext ctx )
+	{
+		if ( !ctx.Read( Year ) )
+			return false;
+
+		if ( !ctx.Read( Month ) )
+			return false;
+
+		if ( !ctx.Read( Day ) )
+			return false;
+
+		if ( !ctx.Read( Hour ) )
+			return false;
+
+		if ( !ctx.Read( Minute ) )
+			return false;
+
+		return true;
+	}
 
 	override void Apply()
 	{
-		if (Year != -1)
+		//! -1 is "leave the clock alone"; zeros are what an unset block loads as, and no
+		//! calendar has a month 0 - setting it would wreck the world's date.
+		if ( Year > 0 && Month > 0 && Day > 0 )
 			g_Game.GetWorld().SetDate( Year, Month, Day, Hour, Minute );
 	}
 
@@ -583,7 +816,26 @@ class JMWeatherRainThreshold: JMWeatherBase
 
 	override string Describe() { return "Set rain thresholds min=" + OvercastMin + " max=" + OvercastMax; }
 
-	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+	override void WriteTo( ParamsWriteContext ctx )
+	{
+		ctx.Write( OvercastMin );
+		ctx.Write( OvercastMax );
+		ctx.Write( Time );
+	}
+
+	override bool ReadFrom( ParamsReadContext ctx )
+	{
+		if ( !ctx.Read( OvercastMin ) )
+			return false;
+
+		if ( !ctx.Read( OvercastMax ) )
+			return false;
+
+		if ( !ctx.Read( Time ) )
+			return false;
+
+		return true;
+	}
 
 	override void Apply()
 	{
@@ -627,7 +879,26 @@ class JMWeatherSnowThreshold: JMWeatherBase
 
 	override string Describe() { return "Set snow thresholds min=" + OvercastMin + " max=" + OvercastMax; }
 
-	override void WriteTo( ParamsWriteContext ctx ) { ctx.Write( this ); }
+	override void WriteTo( ParamsWriteContext ctx )
+	{
+		ctx.Write( OvercastMin );
+		ctx.Write( OvercastMax );
+		ctx.Write( Time );
+	}
+
+	override bool ReadFrom( ParamsReadContext ctx )
+	{
+		if ( !ctx.Read( OvercastMin ) )
+			return false;
+
+		if ( !ctx.Read( OvercastMax ) )
+			return false;
+
+		if ( !ctx.Read( Time ) )
+			return false;
+
+		return true;
+	}
 
 	override void Apply()
 	{
@@ -677,22 +948,16 @@ class JMWeatherPreset
 	autoptr JMWeatherWindDirection PWindDirection;
 	autoptr JMWeatherWindFunction WindFunc;
 
-	// --- Dynamic chain -------------------------------------------------------
-	//! Everything the chain needs the moment it arrives here: whether this
-	//! preset takes part at all, how long it fades in over, how long it holds,
-	//! and where it can go next.
+	// --- Legacy dynamic block, read once and then cleared --------------------
+	//! Before the state machine, a preset carried its own chain settings: whether
+	//! it took part, how long it held, and where it could go next. That all lives
+	//! on JMWeatherState / JMWeatherPhase now - a preset is only weather values.
 	//!
-	//! Held on the preset rather than centrally so a preset describes itself.
-	//! The timing belongs to the preset being ENTERED - a storm and a clear sky
-	//! have no business sharing a hold.
-
-	//! Whether the random pick at server start may land here. A preset meant to
-	//! be applied by hand can stay out of the rotation and still be reachable
-	//! from other presets.
+	//! The fields stay DECLARED because JsonFileLoader can only read a field the
+	//! class still has; deleting them would silently drop an existing
+	//! configuration on the first load instead of migrating it.
+	//! JMWeatherSerialize.MigrateToStates folds them into states and zeroes them.
 	bool InRotation;
-
-	//! Seconds. A roll draws from between the two; equal bounds mean fixed
-	//! timing, which is a range of one rather than a special case.
 	int DurationMin;
 	int DurationMax;
 	int TransitionMin;
@@ -701,12 +966,13 @@ class JMWeatherPreset
 
 	void JMWeatherPreset()
 	{
-		InRotation = true;
-
-		DurationMin   = JMWeatherSerialize.DYNAMIC_DEFAULT_DURATION_MIN;
-		DurationMax   = JMWeatherSerialize.DYNAMIC_DEFAULT_DURATION_MAX;
-		TransitionMin = JMWeatherSerialize.DYNAMIC_DEFAULT_TRANSITION_MIN;
-		TransitionMax = JMWeatherSerialize.DYNAMIC_DEFAULT_TRANSITION_MAX;
+		//! Zero, not defaults: zero is how MigrateToStates tells a preset that was
+		//! never given a chain block from one that was.
+		InRotation    = false;
+		DurationMin   = 0;
+		DurationMax   = 0;
+		TransitionMin = 0;
+		TransitionMax = 0;
 
 		NextStates = new array< ref JMWeatherNextState >;
 
@@ -767,91 +1033,6 @@ class JMWeatherPreset
 		}
 	}
 
-	//! Pick where the chain goes from here, or "" to stay put.
-	//!
-	//! The candidates are WEIGHTS drawn against their own total rather than
-	//! against a fixed 100 - two candidates at 30 and 10 pick the first three
-	//! times in four. The form keeps them summing to 100 so the numbers on
-	//! screen are the real odds, but nothing here relies on that.
-	//!
-	//! A preset that lists ITSELF is how weather persists across several rolls;
-	//! there is no implicit "stay put" remainder. "" comes back only when this
-	//! preset names no candidates at all.
-	string RollNext()
-	{
-		if ( !NextStates )
-			return "";
-
-		int i;
-		int total = 0;
-
-		for ( i = 0; i < NextStates.Count(); i++ )
-			total += NextStates[i].Chance;
-
-		if ( total <= 0 )
-			return "";
-
-		int roll = Math.RandomInt( 0, total );
-		int cumulative = 0;
-
-		for ( i = 0; i < NextStates.Count(); i++ )
-		{
-			cumulative += NextStates[i].Chance;
-
-			if ( roll < cumulative )
-				return NextStates[i].To;
-		}
-
-		return "";
-	}
-
-	//! Carry the dynamic block over from another copy of this preset.
-	//!
-	//! Saving a preset from the form builds a BRAND NEW JMWeatherPreset out of
-	//! the tab controls, which know nothing about the chain - so without this
-	//! the update path would reset the chain settings to defaults every time
-	//! the weather values were saved. See JMWeatherModule.Exec_UpdatePreset.
-	void CopyDynamicFrom( JMWeatherPreset other )
-	{
-		if ( !other )
-			return;
-
-		InRotation    = other.InRotation;
-		DurationMin   = other.DurationMin;
-		DurationMax   = other.DurationMax;
-		TransitionMin = other.TransitionMin;
-		TransitionMax = other.TransitionMax;
-
-		NextStates.Clear();
-
-		if ( !other.NextStates )
-			return;
-
-		JMWeatherNextState copy;
-
-		for ( int i = 0; i < other.NextStates.Count(); i++ )
-		{
-			copy = new JMWeatherNextState;
-			copy.To     = other.NextStates[i].To;
-			copy.Chance = other.NextStates[i].Chance;
-
-			NextStates.Insert( copy );
-		}
-	}
-
-	//! Drop every candidate naming a preset that no longer exists.
-	void PruneNextStates( string removed )
-	{
-		if ( !NextStates )
-			return;
-
-		for ( int i = NextStates.Count() - 1; i >= 0; i-- )
-		{
-			if ( NextStates[i].To == removed )
-				NextStates.Remove( i );
-		}
-	}
-
 	//! Apply, but with the dynamic chain's timing rather than the preset's own.
 	//!
 	//! Only the phenomena take the override - they are the parts that fade. The
@@ -897,6 +1078,102 @@ class JMWeatherPreset
 		{
 			phenomenom.ResumeCurrentChangeInProgress();
 		}
+	}
+
+	//! A preset that changes NOTHING: every marker field is -1, which is what each
+	//! JMWeatherBase.Apply checks before it writes. The caller opts into the one or
+	//! two phenomena it is actually about.
+	//!
+	//! The bundled presets used to set every field on every preset, so "No Rain"
+	//! also forced overcast, snow, wind magnitude and wind direction to zero and
+	//! held all of them - a preset doing four things its name does not mention.
+	static JMWeatherPreset Neutral( string name )
+	{
+		JMWeatherPreset preset = new JMWeatherPreset;
+
+		preset.Name = name;
+
+		preset.ClearDate();
+
+		preset.Storm.Density = -1;
+		preset.Storm.Threshold = -1;
+		preset.Storm.MinTimeBetweenLightning = -1;
+
+		preset.PSandstorm.Enabled = -1;
+		preset.PSandstorm.Duration = -1;
+
+		preset.POvercast.Forecast = -1;
+		preset.POvercast.Time = -1;
+		preset.POvercast.MinDuration = -1;
+
+		preset.PFog.Forecast = -1;
+		preset.PFog.Time = -1;
+		preset.PFog.MinDuration = -1;
+
+		preset.PDynFog.Distance = -1;
+		preset.PDynFog.Height = -1;
+		preset.PDynFog.Bias = -1;
+		preset.PDynFog.Time = -1;
+
+		preset.PRain.Forecast = -1;
+		preset.PRain.Time = -1;
+		preset.PRain.MinDuration = -1;
+
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
+
+		preset.PSnow.Forecast = -1;
+		preset.PSnow.Time = -1;
+		preset.PSnow.MinDuration = -1;
+
+		preset.SnowThreshold.OvercastMin = -1;
+		preset.SnowThreshold.OvercastMax = -1;
+		preset.SnowThreshold.Time = -1;
+
+		preset.PWindMagnitude.Forecast = -1;
+		preset.PWindMagnitude.Time = -1;
+		preset.PWindMagnitude.MinDuration = -1;
+
+		preset.PWindDirection.Forecast = -1;
+		preset.PWindDirection.Time = -1;
+		preset.PWindDirection.MinDuration = -1;
+
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
+
+		return preset;
+	}
+
+	//! The date is not part of a preset any more - weather states do not move the
+	//! clock. -1 is what makes JMWeatherDate.Apply skip it.
+	void ClearDate()
+	{
+		PDate.Year = -1;
+		PDate.Month = -1;
+		PDate.Day = -1;
+		PDate.Hour = -1;
+		PDate.Minute = -1;
+	}
+
+	//! A deep copy, so a phase never shares weather values with the stored state
+	//! it was cloned from. Round-tripped through JSON: this class is nothing but
+	//! plain fields, and listing every one of them again here would be a second
+	//! place to forget a new one.
+	JMWeatherPreset Copy()
+	{
+		JsonSerializer serializer = new JsonSerializer;
+
+		string json;
+		string error;
+
+		serializer.WriteToString( this, false, json );
+
+		JMWeatherPreset copy = new JMWeatherPreset;
+		serializer.ReadFromString( copy, json, error );
+
+		return copy;
 	}
 
 	void Log( PlayerIdentity pidentLogPP )

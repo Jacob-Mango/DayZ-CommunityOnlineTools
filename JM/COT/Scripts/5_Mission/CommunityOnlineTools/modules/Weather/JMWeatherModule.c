@@ -13,6 +13,23 @@ class JMWeatherModule: JMRenderableModuleBase
 	protected ref JMWeatherPreset m_CachedWeatherPreset = new JMWeatherPreset;
 	protected bool m_bFreezeTime;
 
+	//! The dynamic weather state machine. Server only - clients never run one;
+	//! they read its position through m_Status.
+	protected ref JMWeatherMachine m_Machine;
+
+	//! Last known position of the machine. On the server it is refreshed from the
+	//! machine on demand, on a client it is whatever the last status RPC said.
+	protected ref JMWeatherDynamicStatus m_Status;
+
+	//! Bumped by the server whenever the state machine's configuration changes,
+	//! and carried on every status and settings reply. A client that sees a
+	//! revision other than the one it last loaded asks for the settings again.
+	protected int m_Revision;
+	protected int m_LoadedRevision;
+
+	//! Where Input_CyclePreset has got to in the state list.
+	protected int m_CycleIndex = -1;
+
 	//! Sandstorm (SandstormController.IsActive()) and, on Namalsk, EVR storm
 	//! state are server-only - neither replicates to clients the way the
 	//! vanilla WeatherPhenomenon forecasts (fog/rain/overcast/etc) do, so the
@@ -42,39 +59,24 @@ class JMWeatherModule: JMRenderableModuleBase
 		return "";
 	}
 
-	//! The stored preset by name, or NULL. Callers read the dynamic block off
-	//! it directly - it is the preset that owns its own chain settings now.
-	JMWeatherPreset GetPreset( string name )
+	//! The stored state by name, or NULL. A state is what used to be a preset: it
+	//! owns its phases, and each phase owns the weather it applies.
+	JMWeatherState GetState( string name )
 	{
-		if ( name == "" || !settings || !settings.Presets )
+		if ( !settings )
 			return NULL;
 
-		for ( int i = 0; i < settings.Presets.Count(); i++ )
-		{
-			if ( settings.Presets[i].Name == name )
-				return settings.Presets[i];
-		}
-
-		return NULL;
+		return settings.GetState( name );
 	}
 
-	array< ref JMWeatherPreset > GetPresets()
+	array< ref JMWeatherState > GetStates()
 	{
-		return settings.Presets;
+		return settings.States;
 	}
 
-	bool HasPreset( string name )
+	bool HasState( string name )
 	{
-		if ( name == "" || !settings || !settings.Presets )
-			return false;
-
-		for ( int i = 0; i < settings.Presets.Count(); i++ )
-		{
-			if ( settings.Presets[i].Name == name )
-				return true;
-		}
-
-		return false;
+		return GetState( name ) != NULL;
 	}
 
 	bool HasSettings()
@@ -116,13 +118,16 @@ class JMWeatherModule: JMRenderableModuleBase
 		Submit( payload );
 	}
 
-	void SetDynamicFog( float distance, float height = 0, float bias = 0, float time = 0 )
+	void SetDynamicFog( float distance, float height = 0, float bias = 0, float time = 0, float distanceHi = 0, float heightHi = 0, float biasHi = 0 )
 	{
 		JMWeatherDynamicFog payload = new JMWeatherDynamicFog;
 		payload.Distance = distance;
 		payload.Height = height;
 		payload.Bias = bias;
 		payload.Time = time;
+		payload.DistanceHi = distanceHi;
+		payload.HeightHi = heightHi;
+		payload.BiasHi = biasHi;
 
 		Submit( payload );
 	}
@@ -135,9 +140,9 @@ class JMWeatherModule: JMRenderableModuleBase
 			Send_DynamicWeather( config );
 	}
 
-	void SetFog( float forecast, float time = 0, float minDuration = 0 )
+	void SetFog( float forecast, float time = 0, float minDuration = 0, float forecastHi = 0 )
 	{
-		SubmitPhenomenon( new JMWeatherFog, forecast, time, minDuration );
+		SubmitPhenomenon( new JMWeatherFog, forecast, time, minDuration, forecastHi );
 	}
 
 	void SetFreezeTime(bool state)
@@ -160,14 +165,14 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 	}
 
-	void SetOvercast( float forecast, float time = 0, float minDuration = 0 )
+	void SetOvercast( float forecast, float time = 0, float minDuration = 0, float forecastHi = 0 )
 	{
-		SubmitPhenomenon( new JMWeatherOvercast, forecast, time, minDuration );
+		SubmitPhenomenon( new JMWeatherOvercast, forecast, time, minDuration, forecastHi );
 	}
 
-	void SetRain( float forecast, float time = 0, float minDuration = 0 )
+	void SetRain( float forecast, float time = 0, float minDuration = 0, float forecastHi = 0 )
 	{
-		SubmitPhenomenon( new JMWeatherRain, forecast, time, minDuration );
+		SubmitPhenomenon( new JMWeatherRain, forecast, time, minDuration, forecastHi );
 	}
 
 	void SetRainThresholds( float tMin, float tMax, float tTime )
@@ -180,7 +185,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		Submit( payload );
 	}
 
-	void SetSandstorm( bool enabled, float duration, float fadeInTime = -1, float overcast = -1, float windMagnitude = -1 )
+	void SetSandstorm( bool enabled, float duration, float fadeInTime = -1, float overcast = -1, float windMagnitude = -1, float durationHi = 0, float fadeInTimeHi = 0, float overcastHi = 0, float windMagnitudeHi = 0 )
 	{
 		JMWeatherSandstorm payload = new JMWeatherSandstorm;
 		if ( enabled )
@@ -191,13 +196,17 @@ class JMWeatherModule: JMRenderableModuleBase
 		payload.FadeInTime = fadeInTime;
 		payload.OvercastValue = overcast;
 		payload.WindMagnitudeValue = windMagnitude;
+		payload.DurationHi = durationHi;
+		payload.FadeInTimeHi = fadeInTimeHi;
+		payload.OvercastValueHi = overcastHi;
+		payload.WindMagnitudeValueHi = windMagnitudeHi;
 
 		Submit( payload );
 	}
 
-	void SetSnow( float forecast, float time = 0, float minDuration = 0 )
+	void SetSnow( float forecast, float time = 0, float minDuration = 0, float forecastHi = 0 )
 	{
-		SubmitPhenomenon( new JMWeatherSnow, forecast, time, minDuration );
+		SubmitPhenomenon( new JMWeatherSnow, forecast, time, minDuration, forecastHi );
 	}
 
 	void SetSnowThresholds( float tMin, float tMax, float tTime )
@@ -210,34 +219,40 @@ class JMWeatherModule: JMRenderableModuleBase
 		Submit( payload );
 	}
 
-	void SetStorm( float density, float threshold, float minTimeBetweenLightning )
+	void SetStorm( float density, float threshold, float minTimeBetweenLightning, float densityHi = 0, float thresholdHi = 0, float minTimeBetweenLightningHi = 0 )
 	{
 		JMWeatherStorm payload = new JMWeatherStorm;
 		payload.Density = density;
 		payload.Threshold = threshold;
 		payload.MinTimeBetweenLightning = minTimeBetweenLightning;
+		payload.DensityHi = densityHi;
+		payload.ThresholdHi = thresholdHi;
+		payload.MinTimeBetweenLightningHi = minTimeBetweenLightningHi;
 
 		Submit( payload );
 	}
 
-	void SetWindDirection( float forecast, float time = 0, float minDuration = 0 )
+	void SetWindDirection( float forecast, float time = 0, float minDuration = 0, float forecastHi = 0 )
 	{
-		SubmitPhenomenon( new JMWeatherWindDirection, forecast, time, minDuration );
+		SubmitPhenomenon( new JMWeatherWindDirection, forecast, time, minDuration, forecastHi );
 	}
 
-	void SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed )
+	void SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed, float fnMinHi = 0, float fnMaxHi = 0, float fnSpeedHi = 0 )
 	{
 		JMWeatherWindFunction payload = new JMWeatherWindFunction;
 		payload.Min = fnMin;
 		payload.Max = fnMax;
 		payload.Speed = fnSpeed;
+		payload.MinHi = fnMinHi;
+		payload.MaxHi = fnMaxHi;
+		payload.SpeedHi = fnSpeedHi;
 
 		Submit( payload );
 	}
 
-	void SetWindMagnitude( float forecast, float time = 0, float minDuration = 0 )
+	void SetWindMagnitude( float forecast, float time = 0, float minDuration = 0, float forecastHi = 0 )
 	{
-		SubmitPhenomenon( new JMWeatherWindMagnitude, forecast, time, minDuration );
+		SubmitPhenomenon( new JMWeatherWindMagnitude, forecast, time, minDuration, forecastHi );
 	}
 
 	override void DescribeModule( JMModuleInfo info )
@@ -292,6 +307,16 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 	}
 
+	//! A clean shutdown: record how much of the current phase is left, so the
+	//! restart that follows resumes it instead of starting the phase over.
+	override void OnMissionFinish()
+	{
+		super.OnMissionFinish();
+
+		if ( m_Machine )
+			m_Machine.Snapshot();
+	}
+
 	override void RegisterKeyMouseBindings()
 	{
 		super.RegisterKeyMouseBindings();
@@ -311,9 +336,12 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		if ( !JMPermissions.Has( JMConstants.PERM_WEATHER_PRESET_USE ) )
 			return;
-		if ( !settings || !settings.Presets || settings.Presets.Count() == 0 )
+		if ( !settings || !settings.States || settings.States.Count() == 0 )
 			return;
-		UsePreset( settings.Presets[0].Name );
+
+		m_CycleIndex = ( m_CycleIndex + 1 ) % settings.States.Count();
+
+		UsePreset( settings.States[m_CycleIndex].Name );
 	}
 
 	override void OnMissionLoaded()
@@ -342,8 +370,6 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			SeedWeather();
 
-			RestartDynamicWeather();
-
 			OnSettingsUpdated();
 		}
 	}
@@ -355,6 +381,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( settings );
+		rpc.Write( m_Revision );
 		rpc.Send( NULL, JMWeatherModuleRPC.Load, true, ident );
 	}
 
@@ -370,6 +397,13 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 			if ( ctx.Read( settings ) )
 			{
+				ctx.Read( m_LoadedRevision );
+
+				if ( !m_Status )
+					m_Status = new JMWeatherDynamicStatus;
+
+				m_Status.Enabled = settings.DynamicEnabled;
+
 				OnSettingsUpdated();
 			}
 		}
@@ -421,36 +455,19 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 	}
 
-	void UsePreset( string name )
+	//! Put a state's weather on NOW, as the person asked - with the weather's own
+	//! stored fade and hold, not the phase timing the machine would use. An empty
+	//! phase means the state's own entry roll. While the machine is running it
+	//! carries on from the phase that was applied.
+	void UsePreset( string name, string phase = "" )
 	{
-		if ( g_Game.IsServer() )
-			Exec_UsePreset( name, NULL );
-		else
-			Send_PresetName( JMWeatherModuleRPC.UsePreset, name );
-	}
+		JMWeatherDynamicControl control = new JMWeatherDynamicControl;
 
-	void CreatePreset( JMWeatherPreset preset )
-	{
-		if ( g_Game.IsServer() )
-			Exec_CreatePreset( preset, NULL );
-		else
-			Send_Preset( JMWeatherModuleRPC.CreatePreset, preset );
-	}
+		control.Op    = JMWeatherDynamicControl.OP_APPLY;
+		control.State = name;
+		control.Phase = phase;
 
-	void UpdatePreset( JMWeatherPreset preset )
-	{
-		if ( g_Game.IsServer() )
-			Exec_UpdatePreset( preset, NULL );
-		else
-			Send_Preset( JMWeatherModuleRPC.UpdatePreset, preset );
-	}
-
-	void RemovePreset( string name )
-	{
-		if ( g_Game.IsServer() )
-			Exec_RemovePreset( name, NULL );
-		else
-			Send_PresetName( JMWeatherModuleRPC.RemovePreset, name );
+		SendDynamicControl( control );
 	}
 
 	// -------------------------------------------------------------------------
@@ -462,9 +479,10 @@ class JMWeatherModule: JMRenderableModuleBase
 	//  RPC trio per phenomenon to write.
 	// -------------------------------------------------------------------------
 
-	protected void SubmitPhenomenon( JMWeatherPhenomenon payload, float forecast, float time, float minDuration )
+	protected void SubmitPhenomenon( JMWeatherPhenomenon payload, float forecast, float time, float minDuration, float forecastHi = 0 )
 	{
 		payload.Forecast = forecast;
+		payload.ForecastHi = forecastHi;
 		payload.Time = time;
 		payload.MinDuration = minDuration;
 
@@ -502,79 +520,53 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	//! The payload an incoming RPC carries, or NULL when the id is not one of
 	//! ours or the message is short. A mod adding a payload adds its case here.
-	protected JMWeatherBase ReadPayload( int rpc_type, ParamsReadContext ctx )
+	protected JMWeatherBase NewPayload( int rpc_type )
 	{
-		JMWeatherStorm storm;
-		JMWeatherSandstorm sandstorm;
-		JMWeatherFog fog;
-		JMWeatherDynamicFog dynamicFog;
-		JMWeatherRain rain;
-		JMWeatherRainThreshold rainThreshold;
-		JMWeatherSnow snow;
-		JMWeatherSnowThreshold snowThreshold;
-		JMWeatherOvercast overcast;
-		JMWeatherWindMagnitude windMagnitude;
-		JMWeatherWindDirection windDirection;
-		JMWeatherWindFunction windFunction;
-		JMWeatherDate date;
-
 		switch ( rpc_type )
 		{
 		case JMWeatherModuleRPC.Storm:
-			if ( ctx.Read( storm ) )
-				return storm;
-			break;
+			return new JMWeatherStorm;
 		case JMWeatherModuleRPC.Sandstorm:
-			if ( ctx.Read( sandstorm ) )
-				return sandstorm;
-			break;
+			return new JMWeatherSandstorm;
 		case JMWeatherModuleRPC.Fog:
-			if ( ctx.Read( fog ) )
-				return fog;
-			break;
+			return new JMWeatherFog;
 		case JMWeatherModuleRPC.DynamicFog:
-			if ( ctx.Read( dynamicFog ) )
-				return dynamicFog;
-			break;
+			return new JMWeatherDynamicFog;
 		case JMWeatherModuleRPC.Rain:
-			if ( ctx.Read( rain ) )
-				return rain;
-			break;
+			return new JMWeatherRain;
 		case JMWeatherModuleRPC.RainThresholds:
-			if ( ctx.Read( rainThreshold ) )
-				return rainThreshold;
-			break;
+			return new JMWeatherRainThreshold;
 		case JMWeatherModuleRPC.Snow:
-			if ( ctx.Read( snow ) )
-				return snow;
-			break;
+			return new JMWeatherSnow;
 		case JMWeatherModuleRPC.SnowThresholds:
-			if ( ctx.Read( snowThreshold ) )
-				return snowThreshold;
-			break;
+			return new JMWeatherSnowThreshold;
 		case JMWeatherModuleRPC.Overcast:
-			if ( ctx.Read( overcast ) )
-				return overcast;
-			break;
+			return new JMWeatherOvercast;
 		case JMWeatherModuleRPC.WindMagnitude:
-			if ( ctx.Read( windMagnitude ) )
-				return windMagnitude;
-			break;
+			return new JMWeatherWindMagnitude;
 		case JMWeatherModuleRPC.WindDirection:
-			if ( ctx.Read( windDirection ) )
-				return windDirection;
-			break;
+			return new JMWeatherWindDirection;
 		case JMWeatherModuleRPC.WindFunctionParams:
-			if ( ctx.Read( windFunction ) )
-				return windFunction;
-			break;
+			return new JMWeatherWindFunction;
 		case JMWeatherModuleRPC.Date:
-			if ( ctx.Read( date ) )
-				return date;
-			break;
+			return new JMWeatherDate;
 		}
 
 		return NULL;
+	}
+
+	protected JMWeatherBase ReadPayload( int rpc_type, ParamsReadContext ctx )
+	{
+		JMWeatherBase payload = NewPayload( rpc_type );
+
+		if ( !payload )
+			return NULL;
+
+		//! The payload reads itself, field by field, in the order it wrote them.
+		if ( !payload.ReadFrom( ctx ) )
+			return NULL;
+
+		return payload;
 	}
 
 	protected void RPC_Payload( int rpc_type, ParamsReadContext ctx, PlayerIdentity senderRPC )
@@ -656,20 +648,6 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWeatherModuleRPC.FreezeTime, true, NULL );
 	}
 
-	protected void Send_Preset( int rpc_type, JMWeatherPreset preset )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( preset );
-		rpc.Send( NULL, rpc_type, true, NULL );
-	}
-
-	protected void Send_PresetName( int rpc_type, string name )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( name );
-		rpc.Send( NULL, rpc_type, true, NULL );
-	}
-
 	protected void Exec_FreezeTime( bool state, PlayerIdentity ident )
 	{
 		Weather weather = g_Game.GetWeather();
@@ -693,144 +671,54 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		weather.SetWeatherUpdateFreeze(state);
+
+		//! Frozen weather means a frozen countdown: the phase in progress keeps
+		//! the time it has left and carries on from there when time resumes.
+		if ( m_Machine )
+		{
+			if ( state )
+				m_Machine.Pause();
+			else
+				m_Machine.Unpause();
+		}
 	}
 
-	protected void Exec_UsePreset( string name, PlayerIdentity ident )
+	//! Apply a state's phase weather now. The weather goes on exactly as authored -
+	//! its own transition and hold - and the machine, if it is running, is moved to
+	//! that phase so the next roll does not immediately overwrite it.
+	protected void ApplyState( string stateName, string phaseName, PlayerIdentity ident )
 	{
-		array< ref JMWeatherPreset > presets = GetPresets();
-		JMWeatherPreset preset;
+		JMWeatherState state = GetState( stateName );
 
-		for ( int i = 0; i < presets.Count(); i++ )
-		{
-			if ( presets[i].Name == name )
-			{
-				preset = presets[i];
-				break;
-			}
-		}
-
-		if ( preset == NULL )
+		if ( !state )
 			return;
 
-		preset.Apply();
-		preset.Log( ident );
+		string target = phaseName;
 
-		//! ident is NULL whenever the server applies a preset on its own - the
-		//! startup preset, or the dynamic chain - and GetId() on a null
-		//! identity is not survivable.
+		if ( target == "" )
+			target = state.RollEntryPhase();
+
+		JMWeatherPhase phase = state.GetPhase( target );
+
+		if ( !phase )
+			return;
+
+		phase.Conditions.Apply();
+
+		//! Named only for the log line - a phase's weather has no name of its own.
+		string storedName = phase.Conditions.Name;
+		phase.Conditions.Name = stateName + " > " + phase.Name;
+		phase.Conditions.Log( ident );
+		phase.Conditions.Name = storedName;
+
+		if ( m_Machine )
+			m_Machine.Adopt( stateName, target );
+
+		//! ident is NULL whenever the server applies weather on its own - the
+		//! startup state - and GetId() on a null identity is not survivable.
 		JMPlayerInstance upInst = GetCaller( ident );
 
-		SendWebhookColored( "UsePreset", upInst, "Applied weather preset: " + name, JMConstants.WEBHOOK_COLOR_SUCCESS );
-	}
-
-	protected void Exec_CreatePreset( JMWeatherPreset preset, PlayerIdentity ident )
-	{
-		if ( preset == NULL )
-			return;
-
-		array< ref JMWeatherPreset > presets = GetPresets();
-		for ( int i = 0; i < presets.Count(); i++ )
-		{
-			if ( presets[i].Name == preset.Name )
-			{
-				return;
-			}
-		}
-
-		GetPresets().Insert( preset );
-
-		OnSettingsUpdated();
-
-		if (!g_Game.IsServer())
-			return;
-
-		GetCommunityOnlineToolsBase().Log( ident, "Created Weather Preset " + preset.Name );
-		JMPlayerInstance cpInst = GetCaller( ident );
-		SendWebhookColored( "CreatePreset", cpInst, "Created weather preset: " + preset.Name, JMConstants.WEBHOOK_COLOR_SUCCESS );
-
-		settings.Save();
-	}
-
-	protected void Exec_UpdatePreset( JMWeatherPreset preset, PlayerIdentity ident )
-	{
-		if ( preset == NULL )
-			return;
-
-		array< ref JMWeatherPreset > presets = GetPresets();
-		int index = -1;
-
-		for ( int i = 0; i < presets.Count(); i++ )
-		{
-			if ( presets[i].Name == preset.Name )
-			{
-				index = i;
-				break;
-			}
-		}
-
-		if ( index == -1 )
-			return;
-		
-		//! The incoming preset was built from the weather tabs, which know
-		//! nothing about the chain - so it arrives with default chain settings
-		//! that would overwrite whatever this preset was configured with. The
-		//! two editors stay disjoint: Save Preset never touches the dynamic
-		//! block, Save Dynamic Weather never touches the weather values.
-		preset.CopyDynamicFrom( presets[index] );
-
-		GetPresets().Remove( index );
-		GetPresets().InsertAt( preset, index );
-
-		OnSettingsUpdated();
-
-		if (!g_Game.IsServer())
-			return;
-
-		GetCommunityOnlineToolsBase().Log( ident, "Updated Weather Preset " + preset.Name );
-
-		//! ident is NULL when the mission host edits a preset itself.
-		JMPlayerInstance updInst = GetCaller( ident );
-
-		SendWebhookColored( "UpdatePreset", updInst, "Updated weather preset: " + preset.Name, JMConstants.WEBHOOK_COLOR_SUCCESS );
-
-		settings.Save();
-	}
-
-	protected void Exec_RemovePreset( string name, PlayerIdentity ident )
-	{
-		array< ref JMWeatherPreset > presets = GetPresets();
-		int index = -1;
-
-		for ( int i = 0; i < presets.Count(); i++ )
-		{
-			if ( presets[i].Name == name )
-			{
-				index = i;
-				break;
-			}
-		}
-
-		if ( index == -1 )
-			return;
-		
-		GetPresets().Remove( index );
-
-		//! Every edge into or out of the deleted preset is dead weight now, and
-		//! a chain parked on it would stall on a node that no longer resolves.
-		PruneTransitions( name );
-
-		OnSettingsUpdated();
-
-		if (!g_Game.IsServer())
-			return;
-
-		RestartDynamicWeather();
-
-		GetCommunityOnlineToolsBase().Log( ident, "Removed Weather Preset (Name: " + name + ")" );
-		JMPlayerInstance rmInst = GetCaller( ident );
-		SendWebhookColored( "RemovePreset", rmInst, "Removed weather preset: " + name, JMConstants.WEBHOOK_COLOR_WARNING );
-
-		settings.Save();
+		SendWebhookColored( "UsePreset", upInst, "Applied weather preset: " + stateName + " > " + phase.Name, JMConstants.WEBHOOK_COLOR_SUCCESS );
 	}
 
 	protected void RPC_DynamicWeather( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -846,8 +734,28 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_DYNAMIC, senderRPC ) )
+		//! The switch is one permission, and what happens to a state is another: making
+		//! one, changing one and deleting one are the old preset permissions.
+		bool canSwitch = JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_DYNAMIC, senderRPC );
+		bool canEdit   = canSwitch;
+
+		if ( config.Op == JMWeatherDynamicConfig.OP_SAVE && config.TargetName == "" )
+			canEdit = JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_CREATE, senderRPC );
+		else if ( config.Op == JMWeatherDynamicConfig.OP_SAVE )
+			canEdit = JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_UPDATE, senderRPC );
+		else if ( config.Op == JMWeatherDynamicConfig.OP_REMOVE )
+			canEdit = JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_REMOVE, senderRPC );
+
+		if ( config.Op == JMWeatherDynamicConfig.OP_TOGGLE && !canSwitch )
 			return;
+
+		if ( config.Op != JMWeatherDynamicConfig.OP_TOGGLE && !canEdit )
+			return;
+
+		//! Saving a state carries the switch along, but only somebody who may flip it
+		//! gets to - everyone else's message leaves it as it was.
+		if ( config.Op != JMWeatherDynamicConfig.OP_TOGGLE && !canSwitch && settings )
+			config.Enabled = settings.DynamicEnabled;
 
 		Exec_DynamicWeather( config, senderRPC );
 	}
@@ -857,45 +765,70 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !settings || !config )
 			return;
 
+		//! The master switch always applies, whatever else the message carries.
 		settings.DynamicEnabled = config.Enabled;
 
-		//! An empty PresetName is the master switch on its own - sent when the
-		//! toggle is flipped with no preset selected to speak for.
-		JMWeatherPreset target = GetPreset( config.PresetName );
+		string dwMsg;
 
-		if ( target )
+		if ( config.Enabled )
+			dwMsg = "Enabled dynamic weather";
+		else
+			dwMsg = "Disabled dynamic weather";
+
+		string renamedFrom;
+		string renamedTo;
+
+		switch ( config.Op )
 		{
-			target.InRotation = config.InRotation;
+		case JMWeatherDynamicConfig.OP_SAVE:
+		{
+			//! The server keeps its own validated copy of the state, never the
+			//! objects that arrived - see JMWeatherSerialize.NormalizeState.
+			JMWeatherState saved = settings.SaveState( config.TargetName, config.State );
 
-			target.DurationMin   = Math.Max( config.DurationMin, JMWeatherSerialize.DYNAMIC_MIN_INTERVAL );
-			target.DurationMax   = Math.Max( config.DurationMax, target.DurationMin );
-			target.TransitionMin = Math.Max( config.TransitionMin, 0 );
-			target.TransitionMax = Math.Max( config.TransitionMax, target.TransitionMin );
+			if ( !saved )
+			{
+				//! Blank or duplicate name. Nothing about the states changed.
+				dwMsg = "Refused dynamic weather state (blank or duplicate name)";
+				break;
+			}
 
-			if ( config.NextStates )
-				target.NextStates = config.NextStates;
+			if ( config.TargetName != "" && config.TargetName != saved.Name )
+			{
+				renamedFrom = config.TargetName;
+				renamedTo   = saved.Name;
+			}
+
+			dwMsg = "Saved dynamic weather state " + saved.Name + " (" + saved.Phases.Count() + " phases)";
+			break;
+		}
+		case JMWeatherDynamicConfig.OP_REMOVE:
+		{
+			settings.RemoveState( config.TargetName );
+
+			dwMsg = "Removed dynamic weather state " + config.TargetName;
+			break;
+		}
 		}
 
-		//! A chain that has never run, or whose node was deleted out from under
-		//! it, starts from the configured preset.
-		if ( settings.CurrentPreset == "" || !HasPreset( settings.CurrentPreset ) )
-			settings.CurrentPreset = RandomPreset();
+		//! Every client that holds a copy of the configuration is now stale.
+		m_Revision++;
 
 		OnSettingsUpdated();
 
 		if ( !g_Game.IsServer() )
 			return;
 
-		RestartDynamicWeather();
+		if ( m_Machine )
+		{
+			if ( renamedFrom != "" )
+				m_Machine.OnStateRenamed( renamedFrom, renamedTo );
 
-		string dwMsg;
-
-		if ( target )
-			dwMsg = "Set dynamic weather for preset " + target.Name + " (hold " + target.DurationMin + "-" + target.DurationMax + "s, fade " + target.TransitionMin + "-" + target.TransitionMax + "s)";
-		else if ( config.Enabled )
-			dwMsg = "Enabled dynamic weather";
-		else
-			dwMsg = "Disabled dynamic weather";
+			//! Brings the machine in line without restarting a phase that is still
+			//! valid, so an unrelated edit or the toggle alone does not reset the
+			//! countdown - and switching on applies a phase at once.
+			m_Machine.OnConfigChanged();
+		}
 
 		GetCommunityOnlineToolsBase().Log( ident, dwMsg );
 
@@ -909,179 +842,39 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	//! What the weather starts as when the settings load.
 	//!
-	//! With dynamic weather on, the chain starts from a RANDOM preset every
-	//! boot - the whole point of the chain is that no two server sessions run
-	//! the same sequence, so resuming the previous one or always opening on the
-	//! same preset would defeat it. InitialPreset is only consulted when the
-	//! chain is off, where it keeps its original "apply this on startup"
-	//! meaning for anyone still setting it in Weather.json.
+	//! With the dynamic machine on it carries on from the position it was saved
+	//! at - same state, same phase, same time left on it - or begins from a
+	//! random state when there is nothing valid to carry on from. With it off,
+	//! InitialPreset keeps its original "apply this on startup" meaning for
+	//! anyone still setting it in Weather.json.
 	protected void SeedWeather()
 	{
 		if ( !settings )
 			return;
 
+		m_Machine = new JMWeatherMachine( this, settings, m_bFreezeTime );
+
 		if ( !settings.DynamicEnabled )
 		{
 			if ( settings.InitialPreset != "" )
-				Exec_UsePreset( settings.InitialPreset, NULL );
+			{
+				PlayerIdentity noSeedIdent;
+				ApplyState( settings.InitialPreset, "", noSeedIdent );
+			}
 
 			return;
 		}
 
-		string start = RandomPreset();
-
-		if ( start == "" )
-			return;
-
-		settings.CurrentPreset = start;
-
-		//! Entered like any other state, with its own fade and hold, so the
-		//! first state of a session behaves exactly like every one after it.
-		EnterPreset( start );
+		m_Machine.Boot();
 	}
 
-	//! A random preset from the rotation.
-	//!
-	//! Presets can opt out, which is how one that is only ever meant to be
-	//! applied by hand stays off the start-of-session dice while remaining
-	//! reachable from any preset that names it. If NOTHING is in rotation the
-	//! flag is treated as unset rather than as "no weather at all".
-	protected string RandomPreset()
+	//! Called by the machine each time it enters (or resumes) a phase.
+	void OnMachineEntered( string stateName, string phaseName, bool resumed )
 	{
-		if ( !settings || !settings.Presets || settings.Presets.Count() == 0 )
-			return "";
+		string verb = "moved to";
 
-		array<string> pool = new array<string>;
-
-		int i;
-
-		for ( i = 0; i < settings.Presets.Count(); i++ )
-		{
-			if ( settings.Presets[i].InRotation )
-				pool.Insert( settings.Presets[i].Name );
-		}
-
-		if ( pool.Count() == 0 )
-		{
-			for ( i = 0; i < settings.Presets.Count(); i++ )
-				pool.Insert( settings.Presets[i].Name );
-		}
-
-		return pool[ Math.RandomInt( 0, pool.Count() ) ];
-	}
-
-	//! (Re)arm the roll timer. Safe to call on a client - it only ever removes
-	//! the callback there, since the chain is driven entirely by the server.
-	protected void RestartDynamicWeather()
-	{
-		g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( Repeat_DynamicWeather );
-
-		if ( !g_Game.IsServer() || !settings || !settings.DynamicEnabled )
-			return;
-
-		ScheduleDynamicRoll( RollDuration( GetPreset( settings.CurrentPreset ) ) );
-	}
-
-	//! Every state holds for its own draw, so the timer is re-armed one roll at
-	//! a time. A repeating CallLater could only ever run on a fixed period,
-	//! which is exactly the thing the duration range replaces.
-	protected void ScheduleDynamicRoll( int seconds )
-	{
-		g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( Repeat_DynamicWeather );
-		g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Repeat_DynamicWeather, seconds * 1000, false );
-	}
-
-	//! How long the given preset holds. Falls back to the defaults when there
-	//! is no preset to ask - a chain with an empty or unresolved current state
-	//! still has to come back and try again.
-	protected int RollDuration( JMWeatherPreset preset )
-	{
-		int low  = JMWeatherSerialize.DYNAMIC_DEFAULT_DURATION_MIN;
-		int high = JMWeatherSerialize.DYNAMIC_DEFAULT_DURATION_MAX;
-
-		if ( preset )
-		{
-			low  = preset.DurationMin;
-			high = preset.DurationMax;
-		}
-
-		int seconds = RandomBetween( low, high );
-
-		if ( seconds < JMWeatherSerialize.DYNAMIC_MIN_INTERVAL )
-			seconds = JMWeatherSerialize.DYNAMIC_MIN_INTERVAL;
-
-		return seconds;
-	}
-
-	protected int RandomBetween( int low, int high )
-	{
-		if ( high <= low )
-			return low;
-
-		//! RandomInt's upper bound is exclusive, so the top of the range would
-		//! otherwise never come up.
-		return Math.RandomInt( low, high + 1 );
-	}
-
-	protected void Repeat_DynamicWeather()
-	{
-		if ( !settings || !settings.DynamicEnabled )
-			return;
-
-		string current = settings.CurrentPreset;
-
-		if ( current == "" || !HasPreset( current ) )
-			current = RandomPreset();
-
-		JMWeatherPreset from = GetPreset( current );
-
-		string next;
-
-		if ( from )
-			next = from.RollNext();
-
-		JMWeatherPreset entered = GetPreset( next );
-
-		//! The timing belongs to the preset being ENTERED, so the next state
-		//! has to be picked before there is a hold to schedule. A preset knows
-		//! how long it fades in over and how long it stays; the one it came
-		//! from has no say in either.
-		if ( entered )
-		{
-			settings.CurrentPreset = entered.Name;
-
-			EnterPreset( entered.Name );
-
-			settings.Save();
-
-			ScheduleDynamicRoll( RollDuration( entered ) );
-			return;
-		}
-
-		//! Nothing to move to - this preset names no candidates, or the one it
-		//! drew has since been deleted. Hold where we are and come back, rather
-		//! than stopping the chain dead.
-		ScheduleDynamicRoll( RollDuration( from ) );
-	}
-
-	//! Apply a preset as the chain entering it: its own fade, its own hold.
-	//!
-	//! The hold is handed to the engine as the phenomena's MinDuration so the
-	//! weather is not released back to cfgweather.xml before the chain returns
-	//! for it. ScheduleDynamicRoll draws its own value from the same range,
-	//! which is close enough - the two only have to agree in scale, and an
-	//! exact match would mean the release and the roll racing each other.
-	protected void EnterPreset( string name )
-	{
-		JMWeatherPreset preset = GetPreset( name );
-
-		if ( !preset )
-			return;
-
-		int transition = RandomBetween( preset.TransitionMin, preset.TransitionMax );
-		int duration   = RollDuration( preset );
-
-		preset.ApplyTimed( transition, duration );
+		if ( resumed )
+			verb = "resumed at";
 
 		//! Typed nulls, not a bare NULL: Log is overloaded on both
 		//! PlayerIdentity and JMPlayerInstance, and a bare NULL matches
@@ -1089,29 +882,180 @@ class JMWeatherModule: JMRenderableModuleBase
 		PlayerIdentity noIdent;
 		JMPlayerInstance noInstance;
 
-		GetCommunityOnlineToolsBase().Log( noIdent, "Dynamic weather moved to preset " + name );
-		SendWebhookColored( "DynamicWeather", noInstance, "Weather moved to preset: " + name, JMConstants.WEBHOOK_COLOR_INFO );
+		GetCommunityOnlineToolsBase().Log( noIdent, "Dynamic weather " + verb + " " + stateName + " > " + phaseName );
+		SendWebhookColored( "DynamicWeather", noInstance, "Weather " + verb + ": " + stateName + " > " + phaseName, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
-	protected void PruneTransitions( string name )
+	//! The machine's own position, for the status RPC and for the host's UI.
+	void RefreshDynamicStatus()
 	{
-		if ( !settings )
-			return;
+		if ( !m_Status )
+			m_Status = new JMWeatherDynamicStatus;
 
-		//! The deleted preset took its own candidates with it. What is left is
-		//! every OTHER preset still pointing at it, which would otherwise draw
-		//! a state that cannot be entered.
-		if ( settings.Presets )
+		if ( g_Game.IsServer() && m_Machine )
+			m_Machine.FillStatus( m_Status );
+
+		m_Status.Revision   = m_Revision;
+		m_Status.ReceivedAt = g_Game.GetTickTime();
+	}
+
+	JMWeatherDynamicStatus GetDynamicStatus()
+	{
+		if ( !m_Status )
+			m_Status = new JMWeatherDynamicStatus;
+
+		return m_Status;
+	}
+
+	JMWeatherSerialize GetSettings()
+	{
+		return settings;
+	}
+
+	//! Ask for the machine's position. The reply lands in GetDynamicStatus().
+	void RequestDynamicStatus()
+	{
+		if ( g_Game.IsServer() )
 		{
-			for ( int i = 0; i < settings.Presets.Count(); i++ )
-				settings.Presets[i].PruneNextStates( name );
+			RefreshDynamicStatus();
+			return;
 		}
 
-		if ( settings.CurrentPreset == name )
-			settings.CurrentPreset = "";
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMWeatherModuleRPC.DynamicStatus, true, NULL );
+	}
 
-		if ( settings.InitialPreset == name )
-			settings.InitialPreset = "";
+	protected void Exec_DynamicStatus( PlayerIdentity ident )
+	{
+		if ( !ident || !m_Machine )
+			return;
+
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEATHER_VIEW, ident ) )
+			return;
+
+		JMWeatherDynamicStatus status = new JMWeatherDynamicStatus;
+
+		m_Machine.FillStatus( status );
+		status.Revision = m_Revision;
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( status );
+		rpc.Send( NULL, JMWeatherModuleRPC.DynamicStatus, true, ident );
+	}
+
+	protected void RPC_DynamicStatus( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( g_Game.IsDedicatedServer() )
+		{
+			Exec_DynamicStatus( senderRPC );
+			return;
+		}
+
+		JMWeatherDynamicStatus status;
+
+		if ( !ctx.Read( status ) )
+			return;
+
+		status.ReceivedAt = g_Game.GetTickTime();
+		m_Status = status;
+
+		//! The configuration changed since this client last loaded it - another
+		//! admin's edit, or this client's own. Ask for it again.
+		if ( status.Revision != m_LoadedRevision )
+		{
+			m_LoadedRevision = status.Revision;
+			Load();
+		}
+	}
+
+	//! Move the machine: advance, restart, or jump to a state and phase.
+	void SendDynamicControl( JMWeatherDynamicControl control )
+	{
+		if ( g_Game.IsServer() )
+		{
+			PlayerIdentity noIdent;
+			Exec_DynamicControl( control, noIdent );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( control );
+		rpc.Send( NULL, JMWeatherModuleRPC.DynamicControl, true, NULL );
+	}
+
+	protected void RPC_DynamicControl( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMWeatherDynamicControl control = new JMWeatherDynamicControl;
+
+		if ( !ctx.Read( control ) )
+			return;
+
+		if ( !g_Game.IsServer() )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		//! Putting a state's weather on is the old "use preset"; moving the machine is
+		//! the dynamic permission.
+		string controlPermission = JMConstants.PERM_WEATHER_PRESET_DYNAMIC;
+
+		if ( control.Op == JMWeatherDynamicControl.OP_APPLY )
+			controlPermission = JMConstants.PERM_WEATHER_PRESET_USE;
+
+		if ( !JMPermissions.HasRPC( controlPermission, senderRPC ) )
+			return;
+
+		Exec_DynamicControl( control, senderRPC );
+	}
+
+	protected void Exec_DynamicControl( JMWeatherDynamicControl control, PlayerIdentity ident )
+	{
+		if ( !control || !settings )
+			return;
+
+		//! Applying weather by hand works whether or not the machine is running.
+		if ( control.Op == JMWeatherDynamicControl.OP_APPLY )
+		{
+			ApplyState( control.State, control.Phase, ident );
+			return;
+		}
+
+		if ( !m_Machine || !settings.DynamicEnabled )
+			return;
+
+		string message;
+
+		switch ( control.Op )
+		{
+		case JMWeatherDynamicControl.OP_ADVANCE:
+			message = "Advanced dynamic weather";
+			m_Machine.Advance();
+			break;
+		case JMWeatherDynamicControl.OP_RESTART:
+			message = "Restarted dynamic weather";
+			m_Machine.BeginRandom();
+			break;
+		case JMWeatherDynamicControl.OP_HOLD:
+			message = "Paused dynamic weather";
+			m_Machine.SetHeld( true );
+			break;
+		case JMWeatherDynamicControl.OP_RELEASE:
+			message = "Resumed dynamic weather";
+			m_Machine.SetHeld( false );
+			break;
+		case JMWeatherDynamicControl.OP_JUMP:
+			message = "Jumped dynamic weather to " + control.State + " > " + control.Phase;
+
+			if ( !m_Machine.JumpTo( control.State, control.Phase ) )
+				return;
+
+			break;
+		default:
+			return;
+		}
+
+		GetCommunityOnlineToolsBase().Log( ident, message );
 	}
 
 	protected void RPC_FreezeTime( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1127,70 +1071,6 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 
 		Exec_FreezeTime( state, senderRPC );
-	}
-
-	protected void RPC_UsePreset( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		string name;
-		if ( !ctx.Read( name ) )
-			return;
-
-		if (!g_Game.IsServer())
-			return;
-
-		if ( !CanServe( senderRPC, JMConstants.PERM_WEATHER_PRESET_USE ) )
-			return;
-
-		Exec_UsePreset( name, senderRPC );
-	}
-
-	protected void RPC_CreatePreset( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_1(this, "RPC_CreatePreset").Add(senderRPC);
-		#endif
-
-		JMWeatherPreset preset;
-		if ( !ctx.Read( preset ) )
-			return;
-
-		if ( !CanServe( senderRPC, JMConstants.PERM_WEATHER_PRESET_CREATE ) )
-			return;
-
-		if ( g_Game.IsDedicatedServer() )
-			Send_Preset( JMWeatherModuleRPC.CreatePreset, preset );
-
-		Exec_CreatePreset( preset, senderRPC );
-	}
-
-	protected void RPC_UpdatePreset( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		JMWeatherPreset preset;
-		if ( !ctx.Read( preset ) )
-			return;
-
-		if ( !CanServe( senderRPC, JMConstants.PERM_WEATHER_PRESET_UPDATE ) )
-			return;
-
-		if ( g_Game.IsDedicatedServer() )
-			Send_Preset( JMWeatherModuleRPC.UpdatePreset, preset );
-
-		Exec_UpdatePreset( preset, senderRPC );
-	}
-
-	protected void RPC_RemovePreset( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		string name;
-		if ( !ctx.Read( name ) )
-			return;
-
-		if ( !CanServe( senderRPC, JMConstants.PERM_WEATHER_PRESET_REMOVE ) )
-			return;
-
-		if ( g_Game.IsDedicatedServer() )
-			Send_PresetName( JMWeatherModuleRPC.RemovePreset, name );
-
-		Exec_RemovePreset( name, senderRPC );
 	}
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
@@ -1210,20 +1090,14 @@ class JMWeatherModule: JMRenderableModuleBase
 		case JMWeatherModuleRPC.SpecialWeatherStatus:
 			RPC_SpecialWeatherStatus( ctx, sender, target );
 			break;
-		case JMWeatherModuleRPC.UsePreset:
-			RPC_UsePreset( ctx, sender, target );
-			break;
-		case JMWeatherModuleRPC.CreatePreset:
-			RPC_CreatePreset( ctx, sender, target );
-			break;
-		case JMWeatherModuleRPC.UpdatePreset:
-			RPC_UpdatePreset( ctx, sender, target );
-			break;
-		case JMWeatherModuleRPC.RemovePreset:
-			RPC_RemovePreset( ctx, sender, target );
-			break;
 		case JMWeatherModuleRPC.DynamicWeather:
 			RPC_DynamicWeather( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.DynamicControl:
+			RPC_DynamicControl( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.DynamicStatus:
+			RPC_DynamicStatus( ctx, sender, target );
 			break;
 		default:
 			//! Everything else is a JMWeatherBase payload - see ReadPayload().

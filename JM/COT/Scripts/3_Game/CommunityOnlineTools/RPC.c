@@ -147,6 +147,8 @@ enum JMWeatherModuleRPC
 	DynamicWeather,
 	Sandstorm,
 	SpecialWeatherStatus,
+	DynamicControl,
+	DynamicStatus,
 	COUNT
 }
 

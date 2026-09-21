@@ -88,6 +88,13 @@ class JMWeatherForm: JMFormBase
 	ref JMWeatherFormTabTime          m_TabTimeCtrl;
 	ref JMWeatherFormTabPresets       m_TabPresetsCtrl;
 
+	//! How often the dynamic weather machine's position is asked for while the
+	//! form is open. The countdown runs locally in between - see
+	//! JMWeatherDynamicStatus.Remaining - so this only has to be often enough to
+	//! catch a phase change and a configuration revision.
+	static const float DYNAMIC_POLL_INTERVAL = 2.0;
+	protected float m_LastDynamicPoll;
+
 	//! Bitmask tracking which sections the admin has touched since last refresh.
 	protected int m_DirtySectionsMask;
 
@@ -106,7 +113,11 @@ class JMWeatherForm: JMFormBase
 		if ( m_TabPresetsCtrl )
 			preset.Name = m_TabPresetsCtrl.GetEditedName();
 
-		if ( m_TabTimeCtrl )
+		//! A preset carries no date - the Time tab is disabled while one is edited, and
+		//! -1 is what makes JMWeatherDate.Apply leave the clock alone.
+		if ( IsPresetMode() )
+			preset.ClearDate();
+		else if ( m_TabTimeCtrl )
 			m_TabTimeCtrl.ReadInto( preset );
 
 		if ( m_TabSkyCtrl )
@@ -139,17 +150,26 @@ class JMWeatherForm: JMFormBase
 		return ( m_DirtySectionsMask & ( 1 << sectionId ) ) != 0;
 	}
 
-	//! Public: every per-tab Set*Values()/Apply*() calls this to paint a
-	//! percent slider from a phenomenon's actual/forecast value.
-	void SetPercentSlider( UIActionSlider slider, JMWeatherPhenomenon phenomenon, bool actual )
+	//! Any card has been touched since the last load - what the Presets tab's Save
+	//! button glows for while a preset is being edited.
+	bool HasDirtySections()
 	{
-		if ( !slider )
+		return m_DirtySectionsMask != 0;
+	}
+
+	//! Public: every per-tab Set*Values() calls this to paint a control from a
+	//! phenomenon's actual or stored value. A stored value that is a RANGE (its Hi
+	//! twin above it) paints as a span; anything else as one value. The control
+	//! itself converts to the units it shows.
+	void SetPhenomenonRange( JMWeatherRangeControl control, JMWeatherPhenomenon phenomenon, bool actual )
+	{
+		if ( !control )
 			return;
 
 		if ( actual )
-			slider.SetCurrent( phenomenon.Actual * 100.0 );
+			control.SetValue( phenomenon.Actual );
 		else if ( phenomenon.Forecast != -1 )
-			slider.SetCurrent( phenomenon.Forecast * 100.0 );
+			control.Set( phenomenon.Forecast, Math.Max( phenomenon.ForecastHi, phenomenon.Forecast ) );
 	}
 
 	void SetSectionDirty( int sectionId, bool dirty = true )
@@ -257,7 +277,7 @@ class JMWeatherForm: JMFormBase
 		m_TabIdPrecipitation = m_Tabs.AddTab( "#STR_COT_WEATHER_TAB_PRECIPITATION", JMConstants.Lucide( "cloud-rain" ), tabPrecipitation );
 		m_TabIdWind = m_Tabs.AddTab( "#STR_COT_WEATHER_MODULE_WIND", JMConstants.Lucide( "wind" ), tabWind );
 		m_TabIdTime = m_Tabs.AddTab( "#STR_COT_WEATHER_TAB_TIME", JMConstants.Lucide( "calendar-clock" ), tabTime );
-		m_TabIdPresets = m_Tabs.AddTab( "#STR_COT_WEATHER_TAB_PRESETS", JMConstants.Lucide( "bookmark" ), tabPresets );
+		m_TabIdPresets = m_Tabs.AddTab( "#STR_COT_WEATHER_TAB_DYNAMIC", JMConstants.Lucide( "workflow" ), tabPresets );
 
 		DeclareTabs( m_TabIdPresets + 1 );
 
@@ -341,28 +361,12 @@ class JMWeatherForm: JMFormBase
 	//  Shared builders
 	// -------------------------------------------------------------------------
 
-	//! Every 0-1 phenomenon is edited as a whole percentage. The engine wants
-	//! the fraction, so the read side multiplies by 0.01 - see ReadPercent.
-	//! `instance` defaults to this form (Overview has no percent sliders of its
-	//! own, but the default keeps this call-compatible); every other tab class
-	//! passes itself so the CHANGE callback fires on the object that owns it.
-	UIActionSlider CreatePercentSlider( Widget parent, string label, string callback, Class instance = null )
+	//! Every 0-1 phenomenon is edited as a whole percentage. The engine wants the
+	//! fraction, so the control converts (scale 100). `instance` is the tab class
+	//! that owns the CHANGE callback.
+	JMWeatherRangeControl CreatePercentRange( Widget parent, string label, string callback, Class instance )
 	{
-		if ( !instance )
-			instance = this;
-
-		UIActionSlider slider = UIActionManager.CreateSyncedSlider( parent, label, 0, 100, instance, callback );
-		slider.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		slider.SetStepValue( 1 );
-		return slider;
-	}
-
-	float ReadPercent( UIActionSlider slider )
-	{
-		if ( !slider )
-			return 0;
-
-		return slider.GetCurrent() * 0.01;
+		return JMWeatherRangeControl.Create( parent, label, 0, 100, 1, "#STR_COT_FORMAT_PERCENTAGE", 100.0, 0.0, instance, callback );
 	}
 
 	// -------------------------------------------------------------------------
@@ -411,10 +415,32 @@ class JMWeatherForm: JMFormBase
 			m_TabPresetsCtrl.UpdatePresetList();
 	}
 
+	//! Ask the server where the dynamic weather machine is, and repaint the
+	//! status card. Runs whatever tab is showing: the Overview and the Presets
+	//! tab both read the answer.
+	protected void PollDynamicStatus()
+	{
+		if ( !m_Module || !m_Module.IsLoaded() )
+			return;
+
+		float now = g_Game.GetTickTime();
+
+		if ( now - m_LastDynamicPoll >= DYNAMIC_POLL_INTERVAL )
+		{
+			m_LastDynamicPoll = now;
+			m_Module.RequestDynamicStatus();
+		}
+
+		if ( m_TabPresetsCtrl )
+			m_TabPresetsCtrl.Poll();
+	}
+
 	override void Update()
 	{
 		if ( m_TabOverviewCtrl )
 			m_TabOverviewCtrl.Poll();
+
+		PollDynamicStatus();
 
 		//! Auto-refresh pulls the LIVE WORLD into the editing controls several
 		//! times a second. In preset mode those controls hold the preset, so
@@ -573,6 +599,10 @@ class JMWeatherForm: JMFormBase
 			return;
 		}
 
+		//! A stored value can be a span, and a control in single mode would collapse it
+		//! - so every card is a min/max card before anything is loaded into it.
+		SetRangeModeAll( true );
+
 		//! Cleared first because the dirty flags mean "do not overwrite this
 		//! from the world" - loading a preset IS the overwrite being asked for,
 		//! and the controls match what is stored the moment it lands.
@@ -661,6 +691,19 @@ class JMWeatherForm: JMFormBase
 			m_TabPresetsCtrl.RemovePresetConfirmed();
 	}
 
+	//! The rename popups' answers - same lookup rule as above.
+	void RenamePreset_Confirm( JMConfirmation confirmation = NULL )
+	{
+		if ( confirmation && m_TabPresetsCtrl )
+			m_TabPresetsCtrl.RenamePresetConfirmed( confirmation.GetEditBoxValue() );
+	}
+
+	void RenamePhase_Confirm( JMConfirmation confirmation = NULL )
+	{
+		if ( confirmation && m_TabPresetsCtrl )
+			m_TabPresetsCtrl.RenamePhaseConfirmed( confirmation.GetEditBoxValue() );
+	}
+
 	// -------------------------------------------------------------------------
 	//  Permissions / enable state
 	// -------------------------------------------------------------------------
@@ -710,5 +753,41 @@ class JMWeatherForm: JMFormBase
 	{
 		if ( m_Banner )
 			m_Banner.Update();
+
+		UpdateTimeTabState();
+	}
+
+	//! A preset holds weather, not a date, so the Time tab is switched off while one
+	//! is being edited - and an admin sitting on it is moved to the Overview rather
+	//! than left looking at controls that no longer do anything.
+	protected void UpdateTimeTabState()
+	{
+		if ( !m_Tabs )
+			return;
+
+		bool presetMode = IsPresetMode();
+
+		m_Tabs.SetTabEnabled( m_TabIdTime, !presetMode );
+
+		if ( presetMode && m_Tabs.GetSelection() == m_TabIdTime )
+			m_Tabs.SetSelection( m_TabIdOverview );
+	}
+
+	//! Every weather card between one value and a min/max span at once. On while a
+	//! preset is edited, where a span is the normal thing to want; off for the live
+	//! world. Only the tabs that have been opened exist yet - a tab built later
+	//! catches up in LoadEditorValues.
+	void SetRangeModeAll( bool on )
+	{
+		if ( m_TabSkyCtrl )           m_TabSkyCtrl.SetRangeMode( on );
+		if ( m_TabPrecipitationCtrl ) m_TabPrecipitationCtrl.SetRangeMode( on );
+		if ( m_TabWindCtrl )          m_TabWindCtrl.SetRangeMode( on );
+	}
+
+	//! UpdateActionState for a JMWeatherRangeControl, which wraps the action.
+	void UpdateRangeState( JMWeatherRangeControl control, string permission, bool shouldDisable = false )
+	{
+		if ( control )
+			UpdateActionState( control.GetAction(), permission, shouldDisable );
 	}
 }

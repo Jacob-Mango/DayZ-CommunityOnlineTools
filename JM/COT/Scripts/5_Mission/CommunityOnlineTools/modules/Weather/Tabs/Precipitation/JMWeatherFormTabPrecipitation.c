@@ -2,23 +2,37 @@
 //! to the owning form, same shape as JMPlayerRowWidget.Menu. See
 //! JMWeatherFormTabSky.c's header for why Apply/dirty-tracking/preview
 //! mechanics stay on the form.
+//!
+//! The amount is a JMWeatherRangeControl (one value, or a span the server rolls
+//! between). The thresholds are already a min/max pair of their own - "rain is
+//! possible between these overcast levels" - so they stay a plain range.
 class JMWeatherFormTabPrecipitation: JMFormTab
 {
 	protected JMWeatherForm m_Form;
 	protected UIActionScroller m_ScrollerPrecipitation;
-	protected UIActionSlider      m_SliderRainForecast;
-	protected UIActionSliderRange m_RangeRainThreshold;
-	protected UIActionSlider      m_SliderSnowForecast;
-	protected UIActionSliderRange m_RangeSnowThreshold;
+	protected ref JMWeatherRangeControl m_SliderRainForecast;
+	protected UIActionSliderRange       m_RangeRainThreshold;
+	protected ref JMWeatherRangeControl m_SliderSnowForecast;
+	protected UIActionSliderRange       m_RangeSnowThreshold;
+
+	protected ref JMWeatherRangeToggle m_ToggleRain;
+	protected ref JMWeatherRangeToggle m_ToggleSnow;
 
 	void JMWeatherFormTabPrecipitation( JMWeatherForm form )
 	{
 		m_Form = form;
 	}
 
+	//! Every card at once: on while a preset is being edited, off for the live world.
+	void SetRangeMode( bool on )
+	{
+		if ( m_ToggleRain ) m_ToggleRain.SetRanges( on );
+		if ( m_ToggleSnow ) m_ToggleSnow.SetRanges( on );
+	}
+
 	void SetRainValues( JMWeatherPreset preset, bool actual )
 	{
-		m_Form.SetPercentSlider( m_SliderRainForecast, preset.PRain, actual );
+		m_Form.SetPhenomenonRange( m_SliderRainForecast, preset.PRain, actual );
 
 		if ( preset.RainThreshold.Time != -1 && m_RangeRainThreshold )
 			m_RangeRainThreshold.SetRange( preset.RainThreshold.OvercastMin * 100.0, preset.RainThreshold.OvercastMax * 100.0 );
@@ -26,7 +40,7 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 
 	void SetSnowValues( JMWeatherPreset preset, bool actual )
 	{
-		m_Form.SetPercentSlider( m_SliderSnowForecast, preset.PSnow, actual );
+		m_Form.SetPhenomenonRange( m_SliderSnowForecast, preset.PSnow, actual );
 
 		if ( preset.SnowThreshold.Time != -1 && m_RangeSnowThreshold )
 			m_RangeSnowThreshold.SetRange( preset.SnowThreshold.OvercastMin * 100.0, preset.SnowThreshold.OvercastMax * 100.0 );
@@ -41,9 +55,11 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 
 		UIActionCard rainCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_RAIN" );
 		rainCard.AddApplyButton( this, "OnClick_ApplyRain" );
+		m_ToggleRain = new JMWeatherRangeToggle( m_Form, rainCard, JMWeatherForm.SECTION_RAIN );
 		Widget rainBody = UIActionManager.CreateGridSpacer( rainCard.GetContent(), 2, 1 );
 
-		m_SliderRainForecast = m_Form.CreatePercentSlider( rainBody, "#STR_COT_GENERIC_AMOUNT", "OnChange_Rain", this );
+		m_SliderRainForecast = m_Form.CreatePercentRange( rainBody, "#STR_COT_GENERIC_AMOUNT", "OnChange_Rain", this );
+		m_ToggleRain.Add( m_SliderRainForecast );
 
 		//! One range control instead of two sliders that must not cross. The
 		//! pair is a single "rain is possible between these overcast levels"
@@ -55,9 +71,11 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 
 		UIActionCard snowCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_SNOW" );
 		snowCard.AddApplyButton( this, "OnClick_ApplySnow" );
+		m_ToggleSnow = new JMWeatherRangeToggle( m_Form, snowCard, JMWeatherForm.SECTION_SNOW );
 		Widget snowBody = UIActionManager.CreateGridSpacer( snowCard.GetContent(), 2, 1 );
 
-		m_SliderSnowForecast = m_Form.CreatePercentSlider( snowBody, "#STR_COT_GENERIC_AMOUNT", "OnChange_Snow", this );
+		m_SliderSnowForecast = m_Form.CreatePercentRange( snowBody, "#STR_COT_GENERIC_AMOUNT", "OnChange_Snow", this );
+		m_ToggleSnow.Add( m_SliderSnowForecast );
 
 		m_RangeSnowThreshold = UIActionManager.CreateSliderRange( snowBody, "#STR_COT_WEATHER_THRESHOLDS", 0, 100, this, "OnChange_Snow" );
 		m_RangeSnowThreshold.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
@@ -73,9 +91,26 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 			m_ScrollerPrecipitation.UpdateScroller();
 	}
 
+	protected float ReadLow( JMWeatherRangeControl control )
+	{
+		if ( !control )
+			return 0;
+
+		return control.Low();
+	}
+
+	protected float ReadHi( JMWeatherRangeControl control )
+	{
+		if ( !control )
+			return 0;
+
+		return control.Hi();
+	}
+
 	void ReadInto( JMWeatherPreset preset, float transition, float duration )
 	{
-		preset.PRain.Forecast    = m_Form.ReadPercent( m_SliderRainForecast );
+		preset.PRain.Forecast    = ReadLow( m_SliderRainForecast );
+		preset.PRain.ForecastHi  = ReadHi( m_SliderRainForecast );
 		preset.PRain.Time        = transition;
 		preset.PRain.MinDuration = duration;
 
@@ -86,7 +121,8 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 		}
 		preset.RainThreshold.Time = transition;
 
-		preset.PSnow.Forecast    = m_Form.ReadPercent( m_SliderSnowForecast );
+		preset.PSnow.Forecast    = ReadLow( m_SliderSnowForecast );
+		preset.PSnow.ForecastHi  = ReadHi( m_SliderSnowForecast );
 		preset.PSnow.Time        = transition;
 		preset.PSnow.MinDuration = duration;
 
@@ -143,7 +179,7 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 
 		float rainTransition = m_Form.GlobalTransition();
 
-		m_Form.m_Module.SetRain( m_Form.ReadPercent( m_SliderRainForecast ), rainTransition, m_Form.GlobalDuration() );
+		m_Form.m_Module.SetRain( ReadLow( m_SliderRainForecast ), rainTransition, m_Form.GlobalDuration(), ReadHi( m_SliderRainForecast ) );
 
 		if ( m_RangeRainThreshold )
 			m_Form.m_Module.SetRainThresholds( m_RangeRainThreshold.GetRangeLow() * 0.01, m_RangeRainThreshold.GetRangeHigh() * 0.01, rainTransition );
@@ -158,7 +194,7 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 
 		float snowTransition = m_Form.GlobalTransition();
 
-		m_Form.m_Module.SetSnow( m_Form.ReadPercent( m_SliderSnowForecast ), snowTransition, m_Form.GlobalDuration() );
+		m_Form.m_Module.SetSnow( ReadLow( m_SliderSnowForecast ), snowTransition, m_Form.GlobalDuration(), ReadHi( m_SliderSnowForecast ) );
 
 		if ( m_RangeSnowThreshold )
 			m_Form.m_Module.SetSnowThresholds( m_RangeSnowThreshold.GetRangeLow() * 0.01, m_RangeSnowThreshold.GetRangeHigh() * 0.01, snowTransition );
@@ -168,10 +204,12 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 
 	void UpdateStates()
 	{
-		m_Form.UpdateActionState( m_SliderRainForecast, JMConstants.PERM_WEATHER_RAIN );
+		m_Form.UpdateRangeState( m_SliderRainForecast, JMConstants.PERM_WEATHER_RAIN );
 		m_Form.UpdateActionState( m_RangeRainThreshold, JMConstants.PERM_WEATHER_RAIN_THRESHOLDS );
+		if ( m_ToggleRain ) m_ToggleRain.UpdateState( JMConstants.PERM_WEATHER_RAIN );
 
-		m_Form.UpdateActionState( m_SliderSnowForecast, JMConstants.PERM_WEATHER_SNOW );
+		m_Form.UpdateRangeState( m_SliderSnowForecast, JMConstants.PERM_WEATHER_SNOW );
 		m_Form.UpdateActionState( m_RangeSnowThreshold, JMConstants.PERM_WEATHER_SNOW_THRESHOLDS );
+		if ( m_ToggleSnow ) m_ToggleSnow.UpdateState( JMConstants.PERM_WEATHER_SNOW );
 	}
 }
