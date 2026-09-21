@@ -200,7 +200,7 @@ class JMPermissionManager
 
 	bool HasPermission( string permission, PlayerIdentity ihp )
 	{
-		if ( IsTrustedLocalHost() )
+		if ( IsMissionOffline() )
 			return true;
 
 		JMPlayerInstance instance;
@@ -245,7 +245,7 @@ class JMPermissionManager
 	 */
 	bool HasPermissionRPC( string permission, PlayerIdentity ihp )
 	{
-		if ( IsTrustedLocalHost() )
+		if ( IsMissionOffline() )
 			return true;
 
 		JMPlayerInstance instance;
@@ -313,18 +313,6 @@ class JMPermissionManager
 	bool IsRole( string role )
 	{
 		return Roles.Contains( role );
-	}
-
-	/**
-	 * @brief true when this process is the sole authority over the session
-	 *
-	 * Covers true Offline/SP as well as a listen server hosted locally
-	 * (host is admin of their own game, not just IsMissionOffline() - a
-	 * dedicated server is never trusted this way).
-	 */
-	protected bool IsTrustedLocalHost()
-	{
-		return IsMissionOffline() || ( IsMissionHost() && !g_Game.IsDedicatedServer() );
 	}
 
 	protected bool IsValidFolderForRoles( string name, FileAttr attributes )
