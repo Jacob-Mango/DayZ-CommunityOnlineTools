@@ -144,7 +144,9 @@ class JMServerStatsModule : JMModuleBase
 	// -------------------------------------------------------------------------
 	//  Sampling
 	// -------------------------------------------------------------------------
-	override void OnUpdate( float timeslice )
+	//! TODO: CF modules OnUpdate loop is limited to 40 Hz on server for performance reasons,
+	//! so this needs to be renamed and called from DayZGame::OnUpdate
+	void OnUpdate( float timeslice )
 	{
 		super.OnUpdate( timeslice );
 
@@ -163,6 +165,7 @@ class JMServerStatsModule : JMModuleBase
 		Publish();
 	}
 
+	//! TODO: WTF is this, highly inefficient. Redo using proper, performant rolling average implementation (no buffer)
 	protected void RecordFrame( float timeslice )
 	{
 		if ( timeslice <= 0 || timeslice > FRAME_TIME_MAX )
