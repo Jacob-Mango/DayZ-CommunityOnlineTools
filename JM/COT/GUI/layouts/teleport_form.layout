@@ -139,7 +139,6 @@ PanelWidgetClass JMTeleportForm {
      vexactpos 0
      hexactsize 1
      vexactsize 0
-     "Size To Content V" 1
     }
    }
   }

@@ -111,9 +111,7 @@ PanelWidgetClass UIActionTimePicker {
          ignorepointer 0
          font "gui/fonts/sdf_MetronLight24"
          "exact text" 1
-         "exact text size" 15
          "text halign" left
-         "text offset" 8 0
          style COTInput
         }
        }
@@ -183,9 +181,7 @@ PanelWidgetClass UIActionTimePicker {
          ignorepointer 0
          font "gui/fonts/sdf_MetronLight24"
          "exact text" 1
-         "exact text size" 15
          "text halign" left
-         "text offset" 8 0
          style COTInput
         }
        }
@@ -255,9 +251,7 @@ PanelWidgetClass UIActionTimePicker {
          ignorepointer 0
          font "gui/fonts/sdf_MetronLight24"
          "exact text" 1
-         "exact text size" 15
          "text halign" left
-         "text offset" 8 0
          style COTInput
         }
        }

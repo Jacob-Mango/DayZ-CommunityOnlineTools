@@ -94,7 +94,6 @@ PanelWidgetClass UIActionCollapsibleSection {
      vexactpos 0
      hexactsize 0
      vexactsize 0
-     "Size To Content V" 1
     }
    }
   }

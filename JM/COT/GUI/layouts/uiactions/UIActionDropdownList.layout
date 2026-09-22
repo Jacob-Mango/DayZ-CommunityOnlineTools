@@ -87,7 +87,6 @@ PanelWidgetClass UIActionDropdownList {
        "no focus" 0
        font "gui/fonts/Metron"
        style COTInput
-       "text offset" 6 0
       }
      }
     }
@@ -106,7 +105,6 @@ PanelWidgetClass UIActionDropdownList {
      "no focus" 1
      font "gui/fonts/Metron"
      style COTInput
-     "text offset" 6 0
     }
     TextWidgetClass action_placeholder {
      visible 0

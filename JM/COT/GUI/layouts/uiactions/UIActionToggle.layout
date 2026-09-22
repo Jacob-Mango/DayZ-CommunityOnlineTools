@@ -42,10 +42,6 @@ PanelWidgetClass UIActionToggle {
      vexactsize 1
      mode blend
      color 0.722 0.769 0.792 1.000
-     "src alpha" 1
-     "no wrap" 1
-     "clamp mode" clamp
-     "stretch mode" stretch_w_h
      style COTField4Set
     }
     ImageWidgetClass action_check {
