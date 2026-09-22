@@ -417,11 +417,12 @@ class JMCameraModule: JMRenderableModuleBase
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMCameraModuleRPC.Enter, true, sender );
+
+			JMPlayerInstance enterInst = GetPermissionsManager().GetPlayer( sender.GetId() );
+			SendWebhookColored( "Enter", enterInst, "Entered free camera", JMConstants.WEBHOOK_COLOR_INFO );
 		}
 
 		GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
-		JMPlayerInstance enterInst = GetPermissionsManager().GetPlayer( sender.GetId() );
-		SendWebhookColored( "Enter", enterInst, "Entered free camera", JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	protected void RPC_Enter( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -571,14 +572,17 @@ class JMCameraModule: JMRenderableModuleBase
 				ScriptRPC rpc = new ScriptRPC();
 				rpc.Write(waitForPlayerIdleTimeout);
 				rpc.Send( NULL, JMCameraModuleRPC.Leave, true, sender );
-			} else
+
+				JMPlayerInstance leaveInst = GetPermissionsManager().GetPlayer( sender.GetId() );
+				SendWebhookColored( "Leave", leaveInst, "Left free camera", JMConstants.WEBHOOK_COLOR_INFO );
+			}
+			else
 			{
 				Client_Leave(waitForPlayerIdleTimeout);
 			}
 
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
-			JMPlayerInstance leaveInst = GetPermissionsManager().GetPlayer( sender.GetId() );
-			SendWebhookColored( "Leave", leaveInst, "Left free camera", JMConstants.WEBHOOK_COLOR_INFO );
+
 			if (player.m_JM_SpectatedObject)
 				return;
 
