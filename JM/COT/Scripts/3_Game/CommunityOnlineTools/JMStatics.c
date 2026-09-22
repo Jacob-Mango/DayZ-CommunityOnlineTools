@@ -13,6 +13,8 @@ class JMStatics
 	//! Registering the overlay's root makes that walk recognise it.
 	static ref array<Widget> OVERLAY_WIDGETS;
 
+	static ref ScriptInvoker SERVER_STATS_TICK;
+
 	static bool IsOverlay( Widget w )
 	{
 		if ( !w || !OVERLAY_WIDGETS )

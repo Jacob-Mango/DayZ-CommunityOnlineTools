@@ -8,4 +8,15 @@ modded class DayZGame
 		CF_Log.Level = CF_LogLevel.TRACE;
 #endif
 	}
+
+	override void OnUpdate( bool doSim, float timeslice )
+	{
+		super.OnUpdate( doSim, timeslice );
+
+		if ( !doSim )
+			return;
+
+		if ( JMStatics.SERVER_STATS_TICK )
+			JMStatics.SERVER_STATS_TICK.Invoke( timeslice );
+	}
 }

@@ -27,7 +27,7 @@ class JMBuildInfo
 	static const string CHANNEL = "internal";
 
 	//! Short commit the build came from, or "unknown" outside a git checkout.
-	static const string COMMIT = "51e06035";
+	static const string COMMIT = "6146503e";
 
 	//! Branch the build came from.
 	static const string BRANCH = "dev/1.30";
@@ -36,7 +36,7 @@ class JMBuildInfo
 	static const bool DIRTY = true;
 
 	//! UTC build timestamp, "YYYY-MM-DD HH:MM".
-	static const string BUILT_AT = "2026-09-22 16:13";
+	static const string BUILT_AT = "2026-09-22 17:21";
 
 	//! "COT 1.4.2" / "COT 1.4.2-beta". What the sidebar footer renders.
 	static string GetFooterText()

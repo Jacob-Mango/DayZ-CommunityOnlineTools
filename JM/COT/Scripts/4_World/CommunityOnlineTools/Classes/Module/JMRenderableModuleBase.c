@@ -271,6 +271,7 @@ class JMRenderableModuleBase: JMModuleBase
 
 	void OnWindowDestroyed()
 	{
+		m_Window = NULL;
 	}
 
 	void ToggleShow()

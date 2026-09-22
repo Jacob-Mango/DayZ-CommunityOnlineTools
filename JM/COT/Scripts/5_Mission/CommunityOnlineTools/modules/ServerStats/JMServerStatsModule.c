@@ -64,6 +64,15 @@ class JMServerStatsModule : JMModuleBase
 	void JMServerStatsModule()
 	{
 		m_Samples = new array< float >;
+
+		//! DayZGame.OnUpdate's unthrottled per-tick hook - see
+		//! JMStatics.SERVER_STATS_TICK's own comment. The module is a
+		//! singleton for the session, so this runs once; no matching
+		//! Remove() is needed.
+		if ( !JMStatics.SERVER_STATS_TICK )
+			JMStatics.SERVER_STATS_TICK = new ScriptInvoker();
+
+		JMStatics.SERVER_STATS_TICK.Insert( Tick );
 	}
 
 	//! 0 when the anti-cheat module is absent or this is not the host - the
@@ -143,13 +152,14 @@ class JMServerStatsModule : JMModuleBase
 
 	// -------------------------------------------------------------------------
 	//  Sampling
+	//
+	//  Called from DayZGame.OnUpdate rather than this module's own OnUpdate -
+	//  CF's module update loop is rate-limited to 40 Hz on server for
+	//  performance reasons, which would undercount ticks on a server actually
+	//  running faster than that.
 	// -------------------------------------------------------------------------
-	//! TODO: CF modules OnUpdate loop is limited to 40 Hz on server for performance reasons,
-	//! so this needs to be renamed and called from DayZGame::OnUpdate
-	override void OnUpdate( float timeslice )
+	void Tick( float timeslice )
 	{
-		super.OnUpdate( timeslice );
-
 		if ( !IsMissionHost() )
 			return;
 
@@ -165,7 +175,6 @@ class JMServerStatsModule : JMModuleBase
 		Publish();
 	}
 
-	//! TODO: WTF is this, highly inefficient. Redo using proper, performant rolling average implementation (no buffer)
 	protected void RecordFrame( float timeslice )
 	{
 		if ( timeslice <= 0 || timeslice > FRAME_TIME_MAX )
@@ -214,12 +223,16 @@ class JMServerStatsModule : JMModuleBase
 		if ( tail > TAIL_MAX )
 			tail = TAIL_MAX;
 
-		float total = 0;
-
 		//! Slowest frames (largest frame times) and fastest frames (smallest),
-		//! each kept sorted worst-first / best-first.
+		//! each kept sorted worst-first / best-first. total is the plain sum,
+		//! folded into this loop rather than tracked incrementally per tick:
+		//! the loop already runs every broadcast for the tail scan below, so
+		//! summing here is free, and a fresh sum every 2s cannot drift the
+		//! way a running total kept across a 6-hour session's worth of ticks
+		//! would.
 		array< float > slowest = new array< float >;
 		array< float > fastest = new array< float >;
+		float total = 0;
 
 		for ( int i = 0; i < count; i++ )
 		{
