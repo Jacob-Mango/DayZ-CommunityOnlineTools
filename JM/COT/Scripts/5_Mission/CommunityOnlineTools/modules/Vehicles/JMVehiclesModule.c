@@ -653,6 +653,9 @@ class JMVehiclesModule: JMRenderableModuleBase
 	//! resend every vehicle on the server to read one of them.
 	void RequestVehicleUpsert( int netLow, int netHigh )
 	{
+		if (netLow == 0 && netHigh == 0)
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( netLow );
 		rpc.Write( netHigh );
@@ -818,8 +821,16 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestServerVehicles()
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMVehiclesModuleRPC.RequestServerVehicles, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMVehiclesModuleRPC.RequestServerVehicles, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	void RPC_RequestServerVehicles( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -830,13 +841,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !senderRPC ) return;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_VEHICLES_VIEW, senderRPC ) )
 			return;
-
-		// In SP / listen-server the admin IS the host - update the form directly
-		if ( IsMissionHost() && !g_Game.IsDedicatedServer() )
-		{
-			UpdateVehiclesMetaData_SP();
-			return;
-		}
 
 		UpdateVehiclesMetaData();
 
@@ -888,21 +892,62 @@ class JMVehiclesModule: JMRenderableModuleBase
 	void DeleteVehicleUnclaimed()
 	{
 	#ifdef EXPANSIONMODVEHICLE
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleUnclaimed, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleUnclaimed, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_DeleteVehicleUnclaimed();
+			UpdateVehiclesMetaData_SP();
+		}
 	#endif
 	}
 
 	void DeleteVehicleDestroyed()
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleDestroyed, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleDestroyed, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_DeleteVehicleDestroyed();
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	void DeleteVehicleAll()
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleAll, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleAll, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_DeleteVehicleAll();
+			UpdateVehiclesMetaData_SP();
+		}
+	}
+
+	void DeleteVehicle( JMVehicleMetaData meta )
+	{
+		if (g_Game.IsClient())
+		{
+			DeleteVehicle(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			g_Game.ObjectDelete(meta.m_Entity);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	void DeleteVehicle( int netLow, int netHigh )
@@ -1160,10 +1205,18 @@ class JMVehiclesModule: JMRenderableModuleBase
 		//! position that the undo has to be able to come back to.
 		JMTeleportHistory.PushSelf();
 
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportToVehicle, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Send( NULL, JMVehiclesModuleRPC.TeleportToVehicle, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_TeleportToVehicle(PlayerBase.Cast(g_Game.GetPlayer()), meta.m_Entity);
+		}
 	}
 
 	protected void RPC_TeleportToVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1201,6 +1254,9 @@ class JMVehiclesModule: JMRenderableModuleBase
 	void Exec_TeleportToVehicle( PlayerBase player, Object obj )
 	{
 		vector pos = obj.GetPosition();
+		vector minMax[2];
+		obj.ClippingInfo( minMax );
+		pos = pos + minMax[1];  //! Place next to vehicle, not on top
 		pos[1] = g_Game.SurfaceRoadY3D( pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER );
 		player.SetLastPosition();
 		player.SetWorldPosition( pos );
@@ -1213,10 +1269,19 @@ class JMVehiclesModule: JMRenderableModuleBase
 		//! client-side object to ask.
 		JMTeleportHistory.Push( JMTeleportHistory.ObjectKey( meta.m_NetworkIDLow, meta.m_NetworkIDHigh ), meta.m_Position );
 
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleToMe, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleToMe, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_TeleportVehicleToMe(PlayerBase.Cast(g_Game.GetPlayer()), meta.m_Entity);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	protected void RPC_TeleportVehicleToMe( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1268,11 +1333,20 @@ class JMVehiclesModule: JMRenderableModuleBase
 	//! the only one that has to carry a position on the wire.
 	void RequestTeleportVehicleTo( JMVehicleMetaData meta, vector position )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Write( position );
-		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleTo, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Write( position );
+			rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleTo, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_TeleportVehicleTo(meta.m_Entity, position);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	protected void RPC_TeleportVehicleTo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1326,10 +1400,19 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestRepairVehicle( JMVehicleMetaData meta )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Send( NULL, JMVehiclesModuleRPC.RepairVehicle, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Send( NULL, JMVehiclesModuleRPC.RepairVehicle, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_RepairVehicle(meta.m_Entity);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	protected void RPC_RepairVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1394,10 +1477,19 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestRefuelVehicle( JMVehicleMetaData meta )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Send( NULL, JMVehiclesModuleRPC.RefuelVehicle, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Send( NULL, JMVehiclesModuleRPC.RefuelVehicle, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_RefuelVehicle(meta.m_Entity);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	protected void RPC_RefuelVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1469,10 +1561,19 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestUnstuckVehicle( JMVehicleMetaData meta )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Send( NULL, JMVehiclesModuleRPC.UnstuckVehicle, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Send( NULL, JMVehiclesModuleRPC.UnstuckVehicle, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_UnstuckVehicle(meta.m_Entity);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	protected void RPC_UnstuckVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1519,10 +1620,19 @@ class JMVehiclesModule: JMRenderableModuleBase
 	void RequestCoverVehicle( JMVehicleMetaData meta )
 	{
 	#ifdef EXPANSIONMODVEHICLE
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Send( NULL, JMVehiclesModuleRPC.CoverVehicle, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Send( NULL, JMVehiclesModuleRPC.CoverVehicle, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_CoverVehicle(meta.m_Entity, meta);
+			UpdateVehiclesMetaData_SP();
+		}
 	#endif
 	}
 
@@ -1637,7 +1747,31 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestLockVehicle( JMVehicleMetaData meta )
 	{
-		RequestLockVehicleById( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
+		if (g_Game.IsClient())
+		{
+			RequestLockVehicleById( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			RequestLockVehicle(meta.m_Entity);
+		}
+	}
+
+	void RequestLockVehicle( Object obj )
+	{
+		if (g_Game.IsClient())
+		{
+			int netLow, netHigh;
+			obj.GetNetworkID(netLow, netHigh);
+			RequestLockVehicleById( netLow, netHigh );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_LockVehicle(obj);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	//! Same request from a caller that only has a network id - the ESP menu
@@ -1705,7 +1839,31 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestUnPairVehicle( JMVehicleMetaData meta )
 	{
-		RequestUnPairVehicleById( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
+		if (g_Game.IsClient())
+		{
+			RequestUnPairVehicleById( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			RequestUnPairVehicle(meta.m_Entity);
+		}
+	}
+
+	void RequestUnPairVehicle( Object obj )
+	{
+		if (g_Game.IsClient())
+		{
+			int netLow, netHigh;
+			obj.GetNetworkID(netLow, netHigh);
+			RequestUnPairVehicleById( netLow, netHigh );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_UnPairVehicle(obj);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	//! See RequestLockVehicleById.
@@ -1773,10 +1931,18 @@ class JMVehiclesModule: JMRenderableModuleBase
 	//! tidy a trunk is not necessarily trusted to remove the car.
 	void RequestClearVehicleCargo( JMVehicleMetaData meta )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Send( NULL, JMVehiclesModuleRPC.ClearVehicleCargo, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Send( NULL, JMVehiclesModuleRPC.ClearVehicleCargo, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_ClearVehicleCargo(meta.m_Entity);
+		}
 	}
 
 	protected void RPC_ClearVehicleCargo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1852,10 +2018,19 @@ class JMVehiclesModule: JMRenderableModuleBase
 	//! orphan it first.
 	void RequestSpawnVehicleKey( JMVehicleMetaData meta )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
-		rpc.Send( NULL, JMVehiclesModuleRPC.SpawnVehicleKey, true );
+		if (g_Game.IsClient())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( meta.m_NetworkIDLow );
+			rpc.Write( meta.m_NetworkIDHigh );
+			rpc.Send( NULL, JMVehiclesModuleRPC.SpawnVehicleKey, true );
+		}
+		else
+		{
+			//! Offline/SP, network ID not avaialable and we can execute directly
+			Exec_SpawnVehicleKey(PlayerBase.Cast(g_Game.GetPlayer()), meta.m_Entity);
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	protected void RPC_SpawnVehicleKey( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )

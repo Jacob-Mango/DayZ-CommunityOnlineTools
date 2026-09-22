@@ -2293,7 +2293,10 @@ class JMESPActionMenu
 		if ( !vehiclesModule || ( !m_Meta.networkLow && !m_Meta.networkHigh ) )
 			return;
 
-		vehiclesModule.RequestLockVehicleById( m_Meta.networkLow, m_Meta.networkHigh );
+		if ( m_Meta.networkLow || m_Meta.networkHigh )
+			vehiclesModule.RequestLockVehicleById( m_Meta.networkLow, m_Meta.networkHigh );
+		else
+			vehiclesModule.RequestLockVehicle( m_Meta.target );
 	#endif
 	}
 
@@ -2305,10 +2308,13 @@ class JMESPActionMenu
 
 		JMVehiclesModule vehiclesModule = CF_Modules<JMVehiclesModule>.Get();
 
-		if ( !vehiclesModule || ( !m_Meta.networkLow && !m_Meta.networkHigh ) )
+		if ( !vehiclesModule )
 			return;
 
-		vehiclesModule.RequestUnPairVehicleById( m_Meta.networkLow, m_Meta.networkHigh );
+		if ( m_Meta.networkLow || m_Meta.networkHigh )
+			vehiclesModule.RequestUnPairVehicleById( m_Meta.networkLow, m_Meta.networkHigh );
+		else
+			vehiclesModule.RequestUnPairVehicle(m_Meta.target);
 	#endif
 	}
 

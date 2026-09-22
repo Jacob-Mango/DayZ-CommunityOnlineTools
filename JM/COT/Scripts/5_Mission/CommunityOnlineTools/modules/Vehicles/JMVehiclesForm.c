@@ -98,8 +98,7 @@ class JMVehiclesForm: JMFormBase
 	protected ref array<ref JMVehiclesListEntry> m_VehicleEntries;
 	protected JMVehicleMetaData m_CurrentVehicle;
 	protected bool m_IsInVehicleInfo = false;
-	protected int m_PendingDeleteLow;
-	protected int m_PendingDeleteHigh;
+	protected JMVehicleMetaData m_PendingDeleteVehicle;
 	protected string m_SearchFilter;
 
 	//! The search box's needle, prepared once per change instead of once per vehicle - PassesSearchFilter
@@ -615,8 +614,7 @@ class JMVehiclesForm: JMFormBase
 		if ( !vehicle )
 			return;
 
-		m_PendingDeleteLow  = vehicle.m_NetworkIDLow;
-		m_PendingDeleteHigh = vehicle.m_NetworkIDHigh;
+		m_PendingDeleteVehicle  = vehicle;
 
 		ConfirmAction( "#STR_COT_VEHICLES_DELETE_VEHICLE", "Are you sure you want to delete " + vehicle.m_DisplayName + "?", "ConfirmDeleteVehicle_Yes" );
 	}
@@ -624,10 +622,10 @@ class JMVehiclesForm: JMFormBase
 	void ConfirmDeleteVehicle_Yes( JMConfirmation confirmation = NULL )
 	{
 		bool deletingSelected = false;
-		if ( m_CurrentVehicle && m_CurrentVehicle.m_NetworkIDLow == m_PendingDeleteLow && m_CurrentVehicle.m_NetworkIDHigh == m_PendingDeleteHigh )
+		if ( m_CurrentVehicle && m_CurrentVehicle.m_NetworkIDLow == m_PendingDeleteVehicle.m_NetworkIDLow && m_CurrentVehicle.m_NetworkIDHigh == m_PendingDeleteVehicle.m_NetworkIDHigh )
 			deletingSelected = true;
 
-		m_Module.DeleteVehicle( m_PendingDeleteLow, m_PendingDeleteHigh );
+		m_Module.DeleteVehicle( m_PendingDeleteVehicle );
 
 		if ( deletingSelected )
 			BackToList();
@@ -674,7 +672,7 @@ class JMVehiclesForm: JMFormBase
 
 	void OnConfirmation_DeleteVehicle()
 	{
-		m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
+		m_Module.DeleteVehicle( m_CurrentVehicle );
 		BackToList();
 	}
 
