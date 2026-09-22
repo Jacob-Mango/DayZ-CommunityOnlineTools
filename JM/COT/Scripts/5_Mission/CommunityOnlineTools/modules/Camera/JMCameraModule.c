@@ -334,7 +334,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	protected void Client_Enter()
+	protected void Client_Enter(vector position = vector.Zero)
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Client_Enter");
@@ -344,8 +344,12 @@ class JMCameraModule: JMRenderableModuleBase
 		if (COT_PreviousActiveCamera)
 			COT_PreviousActiveCamera.SetActive( false );
 
-		Camera currentCam = Camera.GetCurrentCamera();
-		if ( currentCam && Class.CastTo( CurrentActiveCamera, currentCam ) )
+		if ( IsMissionOffline() )
+			CurrentActiveCamera = JMCameraBase.Cast( g_Game.CreateObject( "JMCinematicCamera", position, false ) );
+		else
+			Class.CastTo( CurrentActiveCamera, Camera.GetCurrentCamera() );
+
+		if ( CurrentActiveCamera )
 		{
 			CurrentActiveCamera.SetActive( true );
 
@@ -355,14 +359,12 @@ class JMCameraModule: JMRenderableModuleBase
 			Human player = g_Game.GetPlayer();
 			if ( player )
 			{
-				//! The head bone's own transform is model-space and does not
-				//! track camera pitch (looking up/down) the way the player's
-				//! actual view does - g_Game.GetCurrentCameraDirection() is
-				//! the same call this file already uses for raycasting from
-				//! the player's view (see LookAtSelection), so it is the
-				//! proven source for "where the player is actually looking".
 				if (!COT_PreviousActiveCamera)
-					CurrentActiveCamera.SetDirection(g_Game.GetCurrentCameraDirection());
+				{
+					vector headTransform[4];
+					player.GetBoneTransformWS(player.GetBoneIndexByName( "Head" ), headTransform);
+					CurrentActiveCamera.SetDirection(headTransform[1]);
+				}
 
 				player.GetInputController().SetDisabled( true );
 			}
@@ -406,12 +408,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			CurrentActiveCamera = JMCameraBase.Cast( g_Game.CreateObject( "JMCinematicCamera", position, false ) );
-
-			CurrentActiveCamera.SetActive( true );
-
-			if ( g_Game.GetPlayer() )
-				g_Game.GetPlayer().GetInputController().SetDisabled( true );
+			Client_Enter(position);
 		}
 		else
 		{
