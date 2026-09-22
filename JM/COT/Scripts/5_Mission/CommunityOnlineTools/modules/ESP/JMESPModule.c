@@ -1001,15 +1001,25 @@ class JMESPModule: JMRenderableModuleBase
 		Print("JMESPModule::OnMissionFinish");
 	#endif
 
+		g_COT_ThreadESP = false;
+		g_COT_ThreadESP_Running = false;
+
+		//! @note the only reason we need to do any of the explicit cleanup below at all is because the module
+		//! will outlive the mission if ThreadESP is running and we want to avoid these resources leaking.
+		//! There will still be a few things that leak (namely the module itself and the array and map pointers)
+		//! but there's not really a way around it.
+
 		for (int j = 0; j < m_ActiveESPObjects.Count(); j++ )
 		{
 			m_ActiveESPObjects[j].Destroy();
 		}
 
 		m_ActiveESPObjects.Clear();
-
-		g_COT_ThreadESP = false;
-		g_COT_ThreadESP_Running = false;
+		m_MappedESPObjects.Clear();
+		m_ViewTypes.Clear();
+		m_ViewTypesByType.Clear();
+		m_ColourSettings = null;
+		m_ESPCanvas = null;
 	}
 
 	override void OnLogout(Class sender, CF_EventArgs args)

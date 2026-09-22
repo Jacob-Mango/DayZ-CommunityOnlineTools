@@ -6,7 +6,7 @@
 //! One line - dot, state markers, name, distance - and a right-click. The tag
 //! used to unfold a panel of controls under itself; every action lives in
 //! JMESPActionMenu now, which the ESP form's tracked list shares.
-class JMESPWidgetHandler: ScriptedWidgetEventHandler
+class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 {
 	static JMESPForm espMenu;
 	static JMESPModule espModule;
