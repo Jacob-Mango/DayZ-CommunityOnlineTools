@@ -88,7 +88,7 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 		s_Instance.HideInternal();
 	}
 
-	void QueueShow( string text, string iconPath, int swatchColor, int textColor, Widget sourceWidget = null )
+	void QueueShow( string text, string iconPath, int swatchColor, int textColor, Widget sourceWidget )
 	{
 		// Store the deadline in game-time ms. Update() fires ShowInternal once
 		// the mouse has hovered continuously for HOVER_DELAY_S.
@@ -230,19 +230,21 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 
 	void Update()
 	{
-		// If the source widget (or any ancestor) is hidden, cancel pending show and hide tooltip.
+		// If the source widget (or any ancestor) is hidden or destroyed, cancel pending show and hide tooltip.
 		// This handles closing the form while a tooltip is pending or visible.
-		if ( ( m_Pending || m_Visible ) && m_SourceWidget )
+		if ( m_Pending || m_Visible )
 		{
 			Widget vis = m_SourceWidget;
-			while ( vis )
+			while ( true )
 			{
-				if ( !vis.IsVisible() )
+				if ( !vis || !vis.IsVisible() )
 				{
 					HideInternal();
 					return;
 				}
 				vis = vis.GetParent();
+				if (vis == JMStatics.WINDOWS_CONTAINER)
+					break;
 			}
 		}
 

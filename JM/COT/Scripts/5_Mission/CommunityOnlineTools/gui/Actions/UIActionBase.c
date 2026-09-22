@@ -826,7 +826,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	void RefreshTooltip()
 	{
 		if ( m_TooltipText != "" )
-			UIActionTooltip.Show( m_TooltipText, m_TooltipIcon, m_TooltipSwatchColor, m_TooltipTextColor );
+			UIActionTooltip.Show( m_TooltipText, m_TooltipIcon, m_TooltipSwatchColor, m_TooltipTextColor, layoutRoot );
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )
