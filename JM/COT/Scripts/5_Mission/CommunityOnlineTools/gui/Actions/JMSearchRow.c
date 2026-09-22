@@ -8,5 +8,5 @@ class JMSearchRow
 
 	//! The row itself, so the caller can Add() more controls and SetGap(). Only set by
 	//! CreateSearchFlexRow(); null for the wrap-spacer row CreateSearchRow() builds.
-	UIActionFlexRow Row;
+	ref UIActionFlexRow Row;
 }
