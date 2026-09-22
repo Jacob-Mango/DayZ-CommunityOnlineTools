@@ -514,6 +514,24 @@ enum JMTerritoryModuleRPC
 	COUNT
 }
 
+
+enum JMBanModuleRPC
+{
+    INVALID = 10800,
+
+    // Client -> Server
+    RequestBanList,
+    RequestBan,
+    UnbanPlayer,
+    EditBanDuration,
+
+    // Server -> Client
+    BanList,
+
+    COUNT
+}
+
+
 // Map editor - 3D place / scale / move / delete of world objects.
 // Stored objects survive mission restart (per-mission JSON on the server).
 // RPCs are deliberately coarse: one RPC per mutation, GUID-list batched on read.

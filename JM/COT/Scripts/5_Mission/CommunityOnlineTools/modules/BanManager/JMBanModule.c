@@ -20,22 +20,6 @@
 //  separate connect hook here.
 // =============================================================================
 
-enum JMBanModuleRPC
-{
-    INVALID = 10800,
-
-    // Client -> Server
-    RequestBanList,
-    RequestBan,
-    UnbanPlayer,
-    EditBanDuration,
-
-    // Server -> Client
-    BanList,
-
-    COUNT
-}
-
 class JMBanModule : JMRenderableModuleBase
 {
     static const string BAN_DIR  = "$profile:CommunityOnlineTools\\Bans\\";
