@@ -323,7 +323,7 @@ class JMRoleManagerForm : JMFormBase
 	Widget ClearEditorContainer()
 	{
 		if ( m_EditorWrapper )
-			delete m_EditorWrapper;
+			m_EditorWrapper.Unlink();
 
 		m_EditorWrapper = UIActionManager.CreateGridSpacer( m_RightScrollContent, 1, 1 );
 

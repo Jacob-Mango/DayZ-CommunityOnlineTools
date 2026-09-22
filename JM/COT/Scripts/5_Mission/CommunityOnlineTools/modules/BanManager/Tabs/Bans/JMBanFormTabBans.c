@@ -100,7 +100,7 @@ class JMBanFormTabBans: JMFormTab
         HideDurationPicker();
 
         if ( m_BanListWrapper )
-            delete m_BanListWrapper;
+            m_BanListWrapper.Unlink();
 
         m_BanListWrapper = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 1 );
 

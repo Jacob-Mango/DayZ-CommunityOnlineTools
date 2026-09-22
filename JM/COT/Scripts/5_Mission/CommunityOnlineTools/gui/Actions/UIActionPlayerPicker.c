@@ -16,13 +16,6 @@ class UIActionPlayerPicker
 		m_SelectedPlayers = new array<JMPlayerInstance>();
 	}
 
-	void ~UIActionPlayerPicker()
-	{
-		delete m_ListController;
-		delete m_AllPlayers;
-		delete m_SelectedPlayers;
-	}
-
 	COTFilteredListController GetListController()
 	{
 		return m_ListController;

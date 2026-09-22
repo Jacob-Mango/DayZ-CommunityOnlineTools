@@ -32,7 +32,7 @@ class JMNamalskEventManagerForm: JMFormBase
 	protected void Rebuild()
 	{
 		if (m_ActionsWrapper)
-			delete m_ActionsWrapper;
+			m_ActionsWrapper.Unlink();
 
 		m_ActionsWrapper = UIActionManager.CreateGridSpacer(m_ContentWrapper, 1, 1);
 

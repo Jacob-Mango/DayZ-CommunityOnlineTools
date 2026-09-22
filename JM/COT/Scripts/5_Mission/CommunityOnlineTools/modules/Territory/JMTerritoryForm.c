@@ -66,7 +66,7 @@ class JMTerritoryForm: JMFormBase
 			return;
 
 		if ( m_TerritoriesWrapper )
-			delete m_TerritoriesWrapper;
+			m_TerritoriesWrapper.Unlink();
 
 		m_TerritoriesWrapper = UIActionManager.CreateGridSpacer( m_ContentWrapper, 1, 1 );
 

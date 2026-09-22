@@ -77,7 +77,7 @@ class JMCompensationsForm: JMFormBase
 		m_Compensations = m_Module.GetCompensations();
 
 		if ( m_ActionsWrapper )
-			delete m_ActionsWrapper;
+			m_ActionsWrapper.Unlink();
 
 		m_ActionsWrapper = UIActionManager.CreateGridSpacer( m_ContentWrapper, 1, 1 );
 

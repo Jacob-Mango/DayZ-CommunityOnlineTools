@@ -101,7 +101,7 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 	void RebuildPlayerList()
 	{
 		if ( m_Form.m_ListWrapper )
-			delete m_Form.m_ListWrapper;
+			m_Form.m_ListWrapper.Unlink();
 
 		m_Form.m_ListWrapper = UIActionManager.CreateGridSpacer( m_Form.m_LeftContent, 1, 1 );
 		m_PlayerRows  = NULL;

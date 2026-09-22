@@ -100,7 +100,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 	void RebuildRoleList()
 	{
 		if ( m_Form.m_ListWrapper )
-			delete m_Form.m_ListWrapper;
+			m_Form.m_ListWrapper.Unlink();
 
 		m_Form.m_ListWrapper = UIActionManager.CreateGridSpacer( m_Form.m_LeftContent, 1, 1 );
 
@@ -211,7 +211,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 		m_PermRoots.Clear();
 
 		if ( m_PermTreeWrapper )
-			delete m_PermTreeWrapper;
+			m_PermTreeWrapper.Unlink();
 
 		m_PermTreeWrapper = UIActionManager.CreateGridSpacer( m_PermTreeHost, 1, 1 );
 

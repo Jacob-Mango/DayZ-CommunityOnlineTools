@@ -18,13 +18,6 @@ class COTFilteredListController
 		m_MultiSelect = false;
 	}
 
-	void ~COTFilteredListController()
-	{
-		delete m_AllItems;
-		delete m_FilteredItems;
-		delete m_SelectedItems;
-	}
-
 	array<Class> GetAllItems()
 	{
 		return m_AllItems;

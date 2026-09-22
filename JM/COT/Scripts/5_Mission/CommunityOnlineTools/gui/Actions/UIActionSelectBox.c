@@ -11,14 +11,6 @@ class UIActionSelectBox: UIActionBase
 	protected TextWidget m_Label;
 	protected ref OptionSelectorMultistate m_Selection;
 
-	void ~UIActionSelectBox()
-	{
-		if (!g_Game)
-			return;
-
-		delete m_Selection;
-	}
-
 	// Backwards-compat alias for callers written against the (brief) Dropdown-style API.
 	void SetItems( notnull array<string> options )
 	{

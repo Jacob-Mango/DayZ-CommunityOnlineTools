@@ -22,11 +22,6 @@ class UIActionMapController
 		}
 	}
 
-	void ~UIActionMapController()
-	{
-		delete m_LayerVisibility;
-	}
-
 	UIActionMap GetMap()
 	{
 		return m_Map;
