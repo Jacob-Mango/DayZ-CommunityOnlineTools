@@ -146,7 +146,7 @@ class JMServerStatsModule : JMModuleBase
 	// -------------------------------------------------------------------------
 	//! TODO: CF modules OnUpdate loop is limited to 40 Hz on server for performance reasons,
 	//! so this needs to be renamed and called from DayZGame::OnUpdate
-	void OnUpdate( float timeslice )
+	override void OnUpdate( float timeslice )
 	{
 		super.OnUpdate( timeslice );
 
