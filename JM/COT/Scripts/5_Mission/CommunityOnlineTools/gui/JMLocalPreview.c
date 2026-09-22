@@ -116,10 +116,10 @@ class JMLocalPreview
 		bool taken = false;
 
 		if ( slotId >= 0 )
-			taken = parent.LocalTakeEntityAsAttachmentEx( ent, slotId );
+			taken = parent.LocalTakeEntityToTargetAttachmentEx( parent, ent, slotId );
 
 		if ( !taken )
-			taken = parent.LocalTakeEntityAsAttachment( ent );
+			taken = parent.LocalTakeEntityToTargetAttachment( parent, ent );
 
 		if ( !taken )
 		{

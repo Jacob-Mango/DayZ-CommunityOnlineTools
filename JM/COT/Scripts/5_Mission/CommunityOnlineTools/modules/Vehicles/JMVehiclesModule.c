@@ -1715,7 +1715,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 					auto keychain = ExpansionKeyChainBase.Cast( placeholder.GetInventory().FindAttachment( slotId ) );
 					if ( keychain && restoredEntity.GetInventory().HasAttachmentSlot( slotId ) )
 					{
-						restoredEntity.ServerTakeEntityAsAttachmentEx( keychain, slotId );
+						restoredEntity.ServerTakeEntityToTargetAttachmentEx( restoredEntity, keychain, slotId );
 					}
 
 					g_Game.ObjectDelete( placeholder );
