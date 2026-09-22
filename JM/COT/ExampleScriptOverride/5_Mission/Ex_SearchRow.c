@@ -42,7 +42,7 @@ modded class JMPlayerForm
 	protected void RebuildExSearchList()
 	{
 		if ( m_ExSearchList )
-			delete m_ExSearchList;
+			m_ExSearchList.Unlink();
 
 		m_ExSearchList = UIActionManager.CreateGridSpacer( m_ExSearchBody, 1, 1 );
 
