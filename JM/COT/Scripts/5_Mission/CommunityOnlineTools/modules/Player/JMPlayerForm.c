@@ -594,7 +594,7 @@ class JMPlayerForm: JMFormBase
 	{
 		super.OnShow();
 
-		g_Game.GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
+		g_Game.GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true, false );
 		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 100, true, false );
 		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapMarkers, 1000, true );
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( m_Roster.UpdateGroupAnimation );
