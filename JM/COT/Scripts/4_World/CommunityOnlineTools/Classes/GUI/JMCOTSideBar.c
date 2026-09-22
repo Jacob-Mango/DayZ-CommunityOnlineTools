@@ -379,7 +379,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		#ifndef CF_WINDOWS
 		GetCOTWindowManager().HideAllActive();
-		if ( !GetCOTWindowManager().HasAnyUnpinnedActive() )
+		if ( g_Game.GetMission() && !GetCOTWindowManager().HasAnyUnpinnedActive() )
 		{
 			g_Game.GetMission().RemoveActiveInputExcludes({"menu"});
 			g_Game.GetUIManager().ShowUICursor( false );
