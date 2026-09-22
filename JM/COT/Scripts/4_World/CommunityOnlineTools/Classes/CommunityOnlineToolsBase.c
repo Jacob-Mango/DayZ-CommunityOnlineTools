@@ -608,7 +608,7 @@ class CommunityOnlineToolsBase
 		{
 			if (skipIDs.Find(inputID) == -1)
 			{
-				#ifdef COT_DEBUGLOGS
+				#ifdef COT_DEBUGLOGS_VERBOSE
 				Print("[COT_DBG]   ForceDisable id=" + inputID + " -> " + state.ToString());
 				#endif
 				GetUApi().GetInputByID(inputID).ForceDisable(state);
