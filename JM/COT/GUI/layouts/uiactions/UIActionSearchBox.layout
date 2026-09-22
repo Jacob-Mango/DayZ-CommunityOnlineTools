@@ -87,7 +87,6 @@ PanelWidgetClass UIActionSearchBox {
        "no focus" 0
        font "gui/fonts/Metron"
        style COTInput
-       "text offset" 6 0
       }
       ButtonWidgetClass action_button_clear {
        ignorepointer 0
@@ -150,7 +149,6 @@ PanelWidgetClass UIActionSearchBox {
      "no focus" 1
      font "gui/fonts/Metron"
      style COTInput
-     "text offset" 6 0
     }
     TextWidgetClass action_placeholder {
      visible 0

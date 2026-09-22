@@ -8,5 +8,4 @@ PanelWidgetClass UIPanel {
  valign top_ref
  color 0 0 0 0
  style COTSurface
- "Size To Content V" 1
 }

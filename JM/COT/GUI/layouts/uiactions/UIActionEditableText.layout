@@ -82,7 +82,6 @@ PanelWidgetClass UIActionEditableText {
          "no focus" 0
          font "gui/fonts/Metron"
          style COTInput
-         "text offset" 8 0
         }
        }
       }
