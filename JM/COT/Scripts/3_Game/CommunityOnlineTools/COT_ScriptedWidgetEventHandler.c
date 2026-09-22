@@ -1,5 +1,19 @@
 class COT_ScriptedWidgetEventHandler: ScriptedWidgetEventHandler
 {
+	static ref CF_DoublyLinkedNodes_WeakRef<COT_ScriptedWidgetEventHandler> s_COT_All = new CF_DoublyLinkedNodes_WeakRef<COT_ScriptedWidgetEventHandler>();
+	ref CF_DoublyLinkedNode_WeakRef<COT_ScriptedWidgetEventHandler> m_COT_Node;
+
+	void COT_ScriptedWidgetEventHandler()
+	{
+		m_COT_Node = s_COT_All.Add(this);
+	}
+
+	void ~COT_ScriptedWidgetEventHandler()
+	{
+		if (s_COT_All)
+			s_COT_All.Remove(m_COT_Node);
+	}
+
 	//! Is the (root) layout element visible?
 	bool IsVisible()
 	{

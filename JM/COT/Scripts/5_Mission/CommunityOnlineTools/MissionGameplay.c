@@ -240,6 +240,23 @@ modded class MissionGameplay
 		
 		if ( IsMissionOffline() )
 			GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance );
+
+		int count;
+
+		auto node = COT_ScriptedWidgetEventHandler.s_COT_All.m_Head;
+		while (node)
+		{
+			auto widgetHandler = node.m_Value;
+			node = node.m_Next;
+			if (widgetHandler)
+			{
+				widgetHandler.Destroy();
+				++count;
+			}
+		}
+
+		if (count > 0)
+			CF_Log.Info("Cleaned up %1 dangling COT ScriptedWidgetEventHandlers", count.ToString());
 	}
 
 	override void OnUpdate( float timeslice )
