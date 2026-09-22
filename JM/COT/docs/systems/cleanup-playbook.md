@@ -356,7 +356,7 @@ Run all of these after each step. None of them exercises the client UI (item 5).
 
 ## 6. Enforce Script and DayZ gotchas found
 
-The current, fuller list (including runtime-only failures) is [conventions.md](conventions.md) section 11.
+The current, fuller list (including runtime-only failures) is [conventions.md](conventions.md) section 12.
 
 - No block scope: variables declared in one `if` branch are visible in the next; use distinct names.
 - No ternary, no multi-line `||`/`&&`/`+` expressions.

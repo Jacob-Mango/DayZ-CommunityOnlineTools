@@ -27,9 +27,10 @@ class member order in [../ui/module-form-patterns.md](../ui/module-form-patterns
 | Trust a verdict without checking its log time | Compare the script log time with the build start | 9 |
 | Call `lint-scripts` clean because it printed nothing | Use `verify-fix`, then a real build | 9 |
 | Fix a native crash from a theory | Instrument, reproduce once, then fix | 10 |
-| Chain `foreach`, `new X().M()` or a temporary as an argument | Use a local (section 11) | 11 |
+| `delete` a widget-owning object | `Widget.Unlink()`, then rebuild | 11 |
+| Chain `foreach`, `new X().M()` or a temporary as an argument | Use a local (section 12) | 12 |
 | Mix whitespace, moves or renames into a logic commit | Commit each on its own (section 2) | 2 |
-| Narrow `protected` to `private`, or remove a public member without a forwarder | See [mod-compatibility.md](mod-compatibility.md) | 12 |
+| Narrow `protected` to `private`, or remove a public member without a forwarder | See [mod-compatibility.md](mod-compatibility.md) | 13 |
 
 ## 1. Class fields: statics first, then a blank line, then members
 
@@ -208,7 +209,27 @@ Full procedure and the tools are in [cleanup-playbook.md](cleanup-playbook.md) s
 - The client `script_*.log` prints `UIActionContextMenu.OnClick: row id=...` for every menu click; grep it to see what a menu
   row really reports.
 
-## 11. Enforce Script: what compiles but breaks
+## 11. Widget lifecycle: `delete` vs `Unlink`
+
+**Never `delete` a widget-owning object.** `delete` on anything holding a `Widget` frees memory
+the engine's own widget tree still references, which segfaults later — reliably on mission
+finish, when everything tears down at once. Use `Widget.Unlink()` to detach a widget before
+recreating or discarding it. Three patterns already used throughout
+`Scripts/5_Mission/CommunityOnlineTools/gui/` cover every case:
+
+- Rebuilding a container in place: `if ( m_Wrapper ) m_Wrapper.Unlink();` then reassign it.
+- `JMWindowBase.DestroyWidget( layoutRoot )` / `COT_ScriptedWidgetEventHandler.DestroyWidget()` -
+  a null- and `"INVALID"`-checked `w.Unlink()` helper, called from destructors.
+- `UIActionManager.ClearChildren( parent )` - detaches every child of a widget one by one, for
+  rebuilding a dynamic list without disturbing the parent itself.
+
+Two exceptions, both `delete this` on the handler object itself, never on a `Widget`:
+`COT_ScriptedWidgetEventHandler.Destroy()` / `COT_WidgetHolder.Destroy()`, and
+`JMWebhookModule`'s `delete cfg` (a `ConfigFile`, not a widget).
+
+Evidence: `da1fe2ab`, `ebb09735`, `22fb6f9e`, `51e06035`.
+
+## 12. Enforce Script: what compiles but breaks
 
 Syntax limits that the compiler rejects (no ternary, no block scope, no multi-line expressions, one class per file) are in
 `CLAUDE.md`. These pass the compiler and fail later:
@@ -238,7 +259,7 @@ Syntax limits that the compiler rejects (no ternary, no block scope, no multi-li
 - Set the flags before the size (`SetFlags( HEXACTSIZE | VEXACTSIZE )` then `SetSize`), and mutate state before firing the
   event that reads it. More layout traps: [../ui/limitations.md](../ui/limitations.md), [../ui/reference/pitfalls.md](../ui/reference/pitfalls.md).
 
-## 12. Do not break other mods
+## 13. Do not break other mods
 
 DayZ-Expansion and other mods use `modded class` on COT forms and modules and override their members.
 
@@ -252,7 +273,7 @@ DayZ-Expansion and other mods use `modded class` on COT forms and modules and ov
 - Removed or renamed user-facing text: check every call site of the stringtable key first; two keys with different text
   can be deliberate ([cleanup-playbook.md](cleanup-playbook.md) 7).
 
-## 13. Working in this environment
+## 14. Working in this environment
 
 - **Big heredocs fail in the Bash tool.** A command with a few dozen lines of mixed quotes is rejected with `unexpected EOF while
   looking for matching '` and runs nothing. Use the Write or Edit tool for multi-line content; keep helper scripts in
