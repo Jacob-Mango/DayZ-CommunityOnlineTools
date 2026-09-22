@@ -269,20 +269,8 @@ class JMRenderableModuleBase: JMModuleBase
 		}
 	}
 
-	//! Called by JMWindowManager.RemoveWindow() once m_Window is actually gone
-	//! - both Close()'s own DestroyLater() and JMWindowManager.DestroyAllWindows()
-	//! (mission end / respawn, see MissionGameplay.OnMissionFinish) end up
-	//! deleting the window object without ever routing back through Close(),
-	//! and neither path used to clear this reference. A module left open
-	//! across a respawn was then a dangling m_Window: IsVisible() kept
-	//! dereferencing the freed CF_Window every frame via JMCOTSideBar's
-	//! CheckForVisibleModules(), reading unstable garbage that flapped
-	//! m_IsTargetCompact and re-triggered the sidebar's open/close animation
-	//! every frame it disagreed with itself - the "open close open close"
-	//! flicker on the next COT open after that module's window died this way.
 	void OnWindowDestroyed()
 	{
-		m_Window = NULL;
 	}
 
 	void ToggleShow()

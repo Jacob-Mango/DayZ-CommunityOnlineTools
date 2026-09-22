@@ -123,9 +123,6 @@ class JMWindowManager
 		{
 
 			window.GetModule().SetMenuButtonColor( JMTheme.TRANSPARENT );
-
-			//! The module's own m_Window would otherwise dangle past this
-			//! point - see JMRenderableModuleBase.OnWindowDestroyed().
 			window.GetModule().OnWindowDestroyed();
 		}
 

@@ -162,9 +162,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		}
 
 		//! @note unlinking the layout root is ABSOLUTELY necessary since destroying the widget handler will NOT do that automatically!
-	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
-	#endif
 
 	#ifdef DIAG
 		s_JMWindowBaseCount--;

@@ -48,9 +48,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		Hide();
 
-	#ifdef DAYZ_1_28
 		DestroyWidget(m_LayoutRoot);
-	#endif
 	}
 
 	Widget GetLayoutRoot()

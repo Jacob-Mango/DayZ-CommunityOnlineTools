@@ -10,8 +10,17 @@ class COT_ScriptedWidgetEventHandler: ScriptedWidgetEventHandler
 
 	void ~COT_ScriptedWidgetEventHandler()
 	{
+		if (!g_Game)
+			return;
+
 		if (s_COT_All)
 			s_COT_All.Remove(m_COT_Node);
+
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		EXError.Info(this, "~");
+	#endif
+	#endif
 	}
 
 	//! Is the (root) layout element visible?

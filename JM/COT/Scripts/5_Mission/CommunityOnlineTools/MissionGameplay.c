@@ -250,13 +250,22 @@ modded class MissionGameplay
 			node = node.m_Next;
 			if (widgetHandler)
 			{
+			#ifdef DIAG_DEVELOPER
+			#ifdef DZ_Expansion_Core
+				EXError.Info(this, "OnMissionFinish -> destroy " + widgetHandler);
+			#endif
+			#endif
 				widgetHandler.Destroy();
 				++count;
 			}
 		}
 
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
 		if (count > 0)
-			CF_Log.Info("Cleaned up %1 dangling COT ScriptedWidgetEventHandlers", count.ToString());
+			EXError.Info(this, string.Format("Cleaned up %1 dangling COT ScriptedWidgetEventHandlers", count));
+	#endif
+	#endif
 	}
 
 	override void OnUpdate( float timeslice )
