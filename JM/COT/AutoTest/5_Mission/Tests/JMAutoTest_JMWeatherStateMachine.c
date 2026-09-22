@@ -224,11 +224,11 @@ static void JMAutoTest_JMWeatherStateMachine()
 	JMWeatherState opener = new JMWeatherState;
 	JMAutoTest_AssertEqualStr( "no phases means nothing to enter", opener.RollEntryPhase(), "" );
 
-	JMWeatherPhase first = new JMWeatherPhase;
-	first.Name = "First";
+	JMWeatherPhase firstPhase = new JMWeatherPhase;
+	firstPhase.Name = "First";
 	JMWeatherPhase second = new JMWeatherPhase;
 	second.Name = "Second";
-	opener.Phases.Insert( first );
+	opener.Phases.Insert( firstPhase );
 	opener.Phases.Insert( second );
 
 	JMAutoTest_AssertEqualStr( "no entry weights opens on the first phase", opener.RollEntryPhase(), "First" );
