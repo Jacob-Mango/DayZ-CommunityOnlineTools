@@ -564,10 +564,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_SetHealth( health, zone, target, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - vanilla OnRPC handles
-			//! that natively before any script runs and a stale/mismatched target
-			//! crashes the server outright (docs/systems/rpc.md - "Never send a
-			//! targeted RPC"). Send untargeted, carry the network id instead.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
@@ -579,8 +575,6 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	//! Untargeted with a network id in the payload - see SetPosition above for
-	//! why a targeted RPC is not safe here.
 	void SetOrientation( vector orientation, Object target )
 	{
 		if ( IsMissionOffline() )
@@ -603,22 +597,6 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	//! Sent UNTARGETED, with the target carried as a network id in the payload
-	//! rather than as the RPC's target object.
-	//!
-	//! A targeted ScriptRPC (rpc.Send(target, ...)) killed the server outright:
-	//! vanilla DayZGame.OnRPC dispatches a targeted RPC into native handling and
-	//! then on to target.OnRPC() BEFORE any of this module's script ever runs,
-	//! and with one of these ids aimed at a vehicle that path died in a native
-	//! memmove writing off the end of the thread stack (0xC0000005, identical
-	//! fault address on every crash). Instrumentation proved it: this module's
-	//! OnRPC was never entered for the targeted transform RPCs, while the
-	//! untargeted Log RPC on the same switch was handled normally every time.
-	//!
-	//! Sending untargeted and resolving the object server-side via
-	//! GetObjectByNetworkId keeps the whole exchange in script, and matches
-	//! what the rest of the mod already does (JMPlayerModule's spectate RPC,
-	//! JMVehiclesModule throughout, and RPC_DeleteObject just below).
 	void SetPosition( vector position, Object target )
 	{
 		if ( IsMissionOffline() )
@@ -1894,8 +1872,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_RecordTransformHistory( previousPosition, previousOrientation, target, NULL );
 		} else
 		{
-			//! Untargeted with a network id in the payload - see SetPosition
-			//! for why a targeted RPC is not safe here.
 			int netLow;
 			int netHigh;
 			target.GetNetworkID( netLow, netHigh );
@@ -2316,7 +2292,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_ObjectAction( action, ivalue, fvalue, target, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - see SetHealth() above.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
@@ -3517,7 +3492,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_BaseBuilding_Build( target, part, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - see SetHealth() above.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
@@ -3577,7 +3551,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_BaseBuilding_Dismantle( target, part, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - see SetHealth() above.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
@@ -3633,7 +3606,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_BaseBuilding_Repair( target, part, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - see SetHealth() above.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
@@ -3696,7 +3668,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_BaseBuilding_SetPartHealth( target, part, health01, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - see SetHealth() above.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
@@ -3770,7 +3741,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_Vehicle_Unstuck( target, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - see SetHealth() above.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
@@ -3820,7 +3790,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_Vehicle_Refuel( target, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - see SetHealth() above.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
@@ -3884,7 +3853,6 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_Heal( target, NULL );
 		} else
 		{
-			//! Never target a ScriptRPC at a world object - see SetHealth() above.
 			int netLow, netHigh;
 			target.GetNetworkID( netLow, netHigh );
 
