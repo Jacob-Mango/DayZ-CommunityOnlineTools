@@ -652,13 +652,13 @@ class JMPlayerInstance : Managed
 
 		array< string > roles = new array< string >;
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		#ifdef DIAG_DEVELOPER
 		#ifdef DZ_Expansion_Core
 		EXError.Info(this, string.Format("Receiving permissions for player %1", m_Name));
 		#endif
 		#endif
 
-	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		if (!m_RootPermission.OnReceive( ctx ))
 		{
 			CF.FormatError("Couldn't receive permissions for player %1", m_Name);
