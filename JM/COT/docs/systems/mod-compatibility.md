@@ -130,14 +130,6 @@ it; worth resolving before either grows further.
 
 ## Methods COT provides for mod compat
 
-### `JMPermissionManager.IsAdminToolsToggledOn()`
-
-Expansion calls this from ~25 sites (recipes, user actions, territory). It
-supplies its own via `modded class` under `#ifdef JM_COT`, but COT defines it
-too so the symbol resolves even if Expansion's modded class is absent,
-load-ordered differently, or its COT block compiles out. Both return
-`GetCommunityOnlineToolsBase().IsActive()` — identical behaviour either way.
-
 ### `JMPermissionManager.RegisterPermission(string, JMPermissionType)`
 
 Expansion carried `Expansion_RegisterPermission` — a verbatim copy of COT's
