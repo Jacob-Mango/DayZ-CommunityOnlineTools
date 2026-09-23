@@ -12,7 +12,7 @@
 //  free and can't be hovered or given a ring - a real widget can be both, at
 //  the cost of needing this per-tick reprojection.
 // =============================================================================
-class JMUIActionMapMarker: ScriptedWidgetEventHandler
+class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 {
 	protected Widget      m_Root;
 	protected TextWidget  m_Name;
@@ -70,8 +70,8 @@ class JMUIActionMapMarker: ScriptedWidgetEventHandler
 
 	void ~JMUIActionMapMarker()
 	{
-		if ( g_Game && m_Root )
-			m_Root.Unlink();
+		if ( g_Game )
+			DestroyWidget(m_Root);
 	}
 
 	string GetId()

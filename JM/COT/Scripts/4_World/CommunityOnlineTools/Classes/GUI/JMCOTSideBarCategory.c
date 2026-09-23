@@ -126,11 +126,11 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 
 	void ~JMCOTSideBarCategory()
 	{
+		if (!g_Game)
+			return;
+
 		HideFlyout();
-		if ( m_FlyoutRoot )
-		{
-			m_FlyoutRoot.Unlink();
-		}
+		DestroyWidget(m_FlyoutRoot);
 	}
 
 	string GetCategoryName()
@@ -435,7 +435,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 
 	protected void HideFlyout()
 	{
-		if ( m_FlyoutRoot )
+		if ( m_FlyoutRoot && m_FlyoutRoot.ToString() != "INVALID" )
 			m_FlyoutRoot.Show( false );
 
 		m_FlyoutVisible = false;

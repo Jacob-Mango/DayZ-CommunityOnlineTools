@@ -86,8 +86,7 @@ class UIActionDropdown: UIActionBase
 		if ( !g_Game )
 			return;
 
-		if ( m_ListPanel )
-			m_ListPanel.Unlink();
+		DestroyWidget(m_ListPanel);
 	}
 
 	string GetSelectedText()

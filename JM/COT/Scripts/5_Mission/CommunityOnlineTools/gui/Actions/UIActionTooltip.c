@@ -60,6 +60,9 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 
 	void ~UIActionTooltip()
 	{
+		if (!g_Game)
+			return;
+
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
 		if ( s_Instance == this )
@@ -68,8 +71,7 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 			s_InstanceRef = null;
 		}
 
-		if ( m_Root )
-			m_Root.Unlink();
+		DestroyWidget(m_Root);
 	}
 
 	static void Show( string text, string iconPath = "", int swatchColor = 0, int textColor = 0, Widget sourceWidget = null )

@@ -69,10 +69,13 @@ class UIActionColorPicker: UIActionBase
 
 	void ~UIActionColorPicker()
 	{
+		if (!g_Game)
+			return;
+
 		if ( m_Open )
 			CommunityOnlineToolsBase.ForceDisableInputs( false );
 
-		if ( m_Popup )
+		if ( m_Popup && m_Popup.ToString() != "INVALID")
 		{
 			JMStatics.RemoveOverlay( m_Popup );
 			m_Popup.Unlink();

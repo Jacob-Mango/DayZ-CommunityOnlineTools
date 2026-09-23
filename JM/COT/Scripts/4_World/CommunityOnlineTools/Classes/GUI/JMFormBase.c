@@ -562,7 +562,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		{
 			overlay = m_FloatingOverlays[i];
 
-			if ( overlay )
+			if ( overlay && overlay.ToString() != "INVALID" )
 				overlay.Close();
 		}
 	}

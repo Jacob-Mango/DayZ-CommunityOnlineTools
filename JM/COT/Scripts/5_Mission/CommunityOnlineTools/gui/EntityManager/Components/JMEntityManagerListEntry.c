@@ -4,7 +4,7 @@
 //  Generic left-panel list row for an entity. Click the row to open its info
 //  panel on the right.
 // =============================================================================
-class JMEntityManagerListEntry: ScriptedWidgetEventHandler
+class JMEntityManagerListEntry: COT_ScriptedWidgetEventHandler
 {
 	protected Widget       m_Root;
 	protected TextWidget   m_Name;
@@ -34,8 +34,8 @@ class JMEntityManagerListEntry: ScriptedWidgetEventHandler
 
 	void ~JMEntityManagerListEntry()
 	{
-		if ( g_Game && m_Root )
-			m_Root.Unlink();
+		if ( g_Game )
+			DestroyWidget(m_Root);
 	}
 
 	JMEntityMetaData GetEntity()

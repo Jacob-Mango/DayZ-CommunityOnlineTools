@@ -7,7 +7,7 @@
 //  Positioning is driven by the owning form's consolidated 20 Hz tick via
 //  UpdatePosition(). No per-marker Timer.
 // =============================================================================
-class JMEntityManagerMapMarker: ScriptedWidgetEventHandler
+class JMEntityManagerMapMarker: COT_ScriptedWidgetEventHandler
 {
 	protected Widget       m_Root;
 	protected TextWidget   m_Name;
@@ -58,8 +58,8 @@ class JMEntityManagerMapMarker: ScriptedWidgetEventHandler
 
 	void ~JMEntityManagerMapMarker()
 	{
-		if ( g_Game && m_Root )
-			m_Root.Unlink();
+		if ( g_Game )
+			DestroyWidget(m_Root);
 	}
 
 	// Called by the form's consolidated ticker. Cheap no-op when frozen or

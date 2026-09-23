@@ -80,10 +80,13 @@ class JMLootAnalysisHoverInfo
 
 	void ~JMLootAnalysisHoverInfo()
 	{
+		if (!g_Game)
+			return;
+
 		DestroyPreviewItem();
 		ClearAttachmentIcons();
 
-		if (g_Game && m_Root)
+		if (m_Root && m_Root.ToString() != "INVALID")
 			m_Root.Unlink();
 	}
 
@@ -377,7 +380,7 @@ class JMLootAnalysisHoverInfo
 
 	protected void ClearPreview()
 	{
-		if (m_Preview)
+		if (m_Preview && m_Preview.ToString() != "INVALID")
 			m_Preview.Show(false);
 	}
 

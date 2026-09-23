@@ -140,9 +140,12 @@ class JMVehiclesHoverInfo
 
 	void ~JMVehiclesHoverInfo()
 	{
+		if (!g_Game)
+			return;
+
 		DestroyPreviewItem();
 
-		if ( g_Game && m_Root )
+		if ( m_Root && m_Root.ToString() != "INVALID" )
 			m_Root.Unlink();
 	}
 
@@ -416,7 +419,7 @@ class JMVehiclesHoverInfo
 
 	protected void ClearPreview()
 	{
-		if ( m_Preview )
+		if ( m_Preview && m_Preview.ToString() != "INVALID" )
 			m_Preview.Show( false );
 	}
 

@@ -1,4 +1,4 @@
-class JMVehiclesListEntry: ScriptedWidgetEventHandler
+class JMVehiclesListEntry: COT_ScriptedWidgetEventHandler
 {
 	protected Widget m_Root;
 	protected TextWidget m_VehicleName;
@@ -36,8 +36,8 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 
 	void ~JMVehiclesListEntry()
 	{
-		if ( g_Game && m_Root )
-			m_Root.Unlink();
+		if ( g_Game )
+			DestroyWidget(m_Root);
 	}
 
 	string GetLabel()

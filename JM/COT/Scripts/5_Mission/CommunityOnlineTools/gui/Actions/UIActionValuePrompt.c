@@ -71,10 +71,13 @@ class UIActionValuePrompt: UIActionBase
 
 	void ~UIActionValuePrompt()
 	{
+		if (!g_Game)
+			return;
+
 		if ( m_Open )
 			CommunityOnlineToolsBase.ForceDisableInputs( false );
 
-		if ( m_Panel )
+		if ( m_Panel && m_Panel.ToString() != "INVALID" )
 		{
 			JMStatics.RemoveOverlay( m_Panel );
 			m_Panel.Unlink();
