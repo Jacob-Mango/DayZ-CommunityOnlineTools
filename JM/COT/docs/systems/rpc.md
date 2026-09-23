@@ -40,7 +40,7 @@ COT uses DayZ's `ScriptRPC` system. Each module owns a numeric range of RPC IDs 
 | `JMKillFeedModuleRPC` | 10720 | - | Third party: `COT_PvPInspector` (not defined in this repo) |
 | `JMAnimalsModuleRPC` | 10740 | - | Third party: `COT_AnimalManager` (not defined in this repo) |
 | `JMXMLEditorModuleRPC` | 10760 | - | Third party: `Mu_XMLEditor` (not defined in this repo) |
-| `JMBanModuleRPC` | 10800 | 10805 | Ban module (defined in `JMBanModule.c`, not `RPC.c`) |
+| `JMBanModuleRPC` | 10800 | 10805 | Ban module |
 | `JMMapEditorModuleRPC` | 10900 | 10912 | Map Editor module |
 | `JMAntiCheatModuleRPC` | 10920 | 10923 | Anti-Cheat module |
 | `JMServerStatsModuleRPC` | 10940 | 10941 | Server Stats module |
@@ -171,14 +171,19 @@ rpc.Write( Object_ref );
 
 // Send
 rpc.Send( Object target, int rpc_type, bool reliable, PlayerIdentity to );
-// target=NULL → server
+// target=NULL → no specific target
+// target=obj → specific target
 // to=NULL     → broadcast to all clients
 // to=identity → specific player only
 ```
 
-> **Do not pass a non-NULL `target`.** See "Never send a targeted RPC" below —
-> it crashed the server hard. Send untargeted and put the target's network id
-> in the payload instead.
+> When passing a target for an RPC sent from server to client, consider if
+> the target is in client's netbubble (if the RPC is a reaction to what a
+> client requested, this is usually the case). A target sent by a client
+> RPC is usually guaranteed to exist on the server, but there may be races
+> where the target is deleted on server before the client knows about the
+> deletion. Targeted RPCs therefore should always check if target is NULL
+> in their handler.
 
 ```c
 // Reading in handler
@@ -199,32 +204,9 @@ ctx.Read( s );
 
 **Never trust client-side permission state for server actions — always re-check on server.**
 
-## Never send a targeted RPC
+## If we only have the network ID on client, don't send a targeted RPC (i.e. netid might have been acquired previously but object it belongs to moved out of client netbubble, so client object reference is then NULL and netid is all we have left to go by)
 
-`ScriptRPC.Send()` takes a target `Object`. **Always pass `NULL`.** Sending a COT
-rpc id targeted at a world object killed the dedicated server outright — a native
-access violation (`0xC0000005`) inside CRT `memmove`, writing off the end of the
-thread stack, at a byte-identical fault address on every single crash.
-
-Why it is fatal: vanilla `DayZGame.OnRPC` handles a targeted RPC as
-
-```
-super.OnRPC(...)                    // native handling  <-- died here
-Event_OnRPC.Invoke(...)             // where COT subscribes
-if (target) target.OnRPC(...)       // then the object's own handler
-```
-
-Two consequences fall out of that order:
-
-1. The native step runs **before** any COT script. No script-side guard, permission
-   check, or `ctx.Read` can protect you, and no Enforce stack trace is produced.
-2. Even when it survives, the same `rpc_type` is then delivered a second time to
-   the target object's own `OnRPC` chain — including whatever other mods have
-   overridden on that class (Expansion overrides `CarScript.OnRPC`). Your id gets
-   interpreted by handlers that know nothing about it, against a `ctx` your own
-   handler may have already partly consumed.
-
-**Correct pattern** — send untargeted, carry the network id in the payload:
+**pattern** — send untargeted, carry the network id in the payload:
 
 ```c
 // sender
@@ -252,9 +234,7 @@ if ( !obj )
 This is already the established pattern in the mod — `JMPlayerModule`'s
 spectate-by-GUID RPC, `JMVehiclesModule` throughout, and `JMESPModule.RPC_DeleteObject`.
 
-> **Known exception:** `JMPlayerModule.StartSpectating( Object spectateObject )` (the overload used when the
-> right-click target is an object, not a player GUID) still calls `rpc.Send( spectateObject, ... )`. It predates this
-> rule; do not copy it, and prefer the untargeted `StartSpectating( string guid )` form when touching that code.
+> **Known exceptions:** Do not change existing (targeted) RPC code.
 
 ## Avoid RPC spam from continuous input
 
@@ -292,11 +272,16 @@ sends a burst of RPCs to a module and the gate would drop all but the first. Thr
 
 ### Debugging a crash with no script stack trace
 
-A native crash produces no Enforce stack trace, so reasoning from the dump alone
-will mislead you about which script path ran. Instrument and reproduce:
+A native crash (segfault with memory dump) produces no or potentially
+misleading Enforce stack trace, so reasoning from the dump alone can mislead
+you about which script path is at fault. Instrument and reproduce:
 
 - Bracket suspicious calls with `Print()` before and after. A "before" with no
-  matching "after" is the killing call.
+  matching "after" could be the killing call, but note that it can also be the
+  result of much earlier memory corruption. Hard and fast rule, origin of a
+  segfault is not always necessarily the script code that was executed
+  immediately before it. If it's just an exception (crash log) without segfault
+  and memdump, this method is much more accurate in determining the cause.
 - Put at least one print **before** any early return or `ctx.Read`, so that its
   absence proves the handler was never entered rather than that it bailed out.
 - A negative result is valuable — proving a path never executes eliminates it.

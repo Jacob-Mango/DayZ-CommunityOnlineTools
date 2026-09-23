@@ -109,9 +109,15 @@ helpers (`JMExpansionLoadoutFile`, `JMItemSetCompat`), not a module. Shared, mod
 | `GetCommunityOnlineTools()` | Mission-level COT instance |
 | `JM_GetSelected()` | Global JMSelectedObjects (player/object selection) |
 | `GetCOTWindowManager()` | Window lifecycle manager |
-| `IsMissionHost()` | True on server or offline |
-| `IsMissionClient()` | True on client |
-| `IsMissionOffline()` | True in singleplayer |
+| `IsMissionHost()` | True on server or offline/singleplayer. Functionally equivalent to `g_Game.IsServer()`. |
+| `IsMissionClient()` | True on client or offline/singleplayer. Functionally equivalent to `!g_Game.IsServer()`. |
+| `IsMissionOffline()` | True in offline/singleplayer. Functionally euivalent to `!g_Game.IsMultiplayer()`. |
+| `g_Game.IsClient()` | Only true on multiplayer client (while connected to server) |
+| `g_Game.IsServer()` | True on server or offline/singleplayer |
+| `g_Game.IsDedicatedServer()` | Only true on dedicated server. `if (g_Game.IsDedicatedServer())` is functionally equivalent to preprocessor directive `#ifdef SERVER`. |
+| `g_Game.IsMultiplayer()` | Always true on server, only true on client while connected to a server |
+
+For new code, the `g_Game.Is*` methods should be preferred over `IsMission*`.
 
 ## JMSelectedObjects (Player Selection)
 
