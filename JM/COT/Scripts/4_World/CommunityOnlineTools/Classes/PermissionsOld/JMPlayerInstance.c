@@ -797,9 +797,12 @@ class JMPlayerInstance : Managed
 		}
 
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-		FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION, FileMode.WRITE );
+		FileHandle file = OpenFile( permissionsPath, FileMode.WRITE );
 		if ( file != 0 )
 		{
+			array< string > permissions = new array< string >;
+			m_RootPermission.Serialize( permissions );
+
 			string line;
 			for ( int i = 0; i < permissions.Count(); i++ )
 			{
