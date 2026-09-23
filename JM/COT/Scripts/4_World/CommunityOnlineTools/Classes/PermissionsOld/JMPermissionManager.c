@@ -153,16 +153,28 @@ class JMPermissionManager
 		return Roles.Get( name );
 	}
 
-	void GetRolesAsList( out array< JMRole > roles )
+	void GetRolesAsList( out array< JMRole > roles, bool sorted = false )
 	{
 		Assert_Null( Roles );
 
 		if ( roles == NULL )
 			roles = new array< JMRole >();
 
-		roles.Copy( Roles.GetValueArray() );
+		if (sorted)
+		{
+			TStringArray names = Roles.GetKeyArray();
+			names.Sort();
+			foreach (string name: names)
+				roles.Insert(Roles[name]);
+		}
+		else
+		{
+			roles.Copy( Roles.GetValueArray() );
+		}
 
+	#ifdef COT_ROLES_DEBUG
 		roles.Debug();
+	#endif
 	}
 
 	JMPermission GetRootPermission()
@@ -820,7 +832,7 @@ class JMPermissionManager
 		return instance;
 	}
 
-	JMRole CreateRole( string name, array< string > data )
+	JMRole CreateRole( string name, array< string > data = null )
 	{
 		Assert_Null( Roles );
 
@@ -832,8 +844,11 @@ class JMPermissionManager
 			Roles.Insert( name, role );
 		}
 
-		role.SerializedData.Copy( data );
-		role.Deserialize();
+		if (data)
+		{
+			role.SerializedData.Copy( data );
+			role.Deserialize();
+		}
 
 		role.Save();
 

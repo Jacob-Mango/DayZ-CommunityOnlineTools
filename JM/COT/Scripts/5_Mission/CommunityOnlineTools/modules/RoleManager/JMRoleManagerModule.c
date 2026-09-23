@@ -1,16 +1,16 @@
 class JMRoleManagerModule : JMRenderableModuleBase
 {
-	void SetRolePermissions( string roleName, array<string> serializedPerms )
+	void SetRolePermissions( string roleName, JMPermission perms )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetRolePermissions( roleName, serializedPerms, NULL, NULL );
+			Exec_SetRolePermissions( roleName, perms, NULL, NULL );
 		}
 		else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( roleName );
-			rpc.Write( serializedPerms );
+			perms.OnSend( rpc );
 			rpc.Send( NULL, JMRoleManagerModuleRPC.SetRolePermissions, true, NULL );
 		}
 	}
@@ -77,7 +77,10 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 	override void RequestData()
 	{
-		RequestRoleList();
+		//! COTModule::OnInvokeConnect syncs all roles to clients so we already have them
+		JMRoleManagerForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.PopulateRoleList();
 	}
 
 	void RequestRoleList()
@@ -127,17 +130,15 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 	protected void SendRoleListToClient( PlayerIdentity recipient )
 	{
-		array<JMRole> roles = new array<JMRole>();
-		GetPermissionsManager().GetRolesAsList( roles );
+		map<string, ref JMRole> roles = GetPermissionsManager().Roles;
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( roles.Count() );
 
-		foreach ( JMRole role : roles )
+		foreach ( string name, JMRole role : roles )
 		{
 			rpc.Write( role.Name );
-			array<string> perms = role.Serialize();
-			rpc.Write( perms );
+			role.RootPermission.OnSend(rpc);
 		}
 
 		rpc.Send( NULL, JMRoleManagerModuleRPC.RoleList, true, recipient );
@@ -207,8 +208,9 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		if ( !ctx.Read( roleName ) || roleName == "" )
 			return;
 
-		array<string> perms = new array<string>();
-		if ( !ctx.Read( perms ) )
+		JMPermission perms = new JMPermission( JMConstants.PERM_ROOT );
+		perms.CopyPermissions(GetPermissionsManager().RootPermission);
+		if ( !perms.OnReceive( ctx ) )
 			return;
 
 		Exec_SetRolePermissions( roleName, perms, sender, instance );
@@ -227,7 +229,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		if ( !ctx.Read( count ) )
 			return;
 
-		array<ref JMRoleData> roles = new array<ref JMRoleData>();
+		GetPermissionsManager().Roles.Clear();
 
 		for ( int i = 0; i < count; i++ )
 		{
@@ -235,17 +237,15 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			if ( !ctx.Read( name ) )
 				break;
 
-			array<string> perms = new array<string>();
-			if ( !ctx.Read( perms ) )
+			JMRole role;
+			GetPermissionsManager().LoadRole( name, role );
+			if (!role.RootPermission.OnReceive(ctx))
 				break;
-
-			JMRoleData rd = new JMRoleData( name, perms );
-			roles.Insert( rd );
 		}
 
 		JMRoleManagerForm form;
 		if ( Class.CastTo( form, GetForm() ) )
-			form.PopulateRoleList( roles );
+			form.PopulateRoleList();
 	}
 
 	// -------------------------------------------------------------------------
@@ -261,8 +261,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			return;
 		}
 
-		array<string> emptyPerms = new array<string>();
-		GetPermissionsManager().CreateRole( name, emptyPerms );
+		GetPermissionsManager().CreateRole( name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Created role: " + name );
 		SendWebhook( "CreateRole", NULL, "Created role: " + name );
@@ -305,18 +304,15 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			SendRoleListToClient( ident );
 	}
 
-	protected void Exec_SetRolePermissions( string roleName, array<string> serializedPerms, PlayerIdentity ident, JMPlayerInstance instance )
+	protected void Exec_SetRolePermissions( string roleName, JMPermission perms, PlayerIdentity ident, JMPlayerInstance instance )
 	{
 		JMRole role = GetPermissionsManager().GetRole( roleName );
 		if ( !role )
 		{
-			array<string> emptyPerms = new array<string>();
-			role = GetPermissionsManager().CreateRole( roleName, emptyPerms );
+			role = GetPermissionsManager().CreateRole( roleName );
 		}
 
-		role.SerializedData.Clear();
-		role.SerializedData.Copy( serializedPerms );
-		role.Deserialize();
+		role.RootPermission.CopyPermissions(perms);
 		role.Save();
 
 		GetCommunityOnlineToolsBase().Log( ident, "Updated permissions for role: " + roleName );
@@ -327,16 +323,3 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	}
 }
 
-// Lightweight DTO used to pass role data from server -> client via RPC
-class JMRoleData
-{
-	string           Name;
-	ref array<string> Permissions;
-
-	void JMRoleData( string name, array<string> perms )
-	{
-		Name        = name;
-		Permissions = new array<string>();
-		Permissions.Copy( perms );
-	}
-}

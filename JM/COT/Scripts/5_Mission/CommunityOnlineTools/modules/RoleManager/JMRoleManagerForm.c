@@ -278,14 +278,14 @@ class JMRoleManagerForm : JMFormBase
 	//  PopulateRoleList - called by the module on RPC receive.
 	// -------------------------------------------------------------------------
 
-	void PopulateRoleList( array<ref JMRoleData> roles )
+	void PopulateRoleList()
 	{
 		bool forceEditor = m_ForceEditorRefresh;
 		m_ForceEditorRefresh = false;
 
 		if ( !m_PlayerMode )
 		{
-			m_TabRoles.OnRoleListArrived( roles, forceEditor );
+			m_TabRoles.OnRoleListArrived( forceEditor );
 			return;
 		}
 
@@ -307,12 +307,6 @@ class JMRoleManagerForm : JMFormBase
 		m_TabPlayers.OpenPlayer( guid );
 
 		UpdateUI();
-
-		//! The role checkboxes are built from the role list, which arrives from
-		//! the server. On a first open it is still empty here - PopulateRoleList
-		//! rebuilds the editor when it lands.
-		if ( m_Module )
-			m_Module.RequestRoleList();
 	}
 
 	// =========================================================================

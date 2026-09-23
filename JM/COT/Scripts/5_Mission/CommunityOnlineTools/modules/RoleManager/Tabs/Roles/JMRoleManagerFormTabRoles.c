@@ -18,7 +18,6 @@ class JMRoleManagerFormTabRoles: JMFormTab
 
 	// ---- Roles mode state --------------------------------------------------
 	protected string                      m_SelectedRole;
-	protected autoptr array<ref JMRoleData> m_RoleList = new array<ref JMRoleData>();
 	protected ref JMRole                  m_TempRole;
 	//! Role name m_TempRole was built for. Compared against m_SelectedRole
 	//! rather than just checking "is m_TempRole set" so a rename - which moves
@@ -46,16 +45,6 @@ class JMRoleManagerFormTabRoles: JMFormTab
 		m_Form = form;
 	}
 
-	protected JMRoleData GetRoleData( string name )
-	{
-		foreach ( JMRoleData rd : m_RoleList )
-		{
-			if ( rd.Name == name )
-				return rd;
-		}
-		return NULL;
-	}
-
 	bool HasSelection()
 	{
 		return m_SelectedRole != "";
@@ -76,13 +65,9 @@ class JMRoleManagerFormTabRoles: JMFormTab
 	//  PopulateRoleList hook
 	// -------------------------------------------------------------------------
 
-	void OnRoleListArrived( array<ref JMRoleData> roles, bool forceEditor )
+	void OnRoleListArrived( bool forceEditor )
 	{
-		m_RoleList.Clear();
-		foreach ( JMRoleData rd : roles )
-			m_RoleList.Insert( rd );
-
-		if ( m_SelectedRole == "" && m_RoleList.Count() > 0 )
+		if ( m_SelectedRole == "" && GetPermissionsManager().Roles.Contains("everyone") )
 			m_SelectedRole = "everyone";
 
 		//! The roster is cheap and stateless - always safe to redraw with
@@ -108,10 +93,12 @@ class JMRoleManagerFormTabRoles: JMFormTab
 		card.AddRefreshButton( this, "OnClick_Refresh", "#STR_COT_ROLEMANAGER_MODULE_REFRESH_ROLES_TOOLTIP" );
 		Widget cardContent = card.GetContent();
 
-		foreach ( JMRoleData rd : m_RoleList )
+		array<JMRole> roles;
+		GetPermissionsManager().GetRolesAsList(roles, true);
+		foreach ( JMRole role : roles )
 		{
-			UIActionButton selectBtn = UIActionManager.CreateButton( cardContent, rd.Name, this, "OnClick_SelectRole" );
-			selectBtn.SetData( new JMStringData( rd.Name ) );
+			UIActionButton selectBtn = UIActionManager.CreateButton( cardContent, role.Name, this, "OnClick_SelectRole" );
+			selectBtn.SetData( new JMStringData( role.Name ) );
 
 			UIActionManager.CreateRowDivider( cardContent );
 		}
@@ -167,13 +154,8 @@ class JMRoleManagerFormTabRoles: JMFormTab
 
 		m_PermTreeHost = permBody;
 
-		JMRoleData roleData = GetRoleData( m_SelectedRole );
 		m_TempRole = new JMRole( m_SelectedRole );
-		if ( roleData )
-		{
-			foreach ( string line : roleData.Permissions )
-				m_TempRole.AddPermission( line );
-		}
+		m_TempRole.CopyPermissions(GetPermissionsManager().GetRole( m_SelectedRole ).RootPermission);
 
 		m_TempRoleBuiltFor = m_SelectedRole;
 
@@ -215,6 +197,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 
 		m_PermTreeWrapper = UIActionManager.CreateGridSpacer( m_PermTreeHost, 1, 1 );
 
+		m_TempRole.RootPermission.Sort();
 		BuildPermissionTree( m_PermTreeWrapper, m_TempRole.RootPermission, NULL, 0 );
 		RefreshPermTreeState();
 
@@ -341,7 +324,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 			return;
 
 		m_Form.m_Module.CreateRole( newName );
-		m_Form.m_Module.SetRolePermissions( newName, m_TempRole.Serialize() );
+		m_Form.m_Module.SetRolePermissions( newName, m_TempRole.RootPermission );
 		m_Form.m_Module.DeleteRole( m_EditingRenameRole );
 
 		m_SelectedRole = newName;
@@ -355,7 +338,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 
 		OptimizeInherit( m_TempRole.RootPermission );
 
-		m_Form.m_Module.SetRolePermissions( m_SelectedRole, m_TempRole.Serialize() );
+		m_Form.m_Module.SetRolePermissions( m_SelectedRole, m_TempRole.RootPermission );
 
 		UIActionImageButton btn;
 		if ( Class.CastTo( btn, action ) )
