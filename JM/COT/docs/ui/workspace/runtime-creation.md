@@ -129,17 +129,17 @@ automatically**. They accumulate. Always `Unlink` widgets you don't need.
 ### Calling `delete` on a widget reference
 
 ```c
-delete m_Widget;   // OK — calls ~Widget which Unlinks
+delete m_Widget;   // OK during runtime but unsafe during game shutdown/mission end — calls ~Widget which Unlinks
 ```
 
 This works because `Widget` extends `Managed`. But:
 
 ```c
-m_Widget.Unlink();
+m_Widget.Unlink();   // OK during runtime but unsafe during game shutdown/mission end
 delete m_Widget;   // CRASH — already destroyed
 ```
 
-Use one or the other, not both.
+All COT widget handlers should inherit from COT_ScriptedWidgetEventHandler and then use `DestroyWidget(widget)`. If a widget is not handled by a COT_ScriptedWidgetEventHandler, check if widget is valid `if (widget && widget.ToString() != "INVALID")` and only then use `widget.Unlink()`.
 
 ### `CreateWidgets` returns null on file error
 

@@ -27,7 +27,9 @@ class member order in [../ui/module-form-patterns.md](../ui/module-form-patterns
 | Trust a verdict without checking its log time | Compare the script log time with the build start | 9 |
 | Call `lint-scripts` clean because it printed nothing | Use `verify-fix`, then a real build | 9 |
 | Fix a native crash from a theory | Instrument, reproduce once, then fix | 10 |
-| `delete` a widget-owning object | `Widget.Unlink()`, then rebuild | 11 |
+| Explicitly set object refrences of managed objects to NULL in DTORs | Managed classes (3_Game and up or inheriting from `Managed` explicitly) are handled automatically by the game and do not need to be nulled. Exceptions apply (e.g. JMESPModule), do not change/remove existing NULL assignments | none |
+| Use `delete` keyword | Avoid completely for new code. Keep existing use in COT_ScriptedWidgetEventHandler.c and JMWebhookModule::OnInit(). | none |
+| `delete` a widget | All COT widget handlers should inherit from COT_ScriptedWidgetEventHandler and then use `DestroyWidget(widget)`. If a widget is not handled by a COT_ScriptedWidgetEventHandler, check if widget is valid `if (widget && widget.ToString() != "INVALID")` and only then use `widget.Unlink()` | 11 |
 | Chain `foreach`, `new X().M()` or a temporary as an argument | Use a local (section 12) | 12 |
 | Mix whitespace, moves or renames into a logic commit | Commit each on its own (section 2) | 2 |
 | Narrow `protected` to `private`, or remove a public member without a forwarder | See [mod-compatibility.md](mod-compatibility.md) | 13 |
@@ -213,8 +215,9 @@ Full procedure and the tools are in [cleanup-playbook.md](cleanup-playbook.md) s
 
 **Never `delete` a widget-owning object.** `delete` on anything holding a `Widget` frees memory
 the engine's own widget tree still references, which segfaults later — reliably on mission
-finish, when everything tears down at once. Use `Widget.Unlink()` to detach a widget before
-recreating or discarding it. Three patterns already used throughout
+finish, when everything tears down at once.
+Use `COT_ScriptedWidgetEventHandler.DestroyWidget` (preferred) or `Widget.Unlink()` to detach a widget before
+recreating or discarding it. If a widget is being detached in a DTOR of a non-COT_ScriptedWidgetEventHandler parent, guard widget deletion by `if (widget && widget.ToString() != "INVALID")`. Three patterns already used throughout
 `Scripts/5_Mission/CommunityOnlineTools/gui/` cover every case:
 
 - Rebuilding a container in place: `if ( m_Wrapper ) m_Wrapper.Unlink();` then reassign it.
@@ -228,6 +231,8 @@ Two exceptions, both `delete this` on the handler object itself, never on a `Wid
 `JMWebhookModule`'s `delete cfg` (a `ConfigFile`, not a widget).
 
 Evidence: `da1fe2ab`, `ebb09735`, `22fb6f9e`, `51e06035`.
+
+Note that when a widget is part of a hierarchy, it is enough to just destroy the root widget (destroys the whole hierarchy), not every widget in the hierarchy explicitly.
 
 ## 12. Enforce Script: what compiles but breaks
 
