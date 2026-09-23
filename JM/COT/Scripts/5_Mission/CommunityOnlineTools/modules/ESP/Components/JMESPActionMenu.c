@@ -478,19 +478,12 @@ class JMESPActionMenu
 				Add( PREFIX_ACTION + "deselect", "#STR_COT_ESP_MODULE_MENU_DESELECT", JMConstants.Lucide( "square" ) );
 			else
 				Add( PREFIX_ACTION + "select", "#STR_COT_ESP_MODULE_MENU_SELECT", JMConstants.Lucide( "mouse-pointer-click" ) );
-		}
 
-		//! Neither transform nor the global health slider means anything on a
-		//! placed building - it moves and takes damage through its construction
-		//! parts (see PAGE_PARTHP below), not as one rigid object with a single
-		//! position or a single health value.
-		bool isBuilding = BaseBuildingBase.Cast( target ) != null;
-
-		if ( !isBuilding )
 			AddPage( PAGE_TRANSFORM, "#STR_COT_ESP_MODULE_PAGE_TRANSFORM", JMConstants.Lucide( "move-3d" ) );
 
-		if ( !isBuilding && MaxHealth() > 0 )
-			AddPage( PAGE_HEALTH, "#STR_COT_ESP_MODULE_PAGE_HEALTH", JMConstants.Lucide( "heart-pulse" ) );
+			if ( MaxHealth() > 0 )
+				AddPage( PAGE_HEALTH, "#STR_COT_ESP_MODULE_PAGE_HEALTH", JMConstants.Lucide( "heart-pulse" ) );
+		}
 
 		ItemBase item = ItemBase.Cast( target );
 
