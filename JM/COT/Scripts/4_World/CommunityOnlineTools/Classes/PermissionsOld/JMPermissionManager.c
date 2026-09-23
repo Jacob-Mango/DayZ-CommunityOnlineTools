@@ -193,9 +193,9 @@ class JMPermissionManager
 		}
 
 		//! A dedicated server has no "own" player to check. Answer false (never
-		//! grant on a wrong call) and say so once, instead of raising a script
-		//! Error on every RPC that forgot to pass the sender's PlayerIdentity.
-		Error("HasPermission( permission ) was called on a server - pass the sender: HasPermission( permission, sender ). Permission: " + permission );
+		//! grant on a wrong call) and raise Error since this is a programming mistake
+		//! in the caller that needs to be fixed (wrong form of HasPermission used).
+		Error("HasPermission( permission ) was called on a server - pass the identity: HasPermission( permission, identity ). Permission: " + permission );
 
 		return false;
 	}
