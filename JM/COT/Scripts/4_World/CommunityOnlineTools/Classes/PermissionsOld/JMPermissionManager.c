@@ -36,8 +36,10 @@ class JMPermissionManager
 		{
 			MakeDirectory( JMConstants.DIR_PF );
 
-			//! Per-user permission files are retired - role permissions only.
-			//! DIR_PERMISSIONS is intentionally not created here anymore.
+		#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
+			MakeDirectory( JMConstants.DIR_PERMISSIONS );
+		#endif
+
 			MakeDirectory( JMConstants.DIR_PLAYERS );
 			MakeDirectory( JMConstants.DIR_ROLES );
 		}

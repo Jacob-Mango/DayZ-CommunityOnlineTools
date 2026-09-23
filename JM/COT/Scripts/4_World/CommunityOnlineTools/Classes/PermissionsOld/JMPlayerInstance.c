@@ -23,7 +23,10 @@ enum JMPlayerVariables
 #ifndef CF_MODULE_PERMISSIONS
 class JMPlayerInstance : Managed
 {
+#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 	protected ref JMPermission m_RootPermission;
+#endif
+
 	protected ref array< string > m_Roles;
 	protected ref map<string, string> m_RoleNameRestrictions;
 	protected ref map<string, bool> m_SyncedToClient;
@@ -78,8 +81,11 @@ class JMPlayerInstance : Managed
 
 		m_PlayerVars = new map<int, bool>;
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		m_RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		m_RootPermission.CopyPermissions(GetPermissionsManager().RootPermission);
+	#endif
+
 		m_Roles = new array< string >();
 		m_RoleNameRestrictions = new map<string, string>();
 		m_SyncedToClient = new map<string, bool>();
@@ -163,7 +169,12 @@ class JMPlayerInstance : Managed
 
 	JMPermission GetPermissions()
 	{
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		return m_RootPermission;
+	#else
+		Error("Individual permissions are not available! Use roles instead");
+		return null;
+	#endif
 	}
 
 	vector GetPosition()
@@ -174,11 +185,16 @@ class JMPlayerInstance : Managed
 	// doesn't check through roles.
 	JMPermissionType GetRawPermissionType( string permission )
 	{
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		Assert_Null( m_RootPermission );
 
 		JMPermissionType permType;
 		m_RootPermission.HasPermission( permission, permType );
 		return permType;
+	#else
+		Error("Individual permissions are not available! Use roles instead");
+		return JMPermissionType.DISALLOW;
+	#endif
 	}
 
 	bool GetReceiveDmgDealt()
@@ -277,18 +293,26 @@ class JMPlayerInstance : Managed
 	//! person" apart from "comes with the role they are in".
 	bool HasOwnPermission( string permission )
 	{
+	#ifdef JMPermissionType
 		Assert_Null( m_RootPermission );
 
 		JMPermissionType ownPermType;
 		return m_RootPermission.HasPermission( permission, ownPermType );
+	#else
+		Error("Individual permissions are not available! Use roles instead");
+		return false;
+	#endif
 	}
 
 	bool HasPermission( string permission )
 	{
+		JMPermissionType permType;
+		bool hasPermission;
+
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		Assert_Null( m_RootPermission );
 		
-		JMPermissionType permType;
-		bool hasPermission = m_RootPermission.HasPermission( permission, permType );
+		hasPermission = m_RootPermission.HasPermission( permission, permType );
 		
 		// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
 		if ( hasPermission )
@@ -297,6 +321,7 @@ class JMPlayerInstance : Managed
 		// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
 		if ( permType == JMPermissionType.DISALLOW )
 			return false;
+	#endif
 
 		for ( int j = 0; j < m_Roles.Count(); j++ )
 		{
@@ -363,9 +388,11 @@ class JMPlayerInstance : Managed
 		if ( m_Roles.Count() != 1 || m_Roles[0] != "everyone" )
 			return false;
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		// m_Sync is set true as soon as any non-INHERIT permission is added to the tree.
 		if ( m_RootPermission.m_Sync )
 			return false;
+	#endif
 
 		// Session history counts as state worth keeping. Without this an
 		// ordinary player - default roles, no explicit permissions - has their
@@ -444,6 +471,7 @@ class JMPlayerInstance : Managed
 
 	void CopyPermissions( JMPermission copy )
 	{
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		auto trace = CF_Trace_0(this, "CopyPermissions");
 
 		Assert_Null( m_RootPermission );
@@ -452,15 +480,22 @@ class JMPlayerInstance : Managed
 		m_RootPermission.CopyPermissions( copy );
 
 		m_SyncedToClient.Clear();
+	#else
+		Error("Individual permissions are not available! Use roles instead");
+	#endif
 	}
 
 	void ClearPermissions()
 	{
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		Assert_Null( m_RootPermission );
 
 		m_RootPermission.Clear();
 
 		m_SyncedToClient.Clear();
+	#else
+		Error("Individual permissions are not available! Use roles instead");
+	#endif
 	}
 
 	void RemoveSyncedToClient(string guid)
@@ -470,6 +505,7 @@ class JMPlayerInstance : Managed
 
 	void LoadPermissions( array< string > permissions )
 	{
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		auto trace = CF_Trace_1(this).Add(permissions.Count());
 
 		Assert_Null( m_RootPermission );
@@ -477,15 +513,22 @@ class JMPlayerInstance : Managed
 		m_RootPermission.Deserialize( permissions );
 		m_SyncedToClient.Clear();
 		Save();
+	#else
+		Error("Individual permissions are not available! Use roles instead");
+	#endif
 	}
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		Assert_Null( m_RootPermission );
 
 		m_RootPermission.AddPermission( permission, type );
 
 		m_SyncedToClient.Clear();
+	#else
+		Error("Individual permissions are not available! Use roles instead");
+	#endif
 	}
 
 	void LoadRoles( notnull array< string > roles, map< string, string > nameRestrictions = NULL )
@@ -559,7 +602,9 @@ class JMPlayerInstance : Managed
 		Print("OnSendPermissions - GUID " + m_GUID + ", already synced to " + sendToGUID + " " + m_SyncedToClient[sendToGUID]);
 		#endif
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		Assert_Null( m_RootPermission );
+	#endif
 
 		ctx.Write( !m_SyncedToClient[sendToGUID] );
 
@@ -569,12 +614,15 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_Steam64ID );
 		ctx.Write( m_Name );
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		#ifdef DIAG_DEVELOPER
 		#ifdef DZ_Expansion_Core
 		EXError.Info(this, string.Format("Sending permissions for player %1", m_Name));
 		#endif
 		#endif
 		m_RootPermission.OnSend( ctx );
+	#endif
+
 		ctx.Write( m_Roles );
 
 		m_SyncedToClient[sendToGUID] = true;
@@ -586,7 +634,9 @@ class JMPlayerInstance : Managed
 		auto trace = CF_Trace_0(this, "OnRecievePermissions");
 		#endif
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		Assert_Null( m_RootPermission );
+	#endif
 		
 		bool permissionsUpdate;
 		ctx.Read( permissionsUpdate );
@@ -608,11 +658,13 @@ class JMPlayerInstance : Managed
 		#endif
 		#endif
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		if (!m_RootPermission.OnReceive( ctx ))
 		{
 			CF.FormatError("Couldn't receive permissions for player %1", m_Name);
 			return;
 		}
+	#endif
 
 		if (!ctx.Read( roles ))
 		{
@@ -699,7 +751,10 @@ class JMPlayerInstance : Managed
 	{
 		auto trace = CF_Trace_1(this, "Save").Add(m_GUID);
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		Assert_Null( m_RootPermission );
+	#endif
+
 		if ( !Assert_Null( m_PlayerFile ) )
 			Assert_Null( m_PlayerFile.Roles );
 
@@ -741,12 +796,24 @@ class JMPlayerInstance : Managed
 			DeleteFile( playerFilePath );
 		}
 
-		//! Per-user permission files are retired - role permissions only.
-		//! Never write permissionsPath anymore; clean up any leftover file instead.
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
+		FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION, FileMode.WRITE );
+		if ( file != 0 )
+		{
+			string line;
+			for ( int i = 0; i < permissions.Count(); i++ )
+			{
+				FPrintln( file, permissions[i] );
+			}
+			
+			CloseFile( file );
+		}
+	#else
 		if ( FileExist( permissionsPath ) )
 		{
 			DeleteFile( permissionsPath );
 		}
+	#endif
 	}
 
 	string FileReadyStripName( string name )
@@ -761,6 +828,7 @@ class JMPlayerInstance : Managed
 
 	protected bool ReadPermissions( string filename )
 	{
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		auto trace = CF_Trace_1(this).Add(filename);
 
 		Assert_Null( m_RootPermission );
@@ -783,6 +851,10 @@ class JMPlayerInstance : Managed
 		CloseFile( file );
 
 		return true;
+	#else
+		Error("Individual permissions are not available! Use roles instead");
+		return false;
+	#endif
 	}
 
 	void Load()
@@ -807,6 +879,7 @@ class JMPlayerInstance : Managed
 			AddRole( m_PlayerFile.Roles[j], loadedNameRestriction );
 		}
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		// Track whether any legacy permission file was migrated so we know whether to re-save.
 		bool migratedPermissions = false;
 
@@ -833,6 +906,7 @@ class JMPlayerInstance : Managed
 		// Normal connects (new player or existing GUID file) are saved on demand by admin actions.
 		if ( migratedPermissions )
 			Save();
+	#endif
 	}
 
 	void DebugPrint()
@@ -841,7 +915,9 @@ class JMPlayerInstance : Managed
 		// Print( "  SSteam64ID: " + m_Steam64ID );
 		// Print( "  SName: " + m_Name );
 
+	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		m_RootPermission.DebugPrint( 2 );
+	#endif
 	}
 
 	string FormatSteamWebhook()
