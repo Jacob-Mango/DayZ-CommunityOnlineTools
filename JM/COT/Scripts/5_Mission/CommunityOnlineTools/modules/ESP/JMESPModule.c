@@ -2122,6 +2122,10 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !target )
 			return;
 
+		//! Anything health/dmg system related can segfault on plain objects
+		if ( target.IsPlainObject() )
+			return;
+
 		if ( (target.IsInherited(Man) || target.IsInherited(DayZCreature)) && !target.IsAlive() )
 			return;
 
@@ -3865,6 +3869,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void Exec_Heal( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		//! Anything health/dmg system related can segfault on plain objects
+		if ( target.IsPlainObject() )
+			return;
+
 		bool allowDamage = target.GetAllowDamage();
 
 		if (!allowDamage)

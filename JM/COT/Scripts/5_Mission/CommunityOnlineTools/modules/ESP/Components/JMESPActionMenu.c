@@ -454,7 +454,8 @@ class JMESPActionMenu
 
 	protected float MaxHealth()
 	{
-		if ( !m_Meta.networkLow && !m_Meta.networkHigh && g_Game.IsMultiplayer() )
+		//! Anything health/dmg system related can segfault on plain objects
+		if ( m_Meta.target.IsPlainObject() )
 			return 0;
 
 		return MiscGameplayFunctions.GetTypeMaxGlobalHealth( m_Meta.target.GetType() );
