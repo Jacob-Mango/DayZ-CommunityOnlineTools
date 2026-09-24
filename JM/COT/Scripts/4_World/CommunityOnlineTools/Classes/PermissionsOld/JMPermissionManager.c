@@ -856,7 +856,7 @@ class JMPermissionManager
 		LoadRole( name, role );
 
 		if ( type != JMPermissionType.INHERIT )
-			role.SetPermissionTypeRecursive( type );
+			role.ChangePermissionTypeRecursive( JMPermissionType.INHERIT, type );
 
 		role.Save();
 

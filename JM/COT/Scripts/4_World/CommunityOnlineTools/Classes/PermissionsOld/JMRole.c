@@ -41,9 +41,9 @@ class JMRole : Managed
 		RootPermission.AddPermission( permission, type );
 	}
 
-	void SetPermissionTypeRecursive( JMPermissionType type = JMPermissionType.INHERIT )
+	void ChangePermissionTypeRecursive( JMPermissionType from = JMPermissionType.INHERIT, JMPermissionType to = JMPermissionType.INHERIT )
 	{
-		RootPermission.SetPermissionTypeRecursive( type );
+		RootPermission.ChangePermissionTypeRecursive( from, to );
 	}
 
 	array< string > Serialize()

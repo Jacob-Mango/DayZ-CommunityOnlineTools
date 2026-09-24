@@ -292,15 +292,20 @@ class JMPermission : Managed
 		Children.Clear();
 	}
 
-	void SetPermissionTypeRecursive( JMPermissionType type = JMPermissionType.INHERIT )
+	void ChangePermissionTypeRecursive( JMPermissionType from = JMPermissionType.INHERIT, JMPermissionType to = JMPermissionType.INHERIT )
 	{
+		if ( to == from )
+			return;
+
 		foreach ( JMPermission child: Children )
 		{
-			if ( type != child.Type )
+			if ( child.Type == from && child.Type != to )
+			{
 				Root.m_Sync = true;
+				child.Type = to;
+			}
 
-			child.Type = type;
-			child.SetPermissionTypeRecursive( type );
+			child.ChangePermissionTypeRecursive( from, to );
 		}
 	}
 
