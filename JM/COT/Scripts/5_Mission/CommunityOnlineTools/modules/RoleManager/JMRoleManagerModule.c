@@ -78,6 +78,11 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	override void RequestData()
 	{
 		//! COTModule::OnInvokeConnect syncs all roles to clients so we already have them
+		PopulateRoleList();
+	}
+
+	void PopulateRoleList()
+	{
 		JMRoleManagerForm form;
 		if ( Class.CastTo( form, GetForm() ) )
 			form.PopulateRoleList();
@@ -85,9 +90,9 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 	void RequestRoleList()
 	{
-		if ( IsMissionHost() )
+		if ( IsMissionOffline() )
 		{
-			SendRoleListToClient( NULL );
+			PopulateRoleList();
 		}
 		else
 		{
@@ -98,7 +103,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 	void CreateRole( string name )
 	{
-		if ( IsMissionHost() )
+		if ( IsMissionOffline() )
 		{
 			Exec_CreateRole( name, NULL, NULL );
 		}
@@ -112,7 +117,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 	void DeleteRole( string name )
 	{
-		if ( IsMissionHost() )
+		if ( IsMissionOffline() )
 		{
 			Exec_DeleteRole( name, NULL, NULL );
 		}
@@ -243,9 +248,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 				break;
 		}
 
-		JMRoleManagerForm form;
-		if ( Class.CastTo( form, GetForm() ) )
-			form.PopulateRoleList();
+		PopulateRoleList();
 	}
 
 	// -------------------------------------------------------------------------
@@ -268,6 +271,8 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 		if ( ident )
 			SendRoleListToClient( ident );
+		else if ( !g_Game.IsMultiplayer() )
+			PopulateRoleList();
 	}
 
 	protected void Exec_DeleteRole( string name, PlayerIdentity ident, JMPlayerInstance instance )
@@ -302,6 +307,8 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 		if ( ident )
 			SendRoleListToClient( ident );
+		else if ( !g_Game.IsMultiplayer() )
+			PopulateRoleList();
 	}
 
 	protected void Exec_SetRolePermissions( string roleName, JMPermission perms, PlayerIdentity ident, JMPlayerInstance instance )
