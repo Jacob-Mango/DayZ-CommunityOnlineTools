@@ -682,20 +682,23 @@ class JMLoadoutModule: JMRenderableModuleBase
 		
 		dataItem.m_Temperature 	= parent.GetTemperature();
 
-		ItemBase child;
-		for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
+		if (parent.GetInventory())
 		{
-			child = ItemBase.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
-			item.m_Attachments.Insert(LoadoutProcessSubItem(child));
-		}
-
-		CargoBase cargo = parent.GetInventory().GetCargo();
-		if(cargo)
-		{
-			for(int j=0; j < cargo.GetItemCount(); j++)
+			ItemBase child;
+			for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
 			{
-				child = ItemBase.Cast(cargo.GetItem(j));
+				child = ItemBase.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
 				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+			}
+
+			CargoBase cargo = parent.GetInventory().GetCargo();
+			if(cargo)
+			{
+				for(int j=0; j < cargo.GetItemCount(); j++)
+				{
+					child = ItemBase.Cast(cargo.GetItem(j));
+					item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+				}
 			}
 		}
 
