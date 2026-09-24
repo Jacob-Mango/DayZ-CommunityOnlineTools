@@ -857,8 +857,8 @@ class UIActionSliderRange: UIActionBase
 			return TranslateStringEx( m_Format, m_High.ToString() );
 
 		if ( m_Step >= 1.0 )
-			return TranslateStringEx( m_Format, Math.Round( m_Low ).ToString() ) + " - " + string.Format( m_Format, Math.Round( m_High ).ToString() );
+			return TranslateStringEx( m_Format, Math.Round( m_Low ).ToString() ) + " - " + TranslateStringEx( m_Format, Math.Round( m_High ).ToString() );
 
-		return TranslateStringEx( m_Format, m_Low.ToString() ) + " - " + string.Format( m_Format, m_High.ToString() );
+		return TranslateStringEx( m_Format, m_Low.ToString() ) + " - " + TranslateStringEx( m_Format, m_High.ToString() );
 	}
 }
