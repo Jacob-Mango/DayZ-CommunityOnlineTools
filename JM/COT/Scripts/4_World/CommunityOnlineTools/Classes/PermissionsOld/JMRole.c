@@ -81,17 +81,6 @@ class JMRole : Managed
 	{
 		auto trace = CF_Trace_1(this, "Save").Add(Name);
 
-		// Skip writing if the role has no custom permissions (all INHERIT).
-		// If a file exists from a previous save when permissions were set, remove it.
-		if ( !RootPermission.m_Sync )
-		{
-			string cleanPath = JMConstants.DIR_ROLES + FileReadyStripName( Name ) + JMConstants.EXT_ROLE;
-			if ( FileExist( cleanPath ) )
-				DeleteFile( cleanPath );
-
-			return true;
-		}
-
 		string filename = FileReadyStripName( Name );
 
 		RootPermission.Sort();
