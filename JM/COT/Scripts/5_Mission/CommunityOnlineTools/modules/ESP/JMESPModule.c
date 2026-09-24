@@ -4244,7 +4244,7 @@ class JMESPModule: JMRenderableModuleBase
 			if (!Class.CastTo(ent, JMobjects[i].obj))
 				continue;
 
-			if (ent.IsEmpty())
+			if (!ent.GetInventory() || ent.IsEmpty())
 				continue;
 			
 			for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)

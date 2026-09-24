@@ -399,7 +399,7 @@ class JMPermissionManager
 
 	protected EntityAI CreateItemWithRandomHealth( EntityAI parent, string classname )
 	{
-		if ( !parent || classname == "" )
+		if ( !parent || classname == "" || !parent.GetInventory() )
 			return NULL;
 
 		EntityAI item = EntityAI.Cast( parent.GetInventory().CreateAttachment( classname ) );
