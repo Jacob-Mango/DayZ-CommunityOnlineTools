@@ -618,7 +618,7 @@ class JMObjectSpawnerProperties
 	//! whole reason the row is there.
 	protected string DefaultLabel( string name )
 	{
-		return string.Format( Widget.TranslateString( "#STR_COT_OBJECT_DEFAULT_FORMAT" ), name );
+		return COT_String.TranslateEx( "#STR_COT_OBJECT_DEFAULT_FORMAT" , name );
 	}
 
 	//! Fill m_LiquidValues and `labels` with what this container can hold.

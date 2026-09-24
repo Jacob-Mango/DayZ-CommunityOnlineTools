@@ -232,13 +232,13 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( m_SelectedGUID );
 		if ( !pi )
 		{
-			UIActionManager.CreateText( m_Form.m_EditorWrapper, Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_PLAYER_NOT_FOUND" ) + ": " + m_SelectedPlayerName );
+			UIActionManager.CreateText( m_Form.m_EditorWrapper, COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_PLAYER_NOT_FOUND" , m_SelectedPlayerName ) );
 			m_Form.m_RightScroller.UpdateScroller();
 			return;
 		}
 
 		// ---- Card 1: Player Credentials ----
-		UIActionCard idCard = UIActionManager.CreateCard( m_Form.m_EditorWrapper, Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_PLAYER_IDENTITY_TITLE" ) + ": " + m_SelectedPlayerName );
+		UIActionCard idCard = UIActionManager.CreateCard( m_Form.m_EditorWrapper, COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_PLAYER_IDENTITY_TITLE", m_SelectedPlayerName ) );
 		Widget idBody = idCard.GetContent();
 
 		// Label on the left, value + copy icon on the right - the same identity
@@ -302,9 +302,9 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 			if ( m_PlayerNameRestrictions.Contains( role.Name ) )
 				currentRest = m_PlayerNameRestrictions.Get( role.Name );
 
-			string noteTip = string.Format( Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_SET_NAME_RESTRICTION_TOOLTIP" ), role.Name );
+			string noteTip = COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_SET_NAME_RESTRICTION_TOOLTIP" , role.Name );
 			if ( currentRest != "" )
-				noteTip = Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_LABEL" ) + ": " + currentRest;
+				noteTip = COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_LABEL", currentRest );
 
 			UIActionImageButton noteBtn = UIActionManager.CreateIconButton( roleRow, JMConstants.ICON_FOLDED_PAPER, this, "" );
 			if ( noteBtn ) noteBtn.SetOnClick( this, "OnClick_EditRoleNameRestriction" );
@@ -382,8 +382,8 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 		if ( m_PlayerNameRestrictions.Contains( m_EditingRestrictionRole ) )
 			currentRest = m_PlayerNameRestrictions.Get( m_EditingRestrictionRole );
 
-		string restrictionTitle = Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_TITLE" ) + ": " + m_EditingRestrictionRole;
-		string restrictionBody  = string.Format( Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_BODY" ), m_EditingRestrictionRole );
+		string restrictionTitle = COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_TITLE", m_EditingRestrictionRole );
+		string restrictionBody  = COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_BODY" , m_EditingRestrictionRole );
 
 		m_Form.PromptInput( restrictionTitle, restrictionBody, "ConfirmRoleNameRestriction" );
 	}

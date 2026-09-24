@@ -368,7 +368,7 @@ class JMWeatherFormTabOverview: JMFormTab
 		//! and the second line says what that wait means for the current state
 		//! rather than repeating the figure.
 		if ( countdown != "" )
-			nextLabel += "   " + string.Format( Widget.TranslateString( "#STR_COT_WEATHER_IN" ), countdown );
+			nextLabel += "   " + COT_String.TranslateEx( "#STR_COT_WEATHER_IN", countdown );
 
 		m_StateTextNext.SetText( nextLabel );
 

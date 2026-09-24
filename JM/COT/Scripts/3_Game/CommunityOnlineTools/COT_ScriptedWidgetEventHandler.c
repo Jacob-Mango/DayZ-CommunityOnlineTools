@@ -149,6 +149,11 @@ class COT_ScriptedWidgetEventHandler: ScriptedWidgetEventHandler
 	{
 		return 0;
 	}
+
+	static string TranslateStringEx(string stringId, string p1 = "", string p2 = "", string p3 = "", string p4 = "", string p5 = "", string p6 = "", string p7 = "", string p8 = "", string p9 = "")
+	{
+		return COT_String.TranslateEx(stringId, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+	}
 }
 
 class COT_WidgetHolder

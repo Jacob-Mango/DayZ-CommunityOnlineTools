@@ -112,6 +112,19 @@ class COT_String: string
 
 		return true;
 	}
+
+	static string TranslateEx(string text, string p1 = "", string p2 = "", string p3 = "", string p4 = "", string p5 = "", string p6 = "", string p7 = "", string p8 = "", string p9 = "")
+	{
+		//! Only a STRINGTABLE KEY goes through TranslateString - it looks up the
+		//! key and hands back the raw "%1..." text untouched. A format built at
+		//! runtime (e.g. "%1 / 125") is not a key, and translating it anyway
+		//! silently ate the %1 token, leaving the literal tail with nothing
+		//! substituted into it.
+		if (text.Length() > 0 && text[0] == "#")
+			text = Widget.TranslateString(text);
+
+		return string.Format(text, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+	}
 }
 
 typedef string COT_String;

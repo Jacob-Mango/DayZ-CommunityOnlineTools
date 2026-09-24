@@ -493,7 +493,7 @@ class JMPlayerFormTabInventory: JMFormTab
 			return;
 
 		if ( truncated )
-			m_InventoryNotice.SetText( string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_INV_TRUNCATED" ), m_InventoryItems.Count().ToString() ) );
+			m_InventoryNotice.SetText( COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_INV_TRUNCATED" , m_InventoryItems.Count().ToString() ) );
 
 		m_InventoryNotice.GetLayoutRoot().Show( truncated );
 	}
@@ -1086,7 +1086,7 @@ class JMPlayerFormTabInventory: JMFormTab
 			m_InvGroupPendingHigh = container.NetIdHigh;
 			m_InvGroupPendingName = container.GetDisplayName();
 
-			m_Form.ConfirmAction( "#STR_COT_PLAYER_MODULE_INV_GROUP_DELETE_TITLE", string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_INV_GROUP_DELETE_BODY" ), InventoryChildCount( index ).ToString(), m_InvGroupPendingName ), "InventoryGroupDeleteConfirm" );
+			m_Form.ConfirmAction( "#STR_COT_PLAYER_MODULE_INV_GROUP_DELETE_TITLE", COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_INV_GROUP_DELETE_BODY" , InventoryChildCount( index ).ToString(), m_InvGroupPendingName ), "InventoryGroupDeleteConfirm" );
 			return;
 		}
 
@@ -1965,7 +1965,7 @@ class JMPlayerFormTabInventory: JMFormTab
 			// The confirmation is asynchronous, so remember which row it was
 			// about - the table can be rebuilt before the answer comes back.
 			m_InventoryPendingRow = row;
-			m_Form.ConfirmAction( "#STR_COT_PLAYER_MODULE_INV_DELETE_CONFIRM_TITLE", string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_INV_DELETE_CONFIRM_BODY" ), item.GetDisplayName() ), "InventoryDeleteConfirm" );
+			m_Form.ConfirmAction( "#STR_COT_PLAYER_MODULE_INV_DELETE_CONFIRM_TITLE", COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_INV_DELETE_CONFIRM_BODY" , item.GetDisplayName() ), "InventoryDeleteConfirm" );
 			return;
 		}
 

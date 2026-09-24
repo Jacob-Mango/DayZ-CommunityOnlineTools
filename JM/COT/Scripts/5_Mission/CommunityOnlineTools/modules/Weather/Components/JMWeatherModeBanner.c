@@ -121,7 +121,7 @@ class JMWeatherModeBanner
 		if ( m_Form.m_TabPresetsCtrl && m_Form.m_TabPresetsCtrl.GetSelectedPreset() != "" )
 		{
 			m_ModeBanner.SetColor( JMTheme.ACCENT );
-			m_ModeBannerText.SetText( string.Format( Widget.TranslateString( "#STR_COT_WEATHER_MODE_PRESET" ), m_Form.m_TabPresetsCtrl.GetSelectedPreset() ) );
+			m_ModeBannerText.SetText( COT_String.TranslateEx( "#STR_COT_WEATHER_MODE_PRESET", m_Form.m_TabPresetsCtrl.GetSelectedPreset() ) );
 			return;
 		}
 

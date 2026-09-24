@@ -1803,20 +1803,20 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( players.Count() > 0 )
 		{
 			if ( value )
-				message = string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_TOGGLE_ENABLED_FMT" ), toggleLabel );
+				message = COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_TOGGLE_ENABLED_FMT" , toggleLabel );
 			else
-				message = string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_TOGGLE_DISABLED_FMT" ), toggleLabel );
+				message = COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_TOGGLE_DISABLED_FMT" , toggleLabel );
 
 			if ( players.Count() > 1 )
-				message += " " + string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_TOGGLE_FOR_N_PLAYERS_FMT" ), players.Count().ToString() );
+				message += " " + COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_TOGGLE_FOR_N_PLAYERS_FMT" , players.Count().ToString() );
 			else if ( ident && ident.GetId() != players[0].GetGUID() )
-				message += " " + string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_TOGGLE_FOR_PLAYER_FMT" ), players[0].GetName() );
+				message += " " + COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_TOGGLE_FOR_PLAYER_FMT" , players[0].GetName() );
 			else
 				message += " " + Widget.TranslateString( "#STR_COT_PLAYER_MODULE_TOGGLE_FOR_YOURSELF" );
 		}
 		else
 		{
-			message = string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_TOGGLE_FAILED_FMT" ), toggleLabel );
+			message = COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_TOGGLE_FAILED_FMT" , toggleLabel );
 		}
 
 		COTCreateNotification( ident, new StringLocaliser( message ) );
@@ -2059,9 +2059,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			message = Widget.TranslateString( "#STR_COT_PLAYER_MODULE_HEAL_FAILED" );
 
 		if ( players.Count() > 1 )
-			message += " " + string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_HEAL_N_PLAYERS_FMT" ), players.Count().ToString() );
+			message += " " + COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_HEAL_N_PLAYERS_FMT" , players.Count().ToString() );
 		else if ( ident && ident.GetId() != guids[0] )
-			message += " " + string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_HEAL_PLAYER_FMT" ), players[0].GetName() );
+			message += " " + COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_HEAL_PLAYER_FMT" , players[0].GetName() );
 		else
 			message += " " + Widget.TranslateString( "#STR_COT_PLAYER_MODULE_HEAL_YOURSELF" );
 

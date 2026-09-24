@@ -1412,9 +1412,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		if (count > 1)
 		{
 			if (inst != GetPermissionsManager().GetClientPlayer() && callbackSelectedPlayerSingle)
-				return CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), callbackSelectedPlayerSingle, "#STR_COT_GENERIC_CONFIRM", callbackSelectedPlayersMulti );
+				return CreateConfirmation_Three( JMConfirmationType.INFO, title, TranslateStringEx("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY", count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), callbackSelectedPlayerSingle, "#STR_COT_GENERIC_CONFIRM", callbackSelectedPlayersMulti );
 			else if (callbackSelf)
-				return CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_SELF", callbackSelf, "#STR_COT_GENERIC_CONFIRM", callbackSelectedPlayersMulti );
+				return CreateConfirmation_Three( JMConfirmationType.INFO, title, TranslateStringEx("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY", count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_SELF", callbackSelf, "#STR_COT_GENERIC_CONFIRM", callbackSelectedPlayersMulti );
 			else
 				return CreateConfirmation_Two( JMConfirmationType.INFO, title, "#STR_COT_WARNING_PLAYERS_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", callbackSelectedPlayersMulti );
 		}
@@ -1422,7 +1422,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		{
 			if (inst != GetPermissionsManager().GetClientPlayer() && callbackSelectedPlayerSingle)
 			{
-				return CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY"), inst.GetName()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), callbackSelectedPlayerSingle, "#STR_COT_GENERIC_SELF", callbackSelf );
+				return CreateConfirmation_Three( JMConfirmationType.INFO, title, TranslateStringEx("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY", inst.GetName()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), callbackSelectedPlayerSingle, "#STR_COT_GENERIC_SELF", callbackSelf );
 			}
 			else if (callbackSelf)
 			{
@@ -1457,7 +1457,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		int count = objects.Count();
 		if (count > 1)
 		{
-			return CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", callbackSelectedObjectsMulti );
+			return CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", TranslateStringEx("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY", count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", callbackSelectedObjectsMulti );
 		}
 
 		if ( executeCallbackOnNoConfirmation && callbackSelectedObjectSingle != string.Empty )

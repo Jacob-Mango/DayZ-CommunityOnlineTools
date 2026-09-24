@@ -130,14 +130,14 @@ class JMRoleManagerFormTabRoles: JMFormTab
 		bool isDeletable = ( m_SelectedRole != "admin" && m_SelectedRole != "everyone" );
 
 		// Permission Configuration Card
-		UIActionCard permCard = UIActionManager.CreateCard( m_Form.m_EditorWrapper, Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_PERMISSION_CONFIG_TITLE" ) + ": " + m_SelectedRole );
-		m_SavePermBtn = permCard.AddSaveButton( this, "", Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_SAVE_PERMISSIONS_TOOLTIP" ) + ": " + m_SelectedRole );
+		UIActionCard permCard = UIActionManager.CreateCard( m_Form.m_EditorWrapper, COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_PERMISSION_CONFIG_TITLE", m_SelectedRole ) );
+		m_SavePermBtn = permCard.AddSaveButton( this, "", COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_SAVE_PERMISSIONS_TOOLTIP", m_SelectedRole ) );
 		if ( m_SavePermBtn ) m_SavePermBtn.SetOnClick( this, "OnClick_SaveRolePermissions" );
 		m_Form.BindPermission( m_SavePermBtn, JMConstants.PERM_ROLES_PERMISSIONS );
 
 		if ( isDeletable )
 		{
-			UIActionImageButton renameBtn = permCard.AddCardHeaderAction( JMConstants.ICON_FOLDED_PAPER, this, "", Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_TOOLTIP" ) + " '" + m_SelectedRole + "'" );
+			UIActionImageButton renameBtn = permCard.AddCardHeaderAction( JMConstants.ICON_FOLDED_PAPER, this, "", COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_TOOLTIP", m_SelectedRole ) );
 			if ( renameBtn ) renameBtn.SetOnClick( this, "OnClick_RenameRole" );
 			renameBtn.SetData( new JMStringData( m_SelectedRole ) );
 
@@ -276,7 +276,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 
 		m_PendingDeleteRole = data.Value;
 
-		string delMsg = string.Format( Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_DELETE_ROLE_CONFIRM_BODY" ), m_PendingDeleteRole );
+		string delMsg = COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_DELETE_ROLE_CONFIRM_BODY", m_PendingDeleteRole );
 
 		m_Form.ConfirmAction( "#STR_COT_GENERIC_CONFIRM", delMsg, "OnDeleteRole_Confirm", "#STR_COT_GENERIC_YES", "#STR_COT_GENERIC_NO" );
 	}
@@ -308,8 +308,8 @@ class JMRoleManagerFormTabRoles: JMFormTab
 
 		m_EditingRenameRole = data.Value;
 
-		string renameTitle = Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_TITLE" ) + ": " + m_EditingRenameRole;
-		string renameBody  = string.Format( Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_BODY" ), m_EditingRenameRole );
+		string renameTitle = COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_TITLE", m_EditingRenameRole );
+		string renameBody  = COT_String.TranslateEx( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_BODY", m_EditingRenameRole );
 
 		m_Form.PromptInput( renameTitle, renameBody, "ConfirmRenameRole" );
 	}
