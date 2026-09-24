@@ -373,12 +373,12 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 	void OnShow()
 	{
-		CommunityOnlineToolsBase.ForceDisableInputs(true);
+		COT_Base.ForceDisableInputs(true);
 	}
 
 	void OnHide() 
 	{
-		CommunityOnlineToolsBase.ForceDisableInputs(false);
+		COT_Base.ForceDisableInputs(false);
 	}
 
 	protected int ButtonIndex( Widget w )

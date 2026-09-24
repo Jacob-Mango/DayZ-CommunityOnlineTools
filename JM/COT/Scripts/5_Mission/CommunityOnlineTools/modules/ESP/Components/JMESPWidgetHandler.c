@@ -767,7 +767,7 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		//! Held from the press rather than from the drag: the world must not
 		//! read a right-press over a tag as aiming down sights.
-		CommunityOnlineToolsBase.ForceDisableInputs( true );
+		COT.ForceDisableInputs( true );
 
 		return true;
 	}
@@ -791,7 +791,7 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		m_RightHeld = false;
 
-		CommunityOnlineToolsBase.ForceDisableInputs( false );
+		COT.ForceDisableInputs( false );
 
 		if ( m_Dragging )
 		{

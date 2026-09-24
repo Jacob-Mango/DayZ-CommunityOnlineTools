@@ -46,7 +46,7 @@ class JMTransformHistoryEntry: JMActionHistoryEntry
 		Transport transport;
 		if ( Class.CastTo( transport, m_Target ) )
 		{
-			CommunityOnlineToolsBase.ForceTransportPositionAndOrientation( transport, m_Position, m_Orientation );
+			COT.ForceTransportPositionAndOrientation( transport, m_Position, m_Orientation );
 		}
 		else
 		{

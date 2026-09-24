@@ -371,7 +371,7 @@ class COTModule : JMModuleBase
 		if (GetCommunityOnlineToolsBase())
 		{
 			if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() || GetCOTWindowManager().PendingDeletionCount() > 0)
-				CommunityOnlineToolsBase.ForceDisableInputs(false);
+				COT_Base.ForceDisableInputs(false);
 		}
 	}
 

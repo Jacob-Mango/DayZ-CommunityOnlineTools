@@ -127,7 +127,7 @@ modded class PlayerBase
 			{
 				if (transport.CrewMemberIndex(this) != -1)
 				{
-					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(transport, position);
+					COT_Base.PlaceOnSurfaceAtPosition(transport, position);
 					
 					return;
 				}

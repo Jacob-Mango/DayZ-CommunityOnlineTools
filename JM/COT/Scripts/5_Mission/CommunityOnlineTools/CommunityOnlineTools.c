@@ -672,3 +672,10 @@ CommunityOnlineTools GetCommunityOnlineTools()
 {
 	return CommunityOnlineTools.Cast( g_cotBase );
 }
+
+CommunityOnlineTools GetCOT()
+{
+	return CommunityOnlineTools.Cast( g_cotBase );
+}
+
+typedef CommunityOnlineTools COT;

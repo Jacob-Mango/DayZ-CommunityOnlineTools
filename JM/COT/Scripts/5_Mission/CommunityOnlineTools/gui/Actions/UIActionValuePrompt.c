@@ -75,7 +75,7 @@ class UIActionValuePrompt: UIActionBase
 			return;
 
 		if ( m_Open )
-			CommunityOnlineToolsBase.ForceDisableInputs( false );
+			COT.ForceDisableInputs( false );
 
 		if ( m_Panel && m_Panel.ToString() != "INVALID" )
 		{
@@ -325,7 +325,7 @@ class UIActionValuePrompt: UIActionBase
 		if ( m_Panel )
 			m_Panel.Show( false );
 
-		CommunityOnlineToolsBase.ForceDisableInputs( false );
+		COT.ForceDisableInputs( false );
 	}
 
 	//! UIActionBase.Hide() tears down the update loop this control needs to keep
@@ -350,7 +350,7 @@ class UIActionValuePrompt: UIActionBase
 
 		// Nothing inside takes keyboard focus, so UIActionBase's focus-driven
 		// input guard never trips on its own and a drag would reach the world.
-		CommunityOnlineToolsBase.ForceDisableInputs( true );
+		COT.ForceDisableInputs( true );
 
 		UpdatePlacement();
 	}

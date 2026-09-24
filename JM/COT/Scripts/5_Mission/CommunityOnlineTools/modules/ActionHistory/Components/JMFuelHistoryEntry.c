@@ -18,7 +18,7 @@ class JMFuelHistoryEntry: JMPropertyHistoryEntry
 		if ( !m_Target )
 			return false;
 
-		CommunityOnlineToolsBase.SetFuel01( m_Target, value );
+		COT.SetFuel01( m_Target, value );
 
 		return true;
 	}

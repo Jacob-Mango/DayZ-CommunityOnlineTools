@@ -73,7 +73,7 @@ class JMHealHistoryEntry: JMActionHistoryEntry
 		if ( !m_Target )
 			return false;
 
-		CommunityOnlineToolsBase.HealEntityRecursive( m_Target );
+		COT.HealEntityRecursive( m_Target );
 
 		if ( !m_IsPlayer )
 			return true;

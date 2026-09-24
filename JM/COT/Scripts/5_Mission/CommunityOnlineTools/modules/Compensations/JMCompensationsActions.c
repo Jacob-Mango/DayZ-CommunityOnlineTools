@@ -27,7 +27,7 @@ class JMCompensationSpawnCursor: JMModuleAction
 		if ( !ctx.Read( SteamID ) || !ctx.Read( Timestamp ) || !ctx.Read( Position ) )
 			return false;
 
-		return CommunityOnlineToolsBase.IsValidWorldPosition( Position );
+		return COT.IsValidWorldPosition( Position );
 	}
 
 	override bool Apply( JMModuleBase module, PlayerIdentity sender, JMPlayerInstance admin )

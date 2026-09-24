@@ -16,6 +16,6 @@ modded class BuildingBase
 
 	void COT_Refuel()
 	{
-		CommunityOnlineToolsBase.Refuel(this);
+		COT_Base.Refuel(this);
 	}
 }

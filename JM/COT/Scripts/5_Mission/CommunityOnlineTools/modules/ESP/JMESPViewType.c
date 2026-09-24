@@ -346,7 +346,7 @@ class JMESPViewTypeTrain: JMESPViewType
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !obj.IsBuilding() || !CommunityOnlineToolsBase.IsHypeTrain(obj) )
+		if ( !obj.IsBuilding() || !COT.IsHypeTrain(obj) )
 			return false;
 		
 		CreateMeta( meta );
@@ -1128,7 +1128,7 @@ class JMESPViewTypeBuilding: JMESPViewTypeImmovable
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !obj.IsBuilding() || CommunityOnlineToolsBase.IsHypeTrain(obj) )
+		if ( !obj.IsBuilding() || COT.IsHypeTrain(obj) )
 			return false;
 				
 		CreateMeta( meta );

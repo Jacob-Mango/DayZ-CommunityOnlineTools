@@ -298,10 +298,10 @@ class JMMapEditorModule : JMRenderableModuleBase
 		//! Straight off the wire and straight onto a spawned object: an
 		//! impossible transform is rendered by every client in range, not by
 		//! the one that sent it.
-		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( pos ) || !CommunityOnlineToolsBase.IsFiniteVector( ori ) )
+		if ( !COT.IsValidWorldPosition( pos ) || !COT.IsFiniteVector( ori ) )
 			return;
 
-		scale = CommunityOnlineToolsBase.SanitizeScale( scale );
+		scale = COT.SanitizeScale( scale );
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
@@ -371,10 +371,10 @@ class JMMapEditorModule : JMRenderableModuleBase
 		if ( !ctx.Read( ori ) )   return;
 		if ( !ctx.Read( scale ) ) return;
 
-		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( pos ) || !CommunityOnlineToolsBase.IsFiniteVector( ori ) )
+		if ( !COT.IsValidWorldPosition( pos ) || !COT.IsFiniteVector( ori ) )
 			return;
 
-		scale = CommunityOnlineToolsBase.SanitizeScale( scale );
+		scale = COT.SanitizeScale( scale );
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;

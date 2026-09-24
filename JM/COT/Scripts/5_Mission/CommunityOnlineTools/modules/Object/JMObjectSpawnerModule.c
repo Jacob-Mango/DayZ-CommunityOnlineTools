@@ -620,7 +620,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
-			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
+			if ( !COT.IsValidWorldPosition( position ) )
 				return;
 
 			string className;

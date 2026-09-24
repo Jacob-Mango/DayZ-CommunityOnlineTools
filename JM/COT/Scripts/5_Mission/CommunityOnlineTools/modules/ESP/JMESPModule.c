@@ -831,7 +831,7 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeMotorbike );
 	#endif
 
-		if (CommunityOnlineToolsBase.s_HypeTrain_Loco_Type)
+		if (COT.s_HypeTrain_Loco_Type)
 			types.Insert( JMESPViewTypeTrain );
 		
 		types.Insert( JMESPViewTypeArchery );
@@ -1475,7 +1475,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			flags |= QueryFlags.STATIC;
 		}
-		else if (CommunityOnlineToolsBase.s_HypeTrain_Loco_Type && m_ViewTypesByType[JMESPViewTypeTrain].View)
+		else if (COT.s_HypeTrain_Loco_Type && m_ViewTypesByType[JMESPViewTypeTrain].View)
 		{
 			flags |= QueryFlags.STATIC;
 		}
@@ -1913,10 +1913,10 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !obj )
 			return;
 
-		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( previousPosition ) )
+		if ( !COT.IsValidWorldPosition( previousPosition ) )
 			return;
 
-		if ( !CommunityOnlineToolsBase.IsFiniteVector( previousOrientation ) )
+		if ( !COT.IsFiniteVector( previousOrientation ) )
 			return;
 
 		if ( !senderRPC )
@@ -1990,7 +1990,7 @@ class JMESPModule: JMRenderableModuleBase
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
 		{
-			CommunityOnlineToolsBase.ForceTransportPositionAndOrientation(transport, position, transport.GetOrientation());
+			COT.ForceTransportPositionAndOrientation(transport, position, transport.GetOrientation());
 		}
 		else
 		{
@@ -2039,7 +2039,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 	#ifdef SERVER
-		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
+		if ( !COT.IsValidWorldPosition( position ) )
 			return;
 
 		if ( !senderRPC )
@@ -2064,7 +2064,7 @@ class JMESPModule: JMRenderableModuleBase
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
 		{
-			CommunityOnlineToolsBase.ForceTransportPositionAndOrientation(transport, transport.GetPosition(), orientation);
+			COT.ForceTransportPositionAndOrientation(transport, transport.GetPosition(), orientation);
 		}
 		else
 		{
@@ -2101,7 +2101,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 	#ifdef SERVER
-		if ( !CommunityOnlineToolsBase.IsFiniteVector( orientation ) )
+		if ( !COT.IsFiniteVector( orientation ) )
 			return;
 
 		if ( !senderRPC )
@@ -2132,7 +2132,7 @@ class JMESPModule: JMRenderableModuleBase
 		//! The number came off the wire. Clamped to what this type of entity
 		//! can actually hold, so a hand-written packet cannot hand the damage
 		//! system a negative, a NaN or a value no health bar can represent.
-		if ( !CommunityOnlineToolsBase.IsFiniteFloat( health ) )
+		if ( !COT.IsFiniteFloat( health ) )
 			return;
 
 		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth( target.GetType() );
@@ -2425,7 +2425,7 @@ class JMESPModule: JMRenderableModuleBase
 			case JMESPObjectAction.SetQuantity:
 				if ( !item )
 					return;
-				if ( !CommunityOnlineToolsBase.IsFiniteFloat( fvalue ) )
+				if ( !COT.IsFiniteFloat( fvalue ) )
 					return;
 				//! Same reasoning as SetHealth: the value is a client's, and
 				//! an item's own maximum is the only bound that means anything.
@@ -2578,14 +2578,14 @@ class JMESPModule: JMRenderableModuleBase
 				return;
 
 			case JMESPObjectAction.SetFuel:
-				float fuelBefore = CommunityOnlineToolsBase.GetFuel01( target );
-				CommunityOnlineToolsBase.SetFuel01( target, fvalue );
+				float fuelBefore = COT.GetFuel01( target );
+				COT.SetFuel01( target, fvalue );
 				PushFuelHistory( target, fuelBefore, ident );
 				logValue = fvalue.ToString();
 				break;
 
 			case JMESPObjectAction.SetCoolant:
-				CommunityOnlineToolsBase.SetCoolant01( target, fvalue );
+				COT.SetCoolant01( target, fvalue );
 				logValue = fvalue.ToString();
 				break;
 
@@ -2613,7 +2613,7 @@ class JMESPModule: JMRenderableModuleBase
 				break;
 
 			case JMESPObjectAction.ClearCargo:
-				logValue = CommunityOnlineToolsBase.ClearCargo( EntityAI.Cast( target ) ).ToString();
+				logValue = COT.ClearCargo( EntityAI.Cast( target ) ).ToString();
 				break;
 
 			case JMESPObjectAction.SetImmobilized:
@@ -2636,14 +2636,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void Exec_SetLockWheels( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
 	{
-		CommunityOnlineToolsBase.SetLockWheels( target, ivalue != 0 );
+		COT.SetLockWheels( target, ivalue != 0 );
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=lockwheels state=" + ivalue );
 		SendWebhookColored( "SetLockWheels", instance, "Wheels lock state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
 	}
 
 	protected void Exec_RefillCoolant( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
 	{
-		CommunityOnlineToolsBase.RefillCoolant( target );
+		COT.RefillCoolant( target );
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=refillcoolant" );
 		SendWebhookColored( "RefillCoolant", instance, "Refilled coolant for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
 	}
@@ -2654,8 +2654,8 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !entity )
 			return;
 
-		CommunityOnlineToolsBase.RepairEntityRecursive( entity );
-		CommunityOnlineToolsBase.Refuel( entity );
+		COT.RepairEntityRecursive( entity );
+		COT.Refuel( entity );
 		GetCommunityOnlineToolsBase().SpawnCompatibleAttachmentsWithColor( entity, NULL, 2, "" );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repairandfill" );
@@ -3760,7 +3760,7 @@ class JMESPModule: JMRenderableModuleBase
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
 		{
-			CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(transport, transport.GetPosition());
+			COT.PlaceOnSurfaceAtPosition(transport, transport.GetPosition());
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=Unstuck " );
@@ -3811,7 +3811,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( before < 0 )
 			return;
 
-		float after = CommunityOnlineToolsBase.GetFuel01( target );
+		float after = COT.GetFuel01( target );
 		if ( after < 0 )
 			return;
 
@@ -3820,9 +3820,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void Exec_Vehicle_Refuel( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		float fuelBefore = CommunityOnlineToolsBase.GetFuel01( target );
+		float fuelBefore = COT.GetFuel01( target );
 
-		CommunityOnlineToolsBase.Refuel(target);
+		COT.Refuel(target);
 
 		PushFuelHistory( target, fuelBefore, ident );
 
@@ -3885,7 +3885,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( Class.CastTo( healEntity, target ) )
 			JMActionHistory.Push( new JMHealHistoryEntry( healEntity ), JMActionHistory.OwnerOf( ident ) );
 
-		CommunityOnlineToolsBase.HealEntityRecursive(target);
+		COT.HealEntityRecursive(target);
 
 		PlayerBase player;
 		if (Class.CastTo(player, target))
@@ -4213,7 +4213,7 @@ class JMESPModule: JMRenderableModuleBase
 
 				EntityAI ent = EntityAI.Cast(obj);
 				if (ent)
-					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(ent, cursor);
+					COT.PlaceOnSurfaceAtPosition(ent, cursor);
 				else
 					obj.SetPosition(cursor);
 				moved++;

@@ -502,7 +502,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		{
 			m_WasFocused = false;
 		}
-		CommunityOnlineTools.ForceDisableInputs(false);
+		COT.ForceDisableInputs(false);
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -652,14 +652,14 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 			#ifdef COT_DEBUGLOGS
 			Print("[COT_DBG] UIActionBase::Update isFocused true->ForceDisableInputs(true)");
 			#endif
-			CommunityOnlineTools.ForceDisableInputs(true);
+			COT.ForceDisableInputs(true);
 		}
 		else if (!isFocused && m_WasFocused)
 		{
 			#ifdef COT_DEBUGLOGS
 			Print("[COT_DBG] UIActionBase::Update isFocused false->ForceDisableInputs(false)");
 			#endif
-			CommunityOnlineTools.ForceDisableInputs(false);
+			COT.ForceDisableInputs(false);
 		}
 
 		m_WasFocused = isFocused;

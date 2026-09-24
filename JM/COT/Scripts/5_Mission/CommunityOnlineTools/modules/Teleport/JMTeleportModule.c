@@ -345,7 +345,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( pos ) )
 				return;
 
-			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( pos ) )
+			if ( !COT.IsValidWorldPosition( pos ) )
 				return;
 
 			bool isCursor;
@@ -432,7 +432,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 			//! Both come off the wire and both feed a raycast: a NaN start or
 			//! direction gives a hit position physics cannot resolve.
-			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( pos ) || !CommunityOnlineToolsBase.IsFiniteVector( dir ) )
+			if ( !COT.IsValidWorldPosition( pos ) || !COT.IsFiniteVector( dir ) )
 				return;
 
 			PlayerBase player;
@@ -566,7 +566,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 			//! This one is written to disk and handed back out to every admin
 			//! afterwards, so a bad value outlives the packet that carried it.
-			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( playerpos ) )
+			if ( !COT.IsValidWorldPosition( playerpos ) )
 				return;
 
 			Exec_AddLocation( locName, catName, playerpos, senderRPC );

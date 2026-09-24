@@ -1044,8 +1044,8 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			vehicles.Insert( vehicle );
 
-			CommunityOnlineToolsBase.HealEntityRecursive(vehicle);
-			CommunityOnlineToolsBase.Refuel(vehicle);
+			COT.HealEntityRecursive(vehicle);
+			COT.Refuel(vehicle);
 			
 			JMObjectSpawnerModule objSpawnerModule;
 			if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
@@ -1125,7 +1125,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( position ) )
 			return;
 
-		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
+		if ( !COT.IsValidWorldPosition( position ) )
 			return;
 
 		array< string > guids;
@@ -2033,7 +2033,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player.GetBleedingManagerServer() )
 				player.GetBleedingManagerServer().RemoveAllSources();
 
-			CommunityOnlineToolsBase.HealEntityRecursive(player, includeAttachments, includeCargo);
+			COT.HealEntityRecursive(player, includeAttachments, includeCargo);
 			player.SetBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
 			player.COTRemoveAllDiseases();
 

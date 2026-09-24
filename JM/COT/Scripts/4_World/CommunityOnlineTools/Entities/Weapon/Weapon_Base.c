@@ -11,7 +11,7 @@ modded class Weapon_Base
 		{
 			if (g_Game.IsServer() && player.COTHasGodMode())
 			{
-				CommunityOnlineToolsBase.HealEntityRecursive(this, true, false);
+				COT_Base.HealEntityRecursive(this, true, false);
 			}
 
 			if (player.COTHasUnlimitedAmmo())

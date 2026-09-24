@@ -1371,7 +1371,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !ctx.Read( position ) )
 			return;
 
-		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
+		if ( !COT.IsValidWorldPosition( position ) )
 			return;
 
 		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );

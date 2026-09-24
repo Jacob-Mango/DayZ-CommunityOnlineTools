@@ -884,7 +884,7 @@ class JMESPActionMenu
 
 		Add( PREFIX_ACTION + "heal", "#STR_COT_PLAYER_MODULE_ACTION_REPAIR", JMConstants.Lucide( "wrench" ), Perm( JMConstants.PERM_ESP_OBJECT_HEAL ) );
 
-		if ( CommunityOnlineToolsBase.AreWheelsLocked( m_Meta.target ) )
+		if ( COT.AreWheelsLocked( m_Meta.target ) )
 			Add( PREFIX_ACTION + "unlockwheels", "#STR_COT_ESP_MODULE_MENU_UNLOCK_WHEELS", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_CAR_LOCKWHEELS ) );
 		else
 			Add( PREFIX_ACTION + "lockwheels", "#STR_COT_ESP_MODULE_MENU_LOCK_WHEELS", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_CAR_LOCKWHEELS ) );

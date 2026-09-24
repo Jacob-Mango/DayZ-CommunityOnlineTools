@@ -73,7 +73,7 @@ class UIActionColorPicker: UIActionBase
 			return;
 
 		if ( m_Open )
-			CommunityOnlineToolsBase.ForceDisableInputs( false );
+			COT.ForceDisableInputs( false );
 
 		if ( m_Popup && m_Popup.ToString() != "INVALID")
 		{
@@ -159,12 +159,12 @@ class UIActionColorPicker: UIActionBase
 			// clicks/drags inside the popup reach the world (the camera turns).
 			// Hold the inputs down for as long as the popup is open, the same
 			// way JMConfirmation does.
-			CommunityOnlineToolsBase.ForceDisableInputs( true );
+			COT.ForceDisableInputs( true );
 		}
 		else
 		{
 			m_Popup.Show( false );
-			CommunityOnlineToolsBase.ForceDisableInputs( false );
+			COT.ForceDisableInputs( false );
 
 			EnsureTick( false );
 		}

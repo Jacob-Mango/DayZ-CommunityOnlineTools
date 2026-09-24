@@ -926,3 +926,10 @@ static CommunityOnlineToolsBase GetCommunityOnlineToolsBase()
 {
 	return g_cotBase;
 }
+
+static CommunityOnlineToolsBase GetCOTBase()
+{
+	return g_cotBase;
+}
+
+typedef CommunityOnlineToolsBase COT_Base;

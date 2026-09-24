@@ -217,7 +217,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 				return;
 			} 
 
-			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
+			if ( !COT.IsValidWorldPosition( position ) )
 				return;
 
 			Exec_SpawnCursor( Loadout, position, senderRPC );
@@ -440,7 +440,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		ent.SetOrientation(itemData.m_LocalRotation);
 
 		if (!ent.IsInherited(PlayerBase))
-			CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(ent, pos);
+			COT.PlaceOnSurfaceAtPosition(ent, pos);
 
 		if ((ent.IsInherited(Transport)))
 			SetupVehicle(ent);
@@ -549,7 +549,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	protected void SetupVehicle(EntityAI entity)
 	{
-		CommunityOnlineToolsBase.Refuel(entity);
+		COT.Refuel(entity);
 	}
 
 	void Create(string name)
