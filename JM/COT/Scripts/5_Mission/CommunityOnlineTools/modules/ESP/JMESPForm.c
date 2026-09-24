@@ -411,7 +411,7 @@ class JMESPForm: JMFormBase
 	void PromptSendMessage( string playerGUID, string playerName )
 	{
 		m_PendingMsgPlayerGUID = playerGUID;
-		PromptInput( "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", Widget.TranslateString( "#STR_COT_ESP_MODULE_MESSAGE_PROMPT" ) + " " + playerName + ":", "OnSendMessage_Confirm" );
+		PromptInput( "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_ESP_MODULE_MESSAGE_PROMPT" + " " + playerName + ":", "OnSendMessage_Confirm" );
 	}
 
 	void OnSendMessage_Confirm( JMConfirmation confirmation )

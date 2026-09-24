@@ -285,7 +285,7 @@ class JMESPFormTabObjects: JMFormTab
 
 			string category = classname;
 			if ( meta.type )
-				category = Widget.TranslateString( meta.type.Localisation );
+				category = meta.type.Localisation;
 
 			names.Insert( label );
 			subs.Insert( string.Format( "%1  -  %2m", category, distance ) );
@@ -326,10 +326,10 @@ class JMESPFormTabObjects: JMFormTab
 		if ( !m_ObjectsCard )
 			return;
 
-		string title = string.Format( "%1 (%2)", Widget.TranslateString( "#STR_COT_ESP_MODULE_OBJECTS_CARD" ), count );
+		string title = string.Format( "%1 (%2)", "#STR_COT_ESP_MODULE_OBJECTS_CARD", count );
 
 		if ( m_ObjectListHeldShown )
-			title = string.Format( "%1  -  %2", title, Widget.TranslateString( "#STR_COT_ESP_MODULE_LIST_HELD" ) );
+			title = string.Format( "%1  -  %2", title, "#STR_COT_ESP_MODULE_LIST_HELD" );
 
 		m_ObjectsCard.SetLabel( title );
 	}

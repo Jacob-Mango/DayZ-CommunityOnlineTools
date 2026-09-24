@@ -107,8 +107,6 @@ class UIActionEditableText: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
-
 		m_Label.SetText( text );
 	}
 
@@ -223,8 +221,6 @@ class UIActionEditableText: UIActionBase
 
 	override void SetButton( string text )
 	{
-		text = Widget.TranslateString( text );
-		
 		m_ButtonText.SetText( text );
 	}
 

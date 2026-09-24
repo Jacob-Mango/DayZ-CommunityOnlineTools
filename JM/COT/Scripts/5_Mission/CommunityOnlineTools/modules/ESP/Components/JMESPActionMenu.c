@@ -104,15 +104,16 @@ class JMESPActionMenu
 	//! separately here rather than baked into the candidate list itself.
 	protected string GetClassDisplayName( string className )
 	{
-		string raw;
+		string displayName;
 
-		if ( !g_Game.ConfigGetText( CFG_VEHICLESPATH + " " + className + " displayName", raw ) || raw == "" )
-			g_Game.ConfigGetText( CFG_WEAPONSPATH + " " + className + " displayName", raw );
+		//! @note ConfigGetText returns already translated values
+		if ( !g_Game.ConfigGetText( CFG_VEHICLESPATH + " " + className + " displayName", displayName ) || displayName == "" )
+			g_Game.ConfigGetText( CFG_WEAPONSPATH + " " + className + " displayName", displayName );
 
-		if ( raw == "" )
+		if ( displayName == "" )
 			return className;
 
-		return Widget.TranslateString( raw );
+		return displayName;
 	}
 
 	UIActionContextMenu GetMenu()
@@ -1054,7 +1055,7 @@ class JMESPActionMenu
 			if ( attached )
 				label += attached.GetDisplayName();
 			else
-				label += Widget.TranslateString( "#STR_COT_ESP_MODULE_ATTACH_EMPTY" );
+				label += "#STR_COT_ESP_MODULE_ATTACH_EMPTY";
 
 			Add( PREFIX_PAGE + PAGE_ATTACH_SLOT + ":" + slotId, label, JMConstants.Lucide( "puzzle" ), true );
 		}
@@ -1201,12 +1202,12 @@ class JMESPActionMenu
 		//! it - the same "row is the view" shape as the Network ID row below -
 		//! for view types (weapons, attachments, ...) whose classname is not
 		//! already the tag's own display name.
-		string classnameLabel = Widget.TranslateString( "#STR_COT_ESP_MODULE_MENU_CLASSNAME" ) + ": " + m_Meta.GetType();
+		string classnameLabel = "#STR_COT_ESP_MODULE_MENU_CLASSNAME" + ": " + m_Meta.GetType();
 		Add( PREFIX_ACTION + "copyclassname", classnameLabel, JMConstants.Lucide( "tag" ) );
 
 		if ( m_Meta.type )
 		{
-			string categoryLabel = Widget.TranslateString( "#STR_COT_ESP_MODULE_MENU_CATEGORY" ) + ": " + Widget.TranslateString( m_Meta.type.Localisation );
+			string categoryLabel = "#STR_COT_ESP_MODULE_MENU_CATEGORY" + ": " + m_Meta.type.Localisation;
 			Add( PREFIX_ACTION + "copycategory", categoryLabel, JMConstants.Lucide( "shapes" ) );
 		}
 
@@ -1216,7 +1217,7 @@ class JMESPActionMenu
 		//! the "view" and the "copy" the object-data ask wanted.
 		if ( m_Meta.networkLow || m_Meta.networkHigh )
 		{
-			string netIdLabel = Widget.TranslateString( "#STR_COT_ESP_MODULE_MENU_NETWORK_ID" ) + ": " + m_Meta.networkLow.ToString() + " / " + m_Meta.networkHigh.ToString();
+			string netIdLabel = "#STR_COT_ESP_MODULE_MENU_NETWORK_ID" + ": " + m_Meta.networkLow.ToString() + " / " + m_Meta.networkHigh.ToString();
 			Add( PREFIX_ACTION + "copynetid", netIdLabel, JMConstants.Lucide( "hash" ) );
 		}
 	}

@@ -439,7 +439,7 @@ class JMWeatherDynamicEditor
 
 		array<string> options = new array<string>;
 
-		options.Insert( Widget.TranslateString( "#STR_COT_WEATHER_DYN_PRESET_NONE" ) );
+		options.Insert( "#STR_COT_WEATHER_DYN_PRESET_NONE" );
 
 		TStringArray names = PresetNames();
 		string label;
@@ -657,7 +657,7 @@ class JMWeatherDynamicEditor
 		}
 
 		edgeNames.Insert( "" );
-		edgeLabels.Insert( Widget.TranslateString( "#STR_COT_WEATHER_DYN_LEAVE" ) );
+		edgeLabels.Insert( "#STR_COT_WEATHER_DYN_LEAVE" );
 
 		m_ListEdges.SetCandidates( edgeNames, edgeLabels );
 	}

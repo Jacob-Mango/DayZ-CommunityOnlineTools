@@ -148,7 +148,7 @@ class UIActionItemList: UIActionBase
 	void SetEmptyText( string text )
 	{
 		if ( m_EmptyText )
-			m_EmptyText.SetText( Widget.TranslateString( text ) );
+			m_EmptyText.SetText( text );
 	}
 
 	//! Host-driven highlight for `index` - independent of the click-selection

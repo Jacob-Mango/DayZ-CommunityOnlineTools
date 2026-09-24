@@ -583,7 +583,7 @@ class JMObjectSpawnerProperties
 
 			//! The selector prints entry text verbatim, so the key is resolved
 			//! here rather than handed over as a key.
-			labels.Insert( Widget.TranslateString( stageLabels[i] ) );
+			labels.Insert( stageLabels[i] );
 		}
 	}
 
@@ -606,10 +606,10 @@ class JMObjectSpawnerProperties
 		for ( int i = 0; i < bits.Count(); i++ )
 		{
 			if ( bits[i] == bit )
-				return Widget.TranslateString( keys[i] );
+				return keys[i];
 		}
 
-		return Widget.TranslateString( "#STR_COT_OBJECT_LIQUID_NONE" );
+		return "#STR_COT_OBJECT_LIQUID_NONE";
 	}
 
 	//! "<name> (default)" - the row that changes nothing, named after what the
@@ -657,7 +657,7 @@ class JMObjectSpawnerProperties
 					continue;
 
 				m_LiquidValues.Insert( b + 1 );
-				labels.Insert( Widget.TranslateString( bloodKeys[b] ) );
+				labels.Insert( bloodKeys[b] );
 			}
 
 			return;
@@ -688,7 +688,7 @@ class JMObjectSpawnerProperties
 				continue;
 
 			m_LiquidValues.Insert( bits[i] );
-			labels.Insert( Widget.TranslateString( keys[i] ) );
+			labels.Insert( keys[i] );
 		}
 	}
 
@@ -697,8 +697,9 @@ class JMObjectSpawnerProperties
 	{
 		string display;
 
+		//! @note ConfigGetText returns localized string
 		if ( g_Game.ConfigGetText( CFG_MAGAZINESPATH + " " + pile + " displayName", display ) && display != "" )
-			return Widget.TranslateString( display );
+			return display;
 
 		return pile;
 	}
@@ -753,7 +754,7 @@ class JMObjectSpawnerProperties
 		}
 
 		if ( defaultName == "" )
-			defaultName = Widget.TranslateString( "#STR_COT_OBJECT_AMMO_NONE" );
+			defaultName = "#STR_COT_OBJECT_AMMO_NONE";
 
 		m_AmmoValues.Insert( "" );
 		labels.Insert( DefaultLabel( defaultName ) );

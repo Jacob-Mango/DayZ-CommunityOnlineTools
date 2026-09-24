@@ -307,7 +307,7 @@ class JMVehiclesHoverInfo
 			return;
 
 		int kph = Math.Round( vehicle.m_SpeedKph );
-		m_SpeedValue.SetText( kph.ToString() + " " + Widget.TranslateString( "#STR_COT_VEHICLE_KMH" ) );
+		m_SpeedValue.SetText( kph.ToString() + " " + "#STR_COT_VEHICLE_KMH" );
 
 		if ( vehicle.m_SpeedKph >= SPEED_IDLE )
 			m_SpeedValue.SetColor( JMTheme.ACCENT_HOVER );

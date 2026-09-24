@@ -114,7 +114,7 @@ class JMWeatherModeBanner
 		if ( m_Form.m_TabPresetsCtrl && m_Form.m_TabPresetsCtrl.IsCreatingPreset() )
 		{
 			m_ModeBanner.SetColor( JMTheme.ACCENT );
-			m_ModeBannerText.SetText( Widget.TranslateString( "#STR_COT_WEATHER_MODE_NEW" ) );
+			m_ModeBannerText.SetText( "#STR_COT_WEATHER_MODE_NEW" );
 			return;
 		}
 
@@ -129,6 +129,6 @@ class JMWeatherModeBanner
 		//! means no reflow when the mode changes, and "which of these am I
 		//! about to change" is worth answering in both directions.
 		m_ModeBanner.SetColor( JMTheme.SURFACE_RAISED );
-		m_ModeBannerText.SetText( Widget.TranslateString( "#STR_COT_WEATHER_MODE_LIVE" ) );
+		m_ModeBannerText.SetText( "#STR_COT_WEATHER_MODE_LIVE" );
 	}
 }

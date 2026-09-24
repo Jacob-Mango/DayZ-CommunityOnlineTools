@@ -88,7 +88,7 @@ class UIActionMultiSelectList: UIActionBase
 			}
 
 			if ( r.LabelWidget )
-				r.LabelWidget.SetText( Widget.TranslateString( item ) );
+				r.LabelWidget.SetText( item );
 
 			PaintRow( r );
 
@@ -109,7 +109,6 @@ class UIActionMultiSelectList: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_Label )
 			m_Label.SetText( text );
 	}

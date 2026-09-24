@@ -107,8 +107,6 @@ class UIActionEditableRichText: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
-
 		m_Label.SetText( text );
 	}
 
@@ -220,8 +218,6 @@ class UIActionEditableRichText: UIActionBase
 
 	override void SetButton( string text )
 	{
-		text = Widget.TranslateString( text );
-		
 		m_ButtonText.SetText( text );
 	}
 

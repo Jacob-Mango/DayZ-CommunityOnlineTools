@@ -397,7 +397,7 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 		if ( tooltip == "" )
 			return false;
 
-		UIActionTooltip.Show( Widget.TranslateString( tooltip ), "", 0, 0, w );
+		UIActionTooltip.Show( tooltip, "", 0, 0, w );
 
 		return false;
 	}

@@ -271,8 +271,8 @@ class JMObjectSpawnerForm: JMFormBase
 		//! Entry text is printed verbatim by the selector, so the keys are
 		//! resolved here rather than being handed over as keys.
 		array<string> nameModes = new array<string>;
-		nameModes.Insert( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_NAMEMODE_CLASS" ) );
-		nameModes.Insert( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_NAMEMODE_DISPLAY" ) );
+		nameModes.Insert( "#STR_COT_OBJECT_MODULE_NAMEMODE_CLASS" );
+		nameModes.Insert( "#STR_COT_OBJECT_MODULE_NAMEMODE_DISPLAY" );
 
 		m_NameModeSelect = UIActionManager.CreateSelectionBox( filterRow, "", nameModes, this, "Click_OnFilterDisplayName" );
 		m_NameModeSelect.SetWidth( MODE_ROW_W );
@@ -283,8 +283,8 @@ class JMObjectSpawnerForm: JMFormBase
 			m_NameModeSelect.SetSelection( 1, false );
 
 		array<string> unsafeModes = new array<string>;
-		unsafeModes.Insert( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_UNSAFE_HIDE" ) );
-		unsafeModes.Insert( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_UNSAFE_SHOW" ) );
+		unsafeModes.Insert( "#STR_COT_OBJECT_MODULE_UNSAFE_HIDE" );
+		unsafeModes.Insert( "#STR_COT_OBJECT_MODULE_UNSAFE_SHOW" );
 
 		m_UnsafeSelect = UIActionManager.CreateSelectionBox( filterRow, "", unsafeModes, this, "Click_OnSafetyToogle" );
 		m_UnsafeSelect.SetWidth( MODE_ROW_W2 );
@@ -353,9 +353,9 @@ class JMObjectSpawnerForm: JMFormBase
 		AddOverlay( m_SpawnMode );
 
 		array<string> setupOptions = new array<string>;
-		setupOptions.Insert( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG" ) );
-		setupOptions.Insert( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_SPAWN_WITH_CE" ) );
-		setupOptions.Insert( Widget.TranslateString( "#STR_COT_GENERIC_NONE" ) );
+		setupOptions.Insert( "#STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG" );
+		setupOptions.Insert( "#STR_COT_OBJECT_MODULE_SPAWN_WITH_CE" );
+		setupOptions.Insert( "#STR_COT_GENERIC_NONE" );
 		m_ObjSetupMode = UIActionManager.CreateDropdown( modeRow, "", layoutRoot, this, "Click_ObjSetupMode", setupOptions );
 		m_ObjSetupMode.SetWidth( MODE_ROW_W2 );
 		m_ObjSetupMode.SetSelection( m_Module.m_ObjSetupMode, false );
@@ -642,7 +642,7 @@ class JMObjectSpawnerForm: JMFormBase
 	protected void AddMode( TIntArray ids, array<string> labels, int mode, string label )
 	{
 		ids.Insert( mode );
-		labels.Insert( Widget.TranslateString( label ) );
+		labels.Insert( label );
 	}
 
 	protected int IndexOfMode( TIntArray ids, int mode )
@@ -1017,7 +1017,7 @@ class JMObjectSpawnerForm: JMFormBase
 					if (m_Module.m_FilterWithDisplayName)
 					{
 						if (g_Game.ConfigGetText(strConfigPath + " " + strName + " displayName", strDisplay) && strDisplay != "")
-							strRowText = Widget.TranslateString(strDisplay);
+							strRowText = strDisplay;
 					}
 
 					rowLabels.Insert( strRowText );

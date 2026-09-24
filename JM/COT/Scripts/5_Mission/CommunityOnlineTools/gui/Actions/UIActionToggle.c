@@ -99,7 +99,7 @@ class UIActionToggle: UIActionBase
 	override void SetLabel( string text )
 	{
 		if ( m_Label )
-			m_Label.SetText( Widget.TranslateString( text ) );
+			m_Label.SetText( text );
 	}
 
 	override void SetIcon( string imagePath )

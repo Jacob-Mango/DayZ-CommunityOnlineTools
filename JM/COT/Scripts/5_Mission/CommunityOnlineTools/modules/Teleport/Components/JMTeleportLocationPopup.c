@@ -158,7 +158,7 @@ class JMTeleportLocationPopup
 			if ( editing == "" )
 				m_PopupCard.SetLabel( "#STR_COT_TELEPORT_MODULE_SAVE_LOCATION" );
 			else
-				m_PopupCard.SetLabel( Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_EDIT_LOCATION_PREFIX" ) + editing );
+				m_PopupCard.SetLabel( COT_String.TranslateEx("#STR_COT_TELEPORT_MODULE_EDIT_LOCATION", editing) );
 		}
 
 		//! The position row is read-only text, and greyed while editing: the
@@ -222,7 +222,7 @@ class JMTeleportLocationPopup
 		}
 
 		m_PopupNewIndex = added;
-		m_PopupCategory.AddEntry( Widget.TranslateString( CATEGORY_NEW_ROW ), JMConstants.Lucide( "plus" ), JMTheme.ACCENT );
+		m_PopupCategory.AddEntry( CATEGORY_NEW_ROW, JMConstants.Lucide( "plus" ), JMTheme.ACCENT );
 
 		//! Open straight in the text box when there is nothing to pick, or when
 		//! the category being edited is not one of the rows - landing on a row
@@ -298,7 +298,7 @@ class JMTeleportLocationPopup
 
 			m_Form.GetModule().AddLocation( name, category, m_PopupWorldPos );
 
-			COTCreateLocalAdminNotification( new StringLocaliser( Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_ADDED_LOCATION_PREFIX" ) + name + Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_TO_CATEGORY_PREFIX" ) + category ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( COT_String.TranslateEx( "#STR_COT_TELEPORT_MODULE_ADDED_LOCATION", name, category ) ) );
 		}
 		else
 		{
@@ -315,7 +315,7 @@ class JMTeleportLocationPopup
 
 			m_Form.GetModule().EditLocation( target, name, category );
 
-			COTCreateLocalAdminNotification( new StringLocaliser( Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_EDITED_LOCATION_PREFIX" ) + m_PopupEditing ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( COT_String.TranslateEx( "#STR_COT_TELEPORT_MODULE_EDITED_LOCATION", m_PopupEditing ) ) );
 
 			//! Follow the rename, so the row that was selected is still the
 			//! selected row once the reload lands.

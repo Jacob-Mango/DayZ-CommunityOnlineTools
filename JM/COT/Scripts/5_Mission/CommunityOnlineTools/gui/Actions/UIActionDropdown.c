@@ -267,7 +267,7 @@ class UIActionDropdown: UIActionBase
 	override void SetLabel( string text )
 	{
 		if ( m_Label )
-			m_Label.SetText( Widget.TranslateString( text ) );
+			m_Label.SetText( text );
 	}
 
 	void AddEntry( string text, string iconPath = "", int iconColor = 0xFFFFFFFF )

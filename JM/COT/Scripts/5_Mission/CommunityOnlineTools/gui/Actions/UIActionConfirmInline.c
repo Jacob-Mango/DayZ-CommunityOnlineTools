@@ -55,14 +55,12 @@ class UIActionConfirmInline: UIActionBase
 
 	void SetCancelLabel( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_CancelText )
 			m_CancelText.SetText( text );
 	}
 
 	void SetConfirmLabel( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_ConfirmText )
 			m_ConfirmText.SetText( text );
 	}
@@ -101,7 +99,6 @@ class UIActionConfirmInline: UIActionBase
 
 	override void SetButton( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_ActionText )
 			m_ActionText.SetText( text );
 	}

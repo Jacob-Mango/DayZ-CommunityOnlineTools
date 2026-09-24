@@ -65,7 +65,7 @@ class UIActionBadge: UIActionBase
 	//! Set the badge text and background color in one call.
 	void SetStatus( string status, int color = JMTheme.SUCCESS_DIM )
 	{
-		m_StatusValue = Widget.TranslateString( status );
+		m_StatusValue = status;
 		if ( m_StatusText )
 			m_StatusText.SetText( m_StatusValue );
 
@@ -91,14 +91,14 @@ class UIActionBadge: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
+		text = text;
 		if ( m_Label )
 			m_Label.SetText( text );
 	}
 
 	override void SetText( string text )
 	{
-		m_StatusValue = Widget.TranslateString( text );
+		m_StatusValue = text;
 		if ( m_StatusText )
 			m_StatusText.SetText( m_StatusValue );
 	}

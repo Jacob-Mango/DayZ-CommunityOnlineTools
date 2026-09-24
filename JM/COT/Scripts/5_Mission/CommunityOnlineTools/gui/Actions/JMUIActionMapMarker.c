@@ -53,7 +53,7 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 
 		if ( m_Name )
 		{
-			m_Name.SetText( Widget.TranslateString( label ) );
+			m_Name.SetText( label );
 			m_Name.SetColor( m_Color );
 		}
 
@@ -107,7 +107,7 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 	void SetLabel( string label )
 	{
 		if ( m_Name )
-			m_Name.SetText( Widget.TranslateString( label ) );
+			m_Name.SetText( label );
 	}
 
 	void SetPosition( vector position )

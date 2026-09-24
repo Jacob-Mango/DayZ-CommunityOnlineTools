@@ -364,7 +364,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 			m_LastIsNight = isNight;
 
 			if ( m_TextWeather )
-				m_TextWeather.SetText( Widget.TranslateString( JMWorldConditions.GetWeatherLabel( kind ) ) );
+				m_TextWeather.SetText( JMWorldConditions.GetWeatherLabel( kind ) );
 
 			string icon = JMWorldConditions.GetWeatherIcon( kind, isNight );
 
@@ -404,7 +404,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		if ( changing )
 		{
 			icon = JMWorldConditions.GetWeatherIcon( forecast, isNight );
-			label = Widget.TranslateString( JMWorldConditions.GetWeatherLabel( forecast ) );
+			label = JMWorldConditions.GetWeatherLabel( forecast );
 		}
 		else
 		{
@@ -751,7 +751,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		//! TextWidget.SetText does not resolve stringtable keys the way the
 		//! `text` field of a layout does, so the lookup has to be explicit here.
 		if ( m_ServerName == "" )
-			m_ServerName = Widget.TranslateString( "#STR_COT_SIDEBAR_FOOTER_LOCAL" );
+			m_ServerName = "#STR_COT_SIDEBAR_FOOTER_LOCAL";
 	}
 
 	// -------------------------------------------------------------------------

@@ -845,7 +845,7 @@ class UIActionTabs: UIActionBase
 		tabWidget.SetHandler( this );
 
 		if ( entry.LabelWidget )
-			entry.LabelWidget.SetText( Widget.TranslateString( entry.Caption ) );
+			entry.LabelWidget.SetText( entry.Caption );
 
 		ApplyEntryIcon( entry );
 

@@ -185,7 +185,6 @@ class UIActionButton: UIActionBase
 
 	override void SetButton( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_Button )
 			m_Button.SetName( text );
 		if ( m_Text )

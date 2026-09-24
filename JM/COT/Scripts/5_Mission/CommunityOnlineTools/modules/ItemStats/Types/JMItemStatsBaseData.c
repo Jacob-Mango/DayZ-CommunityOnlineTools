@@ -10,8 +10,8 @@ class JMItemStatsBaseData
 	void JMItemStatsBaseData(string path, string name)
 	{
 		m_Classname = name;
+		//! @note ConfigGetText returns localized string
 		g_Game.ConfigGetText(path + " displayName", m_DisplayName);
-		m_DisplayName = Widget.TranslateString( m_DisplayName );
 
 		m_Health = g_Game.ConfigGetInt(path + " DamageSystem GlobalHealth Health hitpoints");
 		

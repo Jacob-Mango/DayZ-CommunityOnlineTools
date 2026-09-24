@@ -187,7 +187,7 @@ class JMWorldConditions
 		return ReadWeatherKind( false );
 	}
 
-	//! Stringtable key for a weather kind. Resolve with Widget.TranslateString.
+	//! Stringtable key for a weather kind.
 	static string GetWeatherLabel( int kind )
 	{
 		if ( kind == WEATHER_SANDSTORM )

@@ -146,7 +146,7 @@ class JMWeatherDynamicStatusCard
 
 		if ( !m_Form.m_Module.IsDynamicEnabled() )
 		{
-			m_TextNow.SetText( Widget.TranslateString( "#STR_COT_WEATHER_DYN_OFF" ) );
+			m_TextNow.SetText( "#STR_COT_WEATHER_DYN_OFF" );
 			m_BarTime.SetProgress( 0 );
 			m_BarTime.SetBarText( "" );
 			ShowNext( false );
@@ -155,7 +155,7 @@ class JMWeatherDynamicStatusCard
 
 		if ( !status.IsRunning() )
 		{
-			m_TextNow.SetText( Widget.TranslateString( "#STR_COT_WEATHER_DYN_IDLE" ) );
+			m_TextNow.SetText( "#STR_COT_WEATHER_DYN_IDLE" );
 			m_BarTime.SetProgress( 0 );
 			m_BarTime.SetBarText( "" );
 			ShowNext( false );
@@ -165,9 +165,9 @@ class JMWeatherDynamicStatusCard
 		string now = status.State + " > " + status.Phase;
 
 		if ( status.Held )
-			now += "  " + Widget.TranslateString( "#STR_COT_WEATHER_DYN_HELD" );
+			now += "  " + "#STR_COT_WEATHER_DYN_HELD";
 		else if ( status.Paused )
-			now += "  " + Widget.TranslateString( "#STR_COT_WEATHER_DYN_PAUSED" );
+			now += "  " + "#STR_COT_WEATHER_DYN_PAUSED";
 
 		m_TextNow.SetText( now );
 
@@ -306,7 +306,7 @@ class JMWeatherDynamicStatusCard
 	protected string LabelText( string label )
 	{
 		if ( label == JMWeatherSerialize.ODDS_STAY )
-			return Widget.TranslateString( "#STR_COT_WEATHER_DYN_STAYS" );
+			return "#STR_COT_WEATHER_DYN_STAYS";
 
 		return label;
 	}

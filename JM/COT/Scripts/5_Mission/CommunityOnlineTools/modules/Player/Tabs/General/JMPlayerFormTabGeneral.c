@@ -446,7 +446,7 @@ class JMPlayerFormTabGeneral: JMFormTab
 		//! Resolved here rather than handed to the tooltip as a key: the tooltip
 		//! sizes its panel from the string's length, and a "#STR_..." key is not
 		//! the length of the word it stands for.
-		status.SetTooltip( Widget.TranslateString( tooltip ) );
+		status.SetTooltip( tooltip );
 
 		return status;
 	}

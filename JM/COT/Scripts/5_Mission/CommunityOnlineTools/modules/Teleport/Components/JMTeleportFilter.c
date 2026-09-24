@@ -401,7 +401,7 @@ class JMTeleportFilter
 		if ( hidden == 0 )
 			m_FilterButton.SetTooltip( "#STR_COT_TELEPORT_MODULE_FILTERS_TOOLTIP" );
 		else
-			m_FilterButton.SetTooltip( Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_FILTERS_HIDDEN_PREFIX" ) + hidden + Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_FILTERS_HIDDEN_SUFFIX" ) );
+			m_FilterButton.SetTooltip( COT_String.TranslateEx( "#STR_COT_TELEPORT_MODULE_FILTERS_HIDDEN", hidden.ToString() ) );
 	}
 
 	void CloseMenu()

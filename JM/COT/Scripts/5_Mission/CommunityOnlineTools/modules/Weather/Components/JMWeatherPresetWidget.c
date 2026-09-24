@@ -58,7 +58,7 @@ class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler
 	void SetCreateNew()
 	{
 		Show();
-		m_WName.SetText( Widget.TranslateString( "#STR_COT_WEATHER_DYN_ADD_NEW" ) );
+		m_WName.SetText( "#STR_COT_WEATHER_DYN_ADD_NEW" );
 		m_WName.SetColor( 0xFFFFFFFF );
 		m_WRemoveButton.Show( false );
 

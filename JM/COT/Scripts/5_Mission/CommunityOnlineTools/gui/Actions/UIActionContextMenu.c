@@ -591,7 +591,7 @@ class UIActionContextMenu: UIActionBase
 			Class.CastTo( rowText, row.FindAnyWidget( "item_text" ) );
 			if ( rowText )
 			{
-				rowText.SetText( Widget.TranslateString( entry.Text ) );
+				rowText.SetText( entry.Text );
 				if ( entry.IconPath == "" )
 					rowText.SetPos( TEXT_LEFT_PLAIN, 0 );
 				else

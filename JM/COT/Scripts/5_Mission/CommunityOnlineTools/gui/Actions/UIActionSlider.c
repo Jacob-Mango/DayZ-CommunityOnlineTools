@@ -123,7 +123,6 @@ class UIActionSlider: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_Label )
 			m_Label.SetText( text );
 
@@ -286,19 +285,10 @@ class UIActionSlider: UIActionBase
 		if ( !m_Value )
 			return;
 
-		// Only a STRINGTABLE KEY goes through TranslateString - it looks up the
-		// key and hands back the raw "%1..." text untouched. A format built at
-		// runtime (e.g. "%1 / 125") is not a key, and translating it anyway
-		// silently ate the %1 token, leaving the literal tail with nothing
-		// substituted into it.
-		string fmt = m_Format;
-		if ( fmt.Length() > 0 && fmt.Substring( 0, 1 ) == "#" )
-			fmt = Widget.TranslateString( fmt );
-
 		if ( m_Step >= 1.0 )
-			m_Value.SetText( string.Format( fmt, Math.Round( m_Current ) ) );
+			m_Value.SetText( TranslateStringEx( m_Format, Math.Round( m_Current ).ToString() ) );
 		else
-			m_Value.SetText( string.Format( fmt, m_Current ) );
+			m_Value.SetText( TranslateStringEx( m_Format, m_Current.ToString() ) );
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )

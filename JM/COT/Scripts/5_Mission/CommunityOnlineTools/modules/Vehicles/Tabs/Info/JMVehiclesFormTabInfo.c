@@ -124,9 +124,9 @@ class JMVehiclesFormTabInfo: JMFormTab
 		if ( vehicle.m_OwnerName != "" )
 			m_VehicleInfoOwner.SetText( vehicle.m_OwnerName + " (" + vehicle.m_OwnerUID + ")" );
 		else if ( vehicle.m_LastDriverSteam != "" )
-			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverSteam + " (" + Widget.TranslateString( "#STR_COT_VEHICLE_LAST_DRIVER" ) + ")" );
+			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverSteam + " (" + "#STR_COT_VEHICLE_LAST_DRIVER" + ")" );
 		else if ( vehicle.m_LastDriverUID != "" )
-			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverUID + " (" + Widget.TranslateString( "#STR_COT_VEHICLE_LAST_DRIVER" ) + ")" );
+			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverUID + " (" + "#STR_COT_VEHICLE_LAST_DRIVER" + ")" );
 		else
 			m_VehicleInfoOwner.SetText( "#STR_COT_GENERIC_UNKNOWN" );
 

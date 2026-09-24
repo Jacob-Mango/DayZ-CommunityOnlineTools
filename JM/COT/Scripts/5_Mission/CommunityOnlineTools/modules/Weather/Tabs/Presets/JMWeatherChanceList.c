@@ -271,7 +271,7 @@ class JMWeatherChanceList
 		m_Options.Clear();
 
 		array<string> items = new array<string>;
-		items.Insert( Widget.TranslateString( m_AddHint ) );
+		items.Insert( m_AddHint );
 
 		for ( int i = 0; i < m_CandidateNames.Count(); i++ )
 		{

@@ -353,11 +353,11 @@ class JMWeatherFormTabOverview: JMFormTab
 		int nowKind  = JMWorldConditions.GetWeatherKind();
 		int nextKind = JMWorldConditions.GetForecastWeatherKind();
 
-		m_StateTextNow.SetText( Widget.TranslateString( JMWorldConditions.GetWeatherLabel( nowKind ) ) );
+		m_StateTextNow.SetText( JMWorldConditions.GetWeatherLabel( nowKind ) );
 		//! The countdown is part of the Next label rather than a widget of its
 		//! own, so it stays glued to the state it belongs to however long the
 		//! translated weather name turns out to be.
-		string nextLabel = Widget.TranslateString( JMWorldConditions.GetWeatherLabel( nextKind ) );
+		string nextLabel = JMWorldConditions.GetWeatherLabel( nextKind );
 
 		string countdown = JMWorldConditions.FormatSecondsToChange( JMWorldConditions.GetSecondsToWeatherChange() );
 
@@ -375,9 +375,9 @@ class JMWeatherFormTabOverview: JMFormTab
 		if ( m_StateHint )
 		{
 			if ( countdown != "" )
-				m_StateHint.SetText( Widget.TranslateString( "#STR_COT_WEATHER_STATE_HOLD" ) );
+				m_StateHint.SetText( "#STR_COT_WEATHER_STATE_HOLD" );
 			else
-				m_StateHint.SetText( Widget.TranslateString( "#STR_COT_WEATHER_STATE_NOCHANGE" ) );
+				m_StateHint.SetText( "#STR_COT_WEATHER_STATE_NOCHANGE" );
 		}
 
 		LoadStateIcon( m_StateIconNow, JMWorldConditions.GetWeatherIcon( nowKind, isNight ) );
@@ -385,7 +385,7 @@ class JMWeatherFormTabOverview: JMFormTab
 
 		int tod = JMWorldConditions.GetTimeOfDay( hour );
 
-		string clock = Widget.TranslateString( JMWorldConditions.GetTimeOfDayLabel( tod ) );
+		string clock = JMWorldConditions.GetTimeOfDayLabel( tod );
 		clock += "  " + JMWeatherFormTabTime.FormatClock( hour, minute );
 		clock += "  " + day + "/" + month + "/" + year;
 
@@ -453,7 +453,7 @@ class JMWeatherFormTabOverview: JMFormTab
 		if ( !active )
 			return;
 
-		m_StateSpecialText.SetText( Widget.TranslateString( label ) );
+		m_StateSpecialText.SetText( label );
 		m_StateSpecialText.SetColor( JMTheme.WARNING );
 		m_StateSpecialIcon.LoadImageFile( 0, icon );
 		m_StateSpecialIcon.SetImage( 0 );

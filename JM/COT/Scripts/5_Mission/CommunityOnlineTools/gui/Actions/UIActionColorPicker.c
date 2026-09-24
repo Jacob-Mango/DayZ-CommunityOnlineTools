@@ -195,7 +195,6 @@ class UIActionColorPicker: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_Label )
 			m_Label.SetText( text );
 	}

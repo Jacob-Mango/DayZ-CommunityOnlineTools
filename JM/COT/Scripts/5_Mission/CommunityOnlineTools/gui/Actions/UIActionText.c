@@ -147,7 +147,6 @@ class UIActionText: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_Label )
 			m_Label.SetText( text );
 	}
@@ -161,13 +160,13 @@ class UIActionText: UIActionBase
 		if ( m_ValueLeftAligned )
 		{
 			if ( m_Label )
-				m_Label.SetText( m_ActualText );
+				m_Label.SetText( text );
 
 			return;
 		}
 
 		if ( m_Text )
-			m_Text.SetText( m_ActualText );
+			m_Text.SetText( text );
 	}
 
 	override string GetText()

@@ -675,7 +675,7 @@ class JMTeleportForm: JMFormBase
 		if ( !players )
 			return;
 
-		string kindLabel = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_ROW_PLAYER" );
+		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_PLAYER";
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
@@ -715,7 +715,7 @@ class JMTeleportForm: JMFormBase
 		if ( !list )
 			return;
 
-		string kindLabel = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_ROW_VEHICLE" );
+		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_VEHICLE";
 
 		for ( int i = 0; i < list.Count(); i++ )
 		{
@@ -756,7 +756,7 @@ class JMTeleportForm: JMFormBase
 
 			string markerName = marker.GetName();
 			if ( markerName == "" )
-				markerName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_MARKER_DEFAULT_NAME" );
+				markerName = "#STR_COT_TELEPORT_MODULE_MARKER_DEFAULT_NAME";
 
 			//! The marker's own glyph, so a trader reads as a trader here the
 			//! same as it does on Expansion's map. GetIcon() resolves the
@@ -774,7 +774,7 @@ class JMTeleportForm: JMFormBase
 
 	protected void AppendMapMarkerRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
 	{
-		string kindLabel = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_ROW_MAP_MARKER" );
+		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_MAP_MARKER";
 
 		array< ref JMTeleportMapEntry > entries;
 		CollectMapMarkerEntries( entries );
@@ -801,7 +801,7 @@ class JMTeleportForm: JMFormBase
 
 		//! Every crash carries the same localized name; the ordinal is the
 		//! only thing that tells two of them apart in a list.
-		string crashName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER" );
+		string crashName = "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER";
 		int crashIndex = 0;
 
 #ifdef EXPANSIONMODAI
@@ -839,7 +839,7 @@ class JMTeleportForm: JMFormBase
 
 	protected void AppendHeliCrashRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
 	{
-		string crashName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER" );
+		string crashName = "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER";
 
 		if ( !PassesSearch( crashName, matcher ) )
 			return;
@@ -862,7 +862,7 @@ class JMTeleportForm: JMFormBase
 	{
 		entries = new array< ref JMTeleportMapEntry >();
 
-		string zoneName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER" );
+		string zoneName = "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER";
 		int zoneIndex = 0;
 
 #ifdef EXPANSIONMODMISSIONS
@@ -896,7 +896,7 @@ class JMTeleportForm: JMFormBase
 
 	protected void AppendToxicZoneRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
 	{
-		string zoneName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER" );
+		string zoneName = "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER";
 
 		if ( !PassesSearch( zoneName, matcher ) )
 			return;
@@ -1748,7 +1748,7 @@ class JMTeleportForm: JMFormBase
 		if ( !location )
 			return;
 
-		string delMsg = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_DELETE_LOCATION_CONFIRM_PREFIX" ) + location.Name + Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_DELETE_LOCATION_CONFIRM_SUFFIX" );
+		string delMsg = TranslateStringEx("#STR_COT_TELEPORT_MODULE_DELETE_LOCATION_CONFIRM", location.Name);
 
 		ConfirmAction( "#STR_COT_GENERIC_CONFIRM", delMsg, "OnDeleteLocation_Confirm", "#STR_COT_GENERIC_YES", "#STR_COT_GENERIC_NO" );
 	}
@@ -1759,7 +1759,7 @@ class JMTeleportForm: JMFormBase
 		if ( !location )
 			return;
 
-		COTCreateLocalAdminNotification( new StringLocaliser( Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_REMOVED_LOCATION_PREFIX" ) + location.Name ) );
+		COTCreateLocalAdminNotification( new StringLocaliser( TranslateStringEx( "#STR_COT_TELEPORT_MODULE_REMOVED_LOCATION", location.Name ) ) );
 
 		m_Module.RemoveLocation( location );
 

@@ -91,7 +91,7 @@ class UIActionFeedbackButton: UIActionButton
 	//! use SetFeedbackIcon( "" ) for a feedback face with no icon at all.
 	void SetFeedback( string text, string imagePath = "" )
 	{
-		m_FeedbackText = Widget.TranslateString( text );
+		m_FeedbackText = text;
 
 		if ( imagePath != "" )
 			m_FeedbackIcon = imagePath;
@@ -147,19 +147,18 @@ class UIActionFeedbackButton: UIActionButton
 	override void SetButton( string text )
 	{
 		string previous   = m_RestText;
-		string translated = Widget.TranslateString( text );
 
 		// The name is where GetButton() reads from, so it always carries the
 		// resting value - callers copy it to the clipboard mid-swap.
 		if ( m_Button )
-			m_Button.SetName( translated );
+			m_Button.SetName( text );
 
-		m_RestText = translated;
+		m_RestText = text;
 
 		if ( m_Phase == PHASE_IDLE )
 		{
 			if ( m_Text )
-				m_Text.SetText( translated );
+				m_Text.SetText( text );
 
 			return;
 		}

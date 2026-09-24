@@ -378,7 +378,7 @@ class JMESPFormTabFilters: JMFormTab
 				group.GroupToggle.SetChecked( visible > 0 && enabled >= visible );
 			}
 
-			group.GroupHeader.SetButton( string.Format( "%1  (%2/%3)", Widget.TranslateString( group.GroupLabel ), enabled, group.GroupRows.Count() ) );
+			group.GroupHeader.SetButton( string.Format( "%1  (%2/%3)", group.GroupLabel, enabled, group.GroupRows.Count() ) );
 		}
 	}
 

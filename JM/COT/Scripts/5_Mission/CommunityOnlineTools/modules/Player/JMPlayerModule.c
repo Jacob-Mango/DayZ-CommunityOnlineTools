@@ -1319,7 +1319,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			if ( IsMissionOffline() )
 			{
-				Message( GetPlayer(), Widget.TranslateString( "#STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE" ) );
+				Message( GetPlayer(), "#STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE" );
 			}
 		} else
 		{
@@ -1353,7 +1353,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			if ( IsMissionOffline() )
 			{
-				Message( GetPlayer(), Widget.TranslateString( "#STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE" ) );
+				Message( GetPlayer(), "#STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE" );
 			}
 		} else
 		{

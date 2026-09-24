@@ -54,7 +54,6 @@ class UIActionStepList: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_HeaderLabel )
 		{
 			m_HeaderLabel.SetText( text );

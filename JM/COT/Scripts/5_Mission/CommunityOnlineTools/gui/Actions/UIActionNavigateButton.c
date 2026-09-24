@@ -65,8 +65,6 @@ class UIActionNavigateButton: UIActionBase
 
 	override void SetButton( string text )
 	{
-		text = Widget.TranslateString( text );
-		
 		m_Text.SetText( text );
 	}
 

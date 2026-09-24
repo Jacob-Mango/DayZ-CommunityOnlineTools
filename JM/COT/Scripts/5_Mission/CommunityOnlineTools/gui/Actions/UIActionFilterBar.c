@@ -135,7 +135,7 @@ class UIActionFilterBar: UIActionBase
 			Class.CastTo( txt, btnWidget.FindAnyWidget( "label" ) );
 
 			if ( txt )
-				txt.SetText( Widget.TranslateString( label ) );
+				txt.SetText( label );
 
 			Widget fill = btnWidget.FindAnyWidget( "fill" );
 			Widget outline = btnWidget.FindAnyWidget( "outline" );

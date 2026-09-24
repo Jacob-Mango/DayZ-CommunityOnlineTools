@@ -14,8 +14,6 @@ class UIActionEditableTextPreview: UIActionEditableText
 
 	void SetTextPreview( string text )
 	{
-		text = Widget.TranslateString( text );
-		
 		m_TextPreview.SetText( text );
 	}
 

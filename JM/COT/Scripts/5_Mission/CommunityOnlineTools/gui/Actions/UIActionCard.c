@@ -276,7 +276,7 @@ class UIActionCard: UIActionBase
 		}
 
 		if ( m_HasHeader && m_Title )
-			m_Title.SetText( Widget.TranslateString( text ) );
+			m_Title.SetText( text );
 	}
 
 	override void Update( float timeSlice )

@@ -334,7 +334,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 
 		if (!isSelfOnly && count > 0)
-			COTCreateNotification( ident, new StringLocaliser( Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_TELEPORTED_PREFIX" ) + count.ToString() + Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_PLAYERS_SUFFIX" ) ) );
+			COTCreateNotification( ident, new StringLocaliser( COT_String.TranslateEx( "#STR_COT_TELEPORT_MODULE_TELEPORTED", count.ToString()  ) ) );
 	}
 
 	protected void RPC_Position( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -821,7 +821,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if (!player)
 			return;
 
-		Message(player, Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_YOUR_POSITION_IS" ) + player.GetPosition());
+		Message(player, "#STR_COT_TELEPORT_MODULE_YOUR_POSITION_IS" + player.GetPosition());
 	}
 
 	override void GetSubCommands(inout array<ref JMCommand> commands)

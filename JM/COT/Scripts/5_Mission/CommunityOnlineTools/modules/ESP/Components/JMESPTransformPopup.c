@@ -164,7 +164,7 @@ class JMESPTransformPopup: UIActionBase
 		{
 			TextWidget label;
 			if ( Class.CastTo( label, header.FindAnyWidget( "field_label" ) ) )
-				label.SetText( Widget.TranslateString( labelKey ) );
+				label.SetText( labelKey );
 
 			//! field_buttons is deliberately an exact structural twin of
 			//! popup_titlebar_buttons - same width-fits-its-buttons box,

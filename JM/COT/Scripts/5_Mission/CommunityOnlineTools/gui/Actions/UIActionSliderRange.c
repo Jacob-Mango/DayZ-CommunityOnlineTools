@@ -316,7 +316,6 @@ class UIActionSliderRange: UIActionBase
 
 	override void SetLabel( string text )
 	{
-		text = Widget.TranslateString( text );
 		if ( m_Label )
 			m_Label.SetText( text );
 	}
@@ -849,19 +848,17 @@ class UIActionSliderRange: UIActionBase
 	//! does not read as "19.999999%".
 	protected string FormatRange()
 	{
-		string fmt = Widget.TranslateString( m_Format );
-
 		//! One number in single mode. "30 - 30" is not a range, and reading it
 		//! as one is exactly the confusion the mode exists to remove.
 		if ( m_Single && m_Step >= 1.0 )
-			return string.Format( fmt, Math.Round( m_High ) );
+			return TranslateStringEx( m_Format, Math.Round( m_High ).ToString() );
 
 		if ( m_Single )
-			return string.Format( fmt, m_High );
+			return TranslateStringEx( m_Format, m_High.ToString() );
 
 		if ( m_Step >= 1.0 )
-			return string.Format( fmt, Math.Round( m_Low ) ) + " - " + string.Format( fmt, Math.Round( m_High ) );
+			return TranslateStringEx( m_Format, Math.Round( m_Low ).ToString() ) + " - " + string.Format( m_Format, Math.Round( m_High ).ToString() );
 
-		return string.Format( fmt, m_Low ) + " - " + string.Format( fmt, m_High );
+		return TranslateStringEx( m_Format, m_Low.ToString() ) + " - " + string.Format( m_Format, m_High.ToString() );
 	}
 }

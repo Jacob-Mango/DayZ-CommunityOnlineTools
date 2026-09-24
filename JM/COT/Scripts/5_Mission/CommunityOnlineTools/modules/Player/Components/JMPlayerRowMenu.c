@@ -204,7 +204,7 @@ class JMPlayerRowMenu
 
 		m_PendingRowMsgGuid = guid;
 
-		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", Widget.TranslateString( "#STR_COT_ESP_MODULE_MESSAGE_PROMPT" ) + " " + instance.GetName() + ":", "OnRowMessage_Confirm" );
+		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_ESP_MODULE_MESSAGE_PROMPT" + " " + instance.GetName() + ":", "OnRowMessage_Confirm" );
 	}
 
 	void OnRowMessage_Confirm( JMConfirmation confirmation = NULL )

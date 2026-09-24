@@ -186,7 +186,7 @@ class UIActionSearchBox: UIActionBase
 
 	void SetPlaceholder( string text )
 	{
-		m_PlaceholderText = Widget.TranslateString( text );
+		m_PlaceholderText = text;
 		UpdatePlaceholder();
 	}
 
@@ -201,7 +201,7 @@ class UIActionSearchBox: UIActionBase
 
 	void SetTextPreview( string text )
 	{
-		m_PreviewText = Widget.TranslateString( text );
+		m_PreviewText = text;
 		UpdatePreview();
 	}
 
@@ -278,7 +278,6 @@ class UIActionSearchBox: UIActionBase
 	{
 		if ( !m_Label )
 			return;
-		text = Widget.TranslateString( text );
 		m_Label.SetText( text );
 		m_Label.Show( text != "" );
 	}
