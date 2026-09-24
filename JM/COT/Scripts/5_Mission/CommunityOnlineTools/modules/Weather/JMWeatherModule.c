@@ -7,11 +7,19 @@ enum JMWeatherTypes
 	COUNT
 }
 
+enum JMWeatherBehavior
+{
+	UseWorldData,
+	UseForecastOnly,
+	Static
+}
+
 class JMWeatherModule: JMRenderableModuleBase
 {
 	protected ref JMWeatherSerialize settings;
 	protected ref JMWeatherPreset m_CachedWeatherPreset = new JMWeatherPreset;
 	protected bool m_bFreezeTime;
+	protected bool m_MissionWeather;
 
 	//! The dynamic weather state machine. Server only - clients never run one;
 	//! they read its position through m_Status.
@@ -138,6 +146,18 @@ class JMWeatherModule: JMRenderableModuleBase
 			Exec_DynamicWeather( config, NULL );
 		else
 			Send_DynamicWeather( config );
+	}
+
+	//! Switch between MissionWeather false (i.e. use WorldData weather state machine),
+	//! MissionWeather true (i.e. forecast only) and static weather (continue current
+	//! in-progress weather changes if any but stop computing changes in WorldData state machine)
+	//! Note that static weather is not the same as freezing time since time still progresses
+	void SetWeatherBehavior(JMWeatherBehavior mode)
+	{
+		if ( g_Game.IsServer() )
+			Exec_SetWeatherBehavior( mode, NULL );
+		else
+			Send_SetWeatherBehavior( mode );
 	}
 
 	void SetFog( float forecast, float time = 0, float minDuration = 0, float forecastHi = 0 )
@@ -275,6 +295,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		info.AddPermission( JMConstants.PERM_WEATHER_QUICKACTION_STORM );
 		info.AddPermission( JMConstants.PERM_WEATHER_QUICKACTION_DATE );
 		info.AddPermission( JMConstants.PERM_WEATHER_FREEZETIME );
+		info.AddPermission( JMConstants.PERM_WEATHER_BEHAVIOR );
 		info.AddPermission( JMConstants.PERM_WEATHER_DATE );
 		info.AddPermission( JMConstants.PERM_WEATHER_WIND );
 		info.AddPermission( JMConstants.PERM_WEATHER_WIND_FUNCPARAMS );
@@ -640,6 +661,13 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Write( config );
 		rpc.Send( NULL, JMWeatherModuleRPC.DynamicWeather, true, NULL );
 	}
+	
+	protected void Send_SetWeatherBehavior( JMWeatherBehavior mode )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( mode );
+		rpc.Send( NULL, JMWeatherModuleRPC.SetWeatherBehavior, true, NULL );
+	}
 
 	protected void Send_FreezeTime( bool state )
 	{
@@ -659,13 +687,19 @@ class JMWeatherModule: JMRenderableModuleBase
 			m_CachedWeatherPreset.StopCurrentChangesInProgress();
 
 			//! Step 2: Need to set mission weather to false so weather update freeze actually does something
-			weather.MissionWeather(false);
+			m_MissionWeather = weather.GetMissionWeather();
+
+			if (m_MissionWeather)
+				weather.MissionWeather(false);
 
 			g_Game.GetWorld().SetTimeMultiplier(0);
 		}
 		else
 		{
 			m_CachedWeatherPreset.ResumeCurrentChangesInProgress();
+
+			if (m_MissionWeather)
+				weather.MissionWeather(true);
 
 			g_Game.GetWorld().SetTimeMultiplier(-1);
 		}
@@ -838,6 +872,46 @@ class JMWeatherModule: JMRenderableModuleBase
 		SendWebhookColored( "DynamicWeather", dwInst, dwMsg, JMConstants.WEBHOOK_COLOR_INFO );
 
 		settings.Save();
+	}
+	
+	protected void RPC_SetWeatherBehavior( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		int mode;
+		if ( !ctx.Read( mode ) )
+			return;
+
+		if (!g_Game.IsServer())
+			return;
+
+		if ( !JMPermissions.HasRPC( "Weather.Behavior", senderRPC ) )
+			return;
+
+		Exec_SetWeatherBehavior( mode, senderRPC );
+	}
+
+	protected void Exec_SetWeatherBehavior( JMWeatherBehavior mode, PlayerIdentity ident )
+	{
+		Weather weather = g_Game.GetWeather();
+
+		switch (mode)
+		{
+			case JMWeatherBehavior.UseWorldData:
+				weather.MissionWeather(false);
+				weather.SetWeatherUpdateFreeze(false);
+				break;
+
+			case JMWeatherBehavior.UseForecastOnly:
+				weather.MissionWeather(true);
+				weather.SetWeatherUpdateFreeze(false);
+				break;
+
+			case JMWeatherBehavior.Static:
+				weather.MissionWeather(false);  //! Need to set mission weather to false so weather update freeze actually does something
+				weather.SetWeatherUpdateFreeze(true);
+				break;
+		}
+
+		m_MissionWeather = weather.GetMissionWeather();
 	}
 
 	//! What the weather starts as when the settings load.
@@ -1098,6 +1172,9 @@ class JMWeatherModule: JMRenderableModuleBase
 			break;
 		case JMWeatherModuleRPC.DynamicStatus:
 			RPC_DynamicStatus( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.SetWeatherBehavior:
+			RPC_SetWeatherBehavior( ctx, sender, target );
 			break;
 		default:
 			//! Everything else is a JMWeatherBase payload - see ReadPayload().

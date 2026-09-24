@@ -48,6 +48,7 @@ class JMConstants
 	static const string PERM_WEATHER_QUICKACTION_STORM            = "Weather.QuickAction.Storm";
 	static const string PERM_WEATHER_QUICKACTION_DATE             = "Weather.QuickAction.Date";
 	static const string PERM_WEATHER_FREEZETIME                   = "Weather.FreezeTime";
+	static const string PERM_WEATHER_BEHAVIOR                     = "Weather.Behavior";
 	static const string PERM_WEATHER_DATE                         = "Weather.Date";
 	static const string PERM_WEATHER_WIND                         = "Weather.Wind";
 	static const string PERM_WEATHER_WIND_FUNCPARAMS            = "Weather.Wind.FunctionParams";

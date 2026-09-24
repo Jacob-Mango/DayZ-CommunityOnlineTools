@@ -144,6 +144,7 @@ enum JMWeatherModuleRPC
 	UpdatePreset,
 	RemovePreset,
 	FreezeTime,
+	SetWeatherBehavior,
 	DynamicWeather,
 	Sandstorm,
 	SpecialWeatherStatus,
