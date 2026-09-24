@@ -1504,7 +1504,7 @@ STR_COT_VEHICLE_COOLANT,Coolant,Coolant,Chladicí kapalina,Kühlmittel,Охла�
 STR_COT_VEHICLE_SPEED,Speed,Speed,Rychlost,Geschwindigkeit,Скорость,Prędkość,Sebesség,Velocità,Velocidad,Vitesse,速度,速度,Velocidade,速度,
 STR_COT_VEHICLE_LOCK,Lock,Lock,Zámek,Schloss,Замок,Zamek,Zár,Blocco,Bloqueo,Verrou,鎖,ロック,Bloqueio,锁,
 STR_COT_VEHICLE_CREW,Crew,Crew,Posádka,Besatzung,Экипаж,Załoga,Legénység,Equipaggio,Tripulación,Équipage,乘員,乗員,Tripulação,乘员,
-STR_COT_GENERIC_NA,N/A,N/A,N/V,Н/Д,N/D,N/A,N/D,N/A,N/D,不適用,該当なし,N/D,不适用,
+STR_COT_GENERIC_NA,N/A,N/A,N/A,N/V,Н/Д,N/D,N/A,N/D,N/A,N/D,不適用,該当なし,N/D,不适用,
 STR_COT_VEHICLE_LOCKED,Locked,Locked,Zamčeno,Gesperrt,Заблокировано,Zablokowany,Zárva,Bloccato,Bloqueado,Verrouillé,已上鎖,ロック中,Bloqueado,已锁定,
 STR_COT_VEHICLE_UNLOCKED,Unlocked,Unlocked,Odemčeno,Entsperrt,Разблокировано,Odblokovaný,Nyitva,Sbloccato,Desbloqueado,Déverrouillé,未上鎖,ロック解除,Desbloqueado,未锁定,
 STR_COT_VEHICLE_KMH,km/h,km/h,km/h,км/ч,km/h,km/h,km/h,km/h,km/h,公里/小時,km/h,km/h,公里/小时,
