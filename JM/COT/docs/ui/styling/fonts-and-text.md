@@ -212,7 +212,7 @@ text "#STR_COT_PLAYER_LIST_HEADER"
 Localisation keys are resolved at layout-load time and in script when using
 native widget functions.
 Outside of that, use `Widget.TranslateString(stringId)` or
-`COT_String.TranslatEx(stringId, p1, p2, ...)` if you need to pass parameters
+`COT_String.TranslateEx(stringId, p1, p2, ...)` if you need to pass parameters
 for placeholders in the translated text:
 
 ```c
