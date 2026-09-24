@@ -205,17 +205,16 @@ modded class PlayerBase
 		playerVars[JMPlayerVariables.RAGDOLL] = COTIsRagdoll();
 
 		bool isSick = HasDisease();
+
+	#ifndef DAYZ_1_29
+		//! 1.30+
+		//! Deal with modifiers that do not call IncreaseDiseaseCount (might be a DayZ bug)
 		if ( !isSick && GetModifiersManager() )
 		{
-			isSick = GetModifiersManager().IsModifierActive( eModifiers.MDF_CHOLERA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_INFLUENZA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_SALMONELLA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_POISONING ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_WOUND_INFECTION1 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_WOUND_INFECTION2 );
-
-		#ifndef DAYZ_1_29
-			//! 1.30+
-			isSick |= GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE1 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE2 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE3 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE4 );
 			isSick |= GetModifiersManager().IsModifierActive( eModifiers.MDF_PARTICLES_BREATH ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_PARTICLES_EYES );
 			isSick |= GetModifiersManager().IsModifierActive( eModifiers.MDF_SANDSTORM_EXPOSURE_STATIC ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_SANDSTORM_EXPOSURE_DYNAMIC );
-		#endif
 		}
+	#endif
 
 		playerVars[JMPlayerVariables.SICK] = isSick;
 		playerVars[JMPlayerVariables.BLEEDING] = IsBleeding();
