@@ -193,11 +193,12 @@ it. `Unlink()` destroys the widget and all children.
 proto static string TranslateString(string stringId);
 ```
 
-Resolves `#STR_*` localisation keys. `text "#STR_KEY"` in a layout is
-auto-translated; calling `SetText(string)` from script is not — wrap it:
+Resolves `#STR_*` localisation keys. `"#STR_KEY"` is
+auto-translated  when using native widget functions.
 
 ```c
-m_Label.SetText( Widget.TranslateString(stringId) );
+m_Label.SetText( "#STR_KEY" );  //! Resolved automatically on widgets
+Print( Widget.TranslateString( "#STR_KEY" ) );  //! Explicit translation needed
 ```
 
 ## Global rendering knobs (static)

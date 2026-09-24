@@ -122,11 +122,26 @@ for readability over varied content).
 
 ## Localisation
 
-`text "#STR_KEY"` in a layout is auto-translated at load time. From
-script, you must translate manually:
+`text "#STR_KEY"` is auto-translated in layout  and in script when using
+native widget functions.
+Outside of that, use `Widget.TranslateString(stringId)` or
+`COT_String.TranslatEx(stringId, p1, p2, ...)` if you need to pass parameters
+for placeholders in the translated text:
 
 ```c
-m_Label.SetText( Widget.TranslateString("#STR_KEY") );
+m_Label.SetText( "#STR_KEY" );  //! Resolved automatically on widgets
+Print(Widget.TranslateString(stringId));  //! Explicit translation needed
+COT_String.TranslateEx("#STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF", "Godmode", "END");
+
+class SomeClass: COT_ScriptedWidgetEventHandler
+{
+    void SomeMethod()
+    {
+        //! TranslateStringEx is an alias for COT_String.TranslateEx and
+        //! available on any subclass inheriting from COT_ScriptedWidgetEventHandler
+        string example = TranslateStringEx("#STR_KEY", "A", "B", "C");
+    }
+}
 ```
 
 Unknown keys render as the key itself (e.g. `#STR_MISSING`).
