@@ -834,21 +834,29 @@ class JMPermissionManager
 
 	JMRole CreateRole( string name, array< string > data = null )
 	{
-		Assert_Null( Roles );
+		JMRole role;
 
-		JMRole role = GetRole( name );
-
-		if ( !role )
-		{
-			role = new JMRole( name );
-			Roles.Insert( name, role );
-		}
+		LoadRole( name, role );
 
 		if (data)
 		{
 			role.SerializedData.Copy( data );
 			role.Deserialize();
 		}
+
+		role.Save();
+
+		return role;
+	}
+
+	JMRole CreateRoleEx( string name, JMPermissionType type = JMPermissionType.INHERIT )
+	{
+		JMRole role;
+
+		LoadRole( name, role );
+
+		if ( type != JMPermissionType.INHERIT )
+			role.SetPermissionTypeRecursive( type );
 
 		role.Save();
 

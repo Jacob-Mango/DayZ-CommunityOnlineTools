@@ -292,6 +292,18 @@ class JMPermission : Managed
 		Children.Clear();
 	}
 
+	void SetPermissionTypeRecursive( JMPermissionType type = JMPermissionType.INHERIT )
+	{
+		foreach ( JMPermission child: Children )
+		{
+			if ( type != child.Type )
+				Root.m_Sync = true;
+
+			child.Type = type;
+			child.SetPermissionTypeRecursive( type );
+		}
+	}
+
 	void Serialize( array< string > output, string prepend = "" )
 	{
 		if (!Parent)

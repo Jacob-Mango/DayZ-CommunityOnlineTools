@@ -41,6 +41,11 @@ class JMRole : Managed
 		RootPermission.AddPermission( permission, type );
 	}
 
+	void SetPermissionTypeRecursive( JMPermissionType type = JMPermissionType.INHERIT )
+	{
+		RootPermission.SetPermissionTypeRecursive( type );
+	}
+
 	array< string > Serialize()
 	{
 		auto trace = CF_Trace_2(this, "Serialize").Add(Name).Add(RootPermission.Children.Count());
@@ -89,6 +94,7 @@ class JMRole : Managed
 
 		string filename = FileReadyStripName( Name );
 
+		RootPermission.Sort();
 		Serialize();
 
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.WRITE );

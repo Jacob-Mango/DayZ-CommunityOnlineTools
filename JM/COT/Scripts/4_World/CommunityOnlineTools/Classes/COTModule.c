@@ -161,25 +161,8 @@ class COTModule : JMModuleBase
 	//! creation deterministically. Idempotent - safe to call more than once.
 	static void EnsureDefaultRoles()
 	{
-		array< string > data = GetPermissionsManager().Serialize();
-
-		if ( !GetPermissionsManager().RoleExists( "everyone" ) )
-			GetPermissionsManager().CreateRole( "everyone", data );
-
-		//! Deliberately unconditional (not gated on RoleExists) - "admin" is
-		//! always recreated from the current permission set so it stays in
-		//! sync as mods register new permissions after boot.
-		{
-			for ( int i = 0; i < data.Count(); i++ )
-			{
-				string s = data[i];
-				s.Replace( "0", "2" );
-				data.Remove( i );
-				data.InsertAt( s, i );
-			}
-
-			GetPermissionsManager().CreateRole( "admin", data );
-		}
+		GetPermissionsManager().CreateRole( "everyone" );
+		GetPermissionsManager().CreateRoleEx( "admin", JMPermissionType.ALLOW );
 	}
 
 	//! Fold the in-progress session of every connected player into their total
