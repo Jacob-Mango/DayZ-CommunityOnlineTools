@@ -24,6 +24,7 @@ Range: `10400` – `10404` (`JMNamalskEventManagerRPC` in `RPC.c`)
 | `10402` | `CancelEVR` | Client → Server | Aborts active EVR storm sequence |
 | `10403` | `SetBlizzard` | Client → Server | Configures blizzard intensity and duration |
 | `10404` | `SetAurora` | Client → Server | Toggles visual aurora effects |
+| `10405` | `Log` | Server → Client | Log notification |
 
 ## Conditions
 

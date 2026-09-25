@@ -88,9 +88,10 @@ Cross-references use `[[double brackets]]` to mark related topics.
 - **"Engine truth"** boxes mark behaviour verified against the engine bindings; **"Convention"**
   boxes mark project-level conventions that aren't enforced by the engine.
 
-## Other COT UI docs
+## COT UI Action Components & Forms
 
-- [Module Form Patterns](module-form-patterns.md) — start here to build or maintain a COT form
+- [UI Action Components Guide](components-guide.md) — **START HERE**: complete developer guide to all `UIAction` components (buttons, sliders, inputs, toggles, prompts, tables, scrollers, filter menus, etc.) and when/how to use each
+- [Module Form Patterns](module-form-patterns.md) — start here to build or maintain a COT form: panel layouts, lazy tabs, overlays, permissions
 - [Forms](forms.md) — `JMFormBase` lifecycle, `UIActionManager`, confirmations, permission gating
 - [Window & Sidebar](window-and-sidebar.md) — `JMWindowBase`, `JMCOTSideBar`, `CommunityOnlineToolsBase`
 - [Filter Menus](filter-menus.md) — `UIActionFilterMenu` and `JMFilterRegistry`

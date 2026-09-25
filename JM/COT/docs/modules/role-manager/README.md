@@ -33,6 +33,6 @@ Range: `10500` – `10505` (`JMRoleManagerModuleRPC` in `RPC.c`)
 
 ## System Integration
 
-For detailed architectural rules on how permissions propagate, see [../systems/permissions.md](../systems/permissions.md).
+For detailed architectural rules on how permissions propagate, see [../../codebase/permissions-system.md](../../codebase/permissions-system.md).
 - **Default Roles**: COT ships with default roles (`Everyman`, `Admin`).
 - **Inheritance**: Roles can inherit permissions from parent roles.

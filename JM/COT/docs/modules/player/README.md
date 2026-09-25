@@ -1,15 +1,56 @@
 ---
-name: Player Form, Spectating, and Ban Flow
-description: JMPlayerForm player roster and tabs, stat slider ranges, spectating system internals, how the player list stays updated, ban lookup at login, PluginAdminLog webhook hooks
+name: Player Module
+description: Core player management overview, roster tabs, stat sliders, spectating system, player flows, and ban checks
 type: project
 ---
 
-## JMPlayerForm - roster and tabs
+## Overview
 
-File: `JM/COT/Scripts/5_Mission/CommunityOnlineTools/modules/Player/JMPlayerForm.c`
+The Player Module (`JMPlayerModule`) is the central module for player administration. It handles online player listing, player state modifications (godmode, freeze, invisibility, unconsciousness, bleeding, sickness), stat adjustments (health, blood, water, energy, stamina, heat), spectating, inventory inspection, and player action triggers (heal, strip, dry, kill, kick, ban).
 
-The form is a shell: it owns the selection (`JMPlayerInstance m_SelectedInstance`), the tab strip and the module. Everything
-else is a class it holds (see [../systems/module-folder-layout.md](../systems/module-folder-layout.md)).
+## Key Files
+
+- `Scripts/5_Mission/CommunityOnlineTools/modules/Player/JMPlayerModule.c` — Main player management module, RPC execution, spectator setup, server stat clamping
+- `Scripts/5_Mission/CommunityOnlineTools/modules/Player/JMPlayerForm.c` — Master player form container holding roster list and action tabs
+
+## RPC Range
+
+Range: `10340` – `10394` (`JMPlayerModuleRPC` in `RPC.c`)
+
+| ID | Name | Direction | Description |
+|---|---|---|---|
+| `10340` | `SetGodMode` | Client → Server | Toggles god mode on target player |
+| `10341` | `SetFreeze` | Client → Server | Toggles movement freeze state |
+| `10342` | `SetInvisibility` | Client → Server | Toggles character mesh invisibility |
+| `10343` | `SetHealth` | Client → Server | Sets player health slider value |
+| `10344` | `SetBlood` | Client → Server | Sets player blood slider value |
+| `10345` | `SetShock` | Client → Server | Sets player shock slider value |
+| `10346` | `SetEnergy` | Client → Server | Sets player energy/food value |
+| `10347` | `SetWater` | Client → Server | Sets player water/thirst value |
+| `10348` | `SetStamina` | Client → Server | Sets player max stamina |
+| `10350` | `Heal` | Client → Server | Fully restores health, blood, water, energy, and cures bleeding/sickness |
+| `10351` | `Strip` | Client → Server | Removes all clothing and inventory items from target player |
+| `10352` | `Kill` | Client → Server | Slays target player character |
+| `10353` | `StartSpectating` | Client ↔ Server | Initiates spectator camera focus on target player |
+| `10354` | `EndSpectating` | Client ↔ Server | Terminates spectating session and returns admin control |
+
+## Permissions
+
+- `PERM_PLAYER_VIEW` (`Player.View`) — Open player management form
+- `PERM_PLAYER_GOD` (`Player.God`) — Toggle godmode state
+- `PERM_PLAYER_FREEZE` (`Player.Freeze`) — Freeze/unfreeze player movement
+- `PERM_PLAYER_INVISIBLE` (`Player.Invisible`) — Toggle character invisibility
+- `PERM_PLAYER_HEAL` (`Player.Heal`) — Restore player stats / cure conditions
+- `PERM_PLAYER_KILL` (`Player.Kill`) — Kill player character
+- `PERM_PLAYER_SPECTATE` (`Player.Spectate`) — Spectate target player
+
+---
+
+## JMPlayerForm - Roster and Tabs
+
+File: `Scripts/5_Mission/CommunityOnlineTools/modules/Player/JMPlayerForm.c`
+
+The form is a shell: it owns the selection (`JMPlayerInstance m_SelectedInstance`), the tab strip and the module. Everything else is a class it holds (see [../../conventions/module-folder-layout.md](../../conventions/module-folder-layout.md)).
 
 **Left panel - `JMPlayerRoster`** (`Components/JMPlayerRoster.c`, filter in `JMPlayerRosterFilter.c`):
 
@@ -40,7 +81,7 @@ tab strip, never numbered):
 
 Roles and per-permission editing are done in the Role Manager module (`JMRoleManagerModule`), not in this form.
 
-### Stat sliders - ranges
+### Stat Sliders - Ranges
 
 The stat sliders are rows of the `JMPlayerStat` registry (`JMPlayerModule.RegisterStats()`); the server clamps to the
 `JMConstants.STAT_*_MIN/MAX` range regardless of what the slider allows.
@@ -56,9 +97,11 @@ The stat sliders are rows of the `JMPlayerStat` registry (`JMPlayerModule.Regist
 | HeatBuffer | 0-3, step 0.1 (sent x10) | 0-30 | |
 | HeatComfort | -0.75-0.75 | - | **READ-ONLY** (display only, `Disable()`d) |
 
+---
+
 ## Spectating System
 
-File: `JM/COT/Scripts/5_Mission/CommunityOnlineTools/modules/Player/JMPlayerModule.c`
+File: `Scripts/5_Mission/CommunityOnlineTools/modules/Player/JMPlayerModule.c`
 
 ### Start Spectating Flow
 
@@ -66,12 +109,11 @@ File: `JM/COT/Scripts/5_Mission/CommunityOnlineTools/modules/Player/JMPlayerModu
    - Blocked while in a vehicle; needs `PERM_PLAYER_SPECTATE`
    - Remembers the admin (`m_SpectatorClient`), `COT_TempDisableOnSelectPlayer()`, `COT_RememberVehicle()`
    - Sends `JMPlayerModuleRPC.StartSpectating`: the GUID variant writes the GUID and sends untargeted; the Object variant still
-     sends targeted (see the known exception in [../systems/rpc.md](../systems/rpc.md))
+     sends targeted (see [../../codebase/rpc-design.md](../../codebase/rpc-design.md))
 
 2. **Server:** `RPC_StartSpectating` -> `Server_StartSpectating( guid | object, ident )`; the `guid` overload resolves the player and
-   calls the `Object` one, which holds the body (DayZ-Expansion AI overrides it, see
-   [../systems/deprecations.md](../systems/deprecations.md)). It is `Server_`, not `Exec_`: it only runs on the server and has the
-   `Client_StartSpectating` counterpart ([../systems/naming.md](../systems/naming.md))
+   calls the `Object` one, which holds the body (DayZ-Expansion AI overrides it). It is `Server_`, not `Exec_`: it only runs on the server and has the
+   `Client_StartSpectating` counterpart ([../../conventions/naming-conventions.md](../../conventions/naming-conventions.md))
    - Checks `PERM_PLAYER_SPECTATE`; refuses self-spectate (`CANT_SPECTATE_SELF` notification)
    - Stores `m_Spectators[ident.GetId()] = playerSpectator`; `SetLastPosition()`; `COT_RememberVehicle()`
    - Sets `playerSpectator.m_JM_SpectatedObject = spectateObject`
@@ -99,6 +141,8 @@ End spectating keyboard shortcut: `UAPlayerModuleStopSpectating` (default: Numpa
 Camera positions are synced to the server via `UpdateSpectatorPositions()`, called every 1 s from `MissionServer.OnUpdate()`.
 Object lookup by network ID: `g_Game.GetObjectByNetworkId( networkLow, networkHigh )`.
 
+---
+
 ## Player List - How It Stays Updated
 
 Server push flow (triggered by the roster's `UpdatePlayerList()`):
@@ -117,6 +161,8 @@ Server push flow (triggered by the roster's `UpdatePlayerList()`):
 disconnected), `UpdateClient` (full player data, single), `UpdateClientPosition`, `SetClient` (your own data),
 `UpdateClientBatch`, `UpdateClientPositionBatch`. Ids are wire values and append-only - the two batch entries were added last
 and replace the old per-player unicast loop; the single-player `UpdateClient` still exists for one-off updates.
+
+---
 
 ## Ban System - Full Flow
 
@@ -169,35 +215,13 @@ protected bool IsCOTBanned( PlayerIdentity identity )
 
 `JMPlayerBan.Load` is a static that reads `$profile:CommunityOnlineTools\Bans\Bans.json` directly, so it works before
 `JMBanModule` has loaded. `IsActive()` on the record does the time check for the lookup. `DeleteBanFile()` no longer deletes a
-file: it returns whether a timed ban was marked expired (see [../systems/deprecations.md](../systems/deprecations.md)).
+file: it returns whether a timed ban was marked expired.
 
-### JMPlayerBan Structure
-
-```c
-class JMPlayerBan
-{
-    string SteamID;         // canonical ID for lookups (never PlayerName)
-    string PlayerName;      // display name at ban time
-    string Message;         // message shown on kick screen
-    int BannedAt;           // unix timestamp when banned
-    int BanDuration;        // -1 = permanent, else absolute expiry unix timestamp
-    string IssuedBy;        // admin steam ID
-    string IssuedByName;    // admin display name
-
-    bool IsPermanent()      { return BanDuration == -1; }
-    bool IsActive()         { /* check current time vs BanDuration */ }
-    string GetExpiryString() { /* returns "3d 2h 15m" / "Permanent" / "Expired" */ }
-}
-```
-
-Stored in one `Bans.json` via `JsonFileLoader<JMPlayerBanStore>`; `JMPlayerBanStore` has `array<ref JMPlayerBan> Bans`.
-`JMPlayerBan.Load` matches on SteamID (plain ID) or GUID. `JMBanModule.Ban()` takes a duration in **relative seconds** and
-stores the absolute expiry; it also prunes expired bans once a minute and offers `Unban` and `EditBanDuration`. (The old
-one-file-per-ban layout under `JMConstants.DIR_BANS` is gone; `JMPlayerBan.Save` is a deprecated forwarder to the module.)
+---
 
 ## PluginAdminLog - Webhook Hooks
 
-File: `JM/COT/Scripts/4_World/CommunityOnlineTools/Plugins/PluginAdminLog.c`
+File: `Scripts/4_World/CommunityOnlineTools/Plugins/PluginAdminLog.c`
 
 Hooks override parent `PluginAdminLog` methods:
 
