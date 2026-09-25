@@ -658,9 +658,14 @@ class JMESPActionMenu
 			AddPage( PAGE_ATTACHMENTS, "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS", JMConstants.Lucide( "puzzle" ), Perm( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT ) );
 
 		if ( !isStatic )
-		{
 			AddPage( PAGE_COPY, "#STR_COT_ESP_MODULE_MENU_COPY", JMConstants.Lucide( "copy" ) );
 
+		//! We can spectate anything, it's not limited to players
+		if ( m_Meta.target && ( m_Meta.networkLow || m_Meta.networkHigh ) )
+			Add( PREFIX_ACTION + "spectate", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", JMConstants.Lucide( "eye" ), Perm( JMConstants.PERM_PLAYER_SPECTATE ) );
+
+		if ( !isStatic )
+		{
 			//! Anything that can hold cargo can have it emptied - a tent, a crate, a
 			//! car boot. A player is skipped because the player page carries its own
 			//! clear cargo, routed through the player module for the logging.
@@ -1254,7 +1259,6 @@ class JMESPActionMenu
 		if ( !instance )
 			return;
 
-		Add( PREFIX_ACTION + "spectate", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", JMConstants.Lucide( "eye" ) );
 		Add( PREFIX_ACTION + "heal", "#STR_COT_ESP_MODULE_MENU_HEAL_ALL", JMConstants.Lucide( "heart-pulse" ), Perm( JMConstants.PERM_ESP_OBJECT_HEAL ) );
 
 		//! These are player states the player module already owns, so they are
