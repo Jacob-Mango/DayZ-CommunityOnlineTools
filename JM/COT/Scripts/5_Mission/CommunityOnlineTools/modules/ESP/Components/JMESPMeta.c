@@ -130,46 +130,16 @@ class JMESPMeta: COT_WidgetHolder
 		if ( widgetRoot )
 			return;
 
-		//! A pooled handler (JMESPWidgetHandler.s_Pool) already has its widget
-		//! tree built - reuse it and skip CreateWidgets() entirely. Falls back
-		//! to building a fresh one only when the pool has nothing free.
-		JMESPWidgetHandler pooled = JMESPWidgetHandler.TakeFromPool();
+		//! @note don't try to be cute and re-use widget handler from a pool, it won't work and will segfault the game
 
-		if ( pooled )
-		{
-			widgetHandler = pooled;
-			widgetRoot = pooled.GetLayoutRoot();
-		}
-		else
-		{
-			if ( !Class.CastTo( widgetRoot, g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER ) ) )
-				return;
+		if ( !Class.CastTo( widgetRoot, g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER ) ) )
+			return;
 
-			widgetRoot.GetScript( widgetHandler );
-			if ( !widgetHandler )
-				return;
-		}
+		widgetRoot.GetScript( widgetHandler );
+		if ( !widgetHandler )
+			return;
 
 		widgetHandler.SetInfo( this );
-	}
-
-	//! Returns this meta's widget to JMESPWidgetHandler's pool instead of
-	//! leaving it orphaned - see the pool's own comment for why that matters
-	//! on this engine version specifically. widgetRoot is cleared too: on
-	//! DAYZ_1_28 the destructor below still unlinks it directly, which would
-	//! otherwise destroy the very widget just handed to the pool for reuse.
-	override void Destroy()
-	{
-		if ( widgetHandler )
-		{
-			widgetHandler.SetInfo( NULL );
-			widgetHandler.ReturnToPool();
-
-			widgetHandler = NULL;
-			widgetRoot = NULL;
-		}
-
-		super.Destroy();
 	}
 
 	bool CanDelete()

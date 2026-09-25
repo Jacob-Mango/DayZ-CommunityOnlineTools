@@ -17,53 +17,6 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 	static JMESPModule espModule;
 	static bool UseClassName = false;
 
-	//! Widgets between uses, kept hidden rather than unlinked, so a new tag
-	//! reuses an existing widget tree instead of paying CreateWidgets() again
-	//! (measured ~3.5ms average per object during a dense-area population
-	//! burst). JMESPMeta.Destroy() returns its handler here instead of just
-	//! dropping the reference.
-	//!
-	//! This also closes a leak on this engine version: the widget teardown in
-	//! JMESPMeta's own destructor only ever ran under #ifdef DAYZ_1_28 (a
-	//! workaround this build's engine does not need), so a destroyed tag was
-	//! never actually unlinked on 1.29+ - it just sat invisible in the
-	//! ESP_CONTAINER tree forever. Reuse turns that into deliberate pooling.
-	static ref array< JMESPWidgetHandler > s_Pool = new array< JMESPWidgetHandler >;
-
-	//! Bound on how many hidden widgets stay pooled after a session that
-	//! briefly tracked an unusually large number of objects - past this, a
-	//! returned handler is unlinked for real instead of kept around.
-	static const int POOL_MAX = 500;
-
-	//! A free handler to reuse, or NULL if the pool is empty - the caller
-	//! falls back to building a fresh widget in that case.
-	static JMESPWidgetHandler TakeFromPool()
-	{
-		if ( s_Pool.Count() == 0 )
-			return NULL;
-
-		int last = s_Pool.Count() - 1;
-		JMESPWidgetHandler handler = s_Pool[last];
-
-		s_Pool.Remove( last );
-
-		return handler;
-	}
-
-	//! Gives this handler back for reuse once its meta has released it
-	//! (SetInfo( NULL ) already hid it and cleared Info). Unlinks for real
-	//! instead when the pool is already at its cap.
-	void ReturnToPool()
-	{
-		if ( s_Pool.Count() >= POOL_MAX )
-		{
-			DestroyWidget( layoutRoot );
-			return;
-		}
-
-		s_Pool.Insert( this );
-	}
-
 	//! Distance is the one part of the label an admin may not want: a wall of
 	//! tags reads faster without it.
 	static bool ShowDistance = true;
