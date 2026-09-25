@@ -661,7 +661,7 @@ class JMESPActionMenu
 			AddPage( PAGE_COPY, "#STR_COT_ESP_MODULE_MENU_COPY", JMConstants.Lucide( "copy" ) );
 
 		//! We can spectate anything, it's not limited to players
-		if ( m_Meta.target && ( m_Meta.networkLow || m_Meta.networkHigh ) )
+		if ( m_Meta.target && ( m_Meta.networkLow || m_Meta.networkHigh ) && g_Game.IsMultiplayer() )
 			Add( PREFIX_ACTION + "spectate", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", JMConstants.Lucide( "eye" ), Perm( JMConstants.PERM_PLAYER_SPECTATE ) );
 
 		if ( !isStatic )
