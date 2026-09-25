@@ -204,7 +204,9 @@ ctx.Read( s );
 
 **Never trust client-side permission state for server actions — always re-check on server.**
 
-## If we only have the network ID on client, don't send a targeted RPC (i.e. netid might have been acquired previously but object it belongs to moved out of client netbubble, so client object reference is then NULL and netid is all we have left to go by)
+## Targeted vs untargeted RPCs
+
+If we only have the network ID on client, don't send a targeted RPC (i.e. netid might have been acquired previously but object it belongs to moved out of client netbubble, so client object reference is then NULL and netid is all we have left to go by)
 
 **pattern** — send untargeted, carry the network id in the payload:
 
