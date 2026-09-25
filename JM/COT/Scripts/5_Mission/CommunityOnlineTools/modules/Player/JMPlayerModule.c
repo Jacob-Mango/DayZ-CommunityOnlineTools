@@ -1577,13 +1577,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, NULL );
 	}
 
-	protected void Exec_EndSpectating( PlayerIdentity ident )
-	{
-		Server_EndSpectating( ident );
-	}
-
-	//! DEPRECATED - override Exec_EndSpectating( ident ) instead. Holds the body so
-	//! DayZ-Expansion AI's `override Server_EndSpectating` keeps working.
+	//! @note methods meant to only run on server should not be prefixed Exec_,
+	//! that's reserved for methods that can run both on client or server
 	protected void Server_EndSpectating( PlayerIdentity ident )
 	{
 #ifdef JM_COT_DIAG_LOGGING
@@ -1736,7 +1731,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_SPECTATE, senderRPC ) )
 				return;
 
-			Exec_EndSpectating( senderRPC );
+			Server_EndSpectating( senderRPC );
 		} else
 		{
 			bool switchToPreviousCamera;
