@@ -1782,9 +1782,21 @@ class UIActionManager
 		CF_Window wnd = form.GetWindow();
 
 		if ( !root || !wnd )
+		{
+			if ( !root )
+				UIAMError( "CreateOverlayMenu failed: form.GetLayoutRoot() returned null", null, null );
+			else
+				UIAMError( "CreateOverlayMenu failed: form.GetWindow() returned null", root, null );
 			return null;
+		}
 
 		UIActionContextMenu menu = CreateContextMenu( root, wnd.GetWidgetRoot(), instance, funcname );
+		if ( !menu )
+		{
+			UIAMError( "CreateOverlayMenu failed: CreateContextMenu returned null", root, wnd.GetWidgetRoot() );
+			return null;
+		}
+
 		form.AddOverlay( menu );
 
 		return menu;
@@ -1792,9 +1804,9 @@ class UIActionManager
 
 	// ---------------------------------------------------------------------------
 	//  CreateOverlayFilterMenu - the same for a UIActionFilterMenu: created under the form,
-	//  anchored to its window, registered as an overlay, opening under `owner` (the filter
-	//  button's layout root) and serving the JMFilterRegistry `registryScope` ("" = none). `anchor`
-	//  overrides what the panel hangs off (default: the window root).
+	//  anchored above every window, registered as an overlay, opening under `owner` (the
+	//  filter button's layout root) and serving the JMFilterRegistry `registryScope` ("" = none).
+	//  `anchor` overrides what the panel hangs off (default: JMStatics.WINDOWS_CONTAINER).
 	//  Add pages, then call ToggleAt( owner ) from the button's handler.
 	// ---------------------------------------------------------------------------
 	static UIActionFilterMenu CreateOverlayFilterMenu( notnull JMFormBase form, notnull Widget owner, string registryScope = "", Widget anchor = null )
@@ -1803,16 +1815,33 @@ class UIActionManager
 		CF_Window wnd = form.GetWindow();
 
 		if ( !root || !wnd )
+		{
+			if ( !root )
+				UIAMError( "CreateOverlayFilterMenu failed: form.GetLayoutRoot() returned null", null, owner );
+			else
+				UIAMError( "CreateOverlayFilterMenu failed: form.GetWindow() returned null", root, owner );
 			return null;
+		}
 
-		//! The window root unless the caller has a better place for the panel to hang off.
+		//! JMStatics.WINDOWS_CONTAINER unless the caller has a better place for
+		//! the panel to hang off. Every COT window's own layoutRoot is a direct
+		//! child of WINDOWS_CONTAINER (see JMWindowManager.c) - parenting the
+		//! panel there instead of `wnd.GetWidgetRoot()` puts its SetSort(9999)
+		//! in the same sibling group as every window, not just this form's own,
+		//! so the menu no longer gets buried by whichever window last got
+		//! focus. Falls back to the window root if the container isn't up yet.
 		Widget panelAnchor = anchor;
+		if ( !panelAnchor )
+			panelAnchor = JMStatics.WINDOWS_CONTAINER;
 		if ( !panelAnchor )
 			panelAnchor = wnd.GetWidgetRoot();
 
 		UIActionFilterMenu menu = CreateFilterMenu( root, panelAnchor );
 		if ( !menu )
+		{
+			UIAMError( "CreateOverlayFilterMenu failed: CreateFilterMenu returned null", root, panelAnchor );
 			return null;
+		}
 
 		form.AddOverlay( menu.GetInnerMenu() );
 		menu.SetOwnerWidget( owner );
@@ -1827,9 +1856,21 @@ class UIActionManager
 		CF_Window wnd = form.GetWindow();
 
 		if ( !root || !wnd )
+		{
+			if ( !root )
+				UIAMError( "CreateOverlayPrompt failed: form.GetLayoutRoot() returned null", null, null );
+			else
+				UIAMError( "CreateOverlayPrompt failed: form.GetWindow() returned null", root, null );
 			return null;
+		}
 
 		UIActionValuePrompt prompt = CreateValuePrompt( root, wnd.GetWidgetRoot(), instance, funcname );
+		if ( !prompt )
+		{
+			UIAMError( "CreateOverlayPrompt failed: CreateValuePrompt returned null", root, wnd.GetWidgetRoot() );
+			return null;
+		}
+
 		form.AddOverlay( prompt );
 
 		return prompt;

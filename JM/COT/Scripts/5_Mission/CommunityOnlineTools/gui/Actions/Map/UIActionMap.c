@@ -351,6 +351,13 @@ class UIActionMap: UIActionBase
 		Class.CastTo( m_Map, layoutRoot.FindAnyWidget( "action_map" ) );
 		m_MapHost = layoutRoot.FindAnyWidget( "action_map_host" );
 
+		//! MapWidget is an RTT surface - it renders nothing outside the narrow
+		//! sort band the Preview Lab's live sweep found (see JMUILayout.
+		//! SORT_PREVIEW's note); this is that value, not a sibling-clearing
+		//! SetSort(9999).
+		if ( m_Map )
+			m_Map.SetSort( JMUILayout.SORT_PREVIEW );
+
 		m_Markers       = new array<ref JMMapMarker>;
 		m_ById          = new map<string, ref JMMapMarker>;
 		m_Widgets       = new map<string, ref JMUIActionMapMarker>;
@@ -361,6 +368,8 @@ class UIActionMap: UIActionBase
 
 		if ( m_Map )
 			m_Map.SetScale( DEFAULT_SCALE );
+
+		JMMarkerRegistry.PopulateMap( this );
 	}
 
 	override void OnShow() {}
@@ -526,8 +535,13 @@ class UIActionMap: UIActionBase
 			if ( m_SelectedId == id )
 				m_SelectedId = "";
 
-			if ( m_HoveredMarkerId == id )
-				m_HoveredMarkerId = "";
+			//! m_HoveredMarkerId is deliberately left alone here: the widget
+			//! usually survives via ParkWidget's reclaim pool (nothing re-added
+			//! it under the same id yet), and the cursor never actually left it,
+			//! so a reset now would fire a leave for a marker about to reappear
+			//! under the mouse unchanged. FlushParkedWidgets reconciles this a
+			//! frame later, once it is known whether the id was actually
+			//! reclaimed.
 
 			m_Markers.Remove( i );
 
@@ -604,6 +618,15 @@ class UIActionMap: UIActionBase
 	protected void FlushParkedWidgets()
 	{
 		m_FlushScheduled = false;
+
+		//! Only now is it known whether the hovered marker survived the
+		//! ClearLayer/AddMarker cycle under the same id. If it did not, its
+		//! widget was never going to fire a real MOUSE_LEAVE (the cursor never
+		//! left it, it just stopped existing), so the host has to be told here
+		//! or its hover card would stay open forever.
+		if ( m_HoveredMarkerId != "" && !m_ById.Contains( m_HoveredMarkerId ) )
+			NotifyMarkerHoverLeave( m_HoveredMarkerId );
+
 		m_ParkedWidgets.Clear();
 	}
 

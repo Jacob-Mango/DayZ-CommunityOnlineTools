@@ -49,7 +49,11 @@ class UIActionText: UIActionBase
 
 	void SetLabelHAlign( UIActionHAlign type )
 	{
-		if ( !m_Label ) return;
+		if ( !m_Label )
+		{
+			Error("[UIActionText] SetLabelHAlign failed: m_Label is null!");
+			return;
+		}
 		switch ( type )
 		{
 		case UIActionHAlign.CENTER:
@@ -71,7 +75,11 @@ class UIActionText: UIActionBase
 
 	void SetLabelVAlign( UIActionVAlign type )
 	{
-		if ( !m_Label ) return;
+		if ( !m_Label )
+		{
+			Error("[UIActionText] SetLabelVAlign failed: m_Label is null!");
+			return;
+		}
 		switch ( type )
 		{
 		case UIActionVAlign.CENTER:
@@ -82,7 +90,11 @@ class UIActionText: UIActionBase
 
 	void SetTextHAlign( UIActionHAlign type )
 	{
-		if ( !m_Text ) return;
+		if ( !m_Text )
+		{
+			Error("[UIActionText] SetTextHAlign failed: m_Text is null!");
+			return;
+		}
 		switch ( type )
 		{
 		case UIActionHAlign.CENTER:
@@ -96,7 +108,11 @@ class UIActionText: UIActionBase
 
 	void SetTextVAlign( UIActionVAlign type )
 	{
-		if ( !m_Text ) return;
+		if ( !m_Text )
+		{
+			Error("[UIActionText] SetTextVAlign failed: m_Text is null!");
+			return;
+		}
 		switch ( type )
 		{
 		case UIActionVAlign.CENTER:

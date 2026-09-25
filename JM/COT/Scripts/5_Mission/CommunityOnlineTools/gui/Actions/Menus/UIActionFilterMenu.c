@@ -143,7 +143,10 @@ class UIActionFilterMenu
 		m_Menu = UIActionManager.CreateContextMenu( parent, anchor, this, "OnClick_InnerMenu" );
 
 		if ( !m_Menu )
+		{
+			Error("[UIActionFilterMenu] InitFilterMenu failed: Could not create inner UIActionContextMenu (m_Menu is null)!");
 			return;
+		}
 
 		//! A row picking a value does not close the menu here by default -
 		//! ToggleAtButton/GoToPage/Refresh all rebuild in place instead, the
@@ -226,7 +229,10 @@ class UIActionFilterMenu
 	void ToggleAt( notnull Widget button )
 	{
 		if ( !m_Menu )
+		{
+			Error("[UIActionFilterMenu] ToggleAt failed: m_Menu is null!");
 			return;
+		}
 
 		if ( m_Menu.IsOpen() )
 		{
@@ -267,7 +273,10 @@ class UIActionFilterMenu
 	void MarkRow( string id, string icon, int textColor )
 	{
 		if ( !m_Menu )
+		{
+			Error("[UIActionFilterMenu] MarkRow failed: m_Menu is null!");
 			return;
+		}
 
 		m_Menu.SetItemIcon( id, icon );
 		m_Menu.SetItemTextColor( id, textColor );
@@ -279,7 +288,10 @@ class UIActionFilterMenu
 	void AddRow( string id, string label, string icon = "", int textColor = 0, bool enabled = true, string gotoPage = "" )
 	{
 		if ( !m_Menu )
+		{
+			Error("[UIActionFilterMenu] AddRow failed: m_Menu is null!");
 			return;
+		}
 
 		JMFilterMenuRow row = new JMFilterMenuRow();
 		row.Id       = id;
@@ -333,11 +345,17 @@ class UIActionFilterMenu
 	protected void RebuildCurrentPage()
 	{
 		if ( !m_Menu )
+		{
+			Error("[UIActionFilterMenu] RebuildCurrentPage failed: m_Menu is null!");
 			return;
+		}
 
 		JMFilterMenuPage page = m_Pages.Get( m_CurrentPage );
 		if ( !page )
+		{
+			Error("[UIActionFilterMenu] RebuildCurrentPage failed: page '" + m_CurrentPage + "' not found!");
 			return;
+		}
 
 		m_Menu.ClearItems();
 		m_CurrentRows = new array<ref JMFilterMenuRow>;
@@ -371,8 +389,14 @@ class UIActionFilterMenu
 
 	void OnClick_InnerMenu( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_Menu )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_Menu )
+		{
+			Error("[UIActionFilterMenu] OnClick_InnerMenu failed: m_Menu is null!");
+			return;
+		}
 
 		string id = m_Menu.GetLastClickedId();
 

@@ -35,6 +35,12 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 	{
 		m_Root = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/vehicles/Vehicles_Marker.layout", parent );
 
+		//! Sibling of the MapWidget under the same host panel - the map itself
+		//! sits at JMUILayout.SORT_PREVIEW, so a marker at the default sort (0)
+		//! drew underneath it. See JMUILayout.SORT_PREVIEW_OVERLAY's note.
+		if ( m_Root )
+			m_Root.SetSort( JMUILayout.SORT_PREVIEW_OVERLAY );
+
 		m_Name         = TextWidget.Cast( m_Root.FindAnyWidget( "marker_name" ) );
 		m_Icon         = ImageWidget.Cast( m_Root.FindAnyWidget( "marker_icon" ) );
 		m_MarkerButton = ButtonWidget.Cast( m_Root.FindAnyWidget( "marker_button" ) );
@@ -77,6 +83,21 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 	string GetId()
 	{
 		return m_Id;
+	}
+
+	//! Passthrough for the Preview Lab's live sort sweep - see JMExampleForm.c.
+	void SetSort( int sort )
+	{
+		if ( m_Root )
+			m_Root.SetSort( sort );
+	}
+
+	int GetSort()
+	{
+		if ( !m_Root )
+			return -1;
+
+		return m_Root.GetSort();
 	}
 
 	vector GetPosition()

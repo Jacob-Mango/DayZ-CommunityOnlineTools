@@ -209,7 +209,10 @@ class UIActionContextMenu: UIActionBase
 		m_Columns = columns;
 
 		if ( !m_Anchor )
+		{
+			Error("[UIActionContextMenu] SetColumns failed: m_Anchor is null!");
 			return;
+		}
 
 		Widget anchor = m_Anchor;
 
@@ -414,6 +417,10 @@ class UIActionContextMenu: UIActionBase
 			// mouse back, which is what looks like "the menu/sidebar closed".
 			JMStatics.AddOverlay( m_Panel );
 		}
+		else
+		{
+			Error("[UIActionContextMenu] InitMenu failed: Could not create widgets for panel layout " + PanelLayout());
+		}
 	}
 
 	void ClearItems()
@@ -488,7 +495,13 @@ class UIActionContextMenu: UIActionBase
 
 	void OpenAt( float screenX, float screenY )
 	{
-		if ( !m_Panel || m_Entries.Count() == 0 )
+		if ( !m_Panel )
+		{
+			Error("[UIActionContextMenu] OpenAt failed: m_Panel is null!");
+			return;
+		}
+
+		if ( m_Entries.Count() == 0 )
 			return;
 
 		#ifdef COT_DEBUGLOGS
@@ -534,7 +547,10 @@ class UIActionContextMenu: UIActionBase
 	protected void RebuildItems()
 	{
 		if ( !m_Grid )
+		{
+			Error("[UIActionContextMenu] RebuildItems failed: m_Grid is null!");
 			return;
+		}
 
 		Widget child = m_Grid.GetChildren();
 		while ( child )
@@ -609,7 +625,10 @@ class UIActionContextMenu: UIActionBase
 	protected void RefreshRowColors()
 	{
 		if ( !m_Grid )
+		{
+			Error("[UIActionContextMenu] RefreshRowColors failed: m_Grid is null!");
 			return;
+		}
 
 		Widget child = m_Grid.GetChildren();
 		int i = 0;
