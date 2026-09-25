@@ -59,7 +59,7 @@ PanelWidgetClass JMCOTSideBar {
    ignorepointer 1
    color 0.059 0.071 0.086 0.980
    position 0 0
-   size 1 130
+   size 1 152
    halign center_ref
    valign bottom_ref
    hexactpos 0
@@ -453,11 +453,111 @@ PanelWidgetClass JMCOTSideBar {
      "text halign" left
      "text valign" center
     }
+    PanelWidgetClass ft_position_row {
+     visible 1
+     ignorepointer 1
+     color 0 0 0 0
+     position 12 104
+     size 280 20
+     halign left_ref
+     valign top_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     {
+      ButtonWidgetClass ft_btn_position {
+       visible 1
+       ignorepointer 0
+       position 0 0
+       size 170 20
+       halign left_ref
+       valign top_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       style Empty
+       {
+        ImageWidgetClass ft_icon_position {
+         ignorepointer 1
+         color 0.561 0.600 0.624 1
+         position 0 2
+         size 15 15
+         halign left_ref
+         valign top_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "clamp mode" clamp
+         "stretch mode" stretch_w_h
+        }
+        TextWidgetClass ft_txt_position {
+         ignorepointer 1
+         color 0.925 0.976 1.000 1
+         position 22 0
+         size 238 20
+         halign left_ref
+         valign top_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text ""
+         font "gui/fonts/sdf_MetronLight36"
+         "exact text" 1
+         "exact text size" 15
+         "text halign" left
+         "text valign" center
+        }
+       }
+      }
+      ImageWidgetClass ft_icon_cardinal {
+       ignorepointer 1
+       color 0.561 0.600 0.624 1
+       position 176 2
+       size 13 13
+       halign left_ref
+       valign top_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
+      }
+      TextWidgetClass ft_txt_cardinal {
+       ignorepointer 1
+       color 0.925 0.976 1.000 0.7
+       position 191 0
+       size 30 20
+       halign left_ref
+       valign top_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text ""
+       font "gui/fonts/sdf_MetronLight36"
+       "exact text" 1
+       "exact text size" 13
+       "text halign" left
+       "text valign" center
+      }
+     }
+    }
     TextWidgetClass ft_txt_version {
      visible 1
      ignorepointer 1
      color 0.925 0.976 1.000 0.502
-     position 0 104
+     position 0 128
      size 1 18
      halign center_ref
      valign top_ref

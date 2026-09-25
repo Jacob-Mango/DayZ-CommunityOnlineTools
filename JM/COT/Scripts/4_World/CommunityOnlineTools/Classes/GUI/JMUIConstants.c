@@ -79,9 +79,41 @@ class JMUILayout
 	//
 	//  Ordering rationale: the sidebar is the floor, a category flyout must clear
 	//  the sidebar it springs from, and a module window must clear both.
-	static const int SORT_SIDEBAR = 900;
-	static const int SORT_FLYOUT  = 910;
-	static const int SORT_WINDOW  = 920;
+	//
+	//  All three sit above 999 - DayZ-Expansion's map marker widget
+	//  (ExpansionMapMarker.SetSort(999)) is also a direct workspace child, and
+	//  used to draw over every one of these. Do NOT raise WINDOWS_CONTAINER's
+	//  own sort to clear it instead - that blanks any descendant MapWidget /
+	//  ItemPreviewWidget (see the comment in COTModule.c where the container is
+	//  created); these constants only ever get applied to individual window/
+	//  sidebar/flyout layoutRoots, never the container itself.
+	static const int SORT_SIDEBAR = 1000;
+	static const int SORT_FLYOUT  = 10;
+	static const int SORT_WINDOW  = 20;
+
+	//! Gap BringFront leaves between one window's sort and the next, so the
+	//! just-focused window sits comfortably above every other open one, not
+	//! by a margin of 1.
+	static const int SORT_WINDOW_STEP = 10;
+
+	//! The earlier "200-299 narrow band, or the RTT pass produces nothing"
+	//! reading (2026-09-24) was measured through a Preview Lab slider that
+	//! had a bug of its own: it defaulted to SORT_WINDOW (1020) and silently
+	//! applied that to JMStatics.WINDOWS_CONTAINER on first use, even though
+	//! COTModule.c deliberately never raises that container (see its own
+	//! creation comment - a raised WINDOWS_CONTAINER blanks descendant RTT
+	//! widgets). Every "band" measurement was taken with the container
+	//! already wrongly at 1020, not at its real default of 0. With the lab
+	//! slider fixed to read the real starting value, sort 0 - the plain
+	//! engine default, no override at all - renders correctly. Left at 0
+	//! rather than removing the SetSort call sites entirely, so a future
+	//! finding that some other value is genuinely required is a one-line
+	//! change, not a rewrite.
+	static const int SORT_PREVIEW = 0;
+
+	//! See SORT_PREVIEW's note above - the same false "narrow band" reading
+	//! applied here too. 0 (the plain default) is what actually works.
+	static const int SORT_PREVIEW_OVERLAY = 0;
 }
 
 // =============================================================================

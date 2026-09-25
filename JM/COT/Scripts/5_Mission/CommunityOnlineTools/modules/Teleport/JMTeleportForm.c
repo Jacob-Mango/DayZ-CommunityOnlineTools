@@ -153,7 +153,6 @@ class JMTeleportForm: JMFormBase
 
 	// ---- Right pane --------------------------------------------------------
 	protected UIActionMap            m_Map;
-	protected ref UIActionMapController m_MapController;
 	protected UIActionCard           m_CoordsCard;
 	protected UIActionImageButton    m_BtnExpandMap;
 	protected UIActionEditableVector m_InputCoords;
@@ -375,17 +374,6 @@ class JMTeleportForm: JMFormBase
 		centerBtn.SetTooltip( "#STR_COT_TELEPORT_MODULE_CENTER_ON_ME_TOOLTIP" );
 
 		m_Map = UIActionManager.CreateMap( card.GetContent(), this, "OnClick_Map", MAP_HEIGHT );
-		m_MapController = UIActionManager.CreateMapController( m_Map, this, "OnClick_MapController" );
-	}
-
-	void OnClick_MapController( UIActionMapController controller )
-	{
-		if ( !controller )
-			return;
-
-		vector picked = controller.GetPickedWorldPosition();
-		if ( m_InputCoords )
-			m_InputCoords.SetValue( picked );
 	}
 
 	// =========================================================================
@@ -1112,7 +1100,10 @@ class JMTeleportForm: JMFormBase
 			m_RowMenu = UIActionManager.CreateOverlayMenu( this, this, "OnClick_RowMenu" );
 
 			if ( !m_RowMenu )
+			{
+				Error("[JMTeleportForm] OpenRowContextMenu failed: Could not create UIActionContextMenu (m_RowMenu is null)!");
 				return;
+			}
 
 			AddOverlay( m_RowMenu );
 		}
@@ -1153,8 +1144,14 @@ class JMTeleportForm: JMFormBase
 
 	void OnClick_RowMenu( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_RowMenu )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_RowMenu )
+		{
+			Error("[JMTeleportForm] OnClick_RowMenu failed: m_RowMenu is null!");
+			return;
+		}
 
 		string id = m_RowMenu.GetLastClickedId();
 
@@ -1406,7 +1403,10 @@ class JMTeleportForm: JMFormBase
 			m_MapMenu = UIActionManager.CreateOverlayMenu( this, this, "OnClick_MapMenu" );
 
 			if ( !m_MapMenu )
+			{
+				Error("[JMTeleportForm] OpenMapContextMenu failed: Could not create UIActionContextMenu (m_MapMenu is null)!");
 				return;
+			}
 
 			AddOverlay( m_MapMenu );
 
@@ -1425,8 +1425,14 @@ class JMTeleportForm: JMFormBase
 
 	void OnClick_MapMenu( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_MapMenu )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_MapMenu )
+		{
+			Error("[JMTeleportForm] OnClick_MapMenu failed: m_MapMenu is null!");
+			return;
+		}
 
 		string id = m_MapMenu.GetLastClickedId();
 

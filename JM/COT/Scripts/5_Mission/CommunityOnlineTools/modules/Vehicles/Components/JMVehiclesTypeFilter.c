@@ -63,15 +63,24 @@ class JMVehiclesTypeFilter
 	//! Mods add rows with JMFilterRegistry.Register( JMFilterRegistry.VEHICLES, ... ).
 	void OnClick_TypeFilters( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_FilterButton )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_FilterButton )
+		{
+			Error("[JMVehiclesTypeFilter] OnClick_TypeFilters failed: m_FilterButton is null!");
+			return;
+		}
 
 		if ( !m_FilterMenu )
 		{
 			m_FilterMenu = UIActionManager.CreateOverlayFilterMenu( m_Form, m_FilterButton.GetLayoutRoot(), JMFilterRegistry.VEHICLES );
 
 			if ( !m_FilterMenu )
+			{
+				Error("[JMVehiclesTypeFilter] OnClick_TypeFilters failed: Could not create UIActionFilterMenu (m_FilterMenu is null)!");
 				return;
+			}
 
 			m_FilterMenu.AddPage( "root", this, "BuildFilterRootPage", "", false, "", this, "OnFilterRootChange" );
 		}

@@ -223,13 +223,19 @@ class JMPermissionManager
 
 	bool HasPermission( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
 	{		
-		if ( IsMissionClient() ) 
+		if ( IsMissionClient() )
 		{
 			instance = GetClientPlayer();
 
 			if ( IsMissionHost() )
 				return true;
-			else if ( Assert_Null( instance ) )
+
+			//! Own client player is not registered yet during the connect race -
+			//! permission checks can run this early (sidebar Init, an incoming
+			//! RPC_UpdateRole) before it is. Expected and recoverable, same as
+			//! the other HasPermission() overload above - not a programming
+			//! mistake, so no Assert_Null spam for it.
+			if ( !instance )
 				return false;
 
 			return instance.HasPermission( permission );

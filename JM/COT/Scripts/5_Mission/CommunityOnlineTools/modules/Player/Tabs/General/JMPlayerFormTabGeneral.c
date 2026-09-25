@@ -156,6 +156,8 @@ class JMPlayerFormTabGeneral: JMFormTab
 		//! card that usually says nothing should not sit above the
 		//! identity and the stats an admin opened the tab for.
 		InitActionWidgetsStatuses( panel );
+
+		JMPlayerToggleRegistry.Populate( panel, m_Form );
 	}
 
 	//! Repaint identity badges and the vitals sliders from the selected player.
@@ -488,7 +490,10 @@ class JMPlayerFormTabGeneral: JMFormTab
 			m_StatusMenu = UIActionManager.CreateOverlayMenu( m_Form, this, "OnClick_StatusMenu" );
 
 			if ( !m_StatusMenu )
+			{
+				Error("[JMPlayerFormTabGeneral] OpenStatusContextMenu failed: Could not create UIActionContextMenu (m_StatusMenu is null)!");
 				return;
+			}
 		}
 
 		m_StatusMenuGUID = m_Form.m_SelectedInstance.GetGUID();
@@ -506,8 +511,14 @@ class JMPlayerFormTabGeneral: JMFormTab
 
 	void OnClick_StatusMenu( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_StatusMenu )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_StatusMenu )
+		{
+			Error("[JMPlayerFormTabGeneral] OnClick_StatusMenu failed: m_StatusMenu is null!");
+			return;
+		}
 
 		m_Form.RunStatusRepair( m_StatusMenu.GetLastClickedId(), m_StatusMenuGUID );
 	}

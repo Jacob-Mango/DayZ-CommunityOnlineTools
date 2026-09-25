@@ -474,7 +474,11 @@ class JMCameraForm: JMFormBase
 
 	void RefreshBookmarkSelectBox()
 	{
-		if ( !m_BookmarkSelectBox ) return;
+		if ( !m_BookmarkSelectBox )
+		{
+			Error("[JMCameraForm] RefreshBookmarkSelectBox failed: m_BookmarkSelectBox is null!");
+			return;
+		}
 		m_BookmarkNames = m_Module.GetBookmarkNames();
 		// Belt + suspenders: even though UIActionSelectBox.SetSelections seeds
 		// an empty array with "(empty)", guard here too so the call is

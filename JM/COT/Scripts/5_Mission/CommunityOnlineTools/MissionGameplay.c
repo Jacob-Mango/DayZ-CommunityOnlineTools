@@ -187,26 +187,6 @@ modded class MissionGameplay
 			espModule.CreateCanvas();
 	}
 
-	//! Preview Lab tentative H3 only. COT has never needed a scripted menu of
-	//! its own - its windows are workspace widgets - but every vanilla map and
-	//! item preview lives in one, and that is the last untested difference.
-	override UIScriptedMenu CreateScriptedMenu( int id )
-	{
-		if ( id == JMPreviewLabMenu.MENU_ID )
-			return new JMPreviewLabMenu();
-
-		if ( id == JMPreviewLabProbeMenu.MENU_ID )
-			return new JMPreviewLabProbeMenu();
-
-		if ( id == JMPreviewLayerMenu.MENU_ID )
-			return new JMPreviewLayerMenu();
-
-		if ( id == JMPreviewPrimerMenu.MENU_ID )
-			return new JMPreviewPrimerMenu();
-
-		return super.CreateScriptedMenu( id );
-	}
-
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();

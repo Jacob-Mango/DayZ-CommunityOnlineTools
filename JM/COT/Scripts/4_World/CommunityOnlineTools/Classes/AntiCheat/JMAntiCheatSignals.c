@@ -26,6 +26,13 @@ class JMAntiCheatSignals
 	static ref array< string > ShotGuids = new array< string >;
 	static ref array< int >    ShotAmmoCounts = new array< int >;
 
+	//! Same shot, index-matched: whether it came out jammed, and the weapon's
+	//! own server-side chance to jam at the moment it fired
+	//! (Weapon_Base.GetChanceToJam()). The module compares the observed jam
+	//! rate against the expected one over many shots.
+	static ref array< bool >  ShotJammed    = new array< bool >;
+	static ref array< float > ShotJamChance = new array< float >;
+
 	//! Deliberately small. These are drained every server frame, so a backlog
 	//! this deep already means the module is not running - in which case
 	//! keeping the events is pointless and dropping them is free.
@@ -59,7 +66,7 @@ class JMAntiCheatSignals
 		JMAntiCheatSanction.Grant( guid, JMAntiCheatSanction.MOVEMENT, JMAntiCheatSanction.MoveGraceSeconds );
 	}
 
-	static void ReportShot( string guid, int ammoCountAfter )
+	static void ReportShot( string guid, int ammoCountAfter, bool jammed, float jamChance )
 	{
 		if ( guid == "" )
 			return;
@@ -68,10 +75,14 @@ class JMAntiCheatSignals
 		{
 			ShotGuids.Remove( 0 );
 			ShotAmmoCounts.Remove( 0 );
+			ShotJammed.Remove( 0 );
+			ShotJamChance.Remove( 0 );
 		}
 
 		ShotGuids.Insert( guid );
 		ShotAmmoCounts.Insert( ammoCountAfter );
+		ShotJammed.Insert( jammed );
+		ShotJamChance.Insert( jamChance );
 	}
 
 	// -------------------------------------------------------------------------
@@ -99,10 +110,12 @@ class JMAntiCheatSignals
 		}
 	}
 
-	static void DrainShots( out array< string > guids, out array< int > ammoCounts )
+	static void DrainShots( out array< string > guids, out array< int > ammoCounts, out array< bool > jammed, out array< float > jamChances )
 	{
 		guids.Clear();
 		ammoCounts.Clear();
+		jammed.Clear();
+		jamChances.Clear();
 
 		int count = ShotGuids.Count();
 
@@ -110,12 +123,16 @@ class JMAntiCheatSignals
 		{
 			guids.Insert( ShotGuids.Get( i ) );
 			ammoCounts.Insert( ShotAmmoCounts.Get( i ) );
+			jammed.Insert( ShotJammed.Get( i ) );
+			jamChances.Insert( ShotJamChance.Get( i ) );
 		}
 
 		for ( int j = count - 1; j >= 0; j-- )
 		{
 			ShotGuids.Remove( j );
 			ShotAmmoCounts.Remove( j );
+			ShotJammed.Remove( j );
+			ShotJamChance.Remove( j );
 		}
 	}
 }

@@ -61,15 +61,24 @@ class JMPlayerRosterFilter
 	//! Mods add rows with JMFilterRegistry.Register( JMFilterRegistry.PLAYERS, ... ).
 	void OnClick_PlayerListFilters( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_PlayerListFilters )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_PlayerListFilters )
+		{
+			Error("[JMPlayerRosterFilter] OnClick_PlayerListFilters failed: m_PlayerListFilters is null!");
+			return;
+		}
 
 		if ( !m_Menu )
 		{
 			m_Menu = UIActionManager.CreateOverlayFilterMenu( m_Form, m_PlayerListFilters.GetLayoutRoot(), JMFilterRegistry.PLAYERS );
 
 			if ( !m_Menu )
+			{
+				Error("[JMPlayerRosterFilter] OnClick_PlayerListFilters failed: Could not create UIActionFilterMenu (m_Menu is null)!");
 				return;
+			}
 
 			m_Menu.AddPage( "root", this, "BuildFilterRootPage", "", false, "", this, "OnFilterRootChange" );
 		}

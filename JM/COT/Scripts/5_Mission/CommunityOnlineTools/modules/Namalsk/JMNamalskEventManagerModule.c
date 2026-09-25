@@ -173,7 +173,11 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 		g_Script.CallFunction(g_Game.GetMission(), "GetNamEventManager", m_EventManager, null);
 		Print("m_EventManager " + m_EventManager);
-		if (!m_EventManager) return;
+		if (!m_EventManager)
+		{
+			Error("[JMNamalskEventManagerModule] RetrievePossibleEvents failed: m_EventManager is null!");
+			return;
+		}
 		
 		//! Always returns empty, but we want all possible event types (also unregistered ones) anyway...
 		//map<typename, float> possibleEvents;
@@ -229,7 +233,11 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	{
 		auto trace = CF_Trace_0(this, "StartEvent");
 
-		if (!m_EventManager) return;
+		if (!m_EventManager)
+		{
+			Error("[JMNamalskEventManagerModule] StartEvent failed: m_EventManager is null!");
+			return;
+		}
 
 		Param2<typename, bool> parms = new Param2<typename, bool>(evt.ToType(), true);
 		g_Script.CallFunctionParams(m_EventManager, "StartEvent", null, parms);
@@ -239,7 +247,11 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	{
 		auto trace = CF_Trace_0(this, "CancelEvent");
 
-		if (!m_EventManager) return;
+		if (!m_EventManager)
+		{
+			Error("[JMNamalskEventManagerModule] CancelEvent failed: m_EventManager is null!");
+			return;
+		}
 
 		g_Script.CallFunction(m_EventManager, "CancelEvent", null, evt.ToType());
 	}

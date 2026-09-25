@@ -390,15 +390,21 @@ class JMVehiclesFormTabMap: JMFormTab
 
 		if ( !m_MarkerMenu )
 		{
-			if ( !m_Form.GetWindow() )
+			if ( !m_Form || !m_Form.GetWindow() )
+			{
+				Error("[JMVehiclesFormTabMap] OpenMarkerContextMenu failed: m_Form or m_Form.GetWindow() is null!");
 				return;
+			}
 
 			//! Anchored to the window root, not to the map panel: a menu
 			//! parented to the map would be clipped by it near the edges.
 			m_MarkerMenu = UIActionManager.CreateOverlayMenu( m_Form, this, "OnClick_MarkerMenu" );
 
 			if ( !m_MarkerMenu )
+			{
+				Error("[JMVehiclesFormTabMap] OpenMarkerContextMenu failed: Could not create UIActionContextMenu (m_MarkerMenu is null)!");
 				return;
+			}
 		}
 
 		m_MarkerMenuVehicle = vehicle;
@@ -461,8 +467,14 @@ class JMVehiclesFormTabMap: JMFormTab
 	{
 		JMVehiclesModule module = m_Form.GetModule();
 
-		if ( eid != UIEvent.CLICK || !m_MarkerMenu || !module )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_MarkerMenu || !module )
+		{
+			Error("[JMVehiclesFormTabMap] OnClick_MarkerMenu failed: m_MarkerMenu or module is null!");
+			return;
+		}
 
 		JMVehicleMetaData vehicle = m_MarkerMenuVehicle;
 

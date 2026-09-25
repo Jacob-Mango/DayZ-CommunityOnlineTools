@@ -52,6 +52,10 @@ class JMObjectSpawnerForm: JMFormBase
 	protected UIActionItemList m_ClassList;
 	protected ItemPreviewWidget m_ItemPreview;
 
+	//! Row context menu (right-click a class list row) - shares the same
+	//! Filter/Object/Categories actions the row's own buttons offer.
+	protected ref JMObjectSpawnerRowMenu m_RowMenu;
+
 	//! The preview's wrapper panel. The preview itself is no longer the layout
 	//! root: it now hangs inside a plainly-styled panel, the way vanilla's own
 	//! previews do, so it never inherits whatever style the engine has
@@ -118,7 +122,8 @@ class JMObjectSpawnerForm: JMFormBase
 		m_SpawnModeIds   = new TIntArray;
 		m_ExportModeIds  = new TIntArray;
 
-		m_Props = new JMObjectSpawnerProperties( this );
+		m_Props   = new JMObjectSpawnerProperties( this );
+		m_RowMenu = new JMObjectSpawnerRowMenu( this );
 	}
 
 	void ~JMObjectSpawnerForm()
@@ -317,6 +322,15 @@ class JMObjectSpawnerForm: JMFormBase
 
 		if ( m_ItemPreviewPanel )
 			Class.CastTo( m_ItemPreview, m_ItemPreviewPanel.FindAnyWidget( "object_preview" ) );
+
+		//! ItemPreviewWidget is an RTT surface - it renders nothing outside the
+		//! narrow sort band the Preview Lab's live sweep found (2026-09-24; see
+		//! JMUILayout.SORT_PREVIEW's note). The earlier read - that it only
+		//! renders inside a UIScriptedMenu - was a red herring from only ever
+		//! having tried sort 0 or 32000, never this band; a plain window child
+		//! at the right sort works fine, no render-layer menu needed.
+		if ( m_ItemPreview )
+			m_ItemPreview.SetSort( JMUILayout.SORT_PREVIEW );
 
 		m_Props.Build( rightContent );
 
@@ -597,6 +611,10 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid == UIEvent.CLICK )
 		{
 			UpdateItemPreview();
+
+			if ( m_ClassList.GetLastClickButton() == MouseState.RIGHT && m_RowMenu )
+				m_RowMenu.Open( GetCurrentSelection() );
+
 			return;
 		}
 
@@ -762,18 +780,7 @@ class JMObjectSpawnerForm: JMFormBase
 				clipboardOutput += "<types>\n";
 
 				for ( int j = 0; j < m_ListClasses.Count(); j++ )
-				{
-					clipboardOutput += "	<type name=\"" + m_ListClasses[j] + "\">\n";
-					clipboardOutput += "		<nominal>0</nominal>\n";
-					clipboardOutput += "		<lifetime>3888000</lifetime>\n";
-					clipboardOutput += "		<restock>0</restock>\n";
-					clipboardOutput += "		<min>0</min>\n";
-					clipboardOutput += "		<quantmin>-1</quantmin>\n";
-					clipboardOutput += "		<quantmax>-1</quantmax>\n";
-					clipboardOutput += "		<cost>100</cost>\n";
-					clipboardOutput += "		<flags count_in_cargo=\"0\" count_in_hoarder=\"0\" count_in_map=\"1\" count_in_player=\"0\" crafted=\"0\" deloot=\"0\"/>\n";
-					clipboardOutput += "	</type>\n";
-				}
+					clipboardOutput += BuildTypesXmlEntry( m_ListClasses[j] );
 
 				clipboardOutput += "</types>";
 				COTFeedback.Copy( clipboardOutput );
@@ -803,6 +810,47 @@ class JMObjectSpawnerForm: JMFormBase
 		#endif
 		}
 	}
+
+	//! One <type> block for `className` - the same shape ExportList's TYPES
+	//! mode writes for every row, shared so the row menu's single-item copy
+	//! matches the list export exactly.
+	string BuildTypesXmlEntry( string className )
+	{
+		string entry = "	<type name=\"" + className + "\">\n";
+		entry += "		<nominal>0</nominal>\n";
+		entry += "		<lifetime>3888000</lifetime>\n";
+		entry += "		<restock>0</restock>\n";
+		entry += "		<min>0</min>\n";
+		entry += "		<quantmin>-1</quantmin>\n";
+		entry += "		<quantmax>-1</quantmax>\n";
+		entry += "		<cost>100</cost>\n";
+		entry += "		<flags count_in_cargo=\"0\" count_in_hoarder=\"0\" count_in_map=\"1\" count_in_player=\"0\" crafted=\"0\" deloot=\"0\"/>\n";
+		entry += "	</type>\n";
+		return entry;
+	}
+
+#ifdef DZ_Expansion_Market
+	//! A one-item Expansion market category, same shape ExportList's
+	//! COPYLISTEXPMARKET mode writes for the whole list - the row menu's
+	//! single-item equivalent.
+	void CopyMarketEntry( string className )
+	{
+		auto category = new ExpansionMarketCategory();
+		category.Defaults();
+		category.DisplayName = className;
+
+		auto item = new ExpansionMarketItem( -1, className, 100, 100, 1, 1 );
+		category.Items.Insert( item );
+
+		string categoryJSON;
+		string errorMsg;
+
+		if ( JsonFileLoader<ExpansionMarketCategory>.MakeData( category, categoryJSON, errorMsg ) )
+			COTFeedback.Copy( categoryJSON );
+		else
+			COTCreateLocalAdminNotification( new StringLocaliser( errorMsg ) );
+	}
+#endif
 
 	void SpawnObject(int mode = COT_ObjectSpawnerMode.CURSOR)
 	{

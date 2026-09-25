@@ -303,8 +303,17 @@ class JMESPActionMenu
 
 	void Open( JMESPMeta meta, float x, float y )
 	{
-		if ( !m_Menu || !meta || !meta.target )
+		if ( !m_Menu )
+		{
+			Error("[JMESPActionMenu] Open failed: m_Menu is null!");
 			return;
+		}
+
+		if ( !meta || !meta.target )
+		{
+			Error("[JMESPActionMenu] Open failed: meta or meta.target is null!");
+			return;
+		}
 
 		m_Meta    = meta;
 		m_Page    = PAGE_MAIN;
@@ -660,6 +669,8 @@ class JMESPActionMenu
 
 			Add( PREFIX_ACTION + "delete", "#STR_COT_GENERIC_DELETE", JMConstants.ICON_TRASH_CAN, Perm( JMConstants.PERM_ESP_OBJECT_DELETE ) && m_Meta.CanDelete(), JMTheme.DANGER );
 		}
+
+		JMContextMenuRegistry.Populate( "3DWorld", m_Menu );
 	}
 
 	protected void BuildTransform()

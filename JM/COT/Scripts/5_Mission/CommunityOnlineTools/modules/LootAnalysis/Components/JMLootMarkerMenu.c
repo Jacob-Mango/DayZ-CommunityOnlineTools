@@ -31,13 +31,19 @@ class JMLootMarkerMenu
 
 		if (!m_MarkerMenu)
 		{
-			if (!m_Form.GetWindow())
+			if (!m_Form || !m_Form.GetWindow())
+			{
+				Error("[JMLootMarkerMenu] Show failed: m_Form or m_Form.GetWindow() is null!");
 				return;
+			}
 
 			m_MarkerMenu = UIActionManager.CreateOverlayMenu( m_Form, this, "OnClick_MarkerMenu" );
 
 			if (!m_MarkerMenu)
+			{
+				Error("[JMLootMarkerMenu] Show failed: Could not create UIActionContextMenu (m_MarkerMenu is null)!");
 				return;
+			}
 
 			m_Form.AddOverlay(m_MarkerMenu);
 		}
@@ -67,8 +73,14 @@ class JMLootMarkerMenu
 
 	void OnClick_MarkerMenu(UIEvent eid, UIActionBase action)
 	{
-		if (eid != UIEvent.CLICK || !m_MarkerMenu)
+		if (eid != UIEvent.CLICK)
 			return;
+
+		if (!m_MarkerMenu)
+		{
+			Error("[JMLootMarkerMenu] OnClick_MarkerMenu failed: m_MarkerMenu is null!");
+			return;
+		}
 
 		string id = m_MarkerMenu.GetLastClickedId();
 

@@ -1316,6 +1316,11 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
+	//! Hard ceiling on a single CreateNewWidgets() pass, and the time budget it
+	//! normally stops at first - see the comment inside the method.
+	protected const int CREATE_MAX_PER_PASS = 10;
+	protected const int CREATE_BUDGET_MS = 4;
+
 	protected void CreateNewWidgets()
 	{
 		#ifdef JM_COT_ESP_DEBUG
@@ -1332,13 +1337,19 @@ class JMESPModule: JMRenderableModuleBase
 
 		m_IsCreatingWidgets = true;
 
-		int count = m_ESPToCreate.Count();
+		//! Time-budgeted rather than a flat item count: CreateWidgets() cost per
+		//! object varies a lot (measured ~3.5ms average during a dense-area
+		//! population burst, sometimes far more), so a fixed count either wastes
+		//! the pass on a cheap batch or spikes frame time on an expensive one.
+		//! CREATE_MAX_PER_PASS is still a hard ceiling in case the clock does
+		//! not advance (very low-res timer, or a single item's create call
+		//! blowing well past the budget on its own).
+		int startMs = g_Game.GetTime();
+		int created = 0;
 
-		if (count > 10)
-			count = 10;
-
-		for ( int i = count - 1; i >= 0; i-- )
+		while ( m_ESPToCreate.Count() > 0 )
 		{
+			int i = m_ESPToCreate.Count() - 1;
 			JMESPMeta meta = m_ESPToCreate[i];
 
 			meta.Create( this );
@@ -1346,8 +1357,28 @@ class JMESPModule: JMRenderableModuleBase
 			m_ActiveESPObjects.Insert( meta );
 
 			m_ESPToCreate.Remove(i);
+
+			created++;
+
+			if ( created >= CREATE_MAX_PER_PASS )
+				break;
+
+			if ( g_Game.GetTime() - startMs >= CREATE_BUDGET_MS )
+				break;
 		}
-		
+
+		int activeCountBeforeCreate = m_ActiveESPObjects.Count() - created;
+
+		if ( created > 0 )
+			JMScriptInvokers.ESP_TRACKED_LIST_CHANGED.Invoke();
+
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		if ( created > 0 )
+			Print( "  JMESPModule::CreateNewWidgets - active " + activeCountBeforeCreate + " -> " + m_ActiveESPObjects.Count() + " (created " + created + " in " + ( g_Game.GetTime() - startMs ) + "ms)" );
+		#endif
+		#endif
+
 		if (m_ESPToCreate.Count() > 0)
 			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CreateNewWidgets, 10, false);
 		else
@@ -1402,6 +1433,18 @@ class JMESPModule: JMRenderableModuleBase
 
 			m_ESPToDestroy.Remove(i);
 		}
+
+		int activeCountBeforeDestroy = m_ActiveESPObjects.Count() + count;
+
+		if ( count > 0 )
+			JMScriptInvokers.ESP_TRACKED_LIST_CHANGED.Invoke();
+
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		if ( count > 0 )
+			Print( "  JMESPModule::DestroyOldWidgets - active " + activeCountBeforeDestroy + " -> " + m_ActiveESPObjects.Count() );
+		#endif
+		#endif
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "  Clearing m_ESPToDestroy" );
@@ -1616,6 +1659,20 @@ class JMESPModule: JMRenderableModuleBase
 					bool requireAllKeywords;
 					TStringArray keywords = filter.KeywordSearch_Prepare(requireAllKeywords);
 
+					//! Hoisted out of the object loop below: HasPermission/View do
+					//! not change mid-scan, so this was rebuilding the exact same
+					//! filtered list once per untracked candidate object - with a
+					//! dense area meaning thousands of candidates, that is
+					//! thousands of redundant walks of every registered view type.
+					array< JMESPViewType > validViewTypes = new array< JMESPViewType >;
+					for ( int vt = 0; vt < m_ViewTypes.Count(); vt++ )
+					{
+						if ( m_ViewTypes[vt].HasPermission && m_ViewTypes[vt].View )
+						{
+							validViewTypes.Insert( m_ViewTypes[vt] );
+						}
+					}
+
 					for ( int i = 0; i < objects.Count(); ++i )
 					{
 						Object obj = objects[i];
@@ -1671,16 +1728,7 @@ class JMESPModule: JMRenderableModuleBase
 						}
 						else
 						{
-							array< JMESPViewType > validViewTypes = new array< JMESPViewType >;
-							for ( int j = 0; j < m_ViewTypes.Count(); j++ )
-							{
-								if ( m_ViewTypes[j].HasPermission && m_ViewTypes[j].View )
-								{
-									validViewTypes.Insert( m_ViewTypes[j] );
-								}
-							}
-
-							for ( j = 0; j < validViewTypes.Count(); j++ )
+							for ( int j = 0; j < validViewTypes.Count(); j++ )
 							{
 								#ifdef JM_COT_ESP_DEBUG
 								bool viewTypeIsValid = validViewTypes[j].IsValid( obj, meta );

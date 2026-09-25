@@ -1,5 +1,10 @@
 //! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
-#define COT_DEBUGLOGS
+//! COT_DEBUGLOGS is NOT defined here on purpose: this file's Print()s sit on the
+//! ESP widget lifecycle (SetInfo/Show/Hide, one tag per tracked object), which
+//! fires in bursts of dozens to hundreds whenever the tracked set changes.
+//! An unconditional file-scope define here made every build pay that Print()
+//! volume - define both JM_COT_ESP_DEBUG and COT_DEBUGLOGS locally to opt in
+//! while chasing an ESP bug.
 
 //! The world-space tag for one tracked object.
 //!
@@ -11,6 +16,53 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 	static JMESPForm espMenu;
 	static JMESPModule espModule;
 	static bool UseClassName = false;
+
+	//! Widgets between uses, kept hidden rather than unlinked, so a new tag
+	//! reuses an existing widget tree instead of paying CreateWidgets() again
+	//! (measured ~3.5ms average per object during a dense-area population
+	//! burst). JMESPMeta.Destroy() returns its handler here instead of just
+	//! dropping the reference.
+	//!
+	//! This also closes a leak on this engine version: the widget teardown in
+	//! JMESPMeta's own destructor only ever ran under #ifdef DAYZ_1_28 (a
+	//! workaround this build's engine does not need), so a destroyed tag was
+	//! never actually unlinked on 1.29+ - it just sat invisible in the
+	//! ESP_CONTAINER tree forever. Reuse turns that into deliberate pooling.
+	static ref array< JMESPWidgetHandler > s_Pool = new array< JMESPWidgetHandler >;
+
+	//! Bound on how many hidden widgets stay pooled after a session that
+	//! briefly tracked an unusually large number of objects - past this, a
+	//! returned handler is unlinked for real instead of kept around.
+	static const int POOL_MAX = 500;
+
+	//! A free handler to reuse, or NULL if the pool is empty - the caller
+	//! falls back to building a fresh widget in that case.
+	static JMESPWidgetHandler TakeFromPool()
+	{
+		if ( s_Pool.Count() == 0 )
+			return NULL;
+
+		int last = s_Pool.Count() - 1;
+		JMESPWidgetHandler handler = s_Pool[last];
+
+		s_Pool.Remove( last );
+
+		return handler;
+	}
+
+	//! Gives this handler back for reuse once its meta has released it
+	//! (SetInfo( NULL ) already hid it and cleared Info). Unlinks for real
+	//! instead when the pool is already at its cap.
+	void ReturnToPool()
+	{
+		if ( s_Pool.Count() >= POOL_MAX )
+		{
+			DestroyWidget( layoutRoot );
+			return;
+		}
+
+		s_Pool.Insert( this );
+	}
 
 	//! Distance is the one part of the label an admin may not want: a wall of
 	//! tags reads faster without it.
@@ -204,8 +256,10 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 	void SetInfo( JMESPMeta info )
 	{
+		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		Print( "+JMESPWidgetHandler::SetInfo" );
+		#endif
 		#endif
 
 		Info = info;
@@ -225,12 +279,24 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		ApplyCategoryColour();
 
+		//! Forces Update()'s next tick to do a full repaint rather than skip it
+		//! as unchanged - this handler may be a pooled one that just belonged
+		//! to a different object, whose text/width/health could otherwise
+		//! coincidentally match this one's first frame (same name and rounded
+		//! distance is common in a stack of identical loot).
+		m_LastRenderedText = "";
+		m_LastRenderedWidth = 0;
+		m_LastHealthVisible = false;
+		m_LastHealthLevel = -1;
+
 		ShowOnScreen = true;
 
 		Show();
 
+		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		Print( "-JMESPWidgetHandler::SetInfo" );
+		#endif
 		#endif
 	}
 
@@ -318,29 +384,39 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 	void Show()
 	{
+		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		Print( "+JMESPWidgetHandler::Show" );
 		#endif
+		#endif
 
 		layoutRoot.Show( true );
+		m_WasShown = true;
 		OnShow();
 
+		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		Print( "-JMESPWidgetHandler::Show" );
+		#endif
 		#endif
 	}
 
 	void Hide()
 	{
+		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		Print( "+JMESPWidgetHandler::Hide" );
+		#endif
 		#endif
 
 		OnHide();
 		layoutRoot.Show( false );
+		m_WasShown = false;
 
+		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		Print( "-JMESPWidgetHandler::Hide" );
+		#endif
 		#endif
 	}
 
@@ -401,8 +477,46 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 		return position;
 	}
 
+	//! JM_COT_ESP_DEBUG diagnostics: how often Update() actually redoes the
+	//! expensive on-screen work (text measure + resize) vs how often the same
+	//! text/width was already there - one active ESP session runs this for
+	//! every tracked tag, every client frame. Aggregated and printed once a
+	//! second (not per call) so turning this on does not itself become the
+	//! next thing tanking the framerate.
+	static int s_UpdateTicks;
+	static int s_OnScreenTicks;
+	static int s_RedundantTextSets;
+	static int s_RedundantSizeSets;
+	static int s_LastReportMs;
+	protected string m_LastRenderedText;
+	protected float m_LastRenderedWidth;
+	protected float m_LastMeasuredTextWidth;
+	protected bool m_LastHealthVisible;
+	protected int m_LastHealthLevel = -1;
+
+	//! Whether layoutRoot's engine-side Show() state is currently true - kept
+	//! in sync by every path that changes it (Update(), Show(), Hide()), so
+	//! Show(true)/Show(false) only actually reaches the engine on the frame
+	//! the tag's visibility edge changes, not on every one of thousands of
+	//! frames it stays exactly as it already was.
+	protected bool m_WasShown;
+
+	//! Screen resolution is one engine-wide value, not a per-tag one. Shared
+	//! across every JMESPWidgetHandler instead of each of possibly thousands
+	//! of active tags calling GetScreenSize() itself every frame for an
+	//! identical answer - refreshed at most once per distinct game-time ms.
+	static int s_ScreenWidth;
+	static int s_ScreenHeight;
+	static int s_ScreenSizeMs = -1;
+
 	void Update()
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		s_UpdateTicks++;
+		#endif
+		#endif
+
 		if ( Info == NULL )
 		{
 			ReleaseRight();
@@ -434,7 +548,16 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		distance = Math.Round(distance * 10.0) / 10.0;
 
-		GetScreenSize( Width, Height );
+		int nowMsForScreen = g_Game.GetTime();
+
+		if ( nowMsForScreen != s_ScreenSizeMs )
+		{
+			GetScreenSize( s_ScreenWidth, s_ScreenHeight );
+			s_ScreenSizeMs = nowMsForScreen;
+		}
+
+		Width = s_ScreenWidth;
+		Height = s_ScreenHeight;
 
 		if (ScreenPos[0] <= 0 || ScreenPos[1] <= 0 || ScreenPos[0] >= Width || ScreenPos[1] >= Height || ScreenPos[2] < 0)
 		{
@@ -457,6 +580,12 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		if ( ShowOnScreen && Info )
 		{
+			#ifdef JM_COT_ESP_DEBUG
+			#ifdef COT_DEBUGLOGS
+			s_OnScreenTicks++;
+			#endif
+			#endif
+
 			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1], true );
 
 			bool isHealthVisible = false;
@@ -465,27 +594,37 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 			{
 				isHealthVisible = true;
 
-				switch (Info.target.GetHealthLevel())
+				int healthLevel = Info.target.GetHealthLevel();
+
+				//! SetColor is redundant on every frame the level did not
+				//! actually change - same class of waste as the text/size
+				//! skip above, just one call instead of a text-shaping pass.
+				if ( healthLevel != m_LastHealthLevel )
 				{
-					case GameConstants.STATE_WORN:
-						m_img_HealthLevel.SetColor(Colors.COLOR_WORN | 0xFF000000);
-						break;
+					m_LastHealthLevel = healthLevel;
 
-					case GameConstants.STATE_DAMAGED:
-						m_img_HealthLevel.SetColor(Colors.COLOR_DAMAGED | 0xFF000000);
-						break;
+					switch (healthLevel)
+					{
+						case GameConstants.STATE_WORN:
+							m_img_HealthLevel.SetColor(Colors.COLOR_WORN | 0xFF000000);
+							break;
 
-					case GameConstants.STATE_BADLY_DAMAGED:
-						m_img_HealthLevel.SetColor(Colors.COLOR_BADLY_DAMAGED | 0xFF000000);
-						break;
+						case GameConstants.STATE_DAMAGED:
+							m_img_HealthLevel.SetColor(Colors.COLOR_DAMAGED | 0xFF000000);
+							break;
 
-					case GameConstants.STATE_RUINED:
-						m_img_HealthLevel.SetColor(Colors.COLOR_RUINED | 0xFF000000);
-						break;
+						case GameConstants.STATE_BADLY_DAMAGED:
+							m_img_HealthLevel.SetColor(Colors.COLOR_BADLY_DAMAGED | 0xFF000000);
+							break;
 
-					default:
-						m_img_HealthLevel.SetColor(Colors.COLOR_PRISTINE | 0xFF000000);
-						break;
+						case GameConstants.STATE_RUINED:
+							m_img_HealthLevel.SetColor(Colors.COLOR_RUINED | 0xFF000000);
+							break;
+
+						default:
+							m_img_HealthLevel.SetColor(Colors.COLOR_PRISTINE | 0xFF000000);
+							break;
+					}
 				}
 			}
 
@@ -499,23 +638,115 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 			if ( ShowDistance )
 				text += " (" + distance + " m)";
 
-			m_txt_ObjectName.SetText( text );
+			//! Proven redundant ~99% of the time (distance rounds to the same
+			//! 0.1m most frames): SetText()/GetScreenSize() is a text-shaping,
+			//! engine-side layout pass, so it and the row repack below only run
+			//! when the label or the health icon's visibility actually changed,
+			//! not on every one of possibly thousands of tags every frame.
+			bool textChanged = ( text != m_LastRenderedText );
 
-			float tw, th;
-			m_txt_ObjectName.GetScreenSize( tw, th );
+			if ( textChanged )
+			{
+				m_txt_ObjectName.SetText( text );
 
-			//! Measured every frame rather than grown with Math.Max, so the tag
-			//! shrinks back when the name gets shorter - switching to classnames
-			//! used to leave it stuck at its widest.
-			float w, h;
-			layoutRoot.GetScreenSize( w, h );
-			layoutRoot.SetScreenSize( LayoutRow( isHealthVisible, tw ), h );
+				float tw, th;
+				m_txt_ObjectName.GetScreenSize( tw, th );
 
-			layoutRoot.Show( true );
+				//! Measured every frame rather than grown with Math.Max, so the tag
+				//! shrinks back when the name gets shorter - switching to classnames
+				//! used to leave it stuck at its widest.
+				m_LastMeasuredTextWidth = tw;
+				m_LastRenderedText = text;
+			}
+			#ifdef JM_COT_ESP_DEBUG
+			#ifdef COT_DEBUGLOGS
+			else
+			{
+				s_RedundantTextSets++;
+			}
+			#endif
+			#endif
+
+			bool layoutChanged = textChanged || ( isHealthVisible != m_LastHealthVisible );
+
+			if ( layoutChanged )
+			{
+				float w, h;
+				layoutRoot.GetScreenSize( w, h );
+
+				float newWidth = LayoutRow( isHealthVisible, m_LastMeasuredTextWidth );
+
+				layoutRoot.SetScreenSize( newWidth, h );
+
+				m_LastRenderedWidth = newWidth;
+				m_LastHealthVisible = isHealthVisible;
+			}
+			#ifdef JM_COT_ESP_DEBUG
+			#ifdef COT_DEBUGLOGS
+			else
+			{
+				s_RedundantSizeSets++;
+			}
+			#endif
+			#endif
+
+			//! Selection is purely this outline widget - header/accent/text above
+			//! are never touched by it, so nothing "inside" changes.
+			//!
+			//! Placed entirely in screen pixels, never SetPos/SetSize: a layout
+			//! declares sizes in units the workspace scales by the player's UI
+			//! scale, so a local-unit size next to the root's SetScreenSize
+			//! disagree at any scale but 1:1 - that mismatch already drew this
+			//! ring as a rectangle larger than the tag once. Screen pixels are
+			//! the one space where positioning it and sizing it mean the same
+			//! thing (see JMPlayerForm.MeasureInventoryCell for the same rule).
+			//! The root carries clipchildren 0 so the outset is not cut off.
+			//!
+			//! Called here rather than from LayoutRow(): it uses the tag's live
+			//! screen position, which moves every frame even when the label/row
+			//! layout above did not - it has to stay unconditional, while the
+			//! measure-and-repack above is what is safe to skip.
+			PlaceSelectionRing( m_pnl_SelectedBorder, BORDER_OUTSET );
+			PlaceSelectionRing( m_pnl_SelectedBorderOuter, BORDER_OUTSET + 1 );
+
+			//! Same shape as the text/size/colour skips above: Show(true) is a
+			//! redundant engine call on every frame a tag was already on
+			//! screen last frame too, which for a steadily on-screen tag is
+			//! effectively always. Only the widget's own edge-driven state
+			//! change needs it.
+			if ( !m_WasShown )
+			{
+				layoutRoot.Show( true );
+				m_WasShown = true;
+			}
 		} else
 		{
-			layoutRoot.Show( false );
+			if ( m_WasShown )
+			{
+				layoutRoot.Show( false );
+				m_WasShown = false;
+			}
 		}
+
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		int nowMs = g_Game.GetTime();
+		if ( nowMs - s_LastReportMs >= 1000 )
+		{
+			int activeCount = -1;
+			if ( Info && Info.module )
+				activeCount = Info.module.GetActiveObjects().Count();
+
+			Print( "  JMESPWidgetHandler::Update - ticks/s=" + s_UpdateTicks + " onscreen/s=" + s_OnScreenTicks + " redundant text=" + s_RedundantTextSets + " redundant size=" + s_RedundantSizeSets + " active=" + activeCount );
+
+			s_UpdateTicks = 0;
+			s_OnScreenTicks = 0;
+			s_RedundantTextSets = 0;
+			s_RedundantSizeSets = 0;
+			s_LastReportMs = nowMs;
+		}
+		#endif
+		#endif
 	}
 
 	//! Pack the row left to right and return the width it came to.
@@ -550,20 +781,6 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 			m_pnl_Accent.SetColor( m_CategoryAccentColour );
 
 		m_txt_ObjectName.SetPos( cursor, 0 );
-
-		//! Selection is purely this outline widget - header/accent/text above
-		//! are never touched by it, so nothing "inside" changes.
-		//!
-		//! Placed entirely in screen pixels, never SetPos/SetSize: a layout
-		//! declares sizes in units the workspace scales by the player's UI
-		//! scale, so a local-unit size next to the root's SetScreenSize
-		//! disagree at any scale but 1:1 - that mismatch already drew this
-		//! ring as a rectangle larger than the tag once. Screen pixels are
-		//! the one space where positioning it and sizing it mean the same
-		//! thing (see JMPlayerForm.MeasureInventoryCell for the same rule).
-		//! The root carries clipchildren 0 so the outset is not cut off.
-		PlaceSelectionRing( m_pnl_SelectedBorder, BORDER_OUTSET );
-		PlaceSelectionRing( m_pnl_SelectedBorderOuter, BORDER_OUTSET + 1 );
 
 		return cursor + textWidth + ROW_PAD_RIGHT;
 	}

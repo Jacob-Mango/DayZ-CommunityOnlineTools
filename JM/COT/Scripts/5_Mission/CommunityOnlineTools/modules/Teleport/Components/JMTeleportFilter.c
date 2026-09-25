@@ -125,15 +125,24 @@ class JMTeleportFilter
 
 	void OnClick_CategoryFilter( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_FilterButton )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_FilterButton )
+		{
+			Error("[JMTeleportFilter] OnClick_CategoryFilter failed: m_FilterButton is null!");
+			return;
+		}
 
 		if ( !m_FilterMenu )
 		{
 			m_FilterMenu = UIActionManager.CreateOverlayFilterMenu( m_Form, m_FilterButton.GetLayoutRoot(), JMFilterRegistry.TELEPORT );
 
 			if ( !m_FilterMenu )
+			{
+				Error("[JMTeleportFilter] OnClick_CategoryFilter failed: Could not create UIActionFilterMenu (m_FilterMenu is null)!");
 				return;
+			}
 
 			m_FilterMenu.AddPage( FILTER_PAGE_ROOT, this, "BuildFilterRootPage", "", false, "", this, "OnFilterRootChange" );
 			m_FilterMenu.AddPage( SUB_LOCATIONS, this, "BuildFilterLocationsPage", FILTER_PAGE_ROOT, true, "#STR_COT_TELEPORT_MODULE_TOGGLE_ALL", this, "OnFilterLocationsChange" );

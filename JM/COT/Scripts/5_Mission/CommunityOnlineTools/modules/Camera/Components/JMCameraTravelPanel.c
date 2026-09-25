@@ -553,7 +553,11 @@ class JMCameraTravelPanel
 
 	void RefreshPathSelectBox()
 	{
-		if ( !m_PathSelectBox ) return;
+		if ( !m_PathSelectBox )
+		{
+			Error("[JMCameraTravelPanel] RefreshPathSelectBox failed: m_PathSelectBox is null!");
+			return;
+		}
 		m_PathNames = m_Form.GetModule().GetPathNames();
 		// Belt + suspenders: UIActionSelectBox.SetSelections seeds an empty
 		// array, but pre-seeding here gives the placeholder a UX-meaningful
@@ -637,7 +641,11 @@ class JMCameraTravelPanel
 	// Compute total estimated path duration (sum of all waypoint times + hold times, adjusted by speed)
 	void UpdateDurationLabel()
 	{
-		if ( !m_LabelDuration ) return;
+		if ( !m_LabelDuration )
+		{
+			Error("[JMCameraTravelPanel] UpdateDurationLabel failed: m_LabelDuration is null!");
+			return;
+		}
 
 		float total = 0;
 		float speedMult = m_Form.GetModule().m_TravelSpeedMult;

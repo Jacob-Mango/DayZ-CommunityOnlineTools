@@ -100,6 +100,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	//! Pin state - window survives COT close when pinned
 	protected bool m_IsPinned;
 
+	//! True while this is the focused (front) window. Windows start focused -
+	//! the one just opened/created is the one the manager focuses next.
+	protected bool m_Focused = true;
+
 	//! Minimize state
 	protected bool m_IsMinimized;
 	protected float m_RestoreWidth;
@@ -698,7 +702,17 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		if ( !m_HasBeenCentered )
 		{
-			CenterOnScreen();
+			float savedX, savedY, savedW, savedH;
+			if ( m_Module && GetCOTWindowManager().TryGetSavedLayout( m_Module.GetModuleName(), savedX, savedY, savedW, savedH ) )
+			{
+				ApplyRestoredSize( savedW, savedH );
+				SetPosition( savedX, savedY );
+			}
+			else
+			{
+				CenterOnScreen();
+			}
+
 			m_HasBeenCentered = true;
 		}
 
@@ -810,8 +824,17 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			Minimize();
 	}
 
+	//! True while this is the focused (front) window - see UIActionMap, which
+	//! polls this to hide its MapWidget while its own window is unfocused.
+	bool IsFocused()
+	{
+		return m_Focused;
+	}
+
 	void Focus()
 	{
+		m_Focused = true;
+
 		SetBackgroundColour( JMUIColors.BG_FOCUSED_A,     JMUIColors.BG_FOCUSED_R,     JMUIColors.BG_FOCUSED_G,     JMUIColors.BG_FOCUSED_B );
 		SetTitleColour(      JMUIColors.TITLE_FOCUSED_A,  JMUIColors.TITLE_FOCUSED_R,  JMUIColors.TITLE_FOCUSED_G,  JMUIColors.TITLE_FOCUSED_B );
 
@@ -822,6 +845,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	void Unfocus()
 	{
+		m_Focused = false;
+
 		SetBackgroundColour( JMUIColors.BG_UNFOCUSED_A,    JMUIColors.BG_UNFOCUSED_R,    JMUIColors.BG_UNFOCUSED_G,    JMUIColors.BG_UNFOCUSED_B );
 		SetTitleColour(      JMUIColors.TITLE_UNFOCUSED_A, JMUIColors.TITLE_UNFOCUSED_R, JMUIColors.TITLE_UNFOCUSED_G, JMUIColors.TITLE_UNFOCUSED_B );
 
@@ -1016,12 +1041,16 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		{
 			SetPosition( x - m_OffsetX, y - m_OffsetY );
 
+			GetCOTWindowManager().SaveWindowLayout( this );
+
 			return true;
 		}
 
 		if ( !m_IsMinimized && IsResizeHandle( w ) )
 		{
 			w.SetPos( 0, 0, true );
+
+			GetCOTWindowManager().SaveWindowLayout( this );
 
 			return true;
 		}
@@ -1030,6 +1059,34 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	}
 
 	// --- Private helpers --------------------------------------------------------
+
+	//! Applies a saved window rect on first Show(), including everything a
+	//! live resize normally propagates (content widget, form root,
+	//! confirmation panel, m_Form.OnResize). A plain layoutRoot.SetSize()
+	//! here left the restored window at the right outer size with its form
+	//! content still laid out for whatever size SetModule() gave it, since
+	//! only Resize()/SetSize() ever pushed the size further down.
+	protected void ApplyRestoredSize( float w, float h )
+	{
+		layoutRoot.SetSize( w, h );
+
+		float contentH = h - m_TitleBarHeight;
+
+		if ( m_ContentWidget )
+			m_ContentWidget.SetSize( w, contentH );
+
+		if ( m_FormRoot )
+			m_FormRoot.SetSize( w, contentH );
+
+		if ( m_ConfirmationPanel )
+			m_ConfirmationPanel.SetSize( w, contentH );
+
+		m_RestoreWidth  = w;
+		m_RestoreHeight = h;
+
+		if ( m_Form )
+			m_Form.OnResize( w, contentH );
+	}
 
 	protected void CenterOnScreen()
 	{

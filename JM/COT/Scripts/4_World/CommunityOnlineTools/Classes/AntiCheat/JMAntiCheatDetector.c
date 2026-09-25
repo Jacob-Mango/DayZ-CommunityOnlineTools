@@ -132,6 +132,85 @@ class JMAntiCheatDetector
 		}
 	}
 
+	//! Cartridge count rising outside a reload. DetectInfiniteAmmo only catches
+	//! a count that never falls; this catches the opposite manipulation, a
+	//! count that climbs on its own between shots.
+	static void DetectAmmoIncrease( int prevCount, int nowCount, int weight, out array< ref JMAntiCheatHit > hits )
+	{
+		if ( nowCount <= prevCount )
+			return;
+
+		hits.Insert( new JMAntiCheatHit( weight, "Ammo increase: " + prevCount.ToString() + " -> " + nowCount.ToString() + " outside a reload" ) );
+	}
+
+	// -------------------------------------------------------------------------
+	//  Weapon jam suppression
+	//
+	//  Every weapon has a server-authoritative chance to jam on a given shot
+	//  (Weapon_Base.GetChanceToJam()). A client that patches that check out
+	//  locally cannot change the number the server rolled against - what it
+	//  can do is suppress the JAMMED state client-side well enough that its
+	//  own reported jam count never rises. Judged over a minimum sample count
+	//  so a merely lucky run of shots is not evidence.
+	// -------------------------------------------------------------------------
+	static void DetectJamSuppression( int shotsFired, int jamsObserved, float expectedJamChance, float toleranceRatio, int minSamples, int weight, out array< ref JMAntiCheatHit > hits )
+	{
+		if ( shotsFired < minSamples || expectedJamChance <= 0 )
+			return;
+
+		float observedRate = jamsObserved / shotsFired;
+		float floor = expectedJamChance * toleranceRatio;
+
+		if ( observedRate < floor )
+		{
+			hits.Insert( new JMAntiCheatHit( weight, "Jam suppression: " + jamsObserved.ToString() + "/" + shotsFired.ToString() + " jams, expected ~" + expectedJamChance.ToString() + " chance per shot" ) );
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	//  Spread / accuracy manipulation
+	//
+	//  A weapon's configured dispersion is the standard deviation of shot
+	//  angle it should produce; a no-spread hack removes that scatter, so the
+	//  player's actual dispersion over many shots comes out far tighter than
+	//  configured. Judged over a minimum sample count for the same reason
+	//  headshot ratio is - a handful of tight shots is a good burst, not a
+	//  cheat.
+	// -------------------------------------------------------------------------
+	static void DetectSpreadAnomaly( float observedStdDevDeg, float configuredDispersionDeg, float toleranceRatio, int sampleCount, int minSamples, int weight, out array< ref JMAntiCheatHit > hits )
+	{
+		if ( sampleCount < minSamples || configuredDispersionDeg <= 0 )
+			return;
+
+		float floor = configuredDispersionDeg * toleranceRatio;
+
+		if ( observedStdDevDeg < floor )
+		{
+			hits.Insert( new JMAntiCheatHit( weight, "Spread anomaly: " + observedStdDevDeg.ToString() + " deg over " + sampleCount.ToString() + " shots (configured " + configuredDispersionDeg.ToString() + ")" ) );
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	//  Projectile speed manipulation
+	//
+	//  Compares a shot's observed muzzle-to-impact speed against the ammo's
+	//  configured initSpeed. A speed hack that accelerates its own projectiles
+	//  (or removes drop/drag) shows up as a shot that covered its distance
+	//  faster than the ammo's own config says it can leave the barrel.
+	// -------------------------------------------------------------------------
+	static void DetectProjectileSpeedAnomaly( float observedSpeed, float configuredInitSpeed, float toleranceRatio, int weight, out array< ref JMAntiCheatHit > hits )
+	{
+		if ( configuredInitSpeed <= 0 )
+			return;
+
+		float ceiling = configuredInitSpeed * toleranceRatio;
+
+		if ( observedSpeed > ceiling )
+		{
+			hits.Insert( new JMAntiCheatHit( weight, "Projectile speed " + observedSpeed.ToString() + " m/s (configured initSpeed " + configuredInitSpeed.ToString() + ")" ) );
+		}
+	}
+
 	// -------------------------------------------------------------------------
 	//  Unauthorized RPC
 	// -------------------------------------------------------------------------

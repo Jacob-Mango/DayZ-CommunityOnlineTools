@@ -524,13 +524,20 @@ class JMESPFormTabFilters: JMFormTab
 		{
 			CF_Window window = m_Form.GetWindow();
 			if ( !window )
+			{
+				Error("[JMESPFormTabFilters] OpenCategoryMenu failed: m_Form.GetWindow() returned null!");
 				return;
+			}
 
 			m_CategoryMenu = UIActionManager.CreateContextMenu( m_Form.GetLayoutRoot(), window.GetWidgetRoot(), this, "OnClick_CategoryMenu" );
-			m_Form.AddOverlay( m_CategoryMenu );
 
 			if ( !m_CategoryMenu )
+			{
+				Error("[JMESPFormTabFilters] OpenCategoryMenu failed: Could not create UIActionContextMenu (m_CategoryMenu is null)!");
 				return;
+			}
+
+			m_Form.AddOverlay( m_CategoryMenu );
 		}
 
 		m_CategoryMenuTarget = row;

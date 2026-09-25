@@ -85,7 +85,7 @@ class JMPlayerForm: JMFormBase
 	//! The player list's right-click menu. See JMPlayerRowMenu.
 	protected ref JMPlayerRowMenu m_RowMenu;
 
-	//! protected, not private: modded forms (see Ex_ContextMenu.c) add entries to the
+	//! protected, not private: modded forms (see Ex_PlayerContextMenu.c) add entries to the
 	//! menu after super.OnPlayerRow_RightClick(). JMPlayerRowMenu owns the menu and
 	//! copies it here, together with the GUID it was opened on, each time it opens.
 	protected UIActionContextMenu m_PlayerMenu;

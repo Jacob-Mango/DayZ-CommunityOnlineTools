@@ -34,16 +34,19 @@ modded class Weapon_Base
 		}
 	}
 
-	//! Feed the anti-cheat infinite-ammo rule: who fired, and how many
-	//! cartridges are left afterwards. The rule is only that the number has to
-	//! move; a magazine that never empties across many shots is not one the
-	//! game produced.
+	//! Feed the anti-cheat infinite-ammo and jam-suppression rules: who fired,
+	//! how many cartridges are left afterwards, whether this shot came out
+	//! jammed, and the weapon's own chance to jam at the moment it fired.
+	//! Ammo rule: the cartridge count has to move; a magazine that never
+	//! empties (or grows) across many shots is not one the game produced.
+	//! Jam rule: the module compares how often shots actually jammed against
+	//! this chance over many samples.
 	//!
 	//! COT's own unlimited-ammo grant is refilled a few lines above, so it has
 	//! to be excluded here or every admin using it flags themselves. Same
 	//! reasoning as godmode: an admin decision is not a cheat.
 	//!
-	//! Reporting only - the rule lives in JMAntiCheatModule. This runs inside
+	//! Reporting only - the rules live in JMAntiCheatModule. This runs inside
 	//! the firing path of every weapon on the server, so anything expensive
 	//! here is paid for by every player on every trigger pull.
 	protected void COT_ReportShotToAntiCheat( PlayerBase player, int muzzleType )
@@ -58,7 +61,7 @@ modded class Weapon_Base
 		if ( !identity )
 			return;
 
-		JMAntiCheatSignals.ReportShot( identity.GetId(), GetTotalCartridgeCount( muzzleType ) );
+		JMAntiCheatSignals.ReportShot( identity.GetId(), GetTotalCartridgeCount( muzzleType ), IsJammed(), GetChanceToJam() );
 	}
 
 	TStringArray COTGetMagazineTypesValidated(string name = "magazines", int muzzleIndex = 0)

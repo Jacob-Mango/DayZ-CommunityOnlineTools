@@ -51,6 +51,14 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	protected ref map< string, int > m_ShotsNoDecrement;
 	protected ref map< string, int > m_LastAmmoCount;
 
+	//! Jam suppression: shots fired and jams actually observed since the last
+	//! evaluated batch, plus the running sum of each shot's own chance to jam
+	//! (weapon condition moves it shot to shot, so the expected rate is an
+	//! average over the batch, not a single reading).
+	protected ref map< string, int >   m_JamShotsFired;
+	protected ref map< string, int >   m_JamsObserved;
+	protected ref map< string, float > m_JamChanceSum;
+
 	//! Denied RPCs inside the rolling window, and when that window opened.
 	protected ref map< string, int > m_DeniedRpcCount;
 	protected ref map< string, int > m_DeniedRpcWindowMs;
@@ -87,6 +95,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		m_LastHitHealth        = new map< string, float >;
 		m_ShotsNoDecrement     = new map< string, int >;
 		m_LastAmmoCount        = new map< string, int >;
+		m_JamShotsFired        = new map< string, int >;
+		m_JamsObserved         = new map< string, int >;
+		m_JamChanceSum         = new map< string, float >;
 		m_DeniedRpcCount       = new map< string, int >;
 		m_DeniedRpcWindowMs    = new map< string, int >;
 		m_DeniedRpcLast        = new map< string, string >;
@@ -313,13 +324,19 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		// JMAntiCheatKillHook.  The 4_World module can't see us directly,
 		// so we poll the queue each tick.  Bounded at 200 entries by
 		// the producer (Enqueue), so a single tick is bounded.
-		DrainKillEventQueue();
+		if ( JMAntiCheatKillHook.Pending.Count() > 0 )
+			DrainKillEventQueue();
 
 		// Signals posted from 4_World: refused RPCs and fired shots. Drained
 		// every frame rather than on the poll cadence, because both queues are
 		// bounded and a backlog would start dropping the oldest evidence.
-		DrainDeniedRpcQueue();
-		DrainShotQueue();
+		// Count-checked first so an idle server does not allocate the drain's
+		// out arrays every single frame for nothing.
+		if ( JMAntiCheatSignals.DeniedRpcGuids.Count() > 0 )
+			DrainDeniedRpcQueue();
+
+		if ( JMAntiCheatSignals.ShotGuids.Count() > 0 )
+			DrainShotQueue();
 
 		// Manual throttle - OnUpdate is per-frame
 		static float accumulator = 0;
@@ -421,8 +438,10 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	{
 		array< string > guids = new array< string >;
 		array< int > ammoCounts = new array< int >;
+		array< bool > jammed = new array< bool >;
+		array< float > jamChances = new array< float >;
 
-		JMAntiCheatSignals.DrainShots( guids, ammoCounts );
+		JMAntiCheatSignals.DrainShots( guids, ammoCounts, jammed, jamChances );
 
 		int nowMs = g_Game.GetTime();
 
@@ -434,7 +453,12 @@ class JMAntiCheatModule : JMRenderableModuleBase
 			if ( guid == "" )
 				continue;
 
-			if ( JMAntiCheatSanction.IsActive( guid, JMAntiCheatSanction.AMMO ) )
+			bool ammoSanctioned = JMAntiCheatSanction.IsActive( guid, JMAntiCheatSanction.AMMO );
+
+			if ( !ammoSanctioned )
+				EvaluateJamSuppression( guid, jammed.Get( i ), jamChances.Get( i ), nowMs );
+
+			if ( ammoSanctioned )
 				continue;
 
 			int previous = -1;
@@ -445,6 +469,13 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 			//! First shot seen for this player, or a reload / weapon swap put
 			//! more rounds in than there were. Either way the run restarts.
+			//!
+			//! A rising count is NOT flagged as an ammo-add cheat here: a real
+			//! reload or weapon swap produces exactly the same reading (a
+			//! bigger magazine's worth of cartridges appearing at once), and
+			//! this signal has no way to tell the two apart. Flagging it would
+			//! score every normal reload. JMAntiCheatDetector.DetectAmmoIncrease
+			//! exists for when a real reload signal is wired in to gate it.
 			if ( previous < 0 || ammo > previous )
 			{
 				m_ShotsNoDecrement.Set( guid, 0 );
@@ -475,11 +506,56 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		}
 	}
 
-	protected void DrainKillEventQueue()
+	//! Accumulates one shot's jam outcome into the player's running batch and
+	//! evaluates once the batch reaches JamMinShotSamples. Evaluating in
+	//! batches (rather than a lifetime running average) keeps the expected
+	//! rate representative of current weapon condition instead of being
+	//! diluted by shots fired hours ago on a different weapon.
+	protected void EvaluateJamSuppression( string guid, bool wasJammed, float jamChance, int nowMs )
 	{
-		if ( !JMAntiCheatKillHook.Pending )
+		if ( jamChance <= 0 )
 			return;
 
+		int shots = 0;
+		if ( m_JamShotsFired.Contains( guid ) )
+			shots = m_JamShotsFired.Get( guid );
+
+		int jams = 0;
+		if ( m_JamsObserved.Contains( guid ) )
+			jams = m_JamsObserved.Get( guid );
+
+		float chanceSum = 0;
+		if ( m_JamChanceSum.Contains( guid ) )
+			chanceSum = m_JamChanceSum.Get( guid );
+
+		shots++;
+		if ( wasJammed )
+			jams++;
+		chanceSum += jamChance;
+
+		if ( shots < m_Config.JamMinShotSamples )
+		{
+			m_JamShotsFired.Set( guid, shots );
+			m_JamsObserved.Set( guid, jams );
+			m_JamChanceSum.Set( guid, chanceSum );
+			return;
+		}
+
+		float expectedRate = chanceSum / shots;
+
+		array< ref JMAntiCheatHit > hits = new array< ref JMAntiCheatHit >;
+		JMAntiCheatDetector.DetectJamSuppression( shots, jams, expectedRate, m_Config.JamRateToleranceRatio, m_Config.JamMinShotSamples, m_Config.JamFlagWeight, hits );
+
+		if ( hits.Count() > 0 )
+			ApplyHitsForGuid( guid, "jam", hits, nowMs );
+
+		m_JamShotsFired.Set( guid, 0 );
+		m_JamsObserved.Set( guid, 0 );
+		m_JamChanceSum.Set( guid, 0 );
+	}
+
+	protected void DrainKillEventQueue()
+	{
 		// Iterate a copy so the producer can keep adding during a single
 		// tick.  Bounded by the producer's 200-entry cap.
 		int count = JMAntiCheatKillHook.Pending.Count();

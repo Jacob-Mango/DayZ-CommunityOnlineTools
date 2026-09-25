@@ -74,8 +74,14 @@ class JMPlayerRowMenu
 	//! is missing so the menu keeps one shape whoever opens it.
 	void Open( string guid, int x, int y )
 	{
-		if ( guid == "" || !m_Form.m_Module )
+		if ( guid == "" )
 			return;
+
+		if ( !m_Form || !m_Form.m_Module )
+		{
+			Error("[JMPlayerRowMenu] Open failed: m_Form or m_Form.m_Module is null!");
+			return;
+		}
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( guid );
 		if ( !instance )
@@ -84,14 +90,20 @@ class JMPlayerRowMenu
 		if ( !m_Menu )
 		{
 			if ( !m_Form.GetWindow() )
+			{
+				Error("[JMPlayerRowMenu] Open failed: m_Form.GetWindow() returned null!");
 				return;
+			}
 
 			//! Anchored to the window root, not to the list: a menu parented to
 			//! the scroller would be clipped by it a row from the bottom.
 			m_Menu = UIActionManager.CreateOverlayMenu( m_Form, this, "OnClick_PlayerMenu" );
 
 			if ( !m_Menu )
+			{
+				Error("[JMPlayerRowMenu] Open failed: Could not create UIActionContextMenu (m_Menu is null)!");
 				return;
+			}
 		}
 
 		m_Guid = guid;
@@ -161,6 +173,8 @@ class JMPlayerRowMenu
 			m_Menu.AddItem( ROW_MENU_KICK, "#STR_COT_PLAYER_MODULE_ACTION_KICK", JMConstants.Lucide( "door-open" ), JMTheme.DANGER );
 			m_Menu.AddItem( ROW_MENU_BAN,  "#STR_COT_PLAYER_MODULE_ACTION_BAN",  JMConstants.Lucide( "gavel" ),     JMTheme.DANGER );
 		}
+
+		JMContextMenuRegistry.Populate( "PlayerRoster", m_Menu );
 
 		//! SetItemEnabled on an id the menu is not carrying is a no-op, so the
 		//! two self-only omissions above need no special case here.
@@ -322,8 +336,14 @@ class JMPlayerRowMenu
 	//! confirmation - it was opened on one named row and names the action.
 	void OnClick_PlayerMenu( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_Menu || !m_Form.m_Module )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_Menu || !m_Form || !m_Form.m_Module )
+		{
+			Error("[JMPlayerRowMenu] OnClick_PlayerMenu failed: m_Menu, m_Form, or m_Form.m_Module is null!");
+			return;
+		}
 
 		string id   = m_Menu.GetLastClickedId();
 		string guid = m_Guid;

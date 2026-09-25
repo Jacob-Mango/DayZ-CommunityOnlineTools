@@ -4,11 +4,42 @@ class JMWindowManager
 	protected ref array< JMWindowBase > m_Windows;
 	protected ref array< JMWindowBase > m_WindowsPendingDeletion;
 	protected ImageWidget m_MainCursorWidget;
+	protected ref JMWindowLayoutStore m_LayoutStore;
 
 	void JMWindowManager()
 	{
 		m_Windows = new array< JMWindowBase >;
 		m_WindowsPendingDeletion = new array< JMWindowBase >;
+		m_LayoutStore = JMWindowLayoutStore.Load();
+	}
+
+	//! Saved rect for a module's window, if it was ever moved/resized. Returns
+	//! false (leaving x/y/w/h untouched) when the module has no saved entry.
+	bool TryGetSavedLayout( string moduleName, out float x, out float y, out float w, out float h )
+	{
+		JMWindowLayoutEntry entry = m_LayoutStore.FindEntry( moduleName );
+		if ( !entry )
+			return false;
+
+		x = entry.X;
+		y = entry.Y;
+		w = entry.W;
+		h = entry.H;
+		return true;
+	}
+
+	//! Persists the window's current rect under its module's name.
+	void SaveWindowLayout( JMWindowBase window )
+	{
+		if ( !window || !window.GetModule() || !window.GetLayoutRoot() )
+			return;
+
+		float x, y, w, h;
+		window.GetLayoutRoot().GetPos( x, y );
+		window.GetLayoutRoot().GetSize( w, h );
+
+		m_LayoutStore.SetEntry( window.GetModule().GetModuleName(), x, y, w, h );
+		JMWindowLayoutStore.Save( m_LayoutStore );
 	}
 
 	JMWindowBase Get( int index )
@@ -181,7 +212,12 @@ class JMWindowManager
 
 		for ( int i = 0; i < m_Windows.Count(); i++ )
 		{
-			m_Windows[i].GetLayoutRoot().SetSort( m_Windows.Count() - i );
+			//! Offset above JMUILayout.SORT_WINDOW, not just 1..N, so an open
+			//! window clears DayZ-Expansion's map marker sort (999) too. Spaced
+			//! by SORT_WINDOW_STEP rather than 1, so the just-focused window
+			//! (index 0, the highest number here) sits a clean 10 above the
+			//! next one down rather than by a margin nothing else respects.
+			m_Windows[i].GetLayoutRoot().SetSort( JMUILayout.SORT_WINDOW + ( m_Windows.Count() - i ) * JMUILayout.SORT_WINDOW_STEP );
 
 			m_Windows[i].Unfocus();
 		}

@@ -18,10 +18,10 @@
 
 class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 {
-	//! Height of the footer strip in pixels. Must match the `size 1 130` of the
+	//! Height of the footer strip in pixels. Must match the `size 1 152` of the
 	//! Footer panel in sidebar_menu.layout - JMCOTSideBar subtracts it from the
 	//! screen height to size the module scroller above it.
-	static const float HEIGHT = 130;
+	static const float HEIGHT = 152;
 
 	//! Seconds between refreshes. Player count, world clock, weather and the
 	//! server stats all move slowly enough that once a second looks live, and it
@@ -50,6 +50,57 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	protected ButtonWidget m_BtnAntiCheat;
 	protected ImageWidget  m_IconAntiCheat;
 	protected Widget       m_AntiCheatHover;
+
+	//! Local admin position, click to copy. Full sidebar only - a collapsed
+	//! sidebar drops the row entirely rather than shrinking it to an icon;
+	//! there is no compact widget pair to fall back to. Hover/click only
+	//! ever land on the button (icon + coordinate text) - the cardinal
+	//! reading beside it is informational and sits outside the button.
+	//!
+	//! Click feedback fades the icon out, swaps it to a check mark, fades it
+	//! back in, holds, then reverses - the same animated shape
+	//! UIActionFeedbackButton uses for the GUID/Steam64 copy buttons - rather
+	//! than COTFeedback.Copy's toast, which this bypasses entirely.
+	//!
+	//! The row shows whole-metre coordinates, but the clipboard gets the full
+	//! precision reading - a copy-paste into a teleport field should not lose
+	//! the fractional metre the display rounds away.
+	protected ButtonWidget m_BtnPosition;
+	protected TextWidget   m_TextPosition;
+	protected ImageWidget  m_IconPosition;
+	protected ImageWidget  m_IconCardinal;
+	protected TextWidget   m_TextCardinal;
+
+	//! Left inset of ft_txt_position inside ft_btn_position, and the extra
+	//! trailing pad past the measured text - both baked into the layout's
+	//! own numbers, kept here so PackPositionRow can hug the button to the
+	//! text without re-deriving them.
+	protected static const float POSITION_TEXT_LEFT    = 22;
+	protected static const float POSITION_TRAILING_PAD = 6;
+	protected static const float POSITION_ROW_HEIGHT   = 20;
+
+	//! Feedback icon fade phases, matching UIActionFeedbackButton's own.
+	protected static const int FEEDBACK_PHASE_IDLE        = 0;
+	protected static const int FEEDBACK_PHASE_OUT_TO_FEED = 1;
+	protected static const int FEEDBACK_PHASE_IN_FEED     = 2;
+	protected static const int FEEDBACK_PHASE_HOLD        = 3;
+	protected static const int FEEDBACK_PHASE_OUT_TO_REST = 4;
+	protected static const int FEEDBACK_PHASE_IN_REST     = 5;
+
+	protected static const float FEEDBACK_FADE_SECONDS = 0.10;
+	protected static const float FEEDBACK_HOLD_SECONDS = 1.40;
+
+	protected int   m_PositionFeedbackPhase;
+	protected float m_PositionFeedbackTimer;
+
+	//! Hover indication is the icon's own colour fading toward the theme
+	//! accent and back, rather than a translucent white wash behind it - a
+	//! wash never reads as "clickable" against this footer's own dark fill,
+	//! it just looks like a rendering glitch.
+	protected static const float HOVER_FADE_SECONDS = 0.12;
+	protected static const int   POSITION_ICON_REST_COLOR  = 0xFF8F999F;
+	protected bool  m_PositionHoverTarget;
+	protected float m_PositionHoverAlpha;
 
 	//! The two mutually exclusive presentations.
 	protected Widget m_GroupFull;
@@ -231,6 +282,12 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		Class.CastTo( m_TextHigh,    m_Root.FindAnyWidget( "ft_txt_high"    ) );
 		Class.CastTo( m_TextVersion, m_Root.FindAnyWidget( "ft_txt_version" ) );
 
+		Class.CastTo( m_BtnPosition,   m_Root.FindAnyWidget( "ft_btn_position"   ) );
+		Class.CastTo( m_TextPosition,  m_Root.FindAnyWidget( "ft_txt_position"  ) );
+		Class.CastTo( m_IconPosition,  m_Root.FindAnyWidget( "ft_icon_position" ) );
+		Class.CastTo( m_IconCardinal,  m_Root.FindAnyWidget( "ft_icon_cardinal" ) );
+		Class.CastTo( m_TextCardinal,  m_Root.FindAnyWidget( "ft_txt_cardinal"  ) );
+
 		Class.CastTo( m_IconTimeCompact,       m_Root.FindAnyWidget( "fc_icon_time"       ) );
 		Class.CastTo( m_IconWeatherCompact,    m_Root.FindAnyWidget( "fc_icon_weather"    ) );
 		Class.CastTo( m_IconNextCompact,       m_Root.FindAnyWidget( "fc_icon_next"       ) );
@@ -247,6 +304,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 
 		if ( m_IconAntiCheat )
 			m_IconAntiCheat.LoadImageFile( 0, JMConstants.Lucide( "shield-alert" ) );
+
+		if ( m_BtnPosition )
+			m_BtnPosition.SetHandler( this );
 
 		Class.CastTo( m_TextPlayersCompact, m_Root.FindAnyWidget( "fc_txt_players" ) );
 		Class.CastTo( m_TextTimeCompact,    m_Root.FindAnyWidget( "fc_txt_time"    ) );
@@ -266,6 +326,11 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		SetIcon( "fc_icon_fps",     JMConstants.Lucide( "gauge"         ) );
 		SetIcon( "fc_icon_low",     JMConstants.Lucide( "trending-down" ) );
 		SetIcon( "fc_icon_high",    JMConstants.Lucide( "trending-up"   ) );
+
+		if ( m_IconPosition )
+			m_IconPosition.LoadImageFile( 0, JMConstants.Lucide( "map-pin" ) );
+
+		SetIcon( "ft_icon_cardinal", JMConstants.Lucide( "compass" ) );
 
 		if ( m_IconNextArrow )
 			m_IconNextArrow.LoadImageFile( 0, JMConstants.Lucide( "move-right" ) );
@@ -293,6 +358,11 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	// -------------------------------------------------------------------------
 	void OnUpdate( float timeslice )
 	{
+		//! Every frame, not throttled by REFRESH_INTERVAL below - a fade that
+		//! only advanced once a second would not read as a fade.
+		UpdatePositionFeedback( timeslice );
+		UpdatePositionHover( timeslice );
+
 		m_Elapsed += timeslice;
 
 		if ( m_Elapsed < REFRESH_INTERVAL )
@@ -314,6 +384,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		UpdateWeather( isNight );
 		UpdatePlayers();
 		UpdateServerStats();
+		UpdatePosition();
 	}
 
 	// -------------------------------------------------------------------------
@@ -622,17 +693,29 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
-		if ( w != m_BtnAntiCheat )
-			return false;
+		if ( w == m_BtnAntiCheat )
+		{
+			OpenAntiCheatModule();
+			return true;
+		}
 
-		OpenAntiCheatModule();
-		return true;
+		if ( w == m_BtnPosition )
+		{
+			g_Game.CopyToClipboard( m_LastPositionCopyText );
+			ShowPositionCopiedFeedback();
+			return true;
+		}
+
+		return false;
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )
 	{
 		if ( w == m_BtnAntiCheat && m_AntiCheatHover )
 			m_AntiCheatHover.Show( true );
+
+		if ( w == m_BtnPosition )
+			m_PositionHoverTarget = true;
 
 		return false;
 	}
@@ -642,7 +725,156 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		if ( w == m_BtnAntiCheat && m_AntiCheatHover )
 			m_AntiCheatHover.Show( false );
 
+		if ( w == m_BtnPosition )
+			m_PositionHoverTarget = false;
+
 		return false;
+	}
+
+	//! Fades the icon's own tint toward JMTheme.ACCENT and back, ticked every
+	//! frame from OnUpdate. Skipped while the click feedback animation owns
+	//! the icon (texture swap + its own alpha fade) - the two would otherwise
+	//! fight over the same widget; the hover tint simply resumes once that
+	//! finishes and picks up wherever the mouse actually is by then.
+	protected void UpdatePositionHover( float timeslice )
+	{
+		if ( !m_IconPosition || m_PositionFeedbackPhase != FEEDBACK_PHASE_IDLE )
+			return;
+
+		float target = 0.0;
+		if ( m_PositionHoverTarget )
+			target = 1.0;
+
+		if ( m_PositionHoverAlpha == target )
+			return;
+
+		float step = timeslice / HOVER_FADE_SECONDS;
+
+		if ( m_PositionHoverAlpha < target )
+		{
+			m_PositionHoverAlpha += step;
+			if ( m_PositionHoverAlpha > target )
+				m_PositionHoverAlpha = target;
+		}
+		else
+		{
+			m_PositionHoverAlpha -= step;
+			if ( m_PositionHoverAlpha < target )
+				m_PositionHoverAlpha = target;
+		}
+
+		m_IconPosition.SetColor( LerpColor( POSITION_ICON_REST_COLOR, JMTheme.ACCENT, m_PositionHoverAlpha ) );
+	}
+
+	//! Per-channel ARGB blend. Enforce has no built-in colour lerp.
+	protected int LerpColor( int from, int to, float t )
+	{
+		int fa = ( from >> 24 ) & 0xFF;
+		int fr = ( from >> 16 ) & 0xFF;
+		int fg = ( from >> 8  ) & 0xFF;
+		int fb = from & 0xFF;
+
+		int ta = ( to >> 24 ) & 0xFF;
+		int tr = ( to >> 16 ) & 0xFF;
+		int tg = ( to >> 8  ) & 0xFF;
+		int tb = to & 0xFF;
+
+		int a = fa + (int) ( ( ta - fa ) * t );
+		int r = fr + (int) ( ( tr - fr ) * t );
+		int g = fg + (int) ( ( tg - fg ) * t );
+		int b = fb + (int) ( ( tb - fb ) * t );
+
+		return ( a << 24 ) | ( r << 16 ) | ( g << 8 ) | b;
+	}
+
+	//! Same animated shape UIActionFeedbackButton uses for the GUID/Steam64
+	//! copy buttons: the icon fades out, swaps to a check mark while
+	//! invisible, fades back in, holds, then reverses - no separate toast.
+	//! COTFeedback.Copy exists for controls that cannot show their own
+	//! state; this one can, so it bypasses it (see COTFeedback.c's header).
+	//! Ticked from OnUpdate every frame - see UpdatePositionFeedback.
+	protected void ShowPositionCopiedFeedback()
+	{
+		if ( !m_IconPosition )
+			return;
+
+		m_PositionFeedbackPhase = FEEDBACK_PHASE_OUT_TO_FEED;
+		m_PositionFeedbackTimer = 0;
+	}
+
+	protected void UpdatePositionFeedback( float timeslice )
+	{
+		if ( m_PositionFeedbackPhase == FEEDBACK_PHASE_IDLE || !m_IconPosition )
+			return;
+
+		m_PositionFeedbackTimer += timeslice;
+
+		float t = m_PositionFeedbackTimer / FEEDBACK_FADE_SECONDS;
+		if ( t > 1.0 )
+			t = 1.0;
+
+		if ( m_PositionFeedbackPhase == FEEDBACK_PHASE_OUT_TO_FEED )
+		{
+			m_IconPosition.SetAlpha( 1.0 - t );
+
+			if ( t >= 1.0 )
+			{
+				m_IconPosition.LoadImageFile( 0, JMConstants.ICON_CHECK_MARK );
+				m_PositionFeedbackPhase = FEEDBACK_PHASE_IN_FEED;
+				m_PositionFeedbackTimer = 0;
+			}
+
+			return;
+		}
+
+		if ( m_PositionFeedbackPhase == FEEDBACK_PHASE_IN_FEED )
+		{
+			m_IconPosition.SetAlpha( t );
+
+			if ( t >= 1.0 )
+			{
+				m_PositionFeedbackPhase = FEEDBACK_PHASE_HOLD;
+				m_PositionFeedbackTimer = 0;
+			}
+
+			return;
+		}
+
+		if ( m_PositionFeedbackPhase == FEEDBACK_PHASE_HOLD )
+		{
+			if ( m_PositionFeedbackTimer >= FEEDBACK_HOLD_SECONDS )
+			{
+				m_PositionFeedbackPhase = FEEDBACK_PHASE_OUT_TO_REST;
+				m_PositionFeedbackTimer = 0;
+			}
+
+			return;
+		}
+
+		if ( m_PositionFeedbackPhase == FEEDBACK_PHASE_OUT_TO_REST )
+		{
+			m_IconPosition.SetAlpha( 1.0 - t );
+
+			if ( t >= 1.0 )
+			{
+				m_IconPosition.LoadImageFile( 0, JMConstants.Lucide( "map-pin" ) );
+				m_PositionFeedbackPhase = FEEDBACK_PHASE_IN_REST;
+				m_PositionFeedbackTimer = 0;
+			}
+
+			return;
+		}
+
+		if ( m_PositionFeedbackPhase == FEEDBACK_PHASE_IN_REST )
+		{
+			m_IconPosition.SetAlpha( t );
+
+			if ( t >= 1.0 )
+			{
+				m_PositionFeedbackPhase = FEEDBACK_PHASE_IDLE;
+				m_PositionFeedbackTimer = 0;
+			}
+		}
 	}
 
 	//! Found by class name rather than by type: the module is a 5_Mission class
@@ -726,6 +958,87 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	}
 
 	// -------------------------------------------------------------------------
+	//  Position
+	//
+	//  The viewing admin's own position - raw vector.ToString() with the
+	//  "<" ">" wrapper stripped, plus which way they are facing as an
+	//  8-point compass reading to its right (JMCompass, shared with the
+	//  weather tab's wind heading). The compass reading sits OUTSIDE
+	//  ft_btn_position, so it is never part of the button's hover/click -
+	//  only the icon and the coordinate text are. Click copies the position
+	//  straight to the clipboard and shows its own check-mark feedback -
+	//  see ShowPositionCopiedFeedback.
+	// -------------------------------------------------------------------------
+	protected string m_LastPositionText;
+	protected string m_LastPositionCopyText;
+
+	protected void UpdatePosition()
+	{
+		PlayerBase player = PlayerBase.Cast( GetGame().GetPlayer() );
+		if ( !player )
+			return;
+
+		vector pos = player.GetPosition();
+		float posXFloat = pos[0];
+		float posYFloat = pos[1];
+		float posZFloat = pos[2];
+
+		//! vector.ToString() rounds to whole metres, float.ToString() only
+		//! keeps a handful of significant digits, and string.Format's "%.Nf"
+		//! is not actually implemented (it silently drops the value and
+		//! leaves the literal ".Nf" behind) - FormatFixed builds the decimal
+		//! string by hand instead, which is what actually preserves
+		//! sub-millimetre precision on the clipboard.
+		string copyX = FormatFixed( posXFloat, 6 );
+		string copyY = FormatFixed( posYFloat, 6 );
+		string copyZ = FormatFixed( posZFloat, 6 );
+		m_LastPositionCopyText = copyX + ", " + copyY + ", " + copyZ;
+
+		int posX = posXFloat;
+		int posY = posYFloat;
+		int posZ = posZFloat;
+		m_LastPositionText = "" + posX + ", " + posY + ", " + posZ;
+
+		if ( m_TextPosition )
+			m_TextPosition.SetText( m_LastPositionText );
+
+		vector ori = player.GetOrientation();
+		if ( m_TextCardinal )
+			m_TextCardinal.SetText( JMCompass.CardinalFor( ori[0] ) );
+
+		PackPositionRow();
+	}
+
+	//! Hugs ft_btn_position to the measured text so its hover/click never
+	//! reaches past the coordinate string, then places the cardinal
+	//! reading - a sibling of the button, not a child of it - right after.
+	//! Everything here is in ft_position_row's own local frame: the button
+	//! sits at local (0,0) inside that row, so the text's position relative
+	//! to the button (POSITION_TEXT_LEFT) already IS its position relative
+	//! to the row, and the cardinal reading can be placed directly off the
+	//! button's new width with no extra translation.
+	protected void PackPositionRow()
+	{
+		if ( !m_TextPosition || !m_BtnPosition || !m_IconCardinal || !m_TextCardinal )
+			return;
+
+		int textWidth, textHeight;
+		m_TextPosition.GetTextSize( textWidth, textHeight );
+
+		if ( textWidth <= 0 )
+			return;
+
+		float btnWidth = POSITION_TEXT_LEFT + textWidth + POSITION_TRAILING_PAD;
+
+		m_BtnPosition.SetSize( btnWidth, POSITION_ROW_HEIGHT );
+
+		float cardX = btnWidth + PAIR_GAP;
+
+		m_IconCardinal.SetPos( cardX, 2 );
+		m_TextCardinal.SetPos( cardX + 13 + PAIR_GAP, 0 );
+	}
+
+	// -------------------------------------------------------------------------
 	//  Values that cannot change for the lifetime of the connection.
 	// -------------------------------------------------------------------------
 	protected void CacheStaticInfo()
@@ -771,5 +1084,44 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 			return text;
 
 		return text.Substring( 0, maxLength - 1 ) + "...";
+	}
+
+	//! Fixed-decimal float formatting, built by hand because string.Format's
+	//! "%.Nf" is not implemented by this engine's Enforce runtime - it
+	//! silently drops the value and leaves the literal ".Nf" in the string.
+	protected string FormatFixed( float value, int decimals )
+	{
+		string sign = "";
+		float absValue = value;
+
+		if ( absValue < 0 )
+		{
+			sign = "-";
+			absValue = -absValue;
+		}
+
+		int intPart = absValue;
+
+		int scale = 1;
+		for ( int i = 0; i < decimals; i++ )
+			scale *= 10;
+
+		int fracPart = Math.Round( ( absValue - intPart ) * scale );
+
+		//! Rounding the fraction up to a full unit (e.g. 0.9999995 at 6
+		//! decimals) carries into the integer part rather than overflowing
+		//! the fractional digit count.
+		if ( fracPart >= scale )
+		{
+			fracPart -= scale;
+			intPart += 1;
+		}
+
+		string fracText = "" + fracPart;
+
+		while ( fracText.Length() < decimals )
+			fracText = "0" + fracText;
+
+		return sign + intPart + "." + fracText;
 	}
 }

@@ -52,6 +52,10 @@ class JMESPFormTabObjects: JMFormTab
 	//! when the state actually changes rather than twice a second.
 	protected bool m_ObjectListHeldShown;
 
+	//! Set when JMScriptInvokers.ESP_TRACKED_LIST_CHANGED fires while this tab
+	//! is not focused, so OnFocus() knows to catch up the redraw it skipped.
+	protected bool m_ListDirty;
+
 	//! The same menu the world tags use, so a row in this list and the tag over
 	//! the object it names offer the identical set of actions.
 	protected ref JMESPActionMenu m_ObjectMenu;
@@ -70,6 +74,13 @@ class JMESPFormTabObjects: JMFormTab
 	void JMESPFormTabObjects( JMESPForm form )
 	{
 		m_Form = form;
+
+		JMScriptInvokers.ESP_TRACKED_LIST_CHANGED.Insert( OnTrackedListChanged );
+	}
+
+	void ~JMESPFormTabObjects()
+	{
+		JMScriptInvokers.ESP_TRACKED_LIST_CHANGED.Remove( OnTrackedListChanged );
 	}
 
 	protected bool IsGroupShown( int group )
@@ -212,12 +223,6 @@ class JMESPFormTabObjects: JMFormTab
 			m_ESPSelectedObjects.UpdateScroller();
 	}
 
-	//! Focused, or the form asked for a repaint (UpdateActiveTab): redraw the tracked list.
-	override void OnUpdate()
-	{
-		RefreshList();
-	}
-
 	//! Built from the module's tracked list rather than from a walk of
 	//! JMESPMeta.s_JM_All: the linked list also holds metas queued for creation
 	//! and destruction, which are not on screen.
@@ -300,6 +305,49 @@ class JMESPFormTabObjects: JMFormTab
 		RefreshObjectCardTitle( names.Count() );
 
 		RefreshObjectListSelectionHighlight();
+	}
+
+	//! JMScriptInvokers.ESP_TRACKED_LIST_CHANGED: fired by JMESPModule.CreateNewWidgets()/
+	//! DestroyOldWidgets() only when a pass actually created or destroyed at least one
+	//! tracked object - replaces the old 500ms OnUpdate() poll. Deferred (not redrawn)
+	//! while this tab is not the focused one, so an offscreen list is never rebuilt.
+	void OnTrackedListChanged()
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		int rowCountBefore = m_ObjectRows.Count();
+		#endif
+		#endif
+
+		if ( !IsFocused() )
+		{
+			m_ListDirty = true;
+
+			#ifdef JM_COT_ESP_DEBUG
+			#ifdef COT_DEBUGLOGS
+			Print( "  JMESPFormTabObjects::OnTrackedListChanged - unfocused, deferred (rows " + rowCountBefore + ")" );
+			#endif
+			#endif
+
+			return;
+		}
+
+		RefreshList();
+
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		Print( "  JMESPFormTabObjects::OnTrackedListChanged - rows " + rowCountBefore + " -> " + m_ObjectRows.Count() );
+		#endif
+		#endif
+	}
+
+	override void OnFocus()
+	{
+		if ( !m_ListDirty )
+			return;
+
+		m_ListDirty = false;
+		RefreshList();
 	}
 
 	//! Re-derives the list's per-row highlight from each row's underlying
@@ -456,42 +504,37 @@ class JMESPFormTabObjects: JMFormTab
 		return true;
 	}
 
-	//! What a context menu's panel hangs off. The ESP container is created
-	//! at the workspace root rather than inside a form, which is why the
-	//! world tags' own menu anchors to it (JMESPActionMenu) - a menu given
-	//! the window root instead is a child of the window and gets cut off at
-	//! its edge, which is what was slicing the labels off this one. Falls
-	//! back to the window when ESP is not up, where a clipped menu still
-	//! beats no menu.
-	protected Widget FloatingMenuAnchor()
-	{
-		if ( JMStatics.ESP_CONTAINER )
-			return JMStatics.ESP_CONTAINER;
-
-		CF_Window window = m_Form.GetWindow();
-
-		if ( !window )
-			return null;
-
-		return window.GetWidgetRoot();
-	}
-
 	//! Opens under the filter button, same as JMTeleportForm's and the
 	//! object spawner's - all three now share UIActionFilterMenu (see its
 	//! class header) instead of each hand-rolling a menu-plus-submenu pair,
 	//! which is what used to leave the drill-down page dead to clicks and
-	//! hover until the whole COT window was closed and reopened.
+	//! hover until the whole COT window was closed and reopened. Anchored
+	//! the same way as the other two (default: the window root) rather than
+	//! JMStatics.ESP_CONTAINER - ESP_CONTAINER and JMStatics.WINDOWS_CONTAINER
+	//! are workspace-root siblings created at equal (default) sort with
+	//! WINDOWS_CONTAINER second, so on a sort tie it always wins and every COT
+	//! window drew over the whole ESP layer, menu included, regardless of the
+	//! menu's own SetSort(9999).
 	void OnClick_FilterButton( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK || !m_FilterButton )
+		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_FilterButton )
+		{
+			Error("[JMESPFormTabObjects] OnClick_FilterButton failed: m_FilterButton is null!");
+			return;
+		}
 
 		if ( !m_FilterMenu )
 		{
-			m_FilterMenu = UIActionManager.CreateOverlayFilterMenu( m_Form, m_FilterButton.GetLayoutRoot(), JMFilterRegistry.ESP, FloatingMenuAnchor() );
+			m_FilterMenu = UIActionManager.CreateOverlayFilterMenu( m_Form, m_FilterButton.GetLayoutRoot(), JMFilterRegistry.ESP );
 
 			if ( !m_FilterMenu )
+			{
+				Error("[JMESPFormTabObjects] OnClick_FilterButton failed: Could not create UIActionFilterMenu (m_FilterMenu is null)!");
 				return;
+			}
 
 			//! Pinned rather than measured. The automatic width is what
 			//! clipped the labels to "Liv"/"Ve", and the menu's own

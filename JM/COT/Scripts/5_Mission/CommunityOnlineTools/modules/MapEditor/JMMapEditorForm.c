@@ -973,7 +973,11 @@ class JMMapEditorForm : JMFormBase
 
 	void OnClick_Paste( UIActionBase action )
 	{
-		if ( !m_Module ) return;
+		if ( !m_Module )
+		{
+			Error("[JMMapEditorForm] OnClick_Paste failed: m_Module is null!");
+			return;
+		}
 
 		// Spawn at the cursor's world position. Falls back to the selected
 		// object's position when the cursor pick returned zero.

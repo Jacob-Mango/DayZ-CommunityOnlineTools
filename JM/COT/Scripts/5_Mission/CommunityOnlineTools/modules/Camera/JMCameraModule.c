@@ -277,6 +277,7 @@ class JMCameraModule: JMRenderableModuleBase
 			}
 		}
 	}
+
 	#endif
 
 	override void RegisterKeyMouseBindings()

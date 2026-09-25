@@ -84,12 +84,6 @@ class JMPlayerFormTabPosition: JMFormTab
 	static const int MAP_MARK_TARGET = 0xFFFFFF00;
 	static const int MAP_MARK_SELF   = 0xFF00FF00;
 
-	//! Coordinate precision. The roster copy of a position is a snapshot sent a
-	//! few times a second; when the entity itself is loaded here it can be read
-	//! directly, which is both current and worth printing to millimetres.
-	static const int COORD_DECIMALS_SYNCED = 2;
-	static const int COORD_DECIMALS_LIVE   = 3;
-
 	//! Drawn height of the embedded map, in layout pixels.
 	static const int MAP_HEIGHT = 220;
 
@@ -691,7 +685,7 @@ class JMPlayerFormTabPosition: JMFormTab
 		if ( loaded )
 			rotation = loaded.GetOrientation();
 
-		COTFeedback.Copy("<" + FormatCoordinate( rotation[0], COORD_DECIMALS_LIVE ) + ", " + FormatCoordinate( rotation[1], COORD_DECIMALS_LIVE ) + ", " + FormatCoordinate( rotation[2], COORD_DECIMALS_LIVE ) + ">");
+		COTFeedback.Copy("<" + FormatCoordinate( rotation[0] ) + ", " + FormatCoordinate( rotation[1] ) + ", " + FormatCoordinate( rotation[2] ) + ">");
 
 		m_CopyRotationPlayer.ShowFeedback();
 	}
@@ -719,9 +713,9 @@ class JMPlayerFormTabPosition: JMFormTab
 			return;
 		}
 
-		m_PositionX.SetText(FormatCoordinate( pos[0], COORD_DECIMALS_LIVE ));
-		m_PositionY.SetText(FormatCoordinate( pos[1], COORD_DECIMALS_LIVE ));
-		m_PositionZ.SetText(FormatCoordinate( pos[2], COORD_DECIMALS_LIVE ));
+		m_PositionX.SetText(FormatCoordinate( pos[0] ));
+		m_PositionY.SetText(FormatCoordinate( pos[1] ));
+		m_PositionZ.SetText(FormatCoordinate( pos[2] ));
 
 		Click_SetPosition(eid, action);
 
@@ -797,7 +791,6 @@ class JMPlayerFormTabPosition: JMFormTab
 			m_Form.m_SelectedInstance.Update();
 
 		vector position = m_Form.m_SelectedInstance.GetPosition();
-		int decimals = COORD_DECIMALS_SYNCED;
 
 		//! Null unless the entity is loaded on this client - the server only
 		//! sends a reference, and a player outside our network bubble has none.
@@ -807,10 +800,7 @@ class JMPlayerFormTabPosition: JMFormTab
 		bool isLive = loaded != NULL;
 
 		if ( isLive )
-		{
 			position = loaded.GetPosition();
-			decimals = COORD_DECIMALS_LIVE;
-		}
 
 		if ( isLive != m_PositionIsLive )
 		{
@@ -826,18 +816,17 @@ class JMPlayerFormTabPosition: JMFormTab
 		}
 
 		if ( m_PositionX && !m_PositionXUpdated )
-			m_PositionX.SetText( FormatCoordinate( position[0], decimals ) );
+			m_PositionX.SetText( FormatCoordinate( position[0] ) );
 
 		if ( m_PositionY && !m_PositionYUpdated )
-			m_PositionY.SetText( FormatCoordinate( position[1], decimals ) );
+			m_PositionY.SetText( FormatCoordinate( position[1] ) );
 
 		if ( m_PositionZ && !m_PositionZUpdated )
-			m_PositionZ.SetText( FormatCoordinate( position[2], decimals ) );
+			m_PositionZ.SetText( FormatCoordinate( position[2] ) );
 	}
 
-	//! Says where the three numbers came from: "11969.70" and "11969.703" are
-	//! otherwise the same reading with a stray digit, and only one of them is
-	//! accurate enough to teleport something back onto a roof.
+	//! Says where the number came from - synced is a network snapshot,
+	//! live is read straight off the loaded entity.
 	void UpdatePositionSourceHint()
 	{
 		if ( !m_PositionX )
@@ -858,39 +847,9 @@ class JMPlayerFormTabPosition: JMFormTab
 			m_PositionZ.SetTooltip( hint );
 	}
 
-	//! float.ToString() prints about six significant digits, which on a
-	//! five-digit map coordinate is a whole metre of slop - 11969.7 is every
-	//! position between 11969.65 and 11969.75. Print the fraction from an
-	//! integer instead so the digits that survived the read are all shown.
-	string FormatCoordinate( float value, int decimals )
+	//! Raw float.ToString() - no custom precision handling.
+	string FormatCoordinate( float value )
 	{
-		int scale = 1;
-		for ( int i = 0; i < decimals; i++ )
-			scale *= 10;
-
-		bool negative = value < 0;
-		if ( negative )
-			value = -value;
-
-		int whole = Math.Floor( value );
-		int fraction = Math.Round( ( value - whole ) * scale );
-
-		// Rounding the fraction up to the scale is a carry into the whole part.
-		if ( fraction >= scale )
-		{
-			whole++;
-			fraction -= scale;
-		}
-
-		string text = fraction.ToString();
-		while ( text.Length() < decimals )
-			text = "0" + text;
-
-		text = whole.ToString() + "." + text;
-
-		if ( negative )
-			text = "-" + text;
-
-		return text;
+		return value.ToString();
 	}
 }

@@ -94,6 +94,7 @@ class JMPlayerFormTabStatistics: JMFormTab
 			m_StatsExpansionRoot.Show( false );
 	#endif
 
+		JMPlayerStatRegistry.Populate( parent );
 	}
 
 	//! Tab entered: pull both halves. Never on a timer.

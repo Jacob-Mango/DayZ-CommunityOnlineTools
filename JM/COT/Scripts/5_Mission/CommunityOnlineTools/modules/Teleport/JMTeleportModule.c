@@ -70,6 +70,11 @@ class JMTeleportModule: JMRenderableModuleBase
 			if (!Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
 				return;
 
+			//! GetForm() is null until the player has opened the real in-game map
+			//! at least once this session - expected, not an error, so this just
+			//! skips the sync rather than raising (Error() throws a VM exception
+			//! and would abort whatever called OnSelectLocation, e.g. a list or
+			//! map-marker click still trying to run ApplyMapSelection() after it).
 			if (!Class.CastTo(m_MapMenu, m_MapModule.GetForm()) )
 				return;
 		}

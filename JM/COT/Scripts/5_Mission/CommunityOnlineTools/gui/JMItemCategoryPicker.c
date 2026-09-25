@@ -284,7 +284,10 @@ class JMItemCategoryPicker
 			m_Menu = UIActionManager.CreateOverlayFilterMenu( m_Form, button, m_RegistryScope );
 
 			if ( !m_Menu )
+			{
+				Error("[JMItemCategoryPicker] Toggle failed: Could not create UIActionFilterMenu (m_Menu is null)!");
 				return;
+			}
 
 			m_Menu.AddPage( PAGE_ROOT, this, "BuildRootPage", "", false, "", this, "OnRootChange", true );
 			m_Menu.AddPage( GROUP_GEAR,     this, "BuildGroupPage", PAGE_ROOT, false, "", this, "OnGroupChange", true );

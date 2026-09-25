@@ -78,11 +78,17 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 
 		CF_Window window = m_Form.GetWindow();
 		if ( !window )
+		{
+			Error("[JMAntiCheatFormTabFlagged] EnsureContextMenu failed: m_Form.GetWindow() returned null!");
 			return false;
+		}
 
 		m_ContextMenu = UIActionManager.CreateContextMenu( m_Form.GetLayoutRoot(), window.GetWidgetRoot(), this, "OnClick_ContextMenu" );
 		if ( !m_ContextMenu )
+		{
+			Error("[JMAntiCheatFormTabFlagged] EnsureContextMenu failed: Could not create UIActionContextMenu (m_ContextMenu is null)!");
 			return false;
+		}
 
 		m_Form.AddOverlay( m_ContextMenu );
 

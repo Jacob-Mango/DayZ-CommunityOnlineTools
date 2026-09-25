@@ -69,6 +69,36 @@ class JMAntiCheatConfig
 	int AmmoShotsWithoutDecrement = 8;
 	int AmmoFlagWeight = 20;
 
+	//  Cartridge count rising outside a reload - the other half of the same
+	//  cheat family, caught with its own weight rather than reusing AmmoFlagWeight
+	//  since the evidence is different (a jump, not a run of non-decrements).
+	int AmmoIncreaseFlagWeight = 20;
+
+	// -- Weapon jam suppression -----------------------------------------------
+	//  Observed jam rate compared against Weapon_Base.GetChanceToJam(). Ratio
+	//  rather than an absolute gap, since the expected rate itself varies
+	//  wildly by weapon condition. 0.25 means "less than a quarter of the
+	//  expected jams actually happened" - loose on purpose, jam chance is a
+	//  genuine per-shot roll and unlucky streaks of "no jams" do happen.
+	float JamRateToleranceRatio = 0.25;
+	int   JamMinShotSamples = 40;
+	int   JamFlagWeight = 15;
+
+	// -- Spread / accuracy manipulation ---------------------------------------
+	//  Observed shot-angle standard deviation compared against the weapon's
+	//  configured dispersion. Same ratio reasoning as jam tolerance.
+	float SpreadToleranceRatio = 0.35;
+	int   SpreadMinShotSamples = 20;
+	int   SpreadFlagWeight = 18;
+
+	// -- Projectile speed manipulation -----------------------------------------
+	//  Observed muzzle-to-impact speed compared against the ammo's configured
+	//  initSpeed. A ceiling rather than a floor - drag/drop only ever slow a
+	//  real shot down, so anything meaningfully faster than initSpeed itself
+	//  is not physically reachable without a speed hack.
+	float ProjectileSpeedToleranceRatio = 1.15;
+	int   ProjectileSpeedFlagWeight = 18;
+
 	// -- Kill statistics -----------------------------------------------------
 	//  Aimbot heuristics. All of these need a sample size before they mean
 	//  anything - a player with two kills, both headshots, is not evidence.

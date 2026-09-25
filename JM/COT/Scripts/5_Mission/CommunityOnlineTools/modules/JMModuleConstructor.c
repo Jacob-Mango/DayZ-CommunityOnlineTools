@@ -25,12 +25,6 @@ modded class JMModuleConstructor
 		modules.Insert( JMServerStatsModule );
 		modules.Insert( JMActionHistoryModule );
 
-
-#ifdef DIAG
-		modules.Insert( JMExampleModule );
-		modules.Insert( JMItemStatsModule );
-#endif
-
 		// Namalsk specific checks
 		if ( IsModLoaded("NamEventManager") && IsModLoaded("EVRStorm") )
 			modules.Insert( JMNamalskEventManagerModule );

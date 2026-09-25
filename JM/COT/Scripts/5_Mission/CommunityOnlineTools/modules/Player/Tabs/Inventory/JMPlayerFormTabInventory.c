@@ -1877,7 +1877,10 @@ class JMPlayerFormTabInventory: JMFormTab
 	void ShowInventoryContextMenu()
 	{
 		if ( !m_InventoryMenu )
+		{
+			Error("[JMPlayerFormTabInventory] ShowInventoryContextMenu failed: m_InventoryMenu is null!");
 			return;
+		}
 
 		int row = m_InvSelectedIndex;
 		if ( row < 0 || row >= m_InventoryItems.Count() )
@@ -1937,6 +1940,12 @@ class JMPlayerFormTabInventory: JMFormTab
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+
+		if ( !m_InventoryMenu )
+		{
+			Error("[JMPlayerFormTabInventory] OnClick_InventoryMenu failed: m_InventoryMenu is null!");
+			return;
+		}
 
 		if ( !m_Form.m_SelectedInstance )
 			return;

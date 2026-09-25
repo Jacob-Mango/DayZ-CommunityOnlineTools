@@ -436,13 +436,19 @@ class JMPlayerFormTabActions: JMFormTab
 	{
 		if ( !m_ScalePrompt )
 		{
-			if ( !m_Form.GetWindow() )
+			if ( !m_Form || !m_Form.GetWindow() )
+			{
+				Error("[JMPlayerFormTabActions] ShowScalePrompt failed: m_Form or m_Form.GetWindow() is null!");
 				return;
+			}
 
 			m_ScalePrompt = UIActionManager.CreateOverlayPrompt( m_Form, this, "OnConfirm_ScalePrompt" );
 
 			if ( !m_ScalePrompt )
+			{
+				Error("[JMPlayerFormTabActions] ShowScalePrompt failed: Could not create UIActionValuePrompt (m_ScalePrompt is null)!");
 				return;
+			}
 		}
 
 		m_ScalePendingMode = mode;

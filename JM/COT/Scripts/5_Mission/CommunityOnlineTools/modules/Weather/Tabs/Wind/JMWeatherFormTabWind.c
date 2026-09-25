@@ -19,8 +19,6 @@ class JMWeatherFormTabWind: JMFormTab
 	protected ref JMWeatherRangeToggle m_ToggleWind;
 	protected ref JMWeatherRangeToggle m_ToggleWindFunction;
 
-	static autoptr TStringArray CARDINAL_DIRECTIONS = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
-
 	void JMWeatherFormTabWind( JMWeatherForm form )
 	{
 		m_Form = form;
@@ -249,16 +247,11 @@ class JMWeatherFormTabWind: JMFormTab
 		return ( value * Math.DEG2RAD ) - Math.PI;
 	}
 
-	//! Compass point for a heading in degrees.
+	//! Compass point for a heading in degrees. Kept as a thin forwarder so
+	//! existing callers in this file do not have to change - see JMCompass
+	//! for the shared implementation (also used by the sidebar footer).
 	static string CardinalFor( float degrees )
 	{
-		int index = Math.Floor( ( ( degrees + 22.5 ) / 45 ) );
-
-		if ( index > CARDINAL_DIRECTIONS.Count() - 1 )
-			index -= CARDINAL_DIRECTIONS.Count();
-		else if ( index < 0 )
-			index = 0;
-
-		return CARDINAL_DIRECTIONS[index];
+		return JMCompass.CardinalFor( degrees );
 	}
 }

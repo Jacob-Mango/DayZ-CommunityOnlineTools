@@ -149,6 +149,7 @@ class JMRenderableModuleBase: JMModuleBase
 
 		if ( !button_bkg )
 		{
+			Error("[JMRenderableModuleBase] InitButton failed: button_bkg is null!");
 			return false;
 		}
 
@@ -156,6 +157,7 @@ class JMRenderableModuleBase: JMModuleBase
 
 		if ( !m_MenuButton )
 		{
+			Error("[JMRenderableModuleBase] InitButton failed: m_MenuButton (widget 'btn') is null!");
 			return false;
 		}
 
