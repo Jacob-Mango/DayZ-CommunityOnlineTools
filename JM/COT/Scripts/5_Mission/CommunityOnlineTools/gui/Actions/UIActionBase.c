@@ -362,6 +362,10 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	{
 	}
 
+	void SetTextFormat( string text, string p1 = "", string p2 = "", string p3 = "", string p4 = "", string p5 = "", string p6 = "", string p7 = "", string p8 = "", string p9 = "" )
+	{
+	}
+
 	void SetTooltip( string text, string iconPath = "", int swatchColor = 0, int textColor = 0 )
 	{
 		m_TooltipText        = text;

@@ -493,7 +493,7 @@ class JMPlayerFormTabInventory: JMFormTab
 			return;
 
 		if ( truncated )
-			m_InventoryNotice.SetText( COT_String.TranslateEx( "#STR_COT_PLAYER_MODULE_INV_TRUNCATED" , m_InventoryItems.Count().ToString() ) );
+			m_InventoryNotice.SetTextFormat( "#STR_COT_PLAYER_MODULE_INV_TRUNCATED" , m_InventoryItems.Count().ToString() );
 
 		m_InventoryNotice.GetLayoutRoot().Show( truncated );
 	}

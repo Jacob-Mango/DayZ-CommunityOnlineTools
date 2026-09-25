@@ -286,9 +286,9 @@ class UIActionSlider: UIActionBase
 			return;
 
 		if ( m_Step >= 1.0 )
-			m_Value.SetText( TranslateStringEx( m_Format, Math.Round( m_Current ).ToString() ) );
+			m_Value.SetTextFormat( m_Format, Math.Round( m_Current ) );
 		else
-			m_Value.SetText( TranslateStringEx( m_Format, m_Current.ToString() ) );
+			m_Value.SetTextFormat( m_Format, m_Current );
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
