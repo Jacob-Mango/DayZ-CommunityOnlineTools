@@ -169,7 +169,7 @@ class JMESPMeta: COT_WidgetHolder
 			widgetRoot = NULL;
 		}
 
-		delete this;
+		super.Destroy();
 	}
 
 	bool CanDelete()
