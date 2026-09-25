@@ -122,27 +122,22 @@ for readability over varied content).
 
 ## Localisation
 
-`text "#STR_KEY"` is auto-translated in layout  and in script when using
+`text "#STR_KEY"` is auto-translated in layout and in script when using
 native widget functions.
-Outside of that, use `Widget.TranslateString(stringId)` or
-`COT_String.TranslateEx(stringId, p1, p2, ...)` if you need to pass parameters
-for placeholders in the translated text:
 
 ```c
-m_Label.SetText( "#STR_KEY" );  //! Resolved automatically on widgets
-Print(Widget.TranslateString(stringId));  //! Explicit translation needed
-COT_String.TranslateEx("#STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF", "Godmode", "END");
-
-class SomeClass: COT_ScriptedWidgetEventHandler
-{
-    void SomeMethod()
-    {
-        //! TranslateStringEx is an alias for COT_String.TranslateEx and
-        //! available on any subclass inheriting from COT_ScriptedWidgetEventHandler
-        string example = TranslateStringEx("#STR_KEY", "A", "B", "C");
-    }
-}
+m_Label.SetText( "#STR_KEY" );  //! Resolved automatically
 ```
+
+### `SetTextFormat`
+
+```c
+m_Label.SetTextFormat("Hello %1, you have %2 items", playerName, itemCount);
+```
+
+DayZ's `printf`-style formatter. Substitutes `%1`, `%2`, etc. with the
+varargs (up to 9 parameters). Translates the format string itself if it
+starts with `#STR_`.
 
 Unknown keys render as the key itself (e.g. `#STR_MISSING`).
 
@@ -156,16 +151,6 @@ m_Label.GetTextSize(w, h);
 Returns the pixel size of the **currently rendered** text. Use this for
 marquee scrolling (when text wider than widget) — see
 `JMSidebarScrollEntry` in `JMCOTSideBarCategory.c`.
-
-## `SetTextFormat`
-
-```c
-m_Label.SetTextFormat("Hello %1, you have %2 items", playerName, itemCount);
-```
-
-DayZ's `printf`-style formatter. Substitutes `%1`, `%2`, etc. with the
-varargs (up to 9 parameters). Translates the format string itself if it
-starts with `#STR_`.
 
 ## Common pitfall: line wrapping
 

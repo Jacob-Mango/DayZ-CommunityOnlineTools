@@ -211,14 +211,14 @@ text "#STR_COT_PLAYER_LIST_HEADER"
 
 Localisation keys are resolved at layout-load time and in script when using
 native widget functions.
-Outside of that, use `Widget.TranslateString(stringId)` or
-`COT_String.TranslateEx(stringId, p1, p2, ...)` if you need to pass parameters
-for placeholders in the translated text:
 
 ```c
 m_Label.SetText( "#STR_KEY" );  //! Resolved automatically on widgets
+
+//! Format string is tranlated if it's a valid string ID before params are inserted
+m_Label.SetTextFormat("Hello %1, you have %2 items", playerName, itemCount);
+
 Print(Widget.TranslateString(stringId));  //! Explicit translation needed
-COT_String.TranslateEx("#STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF", "Godmode", "END");
 ```
 
 Missing keys render as the key itself (e.g. `#STR_MISSING`).

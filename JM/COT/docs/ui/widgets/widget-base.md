@@ -194,7 +194,7 @@ proto static string TranslateString(string stringId);
 ```
 
 Resolves `#STR_*` localisation keys. `"#STR_KEY"` is
-auto-translated  when using native widget functions.
+auto-translated when using native widget functions.
 
 ```c
 m_Label.SetText( "#STR_KEY" );  //! Resolved automatically on widgets
