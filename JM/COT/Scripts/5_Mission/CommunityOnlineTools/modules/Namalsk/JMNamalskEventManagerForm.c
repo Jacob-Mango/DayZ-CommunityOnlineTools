@@ -62,7 +62,7 @@ class JMNamalskEventManagerForm: JMFormBase
 
 		if (!canStart && !canCancel)
 		{
-			UIActionText permField = UIActionManager.CreateText(row, "", "#STR_COT_NAMALSK_NO_PERMISSION");
+			UIActionText permField = UIActionManager.CreateText(row, "", "#STR_COT_NO_PERMISSION");
 			permField.SetWidth(0.40);
 			permField.SetTextVAlign(UIActionVAlign.CENTER);
 			return;
