@@ -19,26 +19,30 @@
                                                     constants, which is what the
                                                     sidebar footer reads
 
-    The build number in Workbench/version is incremented on every run, so two
-    builds of the same source are still distinguishable.
+    The version is derived from the current UTC timestamp -
+    <year>.<month>.<day><hour><minute>, e.g. 2026.9.231519 - so every build has
+    a version that sorts and reads as "when", not an arbitrary counter.
+    Workbench/version caches the last stamped string so -NoBump can reuse it
+    verbatim instead of recomputing the time.
 
 .PARAMETER Channel
-    stable | beta | experimental | internal. Omit to auto-detect (see below).
+    stable | experimental | internal. Omit to auto-detect (see below).
 
 .PARAMETER NoBump
-    Regenerate from the current version without incrementing the build number.
+    Reuse the last stamped version (from Workbench/version) instead of
+    deriving a fresh one from the current time.
 
 .NOTES
     Channel auto-detection, most specific first:
       COT_BUILD_CHANNEL environment variable, if set
-      clean tree on an annotated/lightweight tag        -> stable
-      clean tree on main / master                       -> beta
-      branch named exp*, experimental*, or 1.*-exp      -> experimental
-      anything else (feature branch, or a dirty tree)   -> internal
+      dirty tree (uncommitted changes)                  -> internal
+      branch production                                 -> stable
+      branch development                                -> experimental
+      anything else (feature branch, PR branch, etc.)   -> internal
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('stable', 'beta', 'experimental', 'internal')]
+    [ValidateSet('stable', 'experimental', 'internal')]
     [string] $Channel,
 
     [switch] $NoBump
@@ -53,22 +57,16 @@ $buildInfoC  = Join-Path $repoRoot 'Scripts\3_Game\CommunityOnlineTools\JMBuildI
 
 # --- version number -----------------------------------------------------------
 
-if (Test-Path $versionFile) {
-    $raw = (Get-Content $versionFile -Raw).Trim()
+$now = (Get-Date).ToUniversalTime()
+
+if ($NoBump -and (Test-Path $versionFile)) {
+    $version = (Get-Content $versionFile -Raw).Trim()
+    if ([string]::IsNullOrWhiteSpace($version)) {
+        $version = "$($now.Year).$($now.Month).$($now.ToString('dd'))$($now.ToString('HHmm'))"
+    }
 } else {
-    $raw = '0.0.0'
+    $version = "$($now.Year).$($now.Month).$($now.ToString('dd'))$($now.ToString('HHmm'))"
 }
-
-$parts = $raw -split '\.'
-if ($parts.Count -lt 3) { $parts = @('0', '0', '0') }
-
-$major = [int] $parts[0]
-$minor = [int] $parts[1]
-$build = [int] $parts[2]
-
-if (-not $NoBump) { $build++ }
-
-$version = "$major.$minor.$build"
 
 # --- git facts ----------------------------------------------------------------
 
@@ -86,7 +84,6 @@ function Get-GitValue {
 
 $commit = Get-GitValue @('rev-parse', '--short=8', 'HEAD')
 $branch = Get-GitValue @('rev-parse', '--abbrev-ref', 'HEAD')
-$tag    = Get-GitValue @('describe', '--tags', '--exact-match', 'HEAD')
 $status = Get-GitValue @('status', '--porcelain')
 $dirty  = -not [string]::IsNullOrWhiteSpace($status)
 
@@ -101,18 +98,16 @@ if (-not $Channel) {
     } elseif ($dirty) {
         # A dirty tree is by definition not a build anyone else can reproduce.
         $Channel = 'internal'
-    } elseif ($tag -ne '') {
+    } elseif ($branch -eq 'production') {
         $Channel = 'stable'
-    } elseif ($branch -in @('main', 'master')) {
-        $Channel = 'beta'
-    } elseif ($branch -match '^(exp|experimental)') {
+    } elseif ($branch -eq 'development') {
         $Channel = 'experimental'
     } else {
         $Channel = 'internal'
     }
 }
 
-if ($Channel -notin @('stable', 'beta', 'experimental', 'internal')) {
+if ($Channel -notin @('stable', 'experimental', 'internal')) {
     $Channel = 'internal'
 }
 
@@ -120,13 +115,12 @@ if ($Channel -notin @('stable', 'beta', 'experimental', 'internal')) {
 # none - a release should read as a bare version number.
 $suffix = switch ($Channel) {
     'stable'       { '' }
-    'beta'         { '-beta' }
     'experimental' { '-exp' }
     default        { '-internal' }
 }
 
 $displayVersion = "$version$suffix"
-$builtAt        = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd HH:mm')
+$builtAt        = $now.ToString('yyyy-MM-dd HH:mm')
 
 # --- write --------------------------------------------------------------------
 
@@ -153,11 +147,10 @@ class JMBuildInfo
 {
 	//! Channel ids. Compared against CHANNEL rather than parsed out of VERSION.
 	static const string CHANNEL_STABLE       = "stable";
-	static const string CHANNEL_BETA         = "beta";
 	static const string CHANNEL_EXPERIMENTAL = "experimental";
 	static const string CHANNEL_INTERNAL     = "internal";
 
-	//! Bare MAJOR.MINOR.BUILD, no channel suffix.
+	//! <year>.<month>.<day>-<hour><minute> UTC build timestamp, no channel suffix.
 	static const string VERSION = "$version";
 
 	//! VERSION plus the channel suffix - what the UI shows.
@@ -178,7 +171,7 @@ class JMBuildInfo
 	//! UTC build timestamp, "YYYY-MM-DD HH:MM".
 	static const string BUILT_AT = "$builtAt";
 
-	//! "COT 1.4.2" / "COT 1.4.2-beta". What the sidebar footer renders.
+	//! "COT 1.4.2" / "COT 1.4.2-exp". What the sidebar footer renders.
 	static string GetFooterText()
 	{
 		return "COT " + DISPLAY_VERSION;

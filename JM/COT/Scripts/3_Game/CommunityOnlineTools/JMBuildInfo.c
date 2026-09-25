@@ -13,21 +13,20 @@ class JMBuildInfo
 {
 	//! Channel ids. Compared against CHANNEL rather than parsed out of VERSION.
 	static const string CHANNEL_STABLE       = "stable";
-	static const string CHANNEL_BETA         = "beta";
 	static const string CHANNEL_EXPERIMENTAL = "experimental";
 	static const string CHANNEL_INTERNAL     = "internal";
 
-	//! Bare MAJOR.MINOR.BUILD, no channel suffix.
-	static const string VERSION = "0.8.100672";
+	//! <year>.<month>.<day>-<hour><minute> UTC build timestamp, no channel suffix.
+	static const string VERSION = "2026.9.251906";
 
 	//! VERSION plus the channel suffix - what the UI shows.
-	static const string DISPLAY_VERSION = "0.8.100672-internal";
+	static const string DISPLAY_VERSION = "2026.9.251906-internal";
 
 	//! One of the CHANNEL_* ids above.
 	static const string CHANNEL = "internal";
 
 	//! Short commit the build came from, or "unknown" outside a git checkout.
-	static const string COMMIT = "6146503e";
+	static const string COMMIT = "d917b4cc";
 
 	//! Branch the build came from.
 	static const string BRANCH = "dev/1.30";
@@ -36,9 +35,9 @@ class JMBuildInfo
 	static const bool DIRTY = true;
 
 	//! UTC build timestamp, "YYYY-MM-DD HH:MM".
-	static const string BUILT_AT = "2026-09-22 17:21";
+	static const string BUILT_AT = "2026-09-25 19:06";
 
-	//! "COT 1.4.2" / "COT 1.4.2-beta". What the sidebar footer renders.
+	//! "COT 1.4.2" / "COT 1.4.2-exp". What the sidebar footer renders.
 	static string GetFooterText()
 	{
 		return "COT " + DISPLAY_VERSION;

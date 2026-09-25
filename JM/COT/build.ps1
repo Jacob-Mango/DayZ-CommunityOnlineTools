@@ -22,7 +22,7 @@
 [CmdletBinding(PositionalBinding = $false)]
 param(
     # Overrides channel auto-detection for this build.
-    [ValidateSet('stable', 'beta', 'experimental', 'internal')]
+    [ValidateSet('stable', 'experimental', 'internal')]
     [string] $Channel,
 
     # Regenerate the version constants without incrementing the build number.
