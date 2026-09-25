@@ -1302,6 +1302,37 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
+	bool OnBeforeStartSpectating()
+	{
+		if ( IsMissionOffline() )
+		{
+			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE"));
+			return false;
+		}
+		else
+		{
+			if (!JMPermissions.Has(JMConstants.PERM_PLAYER_SPECTATE))
+			{
+				COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_NO_PERMISSION"));
+				return false;
+			}
+
+			if (GetPlayer().GetCommand_Vehicle())
+			{
+				COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_BLOCKED_VEHICLE"));
+				return false;
+			}
+
+			m_SpectatorClient = GetPlayer();
+
+			m_SpectatorClient.COT_TempDisableOnSelectPlayer();
+			m_SpectatorClient.COT_RememberVehicle();
+		}
+
+		return true;
+	}
+
+	//! Spectate player by GUID
 	//! @note this allows to start spectating players that are not in netbubble
 	void StartSpectating( string guid )
 	{
@@ -1309,62 +1340,23 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "StartSpectating").Add(guid);
 #endif
 
-		if (GetPlayer().GetCommand_Vehicle())
+		if (OnBeforeStartSpectating())
 		{
-			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_BLOCKED_VEHICLE"));
-			return;
-		}
-
-		if ( IsMissionHost() )
-		{
-			if ( IsMissionOffline() )
-			{
-				Message( GetPlayer(), "#STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE" );
-			}
-		} else
-		{
-			if (!JMPermissions.Has(JMConstants.PERM_PLAYER_SPECTATE))
-				return;
-
-			m_SpectatorClient = GetPlayer();
-
-			m_SpectatorClient.COT_TempDisableOnSelectPlayer();
-			m_SpectatorClient.COT_RememberVehicle();
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guid );
 			rpc.Send( null, JMPlayerModuleRPC.StartSpectating, true, NULL );
 		}
 	}
 
+	//! Spectate any object
 	void StartSpectating(Object spectateObject)
 	{
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "StartSpectating").Add(spectateObject);
 #endif
 
-		if (GetPlayer().GetCommand_Vehicle())
+		if (OnBeforeStartSpectating())
 		{
-			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_BLOCKED_VEHICLE"));
-			return;
-		}
-
-		if ( IsMissionHost() )
-		{
-			if ( IsMissionOffline() )
-			{
-				Message( GetPlayer(), "#STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE" );
-			}
-		} else
-		{
-			if (!JMPermissions.Has(JMConstants.PERM_PLAYER_SPECTATE))
-				return;
-
-			m_SpectatorClient = GetPlayer();
-
-			m_SpectatorClient.COT_TempDisableOnSelectPlayer();
-			m_SpectatorClient.COT_RememberVehicle();
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( spectateObject, JMPlayerModuleRPC.StartSpectating, true, NULL );
 		}
