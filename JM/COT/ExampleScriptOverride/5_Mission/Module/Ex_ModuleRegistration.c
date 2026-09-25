@@ -10,6 +10,8 @@ modded class JMModuleConstructor
 
 		modules.Insert( JMCustomExampleModule );
 		modules.Insert( JMCustomExampleRPCModule );
+		modules.Insert( JMExampleModule );
+		modules.Insert( JMItemStatsModule );
 	}
 }
 #endif
