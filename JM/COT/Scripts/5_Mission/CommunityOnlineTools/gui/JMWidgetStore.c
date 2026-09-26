@@ -30,42 +30,6 @@ class JMWidgetStore: COT_WidgetHolder
 	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
 	#endif
-
-	/*
-		foreach (auto textWidget: textWidgets)
-		{
-			DestroyWidget(textWidget);
-		}
-
-		foreach (auto buttonWidget: buttonWidgets)
-		{
-			DestroyWidget(buttonWidget);
-		}
-
-		foreach (auto editBoxWidget: editBoxWidgets)
-		{
-			DestroyWidget(editBoxWidget);
-		}
-
-		foreach (auto sliderWidget: sliderWidgets)
-		{
-			DestroyWidget(sliderWidget);
-		}
-
-		foreach (auto textListBoxWidget: textListBoxWidgets)
-		{
-			DestroyWidget(textListBoxWidget);
-		}
-	*/
-
-	#ifdef DAYZ_1_28
-		foreach (auto w: allWidgets)
-		{
-			DestroyWidget(w);
-		}
-
-		DestroyWidget(layoutRoot);
-	#endif
 	}
 
 	ButtonWidget GetButtonWidget( string name ) 

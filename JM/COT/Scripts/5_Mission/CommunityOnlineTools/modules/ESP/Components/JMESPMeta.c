@@ -50,10 +50,6 @@ class JMESPMeta: COT_WidgetHolder
 		Print( "  widgetHandler = " + widgetHandler );
 		#endif
 
-	#ifdef DAYZ_1_28
-		DestroyWidget(widgetRoot);
-	#endif
-
 		if (s_JM_All)
 			s_JM_All.Remove(s_JM_Node);
 

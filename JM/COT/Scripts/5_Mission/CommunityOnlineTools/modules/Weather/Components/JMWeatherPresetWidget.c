@@ -34,10 +34,6 @@ class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
-	#ifdef DAYZ_1_28
-		DestroyWidget(layoutRoot);
-	#endif
-
 	#ifdef DIAG
 		s_JMWeatherPresetWidgetCount--;
 		if (s_JMWeatherPresetWidgetCount <= 0)
