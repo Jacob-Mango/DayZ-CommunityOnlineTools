@@ -271,18 +271,18 @@ class JMESPFormTabObjects: JMFormTab
 			if ( !IsMetaCategoryShown( meta ) )
 				continue;
 
-			string label = meta.GetName();
+			string name = meta.GetName();
 			string classname = meta.GetType();
 
 			if ( needle != "" )
 			{
-				string labelLower = label;
-				labelLower.ToLower();
+				string nameLower = name;
+				nameLower.ToLower();
 
 				string classLower = classname;
 				classLower.ToLower();
 
-				if ( labelLower.IndexOf( needle ) < 0 && classLower.IndexOf( needle ) < 0 )
+				if ( nameLower.IndexOf( needle ) < 0 && classLower.IndexOf( needle ) < 0 )
 					continue;
 			}
 
@@ -291,6 +291,12 @@ class JMESPFormTabObjects: JMFormTab
 			string category = classname;
 			if ( meta.type )
 				category = meta.type.Localisation;
+
+			string label;
+			if ( meta.type.IsInherited( JMESPViewTypePlayer ) || !JMESPWidgetHandler.UseClassName )
+				label = name;
+			else
+				label = classname;
 
 			names.Insert( label );
 			subs.Insert( string.Format( "%1  -  %2m", category, distance ) );
