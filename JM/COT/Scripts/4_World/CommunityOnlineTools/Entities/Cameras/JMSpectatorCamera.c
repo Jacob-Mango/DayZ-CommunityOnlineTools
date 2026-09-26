@@ -1094,7 +1094,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		if (!m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx >= DOLLY_CAM_PATH_LIMIT)
 		{
-			for (i = 0; i < DOLLY_CAM_PATH_LIMIT; ++i)
+			for (i = 0; i < DOLLY_CAM_PATH_LIMIT - 1; ++i)
 			{
 				m_COT_DollyCamPath[i] = m_COT_DollyCamPath[i + 1];
 			}
