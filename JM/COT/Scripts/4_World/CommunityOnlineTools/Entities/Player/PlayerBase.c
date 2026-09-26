@@ -33,15 +33,8 @@ modded class PlayerBase
 	protected ref map<int, bool> m_COT_PlayerVars;
 	protected int m_COT_PlayerVarsBitmask;
 	Object m_JM_SpectatedObject;
+	ref set<PlayerBase> m_JM_Spectators;
 	vector m_JM_CameraPosition;
-	protected bool m_COT_SpectateStatsSaved;
-	protected float m_COT_SavedHealth;
-	protected float m_COT_SavedBlood;
-	protected float m_COT_SavedShock;
-	protected float m_COT_SavedEnergy;
-	protected float m_COT_SavedWater;
-	protected float m_COT_SavedStamina;
-	protected float m_COT_SavedHeatComfort;
 	protected bool m_COT_EdgeTick;
 	protected bool m_COT_ReceiveDamageDealt;
 	protected bool m_COT_CannotBeTargetedByAI;
@@ -1112,9 +1105,6 @@ modded class PlayerBase
 			return;
 		}
 
-		if (spectate)
-			COTMirrorSpectatedVitals();
-
 		if (freeCam && vector.DistanceSq(m_JMLastPosition, position) <= 22500)
 		{
 			//! If we get close (within 150 m) of original position, place player at original position
@@ -1161,6 +1151,20 @@ modded class PlayerBase
 		}
 	}
 
+	void COT_AddSpectator(PlayerBase spectator)
+	{
+		if (!m_JM_Spectators)
+			m_JM_Spectators = new set<PlayerBase>;
+
+		m_JM_Spectators.Insert(spectator);
+	}
+
+	void COT_RemoveSpectator(PlayerBase spectator)
+	{
+		if (m_JM_Spectators)
+			m_JM_Spectators.RemoveItem(spectator);
+	}
+
 	void COTResetSpectator()
 	{
 #ifdef JM_COT_DIAG_LOGGING
@@ -1179,64 +1183,6 @@ modded class PlayerBase
 
 		if (!m_COT_GodMode_Preference)
 			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(COTSetGodMode, 34, false, false, false);
-
-		COTRestoreOwnVitals();
-	}
-
-	//! While spectating, the admin's own HUD (health/blood/water/energy/
-	//! stamina/heat) is made to read the spectated survivor's vitals instead
-	//! of the admin's own - the vanilla HUD only ever displays the locally
-	//! controlled entity's stats, so there is no other way to make it show
-	//! what the target is going through. First tick snapshots the admin's
-	//! real values so COTRestoreOwnVitals() can put them back on spectate end.
-	protected void COTMirrorSpectatedVitals()
-	{
-		PlayerBase target;
-		if (!Class.CastTo(target, m_JM_SpectatedObject))
-			return;
-
-		if (!m_COT_SpectateStatsSaved)
-		{
-			m_COT_SavedHealth = GetHealth( "GlobalHealth", "Health" );
-			m_COT_SavedBlood = GetHealth( "GlobalHealth", "Blood" );
-			m_COT_SavedShock = GetHealth( "GlobalHealth", "Shock" );
-			m_COT_SavedEnergy = GetStatEnergy().Get();
-			m_COT_SavedWater = GetStatWater().Get();
-			m_COT_SavedStamina = GetStatStamina().Get();
-			m_COT_SavedHeatComfort = GetStatHeatComfort().Get();
-			m_COT_SpectateStatsSaved = true;
-
-			//! The 1s position-sync tick that also calls this is too coarse for
-			//! something like bleeding blood to read as "live" - run this on
-			//! its own faster timer for as long as the spectate lasts.
-			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( COTMirrorSpectatedVitals, 200, true );
-		}
-
-		SetHealth( "GlobalHealth", "Health", target.GetHealth( "GlobalHealth", "Health" ) );
-		SetHealth( "GlobalHealth", "Blood", target.GetHealth( "GlobalHealth", "Blood" ) );
-		SetHealth( "GlobalHealth", "Shock", target.GetHealth( "GlobalHealth", "Shock" ) );
-		GetStatEnergy().Set( target.GetStatEnergy().Get() );
-		GetStatWater().Set( target.GetStatWater().Get() );
-		GetStatStamina().Set( target.GetStatStamina().Get() );
-		GetStatHeatComfort().Set( target.GetStatHeatComfort().Get() );
-	}
-
-	protected void COTRestoreOwnVitals()
-	{
-		if (!m_COT_SpectateStatsSaved)
-			return;
-
-		g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( COTMirrorSpectatedVitals );
-
-		SetHealth( "GlobalHealth", "Health", m_COT_SavedHealth );
-		SetHealth( "GlobalHealth", "Blood", m_COT_SavedBlood );
-		SetHealth( "GlobalHealth", "Shock", m_COT_SavedShock );
-		GetStatEnergy().Set( m_COT_SavedEnergy );
-		GetStatWater().Set( m_COT_SavedWater );
-		GetStatStamina().Set( m_COT_SavedStamina );
-		GetStatHeatComfort().Set( m_COT_SavedHeatComfort );
-
-		m_COT_SpectateStatsSaved = false;
 	}
 
 	void COTSetIsBeingKicked(bool state)

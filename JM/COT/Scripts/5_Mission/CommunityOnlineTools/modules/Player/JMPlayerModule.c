@@ -2,6 +2,7 @@ class JMPlayerModule: JMRenderableModuleBase
 {
 	PlayerBase m_SpectatorClient;
 	ref map<string, PlayerBase> m_Spectators = new map<string, PlayerBase>();
+	ref set<string> m_SpectatorsWaitingToFinish = new set<string>();
 	JMCameraBase m_SpectatorCamera;
 
 	// -----------------------------------------------------------------------
@@ -500,7 +501,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "InputToggleUnlimitedAmmo",	"UAPlayerModuleUnlimitedAmmo",	true 	) );
 		Bind( new JMModuleBinding( "InputToggleAdminNV",	"UAPlayerModuleAdminNV",	true 	) );
 		Bind( new JMModuleBinding( "InputFreezePlayer",		"UAPlayerModuleFreezePlayer",		true 	) );
-		Bind( new JMModuleBinding( "EndSpectating",      "UAPlayerModuleStopSpectating", true ) );
+		Bind( new JMModuleBinding( "Input_EndSpectating",      "UAPlayerModuleStopSpectating", true ) );
 		Bind( new JMModuleBinding( "Input_HealSelf",     "UAPlayerModuleHealSelf",       true ) );
 		Bind( new JMModuleBinding( "Input_ToggleFly",    "UAPlayerModuleToggleFly",      true ) );
 	}
@@ -1413,6 +1414,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		playerSpectator.m_JM_SpectatedObject = spectateObject;
 		playerSpectator.m_JM_CameraPosition = vector.Zero;
 
+		PlayerBase spectatePlayer;
+		if (Class.CastTo(spectatePlayer, spectateObject))
+			spectatePlayer.COT_AddSpectator(playerSpectator);
+
 		playerSpectator.COT_TempDisableOnSelectPlayer();
 
 		g_Game.SelectPlayer( ident, NULL );
@@ -1435,8 +1440,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		rpc.Write(networkHigh);
 		rpc.Send( NULL, JMPlayerModuleRPC.StartSpectating, true, ident );
 
-		PlayerBase spectatePlayer;
-		if (Class.CastTo(spectatePlayer, spectateObject) && spectatePlayer.GetAuthenticatedPlayer())
+		if (spectatePlayer && spectatePlayer.GetAuthenticatedPlayer())
 			GetCommunityOnlineToolsBase().Log( ident, "Spectating [guid=" + spectatePlayer.GetAuthenticatedPlayer().GetGUID() + "]" );
 		else
 			GetCommunityOnlineToolsBase().Log( ident, "Spectating " + spectateObject );
@@ -1475,12 +1479,13 @@ class JMPlayerModule: JMRenderableModuleBase
 #ifdef JM_COT_DIAG_LOGGING
 			Print(g_Game.GetPlayer());
 #endif
-			if ( GetPlayer() )
+			if ( m_SpectatorClient )
 			{
 #ifdef JM_COT_DIAG_LOGGING
 				Print("Disabling input controller");
 #endif
-				GetPlayer().GetInputController().SetDisabled( true );
+				m_SpectatorClient.GetInputController().SetDisabled( true );
+				m_SpectatorClient.m_JM_SpectatedObject = spectateObject;
 			}
 		}
 
@@ -1553,6 +1558,13 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
+	void Input_EndSpectating( UAInput input )
+	{
+		if ( !input.LocalPress() ) return;
+
+		EndSpectating();
+	}
+
 	void EndSpectating()
 	{
 #ifdef JM_COT_DIAG_LOGGING
@@ -1562,8 +1574,17 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!g_Game.IsMultiplayer())
 			return;
 
-		if (!JMPermissions.Has(JMConstants.PERM_PLAYER_SPECTATE))
+		//! Since ending spectating should always be possible it is not behind a permissions.
+		//! Otherwise, a mischievous admin could lock another admin (who is currently spectating)
+		//! in spectate mode by revoking his spectate permissions, thus robbing him of the ability
+		//! to end spectating.
+		if (!m_SpectatorClient || !m_SpectatorClient.m_JM_SpectatedObject)
+		{
+			COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_NOT_SPECTATING"));
 			return;
+		}
+
+		m_SpectatorClient.m_JM_SpectatedObject = null;
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, NULL );
@@ -1582,8 +1603,13 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!playerSpectator)
 			return;
 
+		PlayerBase spectatePlayer;
+		if (Class.CastTo(spectatePlayer, playerSpectator.m_JM_SpectatedObject))
+			spectatePlayer.COT_RemoveSpectator(playerSpectator);
+
 		playerSpectator.m_JM_SpectatedObject = null;
 		m_Spectators.Remove( ident.GetId() );
+		m_SpectatorsWaitingToFinish.Insert(ident.GetId());
 
 #ifdef JM_COT_DIAG_LOGGING
 		Print(playerSpectator);
@@ -1683,6 +1709,10 @@ class JMPlayerModule: JMRenderableModuleBase
 			m_SpectatorClient.COT_EnableBonePositionUpdate(true);
 			Client_Check_EndSpectating(m_SpectatorClient, waitForPlayerIdleTimeout);
 		}
+		else
+		{
+			Client_EndSpectating_Finish(false);
+		}
 
 		if (waitForPlayerIdleTimeout > 1000)
 			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_STOPPING"));
@@ -1704,9 +1734,15 @@ class JMPlayerModule: JMRenderableModuleBase
 			playerSpectator.COT_EnableBonePositionUpdate(false);
 			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_STOPPED_HINT"), "set:ccgui_enforce image:HudBuild", 5);
 
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send(NULL, JMPlayerModuleRPC.EndSpectating_Finish, true, NULL);
+			Client_EndSpectating_Finish(true);
 		}
+	}
+
+	void Client_EndSpectating_Finish(bool selectPlayer)
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write(selectPlayer);
+		rpc.Send(NULL, JMPlayerModuleRPC.EndSpectating_Finish, true, NULL);
 	}
 
 	protected void RPC_EndSpectating( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1720,7 +1756,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
-			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_SPECTATE, senderRPC ) )
+
+			//! Since ending spectating should always be possible it is not behind a permissions.
+			//! Otherwise, a mischievous admin could lock another admin (who is currently spectating)
+			//! in spectate mode by revoking his spectate permissions, thus robbing him of the ability
+			//! to end spectating.
+			if (!m_Spectators.Contains(senderRPC.GetId()))
 				return;
 
 			Server_EndSpectating( senderRPC );
@@ -1744,13 +1785,27 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating_Finish").Add(senderRPC).Add(target);
 #endif
 		CF_Log.Debug("JMPlayerModule::RPC_EndSpectating_Finish");
+
+		bool selectPlayer;
+		if (!ctx.Read(selectPlayer))
+			return;
+
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_SPECTATE, senderRPC ) )
+
+		//! Since ending spectating should always be possible it is not behind a permissions.
+		//! Otherwise, a mischievous admin could lock another admin (who is currently spectating)
+		//! in spectate mode by revoking his spectate permissions, thus robbing him of the ability
+		//! to end spectating.
+		int index = m_SpectatorsWaitingToFinish.Find(senderRPC.GetId())
+		if (index == -1)
 			return;
 
-		g_Game.SelectPlayer(senderRPC, senderRPC.GetPlayer());
+		m_SpectatorsWaitingToFinish.Remove(index);
+
+		if (selectPlayer)
+			g_Game.SelectPlayer(senderRPC, senderRPC.GetPlayer());
 	}
 
 	void ProcessToggle(string toggle, bool value, JMPlayerInstance player, array<JMPlayerInstance> affectedPlayers, PlayerIdentity ident, JMPlayerInstance instance)
