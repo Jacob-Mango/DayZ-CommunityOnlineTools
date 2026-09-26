@@ -162,8 +162,6 @@ modded class Weapon_Base
 		if (flags & WeaponWithAmmoFlags.QUANTITY_RNG)
 			mag.ServerSetAmmoCount(Math.RandomIntInclusive(0, mag.GetAmmoMax()));
 			
-	#ifndef DAYZ_1_27
-		//! 1.28+
 		if(MustBeChambered(0))
 		{
 			string bulletType;
@@ -173,7 +171,6 @@ modded class Weapon_Base
 				FillChamber(bulletType, flags);
 			}
 		}
-	#endif
 		
 		// Fill chamber when flagged
 		if ((flags & WeaponWithAmmoFlags.CHAMBER) || (flags & WeaponWithAmmoFlags.CHAMBER_RNG))
@@ -212,11 +209,8 @@ modded class Weapon_Base
 		}
 		
 		
-		bool didSomething = false;		
-	#ifndef DAYZ_1_27
-		//! 1.28+
+		bool didSomething = false;
 		bool needUpdateStateMachine = false;
-	#endif
 		int muzzCount = GetMuzzleCount();
 		
 		bool ammoRng = ammoType == "";
@@ -233,10 +227,7 @@ modded class Weapon_Base
 		// Fill the internal magazine
 		for (int i = 0; i < muzzCount; ++i)
 		{
-		#ifndef DAYZ_1_27
-			//! 1.28+
 			bool loadAnyBullet = false;
-		#endif
 			int ammoCount = GetInternalMagazineMaxCartridgeCount(i);
 			
 			// Decide random quantity when enabled
@@ -261,15 +252,10 @@ modded class Weapon_Base
 						continue;
 
 					PushCartridgeToInternalMagazine(i, 0, ammoType);
-				#ifndef DAYZ_1_27
-					//! 1.28+
 					loadAnyBullet = true;
-				#endif
 					didSomething = true;
 				}
 
-			#ifndef DAYZ_1_27
-				//! 1.28+
 				if (loadAnyBullet && MustBeChambered(i))
 				{
 					if ( ammoFullRng )
@@ -278,7 +264,6 @@ modded class Weapon_Base
 					if (ammoType && FillSpecificChamber(i, 0, ammoType))
 						needUpdateStateMachine = true;
 				}
-			#endif
 			}
 		}
 		
@@ -294,16 +279,13 @@ modded class Weapon_Base
 		// Only fix the FSM and Synchronize when absolutely needed
 		if (!didSomething)
 			return false;
-		
-	#ifndef DAYZ_1_27
-		//! 1.28+	
+			
 		if( needUpdateStateMachine )
 		{
 			// FSM cares about chamber state
 			RandomizeFSMState();		
 			Synchronize();
 		}
-	#endif
 		
 		return true;
 	}
@@ -345,7 +327,7 @@ modded class Weapon_Base
 		}
 		
 		// Just so we don't '&' wastefully in a loop
-		bool didSomething = false;		
+		bool didSomething = false;
 		bool chamberFullRng = (flags & WeaponWithAmmoFlags.CHAMBER_RNG_SPORADIC);
 		bool chamberRng = (flags & WeaponWithAmmoFlags.CHAMBER_RNG);
 		bool chamber = (flags & WeaponWithAmmoFlags.CHAMBER);
