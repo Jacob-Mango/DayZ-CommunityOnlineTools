@@ -323,5 +323,6 @@ Dot-notation strings with state suffix (0=Inherit, 1=Disallow, 2=Allow):
 ```
 
 `JMPermission.Serialize( output )` produces these lines (children are prefixed with their parent's dotted path) and
-`Deserialize` reads them back as `INHERIT` nodes; role files hold the same lines. Over the wire the tree is written by
+`Deserialize` reads them back; role files hold the same lines. DO NOT USE THIS SERIALIZATION FOR NETWORKING/RPCS.
+Over the wire the tree is exchanged in a compact byte format by
 `JMPermission.OnSend( ctx )` / read by `OnReceive( ctx )` (`RPC_SetPermissions` uses it).
