@@ -10,7 +10,7 @@ modded class NotifierBase
 
 	void COT_SubstituteSpectatedPlayer()
 	{
-		if (Class.CastTo(m_JM_SpectatedPlayer, m_Player.m_JM_SpectatedObject))
+		if (Class.CastTo(m_JM_SpectatedPlayer, m_JM_Owner.m_JM_SpectatedObject))
 			m_Player = m_JM_SpectatedPlayer;
 	}
 
