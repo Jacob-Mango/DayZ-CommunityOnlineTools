@@ -14,8 +14,14 @@ modded class VirtualHud
 			return false;
 
 		set<PlayerBase> spectators = m_Player.m_JM_Spectators;
+		Object spectatedObject = m_Player.m_JM_SpectatedObject;
 
-		if (!spectators || spectators.Count() == 0)
+		if (spectatedObject && spectatedObject.IsInherited(PlayerBase))
+		{
+			//! If m_Player is spectating another player, skip RPC
+			return true;
+		}
+		else if (!spectators || spectators.Count() == 0)
 		{
 			m_JM_ResetLastSentArray = false;
 			return false;
@@ -34,14 +40,10 @@ modded class VirtualHud
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write(maskArray);
 
-			Object spectatedObject = m_Player.m_JM_SpectatedObject;
-			if (!spectatedObject || !spectatedObject.IsInherited(PlayerBase))
-			{
-				//! If m_Player is not spectating another player, send their values to themselves
-				PlayerIdentity identity = m_Player.GetIdentity();
-				if (identity)
-					rpc.Send(m_Player, ERPCs.RPC_SYNC_DISPLAY_STATUS, false, identity);
-			}
+			//! If m_Player is not spectating another player, send their values to themselves
+			PlayerIdentity identity = m_Player.GetIdentity();
+			if (identity)
+				rpc.Send(m_Player, ERPCs.RPC_SYNC_DISPLAY_STATUS, false, identity);
 
 			foreach (PlayerBase spectator: spectators)
 			{

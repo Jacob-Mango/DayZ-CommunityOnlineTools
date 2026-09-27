@@ -1798,7 +1798,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		//! Otherwise, a mischievous admin could lock another admin (who is currently spectating)
 		//! in spectate mode by revoking his spectate permissions, thus robbing him of the ability
 		//! to end spectating.
-		int index = m_SpectatorsWaitingToFinish.Find(senderRPC.GetId())
+		int index = m_SpectatorsWaitingToFinish.Find(senderRPC.GetId());
 		if (index == -1)
 			return;
 
