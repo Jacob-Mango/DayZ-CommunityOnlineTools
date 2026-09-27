@@ -1411,10 +1411,15 @@ class JMPlayerModule: JMRenderableModuleBase
 			m_Spectators[ident.GetId()] = playerSpectator;
 		}
 
+		//! It is possible to start spectating another entity while already spectating a different entity,
+		//! so we need to make sure to remove ourselves from the old entity's spectators first
+		PlayerBase spectatePlayer;
+		if (Class.CastTo(spectatePlayer, playerSpectator.m_JM_SpectatedObject))
+			spectatePlayer.COT_RemoveSpectator(playerSpectator);
+
 		playerSpectator.m_JM_SpectatedObject = spectateObject;
 		playerSpectator.m_JM_CameraPosition = vector.Zero;
 
-		PlayerBase spectatePlayer;
 		if (Class.CastTo(spectatePlayer, spectateObject))
 			spectatePlayer.COT_AddSpectator(playerSpectator);
 
