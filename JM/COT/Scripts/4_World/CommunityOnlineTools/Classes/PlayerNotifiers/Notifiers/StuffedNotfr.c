@@ -4,7 +4,7 @@ modded class StuffedNotfr
 	{
 		COT_SubstituteSpectatedPlayer();
 
-		super.DisplayBadge(delta);
+		super.DisplayBadge();
 
 		COT_RestoreOwner();
 	}
