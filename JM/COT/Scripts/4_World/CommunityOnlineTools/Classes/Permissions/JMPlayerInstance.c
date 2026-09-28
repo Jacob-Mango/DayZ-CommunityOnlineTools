@@ -579,6 +579,12 @@ class JMPlayerInstance : Managed
 
 	void ClearRoles()
 	{
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		EXError.Info(this, "Clearing roles for player " + m_Name + " (GUID=" + m_GUID + ")");
+	#endif
+	#endif
+
 		m_Roles.Clear();
 		m_RoleNameRestrictions.Clear();
 	}
@@ -650,7 +656,7 @@ class JMPlayerInstance : Managed
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		#ifdef DIAG_DEVELOPER
 		#ifdef DZ_Expansion_Core
-		EXError.Info(this, string.Format("Sending permissions for player %1", m_Name));
+		EXError.Info(this, string.Format("Sending permissions for player %1 (GUID=%2)", m_Name, m_GUID));
 		#endif
 		#endif
 		m_RootPermission.OnSend( ctx );
@@ -688,28 +694,34 @@ class JMPlayerInstance : Managed
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		#ifdef DIAG_DEVELOPER
 		#ifdef DZ_Expansion_Core
-		EXError.Info(this, string.Format("Receiving permissions for player %1", m_Name));
+		EXError.Info(this, string.Format("Receiving permissions for player %1 (GUID=%2)", m_Name, m_GUID));
 		#endif
 		#endif
 
 		if (!m_RootPermission.OnReceive( ctx ))
 		{
-			CF.FormatError("Couldn't receive permissions for player %1", m_Name);
+			CF.FormatError("Couldn't receive permissions for player %1 (GUID=%2)", m_Name, m_GUID);
 			return false;
 		}
 	#endif
+
+		#ifdef DIAG_DEVELOPER
+		#ifdef DZ_Expansion_Core
+		EXError.Info(this, string.Format("Receiving roles for player %1 (GUID=%2)", m_Name, m_GUID));
+		#endif
+		#endif
 
 		int count;
 
 		if (!ctx.Read( count ))
 		{
-			CF.FormatError("Couldn't read role count for player %1", m_Name);
+			CF.FormatError("Couldn't read role count for player %1 (GUID=%2)", m_Name, m_GUID);
 			return false;
 		}
 
 		if (count < 0 || count > 256)
 		{
-			CF.FormatError("Invalid role count %1 received for player %2", count.ToString(), m_Name);
+			CF.FormatError("Invalid role count %1 received for player %2 (GUID=%2)", count.ToString(), m_Name, m_GUID);
 			return false;
 		}
 
@@ -720,7 +732,7 @@ class JMPlayerInstance : Managed
 			int index;
 			if (!ctx.Read( index ))
 			{
-				CF.FormatError("Couldn't read role index for player %1", m_Name);
+				CF.FormatError("Couldn't read role index for player %1 (GUID=%2)", m_Name, m_GUID);
 				return false;
 			}
 

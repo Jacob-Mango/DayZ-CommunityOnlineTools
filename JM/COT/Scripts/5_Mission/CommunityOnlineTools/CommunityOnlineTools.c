@@ -484,10 +484,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( IsMissionOffline() )
 		{
-			ScriptReadWriteContext rwctx = new ScriptReadWriteContext;
-			player.OnSend( rwctx.GetWriteContext() );
-
-			Client_SetClient( player.GetGUID(), rwctx.GetReadContext() );
+			Client_SetClient( player.GetGUID(), null );
 		} else if ( IsMissionHost() )
 		{
 			Server_SetClient( player );
@@ -502,10 +499,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( IsMissionOffline() )
 		{
-			ScriptReadWriteContext rwctx = new ScriptReadWriteContext;
-			player.OnSend( rwctx.GetWriteContext() );
-
-			Client_SetClient( player.GetGUID(), rwctx.GetReadContext() );
+			Client_SetClient( player.GetGUID(), null );
 		} else if ( IsMissionHost() )
 		{
 			Server_SetClient( player, identity );
@@ -519,6 +513,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		#endif
 
 		GetPermissionsManager().SetClientGUID( guid );
+
+		if ( !g_Game.IsMultiplayer() )
+			return;
 
 		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( g_Game.GetPlayer() ) );
 
