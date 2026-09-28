@@ -45,9 +45,13 @@ class JMWebhookSerialize : Managed
 		ctx.Write( Connections );
 	}
 
-	bool OnRecieve( ParamsReadContext ctx )
+	[Obsolete("Use OnReceive")]
+	bool OnRecieve( ParamsReadContext ctx );
+
+	bool OnReceive( ParamsReadContext ctx )
 	{
-		ctx.Read( Connections );
+		if ( !ctx.Read( Connections ) )
+			return false;
 
 		return true;
 	}

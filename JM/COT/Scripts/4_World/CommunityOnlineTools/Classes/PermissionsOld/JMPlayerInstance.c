@@ -544,11 +544,19 @@ class JMPlayerInstance : Managed
 			AddRole( roles[i], nameRestriction );
 		}
 
+		EnsureDefaultRole();
+
 		Save();
 	}
 
 	void AddRole( string role, string nameRestriction = "" )
 	{
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		EXError.Info(this, "Adding role " + role + " (nameRestriction=" + nameRestriction + ") to player " + m_Name + " (GUID=" + m_GUID + ")");
+	#endif
+	#endif
+
 		Assert_Null( GetPermissionsManager() );
 		Assert_Null( m_Roles );
 
@@ -566,12 +574,22 @@ class JMPlayerInstance : Managed
 		m_SyncedToClient.Clear();
 	}
 
+	void AddRoleByIndex( int index, string nameRestriction = "" )
+	{
+		string role = GetPermissionsManager().GetRoleNameByIndex( index );
+		AddRole( role, nameRestriction );
+	}
+
 	void ClearRoles()
 	{
 		m_Roles.Clear();
 		m_RoleNameRestrictions.Clear();
+	}
 
-		AddRole( "everyone" );
+	void EnsureDefaultRole()
+	{
+		if ( m_Roles.Count() == 0 )
+			AddRole( "everyone" );
 	}
 
 	void OnSend( ParamsWriteContext ctx, string sendToGUID = JMConstants.OFFLINE_GUID )
@@ -582,18 +600,36 @@ class JMPlayerInstance : Managed
 		OnSendHealth( ctx );
 	}
 
-	void OnRecieve( ParamsReadContext ctx )
+	//! Old methods with typo and no return value
+	[Obsolete("Use OnReceive")]
+	void OnRecieve( ParamsReadContext ctx );
+	[Obsolete("Use OnReceivePermissions")]
+	void OnRecievePermissions( ParamsReadContext ctx );
+	[Obsolete("Use OnReceivePosition")]
+	void OnRecievePosition( ParamsReadContext ctx );
+	[Obsolete("Use OnReceiveOrientation")]
+	void OnRecieveOrientation( ParamsReadContext ctx );
+	[Obsolete("Use OnReceiveHealth")]
+	void OnRecieveHealth( ParamsReadContext ctx );
+
+	bool OnReceive( ParamsReadContext ctx )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_0(this, "OnRecieve");
+		auto trace = CF_Trace_0(this, "OnReceive");
 		#endif
 
-		OnRecievePermissions( ctx );
-		OnRecievePosition( ctx );
-		OnRecieveOrientation( ctx );
-		OnRecieveHealth( ctx );
+		if (!OnReceivePermissions( ctx ))
+			return false;
+		if (!OnReceivePosition( ctx ))
+			return false;
+		if (!OnReceiveOrientation( ctx ))
+			return false;
+		if (!OnReceiveHealth( ctx ))
+			return false;
 
 		m_DataLastUpdated = g_Game.GetTime();
+
+		return true;
 	}
 
 	void OnSendPermissions( ParamsWriteContext ctx, string sendToGUID )
@@ -623,15 +659,17 @@ class JMPlayerInstance : Managed
 		m_RootPermission.OnSend( ctx );
 	#endif
 
-		ctx.Write( m_Roles );
+		ctx.Write( m_Roles.Count() );
+		foreach ( string role: m_Roles )
+			ctx.Write( GetPermissionsManager().GetRoleIndexByName( role ) );
 
 		m_SyncedToClient[sendToGUID] = true;
 	}
 
-	void OnRecievePermissions( ParamsReadContext ctx )
+	bool OnReceivePermissions( ParamsReadContext ctx )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_0(this, "OnRecievePermissions");
+		auto trace = CF_Trace_0(this, "OnReceivePermissions");
 		#endif
 
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
@@ -641,16 +679,14 @@ class JMPlayerInstance : Managed
 		bool permissionsUpdate;
 		ctx.Read( permissionsUpdate );
 		#ifdef JM_COT_DIAG_LOGGING
-		Print("OnRecievePermissions - GUID " + m_GUID + " update " + permissionsUpdate);
+		Print("OnReceivePermissions - GUID " + m_GUID + " update " + permissionsUpdate);
 		#endif
 
 		if ( !permissionsUpdate )
-			return;
+			return true;
 
 		ctx.Read( m_Steam64ID );
 		ctx.Read( m_Name );
-
-		array< string > roles = new array< string >;
 
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		#ifdef DIAG_DEVELOPER
@@ -662,39 +698,81 @@ class JMPlayerInstance : Managed
 		if (!m_RootPermission.OnReceive( ctx ))
 		{
 			CF.FormatError("Couldn't receive permissions for player %1", m_Name);
-			return;
+			return false;
 		}
 	#endif
 
-		if (!ctx.Read( roles ))
+		int count;
+
+		if (!ctx.Read( count ))
 		{
-			CF.FormatError("Couldn't receive roles for player %1", m_Name);
-			return;
+			CF.FormatError("Couldn't read role count for player %1", m_Name);
+			return false;
+		}
+
+		if (count < 0 || count > 256)
+		{
+			CF.FormatError("Invalid role count %1 received for player %2", count.ToString(), m_Name);
+			return false;
 		}
 
 		ClearRoles();
-		for ( int j = 0; j < roles.Count(); j++ )
-			AddRole( roles[j] );
+
+		while (count--)
+		{
+			int index;
+			if (!ctx.Read( index ))
+			{
+				CF.FormatError("Couldn't read role index for player %1", m_Name);
+				return false;
+			}
+
+			AddRoleByIndex( index );
+		}
+
+		EnsureDefaultRole();
+
+		return true;
 	}
 
 	void OnSendPosition( ParamsWriteContext ctx )
 	{
-		ctx.Write( m_Position );
+		for (int i = 0; i < 3; ++i)
+			ctx.Write( m_Position[i] );
 	}
 
-	void OnRecievePosition( ParamsReadContext ctx )
+	bool OnReceivePosition( ParamsReadContext ctx )
 	{
-		ctx.Read( m_Position );
+		for (int i = 0; i < 3; ++i)
+		{
+			float value;
+			if (!ctx.Read( value ))
+				return false;
+
+			m_Position[i] = value;
+		}
+
+		return true;
 	}
 
 	void OnSendOrientation( ParamsWriteContext ctx )
 	{
-		ctx.Write( m_Orientation );
+		for (int i = 0; i < 3; ++i)
+			ctx.Write( m_Orientation[i] );
 	}
 
-	void OnRecieveOrientation( ParamsReadContext ctx )
+	bool OnReceiveOrientation( ParamsReadContext ctx )
 	{
-		ctx.Read( m_Orientation );
+		for (int i = 0; i < 3; ++i)
+		{
+			float value;
+			if (!ctx.Read( value ))
+				return false;
+
+			m_Orientation[i] = value;
+		}
+
+		return true;
 	}
 
 	void OnSendHealth( ParamsWriteContext ctx )
@@ -722,29 +800,44 @@ class JMPlayerInstance : Managed
 		ctx.Write( bitmask );
 	}
 
-	void OnRecieveHealth( ParamsReadContext ctx )
+	bool OnReceiveHealth( ParamsReadContext ctx )
 	{
-		ctx.Read( m_Health );
-		ctx.Read( m_Blood );
-		ctx.Read( m_Shock );
-		ctx.Read( m_BloodStatType );
-		ctx.Read( m_Energy );
-		ctx.Read( m_Water );
-		ctx.Read( m_HeatComfort );
-		ctx.Read( m_HeatBuffer );		
-		ctx.Read( m_Wet );
-		ctx.Read( m_Tremor );
-		ctx.Read( m_Stamina );
-		ctx.Read( m_LifeSpanState );
+		if (!ctx.Read( m_Health ))
+			return false;
+		if (!ctx.Read( m_Blood ))
+			return false;
+		if (!ctx.Read( m_Shock ))
+			return false;
+		if (!ctx.Read( m_BloodStatType ))
+			return false;
+		if (!ctx.Read( m_Energy ))
+			return false;
+		if (!ctx.Read( m_Water ))
+			return false;
+		if (!ctx.Read( m_HeatComfort ))
+			return false;
+		if (!ctx.Read( m_HeatBuffer ))
+			return false;		
+		if (!ctx.Read( m_Wet ))
+			return false;
+		if (!ctx.Read( m_Tremor ))
+			return false;
+		if (!ctx.Read( m_Stamina ))
+			return false;
+		if (!ctx.Read( m_LifeSpanState ))
+			return false;
 		
 		int bitmask;
-		ctx.Read( bitmask );
+		if (!ctx.Read( bitmask ))
+			return false;
 
 		for (int i = 0; i < EnumTools.GetEnumSize(JMPlayerVariables); i++)
 		{
 			int value = EnumTools.GetEnumValue(JMPlayerVariables, i);
 			m_PlayerVars[value] = (bitmask & value) == value;
 		}
+
+		return true;
 	}
 
 	void Save()
@@ -881,6 +974,8 @@ class JMPlayerInstance : Managed
 
 			AddRole( m_PlayerFile.Roles[j], loadedNameRestriction );
 		}
+
+		EnsureDefaultRole();
 
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		// Track whether any legacy permission file was migrated so we know whether to re-save.

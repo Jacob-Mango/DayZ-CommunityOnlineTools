@@ -3,6 +3,7 @@ class JMPermissionManager
 {
 	ref map< string, ref JMPlayerInstance > Players;
 	ref map< string, ref JMRole > Roles;
+	protected ref array< string > m_RoleNamesSorted = {};
 	ref map< string, string > SteamToGUID;
 	ref JMPermission RootPermission;
 	protected string m_ClientGUID;
@@ -153,6 +154,22 @@ class JMPermissionManager
 		return Roles.Get( name );
 	}
 
+	JMRole GetRole( int index )
+	{
+		string name = m_RoleNamesSorted[index];
+		return Roles.Get( name );
+	}
+
+	int GetRoleIndexByName( string name )
+	{
+		return m_RoleNamesSorted.Find( name );
+	}
+
+	string GetRoleNameByIndex( int index )
+	{
+		return m_RoleNamesSorted[index];
+	}
+
 	void GetRolesAsList( out array< JMRole > roles, bool sorted = false )
 	{
 		Assert_Null( Roles );
@@ -162,9 +179,7 @@ class JMPermissionManager
 
 		if (sorted)
 		{
-			TStringArray names = Roles.GetKeyArray();
-			names.Sort();
-			foreach (string name: names)
+			foreach (string name: m_RoleNamesSorted)
 				roles.Insert(Roles[name]);
 		}
 		else
@@ -362,6 +377,7 @@ class JMPermissionManager
 
 		Players.Clear();
 		Roles.Clear();
+		m_RoleNamesSorted.Clear();
 	}
 
 	//! Test roster. SERVER ONLY: the client gets these the same way it gets real
@@ -825,7 +841,7 @@ class JMPermissionManager
 			m_RosterVersion++;
 		}
 
-		instance.OnRecieve( ctx );
+		instance.OnReceive( ctx );
 
 		if ( IsMissionClient() )
 		{
@@ -878,7 +894,7 @@ class JMPermissionManager
 		if ( !role )
 		{
 			role = new JMRole( name );
-			Roles.Insert( name, role );
+			InsertRole( role );
 
 			return false;
 		}
@@ -893,7 +909,25 @@ class JMPermissionManager
 		JMRole role = new JMRole( name );
 		
 		if ( role.Load() )
-			Roles.Insert( name, role );
+			InsertRole( role );
+	}
+
+	void InsertRole( JMRole role )
+	{
+		string name = role.Name;
+
+		Roles.Insert( name, role );
+
+		m_RoleNamesSorted.Insert( name );
+
+		if ( m_RoleNamesSorted.Count() > 1 )
+			m_RoleNamesSorted.Sort();
+	}
+
+	void RemoveRole( string role )
+	{
+		Roles.Remove( role );
+		m_RoleNamesSorted.RemoveItem( role );
 	}
 
 	void LoadRoles()

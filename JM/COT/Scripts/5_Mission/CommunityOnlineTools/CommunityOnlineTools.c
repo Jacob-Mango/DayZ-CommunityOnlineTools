@@ -407,7 +407,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				return;
 			}
 
-			player.OnRecievePosition( ctx );
+			player.OnReceivePosition( ctx );
 		}
 	}
 
@@ -465,7 +465,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			JMPlayerInstance player = GetPermissionsManager().GetPlayer( guid );
 			if ( player )
 			{
-				player.OnRecievePosition( ctx );
+				if ( !player.OnReceivePosition( ctx ) )
+					return;
 			} else
 			{
 				vector discard;

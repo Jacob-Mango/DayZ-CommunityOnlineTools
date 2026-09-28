@@ -347,8 +347,6 @@ class JMPermission : Managed
 			return;
 		}
 
-		ctx.Write(Children.Count());
-
 		foreach (auto child: Children)
 		{
 			#ifdef DIAG_DEVELOPER
@@ -367,22 +365,6 @@ class JMPermission : Managed
 		if (!m_Sorted)
 			Sort();
 
-		int count;
-		if (!ctx.Read(count))
-		{
-			CF.FormatError("Couldn't receive child permission count for %1", m_SerializedFullName);
-			return false;
-		}
-
-		if (count == -1)
-			return true;
-
-		if (count != Children.Count())
-		{
-			Error(string.Format("Received child permission count %1 for %2 does not match registered child count %3!", count, m_SerializedFullName, Children.Count()));
-			return false;
-		}
-
 		foreach (auto child: Children)
 		{
 			int type;
@@ -391,6 +373,9 @@ class JMPermission : Managed
 				CF.FormatError("Couldn't receive type for permission %1", child.GetFullName());
 				return false;
 			}
+
+			if (type == -1)  //! No more data
+				break;
 
 			child.Type = type;
 

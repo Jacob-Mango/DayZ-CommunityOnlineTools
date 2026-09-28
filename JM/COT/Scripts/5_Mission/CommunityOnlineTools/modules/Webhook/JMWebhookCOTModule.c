@@ -153,7 +153,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		}
 		else
 		{
-			if ( m_Settings.OnRecieve( ctx ) )
+			if ( m_Settings.OnReceive( ctx ) )
 			{
 				OnSettingsUpdated();
 			}

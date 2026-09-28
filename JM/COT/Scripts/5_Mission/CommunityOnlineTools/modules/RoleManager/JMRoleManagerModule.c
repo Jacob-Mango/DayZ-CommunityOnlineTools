@@ -300,7 +300,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 				DeleteFile( rolePath );
 		}
 
-		GetPermissionsManager().Roles.Remove( name );
+		GetPermissionsManager().RemoveRole( name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Deleted role: " + name );
 		SendWebhook( "DeleteRole", NULL, "Deleted role: " + name );

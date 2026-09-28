@@ -597,9 +597,10 @@ class COTModule : JMModuleBase
 			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), identity );
 		}
 		#else
-		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
+		auto roles = GetPermissionsManager().Roles;
+		foreach ( string roleName, JMRole role: roles)
 		{
-			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().Roles.GetElement(i), identity );
+			GetCommunityOnlineToolsBase().UpdateRole( role, identity );
 		}
 		#endif
 		
