@@ -226,7 +226,6 @@ class JMWebhookModule: JMModuleBase
 		auto trace = CF_Trace_0(this, "SaveConnections");
 		#endif
 
-		JMWebhookSerialize serialize = new JMWebhookSerialize;
 		m_Settings.Save();
 	}
 
