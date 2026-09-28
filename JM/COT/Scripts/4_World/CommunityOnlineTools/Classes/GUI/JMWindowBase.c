@@ -1,4 +1,4 @@
-#ifndef CF_WINDOWS
+//! Only kept for compat with existing mods that might use it, COT itself doesn't (anymore)
 typedef JMWindowBase CF_Window;
 
 enum EResizeDirection
@@ -1225,4 +1225,3 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			m_Form.OnResize( newWidth, contentH );
 	}
 }
-#endif

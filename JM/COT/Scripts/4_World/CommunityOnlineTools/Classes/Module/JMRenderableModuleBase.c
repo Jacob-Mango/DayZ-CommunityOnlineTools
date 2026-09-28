@@ -1,6 +1,6 @@
 class JMRenderableModuleBase: JMModuleBase
 {
-	protected ref CF_Window m_Window;
+	protected ref JMWindowBase m_Window;
 	protected JMFormBase m_Form;
 	protected ButtonWidget m_MenuButton;
 
@@ -97,14 +97,10 @@ class JMRenderableModuleBase: JMModuleBase
 
 	bool IsVisible()
 	{
-		#ifdef CF_WINDOWS
-		return m_Window != null;
-		#else
 		if ( !m_Window )
 			return false;
 		
 		return m_Window.IsVisible();
-		#endif
 	}
 
 	void SetForm(JMFormBase form)
@@ -235,15 +231,6 @@ class JMRenderableModuleBase: JMModuleBase
 
 		if ( HasAccess() )
 		{
-			#ifdef CF_WINDOWS
-			m_Window = new CF_Window();
-
-			Widget widgets = m_Window.CreateWidgets(GetLayoutRoot());
-
-			widgets.GetScript(m_Form);
-
-			m_Form.Init(m_Window, this);
-			#else
 			if ( !m_Window )
 			{
 				m_Window = GetCOTWindowManager().Create();
@@ -251,7 +238,6 @@ class JMRenderableModuleBase: JMModuleBase
 			}
 
 			m_Window.Show();
-			#endif
 		}
 		else
 		{

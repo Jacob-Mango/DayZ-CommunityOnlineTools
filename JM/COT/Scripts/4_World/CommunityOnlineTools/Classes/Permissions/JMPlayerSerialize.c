@@ -1,4 +1,3 @@
-#ifndef CF_MODULE_PERMISSIONS
 class JMPlayerSerialize : Managed
 {
 	[NonSerialized()]
@@ -104,4 +103,3 @@ class JMPlayerSerialize : Managed
 		JsonFileLoader<JMPlayerSerialize>.JsonSaveFile( m_FileName, this );
 	}
 }
-#endif

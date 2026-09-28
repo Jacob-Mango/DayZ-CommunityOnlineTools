@@ -1779,7 +1779,7 @@ class UIActionManager
 	static UIActionContextMenu CreateOverlayMenu( notnull JMFormBase form, Class instance = null, string funcname = "" )
 	{
 		Widget root = form.GetLayoutRoot();
-		CF_Window wnd = form.GetWindow();
+		JMWindowBase wnd = form.GetWindow();
 
 		if ( !root || !wnd )
 		{
@@ -1812,7 +1812,7 @@ class UIActionManager
 	static UIActionFilterMenu CreateOverlayFilterMenu( notnull JMFormBase form, notnull Widget owner, string registryScope = "", Widget anchor = null )
 	{
 		Widget root = form.GetLayoutRoot();
-		CF_Window wnd = form.GetWindow();
+		JMWindowBase wnd = form.GetWindow();
 
 		if ( !root || !wnd )
 		{
@@ -1853,7 +1853,7 @@ class UIActionManager
 	static UIActionValuePrompt CreateOverlayPrompt( notnull JMFormBase form, Class instance = null, string funcname = "" )
 	{
 		Widget root = form.GetLayoutRoot();
-		CF_Window wnd = form.GetWindow();
+		JMWindowBase wnd = form.GetWindow();
 
 		if ( !root || !wnd )
 		{

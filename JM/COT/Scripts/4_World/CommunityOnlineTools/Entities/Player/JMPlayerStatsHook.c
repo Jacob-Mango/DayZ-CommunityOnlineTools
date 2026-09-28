@@ -28,7 +28,6 @@ class JMPlayerStatsHook
 
 	static void RecordDeath( string guid )
 	{
-	#ifndef CF_MODULE_PERMISSIONS
 		if ( guid == "" )
 			return;
 
@@ -46,6 +45,5 @@ class JMPlayerStatsHook
 		// server crash would otherwise swallow, and it happens rarely enough
 		// that the extra file write costs nothing.
 		instance.Save();
-	#endif
 	}
 }

@@ -182,11 +182,9 @@ File: `JM/COT/Scripts/5_Mission/CommunityOnlineTools/MissionGameplay.c`
 
 | CF Class | Used for |
 |---|---|
-| `CF_Permission_PlayerBase` | Modded to carry the `JMPlayerInstance` getters, only when `CF_MODULE_PERMISSIONS` is defined |
 | `JMModuleManager` / `JMModuleConstructorBase` | Module registry and constructor - COT `modded class`es both |
 | `CF_Modules<T>.Get()` | Look up a module instance (`CF_Modules<JMESPModule>.Get( espModule )`) |
 | `CF_InputBindings` | Skip input when EditBox has focus (`3_Game/.../InputBindings/CF_InputBindings.c`, unless `CF_INPUTBINDINGS_FOCUS_FIX`) |
-| `CF_Windows` | Window focus for COT_MENU/ESP_CONTAINER (only when `CF_WINDOWS`) |
 | `CF_Date` | Ban expiry timestamp comparison |
 | `CF_DoublyLinkedNodes_WeakRef` | Vehicle lists (`CarScript.s_JM_AllCars`, ...) |
 | `CF_Trace` | Debug logging (under `JM_COT_DIAG_LOGGING`) |

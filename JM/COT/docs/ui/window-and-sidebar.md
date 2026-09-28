@@ -146,8 +146,8 @@ Active state per-player (server-side `m_ActiveGUIDs` map). `SetActive(bool)` tri
 
 ## Modded Classes (79 declarations)
 
-COT declares 79 `modded class` blocks: vanilla DayZ classes, Community Framework classes (`CF_Windows`, `CF_InputBindings`,
-`CF_Permission_PlayerBase`, `JMModuleManager`, `JMModuleConstructorBase`), Expansion classes (in `4_World`, see
+COT declares 79 `modded class` blocks: vanilla DayZ classes, Community Framework classes (`CF_InputBindings`,
+`JMModuleManager`, `JMModuleConstructorBase`), Expansion classes (in `4_World`, see
 [../systems/mod-compatibility.md](../systems/mod-compatibility.md)) and a few of its own (`JMModuleBase`, `JMModuleConstructor`).
 Key vanilla ones:
 

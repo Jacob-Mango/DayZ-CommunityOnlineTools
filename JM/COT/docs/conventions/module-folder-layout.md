@@ -114,5 +114,5 @@ classes); 4 files (stat and toggle families); then 32 files (UI classes, class f
 
 - `JMPlayerStats.c` and `JMPlayerToggles.c` hold the built-in subclasses (`JMPlayerStatHealth`,
   `JMPlayerToggleGodMode`, ...), not classes of those names. `JMPlayerStats.c` is also easy to confuse with the
-  unrelated session-history class `JMPlayerStats` in `4_World/.../PermissionsOld/`.
+  unrelated session-history class `JMPlayerStats` in `4_World/.../Permissions/`.
 - `JMWeatherPreset.c` declares `JMWeatherBase`, `JMtemStatsModule.c` is missing an `I`. Renames are separate work.

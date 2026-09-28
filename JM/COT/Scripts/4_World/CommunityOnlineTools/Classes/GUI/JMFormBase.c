@@ -5,11 +5,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 #endif
 
 	protected Widget layoutRoot;
-	protected CF_Window m_Window;
+	protected JMWindowBase m_Window;
 
-	#ifndef CF_WINDOWS
+	//! Only kept for compat with existing mods that might use it, COT itself doesn't (anymore)
 	protected JMWindowBase window;
-	#endif
 
 	bool m_IsShown;
 
@@ -215,7 +214,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! Public: a per-tab class anchoring a floating overlay (e.g. a context
 	//! menu) to the window root needs this the same way EnsureContextMenu()
 	//! bodies already did before they lived on the form itself.
-	CF_Window GetWindow()
+	JMWindowBase GetWindow()
 	{
 		return m_Window;
 	}
@@ -378,7 +377,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		m_DeferredCalls.Clear();
 	}
 
-	void Init( CF_Window wdw, JMRenderableModuleBase mdl )
+	void Init( JMWindowBase wdw, JMRenderableModuleBase mdl )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Init").Add(wdw.ToString()).Add(mdl.ToString());
@@ -386,9 +385,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 		m_Window = wdw;
 		
-		#ifndef CF_WINDOWS
 		window = wdw;
-		#endif
 
 		if ( SetModule( mdl ) )
 		{
@@ -1242,56 +1239,32 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
 	{
-		#ifdef CF_WINDOWS
-		return null;
-		#else
-		return window.CreateConfirmation_One( type, title, message, callBackOneName, callBackOne );
-		#endif
+		return m_Window.CreateConfirmation_One( type, title, message, callBackOneName, callBackOne );
 	}
 
 	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName )
 	{
-		#ifdef CF_WINDOWS
-		return null;
-		#else
 		return CreateConfirmation_One( type, title, message, callBackOneName, "" );
-		#endif
 	}
 
 	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
 	{
-		#ifdef CF_WINDOWS
-		return null;
-		#else
-		return window.CreateConfirmation_Two( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo );
-		#endif
+		return m_Window.CreateConfirmation_Two( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo );
 	}
 
 	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName )
 	{
-		#ifdef CF_WINDOWS
-		return null;
-		#else
 		return CreateConfirmation_Two( type, title, message, callBackOneName, "", callBackTwoName, "" );
-		#endif
 	}
 
 	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
 	{
-		#ifdef CF_WINDOWS
-		return null;
-		#else
-		return window.CreateConfirmation_Three( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo, callBackThreeName, callBackThree );
-		#endif
+		return m_Window.CreateConfirmation_Three( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo, callBackThreeName, callBackThree );
 	}
 
 	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName, string callBackThreeName )
 	{
-		#ifdef CF_WINDOWS
-		return null;
-		#else
 		return CreateConfirmation_Three( type, title, message, callBackOneName, "", callBackTwoName, "", callBackThreeName, "" );
-		#endif
 	}
 
 	// -------------------------------------------------------------------------

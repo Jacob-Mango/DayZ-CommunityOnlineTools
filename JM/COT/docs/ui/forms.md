@@ -96,14 +96,14 @@ class JMMyForm : JMFormBase
 | `OnSettingsUpdated()` | COT settings changed |
 | `Update()` | Per-frame (not called automatically — must be wired up) |
 
-`Init( CF_Window wdw, JMRenderableModuleBase mdl )` runs them in that order: `SetModule` -> `OnCreate` -> (`OnInit` if the
+`Init( JMWindowBase wdw, JMRenderableModuleBase mdl )` runs them in that order: `SetModule` -> `OnCreate` -> (`OnInit` if the
 override never reached the base) -> `OnClientPermissionsUpdated` -> `OnShow`. A form that splits itself into tabs also
 gets the tab hooks (`OnTabCreate`, `OnTabFocus`, ...) - see [../systems/naming.md](../systems/naming.md).
 
 Key members available in subclass:
 ```c
 Widget layoutRoot;     // protected: root widget (set by engine)
-CF_Window m_Window;    // protected: parent window handle (typed CF_Window; also `window` when CF_WINDOWS is undefined)
+JMWindowBase m_Window;    // protected: parent window handle
 ```
 
 ## UIActionBase — Event Handler Signature

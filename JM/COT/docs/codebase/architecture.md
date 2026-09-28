@@ -21,8 +21,8 @@ DayZ loads scripts in order — each layer can override previous ones:
 | `JM/COT/Scripts/3_Game/CommunityOnlineTools/JMConstants.c` | Directory path constants |
 | `JM/COT/Scripts/3_Game/CommunityOnlineTools/Bans/JMPlayerBan.c` | Ban record struct |
 | `JM/COT/Scripts/3_Game/CommunityOnlineTools/Bans/JMPlayerBanStore.c` | JSON container for bans |
-| `JM/COT/Scripts/4_World/CommunityOnlineTools/Classes/PermissionsOld/JMPlayerInstance.c` | Per-player COT state (the active class; `3_Game/.../Permissions/JMPlayerInstance.c` is the `CF_MODULE_PERMISSIONS` variant) |
-| `JM/COT/Scripts/4_World/CommunityOnlineTools/Classes/PermissionsOld/JMPermissionManager.c` | `GetPermissionsManager()`: roles, permission tree, roster |
+| `JM/COT/Scripts/4_World/CommunityOnlineTools/Classes/Permissions/JMPlayerInstance.c` | Per-player COT state |
+| `JM/COT/Scripts/4_World/CommunityOnlineTools/Classes/Permissions/JMPermissionManager.c` | `GetPermissionsManager()`: roles, permission tree, roster |
 | `JM/COT/Scripts/4_World/CommunityOnlineTools/Classes/Permissions/JMPermissions.c` | Static API module code uses for permission checks |
 | `JM/COT/Scripts/4_World/CommunityOnlineTools/Classes/Module/JMModuleInfo.c` / `JMModuleAction.c` | `DescribeModule()` descriptor and the client -> server action class |
 | `JM/COT/Scripts/4_World/CommunityOnlineTools/Classes/Module/JMModuleBase.c` | Base module (webhook, commands) |
@@ -177,7 +177,7 @@ limits (`RPC_MAX_GUIDS`, `INVENTORY_MAX_ITEMS`, `RPC_RATE_LIMIT_S`) and the `WEB
 5. `ToggleShow()` closes the window if visible; otherwise it checks `HasAccess()` and `GetCommunityOnlineToolsBase().IsActive()`
    and calls `Show()`
 6. `Show()` (default build) asks `GetCOTWindowManager().Create()` for a `JMWindowBase`, binds the module with `SetModule()`
-   and shows it. Only when `CF_WINDOWS` is defined does it instead create a `CF_Window` from `GetLayoutRoot()`
+   and shows it.`
 7. `Close()` → `m_Window.DestroyLater()`; `JMWindowManager` later calls `module.OnWindowDestroyed()` to clear `m_Window`
 
 ## Settings Persistence Pattern

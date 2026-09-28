@@ -353,12 +353,10 @@ modded class JMModuleBase
 		}
 	}
 
-#ifndef CF_MODULE_PERMISSIONS
 	override void OnClientPermissionsUpdated()
 	{
 		super.OnClientPermissionsUpdated();
 	}
-#endif
 
 	void AddSubCommand(inout array<ref JMCommand> commands, string command, string function, string permission)
 	{

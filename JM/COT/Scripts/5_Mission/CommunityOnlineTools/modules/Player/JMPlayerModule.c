@@ -3196,7 +3196,6 @@ class JMPlayerModule: JMRenderableModuleBase
 		int longestLife = 0;
 		int currentLife = 0;
 
-	#ifndef CF_MODULE_PERMISSIONS
 		if ( guid != "" )
 		{
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
@@ -3217,7 +3216,6 @@ class JMPlayerModule: JMRenderableModuleBase
 				}
 			}
 		}
-	#endif
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( guid );

@@ -1,4 +1,3 @@
-#ifndef CF_MODULE_PERMISSIONS
 class JMPermission : Managed
 {
 	JMPermission Root;
@@ -474,4 +473,3 @@ class JMPermission : Managed
 		}
 	}
 }
-#endif

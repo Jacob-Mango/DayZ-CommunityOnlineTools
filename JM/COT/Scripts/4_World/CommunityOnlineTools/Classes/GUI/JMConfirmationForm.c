@@ -1,6 +1,5 @@
 class JMConfirmationForm: JMConfirmation 
 {
-	#ifndef CF_WINDOWS
 	protected JMWindowBase m_Window;
 
 	override void Init( Managed base )
@@ -17,5 +16,4 @@ class JMConfirmationForm: JMConfirmation
 			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), callback, new Param1<JMConfirmation>( this ) );
 		}
 	}
-	#endif
 }

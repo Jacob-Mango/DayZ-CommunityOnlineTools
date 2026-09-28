@@ -325,7 +325,7 @@ class JMVehiclesFormTabMap: JMFormTab
 	//! the info panel and starts polling that one vehicle's live state.
 	void OnMarker_HoverEnter( JMVehicleMetaData vehicle )
 	{
-		CF_Window window = m_Form.GetWindow();
+		JMWindowBase window = m_Form.GetWindow();
 
 		if ( !vehicle || !window )
 			return;

@@ -1,4 +1,3 @@
-#ifndef CF_MODULE_PERMISSIONS
 class JMRole : Managed
 {
 	ref JMPermission RootPermission;
@@ -133,4 +132,3 @@ class JMRole : Managed
 		RootPermission.DebugPrint( 0 );
 	}
 }
-#endif

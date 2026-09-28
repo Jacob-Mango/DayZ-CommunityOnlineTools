@@ -7,9 +7,7 @@ enum JMInvisibilityType
 
 modded class PlayerBase
 {
-#ifndef CF_MODULE_PERMISSIONS
 	protected JMPlayerInstance m_AuthenticatedPlayer;
-#endif
 
 	protected bool m_COT_GodMode;
 	protected bool m_COT_GodMode_Preference;
@@ -171,9 +169,7 @@ modded class PlayerBase
 
 		RegisterNetSyncVariableFloat("m_JMScaleValue", 0.1, 10.0);
 
-#ifndef CF_MODULE_PERMISSIONS
 		g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
-#endif
 
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
@@ -643,7 +639,6 @@ modded class PlayerBase
 		JMAntiCheatSanction.Grant(identity.GetId(), bucket, seconds);
 	}
 
-#ifndef CF_MODULE_PERMISSIONS
 	JMPlayerInstance GetAuthenticatedPlayer()
 	{
 		if ( m_AuthenticatedPlayer )
@@ -726,7 +721,6 @@ modded class PlayerBase
 
 		return name + " (WARNING)";
 	}
-#endif
 
 	bool COTHasGodMode()
 	{

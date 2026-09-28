@@ -388,12 +388,10 @@ class CommunityOnlineToolsBase
 
 		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
 
-		#ifndef CF_MODULE_PERMISSIONS
 		if ( g_Game.IsServer() && g_Game.IsMultiplayer() )
 		{
 			GetPermissionsManager().LoadRoles();
 		}
-		#endif
 
 		CreateNewLog();
 

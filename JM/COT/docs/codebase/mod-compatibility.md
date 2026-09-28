@@ -29,7 +29,7 @@ Each of these was `private` and is deliberately widened. **Do not re-narrow.**
 | Class | Member | Consumed by |
 |---|---|---|
 | `JMPermissionManager` | `m_MissionLoaded` | `Expansion_RegisterPermission` guard |
-| `JMPlayerInstance` (PermissionsOld) | `m_DataLastUpdated` | AI + Hardline `Update()` netsync rate-limit |
+| `JMPlayerInstance` (Permissions) | `m_DataLastUpdated` | AI + Hardline `Update()` netsync rate-limit |
 | `JMESPModule` | `m_MappedESPObjects` | `ExpansionESPModificationModule.Get(target)` |
 | `JMPlayerForm` | `m_RefreshStats`, `m_ApplyStats` | `SetSort()` re-order when injecting rows |
 | `JMPlayerForm` | `m_Stamina` | `GetLayoutRoot().GetParent()` used as injection anchor |
@@ -39,13 +39,6 @@ Each of these was `private` and is deliberately widened. **Do not re-narrow.**
 Note `JMPlayerInstance.m_Stamina` (a `private float` stat) is **intentionally
 still private** — it is a different member from `JMPlayerForm.m_Stamina`
 (`UIActionSlider`) and no mod touches it. Don't widen by name-matching.
-
-### Keep the two JMPlayerInstance variants in sync
-
-There are two: `4_World/.../PermissionsOld/JMPlayerInstance.c` (active) and
-`3_Game/.../Permissions/JMPlayerInstance.c` (`#ifdef CF_MODULE_PERMISSIONS`).
-The CF variant already declared `m_DataLastUpdated` as `protected`; the old one
-did not, which is what broke. When editing visibility in one, mirror it.
 
 ## Deleting a module can break a dependent mod
 

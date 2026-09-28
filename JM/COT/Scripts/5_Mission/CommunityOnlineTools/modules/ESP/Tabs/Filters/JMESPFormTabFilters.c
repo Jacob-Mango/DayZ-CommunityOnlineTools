@@ -522,7 +522,7 @@ class JMESPFormTabFilters: JMFormTab
 
 		if ( !m_CategoryMenu )
 		{
-			CF_Window window = m_Form.GetWindow();
+			JMWindowBase window = m_Form.GetWindow();
 			if ( !window )
 			{
 				Error("[JMESPFormTabFilters] OpenCategoryMenu failed: m_Form.GetWindow() returned null!");

@@ -46,7 +46,6 @@ modded class JMModuleManager
 	}
 #endif
 
-#ifndef CF_MODULE_PERMISSIONS
 	override void OnClientPermissionsUpdated()
 	{
 		super.OnClientPermissionsUpdated();
@@ -60,5 +59,4 @@ modded class JMModuleManager
 			m_ModuleList[i].OnClientPermissionsUpdated();
 		}
 	}
-#endif
 }

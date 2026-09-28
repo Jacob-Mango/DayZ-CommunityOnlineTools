@@ -3,7 +3,7 @@
 //! Target: JMCommand/JMSubCommand.Execute (Scripts/4_World/CommunityOnlineTools/
 //! Classes/Commands/JMCommand.c) - the single dispatch point every registered
 //! chat command funnels through - and the "Actions.QuickActions" permission
-//! string (Scripts/4_World/CommunityOnlineTools/Classes/PermissionsOld/
+//! string (Scripts/4_World/CommunityOnlineTools/Classes/Permissions/
 //! JMPermissionManager.c - HasQuickActionAccess).
 //!
 //! Only two modules register chat commands in this codebase

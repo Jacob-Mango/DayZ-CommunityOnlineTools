@@ -134,12 +134,10 @@ modded class DayZPlayerImplement
 		}
 	}
 
-#ifndef CF_MODULE_PERMISSIONS
 	string FormatSteamWebhook()
 	{
 		return GetDisplayName();
 	}
-#endif
 
 	void COT_EnableBonePositionUpdate(bool state)
 	{

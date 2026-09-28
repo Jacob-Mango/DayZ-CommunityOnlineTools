@@ -112,7 +112,6 @@ class COTModule : JMModuleBase
 				JMStatics.ESP_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_esp.layout", NULL );
 			}
 
-			#ifndef CF_WINDOWS
 			if ( !JMStatics.WINDOWS_CONTAINER )
 			{
 				JMStatics.WINDOWS_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
@@ -132,7 +131,6 @@ class COTModule : JMModuleBase
 				//! high enough to beat the HUD and low enough to keep these
 				//! widgets rendering - not SORT_WINDOW.
 			}
-			#endif
 
 			if ( m_COTMenu == NULL )
 			{
@@ -146,9 +144,7 @@ class COTModule : JMModuleBase
 		{
 			EnsureDefaultRoles();
 
-		#ifndef CF_MODULE_PERMISSIONS
 			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( FlushPlayerStats, STATS_FLUSH_INTERVAL_MS, true );
-		#endif
 		}
 	}
 
@@ -170,7 +166,6 @@ class COTModule : JMModuleBase
 	//! running this repeatedly does not double-count.
 	void FlushPlayerStats()
 	{
-	#ifndef CF_MODULE_PERMISSIONS
 		if ( !IsMissionHost() )
 			return;
 
@@ -190,7 +185,6 @@ class COTModule : JMModuleBase
 			stats.AccumulateSession();
 			instance.Save();
 		}
-	#endif
 	}
 
 	override void OnMissionFinish()
@@ -201,7 +195,6 @@ class COTModule : JMModuleBase
 			m_COTMenu = null;
 		}
 
-	#ifndef CF_MODULE_PERMISSIONS
 		//! A graceful shutdown is the one crash-like event that CAN be handled:
 		//! close every open session before the mission goes away.
 		if ( IsMissionHost() )
@@ -209,7 +202,6 @@ class COTModule : JMModuleBase
 			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( FlushPlayerStats );
 			FlushPlayerStats();
 		}
-	#endif
 	}
 
 	override void RegisterKeyMouseBindings()
@@ -236,11 +228,7 @@ class COTModule : JMModuleBase
 		if ( !s_JM_LoggedInputBranch )
 		{
 			s_JM_LoggedInputBranch = true;
-			#ifdef CF_WINDOWS
-			Print("[COT_DBG] OnUpdate compiled branch = CF_WINDOWS (click-outside handled entirely by CF_Windows.OverrideInputState, NOT by our OnMouseDown/ContainsWidget code)");
-			#else
 			Print("[COT_DBG] OnUpdate compiled branch = legacy OnMouseDown/UpdateMouseControls polling");
-			#endif
 		}
 		#endif
 
@@ -254,27 +242,6 @@ class COTModule : JMModuleBase
 
 			m_COTMenu.OnUpdate( timeslice );
 
-			#ifdef CF_WINDOWS
-			if (m_COTMenu.IsVisible())
-			{
-				if (!m_WasVisible)
-				{
-					m_WasVisible = true;
-					#ifdef COT_DEBUGLOGS
-					Print("[COT_DBG] CF_WINDOWS: sidebar became visible -> OverrideInputState(true, WINDOW)");
-					#endif
-				}
-
-				CF_Windows.OverrideInputState(true, CF_WindowsFocusState.WINDOW);
-			} else if (!m_COTMenu.IsVisible() && m_WasVisible)
-			{
-				m_WasVisible = false;
-				#ifdef COT_DEBUGLOGS
-				Print("[COT_DBG] CF_WINDOWS: sidebar no longer visible -> OverrideInputState(false)");
-				#endif
-				CF_Windows.OverrideInputState(false);
-			}
-			#else
 			//! Not just "does a click close COT" - this is also what hands
 			//! mouse/camera control back to the game (ResetGameFocus +
 			//! ShowUICursor(false)) so right-click-drag can look around while
@@ -301,14 +268,10 @@ class COTModule : JMModuleBase
 					m_LeftMouseDown = true;
 				}
 			}
-			#endif
 		}
 		else if (m_WasVisible)
 		{
 			m_WasVisible = false;
-			#ifdef CF_WINDOWS
-			CF_Windows.OverrideInputState(false);
-			#endif
 		}
 
 		if ( m_ForceHUD )
@@ -318,7 +281,6 @@ class COTModule : JMModuleBase
 	}
 	#endif
 
-	#ifndef CF_WINDOWS
 	void UpdateMouseControls()
 	{
 		bool isMenuOpen = m_COTMenu && m_COTMenu.IsVisible();
@@ -341,7 +303,6 @@ class COTModule : JMModuleBase
 			g_Game.GetUIManager().ShowUICursor( true );
 		}
 	}
-	#endif
 
 	void COTForceHud( bool enable )
 	{
@@ -434,7 +395,6 @@ class COTModule : JMModuleBase
 	{
 		bool cotOpen = GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen();
 
-		#ifndef CF_WINDOWS
 		bool windowsActive = GetCOTWindowManager().HasAnyActive();
 
 		if ( !cotOpen && !windowsActive )
@@ -456,16 +416,11 @@ class COTModule : JMModuleBase
 				topWindow.Destroy();
 			return;
 		}
-		#else
-		if ( !cotOpen )
-			return;
-		#endif
 
 		if ( cotOpen )
 			ToggleMenu();
 	}
 
-	#ifndef CF_WINDOWS
 	void OnMouseUp()
 	{
 		if ( m_GameActive )
@@ -560,7 +515,6 @@ class COTModule : JMModuleBase
 			}
 		}
 	}
-	#endif
 
 	void ToggleCOT( UAInput input )
 	{
@@ -591,32 +545,23 @@ class COTModule : JMModuleBase
 		Assert_Null( GetPermissionsManager() );
 		Assert_Null( identity );
 
-		#ifdef CF_MODULE_PERMISSIONS
-		for ( int i = 0; i < GetPermissionsManager().RoleCount(); i++ )
-		{
-			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), identity );
-		}
-		#else
 		auto roles = GetPermissionsManager().Roles;
 		foreach ( string roleName, JMRole role: roles)
 		{
 			GetCommunityOnlineToolsBase().UpdateRole( role, identity );
 		}
-		#endif
 		
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientConnected( identity, instance ) )
 		{
 			instance.PlayerObject = player;
 
-		#ifndef CF_MODULE_PERMISSIONS
 			JMPlayerStats connectStats = instance.GetStats();
 			if ( connectStats )
 			{
 				connectStats.OnSessionStart();
 				instance.Save();
 			}
-		#endif
 
 			GetCommunityOnlineToolsBase().SetClient( instance, identity );
 
@@ -695,7 +640,6 @@ class COTModule : JMModuleBase
 
 		Assert_Null( GetPermissionsManager() );
 
-	#ifndef CF_MODULE_PERMISSIONS
 		//! Before OnClientDisconnected below, which drops the instance: closing
 		//! the session afterwards would have nothing left to close.
 		JMPlayerInstance leaving = GetPermissionsManager().GetPlayer( uid );
@@ -708,7 +652,6 @@ class COTModule : JMModuleBase
 				leaving.Save();
 			}
 		}
-	#endif
 
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )

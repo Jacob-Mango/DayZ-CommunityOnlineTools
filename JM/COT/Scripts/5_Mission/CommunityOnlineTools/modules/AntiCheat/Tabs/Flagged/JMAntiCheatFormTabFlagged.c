@@ -76,7 +76,7 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 		if ( m_ContextMenu )
 			return true;
 
-		CF_Window window = m_Form.GetWindow();
+		JMWindowBase window = m_Form.GetWindow();
 		if ( !window )
 		{
 			Error("[JMAntiCheatFormTabFlagged] EnsureContextMenu failed: m_Form.GetWindow() returned null!");

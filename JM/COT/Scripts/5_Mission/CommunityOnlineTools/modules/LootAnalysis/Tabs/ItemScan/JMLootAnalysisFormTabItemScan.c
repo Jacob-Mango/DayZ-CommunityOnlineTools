@@ -272,7 +272,7 @@ class JMLootAnalysisFormTabItemScan: JMFormTab
 
 		if (!m_HoverInfo)
 		{
-			CF_Window window = m_Form.GetWindow();
+			JMWindowBase window = m_Form.GetWindow();
 			if (!window)
 				return;
 

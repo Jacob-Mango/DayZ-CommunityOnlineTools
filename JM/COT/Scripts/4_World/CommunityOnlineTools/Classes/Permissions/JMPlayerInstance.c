@@ -20,7 +20,6 @@ enum JMPlayerVariables
 	RAGDOLL = 131072
 }
 
-#ifndef CF_MODULE_PERMISSIONS
 class JMPlayerInstance : Managed
 {
 #ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
@@ -35,9 +34,7 @@ class JMPlayerInstance : Managed
 	//! protected, not private: DayZ-Expansion's `modded class JMPlayerInstance`
 	//! (DayZExpansion_AI, DayZExpansion_Hardline) reads this in its Update()
 	//! override to rate-limit faction/reputation netsync. A modded class cannot
-	//! touch a private member of the class it mods. The CF_MODULE_PERMISSIONS
-	//! variant of JMPlayerInstance already declares this protected - keep the two
-	//! in sync so mods compile against either.
+	//! touch a private member of the class it mods.
 	protected int m_DataLastUpdated;
 	protected string m_Name;
 	protected string m_GUID;
@@ -1023,4 +1020,3 @@ class JMPlayerInstance : Managed
 		return "[" + m_Name + "](https://steamcommunity.com/profiles/" + m_Steam64ID + ")";
 	}
 }
-#endif

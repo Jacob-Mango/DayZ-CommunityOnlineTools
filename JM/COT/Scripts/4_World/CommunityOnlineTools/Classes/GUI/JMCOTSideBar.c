@@ -364,25 +364,21 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 	void ShowAllWidgets()
 	{
-		#ifndef CF_WINDOWS
 		GetCOTWindowManager().ShowAllActive();
 		g_Game.GetMission().AddActiveInputExcludes({"menu"});
 		g_Game.GetUIManager().ShowUICursor( true );
-		#endif
 	}
 
 	void HideAllWidgets()
 	{
 		m_WasCompact = m_IsCompact;
 
-		#ifndef CF_WINDOWS
 		GetCOTWindowManager().HideAllActive();
 		if ( g_Game.GetMission() && !GetCOTWindowManager().HasAnyUnpinnedActive() )
 		{
 			g_Game.GetMission().RemoveActiveInputExcludes({"menu"});
 			g_Game.GetUIManager().ShowUICursor( false );
 		}
-		#endif
 	}
 
 	void OnUpdate( float timeslice )

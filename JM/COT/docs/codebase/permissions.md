@@ -141,10 +141,7 @@ bool HasRole( string role )
 void AddRole( string role, string nameRestriction = "" )
 ```
 
-There are two builds of this class, chosen by `CF_MODULE_PERMISSIONS`: without it (the normal case) `JMPlayerInstance` is
-defined in `Scripts/4_World/CommunityOnlineTools/Classes/PermissionsOld/JMPlayerInstance.c`; with it,
-`Scripts/3_Game/CommunityOnlineTools/Permissions/JMPlayerInstance.c` instead mods CF's `CF_Permission_PlayerBase` to add the
-same getters. Keep the two in sync (mods such as DayZ-Expansion compile against either). The `JMPlayerVariables` bit
+`JMPlayerInstance` is defined in `Scripts/4_World/CommunityOnlineTools/Classes/Permissions/JMPlayerInstance.c`. The `JMPlayerVariables` bit
 enum (`GODMODE`, `FROZEN`, `INVISIBILITY`, ... `RAGDOLL`) is what the server syncs to clients.
 
 ## Getting a Player Instance
