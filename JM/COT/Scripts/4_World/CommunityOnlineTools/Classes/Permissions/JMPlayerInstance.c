@@ -600,7 +600,7 @@ class JMPlayerInstance : Managed
 		OnSendPermissions( ctx, sendToGUID );
 		OnSendPosition( ctx );
 		OnSendOrientation( ctx );
-		OnSendHealth( ctx );
+		OnSendStatus( ctx );
 	}
 
 	//! Old methods with typo and no return value
@@ -612,7 +612,7 @@ class JMPlayerInstance : Managed
 	void OnRecievePosition( ParamsReadContext ctx );
 	[Obsolete("Use OnReceiveOrientation")]
 	void OnRecieveOrientation( ParamsReadContext ctx );
-	[Obsolete("Use OnReceiveHealth")]
+	[Obsolete("Use OnReceiveStatus")]
 	void OnRecieveHealth( ParamsReadContext ctx );
 
 	bool OnReceive( ParamsReadContext ctx )
@@ -627,7 +627,7 @@ class JMPlayerInstance : Managed
 			return false;
 		if (!OnReceiveOrientation( ctx ))
 			return false;
-		if (!OnReceiveHealth( ctx ))
+		if (!OnReceiveStatus( ctx ))
 			return false;
 
 		m_DataLastUpdated = g_Game.GetTime();
@@ -784,7 +784,10 @@ class JMPlayerInstance : Managed
 		return true;
 	}
 
-	void OnSendHealth( ParamsWriteContext ctx )
+	[Obsolete("Use OnSendStatus")]
+	void OnSendHealth( ParamsWriteContext ctx );
+
+	void OnSendStatus( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Health );
 		ctx.Write( m_Blood );
@@ -809,7 +812,7 @@ class JMPlayerInstance : Managed
 		ctx.Write( bitmask );
 	}
 
-	bool OnReceiveHealth( ParamsReadContext ctx )
+	bool OnReceiveStatus( ParamsReadContext ctx )
 	{
 		if (!ctx.Read( m_Health ))
 			return false;
