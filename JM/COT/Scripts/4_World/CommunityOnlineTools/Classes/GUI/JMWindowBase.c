@@ -357,10 +357,45 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( screenW - ( x + winW ) < SNAP_THRESHOLD && x + winW < screenW + SNAP_THRESHOLD ) x = screenW - winW;
 		if ( screenH - ( y + winH ) < SNAP_THRESHOLD && y + winH < screenH + SNAP_THRESHOLD ) y = screenH - winH;
 
+		float buttonAreaW;
+		float buttonW, buttonH;
+
+		if ( m_PinButton )
+		{
+			m_PinButton.GetSize( buttonW, buttonH );
+			buttonAreaW += buttonW;
+		}
+
+		if ( m_MinimizeButton )
+		{
+			m_MinimizeButton.GetSize( buttonW, buttonH );
+			buttonAreaW += buttonW;
+		}
+
+		if ( m_CloseButton )
+		{
+			m_CloseButton.GetSize( buttonW, buttonH );
+			buttonAreaW += buttonW;
+		}
+
+		float sideBarW;
+		COTModule cotModule;
+
+		if ( CF_Modules<COTModule>.Get(cotModule) )
+		{
+			JMCOTSideBar sideBar = cotModule.GetCOTSidebar();
+			if ( sideBar )
+			{
+				float sidebarX, sidebarY;
+				sideBar.GetLayoutRoot().GetScreenPos( sidebarX, sidebarY );
+				sideBarW = screenW - sidebarX;
+			}
+		}
+
 		// Hard clamp: keep at least the title bar on screen
 		// Allow to move most of the window outside the viewport horizontally,
-		// but make sure at least 20% is still visible so you can still grab it
-		x = Math.Clamp( x, 0 - winW * 0.8, Math.Max( 0, screenW - winW * 0.2 ) );
+		// but make sure at least title + buttons are visible so you can still grab the window
+		x = Math.Clamp( x, 0 - winW + buttonAreaW + 25, Math.Max( 0, screenW - sideBarW - 25 ) );
 		y = Math.Clamp( y, 0, Math.Max( 0, screenH - m_TitleBarHeight ) );
 
 		layoutRoot.SetPos( x, y, true );

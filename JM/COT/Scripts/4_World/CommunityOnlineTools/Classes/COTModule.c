@@ -187,6 +187,11 @@ class COTModule : JMModuleBase
 		}
 	}
 
+	JMCOTSideBar GetCOTSidebar()
+	{
+		return m_COTMenu;
+	}
+
 	override void OnMissionFinish()
 	{
 		if ( m_COTMenu )
