@@ -3,7 +3,7 @@ class JMEntityTracker
 	static int m_EntityCount = 0;
 
 	// Store entities by classname for fast lookup
-	static ref map<string, ref array<EntityAI>> m_EntitiesByType = new map<string, ref array<EntityAI>>;
+	static ref map<string, ref set<EntityAI>> m_EntitiesByType = new map<string, ref set<EntityAI>>;
 
 	static void GetAllClassnames(out array<string> outClassnames)
 	{
@@ -18,11 +18,11 @@ class JMEntityTracker
 		}
 	}
 
-	static void GetByClassname(string className, out array<EntityAI> outItems, bool clearExistingArray = true)
+	static void GetByClassname(string className, out set<EntityAI> outItems, bool clearExistingArray = true)
 	{
 		if (!outItems)
 		{
-			outItems = new array<EntityAI>;
+			outItems = new set<EntityAI>;
 		}
 		else if (clearExistingArray)
 		{
@@ -32,7 +32,7 @@ class JMEntityTracker
 		if (className == "")
 			return;
 
-		array<EntityAI> bucket;
+		set<EntityAI> bucket;
 		if (m_EntitiesByType.Find(className, bucket))
 		{
 			outItems.Copy(bucket);
@@ -41,7 +41,7 @@ class JMEntityTracker
 
 	static int GetClassnameCount(string className)
 	{
-		array<EntityAI> bucket;
+		set<EntityAI> bucket;
 		if (m_EntitiesByType.Find(className, bucket))
 			return bucket.Count();
 		return 0;
@@ -59,10 +59,10 @@ class JMEntityTracker
 
 		string t = item.GetType();
 
-		array<EntityAI> bucket;
+		set<EntityAI> bucket;
 		if (!m_EntitiesByType.Find(t, bucket))
 		{
-			bucket = new array<EntityAI>;
+			bucket = new set<EntityAI>;
 			m_EntitiesByType.Insert(t, bucket);
 		}
 
@@ -81,7 +81,7 @@ class JMEntityTracker
 			return;
 
 		string t = item.GetType();
-		array<EntityAI> bucket;
+		set<EntityAI> bucket;
 
 		if (!m_EntitiesByType.Find(t, bucket))
 			return;
@@ -108,7 +108,7 @@ class JMEntityTracker
 		//! GetByClassname copies into tempArray, so this iterates a snapshot --
 		//! DeleteSafe -> EEDelete -> Unregister mutates the live bucket
 		//! underneath us, which would invalidate a direct iteration.
-		array<EntityAI> tempArray;
+		set<EntityAI> tempArray;
 		GetByClassname(className, tempArray);
 
 		foreach (EntityAI entity : tempArray)

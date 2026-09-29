@@ -1,3 +1,5 @@
+// TODO: Don't use GetRPCManager() (has a lot of overhead) but instead use same RPC system as rest of modules
+
 // ---------------------------------------------------------------------------
 //  CE XML data containers (parsed once at server start)
 // ---------------------------------------------------------------------------
@@ -706,7 +708,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// Server: Scan for spawned items and send positions to client
 	protected void Exec_ScanItems(string className, PlayerIdentity senderRPC)
 	{
-		array<EntityAI> found = new array<EntityAI>;
+		set<EntityAI> found = new set<EntityAI>;
 		JMEntityTracker.GetByClassname(className, found);
 
 		if (!found || found.Count() == 0)
