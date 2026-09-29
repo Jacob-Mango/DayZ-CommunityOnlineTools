@@ -18,6 +18,7 @@ class JMESPTransformPopup: UIActionBase
 	protected Widget m_Panel;
 	protected Widget m_Content;
 	protected Widget m_TitleButtons;
+	protected TextWidget m_Title;
 
 	//! Parallel arrays: button widget, its hover backdrop, which field-action
 	//! it fires. Index-matched rather than eight named field pairs so
@@ -123,6 +124,8 @@ class JMESPTransformPopup: UIActionBase
 			return;
 
 		Class.CastTo( m_Content, m_Panel.FindAnyWidget( "popup_content" ) );
+
+		Class.CastTo( m_Title, m_Panel.FindAnyWidget( "popup_title" ) );
 
 		//! Packed to the END of a container authored the same 96px wide as
 		//! the field rows' own button box, rather than from 0 in a box just
@@ -448,16 +451,31 @@ class JMESPTransformPopup: UIActionBase
 	//! `module`/`target` drive both the live refresh and where Apply sends its
 	//! result - the same JMESPModule.SetPosition/SetOrientation the copy/paste
 	//! actions already use (see JMESPActionMenu.DoPastePosition).
-	void Open( JMESPModule module, notnull Object target, float screenX, float screenY )
+	void Open( notnull JMESPMeta meta, float screenX, float screenY )
 	{
 		if ( !m_Panel )
 			return;
 
-		m_Module = module;
-		m_Target = target;
+		if ( !meta.target )
+		{
+			Error("meta.target is null");
+			return;
+		}
+
+		m_Module = meta.module;
+		m_Target = meta.target;
 		m_PendingX = screenX;
 		m_PendingY = screenY;
 		m_Open = true;
+
+		string title;
+
+		if ( meta.type.IsInherited( JMESPViewTypePlayer ) || !JMESPWidgetHandler.UseClassName )
+			title = meta.GetName();
+		else
+			title = meta.GetType();
+
+		m_Title.SetText( title );
 
 		if ( m_Position )
 			m_Position.SetEdited( false );

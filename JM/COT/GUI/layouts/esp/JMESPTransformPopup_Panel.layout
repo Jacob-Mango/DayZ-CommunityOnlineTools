@@ -37,7 +37,7 @@ PanelWidgetClass JMESPTransformPopup_Panel {
     PanelWidgetClass popup_titlebar_buttons {
      ignorepointer 1
      color 0 0 0 0
-     position -10 0
+     position 2 0
      size 96 28
      halign right_ref
      valign center_ref

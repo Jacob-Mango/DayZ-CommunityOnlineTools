@@ -18,7 +18,9 @@ PanelWidgetClass UIActionEditableVector {
     PanelWidgetClass action_wrapper_input
     {
      position 0 0
-     size 1 1
+     size 1 20
+     vexactsize 1
+     valign center_ref
      {
       TextWidgetClass action_label {
        size 0.3 1

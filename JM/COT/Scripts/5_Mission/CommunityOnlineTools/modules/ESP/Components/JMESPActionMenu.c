@@ -2099,7 +2099,7 @@ class JMESPActionMenu
 		if ( !popup )
 			return;
 
-		popup.Open( m_Meta.module, m_Meta.target, m_X, m_Y );
+		popup.Open( m_Meta, m_X, m_Y );
 
 		Close();
 	}

@@ -1,5 +1,5 @@
 PanelWidgetClass JMESPVectorInputRow {
- size 1 50
+ size 1 40
  halign left_ref
  valign top_ref
  hexactpos 0
