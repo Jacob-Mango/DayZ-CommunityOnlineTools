@@ -68,12 +68,6 @@ class UIActionItemList: UIActionBase
 	protected int  m_DragMouseY;
 	protected int  m_DragTop;
 
-	//! Time and row of the last click, for detecting a double one. The engine's
-	//! own OnDoubleClick only reaches a widget the FORM handles, and these rows
-	//! are handled here.
-	protected int m_LastClickTime;
-	protected int m_LastClickItem;
-
 	//! Which mouse button raised the last CLICK. A host that offers a context
 	//! menu needs to tell a select from a right-click, and both arrive on the
 	//! same event.
@@ -257,9 +251,6 @@ class UIActionItemList: UIActionBase
 		m_Selected  = -1;
 		m_Hovered   = -1;
 		m_ViewportH = 0;
-
-		m_LastClickTime = 0;
-		m_LastClickItem = -1;
 
 		//! Every widget of the control answers to this script, so a wheel notch
 		//! is caught wherever in the list it lands - over a row, over the empty
@@ -661,23 +652,30 @@ class UIActionItemList: UIActionBase
 		m_LastClickButton = MouseState.LEFT;
 		Refresh();
 
-		int now = g_Game.GetTime();
-
-		if ( item == m_LastClickItem && now - m_LastClickTime <= DOUBLE_CLICK_MS )
-		{
-			m_LastClickTime = 0;
-			m_LastClickItem = -1;
-
-			CallEvent( UIEvent.CLICK );
-			CallEvent( UIEvent.DOUBLE_CLICK );
-
-			return true;
-		}
-
-		m_LastClickTime = now;
-		m_LastClickItem = item;
-
 		CallEvent( UIEvent.CLICK );
+
+		return true;
+	}
+
+	override bool OnDoubleClick(Widget w, int x, int y, int button)
+	{
+		if ( button != MouseState.LEFT )
+			return false;
+
+		if ( w == m_ScrollHandle )
+			return false;
+
+		int idx = RowIndexOf( w );
+
+		if ( idx < 0 || idx >= m_Rows.Count() )
+			return false;
+
+		int item = m_Top + idx;
+
+		if ( item < 0 || item >= m_Items.Count() )
+			return false;
+
+		CallEvent( UIEvent.DOUBLE_CLICK );
 
 		return true;
 	}

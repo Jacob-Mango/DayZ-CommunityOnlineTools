@@ -15,8 +15,6 @@ enum UIEvent
 	//! GetHoveredRow().
 	MOUSE_ENTER,
 	MOUSE_LEAVE,
-	//! A row was clicked twice in quick succession. Raised by controls whose
-	//! rows they themselves handle - the engine's own OnDoubleClick only ever
-	//! reaches a widget the FORM is the handler for.
+	//! A row was clicked twice in quick succession.
 	DOUBLE_CLICK
 }
