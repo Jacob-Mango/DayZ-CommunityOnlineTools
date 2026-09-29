@@ -351,13 +351,16 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.GetSize( winW, winH );
 
 		// Snap flush to screen edges when within threshold
-		if ( x < SNAP_THRESHOLD )                    x = 0;
+		// Allow moving window further horizontally and down (but not up) after some brief resistance
+		if ( x < SNAP_THRESHOLD && x > -SNAP_THRESHOLD )                    x = 0;
 		if ( y < SNAP_THRESHOLD )                    y = 0;
-		if ( screenW - ( x + winW ) < SNAP_THRESHOLD ) x = screenW - winW;
-		if ( screenH - ( y + winH ) < SNAP_THRESHOLD ) y = screenH - winH;
+		if ( screenW - ( x + winW ) < SNAP_THRESHOLD && x + winW < screenW + SNAP_THRESHOLD ) x = screenW - winW;
+		if ( screenH - ( y + winH ) < SNAP_THRESHOLD && y + winH < screenH + SNAP_THRESHOLD ) y = screenH - winH;
 
 		// Hard clamp: keep at least the title bar on screen
-		x = Math.Clamp( x, 0, Math.Max( 0, screenW - winW ) );
+		// Allow to move most of the window outside the viewport horizontally,
+		// but make sure at least 20% is still visible so you can still grab it
+		x = Math.Clamp( x, 0 - winW * 0.8, Math.Max( 0, screenW - winW * 0.2 ) );
 		y = Math.Clamp( y, 0, Math.Max( 0, screenH - m_TitleBarHeight ) );
 
 		layoutRoot.SetPos( x, y, true );
