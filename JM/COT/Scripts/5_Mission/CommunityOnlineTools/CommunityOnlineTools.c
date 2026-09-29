@@ -514,12 +514,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		GetPermissionsManager().SetClientGUID( guid );
 
-		if ( !g_Game.IsMultiplayer() )
-			return;
-
-		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( g_Game.GetPlayer() ) );
-
-		GetModuleManager().OnClientPermissionsUpdated();
+		if ( g_Game.IsMultiplayer() )
+			GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( g_Game.GetPlayer() ) );  //! UpdatePlayer will call GetModuleManager().OnClientPermissionsUpdated()
+		else
+			GetModuleManager().OnClientPermissionsUpdated();
 	}
 
 	//! @note methods that only run on server and have a client equivalent (Server_/Client method pair) should not be prefixed Exec_,
