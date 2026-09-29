@@ -534,8 +534,6 @@ class COTModule : JMModuleBase
 		GetCommunityOnlineToolsBase().ToggleActive();
 	}
 
-	//TODO: URGENT: MOVE TO COMMUNITY FRAMEWORK, FULLY DECOUPLE FROM COMMUNITY ONLINE TOOLS
-
 	override void OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
 	{
 		#ifdef COT_DEBUGLOGS

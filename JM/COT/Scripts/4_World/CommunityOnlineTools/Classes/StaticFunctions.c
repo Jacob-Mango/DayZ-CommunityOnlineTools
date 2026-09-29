@@ -1,5 +1,3 @@
-// TODO: MOVE MOST OF THIS INTO A SEPERATE MOD
-
 static bool COTPlayerIsRemoved = false;
 
 static bool COT_ESP_Toggled = false;
