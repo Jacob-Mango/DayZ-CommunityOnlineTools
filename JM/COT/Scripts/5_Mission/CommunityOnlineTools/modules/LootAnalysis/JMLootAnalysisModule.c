@@ -87,14 +87,14 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	void JMLootAnalysisModule()
 	{
-		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemScan", this, SingeplayerExecutionType.Both);
-		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SendItemScanResults", this, SingeplayerExecutionType.Both);
-		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestLootDistribution", this, SingeplayerExecutionType.Both);
-		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SendLootSpawnLocations", this, SingeplayerExecutionType.Both);
-		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SendItemTypeInfo", this, SingeplayerExecutionType.Both);
-		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_DeleteAllItems", this, SingeplayerExecutionType.Both);
-		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SaveItemTypeInfo", this, SingeplayerExecutionType.Both);
-		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemTypeInfo", this, SingeplayerExecutionType.Both);
+		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemScan", this, SingeplayerExecutionType.Server);
+		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SendItemScanResults", this, SingeplayerExecutionType.Client);
+		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestLootDistribution", this, SingeplayerExecutionType.Server);
+		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SendLootSpawnLocations", this, SingeplayerExecutionType.Client);
+		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SendItemTypeInfo", this, SingeplayerExecutionType.Client);
+		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_DeleteAllItems", this, SingeplayerExecutionType.Server);
+		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SaveItemTypeInfo", this, SingeplayerExecutionType.Server);
+		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemTypeInfo", this, SingeplayerExecutionType.Server);
 	}
 
 	override void EnableUpdate()
@@ -512,8 +512,6 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	protected void RPC_RequestItemScan(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		JMPlayerInstance instance;
-		if (!senderRPC)
-			return;
 
 		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance))
 			return;
@@ -557,8 +555,6 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	protected void RPC_RequestLootDistribution(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		JMPlayerInstance instance;
-		if (!senderRPC)
-			return;
 
 		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance))
 			return;
@@ -612,9 +608,6 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// Client -> Server: Delete all items of type
 	protected void RPC_DeleteAllItems(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
-		if (!senderRPC)
-			return;
-
 		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_DELETE, senderRPC))
 			return;
 
@@ -643,8 +636,6 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	protected void RPC_SaveItemTypeInfo(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		JMPlayerInstance instance;
-		if (!senderRPC)
-			return;
 
 		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_EDIT, senderRPC, instance))
 			return;
@@ -682,8 +673,6 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	protected void RPC_RequestItemTypeInfo(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		JMPlayerInstance instance;
-		if (!senderRPC)
-			return;
 
 		bool canScan = JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance);
 		bool canDist = JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance);
