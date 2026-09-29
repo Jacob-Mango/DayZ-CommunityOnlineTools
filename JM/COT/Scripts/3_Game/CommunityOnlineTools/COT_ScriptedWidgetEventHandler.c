@@ -23,6 +23,11 @@ class COT_ScriptedWidgetEventHandler: ScriptedWidgetEventHandler
 	#endif
 	}
 
+	Widget GetRootWidget()
+	{
+		return null;
+	}
+
 	//! Is the (root) layout element visible?
 	bool IsVisible()
 	{

@@ -226,8 +226,6 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		m_Selected = JM_GetSelected().IsObjectSelected( Info.target );
 
-		m_TargetType = Info.GetType();
-
 		m_txt_ObjectName.SetColor( Info.colour );
 
 		ApplyCategoryColour();
@@ -586,7 +584,7 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 			if ( Info.type.IsInherited( JMESPViewTypePlayer ) || !UseClassName )
 				text += Info.name;
 			else
-				text += m_TargetType;
+				text += Info.targetType;
 
 			if ( ShowDistance )
 				text += " (" + distance + " m)";

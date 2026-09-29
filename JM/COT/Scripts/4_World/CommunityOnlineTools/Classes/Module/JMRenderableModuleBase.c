@@ -253,7 +253,7 @@ class JMRenderableModuleBase: JMModuleBase
 	{
 		if (m_Window)
 		{
-			m_Window.DestroyLater();
+			m_Window.Close();
 		}
 	}
 

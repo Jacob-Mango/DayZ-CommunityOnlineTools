@@ -14,6 +14,7 @@
 class JMWindowLayoutEntry
 {
 	string ModuleName;
+	string WindowName;
 	float X, Y, W, H;
 }
 
@@ -35,23 +36,24 @@ class JMWindowLayoutStore
 		JMJsonFile<JMWindowLayoutStore>.Save( FILE, store );
 	}
 
-	JMWindowLayoutEntry FindEntry( string moduleName )
+	JMWindowLayoutEntry FindEntry( string moduleName, string windowName )
 	{
 		foreach ( JMWindowLayoutEntry entry: Entries )
 		{
-			if ( entry.ModuleName == moduleName )
+			if ( entry.ModuleName == moduleName && entry.WindowName == windowName )
 				return entry;
 		}
 		return NULL;
 	}
 
-	void SetEntry( string moduleName, float x, float y, float w, float h )
+	void SetEntry( string moduleName, string windowName, float x, float y, float w, float h )
 	{
-		JMWindowLayoutEntry entry = FindEntry( moduleName );
+		JMWindowLayoutEntry entry = FindEntry( moduleName, windowName );
 		if ( !entry )
 		{
 			entry = new JMWindowLayoutEntry();
 			entry.ModuleName = moduleName;
+			entry.WindowName = windowName;
 			Entries.Insert( entry );
 		}
 

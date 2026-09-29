@@ -15,6 +15,7 @@ class JMESPMeta: COT_WidgetHolder
 	static ref CF_DoublyLinkedNodes_WeakRef<JMESPMeta> s_JM_All = new CF_DoublyLinkedNodes_WeakRef<JMESPMeta>();
 	ref CF_DoublyLinkedNode_WeakRef<JMESPMeta> s_JM_Node;
 	string name;
+	string targetType;
 	JMESPViewType type;
 	int colour;
 	JMPlayerInstance player;
@@ -25,6 +26,8 @@ class JMESPMeta: COT_WidgetHolder
 	JMESPWidgetHandler widgetHandler;
 	Widget widgetRoot;
 	bool m_TargetDeleted;
+	JMESPTransformPopup m_TransformPopup;
+	string m_Key;  //! set if not actively tracked by ESP but created for (e.g.) world actions menu
 
 	//! Which Building door the right-click landed on, from the raycast
 	//! component the menu was opened with. -1 when the target isn't a
@@ -50,6 +53,16 @@ class JMESPMeta: COT_WidgetHolder
 		Print( "  widgetHandler = " + widgetHandler );
 		#endif
 
+		m_TransformPopup = null;
+
+		if ( m_Key && module )
+		{
+		#ifdef DIAG_DEVELOPER
+			Print("~JMESPMeta() " + m_Key);
+		#endif
+			module.RemoveMetaForObject( m_Key );
+		}
+
 		if (s_JM_All)
 			s_JM_All.Remove(s_JM_Node);
 
@@ -58,6 +71,24 @@ class JMESPMeta: COT_WidgetHolder
 		if (s_JMESPMetaCount <= 0)
 			CF_Log.Info("JMESPMeta count: " + s_JMESPMetaCount);
 	#endif
+	}
+
+	void Setup( Object obj, JMESPViewType viewType )
+	{
+		SetTarget( obj );
+
+		colour = viewType.Colour;
+		type = viewType;
+	}
+
+	void SetTarget( Object obj )
+	{
+		target = obj;
+
+		obj.GetNetworkID( networkLow, networkHigh );
+
+		name = GetName();
+		targetType = GetType();
 	}
 
 	//! Construction parts, for the objects that have any. NULL everywhere else,

@@ -20,6 +20,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 #endif
 
 	protected Widget layoutRoot;
+	protected string m_Name;
+	protected Widget m_TitleButtons;
 	protected ButtonWidget m_CloseButton;
 	protected ButtonWidget m_MinimizeButton;
 	protected ImageWidget  m_MinimizeButtonLabel;
@@ -180,6 +182,26 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return m_Form;
 	}
 
+	Widget GetContentWidget()
+	{
+		return m_ContentWidget;
+	}
+
+	Widget GetTitleButtons()
+	{
+		return m_TitleButtons;
+	}
+
+	void SetName( string name )
+	{
+		m_Name = name;
+	}
+
+	string GetName()
+	{
+		return m_Name;
+	}
+
 	protected Widget GetHandleHighlight( Widget w )
 	{
 		if ( w == m_ResizeDragUp )       return m_HighlightUp;
@@ -196,6 +218,11 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	Widget GetLayoutRoot()
 	{
 		return layoutRoot;
+	}
+
+	Widget GetTitlePanel()
+	{
+		return m_TitlePanel;
 	}
 
 	JMRenderableModuleBase GetModule()
@@ -342,6 +369,37 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_Form.OnResize( winW, winH - m_TitleBarHeight );
 	}
 
+	void SetModule( JMRenderableModuleBase module, COT_ScriptedWidgetEventHandler form )
+	{
+		m_Name = form.ClassName();
+		m_Module = module;
+
+		Widget root = form.GetRootWidget();
+
+		if ( Assert_Null( root, "No valid widget supplied." ) )
+			return;
+
+		float width = -1;
+		float height = -1;
+		root.GetSize( width, height );
+
+		float screenW, screenH;
+		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
+
+		if ( width > screenW )
+			width = screenW;
+
+		if ( height + m_TitleBarHeight > screenH )
+			height = screenH - m_TitleBarHeight;
+
+		m_ContentWidget.SetSize( width, height );
+		SetSize( width, height );
+
+		m_FormRoot = root;
+
+		GetCOTWindowManager().BringFront( this );
+	}
+
 	void SetPosition( float x, float y )
 	{
 		float screenW, screenH;
@@ -358,25 +416,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( screenH - ( y + winH ) < SNAP_THRESHOLD && y + winH < screenH + SNAP_THRESHOLD ) y = screenH - winH;
 
 		float buttonAreaW;
-		float buttonW, buttonH;
+		float buttonAreaH;
 
-		if ( m_PinButton )
-		{
-			m_PinButton.GetSize( buttonW, buttonH );
-			buttonAreaW += buttonW;
-		}
-
-		if ( m_MinimizeButton )
-		{
-			m_MinimizeButton.GetSize( buttonW, buttonH );
-			buttonAreaW += buttonW;
-		}
-
-		if ( m_CloseButton )
-		{
-			m_CloseButton.GetSize( buttonW, buttonH );
-			buttonAreaW += buttonW;
-		}
+		if ( m_TitleButtons )
+			m_TitleButtons.GetScreenSize( buttonAreaW, buttonAreaH );
 
 		float sideBarW;
 		COTModule cotModule;
@@ -441,6 +484,11 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		}
 	}
 
+	void SetTitle( string title )
+	{
+		m_TitleText.SetText( title );
+	}
+
 	protected void SetTitleButtonIconAlpha( Widget w, float alpha )
 	{
 		if ( w == m_CloseButton && m_CloseButtonLabel )
@@ -489,6 +537,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this, "Init");
 		#endif
 
+		m_TitleButtons        = layoutRoot.FindAnyWidget( "title_buttons" );
 		m_CloseButton         = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
 		m_MinimizeButton      = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button"       ) );
 		m_MinimizeButtonLabel = ImageWidget.Cast(  layoutRoot.FindAnyWidget( "minimize_button_label" ) );
@@ -733,15 +782,12 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( !layoutRoot )
 			return;
 
-		if ( !m_Form )
-			return;
-
 		layoutRoot.Show( true );
 
 		if ( !m_HasBeenCentered )
 		{
 			float savedX, savedY, savedW, savedH;
-			if ( m_Module && GetCOTWindowManager().TryGetSavedLayout( m_Module.GetModuleName(), savedX, savedY, savedW, savedH ) )
+			if ( m_Module && GetCOTWindowManager().TryGetSavedLayout( m_Module.GetModuleName(), m_Name, savedX, savedY, savedW, savedH ) )
 			{
 				ApplyRestoredSize( savedW, savedH );
 				SetPosition( savedX, savedY );
@@ -754,7 +800,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			m_HasBeenCentered = true;
 		}
 
-		if (!m_Form.m_IsShown)
+		if (m_Form && !m_Form.m_IsShown)
 		{
 			m_Form.OnShow();
 			m_Form.m_IsShown = true;
@@ -788,11 +834,11 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
-		if (!m_Form)
-			return;
-
-		m_Form.OnHide();
-		m_Form.m_IsShown = false;
+		if (m_Form)
+		{
+			m_Form.OnHide();
+			m_Form.m_IsShown = false;
+		}
 
 		if (!layoutRoot || layoutRoot.ToString() == "INVALID")
 			return;
@@ -806,6 +852,11 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		}
 
 		m_IsShown = false;
+	}
+
+	override void Close()
+	{
+		DestroyLater();
 	}
 
 	//! Collapse the window to title-bar only with an animated transition.
@@ -937,7 +988,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	{
 		if ( w == m_CloseButton )
 		{
-			m_Module.Close();
+			Close();
 			return true;
 		}
 

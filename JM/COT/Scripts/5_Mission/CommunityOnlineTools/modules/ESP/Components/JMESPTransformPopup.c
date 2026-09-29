@@ -14,11 +14,10 @@
 //! GetTitleButtonHover for the pattern this mirrors.
 class JMESPTransformPopup: UIActionBase
 {
+	protected ref JMWindowBase m_Window;
 	protected Widget m_Anchor;
 	protected Widget m_Panel;
 	protected Widget m_Content;
-	protected Widget m_TitleButtons;
-	protected TextWidget m_Title;
 
 	//! Parallel arrays: button widget, its hover backdrop, which field-action
 	//! it fires. Index-matched rather than eight named field pairs so
@@ -39,8 +38,8 @@ class JMESPTransformPopup: UIActionBase
 	static const float FEEDBACK_HOLD = 0.6;
 	static const float SPIN_DURATION = 0.5;
 
-	//! Double click to arm a spin button (refresh) to fire itself once a
-	//! second, double click again to stop - the same feature
+	//! Double click to arm a spin button (refresh) to fire itself each
+	//! update, double click again to stop - the same feature
 	//! UIActionImageButton's CreateRefreshButton gets, reimplemented here
 	//! because these are plain ButtonWidgets (see the class note on why).
 	//! Index-matched to m_Buttons like every other per-button array; only
@@ -48,20 +47,19 @@ class JMESPTransformPopup: UIActionBase
 	//! than a single field so a second auto-repeatable action needs no new
 	//! plumbing.
 	static const int   AUTO_REPEAT_DOUBLE_CLICK_MS = 400;
-	static const float AUTO_REPEAT_INTERVAL        = 1.0;
 	static const int   ICON_REST_COLOR             = 0xBFD4DBE6;
 	protected ref array<bool>  m_ButtonAutoRepeatEnabled = new array<bool>;
 	protected ref array<bool>  m_ButtonAutoRepeatActive = new array<bool>;
-	protected ref array<float> m_ButtonAutoRepeatTimer = new array<float>;
+	protected ref map<int, bool>  m_ActionAutoRepeatActive = new map<int, bool>;
 	protected ref array<int>   m_ButtonLastClickTime = new array<int>;
 	protected JMESPVectorInputRow m_Position;
 	protected JMESPVectorInputRow m_Orientation;
+	protected ref JMESPMeta m_Meta;
 	protected JMESPModule m_Module;
 	protected Object m_Target;
 	protected bool m_Open;
 	protected float m_PendingX;
 	protected float m_PendingY;
-	static const int ACTION_CLOSE          = 0;
 	static const int ACTION_REFRESH_ALL    = 1;
 	static const int ACTION_COPY_POSITION  = 2;
 	static const int ACTION_PASTE_POSITION = 3;
@@ -71,11 +69,21 @@ class JMESPTransformPopup: UIActionBase
 	static const int ACTION_APPLY_ORI      = 7;
 	static const int HOVER_NEUTRAL = 0x2EFFFFFF;
 	static const int HOVER_CLOSE   = 0x59FF627D;
-	static const float PANEL_WIDTH = 640;
+	static const float PANEL_WIDTH = 400;
 
 	//! Gap below the last field before the panel's bottom edge, matching
 	//! the 10px popup_root insets the content sits in horizontally.
 	static const float CONTENT_BOTTOM_PAD = 10;
+
+#ifdef DIAG_DEVELOPER
+	void ~JMESPTransformPopup()
+	{
+		if ( !g_Game )
+			return;
+
+		Print("~JMESPTransformPopup()");
+	}
+#endif
 
 	override bool IsOpen()
 	{
@@ -85,7 +93,9 @@ class JMESPTransformPopup: UIActionBase
 	protected void SetButtonAutoRepeatActive( int idx, bool active )
 	{
 		m_ButtonAutoRepeatActive[idx] = active;
-		m_ButtonAutoRepeatTimer[idx] = 0;
+
+		int action = m_ButtonActions[idx];
+		m_ActionAutoRepeatActive[action] = active;
 
 		ImageWidget icon = m_ButtonIcons[idx];
 		if ( !icon )
@@ -99,7 +109,9 @@ class JMESPTransformPopup: UIActionBase
 
 	static JMESPTransformPopup Create( notnull Widget parent, notnull Widget anchor )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp/JMESPTransformPopup.layout", parent );
+		JMWindowBase window = GetCOTWindowManager().Create();
+
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp/JMESPTransformPopup.layout", window.GetContentWidget() );
 
 		if ( !widget )
 			return null;
@@ -110,38 +122,24 @@ class JMESPTransformPopup: UIActionBase
 		if ( !popup )
 			return null;
 
-		popup.InitPopup( anchor );
+		popup.InitPopup( window, anchor );
 
 		return popup;
 	}
 
-	void InitPopup( notnull Widget anchor )
+	void InitPopup( JMWindowBase window, notnull Widget anchor )
 	{
+		m_Window = window;
 		m_Anchor = anchor;
-		m_Panel = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp/JMESPTransformPopup_Panel.layout", m_Anchor );
+		m_Panel = layoutRoot;
 
 		if ( !m_Panel )
 			return;
 
 		Class.CastTo( m_Content, m_Panel.FindAnyWidget( "popup_content" ) );
 
-		Class.CastTo( m_Title, m_Panel.FindAnyWidget( "popup_title" ) );
-
-		//! Packed to the END of a container authored the same 96px wide as
-		//! the field rows' own button box, rather than from 0 in a box just
-		//! wide enough for two. Both boxes then right-align identically and
-		//! the close button lands on exactly the same column as each row's
-		//! apply button - matching by construction instead of by an offset
-		//! tuned against whatever right_ref does with differing widths.
-		m_TitleButtons = m_Panel.FindAnyWidget( "popup_titlebar_buttons" );
-		if ( m_TitleButtons )
-		{
-			Widget refreshBtn = AddIconButton( m_TitleButtons, "refresh-cw", ACTION_REFRESH_ALL, true );
-			refreshBtn.SetPos( 34, 0 );
-
-			Widget closeBtn = AddIconButton( m_TitleButtons, "x", ACTION_CLOSE );
-			closeBtn.SetPos( 68, 0 );
-		}
+		Widget refreshBtn = AddIconButton( m_Window.GetTitleButtons(), "refresh-cw", ACTION_REFRESH_ALL, true );
+		refreshBtn.SetSize( 25, 25 );
 
 		if ( m_Content )
 		{
@@ -152,7 +150,12 @@ class JMESPTransformPopup: UIActionBase
 		m_Panel.Show( false );
 		m_Panel.SetHandler( this );
 
-		JMStatics.AddOverlay( m_Panel );
+		m_Window.SetModule( m_Module, this,  );
+	}
+
+	override Widget GetRootWidget()
+	{
+		return m_Panel;
 	}
 
 	//! One field: a header line with the label on the left and the copy/
@@ -229,7 +232,6 @@ class JMESPTransformPopup: UIActionBase
 		//! second click.
 		m_ButtonAutoRepeatEnabled.Insert( spin );
 		m_ButtonAutoRepeatActive.Insert( false );
-		m_ButtonAutoRepeatTimer.Insert( 0 );
 		m_ButtonLastClickTime.Insert( 0 );
 
 		return btn;
@@ -259,8 +261,6 @@ class JMESPTransformPopup: UIActionBase
 			return false;
 
 		int color = HOVER_NEUTRAL;
-		if ( m_ButtonActions[idx] == ACTION_CLOSE )
-			color = HOVER_CLOSE;
 
 		hover.SetColor( color );
 		hover.Show( true );
@@ -291,16 +291,10 @@ class JMESPTransformPopup: UIActionBase
 
 		DoAction( m_ButtonActions[idx] );
 
-		//! Close is a navigation, not a data action - it needs no receipt,
-		//! and the popup (and the icon with it) is gone by the time one
-		//! would show anyway.
-		if ( m_ButtonActions[idx] != ACTION_CLOSE )
-		{
-			if ( m_ButtonIsSpin[idx] )
-				m_ButtonSpinAngle[idx] = 0.01;
-			else
-				m_ButtonFeedbackTimer[idx] = FEEDBACK_HOLD;
-		}
+		if ( m_ButtonIsSpin[idx] )
+			m_ButtonSpinAngle[idx] = 0.01;
+		else
+			m_ButtonFeedbackTimer[idx] = FEEDBACK_HOLD;
 
 		if ( m_ButtonAutoRepeatEnabled[idx] )
 			ToggleButtonAutoRepeat( idx );
@@ -345,7 +339,6 @@ class JMESPTransformPopup: UIActionBase
 				continue;
 
 			m_ButtonAutoRepeatActive[i] = false;
-			m_ButtonAutoRepeatTimer[i] = 0;
 
 			ImageWidget icon = m_ButtonIcons[i];
 			if ( icon )
@@ -368,18 +361,8 @@ class JMESPTransformPopup: UIActionBase
 			if ( m_ButtonIsSpin[i] )
 			{
 				if ( m_ButtonAutoRepeatActive[i] )
-				{
-					m_ButtonAutoRepeatTimer[i] = m_ButtonAutoRepeatTimer[i] + timeSlice;
-
-					if ( m_ButtonAutoRepeatTimer[i] >= AUTO_REPEAT_INTERVAL )
-					{
-						m_ButtonAutoRepeatTimer[i] = 0;
-						DoAction( m_ButtonActions[i] );
-						m_ButtonSpinAngle[i] = 0.01;
-					}
-				}
-
-				if ( m_ButtonSpinAngle[i] <= 0 )
+					DoAction( m_ButtonActions[i] );
+				else if ( m_ButtonSpinAngle[i] <= 0 )
 					continue;
 
 				m_ButtonSpinAngle[i] = m_ButtonSpinAngle[i] + ( timeSlice / SPIN_DURATION ) * 360;
@@ -421,9 +404,6 @@ class JMESPTransformPopup: UIActionBase
 	{
 		switch ( action )
 		{
-			case ACTION_CLOSE:
-				Close();
-				break;
 			case ACTION_REFRESH_ALL:
 				DoRefreshAll();
 				break;
@@ -462,20 +442,14 @@ class JMESPTransformPopup: UIActionBase
 			return;
 		}
 
+		m_Meta = meta;
 		m_Module = meta.module;
 		m_Target = meta.target;
 		m_PendingX = screenX;
 		m_PendingY = screenY;
 		m_Open = true;
 
-		string title;
-
-		if ( meta.type.IsInherited( JMESPViewTypePlayer ) || !JMESPWidgetHandler.UseClassName )
-			title = meta.GetName();
-		else
-			title = meta.GetType();
-
-		m_Title.SetText( title );
+		UpdateTitle();
 
 		if ( m_Position )
 			m_Position.SetEdited( false );
@@ -484,7 +458,8 @@ class JMESPTransformPopup: UIActionBase
 			m_Orientation.SetEdited( false );
 
 		m_Panel.Show( true );
-		m_Panel.SetSort( 9999, true );
+
+		m_Window.Show();
 
 		UpdatePlacement();
 		RefreshValues();
@@ -499,6 +474,8 @@ class JMESPTransformPopup: UIActionBase
 
 		if ( m_Panel )
 			m_Panel.Show( false );
+
+		m_Window.Close();
 	}
 
 	override void Hide()
@@ -513,7 +490,7 @@ class JMESPTransformPopup: UIActionBase
 
 	protected void UpdatePlacement()
 	{
-		if ( !m_Panel || !m_Anchor )
+		if ( !m_Window || !m_Panel || !m_Target )
 			return;
 
 		float ax, ay;
@@ -558,10 +535,9 @@ class JMESPTransformPopup: UIActionBase
 		if ( py < 0 )
 			py = 0;
 
-		m_Panel.SetFlags( WidgetFlags.HEXACTSIZE );
-		m_Panel.SetFlags( WidgetFlags.VEXACTSIZE );
 		m_Panel.SetSize( PANEL_WIDTH, panelHeight );
-		m_Panel.SetPos( px, py );
+		m_Window.SetPosition( px, py );
+		m_Window.SetSize( PANEL_WIDTH, panelHeight );
 	}
 
 	//! Reads the target's current Position/Orientation into the fields. Runs
@@ -589,28 +565,25 @@ class JMESPTransformPopup: UIActionBase
 		if ( !m_Open )
 			return;
 
+		UpdateTitle();
 		UpdateButtonFeedback( timeSlice );
 
 		if ( !m_Target )
 		{
 			Close();
-			return;
 		}
+	}
 
-		UpdatePlacement();
+	void UpdateTitle()
+	{
+		string title;
 
-		bool leftDown = ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) != 0;
-		bool rightDown = ( GetMouseState( MouseState.RIGHT ) & MB_PRESSED_MASK ) != 0;
+		if ( !JMESPWidgetHandler.UseClassName || ( m_Meta.type && m_Meta.type.IsInherited( JMESPViewTypePlayer ) ) )
+			title = m_Meta.name;
+		else
+			title = m_Meta.targetType;
 
-		if ( !leftDown && !rightDown )
-			return;
-
-		Widget under = GetWidgetUnderCursor();
-
-		if ( IsFocusWidget( under ) )
-			return;
-
-		Close();
+		m_Window.SetTitle( title );
 	}
 
 	override bool IsFocusWidget( Widget widget )
@@ -642,15 +615,18 @@ class JMESPTransformPopup: UIActionBase
 		return super.OnKeyPress( w, x, y, key );
 	}
 
-	//! Refresh (click or auto-repeat): discard unapplied edits and reload both
+	//! Refresh (click or auto-repeat): discard unapplied edits if not auto-repeating and reload both
 	//! fields from the object.
 	protected void DoRefreshAll()
 	{
-		if ( m_Position )
-			m_Position.SetEdited( false );
+		if ( !m_ActionAutoRepeatActive[ACTION_REFRESH_ALL] )
+		{
+			if ( m_Position  )
+				m_Position.SetEdited( false );
 
-		if ( m_Orientation )
-			m_Orientation.SetEdited( false );
+			if ( m_Orientation )
+				m_Orientation.SetEdited( false );
+		}
 
 		RefreshValues();
 	}

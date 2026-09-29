@@ -62,13 +62,12 @@ class JMESPActionMenu
 	//! not clip it.
 	protected static ref JMESPActionMenu s_Shared;
 	protected UIActionContextMenu m_Menu;
-	protected JMESPMeta m_Meta;
+	protected ref JMESPMeta m_Meta;
 
 	//! Kept from Init() so the transform-edit popup can be built lazily, in
 	//! the same parent/anchor the menu itself uses - see GetTransformPopup().
 	protected Widget m_Parent;
 	protected Widget m_Anchor;
-	protected ref JMESPTransformPopup m_TransformPopup;
 	protected string m_Page;
 	protected string m_PageArg;
 
@@ -179,15 +178,15 @@ class JMESPActionMenu
 	//! a separate floating panel rather than a menu page.
 	protected JMESPTransformPopup GetTransformPopup()
 	{
-		if ( m_TransformPopup )
-			return m_TransformPopup;
+		if ( m_Meta.m_TransformPopup )
+			return m_Meta.m_TransformPopup;
 
 		if ( !m_Parent || !m_Anchor )
 			return null;
 
-		m_TransformPopup = JMESPTransformPopup.Create( m_Parent, m_Anchor );
+		m_Meta.m_TransformPopup = JMESPTransformPopup.Create( m_Parent, m_Anchor );
 
-		return m_TransformPopup;
+		return m_Meta.m_TransformPopup;
 	}
 
 	//! Whether this thing has a cargo space at all.

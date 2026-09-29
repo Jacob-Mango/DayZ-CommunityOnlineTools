@@ -214,6 +214,7 @@ class JMESPModule: JMRenderableModuleBase
 	//! (`modded class JMESPModule`) reads this via m_MappedESPObjects.Get(target).
 	//! A modded class cannot touch a private member of the class it mods.
 	protected ref map< Object, JMESPMeta > m_MappedESPObjects;
+	protected ref map< string, JMESPMeta > m_MappedObjects;
 	protected ref array< ref JMESPViewType > m_ViewTypes;
 	protected ref map<typename, JMESPViewType> m_ViewTypesByType;
 
@@ -231,12 +232,6 @@ class JMESPModule: JMRenderableModuleBase
 	//! ignores the pointer so the tags under it stay clickable, and a catcher
 	//! panel wide enough to hear the click would swallow every one of theirs.
 	protected bool m_WorldMenuRightDown;
-
-	//! The object picked out of the world, kept alive here.
-	//!
-	//! A tag's meta is owned by the tracking lists; one made for a right-click
-	//! is owned by nothing, and the menu holds it weakly.
-	protected ref JMESPMeta m_WorldMenuMeta;
 
 	//! How far a right-click reaches. Past this it is scenery an admin is
 	//! looking at rather than something they meant to act on.
@@ -790,6 +785,7 @@ class JMESPModule: JMRenderableModuleBase
 		m_ESPToDestroy = new array< JMESPMeta >;
 
 		m_MappedESPObjects = new map< Object, JMESPMeta >;
+		m_MappedObjects = new map< string, JMESPMeta >;
 
 		m_ViewTypes = new array< ref JMESPViewType >;
 		m_ViewTypesByType = new map<typename, JMESPViewType>;
@@ -1089,8 +1085,6 @@ class JMESPModule: JMRenderableModuleBase
 		else
 			meta.m_DoorIndex = -1;
 
-		m_WorldMenuMeta = meta;
-
 		int mx;
 		int my;
 		GetMousePos( mx, my );
@@ -1216,16 +1210,37 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !obj )
 			return false;
 
+		JMESPMeta tracked;
+
 		//! Already tracked: use the meta the tag is using, so selecting from
 		//! the menu lights up the tag on screen and deselecting from either
 		//! place means the same thing.
 		if ( m_MappedESPObjects )
 		{
-			JMESPMeta tracked = m_MappedESPObjects.Get( obj );
+			tracked = m_MappedESPObjects.Get( obj );
 
 			if ( tracked )
 			{
 				meta = tracked;
+				return true;
+			}
+		}
+
+		//! We use the string representation as key because we need something that survives the object
+		//! and is unique - it contains type and memory address which should suffice
+		//! since we don't need to send it over the network (only used on client).
+		//! Network ID cannot be used since it can be zero.
+		string key = obj.ToString();
+
+		JMESPMeta untracked;
+
+		if ( m_MappedObjects )
+		{
+			untracked = m_MappedObjects[key];
+
+			if ( untracked )
+			{
+				meta = untracked;
 				return true;
 			}
 		}
@@ -1242,7 +1257,7 @@ class JMESPModule: JMRenderableModuleBase
 				if ( viewTypes[i].IsValid( obj, meta ) )
 				{
 					meta.module = this;
-					return true;
+					break;
 				}
 			}
 		}
@@ -1251,17 +1266,35 @@ class JMESPModule: JMRenderableModuleBase
 		//! something no view type describes. The menu still works off the target
 		//! alone, so it gets a bare meta rather than nothing.
 		if ( !meta )
+		{
 			meta = new JMESPMeta;
 
-		meta.target = obj;
-		meta.module = this;
-		meta.colour = JMTheme.INK_50;
+			meta.SetTarget( obj );
 
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+			meta.module = this;
+			meta.colour = JMTheme.INK_50;
+		}
 
-		meta.name = meta.GetName();
+		meta.m_Key = key;
+
+		if ( m_MappedObjects )
+			m_MappedObjects[key] = meta;
 
 		return true;
+	}
+
+	void RemoveMetaForObject( string key )
+	{
+		if ( m_MappedObjects )
+		{
+		#ifdef DIAG_DEVELOPER
+			int count = m_MappedObjects.Count();
+		#endif
+			m_MappedObjects.Remove( key );
+		#ifdef DIAG_DEVELOPER
+			PrintFormat("m_MappedObjects.Count() %1 -> %2", count, m_MappedObjects.Count());
+		#endif
+		}
 	}
 
 	override void OnUpdate(float timeslice)

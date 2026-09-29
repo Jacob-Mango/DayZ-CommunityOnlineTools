@@ -38,7 +38,7 @@ PanelWidgetClass UIActionEditableVector {
        position 0.3 0
        size 0.7 1
        valign top_ref
-       Padding 0
+       Padding 10
        Margin 0
        Columns 3
        Rows 1

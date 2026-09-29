@@ -12,7 +12,7 @@ PanelWidgetClass JMESPVectorInputRow {
   GridSpacerWidgetClass spacer {
    position 0 0
    size 1 1
-   Padding 0
+   Padding 10
    Margin 10
    Columns 3
    Rows 1

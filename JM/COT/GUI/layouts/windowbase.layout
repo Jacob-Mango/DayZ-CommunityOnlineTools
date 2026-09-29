@@ -97,138 +97,160 @@ PanelWidgetClass base_window {
      "text halign" left
      "text valign" center
     }
-    ButtonWidgetClass pin_button {
-     ignorepointer 0
+    WrapSpacerWidgetClass title_buttons {
      visible 1
-     color 0.196 0.220 0.247 1.000
-     position 57 0
-     size 25 25
-     halign right_ref
-     valign center_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     style Empty
-     {
-      PanelWidgetClass pin_button_hover {
-       ignorepointer 1
-       visible 0
-       position 0 0
-       size 1 1
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-       color 1.000 1.000 1.000 0.180
-       style COTPill6Set
-      }
-      ImageWidgetClass pin_button_label {
-       ignorepointer 1
-       position 0 0
-       size 16 16
-       halign center_ref
-       valign center_ref
-       hexactpos 1
-       vexactpos 1
-       hexactsize 1
-       vexactsize 1
-       image0 "JM/COT/GUI/textures/icons/lucide/pin-off.edds"
-       mode blend
-       "src alpha" 1
-       "no wrap" 1
-       "clamp mode" clamp
-       "stretch mode" stretch_w_h
-      }
-     }
-    }
-    ButtonWidgetClass minimize_button {
-     ignorepointer 0
-     visible 1
-     color 0.196 0.220 0.247 1.000
-     position 31 0
-     size 25 25
-     halign right_ref
-     valign center_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     style Empty
-     {
-      PanelWidgetClass minimize_button_hover {
-       ignorepointer 1
-       visible 0
-       position 0 0
-       size 1 1
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-       color 1.000 1.000 1.000 0.180
-       style COTPill6Set
-      }
-      ImageWidgetClass minimize_button_label {
-       ignorepointer 1
-       position 0 0
-       size 16 16
-       halign center_ref
-       valign center_ref
-       hexactpos 1
-       vexactpos 1
-       hexactsize 1
-       vexactsize 1
-       image0 "JM/COT/GUI/textures/icons/lucide/chevrons-down-up.edds"
-       mode blend
-       "src alpha" 1
-       "no wrap" 1
-       "clamp mode" clamp
-       "stretch mode" stretch_w_h
-      }
-     }
-    }
-    ButtonWidgetClass close_button {
-     ignorepointer 0
-     visible 1
-     color 1.000 0.384 0.490 1.000
+     clipchildren 1
+     ignorepointer 1
      position 6 0
-     size 25 25
+     size 100 1
      halign right_ref
      valign center_ref
      hexactpos 1
      vexactpos 1
      hexactsize 1
-     vexactsize 1
+     vexactsize 0
      style Empty
+     Padding 0
+     Margin 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     content_halign right
+     content_valign center
      {
-      PanelWidgetClass close_button_hover {
-       ignorepointer 1
-       visible 0
+      ButtonWidgetClass close_button {
+       ignorepointer 0
+       visible 1
+       color 1.000 0.384 0.490 1.000
        position 0 0
-       size 1 1
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-       color 1.000 0.384 0.490 0.350
-       style COTPill6Set
-      }
-      ImageWidgetClass close_button_image {
-       ignorepointer 1
-       position 0 0
-       size 16 16
-       halign center_ref
+       size 25 25
+       halign right_ref
        valign center_ref
        hexactpos 1
        vexactpos 1
        hexactsize 1
        vexactsize 1
-       image0 "JM/COT/GUI/textures/icons/close.edds"
-       mode blend
-       "src alpha" 1
-       "no wrap" 1
-       "clamp mode" clamp
-       "stretch mode" stretch_w_h
+       style Empty
+       {
+        PanelWidgetClass close_button_hover {
+         ignorepointer 1
+         visible 0
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1.000 0.384 0.490 0.350
+         style COTPill6Set
+        }
+        ImageWidgetClass close_button_image {
+         ignorepointer 1
+         position 0 0
+         size 16 16
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "JM/COT/GUI/textures/icons/close.edds"
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "clamp mode" clamp
+         "stretch mode" stretch_w_h
+        }
+       }
+      }
+      ButtonWidgetClass minimize_button {
+       ignorepointer 0
+       visible 1
+       color 0.196 0.220 0.247 1.000
+       position 0 0
+       size 25 25
+       halign right_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       style Empty
+       {
+        PanelWidgetClass minimize_button_hover {
+         ignorepointer 1
+         visible 0
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1.000 1.000 1.000 0.180
+         style COTPill6Set
+        }
+        ImageWidgetClass minimize_button_label {
+         ignorepointer 1
+         position 0 0
+         size 16 16
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "JM/COT/GUI/textures/icons/lucide/chevrons-down-up.edds"
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "clamp mode" clamp
+         "stretch mode" stretch_w_h
+        }
+       }
+      }
+      ButtonWidgetClass pin_button {
+       ignorepointer 0
+       visible 1
+       color 0.196 0.220 0.247 1.000
+       position 0 0
+       size 25 25
+       halign right_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       style Empty
+       {
+        PanelWidgetClass pin_button_hover {
+         ignorepointer 1
+         visible 0
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1.000 1.000 1.000 0.180
+         style COTPill6Set
+        }
+        ImageWidgetClass pin_button_label {
+         ignorepointer 1
+         position 0 0
+         size 16 16
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "JM/COT/GUI/textures/icons/lucide/pin-off.edds"
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "clamp mode" clamp
+         "stretch mode" stretch_w_h
+        }
+       }
       }
      }
     }

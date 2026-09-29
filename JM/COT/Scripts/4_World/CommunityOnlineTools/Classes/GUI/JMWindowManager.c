@@ -14,9 +14,9 @@ class JMWindowManager
 
 	//! Saved rect for a module's window, if it was ever moved/resized. Returns
 	//! false (leaving x/y/w/h untouched) when the module has no saved entry.
-	bool TryGetSavedLayout( string moduleName, out float x, out float y, out float w, out float h )
+	bool TryGetSavedLayout( string moduleName, string windowName, out float x, out float y, out float w, out float h )
 	{
-		JMWindowLayoutEntry entry = m_LayoutStore.FindEntry( moduleName );
+		JMWindowLayoutEntry entry = m_LayoutStore.FindEntry( moduleName, windowName );
 		if ( !entry )
 			return false;
 
@@ -37,7 +37,7 @@ class JMWindowManager
 		window.GetLayoutRoot().GetPos( x, y );
 		window.GetLayoutRoot().GetSize( w, h );
 
-		m_LayoutStore.SetEntry( window.GetModule().GetModuleName(), x, y, w, h );
+		m_LayoutStore.SetEntry( window.GetModule().GetModuleName(), window.GetName(), x, y, w, h );
 		JMWindowLayoutStore.Save( m_LayoutStore );
 	}
 

@@ -53,6 +53,12 @@ class JMESPViewType
 		#endif
 		#endif
 	}
+
+	void CreateMetaEx( Object obj, out JMESPMeta meta )
+	{
+		 CreateMeta( meta );
+		 meta.Setup( obj, this );
+	}
 }
 
 class JMESPViewTypePlayer: JMESPViewType
@@ -79,13 +85,7 @@ class JMESPViewTypePlayer: JMESPViewType
 		if ( !IsPlayer( obj, player ) )
 			return false;
 		
-		CreateMeta( meta );
-
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		CreateMetaEx( obj,  meta );
 		
 		if ( player.GetIdentity() )
 		{
@@ -95,9 +95,6 @@ class JMESPViewTypePlayer: JMESPViewType
 		if ( meta.player )
 		{
 			meta.name = meta.player.GetName();
-		} else
-		{
-			meta.name = meta.GetName();
 		}
 
 		return true;
@@ -127,21 +124,7 @@ class JMESPViewTypePlayerAI: JMESPViewType
 		if ( !obj.IsMan() || IsPlayer( obj ) )
 			return false;
 
-		CreateMeta( meta );
-
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-
-		if ( meta.player )
-		{
-			meta.name = meta.player.GetName();
-		} else
-		{
-			meta.name = meta.GetName();
-		}
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -169,15 +152,7 @@ class JMESPViewTypeInfected: JMESPViewType
 		if ( !Class.CastTo( entity, obj ) || !( entity.IsZombie() || entity.IsZombieMilitary() ) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -205,15 +180,7 @@ class JMESPViewTypeAnimal: JMESPViewType
 		if ( !Class.CastTo( entity, obj ) || !entity.IsAnimal() )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -242,15 +209,7 @@ class JMESPViewTypeCar: JMESPViewType
 		if ( !obj.IsInherited(CarScript) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -279,15 +238,7 @@ class JMESPViewTypeBoat: JMESPViewType
 		if ( !obj.IsInherited(BoatScript) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -317,15 +268,7 @@ class JMESPViewTypeMotorbike: JMESPViewType
 		if ( !obj.IsInherited(Motorbike) )
 			return false;
 
-		CreateMeta( meta );
-
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -349,15 +292,7 @@ class JMESPViewTypeTrain: JMESPViewType
 		if ( !obj.IsBuilding() || !COT.IsHypeTrain(obj) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -385,15 +320,7 @@ class JMESPViewTypeWeapon: JMESPViewType
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -422,15 +349,7 @@ class JMESPViewTypeArchery: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -458,15 +377,7 @@ class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -494,15 +405,7 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -530,15 +433,7 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) || obj.IsKindOf("Pistol_Base") )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -565,15 +460,7 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 		if ( !obj.IsKindOf("Pistol_Base") )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -600,15 +487,7 @@ class JMESPViewTypeLauncher: JMESPViewTypeWeapon
 		if ( !obj.ShootsExplosiveAmmo() )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -638,15 +517,7 @@ class JMESPViewTypeItemBase: JMESPViewType
 		if ( !CheckLootCategory( obj ) )
 			return false;
 		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -975,15 +846,7 @@ class JMESPViewTypeImmovable: JMESPViewType
 		if ( obj.IsBuilding() )
 			return false;
 				
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -1001,15 +864,7 @@ class JMESPViewTypePlainObject: JMESPViewTypeImmovable
 		if ( !obj.IsPlainObject() )
 			return false;
 				
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -1027,15 +882,7 @@ class JMESPViewTypeRock: JMESPViewTypeImmovable
 		if ( !obj.IsRock() )
 			return false;
 				
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -1053,15 +900,7 @@ class JMESPViewTypeWoodSource: JMESPViewTypeImmovable
 		if ( !obj.IsWoodBase() )
 			return false;
 				
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -1079,15 +918,7 @@ class JMESPViewTypeBush: JMESPViewTypeWoodSource
 		if ( !obj.IsBush() )
 			return false;
 				
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -1105,15 +936,7 @@ class JMESPViewTypeTree: JMESPViewTypeWoodSource
 		if ( !obj.IsTree() )
 			return false;
 				
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
@@ -1131,15 +954,7 @@ class JMESPViewTypeBuilding: JMESPViewTypeImmovable
 		if ( !obj.IsBuilding() || COT.IsHypeTrain(obj) )
 			return false;
 				
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-
-		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		meta.name = meta.GetName();
+		CreateMetaEx( obj,  meta );
 
 		return true;
 	}
