@@ -22,16 +22,15 @@ class UIActionImageButton: UIActionButton
 	//! second, double click again to stop. Opt-in per button (see
 	//! UIActionManager.CreateRefreshButton) rather than on by default: a
 	//! second click on a delete or apply button must never arm anything.
-	static const int   AUTO_REPEAT_DOUBLE_CLICK_MS = 400;
 	static const float AUTO_REPEAT_INTERVAL        = 1.0;
 	protected bool  m_AutoRepeatEnabled;
+	protected bool m_IsDoubleClick;
 
 	//! Spin the icon on every CLICK, including the ones auto-repeat fires, so
 	//! a refresh handler does not have to animate its own button.
 	protected bool  m_SpinOnClick;
 	protected bool  m_AutoRepeatActive;
 	protected float m_AutoRepeatTimer;
-	protected int   m_LastClickTime;
 
 	bool IsAutoRepeating()
 	{
@@ -232,28 +231,40 @@ class UIActionImageButton: UIActionButton
 	{
 		bool ret = super.OnClick( w, x, y, button );
 
+		bool isDoubleClick = m_IsDoubleClick;
+		m_IsDoubleClick = false;
+
 		if ( !m_AutoRepeatEnabled || w != m_Button )
 			return ret;
 
-		if ( m_AutoRepeatActive )
+		if ( m_AutoRepeatActive && !isDoubleClick )
 		{
 			StopAutoRepeat();
-			m_LastClickTime = 0;
 			return ret;
 		}
 
-		int now = g_Game.GetTime();
-
-		if ( now - m_LastClickTime <= AUTO_REPEAT_DOUBLE_CLICK_MS )
-		{
-			m_LastClickTime = 0;
-			StartAutoRepeat();
-			return ret;
-		}
-
-		m_LastClickTime = now;
 
 		return ret;
+	}
+
+	//! On a double click, events fire in this order (three events per double click):
+	//! 1 - OnClick
+	//! 2 - OnDoubleClick
+	//! 3 - OnClick
+	//! This means if we want a single click to undo an action of a previous double click,
+	//! we need to check if that click is not part of the same double click
+	override bool OnDoubleClick( Widget w, int x, int y, int button )
+	{
+		m_IsDoubleClick = true;
+
+		bool ret = super.OnDoubleClick( w, x, y, button );
+
+		if ( !m_AutoRepeatEnabled || w != m_Button )
+			return ret;
+
+		StartAutoRepeat();
+
+		return true;
 	}
 
 	override void AnimateError()

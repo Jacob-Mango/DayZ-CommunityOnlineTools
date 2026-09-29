@@ -83,7 +83,6 @@ class UIActionItemList: UIActionBase
 	//! Row width used until there is something to measure - the first frame,
 	//! before the body has been laid out. See ApplyRowWidth for the real one.
 	static const float ROW_W = 0.972;
-	static const int DOUBLE_CLICK_MS = 400;
 
 	//! Items the selection moves per wheel notch.
 	static const int WHEEL_STEP = 1;
