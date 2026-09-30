@@ -81,7 +81,7 @@ class JMESPTransformPopup: UIActionBase
 		if ( !g_Game )
 			return;
 
-		Print("~JMESPTransformPopup()");
+		PrintFormat("~JMESPTransformPopup() %1", m_Meta.m_Key);
 	}
 #endif
 
@@ -535,9 +535,13 @@ class JMESPTransformPopup: UIActionBase
 		if ( py < 0 )
 			py = 0;
 
-		m_Panel.SetSize( PANEL_WIDTH, panelHeight );
+		if ( !m_Window.IsMinimized() )
+		{
+			m_Panel.SetSize( PANEL_WIDTH, panelHeight );
+			m_Window.SetSize( PANEL_WIDTH, panelHeight );
+		}
+
 		m_Window.SetPosition( px, py );
-		m_Window.SetSize( PANEL_WIDTH, panelHeight );
 	}
 
 	//! Reads the target's current Position/Orientation into the fields. Runs
