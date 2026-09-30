@@ -63,6 +63,8 @@ class JMESPMeta: COT_WidgetHolder
 			module.RemoveMetaForObject( m_Key );
 		}
 
+		DestroyWidget(widgetRoot);
+
 		if (s_JM_All)
 			s_JM_All.Remove(s_JM_Node);
 
