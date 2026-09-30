@@ -637,7 +637,7 @@ class JMESPActionMenu
 				if ( house.CanDoorBeClosed( doorIndex ) )
 					Add( PREFIX_ACTION + "closedoor", "#STR_COT_ESP_MODULE_MENU_CLOSE_DOOR", JMConstants.Lucide( "door-closed" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 			}
-			else if ( house.CanDoorBeOpened( doorIndex ) )
+			else if ( house.CanDoorBeOpened( doorIndex, true ) )
 			{
 				Add( PREFIX_ACTION + "opendoor", "#STR_COT_ESP_MODULE_MENU_OPEN_DOOR", JMConstants.Lucide( "door-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 			}
