@@ -474,23 +474,18 @@ class JMESPActionMenu
 	{
 		Object target = m_Meta.target;
 
-		//! A map object baked into the terrain never got a network ID - a
-		//! dynamically spawned/CE one always has one, even offline (see
-		//! MaxHealth() below for the same test). Static ESP/tag actions
-		//! (select, copy, delete, ...) mean nothing on it and are hidden;
-		//! only the type-specific rows below (door open/close, ...) still
-		//! apply, since a static house genuinely does have doors.
-		bool isStatic = !m_Meta.networkLow && !m_Meta.networkHigh && g_Game.IsMultiplayer();
+		//! A locally spawned object (in offline/SP, we cannot know if the object is local since client acts as the server)
+		bool isLocal = !m_Meta.networkLow && !m_Meta.networkHigh && g_Game.IsMultiplayer();
 
-		if ( !isStatic )
+		if ( IsSelected() )
+			Add( PREFIX_ACTION + "deselect", "#STR_COT_ESP_MODULE_MENU_DESELECT", JMConstants.Lucide( "square" ) );
+		else
+			Add( PREFIX_ACTION + "select", "#STR_COT_ESP_MODULE_MENU_SELECT", JMConstants.Lucide( "mouse-pointer-click" ) );
+
+		AddPage( PAGE_TRANSFORM, "#STR_COT_ESP_MODULE_PAGE_TRANSFORM", JMConstants.Lucide( "move-3d" ) );
+
+		if ( !isLocal )
 		{
-			if ( IsSelected() )
-				Add( PREFIX_ACTION + "deselect", "#STR_COT_ESP_MODULE_MENU_DESELECT", JMConstants.Lucide( "square" ) );
-			else
-				Add( PREFIX_ACTION + "select", "#STR_COT_ESP_MODULE_MENU_SELECT", JMConstants.Lucide( "mouse-pointer-click" ) );
-
-			AddPage( PAGE_TRANSFORM, "#STR_COT_ESP_MODULE_PAGE_TRANSFORM", JMConstants.Lucide( "move-3d" ) );
-
 			if ( MaxHealth() > 0 )
 				AddPage( PAGE_HEALTH, "#STR_COT_ESP_MODULE_PAGE_HEALTH", JMConstants.Lucide( "heart-pulse" ) );
 		}
@@ -656,23 +651,34 @@ class JMESPActionMenu
 		if ( attachInv && attachInv.GetAttachmentSlotsCount() > 0 && !PlayerBase.Cast( target ) )
 			AddPage( PAGE_ATTACHMENTS, "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS", JMConstants.Lucide( "puzzle" ), Perm( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT ) );
 
-		if ( !isStatic )
-			AddPage( PAGE_COPY, "#STR_COT_ESP_MODULE_MENU_COPY", JMConstants.Lucide( "copy" ) );
+		AddPage( PAGE_COPY, "#STR_COT_ESP_MODULE_MENU_COPY", JMConstants.Lucide( "copy" ) );
 
 		//! We can spectate anything, it's not limited to players
-		if ( m_Meta.target && ( m_Meta.networkLow || m_Meta.networkHigh ) && g_Game.IsMultiplayer() )
-			Add( PREFIX_ACTION + "spectate", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", JMConstants.Lucide( "eye" ), Perm( JMConstants.PERM_PLAYER_SPECTATE ) );
+		if ( ( m_Meta.networkLow || m_Meta.networkHigh ) && g_Game.IsMultiplayer() )
+		{
+			string spectateLabel;
 
-		if ( !isStatic )
+			PlayerBase player;
+			if ( Class.CastTo( player, g_Game.GetPlayer() ) && player.m_JM_SpectatedObject != target )
+				spectateLabel = "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE";
+			else
+				spectateLabel = "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_SPECTATE";
+
+			Add( PREFIX_ACTION + "spectate", spectateLabel, JMConstants.Lucide( "eye" ), Perm( JMConstants.PERM_PLAYER_SPECTATE ) );
+		}
+
+		if ( !isLocal )
 		{
 			//! Anything that can hold cargo can have it emptied - a tent, a crate, a
 			//! car boot. A player is skipped because the player page carries its own
 			//! clear cargo, routed through the player module for the logging.
 			if ( HasCargo( EntityAI.Cast( target ) ) && !TargetPlayer() )
 				Add( PREFIX_ACTION + "objclearcargo", "#STR_COT_PLAYER_MODULE_ACTION_CLEAR_CARGO", JMConstants.Lucide( "package-x" ), Perm( JMConstants.PERM_ESP_OBJECT_CLEARCARGO ), JMTheme.DANGER );
-
-			Add( PREFIX_ACTION + "delete", "#STR_COT_GENERIC_DELETE", JMConstants.ICON_TRASH_CAN, Perm( JMConstants.PERM_ESP_OBJECT_DELETE ) && m_Meta.CanDelete(), JMTheme.DANGER );
 		}
+
+		//! Plain objects are baked map objects, they cannot be deleted
+		if ( !target.IsPlainObject() )
+			Add( PREFIX_ACTION + "delete", "#STR_COT_GENERIC_DELETE", JMConstants.ICON_TRASH_CAN, Perm( JMConstants.PERM_ESP_OBJECT_DELETE ) && m_Meta.CanDelete(), JMTheme.DANGER );
 
 		JMContextMenuRegistry.Populate( "3DWorld", m_Menu );
 	}
@@ -1206,18 +1212,22 @@ class JMESPActionMenu
 		AddBack();
 
 		Add( PREFIX_ACTION + "copyraw",       "#STR_COT_ESP_MODULE_MENU_COPY_RAW",       JMConstants.Lucide( "copy" ) );
-		Add( PREFIX_ACTION + "copyxml",       "#STR_COT_ESP_MODULE_MENU_COPY_XML",       JMConstants.Lucide( "file-code" ) );
-		Add( PREFIX_ACTION + "copyspawnable", "#STR_COT_ESP_MODULE_MENU_COPY_SPAWNABLE", JMConstants.Lucide( "code-xml" ) );
-		Add( PREFIX_ACTION + "copyexpansion", "#STR_COT_ESP_MODULE_MENU_COPY_EXPANSION", JMConstants.Lucide( "copy" ) );
+
+		if ( !m_Meta.target.IsPlainObject() && m_Meta.target.GetType() )
+		{
+			Add( PREFIX_ACTION + "copyxml",       "#STR_COT_ESP_MODULE_MENU_COPY_XML",       JMConstants.Lucide( "file-code" ) );
+			Add( PREFIX_ACTION + "copyspawnable", "#STR_COT_ESP_MODULE_MENU_COPY_SPAWNABLE", JMConstants.Lucide( "code-xml" ) );
+			Add( PREFIX_ACTION + "copyexpansion", "#STR_COT_ESP_MODULE_MENU_COPY_EXPANSION", JMConstants.Lucide( "copy" ) );
 #ifdef DZ_Expansion_Core
-		Add( PREFIX_ACTION + "copyloadout",   "#STR_COT_ESP_MODULE_MENU_COPY_LOADOUT",   JMConstants.Lucide( "box" ) );
+			Add( PREFIX_ACTION + "copyloadout",   "#STR_COT_ESP_MODULE_MENU_COPY_LOADOUT",   JMConstants.Lucide( "box" ) );
 #endif
+		}
 
 		//! Classname and category, shown in the label rather than just named by
 		//! it - the same "row is the view" shape as the Network ID row below -
 		//! for view types (weapons, attachments, ...) whose classname is not
 		//! already the tag's own display name.
-		string classnameLabel = "#STR_COT_ESP_MODULE_MENU_CLASSNAME" + ": " + m_Meta.GetType();
+		string classnameLabel = "#STR_COT_ESP_MODULE_MENU_CLASSNAME" + ": " + m_Meta.targetType;
 		Add( PREFIX_ACTION + "copyclassname", classnameLabel, JMConstants.Lucide( "tag" ) );
 
 		if ( m_Meta.type )
@@ -1226,10 +1236,7 @@ class JMESPActionMenu
 			Add( PREFIX_ACTION + "copycategory", categoryLabel, JMConstants.Lucide( "shapes" ) );
 		}
 
-		//! A map object baked into the terrain never got one (see MaxHealth's
-		//! own note on the same test) - nothing to show or copy. The value is
-		//! shown right in the label, not just its name, so this row is both
-		//! the "view" and the "copy" the object-data ask wanted.
+		//! Locally spawned objects don't have a netID
 		if ( m_Meta.networkLow || m_Meta.networkHigh )
 		{
 			string netIdLabel = "#STR_COT_ESP_MODULE_MENU_NETWORK_ID" + ": " + m_Meta.networkLow.ToString() + " / " + m_Meta.networkHigh.ToString();
@@ -1552,7 +1559,7 @@ class JMESPActionMenu
 		if ( !m_Meta || !m_Meta.target )
 			return;
 
-		COTFeedback.Copy( m_Meta.GetType() );
+		COTFeedback.Copy( m_Meta.targetType );
 	}
 
 	//! <type name="..."/> block - the types.xml per-object entry.
@@ -1561,7 +1568,7 @@ class JMESPActionMenu
 		if ( !m_Meta || !m_Meta.target )
 			return;
 
-		string xml = "<type name=\"" + m_Meta.GetType() + "\">\n";
+		string xml = "<type name=\"" + m_Meta.targetType + "\">\n";
 		xml += "</type>";
 		COTFeedback.Copy( xml );
 	}
@@ -1576,7 +1583,7 @@ class JMESPActionMenu
 
 		string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n";
 		xml += "<spawnabletypes>\n";
-		xml += "\t<type name=\"" + m_Meta.GetType() + "\">\n";
+		xml += "\t<type name=\"" + m_Meta.targetType + "\">\n";
 
 		EntityAI entity = EntityAI.Cast( m_Meta.target );
 		if ( entity && entity.GetInventory() )
@@ -1649,7 +1656,7 @@ class JMESPActionMenu
 		EntityAI entity = EntityAI.Cast( m_Meta.target );
 		if ( !entity )
 		{
-			COTFeedback.Copy( m_Meta.GetType() );
+			COTFeedback.Copy( m_Meta.targetType );
 			return;
 		}
 
@@ -2038,7 +2045,7 @@ class JMESPActionMenu
 		if ( !m_Meta )
 			return;
 
-		COTFeedback.Copy( m_Meta.GetType() );
+		COTFeedback.Copy( m_Meta.targetType );
 	}
 
 	protected void DoCopyCategory()

@@ -271,8 +271,8 @@ class JMESPFormTabObjects: JMFormTab
 			if ( !IsMetaCategoryShown( meta ) )
 				continue;
 
-			string name = meta.GetName();
-			string classname = meta.GetType();
+			string name = meta.name;
+			string classname = meta.targetType;
 
 			if ( needle != "" )
 			{
