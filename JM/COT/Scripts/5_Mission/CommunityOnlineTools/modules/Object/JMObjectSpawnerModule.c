@@ -869,7 +869,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				break;
 
 			case COT_ObjectSetupMode.CE:
-				entity.EEOnCECreate();
+				if (g_Game.IsServer())
+					entity.EEOnCECreate();  //! Can only be called on server since SetZoneDamageCEInit calls GetHealth which is an error on client
 				Weapon_Base weapon;
 				if (Class.CastTo(weapon, entity))
 				{
