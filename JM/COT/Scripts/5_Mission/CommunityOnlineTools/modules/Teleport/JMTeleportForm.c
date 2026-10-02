@@ -1362,6 +1362,9 @@ class JMTeleportForm: JMFormBase
 				if ( posRow >= 0 && posRow < m_ListItems.Count() )
 					world = m_ListItems[posRow].m_Position;
 			}
+
+			if ( world[1] == 0 )
+				world = SnapToGround( world );
 		}
 
 		if ( m_InputCoords )
