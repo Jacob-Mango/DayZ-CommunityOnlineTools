@@ -53,6 +53,8 @@ class JMESPMeta: COT_WidgetHolder
 		Print( "  widgetHandler = " + widgetHandler );
 		#endif
 
+		JMScriptInvokers.ESP_WIDGET_DESTROYED.Invoke( this );
+
 		m_TransformPopup = null;
 
 		if ( m_Key && module )

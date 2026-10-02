@@ -221,8 +221,13 @@ class JMESPModule: JMRenderableModuleBase
 	//! Client-side per-category colour overrides. Null on a dedicated server -
 	//! nothing there draws an overlay, and it would only create an empty file.
 	protected ref JMESPSerialize m_ColourSettings;
+
 	protected bool m_IsCreatingWidgets;
 	protected bool m_IsDestroyingWidgets;
+
+	//! Held on the module, not the form or tab, since either may not exist at time of ESP widget creation/destruction
+	protected bool m_TabObjectsListDirty;
+
 	protected bool m_IknowWhatIamDoing;
 
 	//! Right-click-anything, for as long as COT's own interface is up.
@@ -428,6 +433,16 @@ class JMESPModule: JMRenderableModuleBase
 	JMESPState GetState()
 	{
 		return m_CurrentState;
+	}
+
+	bool GetTabObjectsListDirty()
+	{
+		return m_TabObjectsListDirty;
+	}
+
+	void SetTabObjectsListDirty( bool dirty )
+	{
+		m_TabObjectsListDirty = dirty;
 	}
 
 	JMESPViewType GetViewType(typename type)
@@ -1373,11 +1388,16 @@ class JMESPModule: JMRenderableModuleBase
 		//! not advance (very low-res timer, or a single item's create call
 		//! blowing well past the budget on its own).
 		int startMs = g_Game.GetTime();
-		int created = 0;
 
-		while ( m_ESPToCreate.Count() > 0 )
+		array<JMESPMeta> created = {};
+
+		int count = m_ESPToCreate.Count();
+
+		if (count > CREATE_MAX_PER_PASS)
+			count = CREATE_MAX_PER_PASS;
+
+		for ( int i = count - 1; i >= 0; i-- )
 		{
-			int i = m_ESPToCreate.Count() - 1;
 			JMESPMeta meta = m_ESPToCreate[i];
 
 			meta.Create( this );
@@ -1386,24 +1406,24 @@ class JMESPModule: JMRenderableModuleBase
 
 			m_ESPToCreate.Remove(i);
 
-			created++;
-
-			if ( created >= CREATE_MAX_PER_PASS )
-				break;
+			created.Insert( meta );
 
 			if ( g_Game.GetTime() - startMs >= CREATE_BUDGET_MS )
 				break;
 		}
 
-		int activeCountBeforeCreate = m_ActiveESPObjects.Count() - created;
+		m_TabObjectsListDirty = true;
 
-		if ( created > 0 )
-			JMScriptInvokers.ESP_TRACKED_LIST_CHANGED.Invoke();
+		if ( created.Count() > 0 )
+			JMScriptInvokers.ESP_WIDGETS_CREATED.Invoke( created );
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
-		if ( created > 0 )
-			Print( "  JMESPModule::CreateNewWidgets - active " + activeCountBeforeCreate + " -> " + m_ActiveESPObjects.Count() + " (created " + created + " in " + ( g_Game.GetTime() - startMs ) + "ms)" );
+		if ( created.Count() > 0 )
+		{
+			int activeCountBeforeCreate = m_ActiveESPObjects.Count() - created.Count();
+			Print( "  JMESPModule::CreateNewWidgets - active " + activeCountBeforeCreate + " -> " + m_ActiveESPObjects.Count() + " (created " + created.Count() + " in " + ( g_Game.GetTime() - startMs ) + "ms)" );
+		}
 		#endif
 		#endif
 
@@ -1462,15 +1482,15 @@ class JMESPModule: JMRenderableModuleBase
 			m_ESPToDestroy.Remove(i);
 		}
 
-		int activeCountBeforeDestroy = m_ActiveESPObjects.Count() + count;
-
-		if ( count > 0 )
-			JMScriptInvokers.ESP_TRACKED_LIST_CHANGED.Invoke();
+		m_TabObjectsListDirty = true;
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		if ( count > 0 )
+		{
+			int activeCountBeforeDestroy = m_ActiveESPObjects.Count() + count;
 			Print( "  JMESPModule::DestroyOldWidgets - active " + activeCountBeforeDestroy + " -> " + m_ActiveESPObjects.Count() );
+		}
 		#endif
 		#endif
 

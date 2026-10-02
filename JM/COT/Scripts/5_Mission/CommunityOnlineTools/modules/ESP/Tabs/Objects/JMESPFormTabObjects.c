@@ -52,10 +52,6 @@ class JMESPFormTabObjects: JMFormTab
 	//! when the state actually changes rather than twice a second.
 	protected bool m_ObjectListHeldShown;
 
-	//! Set when JMScriptInvokers.ESP_TRACKED_LIST_CHANGED fires while this tab
-	//! is not focused, so OnFocus() knows to catch up the redraw it skipped.
-	protected bool m_ListDirty;
-
 	//! The same menu the world tags use, so a row in this list and the tag over
 	//! the object it names offer the identical set of actions.
 	protected ref JMESPActionMenu m_ObjectMenu;
@@ -75,12 +71,14 @@ class JMESPFormTabObjects: JMFormTab
 	{
 		m_Form = form;
 
-		JMScriptInvokers.ESP_TRACKED_LIST_CHANGED.Insert( OnTrackedListChanged );
+		JMScriptInvokers.ESP_WIDGETS_CREATED.Insert( OnESPWidgetsCreated );
+		JMScriptInvokers.ESP_WIDGET_DESTROYED.Insert( OnESPWidgetDestroyed );
 	}
 
 	void ~JMESPFormTabObjects()
 	{
-		JMScriptInvokers.ESP_TRACKED_LIST_CHANGED.Remove( OnTrackedListChanged );
+		JMScriptInvokers.ESP_WIDGETS_CREATED.Remove( OnESPWidgetsCreated );
+		JMScriptInvokers.ESP_WIDGET_DESTROYED.Remove( OnESPWidgetDestroyed );
 	}
 
 	protected bool IsGroupShown( int group )
@@ -223,11 +221,19 @@ class JMESPFormTabObjects: JMFormTab
 			m_ESPSelectedObjects.UpdateScroller();
 	}
 
+	//! Focused, or the form asked for a repaint (UpdateActiveTab): redraw the tracked list.
+	override void OnUpdate()
+	{
+		RefreshList();
+	}
+
 	//! Built from the module's tracked list rather than from a walk of
 	//! JMESPMeta.s_JM_All: the linked list also holds metas queued for creation
 	//! and destruction, which are not on screen.
 	void RefreshList( bool force = false )
 	{
+		bool isDirty = m_Form.m_Module.GetTabObjectsListDirty();
+
 		if ( !m_ObjectList )
 			return;
 
@@ -245,6 +251,9 @@ class JMESPFormTabObjects: JMFormTab
 			RefreshObjectListSelectionHighlight();
 			return;
 		}
+
+		if ( !force && !isDirty )
+			return;
 
 		array< ref JMESPMeta > active = m_Form.m_Module.GetActiveObjects();
 
@@ -311,13 +320,15 @@ class JMESPFormTabObjects: JMFormTab
 		RefreshObjectCardTitle( names.Count() );
 
 		RefreshObjectListSelectionHighlight();
+
+		m_Form.m_Module.SetTabObjectsListDirty( false );
 	}
 
-	//! JMScriptInvokers.ESP_TRACKED_LIST_CHANGED: fired by JMESPModule.CreateNewWidgets()/
-	//! DestroyOldWidgets() only when a pass actually created or destroyed at least one
-	//! tracked object - replaces the old 500ms OnUpdate() poll. Deferred (not redrawn)
-	//! while this tab is not the focused one, so an offscreen list is never rebuilt.
-	void OnTrackedListChanged()
+	//! JMScriptInvokers.ESP_WIDGETS_CREATED: fired by JMESPModule.CreateNewWidgets()
+	//! only when a pass actually created at least one active ESP widget.
+	//! Deferred (not redrawn) while this tab is not the focused one.
+	//! TODO: This should replace OnUpdate/RefreshLIst once implemented but currently no priority
+	void OnESPWidgetsCreated( array<JMESPMeta> created )
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
@@ -327,32 +338,56 @@ class JMESPFormTabObjects: JMFormTab
 
 		if ( !IsFocused() )
 		{
-			m_ListDirty = true;
-
 			#ifdef JM_COT_ESP_DEBUG
 			#ifdef COT_DEBUGLOGS
-			Print( "  JMESPFormTabObjects::OnTrackedListChanged - unfocused, deferred (rows " + rowCountBefore + ")" );
+			Print( "  JMESPFormTabObjects::OnESPWidgetsCreated - unfocused, deferred (rows " + rowCountBefore + ")" );
 			#endif
 			#endif
 
 			return;
 		}
 
-		RefreshList();
+		//! TODO: Create only the list item(s) that came in this call, do not blindly redraw the whole list
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
-		Print( "  JMESPFormTabObjects::OnTrackedListChanged - rows " + rowCountBefore + " -> " + m_ObjectRows.Count() );
+		Print( "  JMESPFormTabObjects::OnESPWidgetsCreated - rows " + rowCountBefore + " -> " + m_ObjectRows.Count() );
+		#endif
+		#endif
+	}
+
+	//! JMScriptInvokers.ESP_WIDGET_DESTROYED: fired when an active ESP widget is destroyed.
+	//! Deferred (not redrawn) while this tab is not the focused one.
+	void OnESPWidgetDestroyed( JMESPMeta destroyed )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		int rowCountBefore = m_ObjectRows.Count();
+		#endif
+		#endif
+
+		if ( !IsFocused() )
+		{
+			#ifdef JM_COT_ESP_DEBUG
+			#ifdef COT_DEBUGLOGS
+			Print( "  JMESPFormTabObjects::OnESPWidgetDestroyed - unfocused, deferred (rows " + rowCountBefore + ")" );
+			#endif
+			#endif
+
+			return;
+		}
+
+		//! TODO: Destroy only the list item that came in this call, do not blindly redraw the whole list
+
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		Print( "  JMESPFormTabObjects::OnESPWidgetDestroyed - rows " + rowCountBefore + " -> " + m_ObjectRows.Count() );
 		#endif
 		#endif
 	}
 
 	override void OnFocus()
 	{
-		if ( !m_ListDirty )
-			return;
-
-		m_ListDirty = false;
 		RefreshList();
 	}
 
@@ -431,7 +466,7 @@ class JMESPFormTabObjects: JMFormTab
 		else
 		{
 			m_ObjectListLockButton.SetImage( JMConstants.Lucide( "lock-open" ) );
-			m_ObjectListLockButton.SetColor( JMTheme.TEXT_SECONDARY );
+			m_ObjectListLockButton.SetColor( JMTheme.TRANSPARENT );
 		}
 
 		RefreshObjectCardTitle( m_ObjectRows.Count() );
