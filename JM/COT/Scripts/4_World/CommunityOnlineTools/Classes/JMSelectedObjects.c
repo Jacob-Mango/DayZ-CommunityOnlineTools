@@ -158,7 +158,7 @@ class JMSelectedObjects
 		return false;
 	}
 
-	void SerializeObjects( ParamsWriteContext ctx )
+	void SerializeObjects( ParamsWriteContext ctx, out set< Object > localObjects = null )
 	{
 		set<ref JMSelectedObject> objects = new set<ref JMSelectedObject>;
 
@@ -166,7 +166,12 @@ class JMSelectedObjects
 		foreach (JMSelectedObject selectedObj: m_Objects)
 		{
 			if (!Class.CastTo(player, selectedObj.obj) || !player.GetIdentity())
-				objects.Insert(selectedObj);
+			{
+				if (selectedObj.networkLow || selectedObj.networkHigh)
+					objects.Insert(selectedObj);
+				else if (localObjects && selectedObj.obj)
+					localObjects.Insert(selectedObj.obj);
+			}
 		}
 		
 		int count = objects.Count();

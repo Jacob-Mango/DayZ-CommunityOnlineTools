@@ -672,7 +672,12 @@ class JMLoadoutModule: JMRenderableModuleBase
 		}
 
 		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
-			dataItem.m_Health 		= parent.GetHealth();
+		{
+			if ( g_Game.IsServer() )
+				dataItem.m_Health 		= parent.GetHealth();
+			else
+				dataItem.m_Health 		= parent.GetHealthLevelValue(parent.GetHealthLevel());
+		}
 
 		if (parent.HasQuantity())
 		{
@@ -716,7 +721,12 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if ( Class.CastTo( itembs, parent ) )
 		{
 			if (!itembs.IsInherited(Building) && !itembs.IsInherited(AdvancedCommunication))
-				dataItem.m_Health 		= itembs.GetHealth();
+			{
+				if ( g_Game.IsServer() )
+					dataItem.m_Health 		= itembs.GetHealth();
+				else
+					dataItem.m_Health 		= itembs.GetHealthLevelValue(parent.GetHealthLevel());
+			}
 
 			if (itembs.HasQuantity())
 			{

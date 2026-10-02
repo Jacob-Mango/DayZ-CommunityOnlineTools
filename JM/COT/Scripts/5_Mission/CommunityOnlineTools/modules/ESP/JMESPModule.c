@@ -519,14 +519,14 @@ class JMESPModule: JMRenderableModuleBase
 	//! gets its own RPC ids instead.
 	void SetAttachment( Object target, int slotId, string className )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_SetAttachment( slotId, className, target, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -554,14 +554,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void SetHealth( float health, string zone, Object target )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_SetHealth( health, zone, target, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -572,18 +572,17 @@ class JMESPModule: JMRenderableModuleBase
 
 	void SetOrientation( vector orientation, Object target )
 	{
-		if ( IsMissionOffline() )
+		if ( !target )
+			return;
+
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_SetOrientation( orientation, target, NULL );
 		} else
 		{
-			if ( !target )
-				return;
-
-			int netLow;
-			int netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -594,18 +593,17 @@ class JMESPModule: JMRenderableModuleBase
 
 	void SetPosition( vector position, Object target )
 	{
-		if ( IsMissionOffline() )
+		if ( !target )
+			return;
+
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_SetPosition( position, target, NULL );
 		} else
 		{
-			if ( !target )
-				return;
-
-			int netLow;
-			int netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -730,10 +728,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !input.LocalPress() ) return;
 		if ( !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_DELETE ) ) return;
 		Object obj = GetESPObjectAtCursor();
-		if ( !obj ) return;
-		int low, high;
-		obj.GetNetworkID( low, high );
-		DeleteObject( low, high );
+		if ( obj ) DeleteObject( obj );
 	}
 
 	void Input_ESP_HealCursor( UAInput input )
@@ -1948,15 +1943,14 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !target )
 			return;
 
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_RecordTransformHistory( previousPosition, previousOrientation, target, NULL );
 		} else
 		{
-			int netLow;
-			int netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -2223,14 +2217,25 @@ class JMESPModule: JMRenderableModuleBase
 		else
 			health = Math.Max( health, 0 );
 
-		float healthBefore = target.GetHealth( "", "" );
+		float healthBefore;
+
+		if ( g_Game.IsServer() )
+			healthBefore = target.GetHealth( "", "" );
+		else
+			healthBefore = target.GetHealthLevelValue(target.GetHealthLevel());
 
 		target.SetHealth( health );
 
 		//! Read back rather than taken from the request: redo replays what the
 		//! clamp above actually produced. A drag through many values merges into
 		//! one step (JMPropertyHistoryEntry.TryMerge).
-		JMActionHistory.Push( new JMHealthHistoryEntry( target, healthBefore, target.GetHealth( "", "" ) ), JMActionHistory.OwnerOf( ident ) );
+		float healthAfter;
+		if ( g_Game.IsServer() )
+			healthAfter = target.GetHealth( "", "" );
+		else
+			healthAfter = target.GetHealthLevelValue(target.GetHealthLevel());
+
+		JMActionHistory.Push( new JMHealthHistoryEntry( target, healthBefore, healthAfter ), JMActionHistory.OwnerOf( ident ) );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=health value=" + health );
 		SendWebhookColored( "Health", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health, JMConstants.WEBHOOK_COLOR_ESP );
@@ -2267,14 +2272,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void RemoveAttachment( Object target, int slotId )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_RemoveAttachment( slotId, target, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -2372,14 +2377,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void ObjectAction( int action, int ivalue, float fvalue, Object target )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_ObjectAction( action, ivalue, fvalue, target, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -3526,7 +3531,13 @@ class JMESPModule: JMRenderableModuleBase
 
 	void DeleteObject( Object target )
 	{
-		Exec_DeleteObject( target, NULL );
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
+			Exec_DeleteObject( target, NULL );
+		else
+			DeleteObject( netLow, netHigh );
 
 		m_RemoveDeleted = true;
 	}
@@ -3572,14 +3583,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void BaseBuilding_Build( BaseBuildingBase target, string part )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_BaseBuilding_Build( target, part, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -3631,14 +3642,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void BaseBuilding_Dismantle( BaseBuildingBase target, string part )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_BaseBuilding_Dismantle( target, part, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -3686,14 +3697,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void BaseBuilding_Repair( BaseBuildingBase target, string part )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_BaseBuilding_Repair( target, part, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -3748,14 +3759,14 @@ class JMESPModule: JMRenderableModuleBase
 	//! mean something different on every row of the menu.
 	void BaseBuilding_SetPartHealth( BaseBuildingBase target, string part, float health01 )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_BaseBuilding_SetPartHealth( target, part, health01, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -3821,14 +3832,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void Vehicle_Unstuck( Object target )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_Vehicle_Unstuck( target, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -3870,14 +3881,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void Vehicle_Refuel( Object target)
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_Vehicle_Refuel( target, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -3933,14 +3944,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	void Heal( Object target )
 	{
-		if ( IsMissionOffline() )
+		int netLow, netHigh;
+		target.GetNetworkID( netLow, netHigh );
+
+		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
 			Exec_Heal( target, NULL );
 		} else
 		{
-			int netLow, netHigh;
-			target.GetNetworkID( netLow, netHigh );
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( netLow );
 			rpc.Write( netHigh );
@@ -4155,7 +4166,10 @@ class JMESPModule: JMRenderableModuleBase
 		else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			JM_GetSelected().SerializeObjects( rpc );
+			set< Object> localObjects = new set< Object >;
+			JM_GetSelected().SerializeObjects( rpc, localObjects );
+			if ( localObjects.Count() > 0 )
+				Exec_DeleteAll(localObjects, GetPermissionsManager().GetClientPlayer());
 			rpc.Send( NULL, JMESPModuleRPC.DeleteAll, true, NULL );
 		}
 
@@ -4248,7 +4262,10 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( cursor );
-			JM_GetSelected().SerializeObjects( rpc );
+			set< Object> localObjects = new set< Object >;
+			JM_GetSelected().SerializeObjects( rpc, localObjects );
+			if ( localObjects.Count() > 0 )
+				Exec_MoveToCursor(cursor, localObjects, GetPermissionsManager().GetClientPlayer());
 			rpc.Send( NULL, JMESPModuleRPC.MoveToCursor, true, NULL );
 		}
 	}
