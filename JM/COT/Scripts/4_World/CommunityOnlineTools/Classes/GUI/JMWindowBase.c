@@ -883,6 +883,31 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		SyncMinimizeIcon( true );
 	}
 
+	void GetPos( out float x, out float y )
+	{
+		layoutRoot.GetPos( x, y );
+	}
+
+	/**
+	 * @brief Get the expanded size regardless if the window is minimized or not
+	 *
+	 * @param width
+	 * @param height
+	 *
+	 * @return true if expanded, false if minimized
+	 */
+	bool GetExpandedSize( out float width, out float height )
+	{
+		width = m_RestoreWidth;
+		height = m_RestoreHeight;
+
+		if ( IsMinimized() )
+			return false;
+
+		layoutRoot.GetSize( width, height );
+		return true;
+	}
+
 	//! Restore the window to its pre-minimized size with an animated transition.
 	void Restore()
 	{

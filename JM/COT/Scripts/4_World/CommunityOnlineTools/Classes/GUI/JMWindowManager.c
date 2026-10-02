@@ -34,8 +34,8 @@ class JMWindowManager
 			return;
 
 		float x, y, w, h;
-		window.GetLayoutRoot().GetPos( x, y );
-		window.GetLayoutRoot().GetSize( w, h );
+		window.GetPos( x, y );
+		window.GetExpandedSize( w, h );
 
 		m_LayoutStore.SetEntry( window.GetModule().GetModuleName(), window.GetName(), x, y, w, h );
 		JMWindowLayoutStore.Save( m_LayoutStore );
