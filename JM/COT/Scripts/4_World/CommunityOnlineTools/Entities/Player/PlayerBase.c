@@ -239,16 +239,6 @@ modded class PlayerBase
 		else if (CurrentActiveCamera && m_JMIsInvisible)
 		{
 			skip = true;
-
-			if (m_JM_SpectatedObject && m_JM_SpectatedObject.IsInherited(PlayerBase)
-			{
-				//! We want the spectated player's stance and stamina, so since we skip the vanilla commandhandler,
-				//! we need to explicitly update them
-				if (m_StanceIndicator)
-					m_StanceIndicator.Update();
-				if (m_StaminaHandler)
-					m_StaminaHandler.Update(pDt, pCurrentCommandID);
-			}
 		}
 
 		if (!skip)
@@ -257,10 +247,21 @@ modded class PlayerBase
 		}
 		else
 		{
-			//! Only handle inventory
+			//! Only select few things get updated if skipping vanilla commandhandler
+			//! (same order as vanilla)
 
 			GetDayZPlayerInventory().HandleInventory(pDt);
 			GetHumanInventory().Update(pDt);
+
+			if (m_JM_SpectatedObject && m_JM_SpectatedObject.IsInherited(PlayerBase))
+			{
+				//! We want the spectated player's stance and stamina, so since we skip the vanilla commandhandler,
+				//! we need to explicitly update them
+				if (m_StanceIndicator)
+					m_StanceIndicator.Update();
+				if (m_StaminaHandler)
+					m_StaminaHandler.Update(pDt, pCurrentCommandID);
+			}
 
 			UpdateDelete();
 		}
