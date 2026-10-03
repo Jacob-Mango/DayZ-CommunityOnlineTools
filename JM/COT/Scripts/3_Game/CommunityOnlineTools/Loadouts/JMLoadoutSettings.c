@@ -13,7 +13,7 @@ class JMLoadoutSettings
 		
 		string fileName;
 		FileAttr fileAttr;
-		FindFileHandle findFileHandle = FindFile( folder + "*" + ext, fileName, fileAttr, 0 );
+		FindFileHandle findFileHandle = CF.FindFileEx( folder + "*" + ext, fileName, fileAttr, 0 );
 		if ( findFileHandle )
 		{
 			bool isValid = true;
@@ -85,7 +85,7 @@ class JMLoadoutSettings
 		array< string > existingFiles = new array< string >;
 		string fileName;
 		FileAttr fileAttr;
-		FindFileHandle findFileHandle = FindFile( playerDir + "*" + JMConstants.EXT_LOADOUT, fileName, fileAttr, 0 );
+		FindFileHandle findFileHandle = CF.FindFileEx( playerDir + "*" + JMConstants.EXT_LOADOUT, fileName, fileAttr, 0 );
 		if ( findFileHandle )
 		{
 			while ( fileName != "" )

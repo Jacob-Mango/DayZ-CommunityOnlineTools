@@ -17,7 +17,7 @@ class JMCompensationsModule: JMRenderableModuleBase
 		// Enumerate player directories
 		string playerDir;
 		FileAttr playerAttr;
-		FindFileHandle playerHandle = FindFile( JMConstants.DIR_COMPENSATIONS + "*", playerDir, playerAttr, FindFileFlags.DIRECTORIES );
+		FindFileHandle playerHandle = CF.FindFileEx( JMConstants.DIR_COMPENSATIONS + "*", playerDir, playerAttr, FindFileFlags.DIRECTORIES );
 		if ( playerHandle )
 		{
 			while ( playerDir != "" )
@@ -30,7 +30,7 @@ class JMCompensationsModule: JMRenderableModuleBase
 					// Enumerate loadout files in player directory
 					string fileName;
 					FileAttr fileAttr;
-					FindFileHandle fileHandle = FindFile( fullPlayerDir + "*" + JMConstants.EXT_LOADOUT, fileName, fileAttr, 0 );
+					FindFileHandle fileHandle = CF.FindFileEx( fullPlayerDir + "*" + JMConstants.EXT_LOADOUT, fileName, fileAttr, 0 );
 					if ( fileHandle )
 					{
 						while ( fileName != "" )

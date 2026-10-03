@@ -933,7 +933,7 @@ class JMPermissionManager
 	{
 		string sName = "";
 		FileAttr oFileAttr = FileAttr.INVALID;
-		FindFileHandle oFileHandle = FindFile( JMConstants.DIR_ROLES + "*" + JMConstants.EXT_ROLE, sName, oFileAttr, FindFileFlags.ALL );
+		FindFileHandle oFileHandle = CF.FindFileEx( JMConstants.DIR_ROLES + "*" + JMConstants.EXT_ROLE, sName, oFileAttr, FindFileFlags.ALL );
 
 		if ( sName != "" )
 		{

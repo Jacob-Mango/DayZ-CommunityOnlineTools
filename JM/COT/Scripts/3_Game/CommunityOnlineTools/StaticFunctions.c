@@ -464,7 +464,7 @@ static array< string > FindFilesInLocation( string folder )
 	array< string > files = new array< string >;
 	string fileName;
 	FileAttr fileAttr;
-	FindFileHandle findFileHandle = FindFile( folder + "*", fileName, fileAttr, 0 );
+	FindFileHandle findFileHandle = CF.FindFileEx( folder + "*", fileName, fileAttr, 0 );
 	if ( findFileHandle )
 	{
 		if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )

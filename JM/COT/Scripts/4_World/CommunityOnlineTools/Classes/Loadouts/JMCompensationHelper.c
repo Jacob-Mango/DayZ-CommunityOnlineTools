@@ -111,7 +111,7 @@ class JMCompensationHelper
 		array< string > existingFiles = new array< string >;
 		string fileName;
 		FileAttr fileAttr;
-		FindFileHandle findFileHandle = FindFile( playerDir + "*.json", fileName, fileAttr, 0 );
+		FindFileHandle findFileHandle = CF.FindFileEx( playerDir + "*.json", fileName, fileAttr, 0 );
 		if ( findFileHandle )
 		{
 			while ( fileName != "" )
