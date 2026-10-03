@@ -626,7 +626,11 @@ class JMCameraTravelPanel
 		}
 
 		// Apply waypoint effects instantly (no lerp)
-		g_Game.SetEVValue( wp.Exposure );
+		PlayerBase player = PlayerBase.Cast( g_Game.GetPlayer() );
+
+		if ( !player || !player.COTHasAdminNVG() )
+			g_Game.SetEVValue( wp.Exposure );
+
 		PPEffects.SetVignette( wp.Vignette, 0, 0, 0, 0 );
 		m_Form.GetModule().m_Exposure = wp.Exposure;
 		m_Form.GetModule().m_Vignette = wp.Vignette;

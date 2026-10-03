@@ -182,8 +182,11 @@ class JMCameraModule: JMRenderableModuleBase
 				CurrentActiveCamera.SetFOV( m_CurrentFOV );
 			}
 
-			// Apply exposure (EV) and vignette unconditionally
-			g_Game.SetEVValue( m_Exposure );
+			PlayerBase player = PlayerBase.Cast( g_Game.GetPlayer() );
+
+			if ( !player || !player.COTHasAdminNVG() )
+				g_Game.SetEVValue( m_Exposure );
+
 			PPEffects.SetVignette( m_Vignette, 0, 0, 0, 0 );
 
 			if ( m_DOF )
@@ -216,7 +219,6 @@ class JMCameraModule: JMRenderableModuleBase
 			{
 				m_UpdateTime = 0.0;
 
-				auto player = PlayerBase.Cast(g_Game.GetPlayer());
 				if (player && ((CurrentActiveCamera.IsInherited(JMCinematicCamera) && m_EnableFullmapCamera) || (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))))
 				{
 					if (m_EnableFullmapCamera && player.GetCommand_Vehicle())
@@ -500,8 +502,12 @@ class JMCameraModule: JMRenderableModuleBase
 				return;
 		}
 
+		PlayerBase player = PlayerBase.Cast( g_Game.GetPlayer() );
+
+		if ( !player || !player.COTHasAdminNVG() )
+			g_Game.SetEVValue( 0 );
+
 		PPEffects.ResetDOFOverride();
-		g_Game.SetEVValue( 0 );
 		PPEffects.SetVignette( 0, 0, 0, 0, 0 );
 
 		if ( g_Game.GetPlayer() )
@@ -509,8 +515,7 @@ class JMCameraModule: JMRenderableModuleBase
 			g_Game.GetPlayer().GetInputController().SetDisabled( false );
 		}
 
-		PlayerBase player;
-		if (waitForPlayerIdleTimeout && Class.CastTo(player, g_Game.GetPlayer()))
+		if (waitForPlayerIdleTimeout && player)
 		{
 			player.COT_EnableBonePositionUpdate(true);
 			Client_Check_Leave(player, waitForPlayerIdleTimeout);

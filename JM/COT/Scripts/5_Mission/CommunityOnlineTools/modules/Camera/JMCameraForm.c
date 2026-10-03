@@ -462,7 +462,11 @@ class JMCameraForm: JMFormBase
 		m_Module.m_ShakeIntensity = 0;
 		m_Module.m_ShakeFrequency = 1.0;
 
-		g_Game.SetEVValue( 0 );
+		PlayerBase player = PlayerBase.Cast( g_Game.GetPlayer() );
+
+		if ( !player || !player.COTHasAdminNVG() )
+			g_Game.SetEVValue( 0 );
+
 		PPEffects.SetVignette( 0, 0, 0, 0, 0 );
 		PPEffects.ResetDOFOverride();
 		OnSliderUpdate();
