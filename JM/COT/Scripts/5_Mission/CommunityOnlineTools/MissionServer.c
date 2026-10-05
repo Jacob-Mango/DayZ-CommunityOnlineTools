@@ -9,6 +9,8 @@ modded class MissionServer
 		
 		if ( !g_cotBase )
 			g_cotBase = new CommunityOnlineTools;
+		if ( !g_cotGame )
+			g_cotGame = g_cotBase;
 
 		CF_Modules<JMPlayerModule>.Get(m_JM_PlayerModule);
 	}

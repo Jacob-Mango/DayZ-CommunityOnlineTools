@@ -16,6 +16,8 @@ modded class MissionGameplay
 	{
 		if ( !g_cotBase )
 			g_cotBase = new CommunityOnlineTools;
+		if ( !g_cotGame )
+			g_cotGame = g_cotBase;
 	}
 
 	void ~MissionGameplay()

@@ -3,16 +3,12 @@
 //! in exact sync with that file's block; both must change together.
 #define COT_DEBUGLOGS
 
-class CommunityOnlineToolsBase
+class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 {
 	static string s_HypeTrain_Loco_ClsName = "HypeTrain_LocomotiveBase";
 	static typename s_HypeTrain_Loco_Type = s_HypeTrain_Loco_ClsName.ToType();
 	protected bool m_Loaded;
-	protected bool m_IsActive;
-	protected bool m_IsOpen;
-	protected string m_FileLogName;
 	protected JMWebhookModule m_Webhook;
-	protected ref map<string, bool> m_ActiveGUIDs = new map<string, bool>;
 
 	//! Below this gap between two accepted SetOpen() calls, a new request is
 	//! dropped instead of applied. Two independent input bindings reach this
@@ -146,30 +142,6 @@ class CommunityOnlineToolsBase
 		transform[3] = position;
 	}
 
-	bool IsActive()
-	{
-		return m_IsActive;
-	}
-
-	bool IsActive(Man player)
-	{
-		return IsActive(player.GetIdentity());
-	}
-
-	bool IsActive(PlayerIdentity identity)
-	{
-		return IsActive(identity.GetId());
-	}
-
-	bool IsActive(string guid)
-	{
-	#ifdef SERVER
-		return m_ActiveGUIDs[guid];
-	#else
-		return IsActive();
-	#endif
-	}
-
 	static bool IsFiniteFloat(float value)
 	{
 		if (value != value)
@@ -195,11 +167,6 @@ class CommunityOnlineToolsBase
 			return true;
 
 		return false;
-	}
-
-	bool IsOpen()
-	{
-		return m_IsOpen;
 	}
 
 	static bool IsValidWorldPosition(vector pos)
@@ -339,7 +306,7 @@ class CommunityOnlineToolsBase
 			if ( !JMPermissions.Has( JMConstants.PERM_COT_VIEW ) )
 				return;
 
-			if ( !GetCommunityOnlineToolsBase().IsActive() )
+			if ( !IsActive() )
 			{
 				ShowInactiveNotification( "STR_COT_INPUT_TOGGLE_SIDEBAR" );
 				return;
@@ -359,23 +326,6 @@ class CommunityOnlineToolsBase
 		{
 			JMScriptInvokers.COT_ON_CLOSE.Invoke();
 		}
-	}
-
-	void CreateNewLog()
-	{
-		if ( !FileExist( JMConstants.DIR_LOGS ) )
-			MakeDirectory( JMConstants.DIR_LOGS );
-
-		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + JMDate.Now().ToString( "YYYY-MM-DD-hh-mm-ss" ) + JMConstants.EXT_LOG;
-		int fileLog = OpenFile( m_FileLogName, FileMode.WRITE );
-
-		if ( fileLog != 0 )
-			CloseFile( fileLog );
-	}
-
-	void CloseLog()
-	{
-		m_FileLogName = "";
 	}
 
 	void OnStart()
@@ -483,49 +433,11 @@ class CommunityOnlineToolsBase
 		SetOpen(!m_IsOpen);
 	}
 
-	void LogServer( string text )
-	{
-		if ( g_Game.IsServer() )
-		{
-			g_Game.AdminLog( "[COT] " + text );
-		}
-
-		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
-		if ( fileLog != 0 )
-		{
-			FPrintln( fileLog, "[COT " + JMDate.Now().ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
-			CloseFile( fileLog );
-		}
-	}
-
 	void Log( JMPlayerInstance logInstacPlyer, string text )
 	{
 		if ( g_Game.IsMultiplayer() )
 		{
 			text = "" + logInstacPlyer.GetSteam64ID() + ": " + text;
-		} else
-		{
-			text = "Offline: " + text;
-		}
-
-		if ( g_Game.IsServer() )
-		{
-			g_Game.AdminLog( "[COT] " + text );
-		}
-
-		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
-		if ( fileLog != 0 )
-		{
-			FPrintln( fileLog, "[COT " + JMDate.Now().ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
-			CloseFile( fileLog );
-		}
-	}
-
-	void Log( PlayerIdentity logIdentPlyer, string text )
-	{
-		if ( g_Game.IsMultiplayer() && logIdentPlyer )
-		{
-			text = "" + logIdentPlyer.GetPlainId() + ": " + text;
 		} else
 		{
 			text = "Offline: " + text;

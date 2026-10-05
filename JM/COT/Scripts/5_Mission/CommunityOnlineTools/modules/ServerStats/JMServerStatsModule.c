@@ -160,7 +160,11 @@ class JMServerStatsModule : JMModuleBase
 
 	protected void RecordFrame( float timeslice )
 	{
-		if ( timeslice <= 0 || timeslice > FRAME_TIME_MAX )
+		//! @note a timeslice of 0 is a valid frame that must be counted
+		//! else reported avg FPS will be half of actual value if server
+		//! is running at high (> 1000) fps
+
+		if ( timeslice > FRAME_TIME_MAX )
 			return;
 
 		m_Samples[m_SampleNext] = timeslice;
@@ -209,14 +213,46 @@ class JMServerStatsModule : JMModuleBase
 		array< float > slowest = new array< float >;
 		array< float > fastest = new array< float >;
 		float total = 0;
+		int itcount;
 
-		for ( int i = 0; i < count; i++ )
+		for ( int i = 0; i < count; ++i )
 		{
+			++itcount;
 			float sample = m_Samples[i];
+
+			//! zero frametime entries would break our 1% fastest frames display,
+			//! so average frametime over next frame(s)
+			if ( sample == 0 )
+			{
+				float next = 0;
+
+				for ( int j = i + 1; j < count; ++j )
+				{
+					++itcount;
+					next += m_Samples[j];
+
+					if ( next > 0 )
+					{
+						int window = j - i + 1;
+						sample = next / window;
+
+						for ( int k = i; k < j + 1; ++k )
+						{
+							++itcount;
+							m_Samples[k] = sample;
+						}
+
+						break;
+					}
+				}
+			}
+
 			total += sample;
 
 			InsertDescending( slowest, sample, tail );
-			InsertAscending( fastest, sample, tail );
+
+			if ( sample )
+				InsertAscending( fastest, sample, tail );
 		}
 
 		float average = 0;
@@ -235,7 +271,7 @@ class JMServerStatsModule : JMModuleBase
 		if ( m_DiagCounter >= DIAG_PRINT_EVERY )
 		{
 			m_DiagCounter = 0;
-			Print( "[COT ServerStats] frames=" + count.ToString() + " tail=" + tail.ToString() + " avg=" + average.ToString() + " low1=" + low.ToString() + " high1=" + high.ToString() );
+			PrintFormat( "[COT ServerStats] frames=%1 tail=%2 avg=%3 low1=%4 high1=%5 itcount=%6", count, tail, average, low, high, itcount );
 		}
 		#endif
 
@@ -343,7 +379,9 @@ class JMServerStatsModule : JMModuleBase
 		//! An offline / listen host is its own client: no packet, write through.
 		if ( !IsMissionOffline() )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+			TStringArray activeGUIDs = GetCOT().GetActiveGUIDs();
+
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( activeGUIDs );
 
 			foreach ( JMPlayerInstance player: players )
 			{
@@ -355,9 +393,6 @@ class JMServerStatsModule : JMModuleBase
 
 				PlayerIdentity identity = player.PlayerObject.GetIdentity();
 				if ( !identity )
-					continue;
-
-				if ( !JMPermissions.Has( JMConstants.PERM_COT_VIEW, identity ) )
 					continue;
 
 				//! Seeing COT is not the same as being allowed to know the
@@ -378,9 +413,9 @@ class JMServerStatsModule : JMModuleBase
 				//! by one rather than as an array so the reader can stop at the
 				//! count it already has, and so an unauthorised client is sent
 				//! nothing at all rather than an empty container.
-				for ( int g = 0; g < flaggedForThem; g++ )
+				foreach ( string flaggedGuid: flaggedGuids )
 				{
-					rpc.Write( flaggedGuids.Get( g ) );
+					rpc.Write( flaggedGuid );
 				}
 
 				rpc.Send( NULL, JMServerStatsModuleRPC.Stats, false, identity );

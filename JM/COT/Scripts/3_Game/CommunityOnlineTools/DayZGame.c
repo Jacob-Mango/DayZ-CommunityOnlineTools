@@ -16,7 +16,7 @@ modded class DayZGame
 		if ( !doSim )
 			return;
 
-		if ( JMStatics.SERVER_STATS_TICK )
+		if ( JMStatics.SERVER_STATS_TICK && g_cotGame && g_cotGame.ActiveCount() > 0 )
 			JMStatics.SERVER_STATS_TICK.Invoke( timeslice );
 	}
 }
