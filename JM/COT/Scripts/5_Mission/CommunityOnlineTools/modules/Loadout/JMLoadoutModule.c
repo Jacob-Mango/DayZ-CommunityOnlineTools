@@ -661,8 +661,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if (Class.CastTo(bb, parent))
 		{
 			item.m_ConstructionParts = new TStringArray;
-			array<ConstructionPart> parts = bb.GetConstruction().GetConstructionParts().GetValueArray();
-			foreach (ConstructionPart part: parts)
+			map<string, ref ConstructionPart> parts = bb.GetConstruction().GetConstructionParts();
+			foreach (string partName, ConstructionPart part: parts)
 			{
 				if (part.m_IsBuilt)
 				{

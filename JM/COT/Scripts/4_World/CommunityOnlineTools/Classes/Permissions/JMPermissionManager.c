@@ -131,10 +131,15 @@ class JMPermissionManager
 	{
 		Assert_Null( Players );
 		
-		if ( guidsGetPlayers == NULL || !g_Game.IsMultiplayer() )
-			return Players.GetValueArray();
+		array< JMPlayerInstance > players = {};
 
-		array< JMPlayerInstance > players = new array< JMPlayerInstance >;
+		if ( guidsGetPlayers == NULL || !g_Game.IsMultiplayer() )
+		{
+			foreach ( string guid, JMPlayerInstance player: Players )
+				players.Insert( player );
+
+			return players;
+		}
 
 		for ( int i = 0; i < guidsGetPlayers.Count(); i++ )
 		{
@@ -183,7 +188,8 @@ class JMPermissionManager
 		}
 		else
 		{
-			roles.Copy( Roles.GetValueArray() );
+			foreach (JMRole role: Roles)
+				roles.Insert(role);
 		}
 
 	#ifdef COT_ROLES_DEBUG

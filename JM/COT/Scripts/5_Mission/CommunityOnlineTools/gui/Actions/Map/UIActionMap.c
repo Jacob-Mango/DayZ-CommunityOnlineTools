@@ -650,10 +650,8 @@ class UIActionMap: UIActionBase
 				m_TickProbeA = probeA;
 				m_TickProbeB = probeB;
 
-				array<string> ids = m_Widgets.GetKeyArray();
-
-				foreach ( string id: ids )
-					m_Widgets.Get( id ).UpdateScreenPosition( m_Map );
+				foreach ( string id, JMUIActionMapMarker marker: m_Widgets )
+					marker.UpdateScreenPosition( m_Map );
 			}
 		}
 
