@@ -47,12 +47,12 @@ class JMServerStatsModule : JMModuleBase
 	protected static const float FRAME_TIME_MAX = 1.0;
 
 	//! Server-side ring buffer of frame times in seconds.
-	protected ref array< float > m_Samples;
+	protected float m_Samples[1024];  //! MUST match SAMPLE_WINDOW
 	protected int m_SampleNext;
 	protected bool m_SampleWrapped;
 	protected float m_BroadcastAccumulator;
 
-	//! Frame cap read once from serverDZ.cfg, 0 when the server is uncapped.
+	//! Frame cap read once from cmdline, 0 when the server is uncapped.
 	protected int m_MaxFPS;
 
 	#ifdef DIAG
@@ -63,8 +63,6 @@ class JMServerStatsModule : JMModuleBase
 
 	void JMServerStatsModule()
 	{
-		m_Samples = new array< float >;
-
 		//! DayZGame.OnUpdate's unthrottled per-tick hook - see
 		//! JMStatics.SERVER_STATS_TICK's own comment. The module is a
 		//! singleton for the session, so this runs once; no matching
@@ -82,7 +80,7 @@ class JMServerStatsModule : JMModuleBase
 	{
 		guids.Clear();
 
-		if ( !IsMissionHost() )
+		if ( !g_Game.IsServer() )
 			return;
 
 		JMAntiCheatModule antiCheat = CF_Modules<JMAntiCheatModule>.Get();
@@ -125,29 +123,14 @@ class JMServerStatsModule : JMModuleBase
 		JMServerStats.Clear();
 		JMAntiCheatStatus.Clear();
 
-		if ( !IsMissionHost() )
+		if ( !g_Game.IsServer() )
 			return;
-
-		ResetSamples();
 
 		m_BroadcastAccumulator = 0;
 
-		//! serverDZ.cfg is the only place a frame cap is visible to script - the
-		//! -limitFPS startup parameter is not readable from here. Absent key
-		//! returns 0, which is exactly the "uncapped" value the UI wants.
-		m_MaxFPS = g_Game.ServerConfigGetInt( "limitFPS" );
-	}
-
-	protected void ResetSamples()
-	{
-		m_Samples.Clear();
-		m_SampleNext = 0;
-		m_SampleWrapped = false;
-
-		for ( int i = 0; i < SAMPLE_WINDOW; i++ )
-		{
-			m_Samples.Insert( 0 );
-		}
+		string limitFPS;
+		if (GetCLIParam( "limitFPS", limitFPS ))
+			m_MaxFPS = limitFPS.ToInt();
 	}
 
 	// -------------------------------------------------------------------------
@@ -160,7 +143,7 @@ class JMServerStatsModule : JMModuleBase
 	// -------------------------------------------------------------------------
 	void Tick( float timeslice )
 	{
-		if ( !IsMissionHost() )
+		if ( !g_Game.IsServer() )
 			return;
 
 		RecordFrame( timeslice );
@@ -180,14 +163,7 @@ class JMServerStatsModule : JMModuleBase
 		if ( timeslice <= 0 || timeslice > FRAME_TIME_MAX )
 			return;
 
-		//! The ring is sized here rather than trusting OnMissionLoaded to have
-		//! run first. Set() past the end of an Enforce array is not a script
-		//! error, it is a native out-of-bounds write, so the one ordering
-		//! assumption worth not making is this one.
-		if ( m_Samples.Count() != SAMPLE_WINDOW )
-			ResetSamples();
-
-		m_Samples.Set( m_SampleNext, timeslice );
+		m_Samples[m_SampleNext] = timeslice;
 
 		m_SampleNext++;
 
@@ -236,7 +212,7 @@ class JMServerStatsModule : JMModuleBase
 
 		for ( int i = 0; i < count; i++ )
 		{
-			float sample = m_Samples.Get( i );
+			float sample = m_Samples[i];
 			total += sample;
 
 			InsertDescending( slowest, sample, tail );
