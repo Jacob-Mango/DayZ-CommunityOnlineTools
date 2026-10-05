@@ -111,7 +111,8 @@ class CommunityOnlineToolsGame
 }
 
 
-static ref CommunityOnlineToolsGame g_cotGame;
+//! @note deliberately not ref! When g_cotBase (instantiated in 5_Misson) get de-ref'd, this must become NULL
+static CommunityOnlineToolsGame g_cotGame;
 
 static CommunityOnlineToolsGame GetCOTGame()
 {
