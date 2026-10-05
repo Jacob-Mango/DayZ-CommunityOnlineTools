@@ -260,7 +260,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		if ( GetPermissionsManager().RoleExists( name ) )
 		{
 			if ( ident )
-				COTCreateNotification( ident, new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_ROLE_ALREADY_EXISTS_NOTIFICATION", name ) );
+				COTCreateNotification( ident, new StringLocaliser( "STR_COT_ROLEMANAGER_MODULE_ROLE_ALREADY_EXISTS_NOTIFICATION", name ) );
 			return;
 		}
 
@@ -280,14 +280,14 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		if ( name == "everyone" )
 		{
 			if ( ident )
-				COTCreateNotification( ident, new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_CANNOT_DELETE_EVERYONE_NOTIFICATION" ) );
+				COTCreateNotification( ident, new StringLocaliser( "STR_COT_ROLEMANAGER_MODULE_CANNOT_DELETE_EVERYONE_NOTIFICATION" ) );
 			return;
 		}
 
 		if ( !GetPermissionsManager().RoleExists( name ) )
 		{
 			if ( ident )
-				COTCreateNotification( ident, new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_ROLE_NOT_FOUND_NOTIFICATION", name ) );
+				COTCreateNotification( ident, new StringLocaliser( "STR_COT_ROLEMANAGER_MODULE_ROLE_NOT_FOUND_NOTIFICATION", name ) );
 			return;
 		}
 

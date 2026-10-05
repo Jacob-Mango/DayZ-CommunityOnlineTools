@@ -279,7 +279,7 @@ class JMTeleportLocationPopup
 
 		if ( name == "" )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_TELEPORT_MODULE_TELEPORT_ERROR_NONAME" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_TELEPORT_MODULE_TELEPORT_ERROR_NONAME" ) );
 			return;
 		}
 
@@ -287,7 +287,7 @@ class JMTeleportLocationPopup
 
 		if ( category == "" )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_TELEPORT_MODULE_PICK_OR_NAME_CATEGORY" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_TELEPORT_MODULE_PICK_OR_NAME_CATEGORY" ) );
 			return;
 		}
 

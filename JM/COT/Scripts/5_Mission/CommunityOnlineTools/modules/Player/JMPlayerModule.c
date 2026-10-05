@@ -781,7 +781,7 @@ class JMPlayerModule: JMRenderableModuleBase
 				SendWebhookColored( "Notif", instance, "Sent notification to " + player.FormatSteamWebhook() + ": " + NotifText, JMConstants.WEBHOOK_COLOR_INFO );
 			}
 
-			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED, 10, player.PlayerObject.GetIdentity() );
+			NotificationSystem.Create( new StringLocaliser( "STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED, 10, player.PlayerObject.GetIdentity() );
 		}
 	}
 
@@ -1307,20 +1307,20 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionOffline() )
 		{
-			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE"));
+			COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_SPECTATE_OFFLINE_UNAVAILABLE"));
 			return false;
 		}
 		else
 		{
 			if (!JMPermissions.Has(JMConstants.PERM_PLAYER_SPECTATE))
 			{
-				COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_NO_PERMISSION"));
+				COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_NO_PERMISSION"));
 				return false;
 			}
 
 			if (GetPlayer().GetCommand_Vehicle())
 			{
-				COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_BLOCKED_VEHICLE"));
+				COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_SPECTATE_BLOCKED_VEHICLE"));
 				return false;
 			}
 
@@ -1399,7 +1399,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( playerSpectator == spectateObject )
 		{
-			COTCreateNotification(ident, new StringLocaliser("#STR_COT_PLAYER_MODULE_CANT_SPECTATE_SELF"));
+			COTCreateNotification(ident, new StringLocaliser("STR_COT_PLAYER_MODULE_CANT_SPECTATE_SELF"));
 			return;
 		}
 
@@ -1720,9 +1720,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 
 		if (waitForPlayerIdleTimeout > 1000)
-			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_STOPPING"));
+			COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_SPECTATE_STOPPING"));
 		else
-			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_STOPPED"));
+			COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_SPECTATE_STOPPED"));
 
 		CF_Log.Debug("JMPlayerModule::Client_EndSpectating - stopped spectating");
 	}
@@ -1737,7 +1737,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			CF_Log.Debug("JMPlayerModule::Client_Check_EndSpectating - player idle");
 			playerSpectator.COT_EnableBonePositionUpdate(false);
-			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_PLAYER_MODULE_SPECTATE_STOPPED_HINT"), "set:ccgui_enforce image:HudBuild", 5);
+			COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_SPECTATE_STOPPED_HINT"), "set:ccgui_enforce image:HudBuild", 5);
 
 			Client_EndSpectating_Finish(true);
 		}
@@ -2175,7 +2175,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 
 		if (cantBanAdmin)
-			COTCreateNotification(ident, new StringLocaliser("#STR_COT_PLAYER_MODULE_CANT_BAN_ADMINS"));
+			COTCreateNotification(ident, new StringLocaliser("STR_COT_PLAYER_MODULE_CANT_BAN_ADMINS"));
 
 		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
 	}

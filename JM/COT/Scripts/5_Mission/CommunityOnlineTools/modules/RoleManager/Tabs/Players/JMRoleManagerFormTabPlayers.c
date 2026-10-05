@@ -467,7 +467,7 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 
 		action.AnimateSpin( 1.0 );
 
-		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_SAVED_ROLE_NOTIFICATION", m_SelectedPlayerName ) );
+		COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_ROLEMANAGER_MODULE_SAVED_ROLE_NOTIFICATION", m_SelectedPlayerName ) );
 	}
 
 	//! Leaving this mode drops its selection - the other mode starts with none.

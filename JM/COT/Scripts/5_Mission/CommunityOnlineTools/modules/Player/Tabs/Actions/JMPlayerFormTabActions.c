@@ -574,7 +574,7 @@ class JMPlayerFormTabActions: JMFormTab
 
 	void KickPlayerSelfConfirm(JMConfirmation confirmation = NULL)
 	{
-		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_PLAYER_MODULE_CANT_KICK_SELF" ) );
+		COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_PLAYER_MODULE_CANT_KICK_SELF" ) );
 	}
 
 	void KickPlayerMulti(JMConfirmation confirmation)
@@ -607,7 +607,7 @@ class JMPlayerFormTabActions: JMFormTab
 
 	void BanPlayerSelfConfirm(JMConfirmation confirmation)
 	{
-		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_PLAYER_MODULE_CANT_BAN_SELF" ) );
+		COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_PLAYER_MODULE_CANT_BAN_SELF" ) );
 	}
 
 	void BanPlayerMulti(JMConfirmation confirmation)

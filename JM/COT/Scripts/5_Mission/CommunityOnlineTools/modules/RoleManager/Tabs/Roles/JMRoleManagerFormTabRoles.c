@@ -346,7 +346,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 
 		action.AnimateSpin( 1.0 );
 
-		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_SAVED_PERMISSIONS_NOTIFICATION", m_SelectedRole ) );
+		COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_ROLEMANAGER_MODULE_SAVED_PERMISSIONS_NOTIFICATION", m_SelectedRole ) );
 	}
 
 	protected void MarkRolePermChanged()

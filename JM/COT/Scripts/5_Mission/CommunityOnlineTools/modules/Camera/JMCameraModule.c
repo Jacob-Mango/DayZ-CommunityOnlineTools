@@ -815,19 +815,19 @@ class JMCameraModule: JMRenderableModuleBase
 			{
 				case JMCamera3rdPersonMode.OFF:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DEFAULT;
-					COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_CAMERA_MODULE_3RD_DEFAULT"));
+					COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_CAMERA_MODULE_3RD_DEFAULT"));
 					break;
 				case JMCamera3rdPersonMode.DEFAULT:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DOLLY;
-					COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_CAMERA_MODULE_3RD_DOLLY"));
+					COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_CAMERA_MODULE_3RD_DOLLY"));
 					break;
 				case JMCamera3rdPersonMode.DOLLY:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.AUTO;
-					COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_CAMERA_MODULE_3RD_AUTO"));
+					COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_CAMERA_MODULE_3RD_AUTO"));
 					break;
 				case JMCamera3rdPersonMode.AUTO:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.OFF;
-					COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_CAMERA_MODULE_3RD_1ST"));
+					COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_CAMERA_MODULE_3RD_1ST"));
 					break;
 			}
 		}
@@ -855,7 +855,7 @@ class JMCameraModule: JMRenderableModuleBase
 			return;
 
 		m_CameraData.SaveWaypoints( name, m_Waypoints );
-		COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_CAMERA_MODULE_PATH_SAVED", name));
+		COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_CAMERA_MODULE_PATH_SAVED", name));
 	}
 
 	void LoadPath( string name )
@@ -890,7 +890,7 @@ class JMCameraModule: JMRenderableModuleBase
 			m_Waypoints.Insert( copy );
 		}
 
-		COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_CAMERA_MODULE_PATH_LOADED", name));
+		COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_CAMERA_MODULE_PATH_LOADED", name));
 	}
 
 	void DeletePath( string name )
@@ -909,7 +909,7 @@ class JMCameraModule: JMRenderableModuleBase
 			return;
 
 		m_CameraData.SaveBookmark( name, position );
-		COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_CAMERA_MODULE_BOOKMARK_SAVED", name));
+		COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_CAMERA_MODULE_BOOKMARK_SAVED", name));
 	}
 
 	void TeleportToBookmark( string name )

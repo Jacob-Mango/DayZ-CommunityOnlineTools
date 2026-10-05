@@ -761,7 +761,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		if ( m_ListClasses.Count() == 0 )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_OBJECT_MODULE_EXPORT_EMPTY" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_OBJECT_MODULE_EXPORT_EMPTY" ) );
 			return;
 		}
 
@@ -858,7 +858,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		if ( selection == "" )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_OBJECT_MODULE_NO_SELECTION" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_OBJECT_MODULE_NO_SELECTION" ) );
 			return;
 		}
 
