@@ -469,8 +469,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 					return;
 			} else
 			{
-				vector discard;
-				if ( !ctx.Read( discard ) )
+				float x, y, z;
+				if ( !ctx.Read( x ) || !ctx.Read( y ) || !ctx.Read( z ) )
 					return;
 			}
 		}
