@@ -1745,9 +1745,6 @@ class JMPlayerFormTabInventory: JMFormTab
 			if ( child.Health > 0 )
 				childEntity.SetHealth( "", "", child.Health );
 
-			if ( child.QuantityMax > 0 && Class.CastTo( asItem, childEntity ) )
-				asItem.SetQuantity( child.Quantity, false );
-
 			FinishLocalPreview( childEntity );
 
 			spawned.Insert( i, childEntity );
