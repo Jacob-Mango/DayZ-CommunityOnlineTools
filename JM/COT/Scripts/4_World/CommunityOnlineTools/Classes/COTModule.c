@@ -545,9 +545,6 @@ class COTModule : JMModuleBase
 		Print( "+COTModule::OnInvokeConnect - " + identity.GetId() );
 		#endif
 
-		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
-
 		auto roles = GetPermissionsManager().Roles;
 		foreach ( string roleName, JMRole role: roles)
 		{
@@ -593,9 +590,6 @@ class COTModule : JMModuleBase
 		Print( "+COTModule::OnClientReconnect - " + identity.GetId() );
 		#endif
 
-		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
-
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 
 		if ( !Assert_Null( instance ) )
@@ -617,9 +611,6 @@ class COTModule : JMModuleBase
 		Print( "+COTModule::OnClientLogout - " + identity.GetId() );
 		#endif
 
-		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
-
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 
 		if ( !Assert_Null( instance ) )
@@ -640,8 +631,6 @@ class COTModule : JMModuleBase
 		#ifdef COT_DEBUGLOGS
 		Print( "+COTModule::OnClientDisconnect - " + uid );
 		#endif
-
-		Assert_Null( GetPermissionsManager() );
 
 		//! Before OnClientDisconnected below, which drops the instance: closing
 		//! the session afterwards would have nothing left to close.
@@ -685,10 +674,6 @@ class COTModule : JMModuleBase
 		#ifdef COT_DEBUGLOGS
 		Print( "+COTModule::OnClientLogoutCancelled" );
 		#endif
-
-		Assert_Null( GetPermissionsManager() );
-		Assert_Null( player );
-		Assert_Null( player.GetIdentity() );
 
 		#ifdef COT_DEBUGLOGS
 		Print( "  COTModule::OnClientLogoutCancelled - " + player.GetIdentity().GetId() );

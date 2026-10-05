@@ -183,8 +183,6 @@ class JMPlayerInstance : Managed
 	JMPermissionType GetRawPermissionType( string permission )
 	{
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-		Assert_Null( m_RootPermission );
-
 		JMPermissionType permType;
 		m_RootPermission.HasPermission( permission, permType );
 		return permType;
@@ -291,8 +289,6 @@ class JMPlayerInstance : Managed
 	bool HasOwnPermission( string permission )
 	{
 	#ifdef JMPermissionType
-		Assert_Null( m_RootPermission );
-
 		JMPermissionType ownPermType;
 		return m_RootPermission.HasPermission( permission, ownPermType );
 	#else
@@ -307,8 +303,6 @@ class JMPlayerInstance : Managed
 		bool hasPermission;
 
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-		Assert_Null( m_RootPermission );
-		
 		hasPermission = m_RootPermission.HasPermission( permission, permType );
 		
 		// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
@@ -471,9 +465,6 @@ class JMPlayerInstance : Managed
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		auto trace = CF_Trace_0(this, "CopyPermissions");
 
-		Assert_Null( m_RootPermission );
-		Assert_Null( copy );
-
 		m_RootPermission.CopyPermissions( copy );
 
 		m_SyncedToClient.Clear();
@@ -485,8 +476,6 @@ class JMPlayerInstance : Managed
 	void ClearPermissions()
 	{
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-		Assert_Null( m_RootPermission );
-
 		m_RootPermission.Clear();
 
 		m_SyncedToClient.Clear();
@@ -505,8 +494,6 @@ class JMPlayerInstance : Managed
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		auto trace = CF_Trace_1(this).Add(permissions.Count());
 
-		Assert_Null( m_RootPermission );
-
 		m_RootPermission.Deserialize( permissions );
 		m_SyncedToClient.Clear();
 		Save();
@@ -518,8 +505,6 @@ class JMPlayerInstance : Managed
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-		Assert_Null( m_RootPermission );
-
 		m_RootPermission.AddPermission( permission, type );
 
 		m_SyncedToClient.Clear();
@@ -553,9 +538,6 @@ class JMPlayerInstance : Managed
 		EXError.Info(this, "Adding role " + role + " (nameRestriction=" + nameRestriction + ") to player " + m_Name + " (GUID=" + m_GUID + ")");
 	#endif
 	#endif
-
-		Assert_Null( GetPermissionsManager() );
-		Assert_Null( m_Roles );
 
 		if ( !GetPermissionsManager().IsRole( role ) )
 			return;
@@ -641,10 +623,6 @@ class JMPlayerInstance : Managed
 		Print("OnSendPermissions - GUID " + m_GUID + ", already synced to " + sendToGUID + " " + m_SyncedToClient[sendToGUID]);
 		#endif
 
-	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-		Assert_Null( m_RootPermission );
-	#endif
-
 		ctx.Write( !m_SyncedToClient[sendToGUID] );
 
 		if ( m_SyncedToClient[sendToGUID] )
@@ -675,10 +653,6 @@ class JMPlayerInstance : Managed
 		auto trace = CF_Trace_0(this, "OnReceivePermissions");
 		#endif
 
-	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-		Assert_Null( m_RootPermission );
-	#endif
-		
 		bool permissionsUpdate;
 		ctx.Read( permissionsUpdate );
 		#ifdef JM_COT_DIAG_LOGGING
@@ -856,13 +830,6 @@ class JMPlayerInstance : Managed
 	{
 		auto trace = CF_Trace_1(this, "Save").Add(m_GUID);
 
-	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-		Assert_Null( m_RootPermission );
-	#endif
-
-		if ( !Assert_Null( m_PlayerFile ) )
-			Assert_Null( m_PlayerFile.Roles );
-
 		if ( !g_Game.IsServer() )
 			return;
 
@@ -939,8 +906,6 @@ class JMPlayerInstance : Managed
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
 		auto trace = CF_Trace_1(this).Add(filename);
 
-		Assert_Null( m_RootPermission );
-
 		if ( !FileExist( filename ) )
 			return false;
 
@@ -968,8 +933,6 @@ class JMPlayerInstance : Managed
 	void Load()
 	{
 		auto trace = CF_Trace_1(this, "Load").Add(m_GUID);
-
-		Assert_Null( m_PlayerFile );
 
 		if ( !IsMissionHost() )
 			return;

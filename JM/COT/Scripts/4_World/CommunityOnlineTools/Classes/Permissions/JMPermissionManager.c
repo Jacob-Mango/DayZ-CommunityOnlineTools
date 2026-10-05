@@ -44,11 +44,6 @@ class JMPermissionManager
 			MakeDirectory( JMConstants.DIR_ROLES );
 		}
 		
-		Assert_Null( Players );
-		Assert_Null( Roles );
-		Assert_Null( SteamToGUID );
-		Assert_Null( RootPermission );
-
 	#ifdef DIAG_DEVELOPER
 		if (FileExist("$profile:COT_RegisteredPermissions.txt"))
 			DeleteFile("$profile:COT_RegisteredPermissions.txt");
@@ -72,8 +67,6 @@ class JMPermissionManager
 
 	void GetPermissionsAsList( out array< JMPermission > permissions )
 	{
-		Assert_Null( RootPermission );
-
 		if ( permissions == NULL )
 			permissions = new array< JMPermission >();
 
@@ -82,8 +75,6 @@ class JMPermissionManager
 
 	void GetPermissionsAsList( JMPermission permission, out array< JMPermission > permissions )
 	{
-		Assert_Null( RootPermission );
-
 		if ( permissions == NULL )
 			permissions = new array< JMPermission >();
 
@@ -92,9 +83,6 @@ class JMPermissionManager
 
 	protected void GetPermissionsAsList( JMPermission permission, string indent, inout array< JMPermission > permissions, bool last = false )
 	{
-		Assert_Null( RootPermission );
-		Assert_Null( permission );
-
 		if (permission.Parent && permission.Parent.Name != "ROOT")
 		{
 			if (last)
@@ -119,8 +107,6 @@ class JMPermissionManager
 
 	JMPlayerInstance GetPlayer( string guid )
 	{
-		Assert_Null( Players );
-
 		return Players.Get( guid );
 	}
 
@@ -129,8 +115,6 @@ class JMPermissionManager
 	 */
 	array< JMPlayerInstance > GetPlayers( array< string > guidsGetPlayers = NULL )
 	{
-		Assert_Null( Players );
-		
 		array< JMPlayerInstance > players = {};
 
 		if ( guidsGetPlayers == NULL || !g_Game.IsMultiplayer() )
@@ -153,8 +137,6 @@ class JMPermissionManager
 
 	JMRole GetRole( string name )
 	{
-		Assert_Null( Roles );
-
 		return Roles.Get( name );
 	}
 
@@ -176,8 +158,6 @@ class JMPermissionManager
 
 	void GetRolesAsList( out array< JMRole > roles, bool sorted = false )
 	{
-		Assert_Null( Roles );
-
 		if ( roles == NULL )
 			roles = new array< JMRole >();
 
@@ -199,8 +179,6 @@ class JMPermissionManager
 
 	JMPermission GetRootPermission()
 	{
-		Assert_Null( RootPermission );
-
 		return RootPermission;
 	}
 
@@ -372,9 +350,6 @@ class JMPermissionManager
 
 	void ResetMission()
 	{
-		Assert_Null( Players );
-		Assert_Null( Roles );
-
 		m_FakePlayersCreated = false;
 
 		if ( !IsMissionClient() )
@@ -686,8 +661,6 @@ class JMPermissionManager
 		auto trace = CF_Trace_1(this, "RegisterPermission").Add(permission);
 		#endif
 
-		Assert_Null( RootPermission );
-
 		if (m_MissionLoaded)
 			Error("Cannot register new permissions once mission is loaded!");
 		else
@@ -741,8 +714,6 @@ class JMPermissionManager
 	{
 		auto trace = CF_Trace_1(this, "Serialize").Add(RootPermission.Children.Count());
 
-		Assert_Null( RootPermission );
-
 		array< string > data = new array< string >;
 		RootPermission.Serialize( data );
 		return data;
@@ -750,9 +721,6 @@ class JMPermissionManager
 
 	bool OnClientConnected( PlayerIdentity ident, out JMPlayerInstance inst )
 	{
-		Assert_Null( RootPermission );
-		Assert_Null( Players );
-
 		string guid = "";
 		
 		if ( ident == NULL )
@@ -789,8 +757,6 @@ class JMPermissionManager
 
 	bool OnClientDisconnected( string guid, out JMPlayerInstance inst )
 	{
-		Assert_Null( Players );
-
 		inst = Players.Get( guid );
 		if ( inst )
 		{
@@ -892,8 +858,6 @@ class JMPermissionManager
 
 	bool LoadRole( string name, out JMRole role )
 	{
-		Assert_Null( Roles );
-
 		role = GetRole( name );
 
 		if ( !role )
@@ -909,8 +873,6 @@ class JMPermissionManager
 
 	void LoadRoleFromFile( string name )
 	{
-		Assert_Null( Roles );
-
 		JMRole role = new JMRole( name );
 		
 		if ( role.Load() )
@@ -967,8 +929,6 @@ JMPermissionManager GetPermissionsManager()
 {
 	if ( !g_cot_PermissionsManager )
 		g_cot_PermissionsManager = new JMPermissionManager();
-
-	Assert_Null( g_cot_PermissionsManager );
 
 	return g_cot_PermissionsManager;
 }

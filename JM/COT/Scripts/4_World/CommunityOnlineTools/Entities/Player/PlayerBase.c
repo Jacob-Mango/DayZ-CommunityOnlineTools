@@ -668,9 +668,6 @@ modded class PlayerBase
 				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
 			}
 		}
-
-		if ( Assert_Null( m_AuthenticatedPlayer ) )
-			return NULL;
 		
 		m_AuthenticatedPlayer.PlayerObject = this;
 		return m_AuthenticatedPlayer;
