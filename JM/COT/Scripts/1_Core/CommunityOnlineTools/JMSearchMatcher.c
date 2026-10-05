@@ -16,7 +16,7 @@
 //!     m_SearchBox.SetTextPreview( matcher.GetClosestMatch() );
 //!
 //! Matching is case-insensitive; an empty needle matches everything.
-class JMSearchMatcher
+class JMSearchMatcher: Managed
 {
 	protected string m_Search;
 	protected ref TStringArray m_Keywords;
