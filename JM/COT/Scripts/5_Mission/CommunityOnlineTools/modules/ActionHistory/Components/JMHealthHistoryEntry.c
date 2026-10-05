@@ -21,7 +21,15 @@ class JMHealthHistoryEntry: JMPropertyHistoryEntry
 		if ( ( m_Target.IsInherited( Man ) || m_Target.IsInherited( DayZCreature ) ) && !m_Target.IsAlive() )
 			return false;
 
+		bool allowDamage = m_Target.GetAllowDamage();
+
+		if (!allowDamage)
+			m_Target.SetAllowDamage(true);
+
 		m_Target.SetHealth( "", "", value );
+
+		if (!allowDamage)
+			m_Target.SetAllowDamage(false);
 
 		return true;
 	}

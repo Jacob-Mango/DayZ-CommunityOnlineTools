@@ -2244,7 +2244,15 @@ class JMESPModule: JMRenderableModuleBase
 		else
 			healthBefore = target.GetHealthLevelValue(target.GetHealthLevel());
 
+		bool allowDamage = target.GetAllowDamage();
+
+		if (!allowDamage)
+			target.SetAllowDamage(true);
+
 		target.SetHealth( health );
+
+		if (!allowDamage)
+			target.SetAllowDamage(false);
 
 		//! Read back rather than taken from the request: redo replays what the
 		//! clamp above actually produced. A drag through many values merges into

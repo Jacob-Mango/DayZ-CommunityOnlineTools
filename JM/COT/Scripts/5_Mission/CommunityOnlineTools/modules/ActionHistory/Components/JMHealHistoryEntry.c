@@ -50,7 +50,15 @@ class JMHealHistoryEntry: JMActionHistoryEntry
 		if ( !m_Target )
 			return false;
 
+		bool allowDamage = m_Target.GetAllowDamage();
+
+		if (!allowDamage)
+			m_Target.SetAllowDamage(true);
+
 		m_Target.SetHealth( "", "", m_Health );
+
+		if (!allowDamage)
+			m_Target.SetAllowDamage(false);
 
 		if ( !m_IsPlayer )
 			return true;
