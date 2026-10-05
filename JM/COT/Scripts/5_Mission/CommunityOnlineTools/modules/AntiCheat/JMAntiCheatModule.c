@@ -893,7 +893,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 			int elapsedSec = ( nowMs - flag.LastActionTimeMs ) / 1000;
 			if ( identity && ( flag.LastActionTimeMs == 0 || elapsedSec >= m_Config.AutoActionCooldownS ) )
 			{
-				GetGame().DisconnectPlayer( identity, "Auto anti-cheat action (score=" + total.ToString() + ")" );
+				JMPlayerModule playerModule;
+				CF_Modules<JMPlayerModule>.Get(playerModule);
+				playerModule.Kick( {identity.GetId()}, "Auto anti-cheat action (score=" + total.ToString() + ")" );
 				flag.LastActionTimeMs = nowMs;
 
 				GetCommunityOnlineToolsBase().Log( identity, "AntiCheat auto-disconnected " + flag.PlayerName );
