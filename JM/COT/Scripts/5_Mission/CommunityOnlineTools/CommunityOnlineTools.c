@@ -528,6 +528,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto trace = CF_Trace_1(this, "Server_SetClient").Add(player.GetGUID());
 		#endif
 
+		if ( !player.PlayerObject.GetIdentity() )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
 
