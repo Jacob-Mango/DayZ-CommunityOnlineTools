@@ -1292,7 +1292,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (!entity)
 			return "";
 
-		ref array<string> colorTokens = GetColorTokens();
+		array<string> colorTokens = GetColorTokens();
 
 		string typeStr = entity.GetType();
 		typeStr.ToLower();
@@ -1342,7 +1342,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (count == 0)
 			return;
 
-		ref array<int> slot_ids = new array<int>;
+		array<int> slot_ids = new array<int>;
 		int slot_id;
 		int i;
 
@@ -1394,7 +1394,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					if (g_Game.ConfigIsExisting(path + " Nutrition"))
 						continue;
 
-					ref array<string> inv_slots = new array<string>;
+					array<string> inv_slots = new array<string>;
 					g_Game.ConfigGetTextArray(path + " inventorySlot", inv_slots);
 
 					foreach (string inv_slot: inv_slots)

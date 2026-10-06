@@ -377,7 +377,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 
 		foreach ( TextWidget tw : m_ScrollCandidates )
 		{
-			ref JMSidebarScrollEntry entry = new JMSidebarScrollEntry( tw );
+			JMSidebarScrollEntry entry = new JMSidebarScrollEntry( tw );
 			if ( entry.MeasureOverflow() )
 				m_ScrollEntries.Insert( entry );
 		}

@@ -1121,7 +1121,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		for ( int i = 1; i < results.Count(); i++ )
 		{
-			ref RaycastRVResult current = results[i];
+			RaycastRVResult current = results[i];
 			float currentDist = vector.Distance( from, current.pos );
 			int j = i - 1;
 

@@ -204,7 +204,7 @@ class JMBanModule : JMRenderableModuleBase
 
     protected void Exec_Ban( string steamID, string playerName, string message, int durationSeconds, string issuedBy, string issuedByName, PlayerIdentity adminIdent )
     {
-        ref JMPlayerBan ban = new JMPlayerBan();
+        JMPlayerBan ban = new JMPlayerBan();
         ban.SteamID       = steamID;
         ban.PlayerName    = playerName;
         ban.Message       = message;
@@ -450,7 +450,7 @@ class JMBanModule : JMRenderableModuleBase
 
         for ( int i = 0; i < count; i++ )
         {
-            ref JMPlayerBan ban = new JMPlayerBan();
+            JMPlayerBan ban = new JMPlayerBan();
             if ( !ctx.Read( ban.SteamID ) || !ctx.Read( ban.PlayerName ) || !ctx.Read( ban.Message ) || !ctx.Read( ban.BannedAt ) || !ctx.Read( ban.BanDuration ) || !ctx.Read( ban.IssuedByName ) )
                 break;
 

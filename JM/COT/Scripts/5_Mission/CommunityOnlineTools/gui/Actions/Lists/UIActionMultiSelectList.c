@@ -69,7 +69,7 @@ class UIActionMultiSelectList: UIActionBase
 
 			row.SetHandler( this );
 
-			ref JMMultiSelectRow r = new JMMultiSelectRow();
+			JMMultiSelectRow r = new JMMultiSelectRow();
 			r.Label   = item;
 			r.Checked = false;
 			r.Root    = row;

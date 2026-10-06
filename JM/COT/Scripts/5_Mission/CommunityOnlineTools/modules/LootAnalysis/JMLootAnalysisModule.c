@@ -873,7 +873,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 		// Collect matching group names, each with the usage tag that matched it -
 		// that tag is what the client colours/legends the marker by.
-		ref map<string, string> matchingGroups = new map<string, string>;
+		map<string, string> matchingGroups = new map<string, string>;
 		for (int pi = 0; pi < m_CEProtos.Count(); pi++)
 		{
 			string protoKey = m_CEProtos.GetKey(pi);

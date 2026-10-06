@@ -21,8 +21,8 @@ class JMMapEditorCatalog
 	// Returns a sorted list of unique categories (Vehicles, Containers, ...)
 	static array< string > GetCategories()
 	{
-		ref array< ref JMMapEditorAsset > items = Build();
-		ref array< string > cats = new array< string >;
+		array< ref JMMapEditorAsset > items = Build();
+		array< string > cats = new array< string >;
 		for ( int i = 0; i < items.Count(); i++ )
 		{
 			string c = items.Get( i ).Category;
@@ -43,8 +43,8 @@ class JMMapEditorCatalog
 
 	static ref array< ref JMMapEditorAsset > Build()
 	{
-		ref array< ref JMMapEditorAsset > items = new array< ref JMMapEditorAsset >;
-		ref JMMapEditorAsset e;
+		array< ref JMMapEditorAsset > items = new array< ref JMMapEditorAsset >;
+		JMMapEditorAsset e;
 
 		// ---- Vehicles ----
 		e = new JMMapEditorAsset();

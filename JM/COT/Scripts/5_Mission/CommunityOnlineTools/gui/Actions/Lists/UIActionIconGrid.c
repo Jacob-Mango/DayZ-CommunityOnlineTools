@@ -218,7 +218,7 @@ class UIActionIconGrid: UIActionBase
 		if ( m_ById.Contains( id ) )
 			return;
 
-		ref JMIconGridEntry entry = new JMIconGridEntry( id, imagePath, label );
+		JMIconGridEntry entry = new JMIconGridEntry( id, imagePath, label );
 
 		string cellLayout;
 		if ( m_UseLabeledCells )

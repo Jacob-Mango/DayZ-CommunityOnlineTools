@@ -66,7 +66,7 @@ class UIActionLogView: UIActionBase
 		if ( color == 0 )
 			color = DEFAULT_LINE_COLOR;
 
-		ref JMLogLine line = new JMLogLine();
+		JMLogLine line = new JMLogLine();
 		line.Text  = text;
 		line.Color = color;
 

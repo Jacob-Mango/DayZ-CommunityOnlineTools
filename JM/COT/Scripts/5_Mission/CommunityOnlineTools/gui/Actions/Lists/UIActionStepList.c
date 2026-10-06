@@ -63,7 +63,7 @@ class UIActionStepList: UIActionBase
 
 	void AddItem( string label )
 	{
-		ref JMStepListRow row = BuildRow( label );
+		JMStepListRow row = BuildRow( label );
 		if ( row )
 		{
 			m_Items.Insert( row );
@@ -143,7 +143,7 @@ class UIActionStepList: UIActionBase
 
 		rowRoot.SetHandler( this );
 
-		ref JMStepListRow row = new JMStepListRow();
+		JMStepListRow row = new JMStepListRow();
 		row.Label = label;
 		row.Root  = rowRoot;
 

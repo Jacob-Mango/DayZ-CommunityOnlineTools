@@ -115,8 +115,8 @@ class JMTeleportSerialize : Managed
 		Types.Sort();
 		Types.InsertAt("ALL", 0);
 	
-		ref array< ref string > afterSorting = new array< ref string >;
-		ref array< ref string > beforeSorting = new array< ref string >;
+		array< ref string > afterSorting = new array< ref string >;
+		array< ref string > beforeSorting = new array< ref string >;
 
 		int loc_count = Locations.Count();
 		
@@ -128,7 +128,7 @@ class JMTeleportSerialize : Managed
 
 		afterSorting.Sort();
 
-		ref array< ref JMTeleportLocation > tmp_locations = new array< ref JMTeleportLocation >;
+		array< ref JMTeleportLocation > tmp_locations = new array< ref JMTeleportLocation >;
 		
 		for ( int j = 0; j < loc_count; ++j ) 
 		{
