@@ -66,9 +66,9 @@ class JMVehiclesFormTabInfo: JMFormTab
 			m_VehicleClassName      = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_CLASSNAME", "Value" );
 			m_VehicleStatus         = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_STATUS", "Value" );
 			m_VehicleType           = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_TYPE", "Value" );
-			m_VehicleID             = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_ID", "Value" );
-			m_VehiclePersistentIDAB = CreateCopyableText( gridInfoA, "ID AB:", "Value" );
-			m_VehiclePersistentIDCD = CreateCopyableText( gridInfoA, "ID CD:", "Value" );
+			m_VehicleID             = CreateCopyableText( gridInfoA, "#STR_COT_ESP_MODULE_MENU_NETWORK_ID", "Value" );
+			m_VehiclePersistentIDAB = CreateCopyableText( gridInfoA, "Persistent ID AB:", "Value" );
+			m_VehiclePersistentIDCD = CreateCopyableText( gridInfoA, "Persistent ID CD:", "Value" );
 			m_VehiclePosition       = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_POSITION", "Value" );
 			m_VehicleRotation       = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_ROTATION", "Value" );
 			m_VehicleCoolant        = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_COOLANT", "Value" );
@@ -103,7 +103,7 @@ class JMVehiclesFormTabInfo: JMFormTab
 			statusText = "OK";
 		m_VehicleStatus.SetText( statusText );
 		m_VehicleType.SetText( vehicle.GetVehicleType() );
-		m_VehicleID.SetText( vehicle.m_NetworkIDHigh.ToString() + " " + vehicle.m_NetworkIDLow.ToString() );
+		m_VehicleID.SetText( vehicle.m_NetworkIDLow.ToString() + " / " + vehicle.m_NetworkIDHigh.ToString() );
 		m_VehiclePersistentIDAB.SetText( vehicle.m_PersistentIDA.ToString() + " " + vehicle.m_PersistentIDB.ToString() );
 		m_VehiclePersistentIDCD.SetText( vehicle.m_PersistentIDC.ToString() + " " + vehicle.m_PersistentIDD.ToString() );
 		m_VehiclePosition.SetText( vehicle.m_Position.ToString() );
