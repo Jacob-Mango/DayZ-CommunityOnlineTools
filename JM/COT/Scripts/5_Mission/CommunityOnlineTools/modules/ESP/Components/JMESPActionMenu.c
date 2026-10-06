@@ -1215,29 +1215,22 @@ class JMESPActionMenu
 	{
 		AddBack();
 
-		Add( PREFIX_ACTION + "copyraw",       "#STR_COT_ESP_MODULE_MENU_COPY_RAW",       JMConstants.Lucide( "copy" ) );
+		Add( PREFIX_ACTION + "copyclassname",       "#STR_COT_ESP_MODULE_MENU_CLASSNAME" + ": " +  m_Meta.targetType,       JMConstants.Lucide( "copy" ) );
 
 		if ( !m_Meta.target.IsPlainObject() && m_Meta.target.GetType() )
 		{
-			Add( PREFIX_ACTION + "copyxml",       "#STR_COT_ESP_MODULE_MENU_COPY_XML",       JMConstants.Lucide( "file-code" ) );
-			Add( PREFIX_ACTION + "copyspawnable", "#STR_COT_ESP_MODULE_MENU_COPY_SPAWNABLE", JMConstants.Lucide( "code-xml" ) );
-			Add( PREFIX_ACTION + "copyexpansion", "#STR_COT_ESP_MODULE_MENU_COPY_EXPANSION", JMConstants.Lucide( "copy" ) );
+			Add( PREFIX_ACTION + "copyclassnameatts", "#STR_COT_ESP_MODULE_MENU_COPY_CLASSNAMES", JMConstants.Lucide( "list-tree" ) );
+			Add( PREFIX_ACTION + "copyxml",       "#STR_COT_ESP_MODULE_MENU_COPY_XML",       JMConstants.Lucide( "code-xml" ) );
+			Add( PREFIX_ACTION + "copyspawnable", "#STR_COT_ESP_MODULE_MENU_COPY_SPAWNABLE", JMConstants.Lucide( "file-code" ) );
 #ifdef DZ_Expansion_Core
-			Add( PREFIX_ACTION + "copyloadout",   "#STR_COT_ESP_MODULE_MENU_COPY_LOADOUT",   JMConstants.Lucide( "box" ) );
+			Add( PREFIX_ACTION + "copyloadout",   "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_EXPLOADOUT",   JMConstants.Lucide( "box" ) );
 #endif
 		}
-
-		//! Classname and category, shown in the label rather than just named by
-		//! it - the same "row is the view" shape as the Network ID row below -
-		//! for view types (weapons, attachments, ...) whose classname is not
-		//! already the tag's own display name.
-		string classnameLabel = "#STR_COT_ESP_MODULE_MENU_CLASSNAME" + ": " + m_Meta.targetType;
-		Add( PREFIX_ACTION + "copyclassname", classnameLabel, JMConstants.Lucide( "tag" ) );
 
 		if ( m_Meta.type )
 		{
 			string categoryLabel = "#STR_COT_ESP_MODULE_MENU_CATEGORY" + ": " + m_Meta.type.Localisation;
-			Add( PREFIX_ACTION + "copycategory", categoryLabel, JMConstants.Lucide( "shapes" ) );
+			Add( PREFIX_ACTION + "copycategory", categoryLabel, JMConstants.Lucide( "tag" ) );
 		}
 
 		//! Locally spawned objects don't have a netID
@@ -1360,16 +1353,12 @@ class JMESPActionMenu
 			DoSelect( true );
 		else if ( name == "deselect" )
 			DoSelect( false );
-		else if ( name == "copytype" )
+		else if ( name == "copyclassnameatts" )
 			DoCopyTypeWithAttachments();
-		else if ( name == "copyraw" )
-			DoCopyTypeRaw();
 		else if ( name == "copyxml" )
 			DoCopyTypesXml();
 		else if ( name == "copyspawnable" )
 			DoCopySpawnableTypes();
-		else if ( name == "copyexpansion" )
-			DoCopyTypeWithAttachments();
 #ifdef DZ_Expansion_Core
 		else if ( name == "copyloadout" )
 			DoCopyExpLoadout();
@@ -1558,22 +1547,22 @@ class JMESPActionMenu
 #endif
 	}
 
-	protected void DoCopyTypeRaw()
-	{
-		if ( !m_Meta || !m_Meta.target )
-			return;
-
-		COTFeedback.Copy( m_Meta.targetType );
-	}
-
 	//! <type name="..."/> block - the types.xml per-object entry.
 	protected void DoCopyTypesXml()
 	{
 		if ( !m_Meta || !m_Meta.target )
 			return;
 
-		string xml = "<type name=\"" + m_Meta.targetType + "\">\n";
-		xml += "</type>";
+		string xml = "	<type name=\"" + m_Meta.targetType + "\">\n";
+		xml += "		<nominal>0</nominal>\n";
+		xml += "		<lifetime>3888000</lifetime>\n";
+		xml += "		<restock>0</restock>\n";
+		xml += "		<min>0</min>\n";
+		xml += "		<quantmin>-1</quantmin>\n";
+		xml += "		<quantmax>-1</quantmax>\n";
+		xml += "		<cost>100</cost>\n";
+		xml += "		<flags count_in_cargo=\"0\" count_in_hoarder=\"0\" count_in_map=\"1\" count_in_player=\"0\" crafted=\"0\" deloot=\"0\"/>\n";
+		xml += "	</type>";
 		COTFeedback.Copy( xml );
 	}
 
