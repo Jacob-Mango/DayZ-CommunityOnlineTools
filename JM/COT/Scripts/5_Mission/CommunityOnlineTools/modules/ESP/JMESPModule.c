@@ -4567,12 +4567,12 @@ class JMESPModule: JMRenderableModuleBase
 			{
 				if (entity.IsMan())
 				{
-					AddChildrenToExpLoadoutRecursive(expPrefab, entity);
+					JMCompensationHelper.AddChildrenToExpLoadoutRecursive(expPrefab, entity);
 				}
 				else
 				{
 					expPrefab.ClassName = entity.GetType();
-					AddToExpLoadoutRecursive(expPrefab, entity);
+					JMCompensationHelper.AddToExpLoadoutRecursive(expPrefab, entity);
 				}
 			}
 
@@ -4601,49 +4601,6 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		return errorMsg == string.Empty;
-	}
-
-	void AddChildrenToExpLoadoutRecursive(ExpansionPrefab prefab, EntityAI entity)
-	{
-		auto inventory = entity.GetInventory();
-		int i;
-		EntityAI item;
-		auto il = new InventoryLocation();
-
-		for (i = 0; i < inventory.AttachmentCount(); ++i)
-		{
-			item = inventory.GetAttachmentFromIndex(i);
-			item.GetInventory().GetCurrentInventoryLocation(il);
-			string slotName = InventorySlots.GetSlotName(il.GetSlot());
-			prefab = ExpansionPrefab.Cast(prefab.BeginAttachment(item.GetType(), slotName));
-			AddToExpLoadoutRecursive(prefab, item);
-			prefab = ExpansionPrefab.Cast(prefab.End());
-		}
-
-		auto cargo = inventory.GetCargo();
-		if (cargo)
-		{
-			for (i = 0; i < cargo.GetItemCount(); ++i)
-			{
-				item = cargo.GetItem(i);
-				prefab = ExpansionPrefab.Cast(prefab.BeginCargo(item.GetType()));
-				AddToExpLoadoutRecursive(prefab, item);
-				prefab = ExpansionPrefab.Cast(prefab.End());
-			}
-		}
-	}
-
-	void AddToExpLoadoutRecursive(ExpansionPrefab prefab, EntityAI item)
-	{
-		prefab.Chance = 1.0;
-
-		if (item.HasQuantity())
-		{
-			float quantity01 = item.GetQuantityNormalized();
-			prefab.SetQuantity(quantity01, quantity01);
-		}
-
-		AddChildrenToExpLoadoutRecursive(prefab, item);
 	}
 #endif
 }

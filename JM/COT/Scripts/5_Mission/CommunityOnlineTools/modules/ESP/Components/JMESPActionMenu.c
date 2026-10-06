@@ -1635,12 +1635,12 @@ class JMESPActionMenu
 
 		if ( entity.IsMan() )
 		{
-			m_Meta.module.AddChildrenToExpLoadoutRecursive( expPrefab, entity );
+			JMCompensationHelper.AddChildrenToExpLoadoutRecursive( expPrefab, entity );
 		}
 		else
 		{
 			expPrefab.ClassName = entity.GetType();
-			m_Meta.module.AddToExpLoadoutRecursive( expPrefab, entity );
+			JMCompensationHelper.AddToExpLoadoutRecursive( expPrefab, entity );
 		}
 
 		string loadoutJSON;

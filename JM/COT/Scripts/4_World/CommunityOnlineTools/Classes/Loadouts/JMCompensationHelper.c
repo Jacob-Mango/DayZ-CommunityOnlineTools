@@ -141,11 +141,8 @@ class JMCompensationHelper
 		}
 	}
 
-	static void AddChildrenToExpLoadoutRecursive( ExpansionPrefab prefab, EntityAI entity )
+	static void AddChildrenToExpLoadoutRecursive( ExpansionPrefabObject loadout, EntityAI entity )
 	{
-		if ( !prefab || !entity )
-			return;
-
 		GameInventory inventory = entity.GetInventory();
 		if ( !inventory )
 			return;
@@ -157,19 +154,11 @@ class JMCompensationHelper
 		for ( i = 0; i < inventory.AttachmentCount(); ++i )
 		{
 			item = inventory.GetAttachmentFromIndex( i );
-			if ( !item )
-				continue;
-
-			if ( item.GetInventory() )
-				item.GetInventory().GetCurrentInventoryLocation( il );
-
+			item.GetInventory().GetCurrentInventoryLocation( il );
 			string slotName = InventorySlots.GetSlotName( il.GetSlot() );
-			ExpansionPrefab childPrefab = ExpansionPrefab.Cast( prefab.BeginAttachment( item.GetType(), slotName ) );
-			if ( childPrefab )
-			{
-				AddToExpLoadoutRecursive( childPrefab, item );
-				childPrefab.End();
-			}
+			loadout = loadout.BeginAttachment( item.GetType(), slotName );
+			AddToExpLoadoutRecursive( loadout, item );
+			loadout = loadout.End();
 		}
 
 		CargoBase cargo = inventory.GetCargo();
@@ -178,33 +167,24 @@ class JMCompensationHelper
 			for ( i = 0; i < cargo.GetItemCount(); ++i )
 			{
 				item = cargo.GetItem( i );
-				if ( !item )
-					continue;
-
-				ExpansionPrefab cargoPrefab = ExpansionPrefab.Cast( prefab.BeginCargo( item.GetType() ) );
-				if ( cargoPrefab )
-				{
-					AddToExpLoadoutRecursive( cargoPrefab, item );
-					cargoPrefab.End();
-				}
+				loadout = loadout.BeginCargo( item.GetType() );
+				AddToExpLoadoutRecursive( loadout, item );
+				loadout = loadout.End();
 			}
 		}
 	}
 
-	static void AddToExpLoadoutRecursive( ExpansionPrefab prefab, EntityAI item )
+	static void AddToExpLoadoutRecursive( ExpansionPrefabObject loadout, EntityAI item )
 	{
-		if ( !prefab || !item )
-			return;
-
-		prefab.Chance = 1.0;
+		loadout.Chance = 1.0;
 
 		if ( item.HasQuantity() )
 		{
 			float quantity01 = item.GetQuantityNormalized();
-			prefab.SetQuantity( quantity01, quantity01 );
+			loadout.SetQuantity(quantity01, quantity01);
 		}
 
-		AddChildrenToExpLoadoutRecursive( prefab, item );
+		AddChildrenToExpLoadoutRecursive( loadout, item );
 	}
 #endif
 
