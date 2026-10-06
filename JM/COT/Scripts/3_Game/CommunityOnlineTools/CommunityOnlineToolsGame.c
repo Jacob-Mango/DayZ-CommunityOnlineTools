@@ -34,9 +34,13 @@ class CommunityOnlineToolsGame
 		return m_IsOpen;
 	}
 
-	bool ActiveCount()
+	int ActiveCount()
 	{
+	#ifdef SERVER
 		return m_ActiveGUIDs.Count();
+	#else
+		return m_IsActive;
+	#endif
 	}
 
 	map<string, bool> GetActive()
