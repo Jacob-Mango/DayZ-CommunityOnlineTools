@@ -214,16 +214,6 @@ modded class MissionGameplay
 
 	override void OnMissionFinish()
 	{
-		if (GetCOTWindowManager().Count() > 0)
-		{
-			//! Important: When player gets disconnected in MP or mission is restarted in SP/offline while player manager or camera tools are open,
-			//! need to clear GUI call/update queues to prevent segfault in DayZGame::OnUpdate when the queues try to invoke callbacks whose instances
-			//! have already vanished.
-			//! TODO: Normally DTORs take care of callback removal from any call/update queues, figure out why it's not happening in this case
-			g_Game.GetCallQueue(CALL_CATEGORY_GUI).Clear();
-			g_Game.GetUpdateQueue(CALL_CATEGORY_GUI).Clear();
-		}
-
 		GetCOTWindowManager().DestroyAllWindows();
 
 		GetCommunityOnlineTools().OnFinish();
