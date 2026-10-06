@@ -406,6 +406,9 @@ class JMESPModule: JMRenderableModuleBase
 
 		foreach ( RaycastRVResult res: results )
 		{
+			if ( res.hierLevel > 0 )
+				continue;  //! Ignore proxies
+
 			if ( !res.obj )
 				continue;
 
@@ -1167,6 +1170,9 @@ class JMESPModule: JMRenderableModuleBase
 
 			foreach ( RaycastRVResult result: results )
 			{
+				if ( result.hierLevel > 0 )
+					continue;  //! Ignore proxies
+
 				Object obj = result.obj;
 
 				if ( !obj )

@@ -301,13 +301,7 @@ class JMESPFormTabObjects: JMFormTab
 			if ( meta.type )
 				category = meta.type.Localisation;
 
-			string label;
-			if ( meta.type.IsInherited( JMESPViewTypePlayer ) || !JMESPWidgetHandler.UseClassName )
-				label = name;
-			else
-				label = classname;
-
-			names.Insert( label );
+			names.Insert( meta.GetLabel() );
 			subs.Insert( string.Format( "%1  -  %2m", category, distance ) );
 
 			m_ObjectRows.Insert( meta );

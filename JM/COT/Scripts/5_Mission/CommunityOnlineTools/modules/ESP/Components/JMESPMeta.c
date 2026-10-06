@@ -137,6 +137,18 @@ class JMESPMeta: COT_WidgetHolder
 		return GetObjectType(target);
 	}
 
+	string GetLabel()
+	{
+		string label;
+
+		if ( !JMESPWidgetHandler.UseClassName || ( type && type.IsInherited( JMESPViewTypePlayer ) ) )
+			label = name;
+		else
+			label = targetType;
+
+		return label;
+	}
+
 	bool IsValid()
 	{
 		#ifdef JM_COT_ESP_DEBUG

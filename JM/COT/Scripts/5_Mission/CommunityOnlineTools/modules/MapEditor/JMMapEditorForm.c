@@ -289,7 +289,7 @@ class JMMapEditorForm : JMFormBase
 		m_BulkScale.SetTooltip( "#STR_COT_MAPEDITOR_MULTIPLY_THE_CURRENT_SCALE_OF_EVERY" );
 
 		Widget clipRow = UIActionManager.CreateGridSpacer( rightStack, 1, 3 );
-		m_CopyBtn   = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_COPY", this, "" );
+		m_CopyBtn   = UIActionManager.CreateButton( clipRow, "#STR_COT_GENERIC_COPY", this, "" );
 		if ( m_CopyBtn ) m_CopyBtn.SetOnClick( this, "OnClick_Copy" );
 		m_CopyBtn.SetWidth( 0.33 );
 		m_CopyBtn.SetTooltip( "#STR_COT_MAPEDITOR_SNAPSHOT_THE_CURRENTLY_SELECTED_OBJECT_I" );

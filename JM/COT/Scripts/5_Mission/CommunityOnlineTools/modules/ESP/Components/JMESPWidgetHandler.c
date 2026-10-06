@@ -579,12 +579,7 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 				}
 			}
 
-			string text;
-
-			if ( Info.type.IsInherited( JMESPViewTypePlayer ) || !UseClassName )
-				text += Info.name;
-			else
-				text += Info.targetType;
+			string text = Info.GetLabel();
 
 			if ( ShowDistance )
 				text += " (" + distance + " m)";

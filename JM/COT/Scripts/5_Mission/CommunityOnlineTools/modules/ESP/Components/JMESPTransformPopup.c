@@ -580,14 +580,7 @@ class JMESPTransformPopup: UIActionBase
 
 	void UpdateTitle()
 	{
-		string title;
-
-		if ( !JMESPWidgetHandler.UseClassName || ( m_Meta.type && m_Meta.type.IsInherited( JMESPViewTypePlayer ) ) )
-			title = m_Meta.name;
-		else
-			title = m_Meta.targetType;
-
-		m_Window.SetTitle( title );
+		m_Window.SetTitle( m_Meta.GetLabel() );
 	}
 
 	override bool IsFocusWidget( Widget widget )

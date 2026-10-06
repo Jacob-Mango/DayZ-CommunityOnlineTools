@@ -79,7 +79,7 @@ class JMObjectSpawnerRowMenu: JMPagedActionMenu
 		Add( ACTION_SPAWN_CURSOR, "#STR_COT_OBJECT_MODULE_SPAWN_AT_CROSSHAIR", JMConstants.Lucide( "crosshair" ) );
 		Add( ACTION_SPAWN_SELF,   "#STR_COT_OBJECT_MODULE_SPAWN_AT_PLAYER",    JMConstants.Lucide( "user" ) );
 
-		AddPage( PAGE_COPY, "#STR_COT_OBJECT_MODULE_ROWMENU_COPY", JMConstants.Lucide( "copy" ) );
+		AddPage( PAGE_COPY, "#STR_COT_GENERIC_COPY", JMConstants.Lucide( "copy" ) );
 	}
 
 	protected void BuildCopyPage()

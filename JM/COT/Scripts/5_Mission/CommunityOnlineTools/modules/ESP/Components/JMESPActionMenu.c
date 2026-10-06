@@ -98,23 +98,6 @@ class JMESPActionMenu
 	//! only ever resolved against the list that produced it.
 	protected ref array<string> m_AttachCandidates;
 
-	//! m_AttachCandidates stores classnames, not labels - SetAttachment/
-	//! RemoveAttachment need the classname, so the row label is resolved
-	//! separately here rather than baked into the candidate list itself.
-	protected string GetClassDisplayName( string className )
-	{
-		string displayName;
-
-		//! @note ConfigGetText returns already translated values
-		if ( !g_Game.ConfigGetText( CFG_VEHICLESPATH + " " + className + " displayName", displayName ) || displayName == "" )
-			g_Game.ConfigGetText( CFG_WEAPONSPATH + " " + className + " displayName", displayName );
-
-		if ( displayName == "" )
-			return className;
-
-		return displayName;
-	}
-
 	UIActionContextMenu GetMenu()
 	{
 		return m_Menu;
@@ -124,13 +107,17 @@ class JMESPActionMenu
 	//! this slot in its own inventorySlot[] - see the class-level note above
 	//! for why this is deliberately a wide net rather than a weapon-specific
 	//! compatibility table.
-	protected ref array<string> GetSlotCandidates( int slotId )
+	protected ref array<string> GetSlotCandidates( int slotId, array<string> labels )
 	{
 		array<string> result = new array<string>();
 
 		TStringArray configPaths = new TStringArray();
 		configPaths.Insert( CFG_VEHICLESPATH );
-		configPaths.Insert( CFG_WEAPONSPATH );
+
+		if ( !m_Meta.target.IsWeapon() )
+			configPaths.Insert( CFG_WEAPONSPATH );
+
+		configPaths.Insert( CFG_MAGAZINESPATH );
 
 		foreach ( string configPath : configPaths )
 		{
@@ -141,6 +128,9 @@ class JMESPActionMenu
 				string childName;
 				g_Game.ConfigGetChildName( configPath, i, childName );
 
+				if ( result.Find( childName ) > -1 )
+					continue;
+
 				string path = configPath + " " + childName;
 				if ( g_Game.ConfigGetInt( path + " scope" ) != 2 )
 					continue;
@@ -149,18 +139,26 @@ class JMESPActionMenu
 				if ( !g_Game.ConfigGetText( path + " model", model ) || model == "" || model == "bmp" )
 					continue;
 
+				if ( configPath == CFG_MAGAZINESPATH && !g_Game.ConfigIsExisting( path + " ammoItems" ) )  //! Skip ammo (can't be attached)
+					continue;
+
+				string displayName;
+				//! @note ConfigGetText returns already translated values
+				if ( !g_Game.ConfigGetText( path + " displayName", displayName ) || displayName.IndexOf("$UNT$") > -1 )
+					continue;
+
 				array<string> invSlots = new array<string>();
 				g_Game.ConfigGetTextArray( path + " inventorySlot", invSlots );
 
 				foreach ( string invSlot : invSlots )
 				{
-					if ( InventorySlots.GetSlotIdFromString( invSlot ) != slotId )
-						continue;
-
-					if ( result.Find( childName ) == -1 )
+					if ( InventorySlots.GetSlotIdFromString( invSlot ) == slotId )
+					{
 						result.Insert( childName );
+						labels.Insert( displayName );
 
-					break;
+						break;
+					}
 				}
 			}
 		}
@@ -478,9 +476,9 @@ class JMESPActionMenu
 		bool isLocal = !m_Meta.networkLow && !m_Meta.networkHigh && g_Game.IsMultiplayer();
 
 		if ( IsSelected() )
-			Add( PREFIX_ACTION + "deselect", "#STR_COT_ESP_MODULE_MENU_DESELECT", JMConstants.Lucide( "square" ) );
+			Add( PREFIX_ACTION + "deselect", m_Meta.GetLabel(), JMConstants.Lucide( "check" ) );
 		else
-			Add( PREFIX_ACTION + "select", "#STR_COT_ESP_MODULE_MENU_SELECT", JMConstants.Lucide( "mouse-pointer-click" ) );
+			Add( PREFIX_ACTION + "select", m_Meta.GetLabel(), JMConstants.Lucide( "square" ) );
 
 		AddPage( PAGE_TRANSFORM, "#STR_COT_ESP_MODULE_PAGE_TRANSFORM", JMConstants.Lucide( "move-3d" ) );
 
@@ -651,7 +649,7 @@ class JMESPActionMenu
 		if ( attachInv && attachInv.GetAttachmentSlotsCount() > 0 && !PlayerBase.Cast( target ) )
 			AddPage( PAGE_ATTACHMENTS, "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS", JMConstants.Lucide( "puzzle" ), Perm( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT ) );
 
-		AddPage( PAGE_COPY, "#STR_COT_ESP_MODULE_MENU_COPY", JMConstants.Lucide( "copy" ) );
+		AddPage( PAGE_COPY, "#STR_COT_GENERIC_COPY", JMConstants.Lucide( "copy" ) );
 
 		//! We can spectate anything, it's not limited to players
 		if ( ( m_Meta.networkLow || m_Meta.networkHigh ) && g_Game.IsMultiplayer() )
@@ -1100,11 +1098,8 @@ class JMESPActionMenu
 		if ( target.GetInventory().FindAttachment( slotId ) )
 			Add( PREFIX_ACTION + "removeattach", "#STR_COT_ESP_MODULE_MENU_REMOVE", JMConstants.Lucide( "trash-2" ), canSet, JMTheme.DANGER );
 
-		m_AttachCandidates = GetSlotCandidates( slotId );
-
-		array< string > candidateLabels = new array< string >;
-		for ( int i = 0; i < m_AttachCandidates.Count(); i++ )
-			candidateLabels.Insert( GetClassDisplayName( m_AttachCandidates[i] ) );
+		array< string > candidateLabels = {};
+		m_AttachCandidates = GetSlotCandidates( slotId, candidateLabels );
 
 		for ( int j = 0; j < m_AttachCandidates.Count(); j++ )
 		{
@@ -1277,7 +1272,7 @@ class JMESPActionMenu
 #endif
 
 		AddPage( PAGE_SCALE, "#STR_COT_ESP_MODULE_PAGE_SCALE", JMConstants.Lucide( "scaling" ), Perm( JMConstants.PERM_PLAYER_SCALE ) );
-		AddPage( PAGE_COPY_PLAYER, "#STR_COT_ESP_MODULE_MENU_COPY", JMConstants.Lucide( "copy" ) );
+		AddPage( PAGE_COPY_PLAYER, "#STR_COT_GENERIC_COPY", JMConstants.Lucide( "copy" ) );
 
 		//! A menu cannot be typed into, so the message body comes off the
 		//! clipboard - the same route the exact position and the exact lock code
