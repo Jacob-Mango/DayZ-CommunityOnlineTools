@@ -2250,15 +2250,7 @@ class JMESPModule: JMRenderableModuleBase
 		else
 			healthBefore = target.GetHealthLevelValue(target.GetHealthLevel());
 
-		bool allowDamage = target.GetAllowDamage();
-
-		if (!allowDamage)
-			target.SetAllowDamage(true);
-
-		target.SetHealth( health );
-
-		if (!allowDamage)
-			target.SetAllowDamage(false);
+		COT.SetHealth( target, health );
 
 		//! Read back rather than taken from the request: redo replays what the
 		//! clamp above actually produced. A drag through many values merges into
@@ -2783,9 +2775,19 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !entity )
 			return;
 
-		COT.RepairEntityRecursive( entity );
+		bool includeAttachments = true;
+		bool includeCargo = true;
+
+		PlayerBase player;
+		if (Class.CastTo(player, target))
+		{
+			includeAttachments = JMPermissions.Has( JMConstants.PERM_PLAYER_HEAL_ATTACHMENTS, ident );
+			includeCargo = JMPermissions.Has( JMConstants.PERM_PLAYER_HEAL_CARGO, ident );
+		}
+
+		COT.HealEntityRecursive( entity, includeAttachments, includeCargo );
 		COT.Refuel( entity );
-		GetCommunityOnlineToolsBase().SpawnCompatibleAttachmentsWithColor( entity, NULL, 2, "" );
+		GetCommunityOnlineToolsBase().SpawnCompatibleAttachmentsWithColor( entity, NULL, 0, "" );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repairandfill" );
 		SendWebhookColored( "RepairAndFillSlots", instance, "Repaired and filled slots for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
@@ -3825,7 +3827,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( maxHealth <= 0 )
 			return;
 
-		target.SetHealth( damageZone, "Health", Math.Clamp( health01, 0, 1 ) * maxHealth );
+		COT.SetHealth( target, damageZone, "Health", Math.Clamp( health01, 0, 1 ) * maxHealth );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=parthealth part=" + part_name + " value=" + health01 );
 		SendWebhookColored( "BB_Repair", instance, "Set the part \"" + part_name + "\" of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") to " + Math.Round( health01 * 100 ) + "% health", JMConstants.WEBHOOK_COLOR_WARNING );
@@ -3996,22 +3998,26 @@ class JMESPModule: JMRenderableModuleBase
 		if ( target.IsPlainObject() )
 			return;
 
-		bool allowDamage = target.GetAllowDamage();
+		bool includeAttachments = true;
+		bool includeCargo = true;
 
-		if (!allowDamage)
-			target.SetAllowDamage(true);
+		PlayerBase player;
+		if (Class.CastTo(player, target))
+		{
+			includeAttachments = JMPermissions.Has( JMConstants.PERM_PLAYER_HEAL_ATTACHMENTS, ident );
+			includeCargo = JMPermissions.Has( JMConstants.PERM_PLAYER_HEAL_CARGO, ident );
+		}
 
 		//! Captured before the heal - the entry reads the target's own
 		//! current health (and, for a player, energy/water) to know what to
 		//! restore.
 		EntityAI healEntity;
 		if ( Class.CastTo( healEntity, target ) )
-			JMActionHistory.Push( new JMHealHistoryEntry( healEntity ), JMActionHistory.OwnerOf( ident ) );
+			JMActionHistory.Push( new JMHealHistoryEntry( healEntity, includeAttachments, includeCargo ), JMActionHistory.OwnerOf( ident ) );
 
-		COT.HealEntityRecursive(target);
+		COT.HealEntityRecursive(target, includeAttachments, includeCargo);
 
-		PlayerBase player;
-		if (Class.CastTo(player, target))
+		if (player)
 		{
 			if ( player.GetBleedingManagerServer() )
 				player.GetBleedingManagerServer().RemoveAllSources();
@@ -4022,9 +4028,6 @@ class JMESPModule: JMRenderableModuleBase
 			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 			player.GetStatWater().Set( player.GetStatWater().GetMax() );
 		}
-
-		if (!allowDamage)
-			target.SetAllowDamage(false);
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=heal" );
 		SendWebhookColored( "Heal", instance, "Healed " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );

@@ -233,7 +233,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return false;
 
 		float health = Math.Clamp( value, 0, entity.GetMaxHealth( "", "" ) );
-		entity.SetHealth( "", "", health );
+		COT.SetHealth( entity, "", "", health );
 
 		verb = "Set health " + health.ToString();
 		return true;
@@ -1050,7 +1050,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			
 			JMObjectSpawnerModule objSpawnerModule;
 			if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
-				objSpawnerModule.SpawnCompatibleAttachments(vehicle, null, 0);
+				objSpawnerModule.SpawnCompatibleAttachmentsWithColor(vehicle, null, 0, "");
 
 			GetCommunityOnlineToolsBase().Log( ident, "Repaired Transport [guid=" + players[i].GetGUID() + "]" );
 			SendWebhookColored( "Vehicle", instance, "Repaired " + players[i].FormatSteamWebhook() + " vehicle", JMConstants.WEBHOOK_COLOR_SUCCESS );
@@ -2073,10 +2073,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			bool allowDamage = player.GetAllowDamage();
-			if (!allowDamage)
-				player.SetAllowDamage(true);
-
 			if ( player.GetBleedingManagerServer() )
 				player.GetBleedingManagerServer().RemoveAllSources();
 
@@ -2092,9 +2088,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			GetCommunityOnlineToolsBase().Log( ident, "Healed [guid=" + players[i].GetGUID() + "]" );
 
 			SendWebhookColored( "Set", instance, "Healed " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_SUCCESS );
-
-			if (!allowDamage)
-				player.SetAllowDamage(false);
 
 			players[i].Update();
 		}
@@ -3867,7 +3860,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	//! attachments so the two do not disagree about what "repaired" means.
 	protected void RepairEntity( EntityAI entity )
 	{
-		entity.SetHealth( "", "", entity.GetMaxHealth( "", "" ) );
+		COT.SetHealthMax( entity, "", "" );
 
 		ItemBase asItem;
 		if ( Class.CastTo( asItem, entity ) )

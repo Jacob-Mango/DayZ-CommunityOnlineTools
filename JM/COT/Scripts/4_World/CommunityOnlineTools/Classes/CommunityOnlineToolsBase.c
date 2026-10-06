@@ -528,7 +528,7 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 
 	static void HealEntityRecursive(Object obj, bool includeAttachments = true, bool includeCargo = true)
 	{
-		obj.SetFullHealth();
+		SetFullHealth(obj);
 
 		EntityAI entity;
 		if (!Class.CastTo(entity, obj) || !entity.GetInventory())
@@ -596,6 +596,48 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		}
 	}
 
+	//! Sets full health to all zones
+	static void SetFullHealth(Object obj)
+	{
+		bool allowDamage = obj.GetAllowDamage();
+
+		if (!allowDamage)
+			obj.SetAllowDamage(true);
+
+		obj.SetFullHealth();
+
+		if (!allowDamage)
+			obj.SetAllowDamage(false);
+	}
+
+	static void SetHealth(Object obj, string zoneName, string healthType, float health)
+	{
+		bool allowDamage = obj.GetAllowDamage();
+
+		if (!allowDamage)
+			obj.SetAllowDamage(true);
+
+		obj.SetHealth(zoneName, healthType, health);
+
+		if (!allowDamage)
+			obj.SetAllowDamage(false);
+	}
+
+	static void SetHealth(Object obj, float health)
+	{
+		SetHealth(obj, "", "", health);
+	}
+
+	static void SetHealth01(Object obj, string zoneName, string healthType, float coef)
+	{
+		SetHealth(obj, zoneName, healthType, obj.GetMaxHealth(zoneName, healthType) * coef);
+	}
+
+	static void SetHealthMax(Object obj, string zoneName = "", string healthType = "")
+	{
+		SetHealth01(obj, zoneName, healthType, 1.0);
+	}
+
 	static float SanitizeScale(float scale)
 	{
 		if (!IsFiniteFloat(scale))
@@ -608,6 +650,9 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 	{
 		CarScript car;
 		BoatScript boat;
+	#ifndef DAYZ_1_29
+		MotorbikeScript bike;
+	#endif
 		if (Class.CastTo(car, obj))
 		{
 			car.COT_Refuel();
@@ -616,6 +661,12 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		{
 			boat.COT_Refuel();
 		}
+	#ifndef DAYZ_1_29
+		else if (Class.CastTo(bike, obj))
+		{
+			bike.COT_Refuel();
+		}
+	#endif
 		else if (IsHypeTrain(obj))
 		{
 			int fuelQuantityMax;
@@ -683,35 +734,6 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		}
 	#endif
 		return false;
-	}
-
-	static void RepairEntityRecursive(EntityAI ent)
-	{
-		if (!ent)
-			return;
-
-		ent.SetHealth01("", "", 1.0);
-
-		if (!ent.GetInventory())
-			return;
-
-		for (int i = 0; i < ent.GetInventory().AttachmentCount(); ++i)
-		{
-			EntityAI att = ent.GetInventory().GetAttachmentFromIndex(i);
-			if (att)
-				RepairEntityRecursive(att);
-		}
-
-		CargoBase cargo = ent.GetInventory().GetCargo();
-		if (cargo)
-		{
-			for (int j = 0; j < cargo.GetItemCount(); ++j)
-			{
-				EntityAI cargoItem = cargo.GetItem(j);
-				if (cargoItem)
-					RepairEntityRecursive(cargoItem);
-			}
-		}
 	}
 
 	void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3)

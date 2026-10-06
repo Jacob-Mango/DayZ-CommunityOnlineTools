@@ -13,10 +13,12 @@ class JMHealHistoryEntry: JMActionHistoryEntry
 	protected EntityAI m_Target;
 	protected float m_Health;
 	protected bool m_IsPlayer;
+	protected bool m_IncludeAttachments;
+	protected bool m_IncludeCargo;
 	protected float m_Energy;
 	protected float m_Water;
 
-	void JMHealHistoryEntry( EntityAI target )
+	void JMHealHistoryEntry( EntityAI target, bool includeAttachments, bool includeCargo )
 	{
 		RequiredPermission = JMConstants.PERM_ESP_OBJECT_HEAL;
 
@@ -24,7 +26,12 @@ class JMHealHistoryEntry: JMActionHistoryEntry
 		if ( !target )
 			return;
 
+		//! TODO/FIXME: In case of including atts/cargo, would need to record the states of the whole hierarchy
+		//! TODO/FIXME: Not recording the individual damage zones, but HealEntityRecursive heals ALL damage zones
 		m_Health = target.GetHealth( "", "" );
+
+		m_IncludeAttachments = includeAttachments;
+		m_IncludeCargo = includeCargo;
 
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
@@ -50,15 +57,7 @@ class JMHealHistoryEntry: JMActionHistoryEntry
 		if ( !m_Target )
 			return false;
 
-		bool allowDamage = m_Target.GetAllowDamage();
-
-		if (!allowDamage)
-			m_Target.SetAllowDamage(true);
-
-		m_Target.SetHealth( "", "", m_Health );
-
-		if (!allowDamage)
-			m_Target.SetAllowDamage(false);
+		COT.SetHealth( m_Target, "", "", m_Health );
 
 		if ( !m_IsPlayer )
 			return true;
@@ -81,7 +80,7 @@ class JMHealHistoryEntry: JMActionHistoryEntry
 		if ( !m_Target )
 			return false;
 
-		COT.HealEntityRecursive( m_Target );
+		COT.HealEntityRecursive( m_Target, m_IncludeAttachments, m_IncludeCargo );
 
 		if ( !m_IsPlayer )
 			return true;

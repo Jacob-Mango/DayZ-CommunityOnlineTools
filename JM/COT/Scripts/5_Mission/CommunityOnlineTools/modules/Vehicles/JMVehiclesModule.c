@@ -1451,24 +1451,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !entity )
 			return;
 
-		// Restore health on vehicle body and all existing attachments
-		entity.SetHealth( "", "", entity.GetMaxHealth( "", "" ) );
-
-		int attachCount = entity.GetInventory().AttachmentCount();
-		for ( int i = 0; i < attachCount; i++ )
-		{
-			EntityAI attachment = entity.GetInventory().GetAttachmentFromIndex( i );
-			if ( attachment )
-				attachment.SetHealth( "", "", attachment.GetMaxHealth( "", "" ) );
-		}
+		COT.HealEntityRecursive( entity );
+		COT.Refuel( entity );
 
 		// Spawn any missing compatible attachments (wheels, engine parts, etc.)
 		JMObjectSpawnerModule spawnerModule;
 		if ( CF_Modules<JMObjectSpawnerModule>.Get( spawnerModule ) )
-			spawnerModule.SpawnCompatibleAttachments( entity, NULL, 2 );
-
-		// Refuel
-		Exec_RefuelVehicle( obj );
+			spawnerModule.SpawnCompatibleAttachmentsWithColor( entity, NULL, 0, "" );
 	}
 
 	// -------------------------------------------------------------------------
@@ -1524,35 +1513,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void Exec_RefuelVehicle( Object obj )
 	{
-		CarScript car = CarScript.Cast( obj );
-		if ( car )
-		{
-			car.Fill( CarFluid.FUEL, car.GetFluidCapacity( CarFluid.FUEL ) );
-			car.Fill( CarFluid.OIL, car.GetFluidCapacity( CarFluid.OIL ) );
-			car.Fill( CarFluid.BRAKE, car.GetFluidCapacity( CarFluid.BRAKE ) );
-			car.Fill( CarFluid.COOLANT, car.GetFluidCapacity( CarFluid.COOLANT ) );
-			return;
-		}
-
-	#ifndef DAYZ_1_29
-		MotorbikeScript bike = MotorbikeScript.Cast( obj );
-		if ( bike )
-		{
-			bike.COT_Refuel();
-			return;
-		}
-	#endif
-
-		#ifdef EXPANSIONMODVEHICLE
-		ExpansionVehicleBase expVehicle = ExpansionVehicleBase.Cast( obj );
-		if ( expVehicle )
-		{
-			expVehicle.Fill( CarFluid.FUEL, expVehicle.GetFluidCapacity( CarFluid.FUEL ) );
-			expVehicle.Fill( CarFluid.OIL, expVehicle.GetFluidCapacity( CarFluid.OIL ) );
-			expVehicle.Fill( CarFluid.BRAKE, expVehicle.GetFluidCapacity( CarFluid.BRAKE ) );
-			expVehicle.Fill( CarFluid.COOLANT, expVehicle.GetFluidCapacity( CarFluid.COOLANT ) );
-		}
-		#endif
+		COT.Refuel( obj );
 	}
 
 	// -------------------------------------------------------------------------

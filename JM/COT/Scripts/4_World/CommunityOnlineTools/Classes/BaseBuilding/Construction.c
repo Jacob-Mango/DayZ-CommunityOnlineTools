@@ -149,7 +149,7 @@ modded class Construction
 		{
 			if ( GetParent().GetHealth( damage_zone, "Health" ) > 0 )
 			{
-				GetParent().SetHealth( damage_zone, "Health", 0 );
+				COT_Base.SetHealth( GetParent(), damage_zone, "Health", 0 );
 			}
 		}
 	}
@@ -159,7 +159,7 @@ modded class Construction
 		string damage_zone;
 		if ( DamageSystem.GetDamageZoneFromComponentName( GetParent(), part_name, damage_zone ) )
 		{
-			GetParent().SetHealthMax( damage_zone, "Health" );
+			COT_Base.SetHealthMax( GetParent(), damage_zone, "Health" );
 		}
 	}
 

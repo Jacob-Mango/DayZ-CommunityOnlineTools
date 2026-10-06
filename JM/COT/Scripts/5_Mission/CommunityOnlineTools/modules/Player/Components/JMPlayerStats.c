@@ -7,13 +7,13 @@
 
 class JMPlayerStatHealth: JMPlayerStat
 {
-	override void Apply( PlayerBase player, float value ) { player.SetHealth( "GlobalHealth", "Health", value ); }
+	override void Apply( PlayerBase player, float value ) { COT.SetHealth( player, "GlobalHealth", "Health", value ); }
 	override float Read( JMPlayerInstance instance ) { return instance.GetHealth(); }
 }
 
 class JMPlayerStatBlood: JMPlayerStat
 {
-	override void Apply( PlayerBase player, float value ) { player.SetHealth( "GlobalHealth", "Blood", value ); }
+	override void Apply( PlayerBase player, float value ) { COT.SetHealth( player, "GlobalHealth", "Blood", value ); }
 	override float Read( JMPlayerInstance instance ) { return instance.GetBlood(); }
 }
 
@@ -21,7 +21,7 @@ class JMPlayerStatBlood: JMPlayerStat
 //! evenly spaced bands.
 class JMPlayerStatShock: JMPlayerStat
 {
-	override void Apply( PlayerBase player, float value ) { player.SetHealth( "GlobalHealth", "Shock", value ); }
+	override void Apply( PlayerBase player, float value ) { COT.SetHealth( player, "GlobalHealth", "Shock", value ); }
 	override float Read( JMPlayerInstance instance ) { return instance.GetShock(); }
 
 	override int GetColor( float sliderValue )

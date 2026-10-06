@@ -13,7 +13,7 @@
 //  only a holder of ActionHistory.UndoOthers can touch another admin's.
 //
 //  Usage (server side, from whatever handler performs the action):
-//      JMActionHistory.Push( new JMHealHistoryEntry( target ), JMActionHistory.OwnerOf( ident ) );  // before healing
+//      JMActionHistory.Push( new JMHealHistoryEntry( target, includeAttachments, includeCargo ), JMActionHistory.OwnerOf( ident ) );  // before healing
 //
 //  Undo/Redo are driven by JMActionHistoryModule, which also does the
 //  notification, log line and webhook for each step.
