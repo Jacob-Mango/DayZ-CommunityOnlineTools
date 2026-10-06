@@ -117,7 +117,20 @@ class JMESPActionMenu
 		if ( !m_Meta.target.IsWeapon() )
 			configPaths.Insert( CFG_WEAPONSPATH );
 
-		configPaths.Insert( CFG_MAGAZINESPATH );
+		string displayName;
+
+		Weapon_Base weapon;
+		if ( slotId == InventorySlots.MAGAZINE && Class.CastTo( weapon, m_Meta.target ) )
+		{
+			result = weapon.COTGetMagazineTypesValidated( "magazines", weapon.GetCurrentMuzzle() );
+
+			foreach ( string mag: result )
+			{
+				//! @note ConfigGetText returns already translated values
+				g_Game.ConfigGetText( CFG_MAGAZINESPATH + " "  + mag + " displayName", displayName );
+				labels.Insert( displayName );
+			}
+		}
 
 		foreach ( string configPath : configPaths )
 		{
@@ -139,12 +152,8 @@ class JMESPActionMenu
 				if ( !g_Game.ConfigGetText( path + " model", model ) || model == "" || model == "bmp" )
 					continue;
 
-				if ( configPath == CFG_MAGAZINESPATH && !g_Game.ConfigIsExisting( path + " ammoItems" ) )  //! Skip ammo (can't be attached)
-					continue;
-
-				string displayName;
 				//! @note ConfigGetText returns already translated values
-				if ( !g_Game.ConfigGetText( path + " displayName", displayName ) || displayName.IndexOf("$UNT$") > -1 )
+				if ( !g_Game.ConfigGetText( path + " displayName", displayName ) || displayName == "" || displayName.IndexOf("$UNT$") > -1 )
 					continue;
 
 				array<string> invSlots = new array<string>();
