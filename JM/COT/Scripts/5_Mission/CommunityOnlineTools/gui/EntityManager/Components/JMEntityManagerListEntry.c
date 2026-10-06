@@ -59,7 +59,7 @@ class JMEntityManagerListEntry: COT_ScriptedWidgetEventHandler
 		if ( m_Entity.m_Id != "" )
 			id = " - " + m_Entity.m_Id;
 		else if ( m_Entity.m_NetworkIDHigh != 0 || m_Entity.m_NetworkIDLow != 0 )
-			id = " - ID: " + m_Entity.m_NetworkIDLow.ToString() + " / " + m_Entity.m_NetworkIDHigh.ToString();
+			id = " - ID: " + m_Entity.m_NetworkIDLow.ToString() + " | " + m_Entity.m_NetworkIDHigh.ToString();
 		m_Id.SetText( id );
 
 		m_Label = m_Entity.m_DisplayName + id;

@@ -56,7 +56,7 @@ class JMVehiclesListEntry: COT_ScriptedWidgetEventHandler
 		{
 			m_VehicleName.SetText( (m_Sort + 1).ToString() + " - " + m_Vehicle.m_DisplayName );
 
-			string id = " - ID: " + m_Vehicle.m_NetworkIDLow.ToString() + " / " + m_Vehicle.m_NetworkIDHigh.ToString();
+			string id = " - ID: " + m_Vehicle.m_NetworkIDLow.ToString() + " | " + m_Vehicle.m_NetworkIDHigh.ToString();
 			m_VehicleID.SetText( id );
 
 			m_Label = m_Vehicle.m_DisplayName + id;

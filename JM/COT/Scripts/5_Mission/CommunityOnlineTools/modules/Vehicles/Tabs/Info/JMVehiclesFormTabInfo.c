@@ -103,9 +103,9 @@ class JMVehiclesFormTabInfo: JMFormTab
 			statusText = "OK";
 		m_VehicleStatus.SetText( statusText );
 		m_VehicleType.SetText( vehicle.GetVehicleType() );
-		m_VehicleID.SetText( vehicle.m_NetworkIDLow.ToString() + " / " + vehicle.m_NetworkIDHigh.ToString() );
-		m_VehiclePersistentIDAB.SetText( vehicle.m_PersistentIDA.ToString() + " " + vehicle.m_PersistentIDB.ToString() );
-		m_VehiclePersistentIDCD.SetText( vehicle.m_PersistentIDC.ToString() + " " + vehicle.m_PersistentIDD.ToString() );
+		m_VehicleID.SetText( vehicle.m_NetworkIDLow.ToString() + " | " + vehicle.m_NetworkIDHigh.ToString() );
+		m_VehiclePersistentIDAB.SetText( vehicle.m_PersistentIDA.ToString() + " | " + vehicle.m_PersistentIDB.ToString() );
+		m_VehiclePersistentIDCD.SetText( vehicle.m_PersistentIDC.ToString() + " | " + vehicle.m_PersistentIDD.ToString() );
 		m_VehiclePosition.SetText( vehicle.m_Position.ToString() );
 		m_VehicleRotation.SetText( vehicle.m_Orientation.ToString() );
 

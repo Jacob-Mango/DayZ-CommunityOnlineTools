@@ -1243,7 +1243,7 @@ class JMESPActionMenu
 		//! Locally spawned objects don't have a netID
 		if ( m_Meta.networkLow || m_Meta.networkHigh )
 		{
-			string netIdLabel = "#STR_COT_ESP_MODULE_MENU_NETWORK_ID" + ": " + m_Meta.networkLow.ToString() + " / " + m_Meta.networkHigh.ToString();
+			string netIdLabel = "#STR_COT_ESP_MODULE_MENU_NETWORK_ID" + ": " + m_Meta.networkLow.ToString() + " | " + m_Meta.networkHigh.ToString();
 			Add( PREFIX_ACTION + "copynetid", netIdLabel, JMConstants.Lucide( "hash" ) );
 		}
 	}
