@@ -77,8 +77,23 @@ modded class Weapon_Base
 		auto magazinesValidated = new TStringArray;
 		foreach (string magazine: magazines)
 		{
-			if (g_Game.ConfigIsExisting("CfgMagazines " + magazine))
+			string path = CFG_MAGAZINESPATH + " " + magazine;
+			if (g_Game.ConfigIsExisting(path))
+			{
+				if ( g_Game.ConfigGetInt( path + " scope" ) != 2 )
+					continue;
+
+				string model;
+				if ( !g_Game.ConfigGetText( path + " model", model ) || model == "" || model == "bmp" )
+					continue;
+
+				string displayName;
+				//! @note ConfigGetText returns already translated values
+				if ( !g_Game.ConfigGetText( path + " displayName", displayName ) || displayName == "" || displayName.IndexOf("$UNT$") > -1 )
+					continue;
+
 				magazinesValidated.Insert(magazine);
+			}
 		}
 		return magazinesValidated;
 	}

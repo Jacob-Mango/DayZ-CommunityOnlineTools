@@ -2380,11 +2380,20 @@ class JMESPModule: JMRenderableModuleBase
 			g_Game.ObjectDelete( existing );
 		}
 
-		EntityAI created = inventory.CreateAttachmentEx( className, slotId );
-
 		string classAfter;
-		if ( created )
-			classAfter = className;
+		Weapon_Base weapon;
+		if ( slotId == InventorySlots.MAGAZINE && Class.CastTo( weapon, target ) )
+		{
+			if ( weapon.SpawnAmmo( className ) )
+				classAfter = className;
+		}
+		else
+		{
+			EntityAI created = inventory.CreateAttachmentEx( className, slotId );
+
+			if ( created )
+				classAfter = className;
+		}
 
 		if ( classBefore != classAfter )
 			JMActionHistory.Push( new JMAttachmentHistoryEntry( entity, slotId, classBefore, classAfter ), JMActionHistory.OwnerOf( ident ) );
@@ -3177,10 +3186,6 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! Attach a full magazine of whatever the weapon is configured to take.
-	//!
-	//! The type comes from the weapon's own magazines[] array rather than from
-	//! a list here: every weapon declares what fits it, and a table in this file
-	//! would be one more thing to keep in step with every mod that adds a gun.
 	protected bool Exec_LoadMagazine( Object target )
 	{
 		Weapon_Base weapon;
@@ -3188,34 +3193,26 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !Class.CastTo( weapon, target ) )
 			return false;
 
-		TStringArray magazines = new TStringArray;
-		g_Game.ConfigGetTextArray( "CfgWeapons " + weapon.GetType() + " magazines", magazines );
-
-		if ( magazines.Count() == 0 )
-			g_Game.ConfigGetTextArray( "CfgVehicles " + weapon.GetType() + " magazines", magazines );
-
-		if ( magazines.Count() == 0 )
-			return false;
-
-		//! Already wearing one: swap rather than stack a second in a slot that
-		//! only holds one anyway.
-		Magazine existing;
-
-		for ( int i = 0; i < weapon.GetInventory().AttachmentCount(); i++ )
+		int mi = weapon.GetCurrentMuzzle();
+		if ( !weapon.HasInternalMagazine( mi ) )
 		{
-			if ( Class.CastTo( existing, weapon.GetInventory().GetAttachmentFromIndex( i ) ) )
+			//! Already wearing one: swap rather than stack a second in a slot that
+			//! only holds one anyway.
+			Magazine existing;
+
+			for ( int i = 0; i < weapon.GetInventory().AttachmentCount(); i++ )
 			{
-				existing.ServerSetAmmoMax();
-				return true;
+				if ( Class.CastTo( existing, weapon.GetInventory().GetAttachmentFromIndex( i ) ) )
+				{
+					existing.ServerSetAmmoMax();
+					existing.SetSynchDirty();
+					weapon.Synchronize();
+					return true;
+				}
 			}
 		}
 
-		Magazine created;
-
-		if ( !Class.CastTo( created, weapon.GetInventory().CreateAttachment( magazines[0] ) ) )
-			return false;
-
-		created.ServerSetAmmoMax();
+		weapon.SpawnAmmo();
 
 		return true;
 	}
