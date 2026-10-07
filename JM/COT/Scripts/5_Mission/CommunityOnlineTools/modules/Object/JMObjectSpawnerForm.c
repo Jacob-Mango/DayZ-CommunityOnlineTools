@@ -28,6 +28,12 @@ class JMObjectSpawnerForm: JMFormBase
 	protected Widget m_ListWrapper;
 	protected UIActionScroller m_RightScroller;
 
+	//! The right column's two bands: the scroller (preview, properties,
+	//! export) and, pinned under it, the spawn footer - so Spawn is always on
+	//! screen, however long the property card for the selected class is.
+	protected Widget m_RightBody;
+	protected Widget m_RightFooter;
+
 	//! The property card - per-class rows and the values the admin picked.
 	protected ref JMObjectSpawnerProperties m_Props;
 	protected UIActionSearchBox m_SearchBox;
@@ -102,6 +108,10 @@ class JMObjectSpawnerForm: JMFormBase
 	static const int SEARCH_H = 34;
 	static const int FILTER_H = 36;
 	static const int RECENT_H = 36;
+
+	//! Height of the right column's spawn footer: a divider and two rows -
+	//! destination + setup, then Spawn + Delete.
+	static const int FOOTER_H = 80;
 
 	//! Row splits, as FRACTIONS of the row. Never a measured flex pass and
 	//! never a fraction mixed with fixed pixels - see OnCreate.
@@ -179,7 +189,9 @@ class JMObjectSpawnerForm: JMFormBase
 		//! The ONE thing that has to be computed: how far down the left column
 		//! the class list reaches. The three bands above it are fixed height
 		//! and the right column is a scroller that sizes itself, so nothing
-		//! else here depends on a measurement.
+		//! else here depends on a measurement - except where the right
+		//! column's scroller ends and its fixed-height spawn footer begins,
+		//! which is the same subtraction from the same h.
 		//!
 		//! h is real content-height layout pixels handed over by JMWindowBase -
 		//! not a widget's own GetScreenSize, which reads zero before the first
@@ -203,6 +215,13 @@ class JMObjectSpawnerForm: JMFormBase
 			//! frame it is built.
 			if ( m_ClassList )
 				m_ClassList.SetViewportHeight( listH );
+		}
+
+		//! The right column: the scroller takes everything above the footer.
+		if ( h > FOOTER_H )
+		{
+			PinBand( m_RightBody, 0, h - FOOTER_H );
+			PinBand( m_RightFooter, h - FOOTER_H, FOOTER_H );
 		}
 
 		if ( m_RightScroller )
@@ -308,7 +327,10 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ClassList.SetEmptyText( "#STR_COT_OBJECT_MODULE_NO_RESULTS" );
 
 		// --- Right column -----------------------------------------------------
-		m_RightScroller = UIActionManager.CreateScroller( m_RightPanel );
+		m_RightBody   = layoutRoot.FindAnyWidget( "spawner_right_body" );
+		m_RightFooter = layoutRoot.FindAnyWidget( "spawner_right_footer" );
+
+		m_RightScroller = UIActionManager.CreateScroller( m_RightBody );
 		Widget rightContent = m_RightScroller.GetContentWidget();
 
 		UIActionCard previewCard = UIActionManager.CreateCard( rightContent, "#STR_COT_OBJECT_MODULE_PREVIEW" );
@@ -349,8 +371,12 @@ class JMObjectSpawnerForm: JMFormBase
 
 		AddMode( m_SpawnModeIds, spawnModes, COT_ObjectSpawnerMode.OBJECT_INVENTORY, "#STR_COT_OBJECT_MODULE_SELECTED_OBJECTS" );
 
-		UIActionCard spawnCard = UIActionManager.CreateCard( rightContent, "#STR_COT_OBJECT_MODULE_SPAWN" );
-		Widget spawnBody = UIActionManager.CreateGridSpacer( spawnCard.GetContent(), 2, 1 );
+		//! Not a card in the scroller any more: a footer pinned under it, so
+		//! the Spawn button never scrolls away behind a long property card.
+		//! A divider stands in for the card's frame.
+		Widget spawnFooter = UIActionManager.CreateGridSpacer( m_RightFooter, 2, 1 );
+		UIActionManager.CreateDivider( spawnFooter, JMTheme.DIVIDER_MEDIUM, 1 );
+		Widget spawnBody = UIActionManager.CreateGridSpacer( spawnFooter, 2, 1 );
 
 		//! Every width in this card is a FRACTION of its row, never a measured
 		//! flex split. UIActionFlexRow can only divide a row it has already

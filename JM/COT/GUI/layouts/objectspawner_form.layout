@@ -81,6 +81,32 @@ PanelWidgetClass JMObjectSpawnerForm {
    vexactpos 0
    hexactsize 0
    vexactsize 0
+   {
+    PanelWidgetClass spawner_right_body {
+     clipchildren 1
+     color 0 0 0 0
+     position 0 0
+     size 1 520
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+    }
+    PanelWidgetClass spawner_right_footer {
+     clipchildren 1
+     color 0 0 0 0
+     position 0 520
+     size 1 80
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+    }
+   }
   }
   PanelWidgetClass panel_right_disable {
    visible 0
