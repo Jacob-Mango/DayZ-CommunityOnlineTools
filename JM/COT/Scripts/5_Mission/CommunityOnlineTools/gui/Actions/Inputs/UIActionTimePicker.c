@@ -67,6 +67,10 @@ class UIActionTimePicker: UIActionBase
 	//! seconds used to collapse to 0.
 	static const float COMMIT_DELAY = 0.6;
 
+	//! True while the user is working in a field, so callers that refresh the
+	//! control from outside can leave it alone instead of overwriting typed text.
+	bool IsEditing() { return m_EditingField >= 0; }
+
 	int GetHours()   { return m_H; }
 
 	int GetMinutes() { return m_M; }

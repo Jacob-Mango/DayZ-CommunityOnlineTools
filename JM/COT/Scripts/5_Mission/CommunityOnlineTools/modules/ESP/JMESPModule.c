@@ -3492,15 +3492,23 @@ class JMESPModule: JMRenderableModuleBase
 	//! rather than just that the button was pressed.
 	protected int Exec_SetLockAll( Object target, int locked )
 	{
-		array<Object> nearby = new array<Object>;
-		array<CargoBase> proxy = new array<CargoBase>;
+		vector centre = target.GetPosition();
+		vector extent = Vector( LOCK_ALL_RADIUS, LOCK_ALL_RADIUS, LOCK_ALL_RADIUS );
 
-		g_Game.GetObjectsAtPosition3D( target.GetPosition(), LOCK_ALL_RADIUS, nearby, proxy );
+		//! SceneGetEntitiesInBox instead of GetObjectsAtPosition3D: far cheaper,
+		//! and a lock only ever hangs off an EntityAI, so nothing is lost.
+		array<EntityAI> nearby = new array<EntityAI>;
+		DayZPlayerUtils.SceneGetEntitiesInBox( centre - extent, centre + extent, nearby, QueryFlags.DYNAMIC | QueryFlags.STATIC );
 
+		float radiusSq = LOCK_ALL_RADIUS * LOCK_ALL_RADIUS;
 		int touched = 0;
 
 		for ( int i = 0; i < nearby.Count(); i++ )
 		{
+			//! The box reaches past the radius in its corners - keep it a sphere.
+			if ( vector.DistanceSq( centre, nearby[i].GetPosition() ) > radiusSq )
+				continue;
+
 			CombinationLock combo = GetCombinationLock( nearby[i] );
 
 			if ( !combo )
