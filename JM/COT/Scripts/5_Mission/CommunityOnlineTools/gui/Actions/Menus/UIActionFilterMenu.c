@@ -62,6 +62,10 @@ class JMFilterMenuRow
 {
 	string Id;
 	string GotoPage;
+
+	//! Stay open after this row is picked even though its page closes on pick - for a checkbox
+	//! that sits among commands.
+	bool KeepOpen;
 }
 
 class JMFilterMenuPage
@@ -316,6 +320,15 @@ class UIActionFilterMenu
 		AddRow( id, label, rowIcon, ToggleTextColor( on ), enabled );
 	}
 
+	//! Mark a row just added on a close-on-pick page as one that leaves the menu open when picked.
+	void KeepRowOpen( string id )
+	{
+		JMFilterMenuRow row = FindRow( id );
+
+		if ( row )
+			row.KeepOpen = true;
+	}
+
 	//! Rows mods registered for this menu's scope - added after the page's own rows.
 	protected void AddRegisteredRows()
 	{
@@ -430,7 +443,10 @@ class UIActionFilterMenu
 		else if ( page.ChangeTarget && page.ChangeFn != "" )
 			GetGame().GameScript.CallFunctionParams( page.ChangeTarget, page.ChangeFn, null, new Param1<string>( id ) );
 
-		if ( page.CloseOnPick )
+		JMFilterMenuRow picked = FindRow( id );
+		bool keepOpen = picked && picked.KeepOpen;
+
+		if ( page.CloseOnPick && !keepOpen )
 			Close();
 		else
 			Refresh();

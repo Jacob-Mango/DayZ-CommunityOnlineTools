@@ -84,6 +84,10 @@ class JMLootAnalysisForm: JMFormBase
 	protected ref JMLootAnalysisFormTabItemScan    m_TabItemScanCtrl;
 	protected ref JMLootAnalysisFormTabDistribution m_TabDistributionCtrl;
 
+	//! Loader over the right column and the lock state it goes with - see UpdateScanLock.
+	protected ref JMBusySpinner m_ScanBusy;
+	protected bool m_ScanLocked;
+
 	//! Right-click marker menu, shared by both maps.
 	protected ref JMLootMarkerMenu m_MarkerMenu;
 
@@ -182,6 +186,8 @@ class JMLootAnalysisForm: JMFormBase
 		//! Same category filter (menu, groups, recent chips) as the Object Spawner.
 		m_Categories = new JMItemCategoryPicker(this, m_RecentWrapper, JMFilterRegistry.ITEMS, this, "OnCategoryChanged");
 
+		m_Categories.SetFooterToggle("#STR_COT_LOOTANALYSIS_ALLOW_NON_LOOT", false, this, "OnAllowNonLootChanged");
+
 		m_MarkerMenu = new JMLootMarkerMenu(this);
 
 		InitWidgetsLeft();
@@ -252,6 +258,38 @@ class JMLootAnalysisForm: JMFormBase
 		super.Update();
 
 		UpdateActiveTab();
+		UpdateScanLock();
+	}
+
+	//! While a scan is out, nothing that could start another one is usable and a loader spins over
+	//! the results. Locked on the change rather than every frame - the tabs' buttons also answer
+	//! to permissions, so they are handed back to those on release, not simply enabled.
+	protected void UpdateScanLock()
+	{
+		bool busy = m_Module && m_Module.IsScanInProgress();
+
+		if (m_ScanBusy)
+			m_ScanBusy.Update(busy);
+
+		if (busy == m_ScanLocked)
+			return;
+
+		m_ScanLocked = busy;
+
+		if (m_SearchBox)
+			m_SearchBox.SetEnabled(!busy);
+
+		if (m_FilterButton)
+			m_FilterButton.SetEnabled(!busy);
+
+		if (m_ItemList)
+			m_ItemList.SetEnabled(!busy);
+
+		if (m_TabItemScanCtrl)
+			m_TabItemScanCtrl.SetScanLocked(busy);
+
+		if (m_TabDistributionCtrl)
+			m_TabDistributionCtrl.SetScanLocked(busy);
 	}
 
 	// =========================================================================
@@ -295,6 +333,14 @@ class JMLootAnalysisForm: JMFormBase
 	{
 		if (eid == UIEvent.CLICK && m_Categories && m_FilterButton)
 			m_Categories.Toggle(m_FilterButton.GetLayoutRoot());
+	}
+
+	//! The filter menu's "allow non loot" checkbox: lets Item Scan look for objects that are
+	//! not loot items (a house, say) and list every position the server has one at.
+	void OnAllowNonLootChanged(bool allow)
+	{
+		if (m_Module)
+			m_Module.m_AllowNonLoot = allow;
 	}
 
 	//! The picker's change callback: "" is everything, otherwise the config base class to filter on.
@@ -387,7 +433,7 @@ class JMLootAnalysisForm: JMFormBase
 	protected void ActivateSelection()
 	{
 		string className = GetSelectedItem();
-		if (className == "" || !m_Module)
+		if (className == "" || !m_Module || m_ScanLocked)
 			return;
 
 		if (GetActiveTabIndex() == m_TabIdDistribution)
@@ -416,6 +462,9 @@ class JMLootAnalysisForm: JMFormBase
 		m_Tabs.SetSelection(m_TabIdItemScan, false);
 
 		InitTabFocus(m_TabIdItemScan);
+
+		//! Last child of the content area, so it is drawn over both tabs' maps
+		m_ScanBusy = new JMBusySpinner(m_RightContent, 40);
 	}
 
 	override protected void OnTabCreate( int tab, Widget panel )

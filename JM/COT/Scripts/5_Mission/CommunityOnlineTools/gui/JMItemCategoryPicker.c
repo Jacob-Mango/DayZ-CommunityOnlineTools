@@ -36,6 +36,9 @@ class JMItemCategoryPicker
 	static const string MENU_ID_ALL = "__all";
 	static const string PAGE_ROOT   = "root";
 
+	//! Id of the optional checkbox at the bottom of the root page (see SetFooterToggle).
+	static const string MENU_ID_FOOTER = "__footer";
+
 	//! How many recently used categories get a chip.
 	static const int RECENT_MAX = 4;
 	protected JMFormBase m_Form;
@@ -45,6 +48,10 @@ class JMItemCategoryPicker
 	protected string m_ChangeFn;
 	protected string m_Current;
 	protected ref UIActionFilterMenu m_Menu;
+	protected string m_FooterLabel;
+	protected bool m_FooterOn;
+	protected Class m_FooterTarget;
+	protected string m_FooterFn;
 	protected ref TStringArray m_RecentIds = new TStringArray;
 	protected ref array<ref UIActionButton> m_RecentButtons = new array<ref UIActionButton>;
 
@@ -63,6 +70,16 @@ class JMItemCategoryPicker
 	// -------------------------------------------------------------------------
 	//  State
 	// -------------------------------------------------------------------------
+
+	//! Adds a checkbox as the last row of the root page, for a filter that is not a
+	//! category. `fn` is `void Fn( bool on )` on `target`, called when it is toggled.
+	void SetFooterToggle( string label, bool on, Class target, string fn )
+	{
+		m_FooterLabel = label;
+		m_FooterOn = on;
+		m_FooterTarget = target;
+		m_FooterFn = fn;
+	}
 
 	//! The active category id ("" = everything).
 	string GetCurrent()
@@ -325,6 +342,12 @@ class JMItemCategoryPicker
 
 			menu.AddRow( gids[i], glabels[i], gicons[i], color, true, gids[i] );
 		}
+
+		if ( m_FooterLabel != "" )
+		{
+			menu.AddToggleRow( MENU_ID_FOOTER, m_FooterLabel, m_FooterOn );
+			menu.KeepRowOpen( MENU_ID_FOOTER );
+		}
 	}
 
 	//! Only ever reached for MENU_ID_ALL - the four group rows above switch
@@ -332,7 +355,16 @@ class JMItemCategoryPicker
 	void OnRootChange( string id )
 	{
 		if ( id == MENU_ID_ALL )
+		{
 			Select( "" );
+		}
+		else if ( id == MENU_ID_FOOTER )
+		{
+			m_FooterOn = !m_FooterOn;
+
+			if ( m_FooterTarget && m_FooterFn != "" )
+				GetGame().GameScript.CallFunctionParams( m_FooterTarget, m_FooterFn, null, new Param1<bool>( m_FooterOn ) );
+		}
 	}
 
 	void BuildGroupPage( UIActionFilterMenu menu )

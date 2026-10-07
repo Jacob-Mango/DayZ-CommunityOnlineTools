@@ -85,6 +85,28 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//! round-trip it back over the RPC.
 	protected string m_LastScanClassName;
 
+	//! Client: the filter menu's "allow non loot" checkbox, sent with each scan request.
+	bool m_AllowNonLoot;
+
+	//! Client: true from sending a scan until its result arrives, so the form can lock its search actions.
+	protected bool m_ScanInProgress;
+	protected float m_ScanStartTime;
+
+	//! A reply that never comes (a lookup the server rejects answers with a notification only)
+	//! must not leave the form locked, so the lock gives up after this many seconds.
+	static const float SCAN_LOCK_TIMEOUT = 20;
+
+	bool IsScanInProgress()
+	{
+		return m_ScanInProgress && g_Game.GetTickTime() - m_ScanStartTime < SCAN_LOCK_TIMEOUT;
+	}
+
+	protected void BeginScan()
+	{
+		m_ScanInProgress = true;
+		m_ScanStartTime = g_Game.GetTickTime();
+	}
+
 	void JMLootAnalysisModule()
 	{
 		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemScan", this, SingeplayerExecutionType.Server);
@@ -516,7 +538,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance))
 			return;
 
-		Param1<string> data;
+		Param2<string, bool> data;
 		if (!ctx.Read(data))
 			return;
 
@@ -527,7 +549,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log(senderRPC, "Item scan: " + className);
 		SendWebhook("ItemScan", instance, "Scanned for: " + className);
 
-		Exec_ScanItems(className, senderRPC);
+		Exec_ScanItems(className, senderRPC, data.param2);
 		Exec_SendItemTypeInfo(className, senderRPC);
 	}
 
@@ -694,15 +716,70 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//  Server logic
 	// -----------------------------------------------------------------------
 
+	//! Every world object whose classname is `className`: entities are added to `found`, anything
+	//! that is a plain Object (static map props) to `plainObjects`. One sphere from the map's
+	//! centre that reaches every corner; the engine answers with everything inside it.
+	protected void AddNonLootObjects(string className, set<EntityAI> found, array<Object> plainObjects)
+	{
+		string wanted = className;
+		wanted.ToLower();
+
+		float worldSize = 15360;
+		if (g_Game.GetWorld())
+			worldSize = g_Game.GetWorld().GetWorldSize();
+
+		vector centre = Vector(worldSize * 0.5, 0, worldSize * 0.5);
+
+		array<Object> objects = new array<Object>;
+		array<CargoBase> proxies = new array<CargoBase>;
+
+		g_Game.GetObjectsAtPosition3D(centre, worldSize, objects, proxies);
+
+		foreach (Object obj : objects)
+		{
+			//! The engine's own class check goes first: it discards almost everything on the map
+			//! without building a lowercase string for it, which the exact match below needs.
+			if (!obj || !obj.IsKindOf(className))
+				continue;
+
+			string objType = obj.GetType();
+			objType.ToLower();
+
+			if (objType != wanted)
+				continue;
+
+			EntityAI entity;
+			if (Class.CastTo(entity, obj))
+			{
+				if (found.Find(entity) == -1)
+					found.Insert(entity);
+			}
+			else
+			{
+				plainObjects.Insert(obj);
+			}
+		}
+	}
+
 	// Server: Scan for spawned items and send positions to client
-	protected void Exec_ScanItems(string className, PlayerIdentity senderRPC)
+	//! `allowNonLoot` also sweeps the whole world for objects of that class - the entity
+	//! tracker only knows loot items, so a map building would never show up otherwise.
+	protected void Exec_ScanItems(string className, PlayerIdentity senderRPC, bool allowNonLoot = false)
 	{
 		set<EntityAI> found = new set<EntityAI>;
 		JMEntityTracker.GetByClassname(className, found);
 
-		if (!found || found.Count() == 0)
+		array<Object> plainObjects = new array<Object>;
+
+		if (allowNonLoot)
+			AddNonLootObjects(className, found, plainObjects);
+
+		if ((!found || found.Count() == 0) && plainObjects.Count() == 0)
 		{
 			COTCreateNotification(senderRPC, new StringLocaliser("No spawned items found: " + className));
+
+			//! The client is waiting on a reply to release its lock, so it gets an empty one
+			GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", new Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>>(new array<string>, new array<vector>, new array<float>, new array<float>, new array<int>, new array<string>, new array<int>, new array<string>), true, senderRPC);
 			return;
 		}
 
@@ -830,6 +907,19 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 			names.Insert(displayName);
 			positions.Insert(entity.GetPosition());
+		}
+
+		//! Plain objects have none of the per-item stats - every parallel entry is the "N/A" sentinel
+		foreach (Object plain : plainObjects)
+		{
+			names.Insert("");
+			positions.Insert(plain.GetPosition());
+			healthPct.Insert(-1);
+			quantityPct.Insert(-1);
+			lifetimeSeconds.Insert(-1);
+			attachmentsJoined.Insert("");
+			ammoCount.Insert(-1);
+			previewStates.Insert("");
 		}
 
 		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", new Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>>(names, positions, healthPct, quantityPct, lifetimeSeconds, attachmentsJoined, ammoCount, previewStates), true, senderRPC);
@@ -1134,6 +1224,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// Client: Show item scan results on the Item Scan tab's map
 	protected void Client_ShowItemsOnMap(array<string> itemNames, array<vector> itemPositions, array<float> healthPct, array<float> quantityPct, array<int> lifetimeSeconds, array<string> attachmentsJoined, array<int> ammoCount, array<string> previewStates)
 	{
+		m_ScanInProgress = false;
+
 		if (itemNames.Count() != itemPositions.Count())
 			return;
 
@@ -1191,6 +1283,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// Client: Show CE spawn-location results on the Distribution tab's map
 	protected void Client_ShowLootSpawnLocations(array<string> names, array<vector> positions, array<string> types)
 	{
+		m_ScanInProgress = false;
+
 		if (names.Count() != positions.Count())
 			return;
 
@@ -1209,7 +1303,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	void RequestItemScan(string className)
 	{
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_RequestItemScan", new Param1<string>(className), true);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_RequestItemScan", new Param2<string, bool>(className, m_AllowNonLoot), true);
 	}
 
 	void RequestLootDistribution(string className)
@@ -1241,11 +1335,13 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	void ShowItemsOnMap(string className)
 	{
 		m_LastScanClassName = className;
+		BeginScan();
 		RequestItemScan(className);
 	}
 
 	void ShowCESpawnLocations(string className)
 	{
+		BeginScan();
 		RequestLootDistribution(className);
 	}
 }

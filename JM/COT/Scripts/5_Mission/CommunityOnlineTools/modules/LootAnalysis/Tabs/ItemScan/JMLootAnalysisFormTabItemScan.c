@@ -136,6 +136,18 @@ class JMLootAnalysisFormTabItemScan: JMFormTab
 		Layout(m_Form.m_LastRightContentH);
 	}
 
+	//! Locked while a scan is out; on release the button goes back to whatever its permission says.
+	void SetScanLocked(bool locked)
+	{
+		if (!m_ShowOnMapButton)
+			return;
+
+		if (locked)
+			m_ShowOnMapButton.SetEnabled(false);
+		else
+			m_Form.UpdatePermission(m_ShowOnMapButton, JMConstants.PERM_LOOTANALYSIS_ITEMSCAN);
+	}
+
 	void OnClick_ShowOnMap(UIEvent eid, UIActionBase action)
 	{
 		if (eid != UIEvent.CLICK)
