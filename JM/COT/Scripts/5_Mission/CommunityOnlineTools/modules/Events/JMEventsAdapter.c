@@ -192,16 +192,16 @@ class JMEventsAdapter: JMEntityManagerAdapter
 	{
 		m_StaticCache.Clear();
 
-		// Single sweep from map centre with a box that covers all DayZ maps.
-		// On non-Sakhal maps every IsKindOf check fails, so nothing is inserted.
-		vector centre = "10000 0 10000";
-		vector extent = "20000 20000 20000";
+		float worldSize = g_Game.GetWorld().GetWorldSize();
+
+		vector minPos = Vector(0, -1000, 0);
+		vector maxPos = Vector(worldSize, 1000, worldSize);
 
 		// SceneGetEntitiesInBox instead of GetObjectsAtPosition3D: far cheaper.
 		// Both targets are House-derived map objects, so EntityAI is enough;
 		// STATIC is required since they are part of the map.
 		array<EntityAI> found = new array<EntityAI>;
-		DayZPlayerUtils.SceneGetEntitiesInBox( centre - extent, centre + extent, found, QueryFlags.STATIC );
+		DayZPlayerUtils.SceneGetEntitiesInBox( minPos, maxPos, found, QueryFlags.STATIC );
 
 		foreach ( EntityAI obj: found )
 		{

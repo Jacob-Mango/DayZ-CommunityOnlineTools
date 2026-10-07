@@ -716,48 +716,40 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//  Server logic
 	// -----------------------------------------------------------------------
 
-	//! Every world object whose classname is `className`: entities are added to `found`, anything
-	//! that is a plain Object (static map props) to `plainObjects`. One sphere from the map's
-	//! centre that reaches every corner; the engine answers with everything inside it.
-	protected void AddNonLootObjects(string className, set<EntityAI> found, array<Object> plainObjects)
+	//! Every world object whose classname is `className`: entities are added to `found`.
+	protected void AddNonLootObjects(string className, set<EntityAI> found)
 	{
+	#ifdef EXTRACE
+		auto trace = EXTrace.Start(true, this);
+	#endif
+
 		string wanted = className;
 		wanted.ToLower();
 
-		float worldSize = 15360;
-		if (g_Game.GetWorld())
-			worldSize = g_Game.GetWorld().GetWorldSize();
+		float worldSize = g_Game.GetWorld().GetWorldSize();
 
-		vector centre = Vector(worldSize * 0.5, 0, worldSize * 0.5);
+		vector minPos = Vector(0, -1000, 0);
+		vector maxPos = Vector(worldSize, 1000, worldSize);
 
-		array<Object> objects = new array<Object>;
-		array<CargoBase> proxies = new array<CargoBase>;
+		//! SceneGetEntitiesInBox instead of GetObjectsAtPosition3D: far cheaper.
+		array<EntityAI> candidates = {};
+		QueryFlags flags;
+		if (g_Game.IsKindOf(className, "House"))  //! 'House' is the superclass in rvConfig for all buildings
+			flags = QueryFlags.STATIC;
+		else
+			flags = QueryFlags.DYNAMIC;
+		DayZPlayerUtils.SceneGetEntitiesInBox( minPos, maxPos, candidates, flags );
 
-		g_Game.GetObjectsAtPosition3D(centre, worldSize, objects, proxies);
-
-		foreach (Object obj : objects)
+		foreach (EntityAI entity : candidates)
 		{
-			//! The engine's own class check goes first: it discards almost everything on the map
-			//! without building a lowercase string for it, which the exact match below needs.
-			if (!obj || !obj.IsKindOf(className))
-				continue;
-
-			string objType = obj.GetType();
+			string objType = entity.GetType();
 			objType.ToLower();
 
 			if (objType != wanted)
 				continue;
 
-			EntityAI entity;
-			if (Class.CastTo(entity, obj))
-			{
-				if (found.Find(entity) == -1)
-					found.Insert(entity);
-			}
-			else
-			{
-				plainObjects.Insert(obj);
-			}
+			//! no need to check if entity is already in set as set entries are guaranteed unique
+			found.Insert(entity);
 		}
 	}
 
@@ -769,12 +761,10 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		set<EntityAI> found = new set<EntityAI>;
 		JMEntityTracker.GetByClassname(className, found);
 
-		array<Object> plainObjects = new array<Object>;
-
 		if (allowNonLoot)
-			AddNonLootObjects(className, found, plainObjects);
+			AddNonLootObjects(className, found);
 
-		if ((!found || found.Count() == 0) && plainObjects.Count() == 0)
+		if (found.Count() == 0)
 		{
 			COTCreateNotification(senderRPC, new StringLocaliser("No spawned items found: " + className));
 
@@ -907,19 +897,6 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 			names.Insert(displayName);
 			positions.Insert(entity.GetPosition());
-		}
-
-		//! Plain objects have none of the per-item stats - every parallel entry is the "N/A" sentinel
-		foreach (Object plain : plainObjects)
-		{
-			names.Insert("");
-			positions.Insert(plain.GetPosition());
-			healthPct.Insert(-1);
-			quantityPct.Insert(-1);
-			lifetimeSeconds.Insert(-1);
-			attachmentsJoined.Insert("");
-			ammoCount.Insert(-1);
-			previewStates.Insert("");
 		}
 
 		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", new Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>>(names, positions, healthPct, quantityPct, lifetimeSeconds, attachmentsJoined, ammoCount, previewStates), true, senderRPC);
