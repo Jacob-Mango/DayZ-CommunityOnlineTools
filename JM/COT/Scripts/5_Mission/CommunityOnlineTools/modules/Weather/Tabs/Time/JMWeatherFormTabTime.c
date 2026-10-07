@@ -36,7 +36,8 @@ class JMWeatherFormTabTime: JMFormTab
 			m_SpinnerDay.SetValue( preset.PDate.Day );
 		}
 
-		if ( m_TimeOfDay )
+		//! The periodic refresh would otherwise overwrite digits typed but not yet committed.
+		if ( m_TimeOfDay && !m_TimeOfDay.IsEditing() )
 			m_TimeOfDay.SetTotalSeconds( ( preset.PDate.Hour * 3600 ) + ( preset.PDate.Minute * 60 ) );
 	}
 
