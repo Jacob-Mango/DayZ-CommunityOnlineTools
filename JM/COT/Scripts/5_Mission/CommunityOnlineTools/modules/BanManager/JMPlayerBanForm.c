@@ -11,6 +11,9 @@ class JMBanForm : JMFormBase
     // Duration presets
     static const int DURATION_COUNT = 8;
 
+    //! Height of panel_top - the search row. Pinned in ban_form.layout too.
+    static const int TOP_HEIGHT = 40;
+
     // -------------------------------------------------------------------------
     //  Widgets
     // -------------------------------------------------------------------------
@@ -28,8 +31,10 @@ class JMBanForm : JMFormBase
     // Shared search bar (filters both dropdown and ban list)
     protected UIActionSearchBox             m_SearchBar;
 
-    // Action toolbar (above ban list) - lives outside any tab's content panel,
-    // so its click handlers stay on the form and forward into JMBanFormTabBans.
+    // Actions on the selected ban. They used to be a toolbar above the tab
+    // strip; they now live on the Active Bans tab's detail card (built by
+    // BuildSelectionActions), but their click handlers stay on the form and
+    // forward into JMBanFormTabBans.
     protected UIActionButton                m_EditDurationBtn;
     protected UIActionConfirmInline         m_UnbanBtn;
 
@@ -87,9 +92,30 @@ class JMBanForm : JMFormBase
     }
 
     // -------------------------------------------------------------------------
-    //  Toolbar - lives above the tab strip, so its handlers stay here and
-    //  forward into whichever tab actually owns the selection/duration state.
+    //  Selection actions - Unban and Edit Duration. Built onto the Active Bans
+    //  detail card, but their handlers stay here and forward into whichever
+    //  tab actually owns the selection/duration state.
     // -------------------------------------------------------------------------
+
+    //! Build Unban (a confirm icon in `card`'s title bar) and Edit Duration
+    //! (a full-width button in `content`). Called by JMBanFormTabBans when it
+    //! builds its detail card; public for that reason.
+    void BuildSelectionActions( UIActionCard card, Widget content )
+    {
+        m_UnbanBtn = UIActionManager.CreateDeleteConfirmIcon( card.GetHeaderActions(), this, "OnClick_Unban" );
+        m_UnbanBtn.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
+        m_UnbanBtn.CenterIcon( HEADER_ACTION_PX, 16 );
+        m_UnbanBtn.SetTooltip( "#STR_COT_BANMANAGER_LIFT_THE_SELECTED_BAN_S_IMMEDIATELY" );
+        m_UnbanBtn.Disable();
+
+        m_EditDurationBtn = UIActionManager.CreateButton( content, "#STR_COT_BANMANAGER_EDIT_DURATION", this, "OnClick_EditDuration" );
+        m_EditDurationBtn.SetWidth( 1.0 );
+        m_EditDurationBtn.SetIcon( JMConstants.Lucide( "clock" ) );
+        m_EditDurationBtn.Disable();
+        m_EditDurationBtn.SetTooltip( "#STR_COT_BANMANAGER_CHANGE_THE_DURATION_OF_THE_SELECTED" );
+
+        BindPermission( m_UnbanBtn, JMConstants.PERM_BAN_UNBAN );
+    }
 
     void SetToolbarEnabled( bool enabled )
     {
@@ -125,32 +151,18 @@ class JMBanForm : JMFormBase
         InitWidgetsBottom();
     }
 
-    //! Filter and the actions that apply to the current selection. Archetype B:
-    //! a fixed header over a data grid, not a roster over a detail pane - the
-    //! ban list is a table, and it wants the whole width.
+    //! The filter, shared by both tabs. Archetype B: a fixed header over
+    //! tabbed content. The Active Bans tab is itself a roster over a detail
+    //! pane - see JMBanFormTabBans - so the actions that apply to the
+    //! selected ban live on its detail card, not up here.
     protected void InitWidgetsTop()
     {
         Widget top = layoutRoot.FindAnyWidget( "panel_top" );
 
-        JMSearchRow toolbar = UIActionManager.CreateSearchFlexRow( top, "Search name / SteamID...", this, "OnChange_Search", "OnClick_Refresh" );
+        JMSearchRow toolbar = UIActionManager.CreateSearchFlexRow( top, "Search name / SteamID...", this, "OnChange_Search", "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH", 30 );
 
         m_SearchRow = toolbar.Row;
         m_SearchBar = toolbar.Search;
-
-        // Toolbar: Unban (delete-style icon) + Edit Duration. Both act on the
-        // checked rows, so they belong with the filter, above the grid.
-        Widget toolbarRow = UIActionManager.CreateWrapSpacer( top, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-
-        m_UnbanBtn = UIActionManager.CreateDeleteConfirmIcon( toolbarRow, this, "OnClick_Unban" );
-        m_UnbanBtn.SetTooltip( "#STR_COT_BANMANAGER_LIFT_THE_SELECTED_BAN_S_IMMEDIATELY" );
-        m_UnbanBtn.Disable();
-
-        m_EditDurationBtn = UIActionManager.CreateButton( toolbarRow, "#STR_COT_BANMANAGER_EDIT_DURATION", this, "OnClick_EditDuration" );
-        m_EditDurationBtn.SetWidth( 1.0 );
-        m_EditDurationBtn.Disable();
-        m_EditDurationBtn.SetTooltip( "#STR_COT_BANMANAGER_CHANGE_THE_DURATION_OF_THE_SELECTED" );
-
-        BindPermission( m_UnbanBtn, JMConstants.PERM_BAN_UNBAN );
     }
 
     protected void InitWidgetsBottom()
@@ -205,9 +217,22 @@ class JMBanForm : JMFormBase
     {
         super.OnResize( w, h );
 
-        PinBottomPanelGeometry( h - 80 );
+        PinBottomPanelGeometry( h - TOP_HEIGHT );
+
+        //! The search row is a flex row: until Layout() runs, the search box
+        //! keeps its full default width and wraps under the refresh button.
+        //! It measures the row, which reads 0 before the first render, so
+        //! run it again once the form has drawn.
+        LayoutSearchRow();
+        DeferCall( "LayoutSearchRow", 50 );
 
         ResizeTabs( w, h );
+    }
+
+    void LayoutSearchRow()
+    {
+        if ( m_SearchRow )
+            m_SearchRow.Layout();
     }
 
     // -------------------------------------------------------------------------

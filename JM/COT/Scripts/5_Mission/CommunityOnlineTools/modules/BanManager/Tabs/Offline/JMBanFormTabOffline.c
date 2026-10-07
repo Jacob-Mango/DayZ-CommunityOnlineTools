@@ -20,7 +20,12 @@ class JMBanFormTabOffline: JMFormTab
     {
         super.OnCreate( panel );
 
-        UIActionCard card = UIActionManager.CreateScrollCard( panel, "Ban Offline Player", m_OfflineScroller );
+        //! Two cards, one per way of naming the player: picked from the
+        //! players the server has seen, or typed in as a SteamID.
+        m_OfflineScroller = UIActionManager.CreateScroller( panel );
+        Widget content = m_OfflineScroller.GetContentWidget();
+
+        UIActionCard card = UIActionManager.CreateCard( content, "Ban Offline Player" );
         Widget cardBody = card.GetContent();
 
         // Player dropdown - full width, populated on data arrival
@@ -31,17 +36,23 @@ class JMBanFormTabOffline: JMFormTab
 
         m_PlayerPicker = UIActionManager.CreatePlayerPicker( this, "OnPlayerPickerSelection" );
 
-        // Action row: Ban Selected + Ban by ID
-        // Fractional widths must sum < 1.0 in WrapSpacer or the second child
-        // wraps. Use 0.71+0.28 = 0.99 to preserve the 72/28 visual proportion.
-        m_BanOfflineActionsRow = UIActionManager.CreateWrapSpacer( cardBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+        // Action row: Ban Selected, full width under the dropdown it acts on.
+        m_BanOfflineActionsRow = UIActionManager.CreateWrapSpacerCompact( cardBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
         UIActionButton banSelBtn = UIActionManager.CreateButton( m_BanOfflineActionsRow, "#STR_COT_BANMANAGER_BAN_SELECTED", this, "OnClick_ManualBanSelected" );
-        banSelBtn.SetWidth( 0.71 );
+        banSelBtn.SetWidth( 1.0 );
+        banSelBtn.SetIcon( JMConstants.Lucide( "gavel" ) );
         banSelBtn.SetColor( JMTheme.DANGER_FILL );
         banSelBtn.SetTooltip( "#STR_COT_BANMANAGER_BAN_THE_PLAYER_SELECTED_IN_THE" );
 
-        UIActionButton banByIDBtn = UIActionManager.CreateButton( m_BanOfflineActionsRow, "#STR_COT_BANMANAGER_BAN_BY_ID", this, "OnClick_ManualBan" );
-        banByIDBtn.SetWidth( 0.28 );
+        // Ban by ID - its own card: it does not use the dropdown at all.
+        UIActionCard idCard = UIActionManager.CreateCard( content, "#STR_COT_BANMANAGER_BAN_BY_ID" );
+        Widget idBody = idCard.GetContent();
+
+        UIActionManager.CreateText( idBody, "#STR_COT_BANMANAGER_BAN_AN_OFFLINE_PLAYER_BY_TYPING" );
+
+        UIActionButton banByIDBtn = UIActionManager.CreateButton( idBody, "#STR_COT_BANMANAGER_BAN_BY_ID", this, "OnClick_ManualBan" );
+        banByIDBtn.SetWidth( 1.0 );
+        banByIDBtn.SetIcon( JMConstants.Lucide( "user-x" ) );
         banByIDBtn.SetTooltip( "#STR_COT_BANMANAGER_BAN_AN_OFFLINE_PLAYER_BY_TYPING" );
 
         // The ban itself is executed through JMPlayerModule.Ban, so it is that

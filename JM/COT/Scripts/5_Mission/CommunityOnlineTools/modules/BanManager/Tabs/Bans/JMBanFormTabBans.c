@@ -1,7 +1,14 @@
-//! "Active Bans" tab of JMBanForm - the ban list, its checkbox selection, and
-//! the inline duration picker. Holds a back-reference to the owning form (same
+//! "Active Bans" tab of JMBanForm - the ban list, its selection, and the
+//! inline duration picker. Holds a back-reference to the owning form (same
 //! shape as JMPlayerRowWidget.Menu) so it can reach the form's module and
 //! toolbar without either class needing to inherit the other.
+//!
+//! Laid out as a roster over a detail pane (ban_form.layout):
+//!
+//!   ban_list_left    one row per ban - player name, expiry
+//!   ban_list_detail  the selected ban as a card: who, why, until when,
+//!                    by whom; Unban in its title bar, Edit Duration and
+//!                    the duration picker under it
 class JMBanFormTabBans: JMFormTab
 {
     protected JMBanForm m_Form;
@@ -15,15 +22,30 @@ class JMBanFormTabBans: JMFormTab
     protected bool              m_DurationPickerVisible;
     protected Widget m_BanListWrapper;
 
-    // Checkboxes mapped by SteamID so we can clear them on re-selection
+    //! DEPRECATED - rows are no longer checkboxes; selection is the list's
+    //! own. Kept, always empty, for sub-mods that iterate it.
     protected ref map< string, UIActionCheckbox > m_BanCheckboxes = new map< string, UIActionCheckbox >();
 
-    // Selection tracking - SteamID of the checked ban entry
+    // Selection tracking - SteamID of the selected ban entry
     protected string m_SelectedBanSteamID;
     protected string m_SelectedBanPlayerName;
 
     // Cached ban list
     protected autoptr array<ref JMPlayerBan> m_BanList = new array<ref JMPlayerBan>();
+
+    // ---- Roster ----------------------------------------------------------------
+    protected Widget              m_ListHost;
+    protected UIActionItemList    m_List;
+
+    //! SteamID for every row currently in the list, in row order.
+    protected ref TStringArray    m_ListSteamIDs = new TStringArray();
+
+    // ---- Detail ----------------------------------------------------------------
+    protected Widget                m_DetailHost;
+    protected Widget                m_DetailEmpty;
+    protected Widget                m_DetailWrapper;
+    protected UIActionCard          m_DetailCard;
+    protected UIActionKeyValueList  m_DetailValues;
 
     void JMBanFormTabBans( JMBanForm form )
     {
@@ -43,12 +65,34 @@ class JMBanFormTabBans: JMFormTab
     {
         super.OnCreate( panel );
 
-        m_Scroller      = UIActionManager.CreateScroller( panel );
+        m_ListHost   = panel.FindAnyWidget( "ban_list_left" );
+        m_DetailHost = panel.FindAnyWidget( "ban_list_detail" );
+
+        // ---- Roster -------------------------------------------------------
+        m_List = UIActionManager.CreateItemList( m_ListHost, this, "OnClick_BanRow" );
+        m_List.SetEmptyText( "#STR_COT_BANMANAGER_NO_ACTIVE_BANS" );
+
+        // ---- Detail -------------------------------------------------------
+        m_Scroller      = UIActionManager.CreateScroller( m_DetailHost );
         m_ContentWidget = m_Scroller.GetContentWidget();
 
-        m_ActiveBansHeader = UIActionManager.CreateText( m_ContentWidget, "#STR_COT_BANMANAGER_ACTIVE_BANS" );
+        //! What the pane says while nothing is selected: the count, and how to
+        //! get further.
+        m_DetailEmpty = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 1 );
+        m_ActiveBansHeader = UIActionManager.CreateText( m_DetailEmpty, "#STR_COT_BANMANAGER_ACTIVE_BANS", "Select a ban on the left" );
 
-        m_DurationPickerWrapper = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 2 );
+        m_DetailWrapper = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 1 );
+
+        m_DetailCard = UIActionManager.CreateCard( m_DetailWrapper, "" );
+        Widget cardBody = m_DetailCard.GetContent();
+
+        m_DetailValues = UIActionManager.CreateKeyValueList( cardBody );
+
+        UIActionManager.CreateDivider( cardBody, JMTheme.DIVIDER_DARK, 1 );
+
+        m_Form.BuildSelectionActions( m_DetailCard, cardBody );
+
+        m_DurationPickerWrapper = UIActionManager.CreateGridSpacer( cardBody, 1, 2 );
 
         array<string> durationOptions = new array<string>();
         for ( int d = 0; d < JMBanForm.DURATION_COUNT; d++ )
@@ -66,17 +110,27 @@ class JMBanFormTabBans: JMFormTab
         m_DurationPickerWrapper.Show( false );
         m_DurationPickerVisible = false;
 
-        UIActionManager.CreateDivider( m_ContentWidget, JMTheme.DIVIDER_LIGHT, 1 );
-
-        // ---- Ban list (populated dynamically) ------------------------------
+        //! Kept for sub-mods that add rows to it; the roster replaced the
+        //! table it used to hold.
         m_BanListWrapper = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 1 );
-        UIActionManager.CreateText( m_BanListWrapper, "#STR_COT_BANMANAGER_LOADING" );
+
+        ShowDetail( null );
 
         m_Scroller.UpdateScroller();
     }
 
     override void OnResize( float w, float h )
     {
+        //! h is the whole form's height. The roster gets what is left under
+        //! the search row and the (possibly wrapped) tab strip, and is told
+        //! that height rather than measuring it.
+        if ( m_List )
+        {
+            float listH = h - JMBanForm.TOP_HEIGHT - m_Form.GetPinnedStripHeight( m_Form.GetBottomTabStrip() );
+            if ( listH > 0 )
+                m_List.SetViewportHeight( listH );
+        }
+
         if ( m_Scroller )
             m_Scroller.UpdateScroller();
     }
@@ -89,46 +143,18 @@ class JMBanFormTabBans: JMFormTab
     {
         // Arrives from a server response, which does not wait for the Active
         // Bans tab to have been opened.
-        if ( !m_ContentWidget )
+        if ( !m_List )
             return;
 
-        // Clear selection whenever list rebuilds
-        m_SelectedBanSteamID    = "";
-        m_SelectedBanPlayerName = "";
-        m_BanCheckboxes.Clear();
-        UpdateToolbarState();
         HideDurationPicker();
-
-        if ( m_BanListWrapper )
-            m_BanListWrapper.Unlink();
-
-        m_BanListWrapper = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 1 );
-
-        if ( !m_BanList || m_BanList.Count() == 0 )
-        {
-            if ( m_ActiveBansHeader )
-                m_ActiveBansHeader.SetLabel( "Active Bans (0)" );
-            UIActionManager.CreateText( m_BanListWrapper, "#STR_COT_BANMANAGER_NO_ACTIVE_BANS" );
-            m_Scroller.UpdateScroller();
-            return;
-        }
-
-        filter.ToLower();
 
         if ( m_ActiveBansHeader )
             m_ActiveBansHeader.SetLabel( "Active Bans (" + m_BanList.Count() + ")" );
 
-        bool canUnban = JMPermissions.Has( JMConstants.PERM_BAN_UNBAN );
+        m_ListSteamIDs.Clear();
 
-        // Column headers: checkbox col + 4 data cols
-        Widget header = UIActionManager.CreateGridSpacer( m_BanListWrapper, 1, 5 );
-        UIActionManager.CreateText( header, ""                 );  // checkbox column
-        UIActionManager.CreateText( header, "#STR_COT_BANMANAGER_PLAYER_STEAMID" );
-        UIActionManager.CreateText( header, "#STR_COT_BANMANAGER_REASON"           );
-        UIActionManager.CreateText( header, "#STR_COT_BANMANAGER_EXPIRES"          );
-        UIActionManager.CreateText( header, "#STR_COT_BANMANAGER_BANNED_BY"        );
-
-        UIActionManager.CreateDivider( m_BanListWrapper, JMTheme.DIVIDER_LIGHT, 1 );
+        array<string> labels = new array<string>();
+        array<string> subs   = new array<string>();
 
         JMSearchMatcher matcher = new JMSearchMatcher( filter );
 
@@ -137,90 +163,114 @@ class JMBanFormTabBans: JMFormTab
             if ( !matcher.Matches( ban.PlayerName ) && !matcher.Matches( ban.SteamID ) )
                 continue;
 
-            Widget row = UIActionManager.CreateGridSpacer( m_BanListWrapper, 1, 5 );
-
-            // Checkbox - only rendered if user has unban permission
-            if ( canUnban )
-            {
-                UIActionCheckbox cb = UIActionManager.CreateCheckbox( row, "", this, "OnClick_BanRowCheckbox", false );
-                cb.SetData( new JMStringData( ban.SteamID ) );
-                cb.SetWidth( 0.06 );
-                m_BanCheckboxes.Insert( ban.SteamID, cb );
-            }
-            else
-            {
-                UIActionManager.CreateText( row, "" );
-            }
-
-            // Player name + SteamID stacked
-            Widget nameBlock = UIActionManager.CreateGridSpacer( row, 2, 1 );
-            UIActionManager.CreateText( nameBlock, ban.PlayerName );
-            UIActionManager.CreateText( nameBlock, ban.SteamID    );
-
-            UIActionManager.CreateText( row, ban.Message           );
-            UIActionManager.CreateText( row, ban.GetExpiryString() );
-            UIActionManager.CreateText( row, ban.IssuedByName      );
-
-            UIActionManager.CreateRowDivider( m_BanListWrapper );
+            labels.Insert( ban.PlayerName );
+            subs.Insert( ban.GetExpiryString() );
+            m_ListSteamIDs.Insert( ban.SteamID );
         }
 
-        m_Scroller.UpdateScroller();
+        m_List.SetItems( labels, subs );
+
+        //! Keep the selection across a refresh while the ban is still listed;
+        //! a lifted or filtered-out ban drops it.
+        int row = m_ListSteamIDs.Find( m_SelectedBanSteamID );
+        m_List.SetSelectedIndex( row, false );
+
+        if ( row < 0 )
+            ShowDetail( null );
+        else
+            ShowDetail( FindBan( m_SelectedBanSteamID ) );
+    }
+
+    protected JMPlayerBan FindBan( string steamID )
+    {
+        foreach ( JMPlayerBan ban : m_BanList )
+        {
+            if ( ban.SteamID == steamID )
+                return ban;
+        }
+
+        return null;
+    }
+
+    //! Fill the detail card with `ban`, or show the placeholder for null.
+    protected void ShowDetail( JMPlayerBan ban )
+    {
+        bool hasBan = false;
+
+        if ( !ban )
+        {
+            m_SelectedBanSteamID    = "";
+            m_SelectedBanPlayerName = "";
+        }
+        else
+        {
+            m_SelectedBanSteamID    = ban.SteamID;
+            m_SelectedBanPlayerName = ban.PlayerName;
+            hasBan = true;
+        }
+
+        if ( m_DetailEmpty )
+            m_DetailEmpty.Show( !hasBan );
+
+        if ( m_DetailWrapper )
+            m_DetailWrapper.Show( hasBan );
+
+        if ( ban && m_DetailCard )
+            m_DetailCard.SetLabel( ban.PlayerName );
+
+        if ( ban && m_DetailValues )
+        {
+            m_DetailValues.SetValue( "#STR_COT_BANMANAGER_PLAYER_STEAMID", ban.SteamID );
+            m_DetailValues.SetValue( "#STR_COT_BANMANAGER_REASON",         ban.Message );
+            m_DetailValues.SetValue( "#STR_COT_BANMANAGER_EXPIRES",        ban.GetExpiryString() );
+            m_DetailValues.SetValue( "#STR_COT_BANMANAGER_BANNED_BY",      ban.IssuedByName );
+        }
+
+        UpdateToolbarState();
+
+        if ( m_Scroller )
+            m_Scroller.UpdateScroller();
     }
 
     // -------------------------------------------------------------------------
-    //  Ban row checkbox - only one can be checked at a time
+    //  Roster selection
     // -------------------------------------------------------------------------
 
-    void OnClick_BanRowCheckbox( UIEvent eid, UIActionBase action )
+    void OnClick_BanRow( UIEvent eid, UIActionBase action )
     {
         if ( eid != UIEvent.CLICK )
             return;
 
-        UIActionCheckbox cb;
-        if ( !Class.CastTo( cb, action ) )
+        int row = m_List.GetSelectedIndex();
+        if ( row < 0 || row >= m_ListSteamIDs.Count() )
+            return;
+
+        string steamID = m_ListSteamIDs[row];
+        if ( steamID == m_SelectedBanSteamID )
+            return;
+
+        HideDurationPicker();
+        ShowDetail( FindBan( steamID ) );
+    }
+
+    //! DEPRECATED - rows are no longer checkboxes, so nothing raises this.
+    //! Selects the ban carried in the action's data, as a row click would.
+    void OnClick_BanRowCheckbox( UIEvent eid, UIActionBase action )
+    {
+        if ( eid != UIEvent.CLICK )
             return;
 
         JMStringData data;
         if ( !Class.CastTo( data, action.GetData() ) )
             return;
 
-        string steamID = data.Value;
-
-        if ( cb.IsChecked() )
-        {
-            // Uncheck any previously checked entry
-            foreach ( string sid, UIActionCheckbox other : m_BanCheckboxes )
-            {
-                if ( sid != steamID && other && other.IsChecked() )
-                    other.SetChecked( false );
-            }
-
-            // Find the player name from the ban list
-            m_SelectedBanSteamID    = steamID;
-            m_SelectedBanPlayerName = steamID;
-            foreach ( JMPlayerBan ban : m_BanList )
-            {
-                if ( ban.SteamID == steamID )
-                {
-                    m_SelectedBanPlayerName = ban.PlayerName;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            // Unchecked - clear selection
-            m_SelectedBanSteamID    = "";
-            m_SelectedBanPlayerName = "";
-            HideDurationPicker();
-        }
-
-        UpdateToolbarState();
+        ShowDetail( FindBan( data.Value ) );
     }
 
     // -------------------------------------------------------------------------
-    //  Toolbar state - the buttons themselves live on the form, above the tab
-    //  strip, so this only computes whether they should be enabled.
+    //  Toolbar state - the buttons themselves are the form's (built onto the
+    //  detail card by JMBanForm.BuildSelectionActions), so this only computes
+    //  whether they should be enabled.
     // -------------------------------------------------------------------------
 
     protected void UpdateToolbarState()
@@ -236,7 +286,7 @@ class JMBanFormTabBans: JMFormTab
     // -------------------------------------------------------------------------
 
     //! Called by the form's OnClick_EditDuration forwarder (the button itself
-    //! is form-level chrome above the tab strip).
+    //! is form-owned, though it now sits on this tab's detail card).
     void RequestEditDuration()
     {
         if ( m_SelectedBanSteamID == "" )
