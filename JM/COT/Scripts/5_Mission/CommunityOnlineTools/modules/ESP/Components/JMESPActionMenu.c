@@ -53,6 +53,11 @@ class JMESPActionMenu
 	//! others, so it is listed first.
 	static const string SCALE_VALUES = "1|0.5|0.75|1.5|2";
 
+	//! How long after resetting a digital code lock its keypad is raised, in ms -
+	//! long enough for the cleared code to reach the client through the lock's
+	//! synced state, short enough to read as one action.
+	static const int DIGITAL_CODE_LOCK_MENU_DELAY = 500;
+
 	//! The one menu that floats over the world.
 	//!
 	//! Both world entry points - a tag's right-click and a right-click on the
@@ -70,6 +75,9 @@ class JMESPActionMenu
 	protected Widget m_Anchor;
 	protected string m_Page;
 	protected string m_PageArg;
+
+	//! The construction selection the menu was opened on, see Open.
+	protected string m_PartFilter;
 
 	//! Where the menu was first opened. Every page after the first reopens at
 	//! the same spot, so drilling in does not walk the menu across the screen.
@@ -307,7 +315,10 @@ class JMESPActionMenu
 		return s_Shared;
 	}
 
-	void Open( JMESPMeta meta, float x, float y )
+	//! `partFilter` is the construction selection the right-click landed on ("" for none): the
+	//! construction page lists only the parts built from it. It belongs to this open, not to the
+	//! meta, which is cached and reused by every other way of opening the menu.
+	void Open( JMESPMeta meta, float x, float y, string partFilter = "" )
 	{
 		if ( !m_Menu )
 		{
@@ -322,6 +333,7 @@ class JMESPActionMenu
 		}
 
 		m_Meta    = meta;
+		m_PartFilter = partFilter;
 		m_Page    = PAGE_MAIN;
 		m_PageArg = "";
 		m_X       = x;
@@ -529,7 +541,7 @@ class JMESPActionMenu
 			}
 		}
 
-		if ( JMESPModule.GetCombinationLock( target ) )
+		if ( JMESPModule.GetCombinationLock( target ) || JMESPModule.GetDigitalCodeLock( target, m_Meta.m_DoorIndex ) )
 			AddPage( PAGE_LOCK, "#STR_COT_ESP_MODULE_PAGE_LOCK", JMConstants.Lucide( "lock" ) );
 
 		if ( m_Meta.GetConstructionParts() )
@@ -812,22 +824,50 @@ class JMESPActionMenu
 
 		CombinationLock combo = JMESPModule.GetCombinationLock( m_Meta.target );
 
-		if ( !combo )
+		if ( combo )
+		{
+			if ( combo.IsLocked() )
+				Add( PREFIX_ACTION + "unlock", "#STR_COT_ESP_MODULE_MENU_UNLOCK", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+			else
+				Add( PREFIX_ACTION + "lock", "#STR_COT_ESP_MODULE_MENU_LOCK", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+
+			//! The same two verbs over every lock standing near this one. A base is
+			//! a dozen separate entities, so "lock the base" cannot be addressed to
+			//! the gate the menu was opened on.
+			Add( PREFIX_ACTION + "lockall", "#STR_COT_ESP_MODULE_MENU_LOCK_ALL", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+			Add( PREFIX_ACTION + "unlockall", "#STR_COT_ESP_MODULE_MENU_UNLOCK_ALL", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+
+			Add( PREFIX_ACTION + "getcode", "#STR_COT_ESP_MODULE_ACTION_GET_CODE", JMConstants.ICON_STACK, Perm( JMConstants.PERM_ESP_OBJECT_GETCODE ) );
+			Add( PREFIX_ACTION + "pastecode", "#STR_COT_ESP_MODULE_MENU_PASTE_CODE", JMConstants.Lucide( "clipboard-paste" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
+		}
+
+		DigitalCodeLock codeLock = JMESPModule.GetDigitalCodeLock( m_Meta.target, m_Meta.m_DoorIndex );
+
+		if ( codeLock )
+			BuildDigitalCodeLock( codeLock );
+	}
+
+	//! The digital code lock's own verbs. Locking needs a code to lock against, so
+	//! it is only offered once one is set; setting one hands over to the lock's
+	//! own keypad (see DoSetDigitalCode), since a code is free-form digits and a
+	//! menu has no way to ask for them.
+	protected void BuildDigitalCodeLock( DigitalCodeLock codeLock )
+	{
+		if ( codeLock.IsLocked() )
+			Add( PREFIX_ACTION + "digiunlock", "#STR_COT_ESP_MODULE_MENU_UNLOCK", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+		else if ( codeLock.CanBeLocked() && codeLock.HasPIN() )
+			Add( PREFIX_ACTION + "digilock", "#STR_COT_ESP_MODULE_MENU_LOCK", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+
+		if ( codeLock.HasPIN() )
+			Add( PREFIX_ACTION + "digigetcode", "#STR_COT_ESP_MODULE_ACTION_GET_CODE", JMConstants.ICON_STACK, Perm( JMConstants.PERM_ESP_OBJECT_GETCODE ) );
+
+		if ( !codeLock.CanSetCode() )
 			return;
 
-		if ( combo.IsLocked() )
-			Add( PREFIX_ACTION + "unlock", "#STR_COT_ESP_MODULE_MENU_UNLOCK", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
-		else
-			Add( PREFIX_ACTION + "lock", "#STR_COT_ESP_MODULE_MENU_LOCK", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+		if ( codeLock.HasPIN() )
+			Add( PREFIX_ACTION + "digiresetcode", "#STR_COT_ESP_MODULE_MENU_RESET_CODE", JMConstants.Lucide( "rotate-ccw" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
 
-		//! The same two verbs over every lock standing near this one. A base is
-		//! a dozen separate entities, so "lock the base" cannot be addressed to
-		//! the gate the menu was opened on.
-		Add( PREFIX_ACTION + "lockall", "#STR_COT_ESP_MODULE_MENU_LOCK_ALL", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
-		Add( PREFIX_ACTION + "unlockall", "#STR_COT_ESP_MODULE_MENU_UNLOCK_ALL", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
-
-		Add( PREFIX_ACTION + "getcode", "#STR_COT_ESP_MODULE_ACTION_GET_CODE", JMConstants.ICON_STACK, Perm( JMConstants.PERM_ESP_OBJECT_GETCODE ) );
-		Add( PREFIX_ACTION + "pastecode", "#STR_COT_ESP_MODULE_MENU_PASTE_CODE", JMConstants.Lucide( "clipboard-paste" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
+		Add( PREFIX_ACTION + "digisetcode", "#STR_COT_ESP_MODULE_MENU_SET_CODE", JMConstants.Lucide( "keyboard" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
 	}
 
 	protected void BuildConstruction()
@@ -846,10 +886,33 @@ class JMESPActionMenu
 		Add( PREFIX_ACTION + "dismantleall", "#STR_COT_ESP_MODULE_MENU_DISMANTLE_ALL", JMConstants.Lucide( "pickaxe" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE ), JMTheme.DANGER );
 		Add( PREFIX_ACTION + "repairall", "#STR_COT_ESP_MODULE_MENU_REPAIR_ALL", JMConstants.Lucide( "wrench" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_REPAIR ) );
 
+		//! Narrowed to the part the right-click landed on when it landed on one;
+		//! a rebuildable building has dozens. A click on nothing that names a part
+		//! (or a name no part answers to) lists everything rather than nothing.
+		string filter = m_PartFilter;
+		filter.ToLower();
+
+		bool filtered = false;
+
+		if ( filter != "" )
+		{
+			for ( int f = 0; f < parts.Count(); ++f )
+			{
+				if ( PartMatchesFilter( parts.GetElement( f ), filter ) )
+				{
+					filtered = true;
+					break;
+				}
+			}
+		}
+
 		for ( int i = 0; i < parts.Count(); ++i )
 		{
 			string partName = parts.GetKey( i );
 			JMConstructionPartData part = parts.Get( partName );
+
+			if ( filtered && !PartMatchesFilter( part, filter ) )
+				continue;
 
 			//! A part that conflicts with something already built cannot be
 			//! acted on at all, so it is not offered a page.
@@ -857,6 +920,17 @@ class JMESPActionMenu
 
 			AddPage( PAGE_PART + ":" + partName, part.m_DisplayName, JMConstants.Lucide( "hammer" ), enabled );
 		}
+	}
+
+	protected bool PartMatchesFilter( JMConstructionPartData part, string lowerFilter )
+	{
+		string mainName = part.m_MainPartName;
+		mainName.ToLower();
+
+		string name = part.m_Name;
+		name.ToLower();
+
+		return mainName == lowerFilter || name == lowerFilter;
 	}
 
 	protected void BuildPart()
@@ -1222,6 +1296,7 @@ class JMESPActionMenu
 			Add( PREFIX_ACTION + "copyclassnameatts", "#STR_COT_ESP_MODULE_MENU_COPY_CLASSNAMES", JMConstants.Lucide( "list-tree" ) );
 			Add( PREFIX_ACTION + "copyxml",       "#STR_COT_ESP_MODULE_MENU_COPY_XML",       JMConstants.Lucide( "code-xml" ) );
 			Add( PREFIX_ACTION + "copyspawnable", "#STR_COT_ESP_MODULE_MENU_COPY_SPAWNABLE", JMConstants.Lucide( "file-code" ) );
+			Add( PREFIX_ACTION + "copyexpansion", "#STR_COT_ESP_MODULE_MENU_COPY_EXPANSION", JMConstants.Lucide( "map-pin" ) );
 #ifdef DZ_Expansion_Core
 			Add( PREFIX_ACTION + "copyloadout",   "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_EXPLOADOUT",   JMConstants.Lucide( "box" ) );
 #endif
@@ -1359,6 +1434,8 @@ class JMESPActionMenu
 			DoCopyTypesXml();
 		else if ( name == "copyspawnable" )
 			DoCopySpawnableTypes();
+		else if ( name == "copyexpansion" )
+			DoCopyExpansionObject();
 #ifdef DZ_Expansion_Core
 		else if ( name == "copyloadout" )
 			DoCopyExpLoadout();
@@ -1465,6 +1542,16 @@ class JMESPActionMenu
 			m_Meta.module.ObjectAction( JMESPObjectAction.GetCode, 0, 0, m_Meta.target );
 		else if ( name == "pastecode" )
 			DoPasteCode();
+		else if ( name == "digilock" )
+			m_Meta.module.ObjectAction( JMESPObjectAction.SetDigitalLock, 1, m_Meta.m_DoorIndex, m_Meta.target );
+		else if ( name == "digiunlock" )
+			m_Meta.module.ObjectAction( JMESPObjectAction.SetDigitalLock, 0, m_Meta.m_DoorIndex, m_Meta.target );
+		else if ( name == "digigetcode" )
+			m_Meta.module.ObjectAction( JMESPObjectAction.GetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
+		else if ( name == "digiresetcode" )
+			m_Meta.module.ObjectAction( JMESPObjectAction.ResetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
+		else if ( name == "digisetcode" )
+			DoSetDigitalCode();
 		else if ( name == "build" )
 			DoConstruction( 0 );
 		else if ( name == "dismantle" )
@@ -1640,6 +1727,19 @@ class JMESPActionMenu
 			COTCreateLocalAdminNotification( new StringLocaliser( errorMsg ) );
 	}
 #endif
+
+	//! One line of Expansion's object-placement file, the same format
+	//! JMESPModule.CopyToClipboardMap writes for a selection:
+	//!   ClassName|X Y Z|RotX RotY RotZ|special|takeable
+	protected void DoCopyExpansionObject()
+	{
+		if ( !m_Meta || !m_Meta.target )
+			return;
+
+		Object target = m_Meta.target;
+
+		COTFeedback.Copy( target.GetType() + "|" + target.GetPosition().ToString( false ) + "|" + target.GetOrientation().ToString( false ) + "|false|true" );
+	}
 
 	protected void DoCopyTypeWithAttachments()
 	{
@@ -1934,7 +2034,7 @@ class JMESPActionMenu
 		if ( !Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_SETHEALTH ) )
 			return;
 
-		BaseBuildingBase bb;
+		EntityAI bb;
 
 		if ( !Class.CastTo( bb, m_Meta.target ) || m_PageArg == "" )
 			return;
@@ -2258,9 +2358,31 @@ class JMESPActionMenu
 		m_Meta.module.ObjectAction( JMESPObjectAction.SetCode, clipboard.ToInt(), 0, m_Meta.target );
 	}
 
+	//! Opens the lock's own keypad to dial the new code in. A lock that already has
+	//! a code is reset first - the keypad only accepts a new code on a lock that
+	//! has none - and the keypad is raised a moment later, once the reset has
+	//! reached the client through the lock's synced state.
+	protected void DoSetDigitalCode()
+	{
+		DigitalCodeLock codeLock = JMESPModule.GetDigitalCodeLock( m_Meta.target, m_Meta.m_DoorIndex );
+
+		if ( !codeLock )
+			return;
+
+		if ( !codeLock.HasPIN() )
+		{
+			m_Meta.module.OpenDigitalCodeLockMenu( codeLock );
+			return;
+		}
+
+		m_Meta.module.ObjectAction( JMESPObjectAction.ResetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
+
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( m_Meta.module.OpenDigitalCodeLockMenu, DIGITAL_CODE_LOCK_MENU_DELAY, false, codeLock );
+	}
+
 	protected void DoConstruction( int what )
 	{
-		BaseBuildingBase building = BaseBuildingBase.Cast( m_Meta.target );
+		EntityAI building = EntityAI.Cast( m_Meta.target );
 
 		if ( !building || m_PageArg == "" )
 			return;

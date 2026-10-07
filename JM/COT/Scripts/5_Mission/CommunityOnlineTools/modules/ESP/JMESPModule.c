@@ -313,6 +313,22 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !building )
 			return -1;
 
+		int component = GetViewComponentAtCursor( building );
+
+		if ( component < 0 )
+			return -1;
+
+		return building.GetDoorIndex( component );
+	}
+
+	//! The VIEW geometry component of `target` under the pointer, -1 when the
+	//! pointer is not on it. View geometry specifically, because that is the
+	//! index space door indices and construction part selections are named in.
+	protected int GetViewComponentAtCursor( Object target )
+	{
+		if ( !target )
+			return -1;
+
 		vector from = g_Game.GetCurrentCameraPosition();
 		vector dir = g_Game.GetPointerDirection();
 
@@ -343,10 +359,10 @@ class JMESPModule: JMRenderableModuleBase
 			if ( Class.CastTo( entity, obj ) && entity.GetHierarchyRoot() )
 				obj = entity.GetHierarchyRoot();
 
-			if ( obj != building )
+			if ( obj != target )
 				continue;
 
-			return building.GetDoorIndex( result.component );
+			return result.component;
 		}
 
 		return -1;
@@ -382,6 +398,62 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			if ( Class.CastTo( combo, entity.GetInventory().GetAttachmentFromIndex( i ) ) )
 				return combo;
+		}
+
+		return NULL;
+	}
+
+	//! The construction an object builds and dismantles through, if it has one.
+	//! Base building objects have one, and so do the rebuildable map buildings
+	//! (the irrigation tunnel entrance, the well, the rebuildable houses) which
+	//! are plain Buildings rather than BaseBuildingBase.
+	static ConstructionBase GetConstructionOf( Object target )
+	{
+		EntityAI entity = EntityAI.Cast( target );
+
+		if ( !entity )
+			return NULL;
+
+		return ConstructionBase.Cast( entity.GetConstructionBasic() );
+	}
+
+	//! The digital code lock that governs this object: the target itself when the
+	//! menu was opened on the lock, the one on a gate, or - for a building - the one
+	//! on the door under the cursor (doorIndex, -1 when there was none).
+	static DigitalCodeLock GetDigitalCodeLock( Object target, int doorIndex = -1 )
+	{
+		DigitalCodeLock codeLock;
+
+		if ( Class.CastTo( codeLock, target ) )
+			return codeLock;
+
+		Fence fence;
+		if ( Class.CastTo( fence, target ) )
+			return fence.GetCodeLock();
+
+		//! A bunker has the one lock, on its entrance, not one per door
+		Bunker bunker;
+		if ( Class.CastTo( bunker, target ) )
+			return bunker.GetCodeLock();
+
+		BuildingBase building;
+		if ( Class.CastTo( building, target ) )
+		{
+			if ( doorIndex < 0 )
+				return NULL;
+
+			AdditionalDoorInfo doorInfo = building.GetDoorInfo( doorIndex );
+
+			if ( !doorInfo || !doorInfo.m_RelatedInventorySlotNames )
+				return NULL;
+
+			foreach ( string slotName : doorInfo.m_RelatedInventorySlotNames )
+			{
+				codeLock = building.GetCodeLock( slotName );
+
+				if ( codeLock )
+					return codeLock;
+			}
 		}
 
 		return NULL;
@@ -1098,11 +1170,23 @@ class JMESPModule: JMRenderableModuleBase
 		else
 			meta.m_DoorIndex = -1;
 
+		//! A construction with dozens of parts (a rebuildable building) is narrowed
+		//! to the part the click landed on; the selection name is the part's main part name.
+		string partFilter = "";
+
+		if ( GetConstructionOf( obj ) )
+		{
+			int viewComponent = GetViewComponentAtCursor( obj );
+
+			if ( viewComponent >= 0 )
+				partFilter = obj.GetActionComponentName( viewComponent, "view" );
+		}
+
 		int mx;
 		int my;
 		GetMousePos( mx, my );
 
-		menu.Open( meta, mx, my );
+		menu.Open( meta, mx, my, partFilter );
 	}
 
 	//! What the mouse is pointing at.
@@ -2452,7 +2536,14 @@ class JMESPModule: JMRenderableModuleBase
 			case JMESPObjectAction.SetCode:
 				return JMConstants.PERM_ESP_OBJECT_SETCODE;
 			case JMESPObjectAction.GetCode:
+			case JMESPObjectAction.GetDigitalCode:
 				return JMConstants.PERM_ESP_OBJECT_GETCODE;
+
+			case JMESPObjectAction.SetDigitalLock:
+				return JMConstants.PERM_ESP_OBJECT_LOCK;
+
+			case JMESPObjectAction.ResetDigitalCode:
+				return JMConstants.PERM_ESP_OBJECT_SETCODE;
 
 			case JMESPObjectAction.SetJammed:
 			case JMESPObjectAction.SetChambered:
@@ -2610,6 +2701,20 @@ class JMESPModule: JMRenderableModuleBase
 			case JMESPObjectAction.GetCode:
 				Exec_GetCode( target, ident );
 				return;
+
+			case JMESPObjectAction.SetDigitalLock:
+				if ( !Exec_SetDigitalLock( target, ivalue, fvalue ) )
+					return;
+				break;
+
+			case JMESPObjectAction.GetDigitalCode:
+				Exec_GetDigitalCode( target, fvalue, ident );
+				return;
+
+			case JMESPObjectAction.ResetDigitalCode:
+				if ( !Exec_ResetDigitalCode( target, fvalue ) )
+					return;
+				break;
 
 			case JMESPObjectAction.SetJammed:
 				if ( !Exec_SetJammed( target, ivalue ) )
@@ -2944,9 +3049,9 @@ class JMESPModule: JMRenderableModuleBase
 	//! list here.
 	protected int Exec_BuildAll( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
 	{
-		BaseBuildingBase building;
+		ConstructionBase construction = GetConstructionOf( target );
 
-		if ( !Class.CastTo( building, target ) || !building.GetConstruction() )
+		if ( !construction )
 			return 0;
 
 		bool requireMaterials = true;
@@ -2954,7 +3059,7 @@ class JMESPModule: JMRenderableModuleBase
 			requireMaterials = !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED, ident, instance );
 
 		map< string, ref JMConstructionPartData > parts = new map< string, ref JMConstructionPartData >;
-		building.GetConstruction().COT_GetParts( parts, requireMaterials );
+		construction.COT_GetParts( parts, requireMaterials );
 
 		TStringArray names = new TStringArray;
 
@@ -2970,7 +3075,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		building.GetConstruction().COT_BuildParts( names, player, requireMaterials );
+		construction.COT_BuildParts( names, player, requireMaterials );
 
 		SendWebhookColored( "BB_Build", instance, "Built every buildable part (" + names.Count() + ") of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_ESP );
 
@@ -2982,13 +3087,13 @@ class JMESPModule: JMRenderableModuleBase
 	//! itself goes with the last part.
 	protected int Exec_DismantleAll( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
 	{
-		BaseBuildingBase building;
+		ConstructionBase construction = GetConstructionOf( target );
 
-		if ( !Class.CastTo( building, target ) || !building.GetConstruction() )
+		if ( !construction )
 			return 0;
 
 		map< string, ref JMConstructionPartData > parts = new map< string, ref JMConstructionPartData >;
-		building.GetConstruction().COT_GetParts( parts, false );
+		construction.COT_GetParts( parts, false );
 
 		TStringArray names = new TStringArray;
 
@@ -3004,7 +3109,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		building.GetConstruction().COT_DismantleParts( names, player );
+		construction.COT_DismantleParts( names, player );
 
 		SendWebhookColored( "BB_Dismantle", instance, "Dismantled every built part (" + names.Count() + ") of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_WARNING );
 
@@ -3014,13 +3119,13 @@ class JMESPModule: JMRenderableModuleBase
 	//! Heal every already-built construction part of a base building object.
 	protected int Exec_RepairAll( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
 	{
-		BaseBuildingBase building;
+		ConstructionBase construction = GetConstructionOf( target );
 
-		if ( !Class.CastTo( building, target ) || !building.GetConstruction() )
+		if ( !construction )
 			return 0;
 
 		map< string, ref JMConstructionPartData > parts = new map< string, ref JMConstructionPartData >;
-		building.GetConstruction().COT_GetParts( parts, false );
+		construction.COT_GetParts( parts, false );
 
 		TStringArray names = new TStringArray;
 
@@ -3033,7 +3138,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( names.Count() == 0 )
 			return 0;
 
-		building.GetConstruction().COT_RepairParts( names );
+		construction.COT_RepairParts( names );
 
 		SendWebhookColored( "BB_Repair", instance, "Repaired every built part (" + names.Count() + ") of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_SUCCESS );
 
@@ -3486,7 +3591,107 @@ class JMESPModule: JMRenderableModuleBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( JMESPObjectAction.GetCode );
 		rpc.Write( combo.m_CombinationLocked );
+		rpc.Write( "" );
 		rpc.Send( NULL, JMESPModuleRPC.ObjectActionResult, true, ident );
+	}
+
+	//! GetDigitalCodeLock for an object action: the door index rides in the action's float value.
+	static DigitalCodeLock GetDigitalCodeLockForAction( Object target, float doorValue )
+	{
+		int doorIndex = doorValue;
+
+		return GetDigitalCodeLock( target, doorIndex );
+	}
+
+	//! Raise the vanilla keypad over a digital code lock, to dial a new code into
+	//! it. Client only - the keypad sends the code to the server itself.
+	void OpenDigitalCodeLockMenu( DigitalCodeLock codeLock )
+	{
+		if ( !codeLock || !IsMissionClient() )
+			return;
+
+		DigitalCodeLockUIBase keypad = DigitalCodeLockUIBase.Cast( g_Game.GetUIManager().EnterScriptedMenu( MENU_DIGITAL_CODELOCK, NULL ) );
+
+		if ( !keypad )
+			return;
+
+		keypad.SetTargetLock( codeLock.GetCodeLockComponent() );
+
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( WatchDigitalCodeLockMenu, 250, true );
+	}
+
+	//! The keypad is entered without a parent menu, so closing it hides the cursor
+	//! COT's own windows still need - poll for it going away and give the cursor back.
+	protected void WatchDigitalCodeLockMenu()
+	{
+		if ( g_Game.GetUIManager().FindMenu( MENU_DIGITAL_CODELOCK ) )
+			return;
+
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( WatchDigitalCodeLockMenu );
+
+		if ( IsCOTInterfaceOpen() )
+			g_Game.GetUIManager().ShowUICursor( true );
+	}
+
+	//! A lock with no code has nothing to lock against, and locking it anyway
+	//! leaves a lock nobody can open without resetting it first.
+	protected bool Exec_SetDigitalLock( Object target, int locked, float fvalue )
+	{
+		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
+
+		if ( !codeLock )
+			return false;
+
+		if ( locked )
+		{
+			if ( !codeLock.CanBeLocked() || !codeLock.HasPIN() )
+				return false;
+
+			codeLock.SetLockState( true );
+			return true;
+		}
+
+		codeLock.SetLockState( false );
+
+		return true;
+	}
+
+	//! The code is text, not a number - "0042" is a different code from "42" - so
+	//! it goes back as a string through the same result channel the combination
+	//! lock's number uses.
+	protected void Exec_GetDigitalCode( Object target, float fvalue, PlayerIdentity ident )
+	{
+		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
+
+		if ( !codeLock )
+			return;
+
+		if ( !ident )
+		{
+			OnObjectActionResult( JMESPObjectAction.GetDigitalCode, 0, codeLock.GetLockPIN() );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( JMESPObjectAction.GetDigitalCode );
+		rpc.Write( 0 );
+		rpc.Write( codeLock.GetLockPIN() );
+		rpc.Send( NULL, JMESPModuleRPC.ObjectActionResult, true, ident );
+	}
+
+	//! Unlocked first: a lock that is still locked when its code is cleared would
+	//! keep its door shut with nothing left to open it by.
+	protected bool Exec_ResetDigitalCode( Object target, float fvalue )
+	{
+		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
+
+		if ( !codeLock || !codeLock.CanSetCode() )
+			return false;
+
+		codeLock.SetLockState( false );
+		codeLock.ResetPIN();
+
+		return true;
 	}
 
 	protected void RPC_ObjectAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -3539,11 +3744,27 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( ivalue ) )
 			return;
 
-		OnObjectActionResult( action, ivalue );
+		string text;
+		if ( !ctx.Read( text ) )
+			return;
+
+		OnObjectActionResult( action, ivalue, text );
 	}
 
-	protected void OnObjectActionResult( int action, int ivalue )
+	protected void OnObjectActionResult( int action, int ivalue, string text = "" )
 	{
+		if ( action == JMESPObjectAction.GetDigitalCode )
+		{
+			if ( text == "" )
+				return;
+
+			g_Game.CopyToClipboard( text );
+
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_ESP_MODULE_NOTIFY_CODE_COPIED", text ) );
+
+			return;
+		}
+
 		if ( action != JMESPObjectAction.GetCode )
 			return;
 
@@ -3614,7 +3835,7 @@ class JMESPModule: JMRenderableModuleBase
 		Exec_DeleteObject( obj, senderRPC, instance );
 	}
 
-	void BaseBuilding_Build( BaseBuildingBase target, string part )
+	void BaseBuilding_Build( EntityAI target, string part )
 	{
 		int netLow, netHigh;
 		target.GetNetworkID( netLow, netHigh );
@@ -3632,8 +3853,13 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	protected void Exec_BaseBuilding_Build( BaseBuildingBase target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	protected void Exec_BaseBuilding_Build( EntityAI target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		ConstructionBase construction = GetConstructionOf( target );
+
+		if ( !construction )
+			return;
+
 		bool requireMaterials = true;
 		if ( !IsMissionOffline() )
 			requireMaterials = !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED, ident, instance );
@@ -3641,7 +3867,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		target.GetConstruction().COT_BuildRequiredParts( part_name, player, requireMaterials );
+		construction.COT_BuildRequiredParts( part_name, player, requireMaterials );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
 		SendWebhookColored( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_ESP );
@@ -3668,12 +3894,12 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD, senderRPC, instance ) )
 			return;
 
-		BaseBuildingBase bb;
+		EntityAI bb;
 		if ( Class.CastTo( bb, obj ) )
 			Exec_BaseBuilding_Build( bb, part_name, senderRPC, instance );
 	}
 
-	void BaseBuilding_Dismantle( BaseBuildingBase target, string part )
+	void BaseBuilding_Dismantle( EntityAI target, string part )
 	{
 		int netLow, netHigh;
 		target.GetNetworkID( netLow, netHigh );
@@ -3691,12 +3917,17 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	protected void Exec_BaseBuilding_Dismantle( BaseBuildingBase target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	protected void Exec_BaseBuilding_Dismantle( EntityAI target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		ConstructionBase construction = GetConstructionOf( target );
+
+		if ( !construction )
+			return;
+
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		target.GetConstruction().COT_DismantleRequiredParts( part_name, player );
+		construction.COT_DismantleRequiredParts( part_name, player );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
 		SendWebhookColored( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_WARNING );
@@ -3723,12 +3954,12 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE, senderRPC, instance ) )
 			return;
 
-		BaseBuildingBase bb;
+		EntityAI bb;
 		if ( Class.CastTo( bb, obj ) )
 			Exec_BaseBuilding_Dismantle( bb, part_name, senderRPC, instance );
 	}
 
-	void BaseBuilding_Repair( BaseBuildingBase target, string part )
+	void BaseBuilding_Repair( EntityAI target, string part )
 	{
 		int netLow, netHigh;
 		target.GetNetworkID( netLow, netHigh );
@@ -3746,9 +3977,14 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	protected void Exec_BaseBuilding_Repair( BaseBuildingBase target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	protected void Exec_BaseBuilding_Repair( EntityAI target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		target.GetConstruction().COT_RepairPart( part_name );
+		ConstructionBase construction = GetConstructionOf( target );
+
+		if ( !construction )
+			return;
+
+		construction.COT_RepairPart( part_name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair part=" + part_name  );
 		SendWebhookColored( "BB_Repair", instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_SUCCESS );
@@ -3775,7 +4011,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_REPAIR, senderRPC, instance ) )
 			return;
 
-		BaseBuildingBase bb;
+		EntityAI bb;
 		if ( Class.CastTo( bb, obj ) )
 			Exec_BaseBuilding_Repair( bb, part_name, senderRPC, instance );
 	}
@@ -3790,7 +4026,7 @@ class JMESPModule: JMRenderableModuleBase
 	//! `health01` is a fraction of that zone's own maximum, because the maximum
 	//! differs per part and per material tier - a number of hit points would
 	//! mean something different on every row of the menu.
-	void BaseBuilding_SetPartHealth( BaseBuildingBase target, string part, float health01 )
+	void BaseBuilding_SetPartHealth( EntityAI target, string part, float health01 )
 	{
 		int netLow, netHigh;
 		target.GetNetworkID( netLow, netHigh );
@@ -3809,7 +4045,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	protected void Exec_BaseBuilding_SetPartHealth( BaseBuildingBase target, string part_name, float health01, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	protected void Exec_BaseBuilding_SetPartHealth( EntityAI target, string part_name, float health01, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		if ( !target )
 			return;
@@ -3858,7 +4094,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_SETHEALTH, senderRPC, instance ) )
 			return;
 
-		BaseBuildingBase bb;
+		EntityAI bb;
 		if ( Class.CastTo( bb, obj ) )
 			Exec_BaseBuilding_SetPartHealth( bb, part_name, health01, senderRPC, instance );
 	}

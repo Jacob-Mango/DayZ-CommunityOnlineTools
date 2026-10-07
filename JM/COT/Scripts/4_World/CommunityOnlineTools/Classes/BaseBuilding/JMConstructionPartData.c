@@ -12,5 +12,6 @@ class JMConstructionPartData : UIActionData
 {
 	string m_Name;
 	string m_DisplayName;
+	string m_MainPartName;
 	JMConstructionPartState m_State;
 }

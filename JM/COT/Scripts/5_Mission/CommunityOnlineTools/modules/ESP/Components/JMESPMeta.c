@@ -34,6 +34,10 @@ class JMESPMeta: COT_WidgetHolder
 	//! Building or the click wasn't on any of its doors.
 	int m_DoorIndex = -1;
 
+	//! Backing store for GetConstructionParts, kept so the menu reads one map
+	//! instead of allocating a fresh one each time it is rebuilt.
+	protected ref map< string, ref JMConstructionPartData > m_ConstructionParts;
+
 	void JMESPMeta()
 	{
 		s_JM_Node = s_JM_All.Add(this);
@@ -97,9 +101,23 @@ class JMESPMeta: COT_WidgetHolder
 
 	//! Construction parts, for the objects that have any. NULL everywhere else,
 	//! which is what keeps the base building page out of a rock's menu.
+	//!
+	//! Anything with a construction component answers, not only base building
+	//! objects: the rebuildable map buildings (irrigation tunnel entrance, wells,
+	//! rebuildable houses) build and dismantle through the same page.
 	map< string, ref JMConstructionPartData > GetConstructionParts()
 	{
-		return NULL;
+		ConstructionBase construction = JMESPModule.GetConstructionOf( target );
+
+		if ( !construction )
+			return NULL;
+
+		if ( !m_ConstructionParts )
+			m_ConstructionParts = new map< string, ref JMConstructionPartData >;
+
+		construction.COT_GetParts( m_ConstructionParts, false );
+
+		return m_ConstructionParts;
 	}
 
 	string GetName()
@@ -242,19 +260,6 @@ class JMESPMetaBaseBuilding : JMESPMeta
 	//! for itself now in JMESPActionMenu::BuildConstruction.
 	protected void UpdateButtonStates()
 	{
-	}
-
-	//! Re-read whenever the menu asks, rather than cached off a construction
-	//! callback: the menu is the only reader now, and it only exists for as
-	//! long as somebody is looking at it.
-	override map< string, ref JMConstructionPartData > GetConstructionParts()
-	{
-		if ( !Class.CastTo( m_BaseBuilding, target ) )
-			return NULL;
-
-		m_BaseBuilding.GetConstruction().COT_GetParts( m_Parts, false );
-
-		return m_Parts;
 	}
 }
 

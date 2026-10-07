@@ -286,6 +286,15 @@ enum JMESPObjectAction
 	SetHouseDoorOpen,
 	SetHouseDoorLocked,
 
+	//! A digital code lock - the gate's, the one on a building door, or the lock
+	//! itself. fvalue carries the Building door index the raycast picked (-1 when
+	//! there was none). GetDigitalCode answers through ObjectActionResult as text,
+	//! since a code can start with zeros. ResetDigitalCode unlocks the lock and
+	//! clears its code so a new one can be dialled in.
+	SetDigitalLock,
+	GetDigitalCode,
+	ResetDigitalCode,
+
 	COUNT
 }
 
