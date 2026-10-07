@@ -1017,6 +1017,18 @@ class JMVehiclesModule: JMRenderableModuleBase
 			boats = boatNext;
 		}
 
+	#ifndef DAYZ_1_29
+		CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bikes = MotorbikeScript.s_JM_AllBikes.m_Head;
+		while ( bikes )
+		{
+			CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bikeNext = bikes.m_Next;
+			if ( !bikes.m_Value.GetExpansionVehicle().HasKey() )
+				bikes.m_Value.Delete();
+
+			bikes = bikeNext;
+		}
+	#endif
+
 		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
