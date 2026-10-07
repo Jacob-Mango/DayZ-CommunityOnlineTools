@@ -33,6 +33,14 @@ class member order in [../ui/module-form-patterns.md](../ui/module-form-patterns
 | Chain `foreach`, `new X().M()` or a temporary as an argument | Use a local (section 12) | 12 |
 | Mix whitespace, moves or renames into a logic commit | Commit each on its own (section 2) | 2 |
 | Narrow `protected` to `private`, or remove a public member without a forwarder | See [mod-compatibility.md](mod-compatibility.md) | 13 |
+| Put `ref` on a local variable, or on a `static` that must become `NULL` on teardown | `ref` is for members that own an object; locals and such statics are plain | 15 |
+| Add `NULL` guards, casts or `Assert_Null` "to be safe" | Guard only what can really be `NULL` at that point; let the rest fail loudly | 15 |
+| Copy a helper into a second class, or pass a `ModuleBase` instance to reach a static helper | One implementation, call it by class name | 15 |
+| Replace an engine event (`OnDoubleClick`) with hand-rolled timing, or pool widgets | Use the engine path; widget pooling segfaults | 15 |
+| Call an engine setter or `DisconnectPlayer` directly | Use the COT wrapper (`COT_Base.SetHealth`, `JMPlayerModule.Kick`) | 15 |
+| Call a server-only engine method on the client | Wrap in `g_Game.IsServer()`; check the vanilla call for `GetHealth` and quantity | 15 |
+| Prefix a `StringLocaliser` key with `#` | The key is passed bare: `"STR_COT_X"` | 15 |
+| Use `GetKeyArray()` / `GetValueArray()` to iterate a map | `foreach ( K k, V v: map )` | 15 |
 
 ## 1. Class fields: statics first, then a blank line, then members
 
@@ -289,3 +297,101 @@ DayZ-Expansion and other mods use `modded class` on COT forms and modules and ov
 - Grep output is noisy: print counts and short tables rather than raw hits, and exclude your own definitions and deprecation
   message strings. When a scan and a hand read disagree, trust the hand read and fix the scan.
 - Small steps, each built and booted, beat one large rewrite.
+
+## 15. Mistakes the maintainer (lava76) had to undo
+
+Taken from the maintainer's commits of 2026-09-29 to 2026-10-06. Some name the assistant outright ("Claude BS", "Don't try
+to be cute Claude", "FUCK OFF CLAUDE", "Removed a boatload of bad refs added by Claude"); the rest are fixes of the same
+kinds of error (wrong API use, missing server guards). Each item is a pattern, with the commit that undid or fixed it. Sections 3 and 4 hold the older ones (deleted comments, permission side
+effects) and are not repeated.
+
+### 15.1 Do not invent machinery the engine or the codebase already has
+
+- **Widget pooling segfaults (4aa0caf7).** `JMESPWidgetHandler` got a `s_Pool` of hidden widgets, `TakeFromPool` /
+  `ReturnToPool` and a `Destroy()` override in `JMESPMeta`, justified by a measured `CreateWidgets()` cost. Reusing the handler
+  segfaulted the game. It was removed and `JMESPMeta` now says "don't try to be cute and re-use widget handler from a pool".
+  A speed-up that reuses engine objects needs a reproduction on a client, not a benchmark. See section 11 for how widgets
+  are destroyed.
+- **Hand-rolled double click (c500535a).** `UIActionItemList` stored `m_LastClickTime` / `m_LastClickItem` and timed two clicks
+  inside `OnClick`, on the claim that the engine's `OnDoubleClick` does not reach the control. It does; override
+  `OnDoubleClick` on the control and call `CallEvent( UIEvent.DOUBLE_CLICK )`. Prefer the engine event over timing in
+  `OnClick`. Do not write a comment that asserts an engine limit you have not tested.
+- **A second copy of a helper (a8d41ae8).** `JMESPModule` carried its own `AddChildrenToExpLoadoutRecursive` /
+  `AddToExpLoadoutRecursive`, a duplicate of `JMCompensationHelper`, and callers reached them through a module instance
+  (`m_Meta.module.Add...`). One copy, in the helper, called as `JMCompensationHelper.Add...`. Grep for an existing helper
+  before writing one, and do not take a module instance only to call a static.
+- **Wrong parameter type (a8d41ae8).** The Expansion loadout helpers took `ExpansionPrefab` and cast the result of
+  `BeginAttachment` / `BeginCargo`; the right type is `ExpansionPrefabObject`, and no cast is needed. Check the declared
+  return type of the call before adding a cast.
+- **An override that was not needed (d135a19d).** A `modded class CF_InputBindings` for edit-box focus was removed as
+  "unnecessary". Check that the framework does not already cover it before adding a `modded class`.
+
+### 15.2 `NULL` checks: neither noise nor missing
+
+- **Do not pad code with defensive checks that cannot trigger (a8d41ae8, f8a6dbf6, 71102ef7).** `if ( !prefab || !entity ) return;`
+  at the top of a helper whose callers always pass both; `if ( !item ) continue;` over an inventory index that is in range;
+  `if ( item.GetInventory() )` on an `EntityAI`; 40 `Assert_Null( Players )` / `Assert_Null( RootPermission )` lines on
+  members that are created in the constructor. They hide real bugs and bury the lines that matter. A hoisted guard that
+  changes control flow (the early `return` in `JMCameraModule`) is worse: fold the condition into the existing `if` instead.
+- **Do check what is really nullable (429fc904).** `player.PlayerObject.GetIdentity()` is `NULL` for a player who is
+  disconnecting; the code dereferenced it. The question per call is "can this be `NULL` here, and how", not "add one anyway".
+- **A check that is always true or always false is dead code.** The maintainer's titles "dumb unnecessary and broken checks
+  and casts" (a8d41ae8) and "Removed wrong check for basebuilding" (5bb1b1fd) are the same lesson: a wrong guard is a bug.
+
+### 15.3 `ref`, `Managed`, and who owns what
+
+- **`ref` is for members, not locals (2f987d02).** About 20 locals were declared `ref JMLogLine line = new JMLogLine();`,
+  `ref array< string > cats = ...`, `ref RaycastRVResult current = results[i];` and so on. A local needs no `ref`; with it, the
+  local is a strong ref that is meant to outlive the scope. Only fields that own the object take `ref`. A `ref` return type
+  is the one other legitimate place.
+- **A static that must clear when its owner dies is not `ref` (ca61f4bb).** `static ref CommunityOnlineToolsGame g_cotGame`
+  kept the object alive after `g_cotBase` (created in `5_Mission`) was released, so it never became `NULL`. It is now
+  `static CommunityOnlineToolsGame g_cotGame` with a `@note deliberately not ref!` above it. Say why when you leave `ref` off.
+- **A helper object that is not an engine class inherits `Managed` (0518899a).** `JMSearchMatcher` was a plain `class` and
+  was fixed to `: Managed`. See the DTOR rule in the quick list.
+- **`ref` on `ref string` elements (2f987d02):** `array< ref string >` is wrong; strings are values. `array< string >`.
+
+### 15.4 Do not call engine entry points that need server state, or skip COT's wrappers
+
+- **Setting health needs damage allowed (c115adf5, c4522d3c).** `SetHealth`, `SetHealthMax` and `SetFullHealth` do nothing on
+  an entity with damage off, which is exactly the state an admin leaves a target in. Use `COT_Base.SetHealth`,
+  `COT_Base.SetHealthMax`, `COT_Base.SetFullHealth`; they turn damage on, apply, and restore the old state. Do not call the
+  engine setters directly from a module, a form or `ItemBase`.
+- **Never `GetGame().DisconnectPlayer` alone (81dfc98f).** The character stays in the world. The anti-cheat module used it;
+  it now calls `JMPlayerModule.Kick( {identity.GetId()}, reason )`.
+- **Server-only calls on the client are errors (4b17be03, a3d7370a).** `EEOnCECreate` calls `SetZoneDamageCEInit`, which calls
+  `GetHealth`; on an MP client that is an error, so it is wrapped in `g_Game.IsServer()`. `SetQuantity` on a client is an error
+  too and was removed from the ESP spawn path. Before calling an engine method from client code, check the vanilla source
+  for `IsServer()` / `GetGame().IsServer()` guards, and keep the `//!` that says why.
+- **Spawning a magazine into a weapon is `Weapon_Base.SpawnAmmo( className )`, not `CreateAttachmentEx` (288b2d1b).** Candidate
+  lists for the `MAGAZINE` slot come from `weapon.COTGetMagazineTypesValidated( "magazines", muzzle )` (6cfaf199). Config
+  scans must also skip `scope != 2`, an empty or `bmp` model, an empty `displayName`, and `$UNT$` (unfinished) entries
+  (3f7bba11, 288b2d1b). Remember `ConfigGetText` returns an already translated string.
+- **Queue ownership.** GUI callbacks go on `CALL_CATEGORY_GUI`, not `CALL_CATEGORY_GAMEPLAY` (175f2c5f), and the matching
+  `Remove` uses the same category. Clearing a vanilla queue to hide a crash is the wrong place for a fix: the maintainer
+  moved it out of COT to CF (909427fd) after finding it was a vanilla issue. Find the owner before patching.
+
+### 15.5 Small API facts that were wrong
+
+- **`StringLocaliser` takes the bare key (54798755).** `new StringLocaliser( "STR_COT_X" )`, not `"#STR_COT_X"`. About 40 call sites
+  in the camera, object, player and ESP modules had the `#`. The same applies to `Widget.TranslateString`; remove it where
+  the widget translates `#`-keys itself (7a647302, bee34947).
+- **Iterating a map: `foreach ( string k, T v: map )`, never `map.GetKeyArray()` / `GetValueArray()` (8bbe8ee0).** Both copy the
+  whole map, O(n), and are called from per-frame and per-RPC code (player list, map markers, construction parts).
+  For the same reason keep an `O(1)` lookup (`map`) where a loop over an array was used (47dee1a0).
+- **The reader mirrors the writer, type for type (46c451e9).** A `ctx.Read( vector )` was amended to three `ctx.Read( float )`
+  calls to match what is written. A change to a `Write` needs the matching `Read` changed in the same commit.
+- **Predicates return what the name says (66403990).** `bool ActiveCount()` returned a count; it is `int`. Offline/SP has no
+  server, so `#ifdef SERVER` bodies need an `#else` that works in SP, not an empty one.
+- **No leftover TODO or dead comment text.** Remove outdated `TODO`s (b83237d2), but see section 3: a comment that is true and
+  explains a decision stays.
+
+### 15.6 Working pattern
+
+1. Fix what was asked. If you spot a second problem, list it; do not fold it in (section 4).
+2. Before adding a class, field, helper, override, guard or comment about the engine, grep for an existing one and read
+   the vanilla source. Most items above were "I did not look".
+3. A speed-up, a pool, a cache or a custom event path needs a reproduction on the real target (client UI) before it ships.
+   A server boot does not run it (section 9).
+4. After the change, re-read your own diff for added lines nobody asked for. `git diff --stat` that shows more deleted
+   than added lines in a reviewer's cleanup commit means the first commit was too big.
