@@ -75,7 +75,9 @@ class JMCameraTravelPanel
 		m_TravelModeNames.Insert("Ping-Pong");
 	}
 
-	//! Shows the panel when the form's section selector is on it.
+	//! Shows or hides the panel inside its tab. The form's tab strip shows and
+	//! hides the tab itself, so the form no longer calls this - it used to,
+	//! when a section selector switched panels inside one shared scroller.
 	void Show( bool show )
 	{
 		m_PanelTraveling.Show( show );
@@ -105,61 +107,44 @@ class JMCameraTravelPanel
 	}
 
 	//! Creates the panel inside the form's scroller content and fills it.
+	//!
+	//! One card per section. Actions that apply to the section as a whole
+	//! (add, reorder, delete, capture, clipboard, save/load) sit in the card's
+	//! title bar instead of a grid of buttons under it.
 	void Build( Widget actions )
 	{
 		m_PanelTraveling = UIActionManager.CreateGridSpacer( actions, 1, 1 );
 
-		Widget col = UIActionManager.CreateGridSpacer( m_PanelTraveling, 1, 1 );
-
 		// ---- Waypoint List ----
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_WAYPOINT_EDITOR", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		UIActionCard listCard = UIActionManager.CreateCard( m_PanelTraveling, "#STR_COT_CAMERA_SECTION_WAYPOINT_EDITOR" );
+		Widget col = listCard.GetContent();
+
+		// Add / Move Up / Move Down / Remove in the title bar
+		JMCameraForm.AddCardClickAction( listCard, "plus",         this, "OnClick_AddWaypoint",      "#STR_COT_CAMERA_ADD_A_NEW_WAYPOINT_AT_THE" );
+		JMCameraForm.AddCardClickAction( listCard, "chevron-up",   this, "OnClick_MoveWaypointUp",   "#STR_COT_CAMERA_MOVE_THE_SELECTED_WAYPOINT_EARLIER_IN" );
+		JMCameraForm.AddCardClickAction( listCard, "chevron-down", this, "OnClick_MoveWaypointDown", "#STR_COT_CAMERA_MOVE_THE_SELECTED_WAYPOINT_LATER_IN" );
+		JMCameraForm.AddCardDeleteConfirm( listCard, this, "OnClick_DeleteWaypoint", "#STR_COT_CAMERA_REMOVE_THE_SELECTED_WAYPOINT" );
 
 		m_WaypointSelectBox = UIActionManager.CreateSelectionBox( col, "#STR_COT_CAMERA_SELECT", m_WaypointNames, this, "OnClick_WaypointSelectBox" );
 		m_WaypointSelectBox.SetSelectorWidth(1.0);
 
-		// Add / Remove / Move Up / Move Down in a 2x2 grid
-		Widget gridListButtons = UIActionManager.CreateGridSpacer( col, 2, 2 );
-		UIActionButton btnAddWp = UIActionManager.CreateButton( gridListButtons, "#STR_COT_GENERIC_ADD",    this, ""     );
-		if ( btnAddWp ) btnAddWp.SetOnClick( this, "OnClick_AddWaypoint" );
-		btnAddWp.SetTooltip( "#STR_COT_CAMERA_ADD_A_NEW_WAYPOINT_AT_THE" );
-		UIActionConfirmInline delWaypointBtn = UIActionManager.CreateConfirmInline( gridListButtons, "#STR_COT_GENERIC_DELETE", this, "OnClick_DeleteWaypoint" );
-		UIActionIconGrid.ApplyDeletePreset( delWaypointBtn );
-		delWaypointBtn.SetTooltip( "#STR_COT_CAMERA_REMOVE_THE_SELECTED_WAYPOINT" );
-		UIActionButton btnUp   = UIActionManager.CreateButton( gridListButtons, "Up",             this, ""   );
-		if ( btnUp ) btnUp.SetOnClick( this, "OnClick_MoveWaypointUp" );
-		btnUp.SetTooltip( "#STR_COT_CAMERA_MOVE_THE_SELECTED_WAYPOINT_EARLIER_IN" );
-		UIActionButton btnDown = UIActionManager.CreateButton( gridListButtons, "#STR_COT_CAMERA_DOWN",           this, "" );
-		if ( btnDown ) btnDown.SetOnClick( this, "OnClick_MoveWaypointDown" );
-		btnDown.SetTooltip( "#STR_COT_CAMERA_MOVE_THE_SELECTED_WAYPOINT_LATER_IN" );
-
 		UIActionButton btnClear = UIActionManager.CreateButton( col, "#STR_COT_CAMERA_CLEAR_ALL", this, "" );
 		if ( btnClear ) btnClear.SetOnClick( this, "OnClick_ClearWaypoints" );
+		btnClear.SetIcon( JMConstants.Lucide( "list-x" ) );
 		btnClear.SetTooltip( "#STR_COT_CAMERA_REMOVE_EVERY_WAYPOINT_FROM_THE_CURRENT" );
 
 		// ---- Edit Selected Waypoint ----
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_EDIT_SELECTED_WAYPOINT", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		UIActionCard editCard = UIActionManager.CreateCard( m_PanelTraveling, "#STR_COT_CAMERA_EDIT_SELECTED_WAYPOINT" );
+		col = editCard.GetContent();
 
-		UIActionButton btnCapPos = UIActionManager.CreateButton( col, "#STR_COT_CAMERA_CAPTURE_POSITION", this, "" );
-		if ( btnCapPos ) btnCapPos.SetOnClick( this, "OnClick_CapturePosition" );
-		btnCapPos.SetTooltip( "#STR_COT_CAMERA_UPDATE_THE_SELECTED_WAYPOINT_WITH_THE" );
+		// Capture / Look At / clipboard shortcuts in the title bar
+		JMCameraForm.AddCardClickAction( editCard, "crosshair",       this, "OnClick_CapturePosition", "#STR_COT_CAMERA_UPDATE_THE_SELECTED_WAYPOINT_WITH_THE" );
+		JMCameraForm.AddCardClickAction( editCard, "locate-fixed",    this, "OnClick_LookAtSelection", "#STR_COT_CAMERA_ROTATE_THIS_WAYPOINT_SO_THE_CAMERA" );
+		JMCameraForm.AddCardClickAction( editCard, "copy",            this, "OnClick_CopyPos",         "#STR_COT_CAMERA_COPY_THIS_WAYPOINT_S_WORLD_POSITION" );
+		JMCameraForm.AddCardClickAction( editCard, "clipboard-paste", this, "OnClick_PastePos",        "#STR_COT_CAMERA_PASTE_A_WORLD_POSITION_FROM_THE" );
 
-		m_SliderWaypointSpeed = UIActionManager.CreateSyncedSlider( col, "Speed (m/s)", 0.1, 50, this, "OnChange_WaypointSpeed" );
-		m_SliderWaypointSpeed.SetCurrent( 5 );
-		m_SliderWaypointSpeed.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_SliderWaypointSpeed.SetStepValue( 0.1 );
-		m_SliderWaypointSpeed.SetWidth( 1.0 );
-		m_SliderWaypointSpeed.SetWidgetWidth( m_SliderWaypointSpeed.GetLabelWidget(), 0.5 );
-		m_SliderWaypointSpeed.SetWidgetWidth( m_SliderWaypointSpeed.GetSliderWidget(), 0.5 );
-
-		m_SliderHoldTime = UIActionManager.CreateSyncedSlider( col, "Hold Time", 0, 10, this, "OnChange_HoldTime" );
-		m_SliderHoldTime.SetCurrent( 0 );
-		m_SliderHoldTime.SetFormat( "#STR_COT_FORMAT_SECOND" );
-		m_SliderHoldTime.SetStepValue( 0.5 );
-		m_SliderHoldTime.SetWidth( 1.0 );
-		m_SliderHoldTime.SetWidgetWidth( m_SliderHoldTime.GetLabelWidget(), 0.5 );
-		m_SliderHoldTime.SetWidgetWidth( m_SliderHoldTime.GetSliderWidget(), 0.5 );
+		m_SliderWaypointSpeed = JMCameraForm.CreateEffectSlider( col, "Speed (m/s)", 0.1, 50, this, "OnChange_WaypointSpeed", 5, 0.1, "#STR_COT_FORMAT_NONE" );
+		m_SliderHoldTime      = JMCameraForm.CreateEffectSlider( col, "Hold Time", 0, 10, this, "OnChange_HoldTime", 0, 0.5, "#STR_COT_FORMAT_SECOND" );
 
 		// Catmull + Track Target on the same row
 		Widget gridCatmullTrack = UIActionManager.CreateGridSpacer( col, 1, 2 );
@@ -176,86 +161,25 @@ class JMCameraTravelPanel
 		m_EasingSelectBox.SetSelection((int)JMCameraEasing.EASE_IN_OUT, false);
 
 		// ---- Per-Waypoint Screen Effects ----
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_WAYPOINT_EFFECTS", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		UIActionCard fxCard = UIActionManager.CreateCard( m_PanelTraveling, "#STR_COT_CAMERA_WAYPOINT_EFFECTS" );
+		col = fxCard.GetContent();
 
-		m_WP_SliderExposure = UIActionManager.CreateSyncedSlider( col, "Exposure (EV)", -5, 5, this, "OnChange_WP_Exposure" );
-		m_WP_SliderExposure.SetCurrent( 0 );
-		m_WP_SliderExposure.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_WP_SliderExposure.SetStepValue( 0.05 );
-		m_WP_SliderExposure.SetWidth( 1.0 );
-		m_WP_SliderExposure.SetWidgetWidth( m_WP_SliderExposure.GetLabelWidget(), 0.4 );
-		m_WP_SliderExposure.SetWidgetWidth( m_WP_SliderExposure.GetSliderWidget(), 0.6 );
-
-		m_WP_SliderVignette = UIActionManager.CreateSyncedSlider( col, "Vignette", 0, 1, this, "OnChange_WP_Vignette" );
-		m_WP_SliderVignette.SetCurrent( 0 );
-		m_WP_SliderVignette.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		m_WP_SliderVignette.SetStepValue( 0.01 );
-		m_WP_SliderVignette.SetWidth( 1.0 );
-		m_WP_SliderVignette.SetWidgetWidth( m_WP_SliderVignette.GetLabelWidget(), 0.4 );
-		m_WP_SliderVignette.SetWidgetWidth( m_WP_SliderVignette.GetSliderWidget(), 0.6 );
-
-		m_WP_SliderBlur = UIActionManager.CreateSyncedSlider( col, "Blur", 0, 100, this, "OnChange_WP_Blur" );
-		m_WP_SliderBlur.SetCurrent( 1 );
-		m_WP_SliderBlur.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		m_WP_SliderBlur.SetStepValue( 0.1 );
-		m_WP_SliderBlur.SetWidth( 1.0 );
-		m_WP_SliderBlur.SetWidgetWidth( m_WP_SliderBlur.GetLabelWidget(), 0.4 );
-		m_WP_SliderBlur.SetWidgetWidth( m_WP_SliderBlur.GetSliderWidget(), 0.6 );
-
-		m_WP_SliderFOV = UIActionManager.CreateSyncedSlider( col, "FOV", 0.001, 4, this, "OnChange_WP_FOV" );
-		m_WP_SliderFOV.SetCurrent( 1 );
-		m_WP_SliderFOV.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_WP_SliderFOV.SetStepValue( 0.001 );
-		m_WP_SliderFOV.SetWidth( 1.0 );
-		m_WP_SliderFOV.SetWidgetWidth( m_WP_SliderFOV.GetLabelWidget(), 0.4 );
-		m_WP_SliderFOV.SetWidgetWidth( m_WP_SliderFOV.GetSliderWidget(), 0.6 );
-
-		m_WP_SliderShakeIntensity = UIActionManager.CreateSyncedSlider( col, "Shake Intensity", 0, 0.5, this, "OnChange_WP_ShakeIntensity" );
-		m_WP_SliderShakeIntensity.SetCurrent( 0 );
-		m_WP_SliderShakeIntensity.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_WP_SliderShakeIntensity.SetStepValue( 0.005 );
-		m_WP_SliderShakeIntensity.SetWidth( 1.0 );
-		m_WP_SliderShakeIntensity.SetWidgetWidth( m_WP_SliderShakeIntensity.GetLabelWidget(), 0.4 );
-		m_WP_SliderShakeIntensity.SetWidgetWidth( m_WP_SliderShakeIntensity.GetSliderWidget(), 0.6 );
-
-		m_WP_SliderShakeFrequency = UIActionManager.CreateSyncedSlider( col, "Shake Frequency", 0.1, 10, this, "OnChange_WP_ShakeFrequency" );
-		m_WP_SliderShakeFrequency.SetCurrent( 1.0 );
-		m_WP_SliderShakeFrequency.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_WP_SliderShakeFrequency.SetStepValue( 0.1 );
-		m_WP_SliderShakeFrequency.SetWidth( 1.0 );
-		m_WP_SliderShakeFrequency.SetWidgetWidth( m_WP_SliderShakeFrequency.GetLabelWidget(), 0.4 );
-		m_WP_SliderShakeFrequency.SetWidgetWidth( m_WP_SliderShakeFrequency.GetSliderWidget(), 0.6 );
-
-		// Clipboard shortcuts
-		Widget gridPosActions = UIActionManager.CreateGridSpacer( col, 1, 2 );
-		UIActionButton btnCopyPos  = UIActionManager.CreateButton( gridPosActions, "#STR_COT_CAMERA_COPY_POS",  this, ""  );
-		if ( btnCopyPos ) btnCopyPos.SetOnClick( this, "OnClick_CopyPos" );
-		btnCopyPos.SetIcon( JMConstants.ICON_STACK );
-		btnCopyPos.SetTooltip( "#STR_COT_CAMERA_COPY_THIS_WAYPOINT_S_WORLD_POSITION" );
-		UIActionButton btnPastePos = UIActionManager.CreateButton( gridPosActions, "#STR_COT_CAMERA_PASTE_POS", this, "" );
-		if ( btnPastePos ) btnPastePos.SetOnClick( this, "OnClick_PastePos" );
-		btnPastePos.SetTooltip( "#STR_COT_CAMERA_PASTE_A_WORLD_POSITION_FROM_THE" );
-
-		UIActionButton btnLookAt = UIActionManager.CreateButton( col, "#STR_COT_CAMERA_LOOK_AT", this, "" );
-		if ( btnLookAt ) btnLookAt.SetOnClick( this, "OnClick_LookAtSelection" );
-		btnLookAt.SetTooltip( "#STR_COT_CAMERA_ROTATE_THIS_WAYPOINT_SO_THE_CAMERA" );
+		m_WP_SliderExposure       = JMCameraForm.CreateEffectSlider( col, "Exposure (EV)", -5, 5, this, "OnChange_WP_Exposure", 0, 0.05, "#STR_COT_FORMAT_NONE" );
+		m_WP_SliderVignette       = JMCameraForm.CreateEffectSlider( col, "Vignette", 0, 1, this, "OnChange_WP_Vignette", 0, 0.01, "#STR_COT_FORMAT_PERCENTAGE" );
+		m_WP_SliderBlur           = JMCameraForm.CreateEffectSlider( col, "Blur", 0, 100, this, "OnChange_WP_Blur", 1, 0.1, "#STR_COT_FORMAT_PERCENTAGE" );
+		m_WP_SliderFOV            = JMCameraForm.CreateEffectSlider( col, "FOV", 0.001, 4, this, "OnChange_WP_FOV", 1, 0.001, "#STR_COT_FORMAT_NONE" );
+		m_WP_SliderShakeIntensity = JMCameraForm.CreateEffectSlider( col, "Shake Intensity", 0, 0.5, this, "OnChange_WP_ShakeIntensity", 0, 0.005, "#STR_COT_FORMAT_NONE" );
+		m_WP_SliderShakeFrequency = JMCameraForm.CreateEffectSlider( col, "Shake Frequency", 0.1, 10, this, "OnChange_WP_ShakeFrequency", 1.0, 0.1, "#STR_COT_FORMAT_NONE" );
 
 		// ---- Path Controls ----
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_PATH_CONTROLS", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		UIActionCard pathCard = UIActionManager.CreateCard( m_PanelTraveling, "#STR_COT_CAMERA_SECTION_PATH_CONTROLS" );
+		col = pathCard.GetContent();
 
 		m_TravelModeSelectBox = UIActionManager.CreateSelectionBox( col, "#STR_COT_CAMERA_MODE", m_TravelModeNames, this, "OnClick_TravelModeSelectBox" );
 		m_TravelModeSelectBox.SetSelectorWidth(1.0);
 		m_TravelModeSelectBox.SetSelection(0, false);
 
-		m_SliderSpeedMult = UIActionManager.CreateSyncedSlider( col, "Speed Mult.", 0.1, 4, this, "OnChange_SpeedMult" );
-		m_SliderSpeedMult.SetCurrent( 1.0 );
-		m_SliderSpeedMult.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_SliderSpeedMult.SetStepValue( 0.1 );
-		m_SliderSpeedMult.SetWidth( 1.0 );
-		m_SliderSpeedMult.SetWidgetWidth( m_SliderSpeedMult.GetLabelWidget(), 0.4 );
-		m_SliderSpeedMult.SetWidgetWidth( m_SliderSpeedMult.GetSliderWidget(), 0.6 );
+		m_SliderSpeedMult = JMCameraForm.CreateEffectSlider( col, "Speed Mult.", 0.1, 4, this, "OnChange_SpeedMult", 1.0, 0.1, "#STR_COT_FORMAT_NONE" );
 
 		m_LabelDuration = UIActionManager.CreateText( col, "#STR_COT_CAMERA_EST_DURATION", "" );
 
@@ -263,6 +187,7 @@ class JMCameraTravelPanel
 		m_BtnTravel = UIActionManager.CreateButton( gridPlayback, "#STR_COT_CAMERA_TRAVEL", this, "" );
 		if ( m_BtnTravel ) m_BtnTravel.SetOnClick( this, "OnClick_GoToPositions" );
 		m_BtnTravel.SetIcon( JMConstants.ICON_PLAY );
+		m_BtnTravel.SetColor( JMTheme.SUCCESS_FILL );
 		m_BtnTravel.SetTooltip( "#STR_COT_CAMERA_START_TRAVELLING_THROUGH_THE_WAYPOINTS" );
 		m_BtnPauseResume = UIActionManager.CreateButton( gridPlayback, "#STR_COT_CAMERA_PAUSE", this, "" );
 		if ( m_BtnPauseResume ) m_BtnPauseResume.SetOnClick( this, "OnClick_PauseResume" );
@@ -270,25 +195,19 @@ class JMCameraTravelPanel
 		m_BtnPauseResume.SetTooltip( "#STR_COT_CAMERA_PAUSE_OR_RESUME_THE_CURRENT_TRAVEL" );
 
 		// ---- Saved Paths ----
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_SAVED_PATHS", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		UIActionCard savedCard = UIActionManager.CreateCard( m_PanelTraveling, "#STR_COT_CAMERA_SECTION_SAVED_PATHS" );
+		col = savedCard.GetContent();
+
+		// Save / Load / Delete in the title bar
+		JMCameraForm.AddCardClickAction( savedCard, "save",        this, "OnClick_SavePath", "#STR_COT_CAMERA_SAVE_THE_CURRENT_WAYPOINT_PATH_UNDER" );
+		JMCameraForm.AddCardClickAction( savedCard, "folder-open", this, "OnClick_LoadPath", "#STR_COT_CAMERA_LOAD_THE_SELECTED_SAVED_PATH_INTO" );
+		JMCameraForm.AddCardDeleteConfirm( savedCard, this, "OnClick_DeletePath", "#STR_COT_CAMERA_DELETE_THE_SELECTED_SAVED_PATH" );
 
 		m_PathNames     = m_Form.GetModule().GetPathNames();
 		m_PathSelectBox = UIActionManager.CreateSelectionBox( col, "#STR_COT_CAMERA_MODULE_SAVED_PATHS", m_PathNames, this, "OnClick_PathSelectBox" );
 		m_PathSelectBox.SetSelectorWidth(1.0);
 
 		m_PathName = UIActionManager.CreateEditableText( col, "#STR_COT_CAMERA_MODULE_PATH_NAME", this );
-
-		Widget gridPathActions = UIActionManager.CreateGridSpacer( col, 1, 3 );
-		UIActionButton btnSavePath = UIActionManager.CreateButton( gridPathActions, "#STR_COT_CAMERA_SAVE",           this, ""   );
-		if ( btnSavePath ) btnSavePath.SetOnClick( this, "OnClick_SavePath" );
-		btnSavePath.SetTooltip( "#STR_COT_CAMERA_SAVE_THE_CURRENT_WAYPOINT_PATH_UNDER" );
-		UIActionButton btnLoadPath = UIActionManager.CreateButton( gridPathActions, "#STR_COT_CAMERA_LOAD",          this, ""   );
-		if ( btnLoadPath ) btnLoadPath.SetOnClick( this, "OnClick_LoadPath" );
-		btnLoadPath.SetTooltip( "#STR_COT_CAMERA_LOAD_THE_SELECTED_SAVED_PATH_INTO" );
-		UIActionConfirmInline delPathBtn = UIActionManager.CreateConfirmInline( gridPathActions, "#STR_COT_GENERIC_DELETE", this, "OnClick_DeletePath" );
-		UIActionIconGrid.ApplyDeletePreset( delPathBtn );
-		delPathBtn.SetTooltip( "#STR_COT_CAMERA_DELETE_THE_SELECTED_SAVED_PATH" );
 	}
 
 	// ----------------------------------------------------------------

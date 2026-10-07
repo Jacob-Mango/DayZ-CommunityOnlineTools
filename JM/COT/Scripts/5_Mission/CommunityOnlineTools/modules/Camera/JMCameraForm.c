@@ -1,7 +1,14 @@
 class JMCameraForm: JMFormBase
 {
+	//! Scroller of the Effects tab. Every tab now has its own scroller - see
+	//! m_TabScrollers - this one keeps its old name for sub-mods.
 	protected UIActionScroller m_sclr_MainActions;
+
+	//! DEPRECATED - the section selector was replaced by m_Tabs and is never
+	//! created. Kept so sub-mods that null-check it still compile.
 	protected UIActionSelectBox m_SelectBox;
+
+	//! Tab captions, in tab order.
 	protected ref array< string > m_SelectBoxText =
 	{
 		"#STR_COT_CAMERA_TAB_EFFECTS",
@@ -9,6 +16,22 @@ class JMCameraForm: JMFormBase
 		"#STR_COT_CAMERA_TAB_BOOKMARKS",
 		"Settings"
 	};
+
+	//! Label/slider split shared by every effect slider.
+	static const float SLIDER_LABEL_W = 0.4;
+	static const float SLIDER_BODY_W  = 0.6;
+
+	// ---- Tabs ----
+	protected UIActionTabs m_Tabs;
+
+	//! Tab indices - what the strip's AddTab() returned for each tab, never written as numbers.
+	protected int m_TabIdEffects   = -1;
+	protected int m_TabIdTravel    = -1;
+	protected int m_TabIdBookmarks = -1;
+	protected int m_TabIdSettings  = -1;
+
+	//! One scroller per tab, in tab order.
+	protected ref array< UIActionScroller > m_TabScrollers;
 
 	// ---- Effects panel ----
 	protected GridSpacerWidget m_PanelEffects;
@@ -47,6 +70,7 @@ class JMCameraForm: JMFormBase
 		m_Travel = new JMCameraTravelPanel( this );
 
 		m_BookmarkNames = new TStringArray;
+		m_TabScrollers  = new array< UIActionScroller >;
 	}
 
 	bool GetCurrentCamera1stPersonADSHideScope()
@@ -64,6 +88,59 @@ class JMCameraForm: JMFormBase
 	JMCameraModule GetModule()
 	{
 		return m_Module;
+	}
+
+	//! An icon button in a card's title bar whose callback takes only the
+	//! action - the SetOnClick signature - rather than (UIEvent, action) the
+	//! premade UIActionCard.Add*Button helpers call. Public and static for the
+	//! panels split out of this form.
+	static UIActionImageButton AddCardClickAction( UIActionCard card, string icon, Class instance, string funcname, string tooltip = "" )
+	{
+		UIActionImageButton btn = UIActionManager.CreateIconButton( card.GetHeaderActions(), JMConstants.Lucide( icon ), instance, "" );
+		if ( !btn )
+			return null;
+
+		btn.SetOnClick( instance, funcname );
+		btn.SetFixedSize( JMFormBase.HEADER_ACTION_PX, JMFormBase.HEADER_ACTION_PX );
+
+		if ( tooltip != "" )
+			btn.SetTooltip( tooltip );
+
+		return btn;
+	}
+
+	//! A delete confirm icon in a card's title bar. Fires CHANGE once confirmed.
+	static UIActionConfirmInline AddCardDeleteConfirm( UIActionCard card, Class instance, string funcname, string tooltip = "" )
+	{
+		UIActionConfirmInline btn = UIActionManager.CreateDeleteConfirmIcon( card.GetHeaderActions(), instance, funcname );
+		if ( !btn )
+			return null;
+
+		btn.SetFixedSize( JMFormBase.HEADER_ACTION_PX, JMFormBase.HEADER_ACTION_PX );
+		btn.CenterIcon( JMFormBase.HEADER_ACTION_PX, 16 );
+
+		if ( tooltip != "" )
+			btn.SetTooltip( tooltip );
+
+		return btn;
+	}
+
+	//! One full-width synced slider with the shared label/slider split.
+	//! `format` "" leaves the slider's default format alone.
+	static UIActionSlider CreateEffectSlider( Widget parent, string label, float min, float max, Class instance, string funcname, float current, float step, string format = "" )
+	{
+		UIActionSlider slider = UIActionManager.CreateSyncedSlider( parent, label, min, max, instance, funcname );
+		slider.SetCurrent( current );
+
+		if ( format != "" )
+			slider.SetFormat( format );
+
+		slider.SetStepValue( step );
+		slider.SetWidth( 1.0 );
+		slider.SetWidgetWidth( slider.GetLabelWidget(), SLIDER_LABEL_W );
+		slider.SetWidgetWidth( slider.GetSliderWidget(), SLIDER_BODY_W );
+
+		return slider;
 	}
 
 	string GetSelectedBookmarkName()
@@ -110,22 +187,52 @@ class JMCameraForm: JMFormBase
 
 	override void OnCreate()
 	{
-		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
-		Widget actions = m_sclr_MainActions.GetContentWidget();
+		// ----------------------------------------------------------------------
+		// Full pane, tabbed: a tab strip over one content frame per tab, each
+		// with its own scroller and its sections as cards.
+		//
+		//   Effects    Controls, Depth of Field, Post-Process, Shake, Reset
+		//   Traveling  JMCameraTravelPanel
+		//   Bookmarks  saved camera positions
+		//   Settings   options
+		//
+		// Every tab is built here rather than on first activation: Update()
+		// drives the Effects sliders every frame, whichever tab is showing.
+		// ----------------------------------------------------------------------
 
-		m_SelectBox = UIActionManager.CreateSelectionBox( actions, "", m_SelectBoxText, this, "OnClick_SelectBox" );
-		m_SelectBox.SetSelectorWidth(1.0);
-		m_SelectBox.SetSelection(0, false);
+		m_RightTabStrip = layoutRoot.FindAnyWidget( "panel_right_tabs" );
+		m_RightContent  = layoutRoot.FindAnyWidget( "panel_right_content" );
 
-		m_PanelEffects = UIActionManager.CreateGridSpacer( actions, 1, 1 );
+		Widget panelEffects   = layoutRoot.FindAnyWidget( "cam_tab_effects" );
+		Widget panelTravel    = layoutRoot.FindAnyWidget( "cam_tab_travel" );
+		Widget panelBookmarks = layoutRoot.FindAnyWidget( "cam_tab_bookmarks" );
+		Widget panelSettings  = layoutRoot.FindAnyWidget( "cam_tab_settings" );
+
+		//! Hoisted: an indexed string read as a call argument miscompiles.
+		string labelEffects   = m_SelectBoxText[0];
+		string labelTravel    = m_SelectBoxText[1];
+		string labelBookmarks = m_SelectBoxText[2];
+		string labelSettings  = m_SelectBoxText[3];
+
+		m_Tabs = UIActionManager.CreateTabStrip( m_RightTabStrip, this, "OnClick_SelectBox" );
+		m_TabIdEffects   = m_Tabs.AddTab( labelEffects,   JMConstants.Lucide( "aperture" ), panelEffects );
+		m_TabIdTravel    = m_Tabs.AddTab( labelTravel,    JMConstants.Lucide( "route" ),    panelTravel );
+		m_TabIdBookmarks = m_Tabs.AddTab( labelBookmarks, JMConstants.Lucide( "bookmark" ), panelBookmarks );
+		m_TabIdSettings  = m_Tabs.AddTab( labelSettings,  JMConstants.Lucide( "settings" ), panelSettings );
+
+		m_sclr_MainActions = CreateTabScroller( panelEffects );
+		m_PanelEffects = UIActionManager.CreateGridSpacer( m_sclr_MainActions.GetContentWidget(), 1, 1 );
 			InitCameraEffects();
 
-		m_Travel.Build( actions );
+		UIActionScroller travelScroller = CreateTabScroller( panelTravel );
+		m_Travel.Build( travelScroller.GetContentWidget() );
 
-		m_PanelBookmarks = UIActionManager.CreateGridSpacer( actions, 1, 1 );
+		UIActionScroller bookmarkScroller = CreateTabScroller( panelBookmarks );
+		m_PanelBookmarks = UIActionManager.CreateGridSpacer( bookmarkScroller.GetContentWidget(), 1, 1 );
 			InitCameraBookmarks();
 
-		m_PanelSettings = UIActionManager.CreateGridSpacer( actions, 1, 1 );
+		UIActionScroller settingsScroller = CreateTabScroller( panelSettings );
+		m_PanelSettings = UIActionManager.CreateGridSpacer( settingsScroller.GetContentWidget(), 1, 1 );
 			InitCameraSettings();
 
 		if ( m_Module )
@@ -145,10 +252,33 @@ class JMCameraForm: JMFormBase
 			RefreshBookmarkSelectBox();
 		}
 
-		Exec_SelectBox();
+		// sendEvent = false: the panels are already in their initial state.
+		m_Tabs.SetSelection( m_TabIdEffects, false );
+
 		m_Travel.UpdateUIWaypoint();
 		m_Travel.UpdateDurationLabel();
-		m_sclr_MainActions.UpdateScroller();
+		UpdateTabScrollers();
+	}
+
+	protected UIActionScroller CreateTabScroller( Widget panel )
+	{
+		UIActionScroller scroller = UIActionManager.CreateScroller( panel );
+		m_TabScrollers.Insert( scroller );
+		return scroller;
+	}
+
+	protected void UpdateTabScrollers()
+	{
+		foreach ( UIActionScroller scroller : m_TabScrollers )
+		{
+			if ( scroller )
+				scroller.UpdateScroller();
+		}
+	}
+
+	protected override COT_ScriptedWidgetEventHandler GetTabStrip()
+	{
+		return m_Tabs;
 	}
 
 	// ----------------------------------------------------------------
@@ -157,109 +287,46 @@ class JMCameraForm: JMFormBase
 
 	void InitCameraEffects()
 	{
-		Widget col = UIActionManager.CreateGridSpacer( m_PanelEffects, 1, 1 );
+		// ---- Controls - live, so first -----------------------------------
+		UIActionCard controlsCard = UIActionManager.CreateCard( m_PanelEffects, "#STR_COT_CAMERA_SECTION_CONTROLS" );
+		Widget controls = controlsCard.GetContent();
 
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_DOF", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		m_SliderSpeed = CreateEffectSlider( controls, "#STR_COT_CAMERA_MODULE_SPEED", 0.001, 10, this, "OnChange_Speed", JMCameraBase.s_CurrentSpeed, 0.001 );
+		m_SliderFOV   = CreateEffectSlider( controls, "#STR_COT_CAMERA_MODULE_FOV", 0.001, 4, this, "OnChange_FOV", m_Module.m_CurrentFOV, 0.001 );
 
-		m_SliderBlurStrength = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_BLUR", 0, 100, this, "OnChange_Blur" );
-		m_SliderBlurStrength.SetCurrent( 0 );
-		m_SliderBlurStrength.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		m_SliderBlurStrength.SetStepValue( 0.1 );
-		m_SliderBlurStrength.SetWidth( 1.0 );
-		m_SliderBlurStrength.SetWidgetWidth( m_SliderBlurStrength.GetLabelWidget(), 0.4 );
-		m_SliderBlurStrength.SetWidgetWidth( m_SliderBlurStrength.GetSliderWidget(), 0.6 );
+		// ---- Depth of field ------------------------------------------------
+		UIActionCard dofCard = UIActionManager.CreateCard( m_PanelEffects, "#STR_COT_CAMERA_SECTION_DOF" );
+		Widget dof = dofCard.GetContent();
 
-		m_SliderFocusDistance = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_FOCUS", 0, 1000, this, "OnChange_Focus" );
-		m_SliderFocusDistance.SetCurrent( 0 );
-		m_SliderFocusDistance.SetFormat( "#STR_COT_FORMAT_METRE" );
-		m_SliderFocusDistance.SetStepValue( 0.1 );
-		m_SliderFocusDistance.SetWidth( 1.0 );
-		m_SliderFocusDistance.SetWidgetWidth( m_SliderFocusDistance.GetLabelWidget(), 0.4 );
-		m_SliderFocusDistance.SetWidgetWidth( m_SliderFocusDistance.GetSliderWidget(), 0.6 );
+		m_SliderBlurStrength  = CreateEffectSlider( dof, "#STR_COT_CAMERA_MODULE_BLUR", 0, 100, this, "OnChange_Blur", 0, 0.1, "#STR_COT_FORMAT_PERCENTAGE" );
+		m_SliderFocusDistance = CreateEffectSlider( dof, "#STR_COT_CAMERA_MODULE_FOCUS", 0, 1000, this, "OnChange_Focus", 0, 0.1, "#STR_COT_FORMAT_METRE" );
+		m_SliderFocalLength   = CreateEffectSlider( dof, "#STR_COT_CAMERA_MODULE_FOCAL_LENGTH", 0, 1000, this, "OnChange_FocalLength", 0, 0.1, "#STR_COT_FORMAT_METRE" );
+		m_SliderFocalNear     = CreateEffectSlider( dof, "#STR_COT_CAMERA_MODULE_FOCAL_NEAR", 0, 1000, this, "OnChange_FocalNear", 0, 0.1, "#STR_COT_FORMAT_METRE" );
 
-		m_SliderFocalLength = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_FOCAL_LENGTH", 0, 1000, this, "OnChange_FocalLength" );
-		m_SliderFocalLength.SetCurrent( 0 );
-		m_SliderFocalLength.SetFormat( "#STR_COT_FORMAT_METRE" );
-		m_SliderFocalLength.SetStepValue( 0.1 );
-		m_SliderFocalLength.SetWidth( 1.0 );
-		m_SliderFocalLength.SetWidgetWidth( m_SliderFocalLength.GetLabelWidget(), 0.4 );
-		m_SliderFocalLength.SetWidgetWidth( m_SliderFocalLength.GetSliderWidget(), 0.6 );
+		// ---- Post-process --------------------------------------------------
+		UIActionCard ppCard = UIActionManager.CreateCard( m_PanelEffects, "#STR_COT_CAMERA_SECTION_POSTPROCESS" );
+		Widget pp = ppCard.GetContent();
 
-		m_SliderFocalNear = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_FOCAL_NEAR", 0, 1000, this, "OnChange_FocalNear" );
-		m_SliderFocalNear.SetCurrent( 0 );
-		m_SliderFocalNear.SetFormat( "#STR_COT_FORMAT_METRE" );
-		m_SliderFocalNear.SetStepValue( 0.1 );
-		m_SliderFocalNear.SetWidth( 1.0 );
-		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetLabelWidget(), 0.4 );
-		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetSliderWidget(), 0.6 );
+		m_SliderExposure = CreateEffectSlider( pp, "#STR_COT_CAMERA_MODULE_EXPOSURE", -5, 5, this, "OnChange_Exposure", 0, 0.05, "#STR_COT_FORMAT_NONE" );
+		m_SliderVignette = CreateEffectSlider( pp, "#STR_COT_CAMERA_MODULE_VIGNETTE", 0, 1, this, "OnChange_Vignette", 0, 0.01, "#STR_COT_FORMAT_PERCENTAGE" );
 
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_POSTPROCESS", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		// ---- Shake ---------------------------------------------------------
+		UIActionCard shakeCard = UIActionManager.CreateCard( m_PanelEffects, "#STR_COT_CAMERA_SECTION_SHAKE" );
+		Widget shake = shakeCard.GetContent();
 
-		m_SliderExposure = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_EXPOSURE", -5, 5, this, "OnChange_Exposure" );
-		m_SliderExposure.SetCurrent( 0 );
-		m_SliderExposure.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_SliderExposure.SetStepValue( 0.05 );
-		m_SliderExposure.SetWidth( 1.0 );
-		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetLabelWidget(), 0.4 );
-		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetSliderWidget(), 0.6 );
+		m_SliderShakeIntensity = CreateEffectSlider( shake, "#STR_COT_CAMERA_MODULE_SHAKE_INTENSITY", 0, 0.5, this, "OnChange_ShakeIntensity", 0, 0.005, "#STR_COT_FORMAT_NONE" );
+		m_SliderShakeFrequency = CreateEffectSlider( shake, "#STR_COT_CAMERA_MODULE_SHAKE_FREQUENCY", 0.1, 10, this, "OnChange_ShakeFrequency", 1.0, 0.1, "#STR_COT_FORMAT_NONE" );
 
-		m_SliderVignette = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_VIGNETTE", 0, 1, this, "OnChange_Vignette" );
-		m_SliderVignette.SetCurrent( 0 );
-		m_SliderVignette.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		m_SliderVignette.SetStepValue( 0.01 );
-		m_SliderVignette.SetWidth( 1.0 );
-		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetLabelWidget(), 0.4 );
-		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetSliderWidget(), 0.6 );
-
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_CONTROLS", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
-
-		m_SliderSpeed = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_SPEED", 0.001, 10, this, "OnChange_Speed" );
-		m_SliderSpeed.SetCurrent( JMCameraBase.s_CurrentSpeed );
-		m_SliderSpeed.SetStepValue( 0.001 );
-		m_SliderSpeed.SetWidth( 1.0 );
-		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetLabelWidget(), 0.4 );
-		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetSliderWidget(), 0.6 );
-
-		m_SliderFOV = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_FOV", 0.001, 4, this, "OnChange_FOV" );
-		m_SliderFOV.SetCurrent( m_Module.m_CurrentFOV );
-		m_SliderFOV.SetStepValue( 0.001 );
-		m_SliderFOV.SetWidth( 1.0 );
-		m_SliderFOV.SetWidgetWidth( m_SliderFOV.GetLabelWidget(), 0.4 );
-		m_SliderFOV.SetWidgetWidth( m_SliderFOV.GetSliderWidget(), 0.6 );
-
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_SHAKE", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
-
-		m_SliderShakeIntensity = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_SHAKE_INTENSITY", 0, 0.5, this, "OnChange_ShakeIntensity" );
-		m_SliderShakeIntensity.SetCurrent( 0 );
-		m_SliderShakeIntensity.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_SliderShakeIntensity.SetStepValue( 0.005 );
-		m_SliderShakeIntensity.SetWidth( 1.0 );
-		m_SliderShakeIntensity.SetWidgetWidth( m_SliderShakeIntensity.GetLabelWidget(), 0.4 );
-		m_SliderShakeIntensity.SetWidgetWidth( m_SliderShakeIntensity.GetSliderWidget(), 0.6 );
-
-		m_SliderShakeFrequency = UIActionManager.CreateSyncedSlider( col, "#STR_COT_CAMERA_MODULE_SHAKE_FREQUENCY", 0.1, 10, this, "OnChange_ShakeFrequency" );
-		m_SliderShakeFrequency.SetCurrent( 1.0 );
-		m_SliderShakeFrequency.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_SliderShakeFrequency.SetStepValue( 0.1 );
-		m_SliderShakeFrequency.SetWidth( 1.0 );
-		m_SliderShakeFrequency.SetWidgetWidth( m_SliderShakeFrequency.GetLabelWidget(), 0.4 );
-		m_SliderShakeFrequency.SetWidgetWidth( m_SliderShakeFrequency.GetSliderWidget(), 0.6 );
-
-		UIActionButton btnResetFx = UIActionManager.CreateButton( col, "#STR_COT_CAMERA_RESET", this, "" );
+		UIActionButton btnResetFx = UIActionManager.CreateButton( m_PanelEffects, "#STR_COT_CAMERA_RESET", this, "" );
 		if ( btnResetFx ) btnResetFx.SetOnClick( this, "OnClick_ResetEffects" );
+		btnResetFx.SetIcon( JMConstants.Lucide( "rotate-ccw" ) );
 		btnResetFx.SetTooltip( "#STR_COT_CAMERA_RESET_EVERY_SCREEN_EFFECT_BACK_TO" );
 	}
 
 	void InitCameraSettings()
 	{
-		Widget col = UIActionManager.CreateGridSpacer( m_PanelSettings, 1, 1 );
-
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_OPTIONS", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		UIActionCard card = UIActionManager.CreateCard( m_PanelSettings, "#STR_COT_CAMERA_SECTION_OPTIONS" );
+		Widget col = card.GetContent();
 
 		m_EnableFullmapCamera    = UIActionManager.CreateCheckbox( col, "#STR_COT_CAMERA_MODULE_FULLMAP_UPDATE",  this, "OnClick_EnableFullmap",         m_Module.m_EnableFullmapCamera );
 		m_EnableFullmapCamera.SetTooltip( "#STR_COT_CAMERA_UPDATE_THE_FULLSCREEN_MAP_TO_FOLLOW" );
@@ -271,25 +338,23 @@ class JMCameraForm: JMFormBase
 
 	void InitCameraBookmarks()
 	{
-		Widget col = UIActionManager.CreateGridSpacer( m_PanelBookmarks, 1, 1 );
+		//! Save and delete act on the list, so they sit in the card's title
+		//! bar; Go To is the action the tab exists for and gets the full row.
+		UIActionCard card = UIActionManager.CreateCard( m_PanelBookmarks, "#STR_COT_CAMERA_SECTION_BOOKMARKS" );
+		Widget col = card.GetContent();
 
-		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_BOOKMARKS", "" );
-		UIActionManager.CreateDivider( col, JMTheme.DIVIDER_DARK, 2 );
+		AddCardClickAction( card, "bookmark-plus", this, "OnClick_SaveBookmark", "#STR_COT_CAMERA_SAVE_THE_CURRENT_CAMERA_POSITION_AS" );
+		m_DeleteBookmarkBtn = AddCardDeleteConfirm( card, this, "OnClick_DeleteBookmark", "#STR_COT_CAMERA_REMOVE_THE_SELECTED_BOOKMARK" );
 
 		m_BookmarkNames     = m_Module.GetBookmarkNames();
 		m_BookmarkSelectBox = UIActionManager.CreateSelectionBox( col, "#STR_COT_CAMERA_MODULE_BOOKMARKS", m_BookmarkNames, this, "OnClick_BookmarkSelectBox" );
 		m_BookmarkSelectBox.SetSelectorWidth(1.0);
 
-		Widget gridBookmarkActions = UIActionManager.CreateGridSpacer( col, 1, 3 );
-		UIActionButton btnSaveBm = UIActionManager.CreateButton( gridBookmarkActions, "#STR_COT_CAMERA_SAVE",   this, ""    );
-		if ( btnSaveBm ) btnSaveBm.SetOnClick( this, "OnClick_SaveBookmark" );
-		btnSaveBm.SetTooltip( "#STR_COT_CAMERA_SAVE_THE_CURRENT_CAMERA_POSITION_AS" );
-		UIActionButton btnGoToBm = UIActionManager.CreateButton( gridBookmarkActions, "#STR_COT_CAMERA_GO_TO",  this, "" );
+		UIActionButton btnGoToBm = UIActionManager.CreateButton( col, "#STR_COT_CAMERA_GO_TO",  this, "" );
 		if ( btnGoToBm ) btnGoToBm.SetOnClick( this, "OnClick_TeleportBookmark" );
+		btnGoToBm.SetIcon( JMConstants.Lucide( "navigation" ) );
+		btnGoToBm.SetColor( JMTheme.SUCCESS_FILL );
 		btnGoToBm.SetTooltip( "#STR_COT_CAMERA_TELEPORT_THE_CAMERA_TO_THE_SELECTED" );
-		m_DeleteBookmarkBtn = UIActionManager.CreateConfirmInline( gridBookmarkActions, "#STR_COT_GENERIC_DELETE", this, "OnClick_DeleteBookmark" );
-		UIActionIconGrid.ApplyDeletePreset( m_DeleteBookmarkBtn );
-		m_DeleteBookmarkBtn.SetTooltip( "#STR_COT_CAMERA_REMOVE_THE_SELECTED_BOOKMARK" );
 	}
 
 	// ----------------------------------------------------------------
@@ -298,8 +363,11 @@ class JMCameraForm: JMFormBase
 
 	override void OnResize( float w, float h )
 	{
-		if ( m_sclr_MainActions )
-			m_sclr_MainActions.UpdateScroller();
+		super.OnResize( w, h );
+
+		PinRightPanelGeometry( h );
+
+		UpdateTabScrollers();
 	}
 
 	override void Update()
@@ -330,6 +398,8 @@ class JMCameraForm: JMFormBase
 	//  Tab selection
 	// ----------------------------------------------------------------
 
+	//! The tab strip's callback. Kept under its old name - it used to be the
+	//! section select box's.
 	void OnClick_SelectBox( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
@@ -338,13 +408,12 @@ class JMCameraForm: JMFormBase
 		Exec_SelectBox();
 	}
 
+	//! The strip shows and hides the tab panels itself; what is left is
+	//! dismissing popups from the tab being left and sizing the new one.
 	void Exec_SelectBox()
 	{
-		int id = m_SelectBox.GetSelection();
-		m_PanelEffects.Show(   id == 0 );
-		m_Travel.Show( id == 1 );
-		m_PanelBookmarks.Show( id == 2 );
-		m_PanelSettings.Show(  id == 3 );
+		CloseAllOverlays();
+		UpdateTabScrollers();
 	}
 
 	// ----------------------------------------------------------------
