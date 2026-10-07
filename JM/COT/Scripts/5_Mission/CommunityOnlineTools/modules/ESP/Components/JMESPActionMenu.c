@@ -287,6 +287,7 @@ class JMESPActionMenu
 		m_Anchor = anchor;
 
 		m_Menu = UIActionManager.CreateContextMenu( parent, anchor, this, "OnMenuClick" );
+		m_Menu.SetHoverCallback( this, "OnMenuHover" );
 
 		return m_Menu;
 	}
@@ -886,6 +887,12 @@ class JMESPActionMenu
 		Add( PREFIX_ACTION + "dismantleall", "#STR_COT_ESP_MODULE_MENU_DISMANTLE_ALL", JMConstants.Lucide( "pickaxe" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE ), JMTheme.DANGER );
 		Add( PREFIX_ACTION + "repairall", "#STR_COT_ESP_MODULE_MENU_REPAIR_ALL", JMConstants.Lucide( "wrench" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_REPAIR ) );
 
+		//! A rebuildable building narrows this page to the part under the click,
+		//! so where to click is worth seeing. Client-side drawing only - nothing
+		//! is sent, so there is no permission to check.
+		if ( Rebuilding.Cast( JMESPModule.GetConstructionOf( m_Meta.target ) ) )
+			AddToggle( PREFIX_ACTION + "shownodes", "#STR_COT_ESP_MODULE_MENU_SHOW_NODES", m_Meta.module.GetConstructionPreview().IsShowingNodes( EntityAI.Cast( m_Meta.target ) ) );
+
 		//! Narrowed to the part the right-click landed on when it landed on one;
 		//! a rebuildable building has dozens. A click on nothing that names a part
 		//! (or a name no part answers to) lists everything rather than nothing.
@@ -1390,6 +1397,83 @@ class JMESPActionMenu
 		RunAction( id.Substring( 2, id.Length() - 2 ), action );
 	}
 
+	//! Draws what a construction row acts on while the pointer rests on it, and
+	//! nothing once it leaves (`id` is then ""). Every other row clears it.
+	void OnMenuHover( string id )
+	{
+		if ( !m_Meta || !m_Meta.target )
+			return;
+
+		JMConstructionPreview preview = m_Meta.module.GetConstructionPreview();
+		preview.ClearPreview();
+
+		EntityAI target = EntityAI.Cast( m_Meta.target );
+		map< string, ref JMConstructionPartData > parts = m_Meta.GetConstructionParts();
+
+		if ( !target || !parts )
+			return;
+
+		TStringArray partNames = new TStringArray;
+		JMConstructionPartData part;
+
+		if ( m_Page == PAGE_BUILD )
+		{
+			string partPage = PREFIX_PAGE + PAGE_PART + ":";
+
+			if ( id.IndexOf( partPage ) == 0 )
+			{
+				string partName = id.Substring( partPage.Length(), id.Length() - partPage.Length() );
+				part = parts.Get( partName );
+
+				if ( !part )
+					return;
+
+				partNames.Insert( partName );
+
+				if ( part.m_State == JMConstructionPartState.BUILT )
+					preview.PreviewParts( target, partNames );
+				else
+					preview.PreviewBuild( target, partNames );
+			}
+			else if ( id == PREFIX_ACTION + "buildall" )
+			{
+				//! The same parts Exec_BuildAll picks, read without the materials
+				//! check the server may still apply.
+				foreach ( string buildName, JMConstructionPartData buildPart : parts )
+				{
+					if ( buildPart.m_State == JMConstructionPartState.CAN_BUILD )
+						partNames.Insert( buildName );
+				}
+
+				preview.PreviewBuild( target, partNames );
+			}
+			else if ( id == PREFIX_ACTION + "dismantleall" || id == PREFIX_ACTION + "repairall" )
+			{
+				foreach ( string builtName, JMConstructionPartData builtPart : parts )
+				{
+					if ( builtPart.m_State == JMConstructionPartState.BUILT )
+						partNames.Insert( builtName );
+				}
+
+				if ( id == PREFIX_ACTION + "dismantleall" )
+					preview.PreviewDismantle( target, partNames );
+				else
+					preview.PreviewParts( target, partNames );
+			}
+		}
+		else if ( m_Page == PAGE_PART && parts.Contains( m_PageArg ) )
+		{
+			partNames.Insert( m_PageArg );
+
+			if ( id == PREFIX_ACTION + "build" )
+				preview.PreviewBuild( target, partNames );
+			else if ( id == PREFIX_ACTION + "dismantle" )
+				preview.PreviewDismantle( target, partNames );
+			else if ( id == PREFIX_ACTION + "repairpart" )
+				preview.PreviewParts( target, partNames );
+		}
+	}
+
 	//! "part:foo" is the only page that carries an argument; everything else is
 	//! a bare page name.
 	protected void GoToPage( string page )
@@ -1552,6 +1636,8 @@ class JMESPActionMenu
 			m_Meta.module.ObjectAction( JMESPObjectAction.ResetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
 		else if ( name == "digisetcode" )
 			DoSetDigitalCode();
+		else if ( name == "shownodes" )
+			DoShowNodes();
 		else if ( name == "build" )
 			DoConstruction( 0 );
 		else if ( name == "dismantle" )
@@ -2378,6 +2464,14 @@ class JMESPActionMenu
 		m_Meta.module.ObjectAction( JMESPObjectAction.ResetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
 
 		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( m_Meta.module.OpenDigitalCodeLockMenu, DIGITAL_CODE_LOCK_MENU_DELAY, false, codeLock );
+	}
+
+	protected void DoShowNodes()
+	{
+		EntityAI building = EntityAI.Cast( m_Meta.target );
+		JMConstructionPreview preview = m_Meta.module.GetConstructionPreview();
+
+		preview.SetShowNodes( building, !preview.IsShowingNodes( building ) );
 	}
 
 	protected void DoConstruction( int what )

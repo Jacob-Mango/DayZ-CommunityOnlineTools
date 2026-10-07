@@ -69,6 +69,119 @@ modded class ConstructionBase
 		}
 	}
 
+	//! The not yet built parts that building `partName` through COT_BuildRequiredParts
+	//! puts up: the part itself and, recursively, every required part still missing.
+	//! Read on the client to preview a build; it changes nothing.
+	void COT_GetPartsToBuild( string partName, notnull TStringArray result )
+	{
+		ConstructionPart part = GetConstructionPart( partName );
+		if ( !part || part.IsBuilt() || result.Find( partName ) > -1 )
+			return;
+
+		result.Insert( partName );
+
+		array<string> requiredParts = part.GetRequiredParts();
+		if ( !requiredParts )
+			return;
+
+		foreach ( string requiredPart : requiredParts )
+			COT_GetPartsToBuild( requiredPart, result );
+	}
+
+	//! The built parts that dismantling `partName` through COT_DismantleRequiredParts
+	//! takes down: the part itself and, recursively, every built part depending on it.
+	void COT_GetPartsToDismantle( string partName, notnull TStringArray result )
+	{
+		if ( !IsPartConstructed( partName ) || result.Find( partName ) > -1 )
+			return;
+
+		result.Insert( partName );
+
+		array<string> dependentParts = GetValidDepenentPartsArray( partName );
+		if ( !dependentParts )
+			return;
+
+		foreach ( string dependentPart : dependentParts )
+			COT_GetPartsToDismantle( dependentPart, result );
+	}
+
+	//! A model-space box around one part, for drawing it on the client.
+	//!
+	//! The part's own collision_data box comes first: it is per part, where the
+	//! view geometry selection is usually shared by every part of one main part
+	//! (all the walls of a fence answer to "wall"). Then the view geometry of
+	//! the selection named after the part, then after its main part. False when
+	//! the model has none of the three.
+	bool COT_GetPartBounds( string partName, out vector min, out vector max )
+	{
+		ConstructionPart part = GetConstructionPart( partName );
+		if ( !part )
+			return false;
+
+		array<string> collisionData = part.GetCollisionData();
+		if ( collisionData && collisionData.Count() == 2 )
+		{
+			string minPoint = collisionData[0];
+			string maxPoint = collisionData[1];
+
+			if ( m_EntityParent.MemoryPointExists( minPoint ) && m_EntityParent.MemoryPointExists( maxPoint ) )
+			{
+				vector a = m_EntityParent.GetMemoryPointPos( minPoint );
+				vector b = m_EntityParent.GetMemoryPointPos( maxPoint );
+
+				//! The two points are named min and max, but nothing makes a
+				//! model author put them that way round on every axis.
+				for ( int i = 0; i < 3; ++i )
+				{
+					min[i] = Math.Min( a[i], b[i] );
+					max[i] = Math.Max( a[i], b[i] );
+				}
+
+				return true;
+			}
+		}
+
+		if ( COT_GetSelectionBounds( partName, min, max ) )
+			return true;
+
+		return COT_GetSelectionBounds( part.GetMainPartName(), min, max );
+	}
+
+	//! The model-space box around every view geometry component of a selection -
+	//! the geometry a right-click on the object hits, so the box is where to click.
+	bool COT_GetSelectionBounds( string selection, out vector min, out vector max )
+	{
+		int level = m_EntityParent.GetViewGeometryLevel();
+
+		TIntArray components = new TIntArray;
+		m_EntityParent.GetActionComponentsForSelectionName( level, selection, components );
+
+		if ( components.Count() == 0 )
+			return false;
+
+		for ( int c = 0; c < components.Count(); ++c )
+		{
+			vector componentMin;
+			vector componentMax;
+			m_EntityParent.GetActionComponentMinMax( level, components[c], componentMin, componentMax );
+
+			if ( c == 0 )
+			{
+				min = componentMin;
+				max = componentMax;
+				continue;
+			}
+
+			for ( int j = 0; j < 3; ++j )
+			{
+				min[j] = Math.Min( min[j], componentMin[j] );
+				max[j] = Math.Max( max[j], componentMax[j] );
+			}
+		}
+
+		return true;
+	}
+
 	//! The verbs below differ per construction type - Construction goes through
 	//! its BaseBuildingBase parent, Rebuilding through its own server methods -
 	//! so they are overridden, never reached through the base.

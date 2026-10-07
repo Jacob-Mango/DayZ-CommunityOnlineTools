@@ -238,6 +238,10 @@ class JMESPModule: JMRenderableModuleBase
 	//! panel wide enough to hear the click would swallow every one of theirs.
 	protected bool m_WorldMenuRightDown;
 
+	//! The construction part boxes the action menus draw into the world - see
+	//! GetConstructionPreview. Client only, made on first use.
+	protected ref JMConstructionPreview m_ConstructionPreview;
+
 	//! How far a right-click reaches. Past this it is scenery an admin is
 	//! looking at rather than something they meant to act on.
 	static const float WORLD_MENU_RANGE = 200;
@@ -1397,9 +1401,22 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
+	//! Shared by every action menu, so a part previewed from the world menu and
+	//! the nodes toggled from the ESP form's menu are one set of drawings.
+	JMConstructionPreview GetConstructionPreview()
+	{
+		if ( !m_ConstructionPreview )
+			m_ConstructionPreview = new JMConstructionPreview();
+
+		return m_ConstructionPreview;
+	}
+
 	override void OnUpdate(float timeslice)
 	{
 		UpdateWorldContextMenu();
+
+		if ( m_ConstructionPreview )
+			m_ConstructionPreview.Draw();
 
 		if (!DrawPlayerSkeletonsEnabled || !m_ESPCanvas || !m_ESPCanvas.HasCanvas())
 			return;

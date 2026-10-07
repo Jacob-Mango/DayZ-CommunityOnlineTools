@@ -111,6 +111,12 @@ class UIActionContextMenu: UIActionBase
 	//! handler run made a dropdown button close and immediately reopen the menu,
 	//! so it never toggled shut.
 	protected Widget m_OwnerWidget;
+
+	//! Told the id of the row under the pointer whenever it changes, and "" when
+	//! the pointer leaves the rows or the menu closes - see SetHoverCallback.
+	protected Class  m_HoverTarget;
+	protected string m_HoverCallback;
+	protected string m_HoveredId;
 	static const int COLOR_ROW_NORMAL   = JMTheme.SURFACE_OVERLAY;
 	static const int COLOR_ROW_HOVER    = JMTheme.ACCENT_WASH;
 	static const int COLOR_ROW_DISABLED = JMTheme.SURFACE_OVERLAY;
@@ -187,6 +193,34 @@ class UIActionContextMenu: UIActionBase
 	void SetCloseOnClick( bool closeOnClick )
 	{
 		m_CloseOnClick = closeOnClick;
+	}
+
+	//! `callback` on `target` is called with a Param1<string>: the id of the row
+	//! the pointer moved onto, or "" once it is on none.
+	//!
+	//! Its own callback rather than a hover UIEvent through the click callback:
+	//! not every existing click handler checks for UIEvent.CLICK, and a new event
+	//! reaching one of those would read as a click.
+	void SetHoverCallback( Class target, string callback )
+	{
+		m_HoverTarget = target;
+		m_HoverCallback = callback;
+	}
+
+	string GetHoveredId()
+	{
+		return m_HoveredId;
+	}
+
+	protected void SetHoveredId( string id )
+	{
+		if ( id == m_HoveredId )
+			return;
+
+		m_HoveredId = id;
+
+		if ( m_HoverTarget && m_HoverCallback != "" )
+			GetGame().GameScript.CallFunctionParams( m_HoverTarget, m_HoverCallback, null, new Param1<string>( id ) );
 	}
 
 	//! Lay the entries out in `columns` columns (1 or 2). Call it before the
@@ -427,6 +461,7 @@ class UIActionContextMenu: UIActionBase
 	{
 		m_Entries.Clear();
 		m_HoveredRow = -1;
+		SetHoveredId( "" );
 
 		if ( m_Grid )
 		{
@@ -531,6 +566,7 @@ class UIActionContextMenu: UIActionBase
 
 		m_Open       = false;
 		m_HoveredRow = -1;
+		SetHoveredId( "" );
 
 		if ( m_Panel )
 			m_Panel.Show( false );
@@ -745,6 +781,9 @@ class UIActionContextMenu: UIActionBase
 		{
 			m_HoveredRow = idx;
 			RefreshRowColors();
+
+			if ( idx < m_Entries.Count() )
+				SetHoveredId( m_Entries[idx].Id );
 		}
 		return false;
 	}
@@ -757,6 +796,7 @@ class UIActionContextMenu: UIActionBase
 		{
 			m_HoveredRow = -1;
 			RefreshRowColors();
+			SetHoveredId( "" );
 		}
 		return false;
 	}
