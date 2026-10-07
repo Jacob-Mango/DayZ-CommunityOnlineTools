@@ -11,36 +11,6 @@ PanelWidgetClass confirmation_panel_inner {
  vexactsize 1
  style COTBox8Set
  {
-  ButtonWidgetClass confirmation_close {
-   ignorepointer 0
-   color 0 0 0 0
-   style Empty
-   position -8 8
-   size 22 22
-   halign right_ref
-   valign top_ref
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
-   vexactsize 1
-   {
-    ImageWidgetClass confirmation_close_icon {
-     ignorepointer 1
-     position 0 0
-     size 1 1
-     hexactpos 0
-     vexactpos 0
-     hexactsize 0
-     vexactsize 0
-     mode blend
-     color 0.925 0.976 1.000 0.702
-     "src alpha" 1
-     "no wrap" 1
-     "clamp mode" clamp
-     "stretch mode" stretch_w_h
-    }
-   }
-  }
   FrameWidgetClass confirmation_title_panel {
    ignorepointer 1
    position 0 0.03
