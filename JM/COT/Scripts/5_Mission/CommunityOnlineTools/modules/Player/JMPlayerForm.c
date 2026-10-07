@@ -601,6 +601,8 @@ class JMPlayerForm: JMFormBase
 
 		UpdateUI();
 
+		m_Roster.BeginFetch();
+
 		UpdatePlayerList( true );
 	}
 
@@ -636,6 +638,9 @@ class JMPlayerForm: JMFormBase
 	override void Update()
 	{
 		super.Update();
+
+		if ( m_Roster )
+			m_Roster.UpdateBusy();
 
 		if ( m_TabPositionCtrl )
 			m_TabPositionCtrl.Tick();

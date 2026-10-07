@@ -22,6 +22,7 @@ class JMPermissionManager
 	//! changes, so UI consumers can skip a rebuild when the roster hasn't
 	//! actually changed since their last poll.
 	protected int m_RosterVersion;
+	protected int m_RosterBatchCount;
 
 	void JMPermissionManager()
 	{
@@ -180,6 +181,18 @@ class JMPermissionManager
 	JMPermission GetRootPermission()
 	{
 		return RootPermission;
+	}
+
+	//! Client: how many roster batches the server has answered with this session. Zero means
+	//! the roster has been asked for but nothing has come back yet.
+	int GetRosterBatchCount()
+	{
+		return m_RosterBatchCount;
+	}
+
+	void OnRosterBatchReceived()
+	{
+		m_RosterBatchCount++;
 	}
 
 	int GetRosterVersion()
@@ -358,6 +371,7 @@ class JMPermissionManager
 		Players.Clear();
 		Roles.Clear();
 		m_RoleNamesSorted.Clear();
+		m_RosterBatchCount = 0;
 	}
 
 	//! Test roster. SERVER ONLY: the client gets these the same way it gets real

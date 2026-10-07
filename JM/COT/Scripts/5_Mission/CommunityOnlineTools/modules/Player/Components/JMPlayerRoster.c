@@ -74,6 +74,15 @@ class JMPlayerRoster
 	// -------------------------------------------------------------------------
 
 	static const float GROUP_ANIM_DURATION = 0.16;
+
+	//! The loader shown while the roster is being fetched.
+	protected ref JMBusySpinner m_Busy;
+	protected int m_FetchBaseline;
+	protected float m_FetchStart = -1000;
+
+	//! Seconds the loader is held at least, and at most, after the form opens.
+	static const float FETCH_MIN_SHOWN = 0.6;
+	static const float FETCH_TIMEOUT = 10;
 	protected int m_LastRosterVersion = -1;
 
 	void JMPlayerRoster( JMPlayerForm form )
@@ -323,6 +332,43 @@ class JMPlayerRoster
 		}
 
 		m_PlayerListScroller.UpdateScroller();
+
+		//! Drawn over the list (it is the later child), shown only while the roster has not arrived yet
+		m_Busy = new JMBusySpinner( layoutRoot.FindAnyWidget( "panel_left_bottom" ), 32, 24 );
+	}
+
+	//! While the server has not sent the roster the list is simply empty, which reads as
+	//! "nobody is here". A spinning loader says it is still being fetched instead. Called every frame.
+	void UpdateBusy()
+	{
+		if ( !m_Busy )
+			return;
+
+		m_Busy.Update( IsFetching() );
+	}
+
+	//! The form was just opened: the roster on screen is whatever was cached (at the very least,
+	//! the admin's own row) until the server answers this open's request.
+	void BeginFetch()
+	{
+		m_FetchBaseline = GetPermissionsManager().GetRosterBatchCount();
+		m_FetchStart = g_Game.GetTickTime();
+	}
+
+	//! Waiting for the first roster reply since the form opened. Held for a moment even when the
+	//! reply is quick, so it reads as "loading" rather than as a flicker, and given up after a
+	//! while so a lost reply cannot leave it spinning for good. Offline there is no server to wait for.
+	protected bool IsFetching()
+	{
+		if ( IsMissionOffline() )
+			return false;
+
+		float elapsed = g_Game.GetTickTime() - m_FetchStart;
+
+		if ( elapsed > FETCH_TIMEOUT )
+			return false;
+
+		return elapsed < FETCH_MIN_SHOWN || GetPermissionsManager().GetRosterBatchCount() == m_FetchBaseline;
 	}
 
 	void OnClick_PlayerPrefSave( UIActionBase action )

@@ -426,6 +426,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !ctx.Read( count ) )
 			return;
 
+		GetPermissionsManager().OnRosterBatchReceived();
+
 		for ( int i = 0; i < count; i++ )
 		{
 			PlayerBase po;
