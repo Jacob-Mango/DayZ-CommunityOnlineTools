@@ -7,7 +7,13 @@ modded class JMWebhookModule
 		if ( !g_Game.IsServer() )
 			return;
 
-		CreateNotification( title, message );
+		auto payload = CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_DEFAULT );
+		payload.GetEmbed().SetTitle( title );
+		payload.GetEmbed().SetDescription( message );
+
+		// "ServerStartup" is one of JMWebhookConstructor's built-in connection types (Discord/Settings tab);
+		// a real sub-mod would add its own type there and route through that name instead.
+		Post( "ServerStartup", payload );
 	}
 }
 #endif

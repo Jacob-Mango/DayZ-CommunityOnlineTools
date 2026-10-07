@@ -8,7 +8,7 @@ modded class JMPlayerForm
 		super.OnPlayerRow_RightClick( guid, x, y );
 
 		//! Register sub-mod player roster action items
-		JMContextMenuRegistry.Register( "PlayerRoster", "ex_quick", "Sub-Mod Quick Action", JMConstants.Lucide( "sparkles" ), this, "OnExQuickAction" );
+		JMContextMenuRegistry.Register( "PlayerRoster", "ex_quick", "Sub-Mod Quick Action", JMConstants.Lucide( "sparkles" ), 0, false, this, "OnExQuickAction" );
 		JMContextMenuRegistry.Register( "PlayerRoster", "ex_danger", "Sub-Mod Danger Action", JMConstants.Lucide( "ban" ), JMTheme.DANGER, false, this, "OnExDangerAction" );
 
 		if ( m_PlayerMenu )
