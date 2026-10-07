@@ -117,6 +117,27 @@ modded class ItemBase
 
 	void COT_OnDebugSpawn(PlayerBase player)
 	{
+		//! The spawner form's item preview runs this on a client-local entity. Vanilla
+		//! overrides (e.g. Barrel_ColorBase::OnDebugSpawn -> SetQuantityMax) change
+		//! server-only variables and raise "Attempting to change variable client side",
+		//! so on a pure client only run the COT attachment pass.
+		if (!g_Game.IsServer())
+		{
+			//! A weapon's vanilla debug spawn is what fills it on the server (specific
+			//! stock, handguard, optic...), so the preview runs the same one rather than
+			//! the generic pass, which picks whatever attachment comes first per slot.
+			if (IsWeapon())
+			{
+				OnDebugSpawn();
+				return;
+			}
+
+			if (!IsInherited(TentBase))
+				GetCommunityOnlineToolsBase().SpawnCompatibleAttachments(this, null, 0);
+
+			return;
+		}
+
 		OnDebugSpawnEx(DebugSpawnParams.WithPlayer(player));
 	}
 }

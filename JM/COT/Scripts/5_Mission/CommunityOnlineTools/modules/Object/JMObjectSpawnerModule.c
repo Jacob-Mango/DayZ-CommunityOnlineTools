@@ -85,7 +85,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! mis-tokenized as a blue one with "dark" left dangling in its base name.
 	static ref array<string> GetColorTokens()
 	{
-		return { "darkblue", "white", "black", "blue", "red", "green", "tan", "camo", "orange", "grey", "gray", "yellow", "wine", "beige", "rust" };
+		return { "darkblue", "white", "black", "blue", "red", "green", "tan", "camo", "orange", "grey", "gray", "yellow", "wine", "beige", "rust", "gold", "plum" };
 	}
 
 	//! Default distance is chosen such that if you can see the item hint on HUD, raycast should also hit
@@ -866,6 +866,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				if (!entity.IsMan())
 					depth = 3;
 				OnDebugSpawn(entity, player, depth);
+
+				//! A freshly spawned vehicle with its wheels free rolls off wherever it was dropped.
+				//! Server only: the wheel lock is server state, and the spawner's preview runs this too.
+				if (g_Game.IsServer() && entity.IsTransport())
+					COT.SetLockWheels(entity, true);
+
 				break;
 
 			case COT_ObjectSetupMode.CE:
@@ -1105,14 +1111,101 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (!entity.GetInventory())
 			return;
 
-		if (entity.GetInventory().AttachmentCount())
+		if (!entity.GetInventory().AttachmentCount() && !entity.IsInherited(DayZCreature) && !entity.IsInherited(TentBase) && !entity.IsInherited(Weapon_Base))
+		{
+			//! If no atts were spawned, do it ourself (except for creatures, tents & weapons)
+			SpawnCompatibleAttachments(entity, player, depth);
+		}
+
+		//! A colored spawn (e.g. M4A1_Green) gets the matching color variant of whatever
+		//! attachments it came with, where one exists - same classname swap "Change Colors" does.
+		//! Not for vehicles, whose spawn is left as it was, nor for characters, whose gear is not a color set.
+		string spawnColor = GetColorTokenOfType(entity.GetType());
+		if (spawnColor != "" && !entity.IsMan() && !entity.IsTransport())
+			ApplyColorToAttachments(entity, player, spawnColor, depth);
+	}
+
+	//! The color token in a bare classname, "" if it has none. Unlike DetectColorToken
+	//! this ignores attachments: a spawn is colored by what it is, not by whatever
+	//! its default loadout happened to carry.
+	static string GetColorTokenOfType(string type)
+	{
+		type.ToLower();
+
+		array<string> tokens = GetColorTokens();
+		for (int i = 0; i < tokens.Count(); ++i)
+		{
+			if (HasDelimitedToken(type, tokens[i]))
+				return tokens[i];
+		}
+
+		return "";
+	}
+
+	//! Swap every attachment of `entity` that has a `color` sibling classname for it,
+	//! descending `depth` levels into attachments that have none. Attachments are
+	//! replaced rather than retyped (there is no in-place retype in this engine), and
+	//! the replacement is given its own default attachments the same way the original was.
+	protected void ApplyColorToAttachments(EntityAI entity, PlayerBase player, string color, int depth)
+	{
+		GameInventory inventory = entity.GetInventory();
+		if (!inventory)
 			return;
 
-		if (entity.IsInherited(DayZCreature)  || entity.IsInherited(TentBase) || entity.IsInherited(Weapon_Base))
-			return;
+		//! Collected first: replacing an attachment while walking the inventory would shift the indices
+		array<EntityAI> attachments = new array<EntityAI>;
+		int count = inventory.AttachmentCount();
+		int i;
+		for (i = 0; i < count; ++i)
+		{
+			EntityAI att = inventory.GetAttachmentFromIndex(i);
+			if (att)
+				attachments.Insert(att);
+		}
 
-		//! If no atts were spawned, do it ourself (except for creatures, tents & weapons)
-		SpawnCompatibleAttachments(entity, player, depth);
+		for (i = 0; i < attachments.Count(); ++i)
+		{
+			EntityAI attachment = attachments[i];
+			string originalType = attachment.GetType();
+			string variant = FindColorVariant(originalType, color, true);
+
+			if (variant == "")
+			{
+				if (depth > 0)
+					ApplyColorToAttachments(attachment, player, color, depth - 1);
+
+				continue;
+			}
+
+			InventoryLocation location = new InventoryLocation;
+			if (!attachment.GetInventory().GetCurrentInventoryLocation(location) || location.GetType() != InventoryLocationType.ATTACHMENT)
+				continue;
+
+			int slotId = location.GetSlot();
+
+			g_Game.ObjectDelete(attachment);
+
+			//! A weapon's magazine is attached and filled through the weapon, same as the attachments page does it
+			Weapon_Base weapon;
+			if (slotId == InventorySlots.MAGAZINE && Class.CastTo(weapon, entity))
+			{
+				if (!weapon.SpawnAmmo(variant))
+					weapon.SpawnAmmo(originalType);
+
+				continue;
+			}
+
+			EntityAI recolored = inventory.CreateAttachmentEx(variant, slotId);
+			if (!recolored)
+			{
+				//! Never leave the slot emptier than the variant swap found it
+				inventory.CreateAttachmentEx(originalType, slotId);
+				continue;
+			}
+
+			if (depth > 0)
+				OnDebugSpawn(recolored, player, depth - 1);
+		}
 	}
 
 	//! @note this does what vanilla EntityAI::OnDebugSpawn *should* be doing (get inventorySlot as array, use slot IDs instead of case-sensitive match of slot names, filter bad items)
@@ -1292,17 +1385,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (!entity)
 			return "";
 
-		array<string> colorTokens = GetColorTokens();
-
-		string typeStr = entity.GetType();
-		typeStr.ToLower();
-
-		int i;
-		for (i = 0; i < colorTokens.Count(); ++i)
-		{
-			if (HasDelimitedToken(typeStr, colorTokens[i]))
-				return colorTokens[i];
-		}
+		string typeToken = GetColorTokenOfType(entity.GetType());
+		if (typeToken != "")
+			return typeToken;
 
 		if (entity.GetInventory())
 		{
@@ -1310,16 +1395,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			for (int j = 0; j < attCount; ++j)
 			{
 				EntityAI att = entity.GetInventory().GetAttachmentFromIndex(j);
-				if (att)
-				{
-					string attType = att.GetType();
-					attType.ToLower();
-					for (i = 0; i < colorTokens.Count(); ++i)
-					{
-						if (HasDelimitedToken(attType, colorTokens[i]))
-							return colorTokens[i];
-					}
-				}
+				if (!att)
+					continue;
+
+				string attToken = GetColorTokenOfType(att.GetType());
+				if (attToken != "")
+					return attToken;
 			}
 		}
 
@@ -1508,7 +1589,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! for `newColor` - e.g. "CivilianSedan_Blue" -> "CivilianSedan_White".
 	//! Empty string if there's no color token to swap or no such classname is
 	//! configured.
-	string FindColorVariant(string sourceClass, string newColor)
+	//!
+	//! `allowUntokened` also resolves a classname that carries no color token
+	//! at all, e.g. "M4_OEBttstck" -> "M4_OEBttstck_Green". "Change Colors" must
+	//! not do that (it only recolors what is already colored), but a fresh
+	//! spawn of a colored item wants its default, token-less attachments
+	//! swapped for the matching variant.
+	string FindColorVariant(string sourceClass, string newColor, bool allowUntokened = false)
 	{
 		EnsureColorVariantIndex();
 
@@ -1528,10 +1615,15 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			}
 		}
 
-		if (oldToken == "" || oldToken == newColor)
+		if (oldToken == newColor)
 			return "";
 
-		string base = StripDelimitedToken(lowerSource, oldTokenIdx, oldToken.Length());
+		if (oldToken == "" && !allowUntokened)
+			return "";
+
+		string base = lowerSource;
+		if (oldToken != "")
+			base = StripDelimitedToken(lowerSource, oldTokenIdx, oldToken.Length());
 
 		map<string, string> variants = s_ColorVariantsByBase.Get(base);
 		if (!variants || !variants.Contains(newColor))
