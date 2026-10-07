@@ -514,16 +514,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 	#endif
 
 		#ifdef EXPANSIONMODVEHICLE
-		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
-		foreach ( ExpansionVehicleBase vehicle: vehicles )
-		{
-			if ( !vehicle )
-				continue;
-
-			if ( !vehicle.IsSetForDeletion() )
-				m_Vehicles.Insert( JMVehicleMetaData.Create( vehicle ) );
-		}
-
 		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
@@ -755,10 +745,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 	#endif
 
 	#ifdef EXPANSIONMODVEHICLE
-		ExpansionVehicleBase expVeh = ExpansionVehicleBase.Cast( obj );
-		if ( expVeh )
-			return JMVehicleMetaData.Create( expVeh );
-
 		ExpansionVehicleCover cover = ExpansionVehicleCover.Cast( obj );
 		if ( cover )
 			return JMVehicleMetaData.CreateCover( cover );
@@ -1031,18 +1017,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 			boats = boatNext;
 		}
 
-		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
-		foreach ( ExpansionVehicleBase vehicle: vehicles )
-		{
-			if ( !vehicle )
-				continue;
-
-			if ( vehicle.GetExpansionVehicle().HasKey() )
-				continue;
-
-			g_Game.ObjectDelete( vehicle );
-		}
-
 		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
@@ -1109,18 +1083,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 	#endif
 
 		#ifdef EXPANSIONMODVEHICLE
-		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
-		foreach ( ExpansionVehicleBase vehicle: vehicles )
-		{
-			if ( !vehicle )
-				continue;
-
-			if ( !vehicle.IsDamageDestroyed() )
-				continue;
-
-			g_Game.ObjectDelete( vehicle );
-		}
-
 		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
@@ -1180,15 +1142,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 	#endif
 
 		#ifdef EXPANSIONMODVEHICLE
-		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
-		foreach ( ExpansionVehicleBase vehicle: vehicles )
-		{
-			if ( !vehicle )
-				continue;
-
-			g_Game.ObjectDelete( vehicle );
-		}
-
 		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{

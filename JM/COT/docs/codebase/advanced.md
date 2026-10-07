@@ -217,7 +217,6 @@ MotorbikeScript.s_JM_AllBikes // doubly-linked list of all motorbikes
 
 // Expansion vehicles (conditional):
 #ifdef EXPANSIONMODVEHICLE
-ExpansionVehicleBase.GetAll()
 ExpansionVehicleCover.s_JM_AllCovers
 #endif
 ```
