@@ -866,12 +866,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				if (!entity.IsMan())
 					depth = 3;
 				OnDebugSpawn(entity, player, depth);
-
-				//! A freshly spawned vehicle with its wheels free rolls off wherever it was dropped.
-				//! Server only: the wheel lock is server state, and the spawner's preview runs this too.
-				if (g_Game.IsServer() && entity.IsTransport())
-					COT.SetLockWheels(entity, true);
-
 				break;
 
 			case COT_ObjectSetupMode.CE:
@@ -903,6 +897,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				}
 				break;
 		}
+
+		//! A freshly spawned vehicle with its wheels free rolls off wherever it was dropped.
+		//! Server only: the wheel lock is server state, and the spawner's preview runs this too.
+		if (g_Game.IsServer() && entity.IsTransport())
+			COT.SetLockWheels(entity, true);
 	}
 
 	//! Pick a value out of a spawn range.
