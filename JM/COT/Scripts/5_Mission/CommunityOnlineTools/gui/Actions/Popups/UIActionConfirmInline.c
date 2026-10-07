@@ -28,6 +28,14 @@ class UIActionConfirmInline: UIActionBase
 	protected TextWidget   m_ConfirmText;
 	protected TextWidget   m_CancelText;
 	protected ImageWidget  m_Icon;
+
+	//! The rounded fill and outline inside action_button. SetColor paints
+	//! these, not the ButtonWidget: the button itself is a plain rectangle,
+	//! and painting it showed a square block behind the rounded corners.
+	protected Widget       m_Fill;
+	protected Widget       m_Outline;
+	protected int          m_FillColor;
+	protected int          m_OutlineColor;
 	protected bool  m_Pending;
 	protected float m_Timeout;
 	protected float m_Timer;
@@ -91,6 +99,18 @@ class UIActionConfirmInline: UIActionBase
 		Class.CastTo( m_ConfirmText,layoutRoot.FindAnyWidget( "confirm_text"          ) );
 		Class.CastTo( m_CancelText, layoutRoot.FindAnyWidget( "cancel_text"           ) );
 		Class.CastTo( m_Icon,       layoutRoot.FindAnyWidget( "action_icon"           ) );
+
+		if ( m_BtnAction )
+		{
+			m_Fill    = m_BtnAction.FindAnyWidget( "fill" );
+			m_Outline = m_BtnAction.FindAnyWidget( "outline" );
+		}
+
+		if ( m_Fill )
+			m_FillColor = m_Fill.GetColor();
+
+		if ( m_Outline )
+			m_OutlineColor = m_Outline.GetColor();
 
 		m_Pending        = false;
 		m_TimeoutSeconds = 4.0;
@@ -180,15 +200,50 @@ class UIActionConfirmInline: UIActionBase
 		if ( bw < m_CenterIconPx || bh < m_CenterIconPx )
 			return;
 
+		//! Only X needs an offset. action_icon is declared valign center_ref,
+		//! so Y is already measured from the button's vertical centre - adding
+		//! half the slack on top of that pushed the icon down by that much,
+		//! which is why trash icons sat on the bottom edge of their buttons.
 		float offsetX = ( bw - m_CenterIconPx ) / 2.0;
-		float offsetY = ( bh - m_CenterIconPx ) / 2.0;
-		m_Icon.SetPos( offsetX, offsetY );
+		m_Icon.SetPos( offsetX, 0 );
 	}
 
 	override void SetColor( int color )
 	{
-		if ( m_BtnAction )
-			m_BtnAction.SetColor( color );
+		m_FillColor = color;
+
+		if ( m_Fill )
+			m_Fill.SetColor( color );
+	}
+
+	//! Hover feedback on the rounded shapes - the button widget has an empty
+	//! style, so it draws no hover of its own.
+	override bool OnMouseEnter( Widget w, int x, int y )
+	{
+		if ( w == m_BtnAction )
+		{
+			if ( m_Fill )
+				m_Fill.SetColor( JMTheme.Lighten( m_FillColor, 0.18 ) );
+
+			if ( m_Outline )
+				m_Outline.SetColor( JMTheme.Lighten( m_OutlineColor, 0.35 ) );
+		}
+
+		return super.OnMouseEnter( w, x, y );
+	}
+
+	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
+	{
+		if ( w == m_BtnAction )
+		{
+			if ( m_Fill )
+				m_Fill.SetColor( m_FillColor );
+
+			if ( m_Outline )
+				m_Outline.SetColor( m_OutlineColor );
+		}
+
+		return super.OnMouseLeave( w, enterW, x, y );
 	}
 
 	//! Programmatic equivalent of the first click: arms the confirm/cancel pair

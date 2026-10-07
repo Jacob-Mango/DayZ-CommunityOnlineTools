@@ -20,6 +20,8 @@ PanelWidgetClass UIActionConfirmInline {
    vexactsize 0
    {
     ButtonWidgetClass action_button {
+     color 0 0 0 0
+     style Empty
      ignorepointer 0
      size 1 1
      hexactpos 0
@@ -88,6 +90,8 @@ PanelWidgetClass UIActionConfirmInline {
      }
     }
     ButtonWidgetClass action_button_confirm {
+     color 0 0 0 0
+     style Empty
      ignorepointer 0
      visible 0
      size 0.5 1
@@ -124,6 +128,8 @@ PanelWidgetClass UIActionConfirmInline {
      }
     }
     ButtonWidgetClass action_button_cancel {
+     color 0 0 0 0
+     style Empty
      ignorepointer 0
      visible 0
      size 0.5 1
