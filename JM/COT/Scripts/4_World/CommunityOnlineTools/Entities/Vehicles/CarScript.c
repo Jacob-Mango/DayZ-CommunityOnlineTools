@@ -152,66 +152,6 @@ modded class CarScript
 		COT_FillCarFluid( CarFluid.COOLANT );
 	}
 
-	void COT_SetLockWheels( bool lockState )
-	{
-		if ( !GetInventory() )
-			return;
-
-		int count = GetInventory().GetAttachmentSlotsCount();
-		for ( int i = 0; i < count; ++i )
-		{
-			int slotId = GetInventory().GetAttachmentSlotId( i );
-			if ( slotId != InventorySlots.INVALID )
-			{
-				string slotName = InventorySlots.GetSlotName( slotId );
-				slotName.ToLower();
-				EntityAI att = GetInventory().FindAttachment( slotId );
-				bool isWheel = slotName.Contains( "wheel" );
-				if ( !isWheel && att )
-				{
-					if ( att.IsInherited( CarWheel ) )
-						isWheel = true;
-				}
-
-				if ( isWheel )
-				{
-					GetInventory().SetSlotLock( slotId, lockState );
-				}
-			}
-		}
-	}
-
-	bool COT_AreWheelsLocked()
-	{
-		if ( !GetInventory() )
-			return false;
-
-		int count = GetInventory().GetAttachmentSlotsCount();
-		for ( int i = 0; i < count; ++i )
-		{
-			int slotId = GetInventory().GetAttachmentSlotId( i );
-			if ( slotId != InventorySlots.INVALID )
-			{
-				string slotName = InventorySlots.GetSlotName( slotId );
-				slotName.ToLower();
-				EntityAI att = GetInventory().FindAttachment( slotId );
-				bool isWheel = slotName.Contains( "wheel" );
-				if ( !isWheel && att )
-				{
-					if ( att.IsInherited( CarWheel ) )
-						isWheel = true;
-				}
-
-				if ( isWheel && GetInventory().GetSlotLock( slotId ) )
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
 	//! Car doors are NOT separate openable inventory items - CarDoor
 	//! attachments are hitzone/health parts, and ItemBase.Open()/Close()/
 	//! IsOpen() are stub declarations for lidded CONTAINERS (cans, barrels)

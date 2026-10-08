@@ -898,10 +898,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				break;
 		}
 
-		//! A freshly spawned vehicle with its wheels free rolls off wherever it was dropped.
-		//! Server only: the wheel lock is server state, and the spawner's preview runs this too.
-		if (g_Game.IsServer() && entity.IsTransport())
-			COT.SetLockWheels(entity, true);
+		//! A freshly spawned vehicle with wheels should not start to roll. It doesn't. Set brake anyway to make sure.
+		if (g_Game.IsServer())
+			COT.SetBrake(entity, 1.0);
 	}
 
 	//! Pick a value out of a spawn range.
@@ -1234,9 +1233,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			slot_id = inventory.GetAttachmentSlotId(i);
 			if (slot_id != InventorySlots.INVALID && InventorySlots.GetShowForSlotId(slot_id))
 			{
-				string att = InventorySlots.GetSlotName(slot_id);
-				CF_Log.Info("Entity %1 has visible attachment slot %2 (ID %3)", entity.GetType(), att, slot_id.ToString());
-				slot_ids.Insert(slot_id);
+				if (!inventory.FindAttachment(slot_id))
+				{
+					string att = InventorySlots.GetSlotName(slot_id);
+					CF_Log.Info("Entity %1 has visible attachment slot %2 (ID %3)", entity.GetType(), att, slot_id.ToString());
+					slot_ids.Insert(slot_id);
+				}
 			}
 		}
 
@@ -1414,6 +1416,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (preferredColor == "")
 			preferredColor = DetectColorToken(entity);
 
+		CF_Log.Debug("JMObjectSpawnerModule::SpawnCompatibleAttachments %1 %2 %3", entity.ToString(), player.ToString(), depth.ToString());
+
 		GameInventory inventory = entity.GetInventory();
 		if (!inventory)
 			return;
@@ -1433,6 +1437,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			{
 				if (!inventory.FindAttachment(slot_id))
 				{
+					string att = InventorySlots.GetSlotName(slot_id);
+					CF_Log.Info("Entity %1 has visible, empty attachment slot %2 (ID %3)", entity.GetType(), att, slot_id.ToString());
 					slot_ids.Insert(slot_id);
 				}
 			}
@@ -1499,9 +1505,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			}
 		}
 
-		for (i = 0; i < slot_ids.Count(); ++i)
+		foreach (int targetSlot: slot_ids)
 		{
-			int targetSlot = slot_ids[i];
 			TStringArray candidates = slotCandidates.Get(targetSlot);
 			if (!candidates || candidates.Count() == 0)
 				continue;
@@ -1525,9 +1530,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				bestMatch = candidates[0];
 
 			EntityAI child = inventory.CreateAttachmentEx(bestMatch, targetSlot);
-			if (child && depth > 0)
+			if (child)
 			{
-				SpawnCompatibleAttachmentsWithColor(child, player, depth - 1, preferredColor);
+				string slotName = InventorySlots.GetSlotName(targetSlot);
+				CF_Log.Info("Successfully spawned %1 in slot %2 on %3", bestMatch, slotName, entity.GetType());
+
+				if (depth > 0)
+					SpawnCompatibleAttachmentsWithColor(child, player, depth - 1, preferredColor);
 			}
 		}
 	}

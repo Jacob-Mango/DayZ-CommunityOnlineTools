@@ -254,20 +254,57 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		}
 	}
 
+	//! This locks/unlocks the ability to add/remove wheel attachments, has nothing to do with physics
 	static void SetLockWheels(Object obj, bool lockState)
 	{
-		CarScript car;
+		EntityAI entity;
+		if ( !Class.CastTo( entity, obj ) )
+			return;
+
+		GameInventory inventory = entity.GetInventory();
+
+		if ( !inventory )
+			return;
+
+		int count = inventory.GetAttachmentSlotsCount();
+		for ( int i = 0; i < count; ++i )
+		{
+			int slotId = inventory.GetAttachmentSlotId( i );
+			if ( slotId != InventorySlots.INVALID )
+			{
+				string slotName = InventorySlots.GetSlotName( slotId );
+				slotName.ToLower();
+				EntityAI att = inventory.FindAttachment( slotId );
+				bool isWheel = slotName.Contains( "wheel" );
+				if ( !isWheel && att )
+				{
+					//! Both motorbike and car wheels inherit from CarWheel so this works for both
+					if ( att.IsInherited( CarWheel ) )
+						isWheel = true;
+				}
+
+				if ( isWheel && inventory.GetSlotLock( slotId ) )
+				{
+					inventory.SetSlotLock( slotId, lockState );
+				}
+			}
+		}
+	}
+
+	static void SetBrake(Object obj, float value)
+	{
+		Car car;
 		if (Class.CastTo(car, obj))
 		{
-			car.COT_SetLockWheels(lockState);
+			car.SetBrake(value);
 			return;
 		}
 
 	#ifndef DAYZ_1_29
-		MotorbikeScript bike;
+		Motorbike bike;
 		if (Class.CastTo(bike, obj))
 		{
-			bike.COT_SetLockWheels(lockState);
+			bike.SetBrake(value);
 		}
 	#endif
 	}
@@ -720,19 +757,39 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 
 	static bool AreWheelsLocked(Object obj)
 	{
-		CarScript car;
-		if (Class.CastTo(car, obj))
+		EntityAI entity;
+		if ( !Class.CastTo( entity, obj ) )
+			return false;
+
+		GameInventory inventory = entity.GetInventory();
+
+		if ( !inventory )
+			return false;
+
+		int count = inventory.GetAttachmentSlotsCount();
+		for ( int i = 0; i < count; ++i )
 		{
-			return car.COT_AreWheelsLocked();
+			int slotId = inventory.GetAttachmentSlotId( i );
+			if ( slotId != InventorySlots.INVALID )
+			{
+				string slotName = InventorySlots.GetSlotName( slotId );
+				slotName.ToLower();
+				EntityAI att = inventory.FindAttachment( slotId );
+				bool isWheel = slotName.Contains( "wheel" );
+				if ( !isWheel && att )
+				{
+					//! Both motorbike and car wheels inherit from CarWheel so this works for both
+					if ( att.IsInherited( CarWheel ) )
+						isWheel = true;
+				}
+
+				if ( isWheel && inventory.GetSlotLock( slotId ) )
+				{
+					return true;
+				}
+			}
 		}
 
-	#ifndef DAYZ_1_29
-		MotorbikeScript bike;
-		if (Class.CastTo(bike, obj))
-		{
-			return bike.COT_AreWheelsLocked();
-		}
-	#endif
 		return false;
 	}
 
