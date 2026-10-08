@@ -270,7 +270,7 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		for ( int i = 0; i < count; ++i )
 		{
 			int slotId = inventory.GetAttachmentSlotId( i );
-			if ( slotId != InventorySlots.INVALID )
+			if ( slotId != InventorySlots.INVALID && InventorySlots.GetShowForSlotId( slotId ) )
 			{
 				string slotName = InventorySlots.GetSlotName( slotId );
 				slotName.ToLower();
@@ -771,7 +771,7 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		for ( int i = 0; i < count; ++i )
 		{
 			int slotId = inventory.GetAttachmentSlotId( i );
-			if ( slotId != InventorySlots.INVALID )
+			if ( slotId != InventorySlots.INVALID && InventorySlots.GetShowForSlotId( slotId ) )
 			{
 				string slotName = InventorySlots.GetSlotName( slotId );
 				slotName.ToLower();

@@ -217,7 +217,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		for (int i = 0; i < count; ++i)
 		{
 			int slot_id = inventory.GetAttachmentSlotId(i);
-			if (slot_id == InventorySlots.INVALID)
+			if (slot_id == InventorySlots.INVALID || !InventorySlots.GetShowForSlotId(slot_id))
 				continue;
 
 			EntityAI child = inventory.FindAttachment(slot_id);
