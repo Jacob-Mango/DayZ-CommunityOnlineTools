@@ -254,7 +254,7 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		}
 	}
 
-	//! This locks/unlocks the ability to add/remove wheel attachments, has nothing to do with physics
+	//! This locks/unlocks wheel inventory slots and thus the ability to add/remove wheel attachments, has nothing to do with physics
 	static void SetLockWheels(Object obj, bool lockState)
 	{
 		EntityAI entity;
@@ -283,7 +283,7 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 						isWheel = true;
 				}
 
-				if ( isWheel && inventory.GetSlotLock( slotId ) )
+				if ( isWheel )
 				{
 					inventory.SetSlotLock( slotId, lockState );
 				}
@@ -755,6 +755,7 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		return count;
 	}
 
+	//! Returns true if at least one wheel slot is locked
 	static bool AreWheelsLocked(Object obj)
 	{
 		EntityAI entity;
