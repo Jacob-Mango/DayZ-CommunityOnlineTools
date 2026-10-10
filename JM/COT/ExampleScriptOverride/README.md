@@ -31,7 +31,6 @@ stops compiling is a broken public API.
 | add admin toggle controls to player general tab | `Player/Ex_PlayerToggleState.c` |
 | register custom vehicle category filters | `Vehicles/Ex_VehicleFilter.c` |
 | dispatch custom Discord webhooks | `Webhooks/Ex_CustomWebhookPayload.c` |
-| audit/log admin activity | `Logging/Ex_AdminAuditLog.c` |
 | add custom anti-cheat detection signals | `AntiCheat/Ex_AntiCheatSignal.c` |
 | register custom weather presets | `Weather/Ex_WeatherPreset.c` |
 | register automated server events | `Events/Ex_EventRegistration.c` |
