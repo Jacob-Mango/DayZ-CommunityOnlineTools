@@ -50,6 +50,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	array<string> GetAvailableColorVariants(EntityAI entity, int depth = 3)
 	{
 		//auto trace = EXTrace.Start(true);
+		EnsureColorVariantIndex();
+
 		array<string> result = {};
 		if (!entity)
 			return result;
@@ -60,6 +62,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		map<string, string> variants;
 		if (s_ColorVariantsByBase.Find(typeLower, variants))
 		{
+			if (!variants)
+				return result;
+
 			foreach (string color, string className: variants)
 				result.Insert(color);
 		}
