@@ -204,10 +204,10 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 
 		// Raise above every sibling so nothing else in the form obscures it.
 		Widget parent = m_Root.GetParent();
-		if ( parent )
+		if ( parent && parent.ToString() != "INVALID" )
 		{
 			Widget sibling = parent.GetChildren();
-			while ( sibling )
+			while ( sibling && sibling.ToString() != "INVALID" )
 			{
 				Widget next = sibling.GetSibling();
 				if ( sibling != m_Root )
