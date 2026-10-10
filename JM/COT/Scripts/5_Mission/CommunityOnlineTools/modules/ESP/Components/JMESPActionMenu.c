@@ -567,9 +567,11 @@ class JMESPActionMenu
 		EntityAI colorEntity = EntityAI.Cast( target );
 		if ( colorEntity && !PlayerBase.Cast( target ) && Perm( JMConstants.PERM_ESP_OBJECT_CHANGECOLOR ) )
 		{
+			//auto trace = EXTrace.Start(true);
 			JMObjectSpawnerModule objSpawner;
 			if ( CF_Modules<JMObjectSpawnerModule>.Get( objSpawner ) && objSpawner.GetAvailableColorVariants( colorEntity ).Count() > 0 )
 				AddPage( PAGE_COLOR, "#STR_COT_ESP_MODULE_PAGE_COLOR", JMConstants.Lucide( "palette" ) );
+			//trace = null;
 		}
 
 		//! TargetPlayer, not m_Meta.player: the meta's own copy is filled from

@@ -47,15 +47,28 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! nothing when clicked.
 	array<string> GetAvailableColorVariants(EntityAI entity, int depth = 3)
 	{
-		array<string> result = new array<string>;
+		//auto trace = EXTrace.Start(true);
+		array<string> result = {};
 		if (!entity)
 			return result;
 
-		array<string> tokens = GetColorTokens();
-		for (int i = 0; i < tokens.Count(); ++i)
+		string typeLower = entity.GetType();
+		typeLower.ToLower();
+
+		map<string, string> variants;
+		if (s_ColorVariantsByBase.Find(typeLower, variants))
 		{
-			if (HasColorVariant(entity, tokens[i], depth))
-				result.Insert(tokens[i]);
+			foreach (string color, string className: variants)
+				result.Insert(color);
+		}
+		else
+		{
+			array<string> tokens = GetColorTokens();
+			foreach (string token: tokens)
+			{
+				if (HasColorVariant(entity, token, depth))
+					result.Insert(token);
+			}
 		}
 
 		return result;
@@ -1338,27 +1351,22 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! "_" (or the string's start/end) on both sides.
 	protected static int FindDelimitedTokenIndex(string lower, string token)
 	{
+		//auto trace = EXTrace.Profile(true, JMObjectSpawnerModule, "FindDelimitedTokenIndex");
+
+		int idx = lower.LastIndexOf(token);
+		if (idx == -1)
+			return -1;
+
+		if (idx != 0 && lower[idx - 1] != "_")
+			return -1;
+
 		int tokenLen = token.Length();
 		int lowerLen = lower.Length();
-		int searchFrom = 0;
+		int afterIdx = idx + tokenLen;
+		if (afterIdx != lowerLen && lower[afterIdx] != "_")
+			return -1;
 
-		while (searchFrom <= lowerLen - tokenLen)
-		{
-			int idx = lower.IndexOfFrom(searchFrom, token);
-			if (idx == -1)
-				return -1;
-
-			bool leftOk = (idx == 0) || (lower.Substring(idx - 1, 1) == "_");
-			int afterIdx = idx + tokenLen;
-			bool rightOk = (afterIdx == lowerLen) || (lower.Substring(afterIdx, 1) == "_");
-
-			if (leftOk && rightOk)
-				return idx;
-
-			searchFrom = idx + 1;
-		}
-
-		return -1;
+		return idx;
 	}
 
 	//! Strip a delimited token match plus exactly one bordering "_" (the
@@ -1367,13 +1375,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! "hatchback_02" base regardless of which color they started as.
 	protected static string StripDelimitedToken(string lower, int idx, int tokenLen)
 	{
+		//auto trace = EXTrace.Start(true);
 		int lowerLen = lower.Length();
 		int removeStart = idx;
 		int removeEnd = idx + tokenLen;
 
-		if (removeEnd < lowerLen && lower.Substring(removeEnd, 1) == "_")
+		if (removeEnd < lowerLen && lower[removeEnd] == "_")
 			removeEnd = removeEnd + 1;
-		else if (removeStart > 0 && lower.Substring(removeStart - 1, 1) == "_")
+		else if (removeStart > 0 && lower[removeStart - 1] == "_")
 			removeStart = removeStart - 1;
 
 		string before = lower.Substring(0, removeStart);
@@ -1543,6 +1552,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	protected static void EnsureColorVariantIndex()
 	{
+		//auto trace = EXTrace.Start(true);
 		if (s_ColorVariantsByBase)
 			return;
 
@@ -1550,6 +1560,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		array<string> tokens = GetColorTokens();
 
+		//! TODO/FIXME: Too much individual iteration of the whole Cfg* tree in various places scattered all across
+		//! COT - if we are going to build various lookup tables, we should do that in ONE place
 		TStringArray all_paths = new TStringArray;
 		all_paths.Insert(CFG_VEHICLESPATH);
 		all_paths.Insert(CFG_WEAPONSPATH);
@@ -1605,14 +1617,34 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! swapped for the matching variant.
 	string FindColorVariant(string sourceClass, string newColor, bool allowUntokened = false)
 	{
+		//auto trace = EXTrace.Start(true);
 		EnsureColorVariantIndex();
 
 		string lowerSource = sourceClass;
 		lowerSource.ToLower();
 
+		map<string, string> variants;
+		string variant;
+
+		if (s_ColorVariantsByBase.Find(lowerSource, variants))
+		{
+			if (!variants || !variants.Find(newColor, variant))
+				return "";
+
+			string variantLower = variant;
+			variantLower.ToLower();
+
+			if (variantLower == lowerSource)
+				return "";
+
+			return variant;
+		}
+
 		array<string> tokens = GetColorTokens();
 		string oldToken = "";
 		int oldTokenIdx = -1;
+		//auto trace2 = EXTrace.Start(true, this, sourceClass + " " + newColor + " foreach (string token: tokens)");
+		//! @note slow loop
 		for (int t = 0; t < tokens.Count(); ++t)
 		{
 			oldTokenIdx = FindDelimitedTokenIndex(lowerSource, tokens[t]);
@@ -1622,6 +1654,19 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				break;
 			}
 		}
+		//trace2 = null;
+
+		string base = lowerSource;
+		if (oldToken != "")
+			base = StripDelimitedToken(lowerSource, oldTokenIdx, oldToken.Length());
+
+		if (!s_ColorVariantsByBase.Find(base, variants))
+			variants = null;
+
+		s_ColorVariantsByBase[lowerSource] = variants;
+
+		if (!variants || !variants.Find(newColor, variant))
+			return "";
 
 		if (oldToken == newColor)
 			return "";
@@ -1629,15 +1674,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (oldToken == "" && !allowUntokened)
 			return "";
 
-		string base = lowerSource;
-		if (oldToken != "")
-			base = StripDelimitedToken(lowerSource, oldTokenIdx, oldToken.Length());
-
-		map<string, string> variants = s_ColorVariantsByBase.Get(base);
-		if (!variants || !variants.Contains(newColor))
-			return "";
-
-		return variants.Get(newColor);
+		return variant;
 	}
 
 	//! "Change Colors": snapshot `entity` (classname, health/quantity/liquid/
