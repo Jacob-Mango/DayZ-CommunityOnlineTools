@@ -30,6 +30,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	bool m_AllowRestrictedClassNames;
 	bool m_FilterWithDisplayName;
 
+	static ref TStringArray s_ColorTokens = { "darkblue", "white", "black", "blue", "red", "green", "tan", "camo", "orange", "grey", "gray", "yellow", "wine", "beige", "rust", "gold", "plum" };
+
 	//! classname (lowercased, color token stripped) -> { token -> real classname }.
 	//! Built once from CfgVehicles + CfgWeapons and kept for the module's
 	//! whole lifetime - those trees are static game data, so re-scanning tens
@@ -98,7 +100,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! mis-tokenized as a blue one with "dark" left dangling in its base name.
 	static ref array<string> GetColorTokens()
 	{
-		return { "darkblue", "white", "black", "blue", "red", "green", "tan", "camo", "orange", "grey", "gray", "yellow", "wine", "beige", "rust", "gold", "plum" };
+		return s_ColorTokens;
 	}
 
 	//! Default distance is chosen such that if you can see the item hint on HUD, raycast should also hit
@@ -1574,6 +1576,32 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			for (int i = 0; i < children_count; i++)
 			{
 				g_Game.ConfigGetChildName(config_path, i, child_name);
+
+				string child_path = config_path + " " + child_name;
+				if (g_Game.ConfigGetInt(child_path + " scope") != 2)
+					continue;
+
+				string model;
+				if (!g_Game.ConfigGetText(child_path + " model", model) || model == string.Empty || model == "bmp")
+					continue;
+
+				string color;
+				if (g_Game.ConfigGetText(child_path + " color", color))
+				{
+					color.ToLower();
+					if (tokens.Find(color) == -1)
+						tokens.Insert(color);
+				}
+
+			#ifdef DZ_Expansion_Core
+				string skinName;
+				if (g_Game.ConfigGetText(child_path + " skinName", skinName))
+				{
+					skinName.ToLower();
+					if (tokens.Find(skinName) == -1)
+						tokens.Insert(skinName);
+				}
+			#endif
 
 				string lower = child_name;
 				lower.ToLower();
