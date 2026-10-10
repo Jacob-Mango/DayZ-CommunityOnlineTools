@@ -3,10 +3,8 @@
 // Uses JMContextMenuRegistry helper for simplified 1-line context menu item registration.
 modded class JMESPActionMenu
 {
-	override void BuildMain()
+	void JMESPActionMenu()
 	{
-		super.BuildMain();
-
 		//! Register sub-mod 3D world action item using helper
 		JMContextMenuRegistry.Register3DWorldAction( "ex_3d_tp_here", "Sub-Mod Teleport To Me", JMConstants.Lucide( "move-down-left" ), this, "OnExTeleportToMe" );
 	}
