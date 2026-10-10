@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: a checkbox in the Teleport map's filter menu that shows/hides a custom map marker layer.
 // Same Register() call, Teleport scope; the marker is added in RefreshMapMarkers only while it is on.
 modded class JMTeleportForm

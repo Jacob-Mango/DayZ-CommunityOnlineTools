@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: tooltips. SetTooltip takes plain text or a #STR_ stringtable key,
 // on any control.
 modded class JMPlayerForm

@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: a custom row in the Object Spawner's category menu - the same Register() call as the
 // Player list, with the Object Spawner's scope. The callback receives the clicked id.
 modded class JMObjectSpawnerForm

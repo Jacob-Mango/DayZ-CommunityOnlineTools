@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: gating a control by permission. The key is declared once in a module's
 // DeclarePermissions() (see JMCustomExampleModule.c) and bound to the control here:
 // BindPermission hides the control when the permission is missing and keeps it

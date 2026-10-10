@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: a tab as its own class. Extend JMFormTab and hand it to the form - the form assigns
 // the tab its index at runtime (tab.GetTabId()), so the class never names a number and cannot
 // clash with tabs other mods add to the same form. The form then drives its lifecycle:

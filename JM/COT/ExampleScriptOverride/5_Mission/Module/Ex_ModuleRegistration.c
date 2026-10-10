@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: making COT load your modules. A module class does nothing until it is
 // listed here - see JMCustomExampleModule.c (sidebar module + form) and
 // Ex_RPCHandling.c (server-side RPC module with no UI).

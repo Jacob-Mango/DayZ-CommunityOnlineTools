@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: a search toolbar over a list. CreateSearchRow builds [refresh] [search box] in one
 // call and JMSearchMatcher does the matching (case-insensitive, all words must match, `|` or
 // `OR` for any). Prepare the matcher once per rebuild, then ask it about each row.

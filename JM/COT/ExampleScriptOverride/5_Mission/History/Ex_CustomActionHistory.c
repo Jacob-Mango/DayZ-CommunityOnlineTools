@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: tracking custom teleport undo/redo steps in JMTeleportHistory.
 modded class JMTeleportHistory
 {

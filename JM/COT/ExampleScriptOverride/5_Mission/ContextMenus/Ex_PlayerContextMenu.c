@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: adding entries to the player list right-click menu (JMPlayerForm).
 // Uses JMContextMenuRegistry for declarative 1-line context menu item registration.
 modded class JMPlayerForm

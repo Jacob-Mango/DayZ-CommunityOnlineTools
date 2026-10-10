@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: adding entries to the 3D world / tracked object context menu (JMESPActionMenu).
 // Uses JMContextMenuRegistry helper for simplified 1-line context menu item registration.
 modded class JMESPActionMenu

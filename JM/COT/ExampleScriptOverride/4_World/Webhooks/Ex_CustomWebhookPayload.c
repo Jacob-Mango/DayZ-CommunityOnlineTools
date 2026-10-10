@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: dispatching custom webhook events to Discord via JMWebhookModule.
 modded class JMWebhookModule
 {

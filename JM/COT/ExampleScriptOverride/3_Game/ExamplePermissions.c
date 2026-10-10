@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: keep custom permission keys as constants on JMConstants so the
 // registration, the UI binding and the server check all spell them the same.
 // (PERM_PLAYER_INJECTED_PANEL already exists in COT itself - only declare your own.)

@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: the form behind JMCustomExampleModule. The layout's `scriptclass` picks this class,
 // SetModule() receives the module, and the base class runs the tab lifecycle:
 // OnTabCreate (once) -> OnTabFocus -> OnTabUpdate, OnTabUnfocus when another tab is picked,

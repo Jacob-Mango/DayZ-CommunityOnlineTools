@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: adding custom right-click actions to items in the player inventory tab (JMPlayerFormTabInventory).
 modded class JMPlayerFormTabInventory
 {

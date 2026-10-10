@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: a new ESP category. Give it a name, a colour, a permission suffix and a test; ESP
 // registers the "ESP.View.<Permission>" permission and adds the category to the filters tab.
 class JMESPViewTypeExampleBarrels: JMESPViewTypeItemBase

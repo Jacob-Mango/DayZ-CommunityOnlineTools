@@ -14,6 +14,7 @@
  *   4  "Selection"     - MultiSelectList, FilterBar, IconGrid, SelectBox, StagedIcon, Dropdown
  *   5  "Advanced"      - Tabs (nested), Paginator, StepList, ConfirmInline
  */
+#ifdef DIAG_DEVELOPER
 class JMExampleForm: JMFormBase
 {
 	protected JMExampleModule m_Module;
@@ -1717,3 +1718,4 @@ class JMExampleForm: JMFormBase
 		}
 	}
 }
+#endif

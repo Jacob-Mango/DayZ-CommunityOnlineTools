@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: a checkbox row in the Player list's filter menu. One Register() call adds the row
 // (re-registering the same id replaces it, so OnCreate can run more than once); the state
 // callback makes it a checkbox, PassesListFilters decides which players the list shows.

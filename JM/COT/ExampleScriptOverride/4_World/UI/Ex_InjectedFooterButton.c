@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: injecting custom action shortcut buttons into the COT sidebar footer (JMCOTSideBarFooter).
 modded class JMCOTSideBarFooter
 {

@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: a card with action buttons in its title bar. Premade Refresh / Apply / Delete
 // buttons pack right-to-left, and AddCardHeaderAction takes any Lucide icon.
 modded class JMPlayerForm

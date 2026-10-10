@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: popups owned by a form - a slider prompt and a menu opened at the cursor.
 // CreateOverlayPrompt / CreateOverlayMenu build the popup anchored to the window and register
 // it as an overlay, so switching tab or closing the form dismisses it. Never call InitPrompt().

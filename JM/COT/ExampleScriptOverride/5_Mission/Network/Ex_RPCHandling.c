@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: client -> server -> client round trip in a module with no UI.
 // (It is its own class, not a `modded class JMCustomExampleModule`: Enforce cannot resolve a
 // modded class whose base is defined in the same addon's compile pass, so give each module its own class.)

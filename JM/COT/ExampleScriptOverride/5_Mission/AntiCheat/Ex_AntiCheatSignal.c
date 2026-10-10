@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: feeding a custom anti-cheat detection signal into JMAntiCheatModule.
 // Real detectors (JMAntiCheatDetector) build a JMAntiCheatHit array and hand it
 // to ApplyHitsForGuid under their own detector name; a sub-mod plugs in the

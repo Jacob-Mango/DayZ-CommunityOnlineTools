@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: injecting a card into a tab that already exists (Player > General), with a
 // header refresh button and a permission-gated action.
 modded class JMPlayerForm

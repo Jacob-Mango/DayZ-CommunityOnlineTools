@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: persisting module settings as JSON in the server profile
 // (same shape as COT's own JMESPSerialize: static Load(), instance Save()).
 class JMCustomExampleSettings: Managed

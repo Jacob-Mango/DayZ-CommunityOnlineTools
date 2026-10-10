@@ -1,3 +1,4 @@
+#ifdef DIAG_DEVELOPER
 class JMExampleModule: JMRenderableModuleBase
 {
 	override void DescribeModule( JMModuleInfo info )
@@ -22,3 +23,4 @@ class JMExampleModule: JMRenderableModuleBase
 
 	
 }
+#endif

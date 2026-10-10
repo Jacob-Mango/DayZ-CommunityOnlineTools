@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: a sidebar module. Everything a module needs is one small override each;
 // the form it opens is JMCustomExampleForm.c and it is loaded by Ex_ModuleRegistration.c.
 class JMCustomExampleModule: JMRenderableModuleBase

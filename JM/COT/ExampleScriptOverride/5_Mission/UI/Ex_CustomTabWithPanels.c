@@ -1,4 +1,4 @@
-#ifdef JM_CommunityOnlineTools
+#ifdef DIAG_DEVELOPER
 // Example: adding a tab to an existing form. One AddTab() call; the callback runs lazily,
 // the first time the tab is opened, and receives the empty panel to fill.
 modded class JMPlayerForm
