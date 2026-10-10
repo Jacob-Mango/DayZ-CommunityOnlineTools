@@ -19,6 +19,14 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 	}
 
+	override void CloseSharedMenu()
+	{
+		JMESPActionMenu menu = JMESPActionMenu.Shared();
+
+		if ( menu )
+			menu.Close();
+	}
+
 	override void OnStart()
 	{
 		super.OnStart();

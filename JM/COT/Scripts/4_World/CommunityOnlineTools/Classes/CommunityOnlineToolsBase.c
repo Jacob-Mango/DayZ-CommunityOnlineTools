@@ -563,6 +563,10 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		}
 	}
 
+	void CloseSharedMenu()
+	{
+	}
+
 	static void HealEntityRecursive(Object obj, bool includeAttachments = true, bool includeCargo = true)
 	{
 		SetFullHealth(obj);

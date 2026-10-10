@@ -402,6 +402,8 @@ class COTModule : JMModuleBase
 
 		bool windowsActive = GetCOTWindowManager().HasAnyActive();
 
+		GetCOTBase().CloseSharedMenu();
+
 		if ( !cotOpen && !windowsActive )
 			return;
 
