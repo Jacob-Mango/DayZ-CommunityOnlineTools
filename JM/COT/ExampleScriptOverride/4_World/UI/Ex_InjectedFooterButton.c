@@ -2,11 +2,11 @@
 // Example: injecting custom action shortcut buttons into the COT sidebar footer (JMCOTSideBarFooter).
 modded class JMCOTSideBarFooter
 {
-	override void OnInit()
+	override void Init( Widget footer )
 	{
-		super.OnInit();
+		super.Init( footer );
 
-		if ( !layoutRoot )
+		if ( !m_Root )
 			return;
 
 		#ifdef COT_DEBUGLOGS
