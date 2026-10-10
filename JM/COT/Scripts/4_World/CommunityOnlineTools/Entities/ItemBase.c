@@ -1,5 +1,7 @@
 modded class ItemBase
 {
+	static bool s_COT_IsServerCheck_AllowClientOverride;
+
 	//! Last player to throw or place this item, for kill attribution.
 	//! ItemBase is the common ancestor of both ExplosivesBase and TrapBase, so
 	//! tagging here covers grenades, mines, claymores and bear traps in one
@@ -115,30 +117,21 @@ modded class ItemBase
 			GetCommunityOnlineToolsBase().SpawnCompatibleAttachments(this, null, 0);
 	}
 
+	override bool IsServerCheck(bool allow_client)
+	{
+		if (!allow_client)
+			allow_client = s_COT_IsServerCheck_AllowClientOverride;
+
+		return super.IsServerCheck(allow_client);
+	}
+
 	void COT_OnDebugSpawn(PlayerBase player)
 	{
-		//! The spawner form's item preview runs this on a client-local entity. Vanilla
-		//! overrides (e.g. Barrel_ColorBase::OnDebugSpawn -> SetQuantityMax) change
-		//! server-only variables and raise "Attempting to change variable client side",
-		//! so on a pure client only run the COT attachment pass.
-		if (!g_Game.IsServer())
-		{
-			//! A weapon's vanilla debug spawn is what fills it on the server (specific
-			//! stock, handguard, optic...), so the preview runs the same one rather than
-			//! the generic pass, which picks whatever attachment comes first per slot.
-			if (IsWeapon())
-			{
-				OnDebugSpawn();
-				return;
-			}
-
-			if (!IsInherited(TentBase))
-				GetCommunityOnlineToolsBase().SpawnCompatibleAttachments(this, null, 0);
-
-			return;
-		}
+		s_COT_IsServerCheck_AllowClientOverride = true;
 
 		OnDebugSpawnEx(DebugSpawnParams.WithPlayer(player));
+
+		s_COT_IsServerCheck_AllowClientOverride = false;
 	}
 }
 
