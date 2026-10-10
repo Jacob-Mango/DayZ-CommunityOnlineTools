@@ -3028,7 +3028,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	protected void RPC_SendDiseaseMask( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		// Server-side: client requested a mask - read the guid and send back
-		if ( IsMissionHost() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			string guid;
 			if ( !ctx.Read( guid ) )
@@ -3136,7 +3136,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	protected void RPC_RequestPlayerStats( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		// Server-side: a client asked for a player history.
-		if ( IsMissionHost() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			string guid;
 			if ( !ctx.Read( guid ) )
@@ -3238,7 +3238,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	protected void RPC_RequestExpansionInfo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		// Server-side: a client asked for the Expansion block.
-		if ( IsMissionHost() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			string guid;
 			if ( !ctx.Read( guid ) )
@@ -3387,7 +3387,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	protected void RPC_RequestInventory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		// Server-side: a client asked for a listing.
-		if ( IsMissionHost() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			string guid;
 			if ( !ctx.Read( guid ) )
@@ -4257,7 +4257,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_SendBleedingState( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( IsMissionHost() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			string reqGuid;
 			if ( !ctx.Read( reqGuid ) )
