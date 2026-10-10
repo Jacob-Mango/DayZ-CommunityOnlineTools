@@ -1737,9 +1737,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (!snapshot)
 			return entity;
 
-		RecolorLoadoutItem(snapshot, newColor, depth);
-
+		entity.SetPosition(vector.Zero);
 		g_Game.ObjectDelete(entity);
+
+		RecolorLoadoutItem(snapshot, newColor, depth);
 
 		EntityAI recreated = loadoutModule.SpawnItem(snapshot, pos, false);
 
