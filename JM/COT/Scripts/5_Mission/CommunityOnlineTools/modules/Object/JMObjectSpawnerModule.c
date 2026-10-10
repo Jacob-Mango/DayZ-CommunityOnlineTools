@@ -67,6 +67,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			foreach (string color, string className: variants)
 				result.Insert(color);
+
+			result.Sort();
 		}
 		else
 		{
