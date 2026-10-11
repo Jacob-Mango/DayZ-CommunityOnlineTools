@@ -1,8 +1,23 @@
+#ifdef DAYZ_1_29
+typedef Construction ConstructionBase
+modded class Construction
+{
+	protected EntityAI 	m_EntityParent;
+
+	override protected void SetParent( BaseBuildingBase parent )
+	{
+		super.SetParent(parent);
+		
+		m_EntityParent = parent;
+	}
+#else
+//! 1.30+
 //! The half of COT's construction access that both kinds of construction share:
 //! Construction (base building objects) and Rebuilding (rebuildable map buildings
 //! such as the irrigation tunnel entrance) are siblings under ConstructionBase.
 modded class ConstructionBase
 {
+#endif
 	bool COT_CanBuildPart(string partName, bool checkMaterials = true)
 	{
 		if ( !HasRequiredPart( partName ) )
@@ -118,6 +133,8 @@ modded class ConstructionBase
 		if ( !part )
 			return false;
 
+	#ifndef DAYZ_1_29
+		//! 1.30+
 		array<string> collisionData = part.GetCollisionData();
 		if ( collisionData && collisionData.Count() == 2 )
 		{
@@ -140,6 +157,7 @@ modded class ConstructionBase
 				return true;
 			}
 		}
+	#endif
 
 		if ( COT_GetSelectionBounds( partName, min, max ) )
 			return true;
@@ -182,30 +200,118 @@ modded class ConstructionBase
 		return true;
 	}
 
-	//! The verbs below differ per construction type - Construction goes through
-	//! its BaseBuildingBase parent, Rebuilding through its own server methods -
-	//! so they are overridden, never reached through the base.
-	void COT_BuildParts(TStringArray parts_name, PlayerBase player, bool checkMaterials = true)
+	BaseBuildingBase COT_GetParent()
 	{
+	#ifdef DAYZ_1_29
+		return GetParent();
+	#else
+		return null;
+	#endif
 	}
 
+	void COT_BuildParts(TStringArray parts_name, PlayerBase player, bool checkMaterials = true)
+	{
+		foreach(string part_name: parts_name)
+			COT_BuildRequiredParts(part_name, player, checkMaterials);
+
+		UpdateVisuals();
+	}
+	
 	void COT_BuildRequiredParts(string part_name, PlayerBase player, bool checkMaterials = true)
 	{
+		string main_part_name = GetConstructionPart( part_name ).GetMainPartName();
+		string cfg_path = "cfgVehicles" + " " + COT_GetParent().GetType() + " "+ "Construction" + " " + main_part_name + " " + part_name + " " + "required_parts";
+		
+		array<string> required_parts = new array<string>;
+		g_Game.ConfigGetTextArray( cfg_path, required_parts );
+		
+		for ( int i = 0; i < required_parts.Count(); ++i )
+		{
+			if ( !IsPartConstructed( required_parts.Get( i ) ) )
+				COT_BuildRequiredParts(required_parts.Get( i ), player, checkMaterials);
+		}
+
+		if ( !IsPartConstructed( part_name ) )
+			COT_BuildPart(part_name, player, checkMaterials);
 	}
 
 	void COT_DismantleParts(TStringArray parts_name, PlayerBase player)
 	{
-	}
+		foreach(string part_name: parts_name)
+			COT_DismantleRequiredParts(part_name, player);
 
+		UpdateVisuals();
+	}
+	
 	void COT_DismantleRequiredParts(string part_name, PlayerBase player)
 	{
+		array<string> required_parts = new array<string>;
+		required_parts = GetValidDepenentPartsArray(part_name);
+		
+		for ( int i = 0; i < required_parts.Count(); ++i )
+		{
+			if ( HasDependentPart( required_parts.Get( i ) ) )
+				COT_DismantleRequiredParts(required_parts.Get( i ), player);
+			else
+				COT_DismantlePart(required_parts.Get( i ), player);
+		}
+
+		if ( !HasDependentPart( part_name ) )
+			COT_DismantlePart(part_name, player);
+	}
+
+	void COT_BuildPart(string part_name, PlayerBase player, bool checkMaterials = true )
+	{
+		if ( !COT_CanBuildPart( part_name, checkMaterials ) )
+			return;
+
+		string damage_zone;
+		if ( DamageSystem.GetDamageZoneFromComponentName( COT_GetParent(), part_name, damage_zone ) )
+		{
+			COT_GetParent().SetAllowDamage(true);
+			COT_GetParent().SetHealthMax( damage_zone, "Health" );
+			COT_GetParent().ProcessInvulnerabilityCheck(COT_GetParent().GetInvulnerabilityTypeString());
+		}
+
+	#ifdef DAYZ_1_29
+		if ( m_ConstructionBoxTrigger )
+			DestroyCollisionTrigger();
+	#endif
+
+		COT_GetParent().OnPartBuiltServer( player, part_name, AT_BUILD_PART );
+	}
+
+	void COT_DismantlePart( string part_name, PlayerBase player )
+	{
+		if ( !COT_CanDismantlePart( part_name ) )
+			return;
+
+		COT_GetParent().OnPartDismantledServer( player, part_name, AT_DISMANTLE_PART );
+
+		string damage_zone;
+		if ( DamageSystem.GetDamageZoneFromComponentName( COT_GetParent(), part_name, damage_zone ) )
+		{
+			if ( COT_GetParent().GetHealth( damage_zone, "Health" ) > 0 )
+			{
+				COT_Base.SetHealth( COT_GetParent(), damage_zone, "Health", 0 );
+			}
+		}
 	}
 
 	void COT_RepairPart( string part_name )
 	{
+		string damage_zone;
+		if ( DamageSystem.GetDamageZoneFromComponentName( COT_GetParent(), part_name, damage_zone ) )
+		{
+			COT_Base.SetHealthMax( COT_GetParent(), damage_zone, "Health" );
+		}
 	}
 
 	void COT_RepairParts( TStringArray parts_name )
 	{
+		foreach ( string part_name : parts_name )
+			COT_RepairPart( part_name );
+
+		UpdateVisuals();
 	}
 }

@@ -413,14 +413,28 @@ class JMESPModule: JMRenderableModuleBase
 	//! are plain Buildings rather than BaseBuildingBase.
 	static ConstructionBase GetConstructionOf( Object target )
 	{
+	#ifdef DAYZ_1_29
+		BaseBuildingBase baseBuilding;
+
+		if ( !Class.CastTo( baseBuilding, target ) )
+			return NULL;
+
+		return ConstructionBase.Cast( baseBuilding.GetConstruction() );
+	#else
+		//! 1.30+
 		EntityAI entity = EntityAI.Cast( target );
 
 		if ( !entity )
 			return NULL;
 
 		return ConstructionBase.Cast( entity.GetConstructionBasic() );
+	#endif
 	}
 
+#ifdef DAYZ_1_29
+	static ItemBase GetDigitalCodeLock( Object target, int doorIndex = -1 );
+#else
+	//! 1.30+
 	//! The digital code lock that governs this object: the target itself when the
 	//! menu was opened on the lock, the one on a gate, or - for a building - the one
 	//! on the door under the cursor (doorIndex, -1 when there was none).
@@ -462,6 +476,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		return NULL;
 	}
+#endif
 
 	bool GetDrawPlayerSkeletonsEnabled()
 	{
@@ -3620,6 +3635,10 @@ class JMESPModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMESPModuleRPC.ObjectActionResult, true, ident );
 	}
 
+#ifdef DAYZ_1_29
+	static ItemBase GetDigitalCodeLockForAction( Object target, float doorValue );
+#else
+	//! 1.30+
 	//! GetDigitalCodeLock for an object action: the door index rides in the action's float value.
 	static DigitalCodeLock GetDigitalCodeLockForAction( Object target, float doorValue )
 	{
@@ -3627,7 +3646,12 @@ class JMESPModule: JMRenderableModuleBase
 
 		return GetDigitalCodeLock( target, doorIndex );
 	}
+#endif
 
+#ifdef DAYZ_1_29
+	void OpenDigitalCodeLockMenu( ItemBase codeLock );
+#else
+	//! 1.30+
 	//! Raise the vanilla keypad over a digital code lock, to dial a new code into
 	//! it. Client only - the keypad sends the code to the server itself.
 	void OpenDigitalCodeLockMenu( DigitalCodeLock codeLock )
@@ -3657,11 +3681,16 @@ class JMESPModule: JMRenderableModuleBase
 		if ( IsCOTInterfaceOpen() )
 			g_Game.GetUIManager().ShowUICursor( true );
 	}
+#endif
 
 	//! A lock with no code has nothing to lock against, and locking it anyway
 	//! leaves a lock nobody can open without resetting it first.
 	protected bool Exec_SetDigitalLock( Object target, int locked, float fvalue )
 	{
+	#ifdef DAYZ_1_29
+		return false;
+	#else
+		//! 1.30+
 		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
 
 		if ( !codeLock )
@@ -3679,6 +3708,7 @@ class JMESPModule: JMRenderableModuleBase
 		codeLock.SetLockState( false );
 
 		return true;
+	#endif
 	}
 
 	//! The code is text, not a number - "0042" is a different code from "42" - so
@@ -3686,6 +3716,8 @@ class JMESPModule: JMRenderableModuleBase
 	//! lock's number uses.
 	protected void Exec_GetDigitalCode( Object target, float fvalue, PlayerIdentity ident )
 	{
+	#ifndef DAYZ_1_29
+		//! 1.30+
 		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
 
 		if ( !codeLock )
@@ -3702,12 +3734,17 @@ class JMESPModule: JMRenderableModuleBase
 		rpc.Write( 0 );
 		rpc.Write( codeLock.GetLockPIN() );
 		rpc.Send( NULL, JMESPModuleRPC.ObjectActionResult, true, ident );
+	#endif
 	}
 
 	//! Unlocked first: a lock that is still locked when its code is cleared would
 	//! keep its door shut with nothing left to open it by.
 	protected bool Exec_ResetDigitalCode( Object target, float fvalue )
 	{
+	#ifdef DAYZ_1_29
+		return false;
+	#else
+		//! 1.30+
 		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
 
 		if ( !codeLock || !codeLock.CanSetCode() )
@@ -3717,6 +3754,7 @@ class JMESPModule: JMRenderableModuleBase
 		codeLock.ResetPIN();
 
 		return true;
+	#endif
 	}
 
 	protected void RPC_ObjectAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )

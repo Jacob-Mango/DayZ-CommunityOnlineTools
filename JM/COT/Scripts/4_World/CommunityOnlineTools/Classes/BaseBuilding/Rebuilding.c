@@ -1,3 +1,5 @@
+#ifndef DAYZ_1_29
+//! 1.30+
 //! Build, dismantle and repair for the rebuildable map buildings - the irrigation
 //! tunnel entrance, the well, the rebuildable houses - which are plain Buildings
 //! with a Rebuilding construction rather than BaseBuildingBase with a Construction.
@@ -87,3 +89,4 @@ modded class Rebuilding
 		UpdateVisuals();
 	}
 }
+#endif

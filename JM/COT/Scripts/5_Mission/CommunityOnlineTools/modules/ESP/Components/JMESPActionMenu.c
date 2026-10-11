@@ -844,12 +844,17 @@ class JMESPActionMenu
 			Add( PREFIX_ACTION + "pastecode", "#STR_COT_ESP_MODULE_MENU_PASTE_CODE", JMConstants.Lucide( "clipboard-paste" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
 		}
 
+	#ifndef DAYZ_1_29
+		//! 1.30+
 		DigitalCodeLock codeLock = JMESPModule.GetDigitalCodeLock( m_Meta.target, m_Meta.m_DoorIndex );
 
 		if ( codeLock )
 			BuildDigitalCodeLock( codeLock );
+	#endif
 	}
 
+#ifndef DAYZ_1_29
+	//! 1.30+
 	//! The digital code lock's own verbs. Locking needs a code to lock against, so
 	//! it is only offered once one is set; setting one hands over to the lock's
 	//! own keypad (see DoSetDigitalCode), since a code is free-form digits and a
@@ -872,6 +877,7 @@ class JMESPActionMenu
 
 		Add( PREFIX_ACTION + "digisetcode", "#STR_COT_ESP_MODULE_MENU_SET_CODE", JMConstants.Lucide( "keyboard" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
 	}
+#endif
 
 	protected void BuildConstruction()
 	{
@@ -889,11 +895,13 @@ class JMESPActionMenu
 		Add( PREFIX_ACTION + "dismantleall", "#STR_COT_ESP_MODULE_MENU_DISMANTLE_ALL", JMConstants.Lucide( "pickaxe" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE ), JMTheme.DANGER );
 		Add( PREFIX_ACTION + "repairall", "#STR_COT_ESP_MODULE_MENU_REPAIR_ALL", JMConstants.Lucide( "wrench" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_REPAIR ) );
 
+	#ifndef DAYZ_1_29
 		//! A rebuildable building narrows this page to the part under the click,
 		//! so where to click is worth seeing. Client-side drawing only - nothing
 		//! is sent, so there is no permission to check.
 		if ( Rebuilding.Cast( JMESPModule.GetConstructionOf( m_Meta.target ) ) )
 			AddToggle( PREFIX_ACTION + "shownodes", "#STR_COT_ESP_MODULE_MENU_SHOW_NODES", m_Meta.module.GetConstructionPreview().IsShowingNodes( EntityAI.Cast( m_Meta.target ) ) );
+	#endif
 
 		//! Narrowed to the part the right-click landed on when it landed on one;
 		//! a rebuildable building has dozens. A click on nothing that names a part
@@ -2452,6 +2460,8 @@ class JMESPActionMenu
 	//! reached the client through the lock's synced state.
 	protected void DoSetDigitalCode()
 	{
+	#ifndef DAYZ_1_29
+		//! 1.30+
 		DigitalCodeLock codeLock = JMESPModule.GetDigitalCodeLock( m_Meta.target, m_Meta.m_DoorIndex );
 
 		if ( !codeLock )
@@ -2466,6 +2476,7 @@ class JMESPActionMenu
 		m_Meta.module.ObjectAction( JMESPObjectAction.ResetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
 
 		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( m_Meta.module.OpenDigitalCodeLockMenu, DIGITAL_CODE_LOCK_MENU_DELAY, false, codeLock );
+	#endif
 	}
 
 	protected void DoShowNodes()
