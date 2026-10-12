@@ -366,12 +366,12 @@ class UIActionDropdown: UIActionBase
 				m_SelectedIcon.SetImage( 0 );
 				m_SelectedIcon.SetColor( entry.IconColor );
 				m_SelectedIcon.Show( true );
-				if ( m_SelectedText ) m_SelectedText.SetTextOffset( JMUILayout.Px( TEXT_OFFSET_ICON ), 0 );
+				if ( m_SelectedText ) m_SelectedText.SetTextOffset( TEXT_OFFSET_ICON, 0 );
 			}
 			else
 			{
 				m_SelectedIcon.Show( false );
-				if ( m_SelectedText ) m_SelectedText.SetTextOffset( JMUILayout.Px( TEXT_OFFSET_PLAIN ), 0 );
+				if ( m_SelectedText ) m_SelectedText.SetTextOffset( TEXT_OFFSET_PLAIN, 0 );
 			}
 		}
 	}
@@ -423,9 +423,9 @@ class UIActionDropdown: UIActionBase
 			{
 				rowText.SetText( entry.Text );
 				if ( entry.IconPath == "" )
-					rowText.SetTextOffset( JMUILayout.Px( TEXT_OFFSET_PLAIN ), 0 );
+					rowText.SetTextOffset( TEXT_OFFSET_PLAIN, 0 );
 				else
-					rowText.SetTextOffset( JMUILayout.Px( TEXT_OFFSET_ICON ), 0 );
+					rowText.SetTextOffset( TEXT_OFFSET_ICON, 0 );
 			}
 
 			// Store index in the row widget name for retrieval on click

@@ -154,7 +154,7 @@ class UIActionConfirmInline: UIActionBase
 		// Shifting the glyphs right by half the reserved strip re-centres them in
 		// the space right of the icon instead - same math as UIActionTabs.
 		if ( m_ActionText )
-			m_ActionText.SetTextOffset( JMUILayout.Px( LABEL_OFFSET_ICON ), 0 );
+			m_ActionText.SetTextOffset( LABEL_OFFSET_ICON, 0 );
 	}
 
 	// Position the icon at the geometric center of the button. Use after

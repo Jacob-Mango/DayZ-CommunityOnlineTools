@@ -874,7 +874,7 @@ class UIActionTabs: UIActionBase
 		{
 			//! Glyphs move right by half the icon strip so the label stays centred beside it.
 			if ( entry.IconPath != "" )
-				entry.LabelWidget.SetTextOffset( JMUILayout.Px( LABEL_OFFSET_ICON ), 0 );
+				entry.LabelWidget.SetTextOffset( LABEL_OFFSET_ICON, 0 );
 			else
 				entry.LabelWidget.SetTextOffset( 0, 0 );
 		}

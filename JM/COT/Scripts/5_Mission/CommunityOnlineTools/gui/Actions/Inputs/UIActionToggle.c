@@ -111,7 +111,7 @@ class UIActionToggle: UIActionBase
 		{
 			m_Icon.Show( false );
 			if ( m_Label )
-				m_Label.SetTextOffset( JMUILayout.Px( 31 ), 0 );
+				m_Label.SetTextOffset( 31, 0 );
 			return;
 		}
 
@@ -119,7 +119,7 @@ class UIActionToggle: UIActionBase
 		m_Icon.Show( true );
 
 		if ( m_Label )
-			m_Label.SetTextOffset( JMUILayout.Px( 56 ), 0 );
+			m_Label.SetTextOffset( 56, 0 );
 	}
 
 	override bool IsChecked() { return m_Checked; }

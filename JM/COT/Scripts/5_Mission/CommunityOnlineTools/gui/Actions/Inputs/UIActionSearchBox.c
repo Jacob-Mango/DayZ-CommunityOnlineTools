@@ -636,7 +636,7 @@ class UIActionSearchBox: UIActionBase
 			if ( Class.CastTo( rowText, row.FindAnyWidget( "row_text" ) ) )
 			{
 				rowText.SetText( item );
-				rowText.SetTextOffset( JMUILayout.Px( UIActionDropdown.TEXT_OFFSET_PLAIN ), 0 );
+				rowText.SetTextOffset( UIActionDropdown.TEXT_OFFSET_PLAIN, 0 );
 			}
 
 			// Encode the source index so OnClick can look up the full value.
