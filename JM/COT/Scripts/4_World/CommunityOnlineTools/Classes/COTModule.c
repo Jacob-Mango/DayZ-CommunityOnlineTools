@@ -462,43 +462,17 @@ class COTModule : JMModuleBase
 			Print("[COT_DBG] OnMouseDown clicked=" + clickedName);
 			#endif
 
-			// Check sidebar root + all category flyouts in one call
-			if ( m_COTMenu && m_COTMenu.ContainsWidget( clickedWidget ) )
-			{
-				canContinue = true;
-				#ifdef COT_DEBUGLOGS
-				Print("[COT_DBG] OnMouseDown canContinue=true via m_COTMenu.ContainsWidget");
-				#endif
-			}
-
 			if ( !canContinue )
 			{
 				Widget parentWidget = clickedWidget;
 				while ( parentWidget != NULL )
 				{
-					if ( GetCOTWindowManager().GetWindowFromWidget( parentWidget ) )
+					//! Any widget that doesn't ignore mouse buttons and isn't part of the vanilla HUD
+					if ( (parentWidget.GetFlags() & WidgetFlags.IGNOREPOINTER) != WidgetFlags.IGNOREPOINTER && !IsHUDWidget( parentWidget ) )
 					{
 						canContinue = true;
 						#ifdef COT_DEBUGLOGS
-						Print("[COT_DBG] OnMouseDown canContinue=true via GetWindowFromWidget at " + parentWidget.GetName() + " (" + parentWidget.ClassName() + ")");
-						#endif
-						break;
-					}
-
-					if ( JMStatics.ESP_CONTAINER && JMStatics.ESP_CONTAINER == parentWidget )
-					{
-						canContinue = true;
-						#ifdef COT_DEBUGLOGS
-						Print("[COT_DBG] OnMouseDown canContinue=true via ESP_CONTAINER match");
-						#endif
-						break;
-					}
-
-					if ( JMStatics.IsOverlay( parentWidget ) )
-					{
-						canContinue = true;
-						#ifdef COT_DEBUGLOGS
-						Print("[COT_DBG] OnMouseDown canContinue=true via IsOverlay at " + parentWidget.GetName() + " (" + parentWidget.ClassName() + ")");
+						Print("[COT_DBG] OnMouseDown canContinue=true ignorepointer 0 at " + parentWidget.GetName() + " (" + parentWidget.ClassName() + ")");
 						#endif
 						break;
 					}
@@ -521,6 +495,19 @@ class COTModule : JMModuleBase
 				UpdateMouseControls();
 			}
 		}
+	}
+
+	bool IsHUDWidget( Widget widget )
+	{
+		switch ( widget.GetName() )
+		{
+			case "CursorIcons":
+			case "HudFrameWidget":
+			case "HudPanel":
+				return true;
+		}
+
+		return false;
 	}
 
 	void ToggleCOT( UAInput input )
