@@ -614,6 +614,9 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 	void Hide()
 	{
+		if ( !m_IsShown )
+			return;
+
 		Deactivate();
 
 		OnHide();
