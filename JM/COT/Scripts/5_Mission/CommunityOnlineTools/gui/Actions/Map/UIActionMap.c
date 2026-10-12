@@ -744,7 +744,7 @@ class UIActionMap: UIActionBase
 			return "";
 
 		string best     = "";
-		float  bestDist = MARKER_HIT_PX;
+		float  bestDist = JMUILayout.Px( MARKER_HIT_PX );
 
 		for ( int i = 0; i < m_Markers.Count(); i++ )
 		{

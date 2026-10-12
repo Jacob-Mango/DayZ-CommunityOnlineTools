@@ -32,13 +32,13 @@ class UIActionManager
 
 		widget.GetSize( w, h );
 		widget.SetFlags( WidgetFlags.VEXACTSIZE );
-		widget.SetSize( w, height );
+		widget.SetSize( w, JMUILayout.Px( height ) );
 	}
 
 	static void SetFixedSize( Widget widget, float width, float height )
 	{
 		widget.SetFlags( WidgetFlags.HEXACTSIZE | WidgetFlags.VEXACTSIZE );
-		widget.SetSize( width, height );
+		widget.SetSize( JMUILayout.Px( width ), JMUILayout.Px( height ) );
 	}
 
 	static void SetWidthFraction( Widget widget, float width )
@@ -1369,7 +1369,7 @@ class UIActionManager
 
 		float w, h;
 		widget.GetSize( w, h );
-		widget.SetSize( w, height );
+		widget.SetSize( w, JMUILayout.Px( height ) );
 
 		return action;
 	}

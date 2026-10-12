@@ -217,7 +217,7 @@ class JMBanForm : JMFormBase
     {
         super.OnResize( w, h );
 
-        PinBottomPanelGeometry( h - TOP_HEIGHT );
+        PinBottomPanelGeometry( h - JMUILayout.Px( TOP_HEIGHT ) );
 
         //! The search row is a flex row: until Layout() runs, the search box
         //! keeps its full default width and wraps under the refresh button.

@@ -139,7 +139,7 @@ class JMESPTransformPopup: UIActionBase
 		Class.CastTo( m_Content, m_Panel.FindAnyWidget( "popup_content" ) );
 
 		Widget refreshBtn = AddIconButton( m_Window.GetTitleButtons(), "refresh-cw", ACTION_REFRESH_ALL, true );
-		refreshBtn.SetSize( 25, 25 );
+		refreshBtn.SetSize( JMUILayout.Px( 25 ), JMUILayout.Px( 25 ) );
 
 		if ( m_Content )
 		{
@@ -186,10 +186,10 @@ class JMESPTransformPopup: UIActionBase
 				copyBtn.SetPos( 0, 0 );
 
 				Widget pasteBtn = AddIconButton( buttons, "clipboard-paste", pasteAction );
-				pasteBtn.SetPos( 34, 0 );
+				pasteBtn.SetPos( JMUILayout.Px( 34 ), 0 );
 
 				Widget applyBtn = AddIconButton( buttons, "check", applyAction );
-				applyBtn.SetPos( 68, 0 );
+				applyBtn.SetPos( JMUILayout.Px( 68 ), 0 );
 			}
 		}
 
@@ -517,7 +517,7 @@ class JMESPTransformPopup: UIActionBase
 			float panelX, panelY;
 			m_Panel.GetScreenPos( panelX, panelY );
 
-			float measured = ( cy - panelY ) + ch + CONTENT_BOTTOM_PAD;
+			float measured = ( cy - panelY ) + ch + JMUILayout.Px( CONTENT_BOTTOM_PAD );
 			if ( measured > panelHeight )
 				panelHeight = measured;
 		}
@@ -525,8 +525,8 @@ class JMESPTransformPopup: UIActionBase
 		float px = m_PendingX - ax;
 		float py = m_PendingY - ay;
 
-		if ( m_PendingX + PANEL_WIDTH > screenW )
-			px = m_PendingX - ax - PANEL_WIDTH;
+		if ( m_PendingX + JMUILayout.Px( PANEL_WIDTH ) > screenW )
+			px = m_PendingX - ax - JMUILayout.Px( PANEL_WIDTH );
 		if ( m_PendingY + panelHeight > screenH )
 			py = m_PendingY - ay - panelHeight;
 
@@ -537,8 +537,8 @@ class JMESPTransformPopup: UIActionBase
 
 		if ( !m_Window.IsMinimized() )
 		{
-			m_Panel.SetSize( PANEL_WIDTH, panelHeight );
-			m_Window.SetSize( PANEL_WIDTH, panelHeight );
+			m_Panel.SetSize( JMUILayout.Px( PANEL_WIDTH ), panelHeight );
+			m_Window.SetSize( JMUILayout.Px( PANEL_WIDTH ), panelHeight );
 		}
 
 		m_Window.SetPosition( px, py );

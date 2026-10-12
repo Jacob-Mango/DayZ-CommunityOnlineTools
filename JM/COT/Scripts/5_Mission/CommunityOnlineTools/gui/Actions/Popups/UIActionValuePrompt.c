@@ -369,7 +369,7 @@ class UIActionValuePrompt: UIActionBase
 		float gw, gh;
 		m_Grid.GetScreenSize( gw, gh );
 		if ( gh >= 1 )
-			m_FullHeight = gh + ( PANEL_PAD * 2 );
+			m_FullHeight = gh + JMUILayout.Px( PANEL_PAD * 2 );
 
 		if ( m_FullHeight <= 0 )
 			return;
@@ -377,7 +377,7 @@ class UIActionValuePrompt: UIActionBase
 		// Never wider than what there is room to draw. Past the anchor's edge
 		// the panel is clipped, and what gets cut is the right-hand end of the
 		// row - the Confirm button and the slider's value readout.
-		float width = PANEL_WIDTH;
+		float width = JMUILayout.Px( PANEL_WIDTH );
 		if ( aw >= 1 && width > aw )
 			width = aw;
 
@@ -394,7 +394,7 @@ class UIActionValuePrompt: UIActionBase
 		if ( gh >= 1 )
 		{
 			m_Grid.SetFlags( WidgetFlags.HEXACTSIZE );
-			m_Grid.SetSize( width - ( PANEL_PAD * 2 ), gh );
+			m_Grid.SetSize( width - JMUILayout.Px( PANEL_PAD * 2 ), gh );
 		}
 
 		// Clamped, not just centred: a negative origin puts the left edge of the

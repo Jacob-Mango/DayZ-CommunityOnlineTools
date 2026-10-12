@@ -69,10 +69,37 @@ horizontal centre, so `position 0` now means "centred". See
 
 ## Pixel resolution
 
-"Pixels" here means **logical pixels** at the engine's reference resolution
-(approximately 1920×1080). The renderer scales the workspace to fit the
-actual screen, so a `size 32 32` panel doesn't physically become 32 monitor
-pixels on a 4K screen — it stays 32 logical pixels.
+A pixel value written in a **layout file** is an *authored* pixel at a 1080
+high reference. When the engine loads the layout it multiplies exact values by
+`screenHeight / 1080`, so `size 32 32` is 64 monitor pixels on a 4K screen.
+
+Everything **script** touches is in raw *screen* pixels, with no scaling:
+`SetSize` / `SetPos` / `GetSize` / `GetPos` on an exact-flag axis,
+`GetScreenSize`, `GetScreenPos` and the mouse position. So a pixel number
+written in script (`SetSize( 300, 70 )`) is half the size of the same number in
+a layout at 4K, and wider than it in a window shorter than 1080.
+
+Rule: a pixel constant in script is an authored pixel and goes through
+`JMUILayout.Px()` before it reaches a widget (vanilla does the same, see
+`InventoryMenu.GetHeightMultiplied`). Anything that is persisted is stored in
+authored pixels (`JMUILayout.FromPx()`). A value that was *measured*
+(`GetScreenSize`, the `w` / `h` handed to `OnResize`) is already in screen
+pixels and is not scaled again.
+
+COT helpers that take a pixel argument say which kind they want:
+
+| Takes authored pixels (scales inside) | Takes screen pixels (no scaling) |
+|---|---|
+| `UIActionBase.SetFixedSize` / `SetFixedHeight` | `UIActionBase.SetHeight` |
+| `UIActionManager.SetFixedSize` / `SetFixedHeight` | `UIActionItemList.SetViewportHeight` |
+| `UIActionBase.SetFlex` (basis and max) | `JMFormBase.PinBand` |
+| `UIActionContextMenu.SetMenuWidth` | `contentHeight` of `PinStripGeometry` / `Pin*PanelGeometry` |
+| `stripHeight` / `bandHeight` of `PinStripGeometry` | `JMWindowBase.SetSize` / `SetPosition` |
+| `UIActionText.SetLabelOffset` | |
+
+A value cached in screen pixels goes stale when the resolution changes. Keep
+the authored number and scale it where it is used, or re-derive it in an
+`OnResolutionChanged` (see `JMUILayout.ConsumeResolutionChange`).
 
 ## When to use which
 

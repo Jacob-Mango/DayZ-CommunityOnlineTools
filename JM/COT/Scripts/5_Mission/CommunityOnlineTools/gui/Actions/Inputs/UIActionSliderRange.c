@@ -489,7 +489,7 @@ class UIActionSliderRange: UIActionBase
 
 		float hostW = trackW * m_FlowWidth;
 
-		if ( m_FlowDir == 0 || m_FlowWidth <= 0 || hostW < FLOW_MIN_PX )
+		if ( m_FlowDir == 0 || m_FlowWidth <= 0 || hostW < JMUILayout.Px( FLOW_MIN_PX ) )
 		{
 			m_Flow.Show( false );
 			return;
@@ -516,7 +516,7 @@ class UIActionSliderRange: UIActionBase
 
 		//! On a short span that many arrows would sit on top of each other, so
 		//! the pixel floor decides how many are used instead.
-		int fits = ( int ) Math.Floor( hostW / FLOW_SPACING_PX );
+		int fits = ( int ) Math.Floor( hostW / JMUILayout.Px( FLOW_SPACING_PX ) );
 
 		if ( count > fits )
 			count = fits;

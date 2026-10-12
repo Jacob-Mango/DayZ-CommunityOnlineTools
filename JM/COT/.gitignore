@@ -17,3 +17,4 @@
 .dz-project-manager/steam_workshop.json
 .dz-project-manager/.steam-workshop-last-online-refresh
 
+__pycache__/

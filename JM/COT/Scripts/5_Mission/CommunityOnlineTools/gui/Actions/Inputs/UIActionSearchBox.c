@@ -50,6 +50,8 @@ class UIActionSearchBox: UIActionBase
 	protected int                m_SelectedIndex;
 	static const int CHANGE_DEBOUNCE_MS = 100;
 	static const float LIST_EDGE_MARGIN = 4;
+	//! Tallest an open list gets before it scrolls, in authored pixels.
+	static const float LIST_MAX_HEIGHT = 360;
 
 	//! See UIActionDropdown.OnMouseWheel - same fix, same reason: a direct
 	//! pixel move instead of VScrollStep, which jumped several rows per notch
@@ -634,7 +636,7 @@ class UIActionSearchBox: UIActionBase
 			if ( Class.CastTo( rowText, row.FindAnyWidget( "row_text" ) ) )
 			{
 				rowText.SetText( item );
-				rowText.SetTextOffset( UIActionDropdown.TEXT_OFFSET_PLAIN, 0 );
+				rowText.SetTextOffset( JMUILayout.Px( UIActionDropdown.TEXT_OFFSET_PLAIN ), 0 );
 			}
 
 			// Encode the source index so OnClick can look up the full value.
@@ -818,10 +820,11 @@ class UIActionSearchBox: UIActionBase
 
 		if ( m_ListPanel.IsVisible() && m_FullHeight > 0 )
 		{
-			float maxH = anchorH - LIST_EDGE_MARGIN * 2;
+			float edge = JMUILayout.Px( LIST_EDGE_MARGIN );
+			float maxH = anchorH - edge * 2;
 			float fullH = m_FullHeight;
 
-			float listCapH = 360.0;
+			float listCapH = JMUILayout.Px( LIST_MAX_HEIGHT );
 			if ( maxH > 0 && maxH < listCapH )
 				listCapH = maxH;
 
@@ -843,13 +846,13 @@ class UIActionSearchBox: UIActionBase
 			else
 				posY = fy - ay + fh;
 
-			float maxY = anchorH - animH - LIST_EDGE_MARGIN;
+			float maxY = anchorH - animH - edge;
 
 			if ( posY > maxY )
 				posY = maxY;
 
-			if ( posY < LIST_EDGE_MARGIN )
-				posY = LIST_EDGE_MARGIN;
+			if ( posY < edge )
+				posY = edge;
 
 			m_ListPanel.SetPos( fx - ax, posY );
 		}

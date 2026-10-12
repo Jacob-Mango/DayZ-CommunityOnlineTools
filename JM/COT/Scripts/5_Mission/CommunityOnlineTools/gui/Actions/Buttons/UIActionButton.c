@@ -229,7 +229,7 @@ class UIActionButton: UIActionBase
 
 		// Shift text right so it stays visually centered in the remaining space
 		if ( m_Text )
-			m_Text.SetTextOffset( 16, 0 );
+			m_Text.SetTextOffset( JMUILayout.Px( 16 ), 0 );
 	}
 
 	//! The icon slot is reserved whether or not an icon is loaded, so a leaf
@@ -241,12 +241,12 @@ class UIActionButton: UIActionBase
 
 		if ( m_Icon )
 		{
-			m_Icon.SetPos( m_ContentIndent + ICON_SLOT_PAD, 0 );
+			m_Icon.SetPos( JMUILayout.Px( m_ContentIndent + ICON_SLOT_PAD ), 0 );
 			m_Icon.Update();
 		}
 
 		if ( m_Text )
-			m_Text.SetTextOffset( m_ContentIndent + ICON_SLOT_W, 0 );
+			m_Text.SetTextOffset( JMUILayout.Px( m_ContentIndent + ICON_SLOT_W ), 0 );
 	}
 
 	override bool OnClick(Widget w, int x, int y, int button)

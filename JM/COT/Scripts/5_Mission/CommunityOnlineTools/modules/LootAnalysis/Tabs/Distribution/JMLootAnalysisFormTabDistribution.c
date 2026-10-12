@@ -120,7 +120,7 @@ class JMLootAnalysisFormTabDistribution: JMFormTab
 
 		if (m_DistributionMap)
 		{
-			float mapH = mapCardH - JMLootAnalysisForm.MAP_CARD_CHROME;
+			float mapH = mapCardH - JMUILayout.Px( JMLootAnalysisForm.MAP_CARD_CHROME );
 			if (mapH < 0)
 				mapH = 0;
 			m_DistributionMap.SetHeight(mapH);

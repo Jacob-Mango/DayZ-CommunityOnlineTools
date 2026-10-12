@@ -18,6 +18,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	//! Last screen height the scroller was sized against, so the (comparatively
 	//! expensive) resize only runs when the resolution actually changes.
 	protected float m_LastScreenHeight;
+	protected Widget m_FooterWidget;
 	protected float m_WidthFull;
 	protected float m_WidthIcon;
 	protected float m_CurrentWidth;
@@ -117,8 +118,8 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	{
 		Class.CastTo( m_TitleBarText, m_LayoutRoot.FindAnyWidget( "TitleBarText" ) );
 
-		Widget footerW = m_LayoutRoot.FindAnyWidget( "Footer" );
-		m_Footer.Init( footerW );
+		m_FooterWidget = m_LayoutRoot.FindAnyWidget( "Footer" );
+		m_Footer.Init( m_FooterWidget );
 
 		Class.CastTo( m_ButtonsScroller, m_LayoutRoot.FindAnyWidget( "Buttons_Scroller" ) );
 
@@ -207,6 +208,10 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		m_LayoutRoot.GetSize( m_WidthFull, h );
 		m_WidthIcon = m_WidthFull * 0.8;
 
+		//! Everything above was measured at the current resolution, so only a
+		//! change from here on has to be handled.
+		JMUILayout.ResetResolutionWatch();
+
 		LayoutScroller();
 
 		Hide();
@@ -230,7 +235,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		m_LastScreenHeight = scrH;
 
-		float available = scrH - ( scrH * TITLEBAR_HEIGHT_FRAC ) - JMCOTSideBarFooter.HEIGHT;
+		float available = scrH - ( scrH * TITLEBAR_HEIGHT_FRAC ) - JMUILayout.Px( JMCOTSideBarFooter.HEIGHT );
 		if ( available < 0 )
 			available = 0;
 
@@ -381,8 +386,40 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		}
 	}
 
+	//! The game's resolution changed under an already built sidebar. Everything
+	//! that is derived fresh each frame (the module scroller, the footer text
+	//! rows, the flyout) follows on its own; what is cached is the bar's width,
+	//! its slide position, the footer strip's height and any open flyout.
+	protected void OnResolutionChanged( float ratio )
+	{
+		m_WidthFull = m_WidthFull * ratio;
+		m_WidthIcon = m_WidthFull * 0.8;
+		m_CurrentWidth = m_CurrentWidth * ratio;
+
+		float rootW, rootH;
+		m_LayoutRoot.GetSize( rootW, rootH );
+		m_LayoutRoot.SetSize( m_WidthFull, rootH );
+
+		//! Placed again by the slide when it is moving; a bar at rest has to be
+		//! put back where it belongs by hand.
+		m_LayoutRoot.SetPos( m_CurrentWidth, 0 );
+
+		if ( m_FooterWidget )
+			m_FooterWidget.SetSize( 1.0, JMUILayout.Px( JMCOTSideBarFooter.HEIGHT ) );
+
+		//! A flyout is placed in screen space from the tile it opened beside.
+		foreach ( JMCOTSideBarCategory cat: m_Categories )
+			cat.ForceHideFlyout();
+
+		GetCOTWindowManager().OnResolutionChanged( ratio );
+	}
+
 	void OnUpdate( float timeslice )
 	{
+		float resolutionRatio;
+		if ( JMUILayout.ConsumeResolutionChange( resolutionRatio ) )
+			OnResolutionChanged( resolutionRatio );
+
 		bool animating = m_IsAnimatingIn || m_IsAnimatingOut || (m_IsTargetCompact != m_IsCompact);
 
 		CheckForVisibleModules();

@@ -381,14 +381,19 @@ class JMVehiclesHoverInfo
 		m_Anchor.GetScreenPos( ax, ay );
 		m_Anchor.GetScreenSize( aw, ah );
 
-		float px = screenX + CURSOR_OFFSET_X - ax;
-		float py = screenY + CURSOR_OFFSET_Y - ay;
+		float offsetX = JMUILayout.Px( CURSOR_OFFSET_X );
+		float offsetY = JMUILayout.Px( CURSOR_OFFSET_Y );
+		float panelW  = JMUILayout.Px( PANEL_W );
+		float panelH  = JMUILayout.Px( PANEL_H );
 
-		if ( screenX + CURSOR_OFFSET_X + PANEL_W > ax + aw )
-			px = screenX - CURSOR_OFFSET_X - PANEL_W - ax;
+		float px = screenX + offsetX - ax;
+		float py = screenY + offsetY - ay;
 
-		if ( screenY + CURSOR_OFFSET_Y + PANEL_H > ay + ah )
-			py = screenY - CURSOR_OFFSET_Y - PANEL_H - ay;
+		if ( screenX + offsetX + panelW > ax + aw )
+			px = screenX - offsetX - panelW - ax;
+
+		if ( screenY + offsetY + panelH > ay + ah )
+			py = screenY - offsetY - panelH - ay;
 
 		if ( px < 0 )
 			px = 0;

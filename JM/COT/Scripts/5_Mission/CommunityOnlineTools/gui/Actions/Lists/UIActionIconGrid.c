@@ -200,7 +200,7 @@ class UIActionIconGrid: UIActionBase
 		// Force the inner WrapSpacer to an exact size. The pixelHeight is what
 		// constrains chips to a single row.
 		m_Grid.SetFlags( WidgetFlags.HEXACTSIZE | WidgetFlags.VEXACTSIZE );
-		m_Grid.SetSize( pixelWidth, pixelHeight );
+		m_Grid.SetSize( JMUILayout.Px( pixelWidth ), JMUILayout.Px( pixelHeight ) );
 		// IconGrid root: only force width (so the outer scroller measures
 		// content overflow correctly). Leave height fractional so the
 		// horizontal scroller's Content can size it naturally without conflict
@@ -209,7 +209,7 @@ class UIActionIconGrid: UIActionBase
 		layoutRoot.SetFlags( WidgetFlags.HEXACTSIZE );
 		float lrW, lrH;
 		layoutRoot.GetSize( lrW, lrH );
-		layoutRoot.SetSize( pixelWidth, lrH );
+		layoutRoot.SetSize( JMUILayout.Px( pixelWidth ), lrH );
 	}
 
 	//! Add an icon button.  Duplicate IDs are ignored.

@@ -698,14 +698,14 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 	//! Pack the row left to right and return the width it came to.
 	protected float LayoutRow( bool healthVisible, float textWidth )
 	{
-		float cursor = ROW_PAD_LEFT;
+		float cursor = JMUILayout.Px( ROW_PAD_LEFT );
 
 		m_img_HealthLevel.Show( healthVisible );
 
 		if ( healthVisible )
 		{
 			m_img_HealthLevel.SetPos( cursor, 0 );
-			cursor += ROW_DOT_W + ROW_GAP;
+			cursor += JMUILayout.Px( ROW_DOT_W + ROW_GAP );
 		}
 
 		bool destroyed = false;
@@ -728,7 +728,7 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		m_txt_ObjectName.SetPos( cursor, 0 );
 
-		return cursor + textWidth + ROW_PAD_RIGHT;
+		return cursor + textWidth + JMUILayout.Px( ROW_PAD_RIGHT );
 	}
 
 	//! One ring of the selection border, `outset` screen px outside the
@@ -766,7 +766,7 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		icon.SetPos( x, 0 );
 
-		return x + ROW_ICON_W + ROW_GAP;
+		return x + JMUILayout.Px( ROW_ICON_W + ROW_GAP );
 	}
 
 	//! Paint the tag from its category: a solid accent strip down the left edge
@@ -1074,7 +1074,7 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 		{
 			//! Adding the middle button is itself a deliberate act, so a turn
 			//! does not have to travel first the way a move does.
-			if ( !rotating && Math.AbsFloat( px ) < DRAG_ARM_PX && Math.AbsFloat( py ) < DRAG_ARM_PX )
+			if ( !rotating && Math.AbsFloat( px ) < JMUILayout.Px( DRAG_ARM_PX ) && Math.AbsFloat( py ) < JMUILayout.Px( DRAG_ARM_PX ) )
 				return;
 
 			m_Dragging = true;

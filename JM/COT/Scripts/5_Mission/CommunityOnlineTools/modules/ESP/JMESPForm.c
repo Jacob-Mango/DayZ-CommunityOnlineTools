@@ -189,7 +189,7 @@ class JMESPForm: JMFormBase
 	{
 		super.OnResize( w, h );
 
-		PinBottomPanelGeometry( h - TOOLBAR_HEIGHT );
+		PinBottomPanelGeometry( h - JMUILayout.Px( TOOLBAR_HEIGHT ) );
 
 		if ( m_ToolbarRow )
 			m_ToolbarRow.Layout();

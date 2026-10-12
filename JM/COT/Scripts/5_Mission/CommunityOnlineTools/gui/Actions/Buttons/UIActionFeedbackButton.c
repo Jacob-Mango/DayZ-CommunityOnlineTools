@@ -372,6 +372,6 @@ class UIActionFeedbackButton: UIActionButton
 		m_Icon.Show( true );
 
 		if ( m_Text )
-			m_Text.SetTextOffset( 16, 0 );
+			m_Text.SetTextOffset( JMUILayout.Px( 16 ), 0 );
 	}
 }

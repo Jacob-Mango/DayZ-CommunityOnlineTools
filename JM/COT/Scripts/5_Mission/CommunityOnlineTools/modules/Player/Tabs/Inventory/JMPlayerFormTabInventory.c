@@ -1021,7 +1021,7 @@ class JMPlayerFormTabInventory: JMFormTab
 		Widget glyph = button.GetLayoutRoot().FindAnyWidget( "action_image" );
 		if ( glyph )
 		{
-			glyph.SetSize( INV_BAND_ICON_PX, INV_BAND_ICON_PX );
+			glyph.SetSize( JMUILayout.Px( INV_BAND_ICON_PX ), JMUILayout.Px( INV_BAND_ICON_PX ) );
 			glyph.Update();
 		}
 
@@ -1825,14 +1825,17 @@ class JMPlayerFormTabInventory: JMFormTab
 		int mx, my;
 		GetMousePos( mx, my );
 
-		int x = mx + 18;
-		int y = my + 18;
+		float cursorGap = JMUILayout.Px( 18 );
+		float edgeGap   = JMUILayout.Px( 10 );
 
-		if ( x + tw > screenW - 10 )
-			x = screenW - 10 - tw;
+		float x = mx + cursorGap;
+		float y = my + cursorGap;
 
-		if ( y + th > screenH - 10 )
-			y = screenH - 10 - th;
+		if ( x + tw > screenW - edgeGap )
+			x = screenW - edgeGap - tw;
+
+		if ( y + th > screenH - edgeGap )
+			y = screenH - edgeGap - th;
 
 		// The layout root is declared with exact pos flags, but it is parented
 		// to the window root here rather than to the inventory screen, so set

@@ -25,7 +25,7 @@ class UIActionText: UIActionBase
 		{
 			m_IconRight.Show( false );
 			if ( m_Text )
-				m_Text.SetTextOffset( -6, 0 );
+				m_Text.SetTextOffset( JMUILayout.Px( -6 ), 0 );
 			return;
 		}
 
@@ -35,7 +35,7 @@ class UIActionText: UIActionBase
 		// Icon sits 8px in from the right edge and is 14 wide -> 22px, plus a
 		// 14px gap so the number does not read as part of the glyph.
 		if ( m_Text )
-			m_Text.SetTextOffset( -36, 0 );
+			m_Text.SetTextOffset( JMUILayout.Px( -36 ), 0 );
 	}
 
 	//! Colour of the label text. NOT SetColor - the base paints layoutRoot, which
@@ -70,7 +70,7 @@ class UIActionText: UIActionBase
 	void SetLabelOffset( float x )
 	{
 		if ( m_Label )
-			m_Label.SetTextOffset( x, 0 );
+			m_Label.SetTextOffset( JMUILayout.Px( x ), 0 );
 	}
 
 	void SetLabelVAlign( UIActionVAlign type )
@@ -217,7 +217,7 @@ class UIActionText: UIActionBase
 		{
 			m_Icon.Show( false );
 			if ( m_Label )
-				m_Label.SetTextOffset( 10, 0 );
+				m_Label.SetTextOffset( JMUILayout.Px( 10 ), 0 );
 			return;
 		}
 
@@ -226,7 +226,7 @@ class UIActionText: UIActionBase
 
 		// Push label text right to clear the icon (icon is at x=6, width=20 -> end at 26 + 4 gap = 30)
 		if ( m_Label )
-			m_Label.SetTextOffset( 30, 0 );
+			m_Label.SetTextOffset( JMUILayout.Px( 30 ), 0 );
 	}
 
 	override bool OnClick(Widget w, int x, int y, int button)

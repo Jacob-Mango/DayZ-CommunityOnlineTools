@@ -111,6 +111,12 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 	protected float m_HideTimer;
 	static const float HIDE_DELAY = 0.15;
 
+	//! Flyout panel width, matching `size 300 60` in sidebar_flyout.layout.
+	//! Authored pixels (see JMUILayout.Px).
+	static const float FLYOUT_WIDTH = 300;
+	//! Height of one sidebar_button.layout row stacked in the flyout. Authored pixels.
+	static const float FLYOUT_ROW_HEIGHT = 52;
+
 	// Reference back to the sidebar so ShowFlyout can close sibling flyouts
 	protected JMCOTSideBar m_SideBar;
 
@@ -343,7 +349,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 			return;
 
 		float flyW, flyH;
-		m_FlyoutRoot.GetSize( flyW, flyH );
+		m_FlyoutRoot.GetScreenSize( flyW, flyH );
 
 		float tileX, tileY;
 		m_Root.GetScreenPos( tileX, tileY );
@@ -361,7 +367,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		if ( posY < 0 )
 			posY = 0;
 
-		m_FlyoutRoot.SetPos( posX, posY );
+		m_FlyoutRoot.SetScreenPos( posX, posY );
 	}
 
 	void ForceHideFlyout()
@@ -396,13 +402,16 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		if ( visibleCount == 0 )
 			return;
 
-		float flyW = 300;
-		float flyH = visibleCount * 70;
+		//! The flyout is a top-level workspace widget, so it is sized and placed
+		//! in screen space, while its rows come from the layout and are scaled by
+		//! the engine.
+		float flyW = JMUILayout.Px( FLYOUT_WIDTH );
+		float flyH = visibleCount * JMUILayout.Px( FLYOUT_ROW_HEIGHT );
 
-		// Resize the panel and spacer to the exact content height
-		m_FlyoutRoot.SetSize( flyW, flyH );
+		// Resize the panel and spacer to the exact content height (screen pixels)
+		m_FlyoutRoot.SetScreenSize( flyW, flyH );
 		if ( m_FlyoutButtons )
-			m_FlyoutButtons.SetSize( flyW, flyH );
+			m_FlyoutButtons.SetScreenSize( flyW, flyH );
 
 		// Get the screen pixel position of the category tile
 		float tileX, tileY;
@@ -422,7 +431,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		if ( posY < 0 )
 			posY = 0;
 
-		m_FlyoutRoot.SetPos( posX, posY );
+		m_FlyoutRoot.SetScreenPos( posX, posY );
 		m_FlyoutRoot.Show( true );
 		m_FlyoutVisible = true;
 		m_HideTimer = 0.0;

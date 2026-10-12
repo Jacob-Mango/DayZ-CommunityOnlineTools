@@ -505,11 +505,11 @@ class JMESPFormTabObjects: JMFormTab
 
 		int rows = Math.Clamp( m_ObjectList.GetItemCount(), OBJECT_LIST_MIN_ROWS, OBJECT_LIST_MAX_ROWS );
 
-		float listHeight = rows * UIActionItemList.ROW_H;
+		float listHeight = rows * JMUILayout.Px( UIActionItemList.ROW_H );
 
 		float tabStripHeight = m_Form.GetPinnedStripHeight( m_Form.GetBottomTabStrip() );
-		float available = m_Form.m_ContentHeight - JMESPForm.TOOLBAR_HEIGHT - tabStripHeight - OBJECT_LIST_CHROME;
-		float floorPx   = OBJECT_LIST_MIN_ROWS * UIActionItemList.ROW_H;
+		float available = m_Form.m_ContentHeight - JMUILayout.Px( JMESPForm.TOOLBAR_HEIGHT ) - tabStripHeight - JMUILayout.Px( OBJECT_LIST_CHROME );
+		float floorPx   = OBJECT_LIST_MIN_ROWS * JMUILayout.Px( UIActionItemList.ROW_H );
 
 		if ( available < floorPx )
 			available = floorPx;

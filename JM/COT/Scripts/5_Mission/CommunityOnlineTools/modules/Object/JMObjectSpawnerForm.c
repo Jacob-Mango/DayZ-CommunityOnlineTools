@@ -154,10 +154,10 @@ class JMObjectSpawnerForm: JMFormBase
 
 	//! Sum of the three above. A function rather than a constant because a static const folded
 	//! from other static consts evaluates to 0 in Enforce - and writing the total out by hand
-	//! left it free to drift from the bands it adds up.
-	static int GetLeftHeaderHeight()
+	//! left it free to drift from the bands it adds up. Returned in screen pixels.
+	static float GetLeftHeaderHeight()
 	{
-		return SEARCH_H + FILTER_H + RECENT_H;
+		return JMUILayout.Px( SEARCH_H + FILTER_H + RECENT_H );
 	}
 
 	//! The module this form drives. Public for the property card.
@@ -193,22 +193,26 @@ class JMObjectSpawnerForm: JMFormBase
 		//! column's scroller ends and its fixed-height spawn footer begins,
 		//! which is the same subtraction from the same h.
 		//!
-		//! h is real content-height layout pixels handed over by JMWindowBase -
+		//! h is real content-height screen pixels handed over by JMWindowBase -
 		//! not a widget's own GetScreenSize, which reads zero before the first
 		//! render and is what made the old flex footer unreliable.
 		//! All four bands, from one place. Only the last of them has anything to
 		//! compute - the three above it are fixed - but they are pinned here too
 		//! so the layout file cannot quietly disagree with this about where the
 		//! list starts. When it did, the chip strip ran on underneath it.
-		PinBand( m_SearchWrapper, 0, SEARCH_H );
-		PinBand( m_FilterWrapper, SEARCH_H, FILTER_H );
-		PinBand( m_RecentWrapper, SEARCH_H + FILTER_H, RECENT_H );
+		float searchH = JMUILayout.Px( SEARCH_H );
+		float filterH = JMUILayout.Px( FILTER_H );
+		float headerH = GetLeftHeaderHeight();
 
-		if ( m_ListWrapper && h > GetLeftHeaderHeight() )
+		PinBand( m_SearchWrapper, 0, searchH );
+		PinBand( m_FilterWrapper, searchH, filterH );
+		PinBand( m_RecentWrapper, searchH + filterH, JMUILayout.Px( RECENT_H ) );
+
+		if ( m_ListWrapper && h > headerH )
 		{
-			float listH = h - GetLeftHeaderHeight();
+			float listH = h - headerH;
 
-			PinBand( m_ListWrapper, GetLeftHeaderHeight(), listH );
+			PinBand( m_ListWrapper, headerH, listH );
 
 			//! The list is told the height rather than measuring it. Same
 			//! number, one source - and a widget cannot measure itself on the
@@ -218,10 +222,11 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		//! The right column: the scroller takes everything above the footer.
-		if ( h > FOOTER_H )
+		float footerH = JMUILayout.Px( FOOTER_H );
+		if ( h > footerH )
 		{
-			PinBand( m_RightBody, 0, h - FOOTER_H );
-			PinBand( m_RightFooter, h - FOOTER_H, FOOTER_H );
+			PinBand( m_RightBody, 0, h - footerH );
+			PinBand( m_RightFooter, h - footerH, footerH );
 		}
 
 		if ( m_RightScroller )

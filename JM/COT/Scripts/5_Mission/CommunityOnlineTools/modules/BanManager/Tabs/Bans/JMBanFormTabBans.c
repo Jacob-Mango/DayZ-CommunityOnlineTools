@@ -126,7 +126,7 @@ class JMBanFormTabBans: JMFormTab
         //! that height rather than measuring it.
         if ( m_List )
         {
-            float listH = h - JMBanForm.TOP_HEIGHT - m_Form.GetPinnedStripHeight( m_Form.GetBottomTabStrip() );
+            float listH = h - JMUILayout.Px( JMBanForm.TOP_HEIGHT ) - m_Form.GetPinnedStripHeight( m_Form.GetBottomTabStrip() );
             if ( listH > 0 )
                 m_List.SetViewportHeight( listH );
         }

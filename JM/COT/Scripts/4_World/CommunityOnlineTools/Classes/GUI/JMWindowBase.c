@@ -410,10 +410,11 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		// Snap flush to screen edges when within threshold
 		// Allow moving window further horizontally and down (but not up) after some brief resistance
-		if ( x < SNAP_THRESHOLD && x > -SNAP_THRESHOLD )                    x = 0;
-		if ( y < SNAP_THRESHOLD )                    y = 0;
-		if ( screenW - ( x + winW ) < SNAP_THRESHOLD && x + winW < screenW + SNAP_THRESHOLD ) x = screenW - winW;
-		if ( screenH - ( y + winH ) < SNAP_THRESHOLD && y + winH < screenH + SNAP_THRESHOLD ) y = screenH - winH;
+		float snap = JMUILayout.Px( SNAP_THRESHOLD );
+		if ( x < snap && x > -snap )                    x = 0;
+		if ( y < snap )                    y = 0;
+		if ( screenW - ( x + winW ) < snap && x + winW < screenW + snap ) x = screenW - winW;
+		if ( screenH - ( y + winH ) < snap && y + winH < screenH + snap ) y = screenH - winH;
 
 		float buttonAreaW;
 		float buttonAreaH;
@@ -438,7 +439,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		// Hard clamp: keep at least the title bar on screen
 		// Allow to move most of the window outside the viewport horizontally,
 		// but make sure at least title + buttons are visible so you can still grab the window
-		x = Math.Clamp( x, 0 - winW + buttonAreaW + 25, Math.Max( 0, screenW - sideBarW - 25 ) );
+		float grabMargin = JMUILayout.Px( 25 );
+		x = Math.Clamp( x, 0 - winW + buttonAreaW + grabMargin, Math.Max( 0, screenW - sideBarW - grabMargin ) );
 		y = Math.Clamp( y, 0, Math.Max( 0, screenH - m_TitleBarHeight ) );
 
 		layoutRoot.SetPos( x, y, true );
@@ -614,9 +616,17 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		}
 		else
 		{
-			m_TitleBarHeight = 25;
+			m_TitleBarHeight = JMUILayout.Px( 25 );
 		}
 
+		PositionBelowTitleBar();
+	}
+
+	//! Everything that hangs off the bottom of the title bar. Split out of Init()
+	//! because the title bar's height is a screen-pixel value, so a resolution
+	//! change moves all of it.
+	protected void PositionBelowTitleBar()
+	{
 		// Position content and confirmation panel below the title bar
 		if ( m_ContentWidget )
 			m_ContentWidget.SetPos( 0, m_TitleBarHeight, true );
@@ -625,12 +635,53 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			m_ConfirmationPanel.SetPos( 0, m_TitleBarHeight, true );
 
 		// Offset top edge/corner handles and their highlights below the title bar
-		if ( m_ResizeDragUp )       m_ResizeDragUp.SetPos( 10, m_TitleBarHeight, true );
+		if ( m_ResizeDragUp )       m_ResizeDragUp.SetPos( JMUILayout.Px( 10 ), m_TitleBarHeight, true );
 		if ( m_ResizeDragTopLeft )  m_ResizeDragTopLeft.SetPos( 0, m_TitleBarHeight, true );
 		if ( m_ResizeDragTopRight ) m_ResizeDragTopRight.SetPos( 0, m_TitleBarHeight, true );
 		if ( m_HighlightUp )        m_HighlightUp.SetPos( 0, m_TitleBarHeight, true );
 		if ( m_HighlightTopLeft )   m_HighlightTopLeft.SetPos( 0, m_TitleBarHeight, true );
 		if ( m_HighlightTopRight )  m_HighlightTopRight.SetPos( 0, m_TitleBarHeight, true );
+	}
+
+	//! The game's resolution changed while this window was up. The window's rect and
+	//! title bar height are screen pixels that this class set itself, so they are
+	//! stale; `ratio` is newScale / oldScale. Re-derives them, then runs the same
+	//! path a restored window takes so the form lays out for the new size.
+	void OnResolutionChanged( float ratio )
+	{
+		if ( !layoutRoot || ratio <= 0 )
+			return;
+
+		m_TitleBarHeight = m_TitleBarHeight * ratio;
+		PositionBelowTitleBar();
+
+		float x, y;
+		layoutRoot.GetPos( x, y );
+
+		float w, h;
+		GetExpandedSize( w, h );
+		w = w * ratio;
+		h = h * ratio;
+
+		//! A minimize/restore in flight lerps between two heights captured at the
+		//! old scale. Both are reset when the next animation starts, so scaling
+		//! them while idle is harmless.
+		m_AnimateFromH = m_AnimateFromH * ratio;
+		m_AnimateToH   = m_AnimateToH * ratio;
+
+		if ( m_IsMinimized )
+		{
+			layoutRoot.SetSize( w, m_TitleBarHeight );
+
+			m_RestoreWidth  = w;
+			m_RestoreHeight = h;
+		}
+		else
+		{
+			ApplyRestoredSize( w, h );
+		}
+
+		SetPosition( x * ratio, y * ratio );
 	}
 
 	//! The confirmation scrim is sized in pixels by the open/resize animations,
@@ -1182,6 +1233,18 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	//! only Resize()/SetSize() ever pushed the size further down.
 	protected void ApplyRestoredSize( float w, float h )
 	{
+		//! The saved rect may come from a bigger screen (the layout file is
+		//! shared across resolutions), so it is capped to what this one can
+		//! show, the same way SetModule() caps the initial size.
+		float screenW, screenH;
+		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
+
+		if ( w > screenW * RESIZE_MAX_SCREEN_FRACTION )
+			w = screenW * RESIZE_MAX_SCREEN_FRACTION;
+
+		if ( h > screenH * RESIZE_MAX_SCREEN_FRACTION )
+			h = screenH * RESIZE_MAX_SCREEN_FRACTION;
+
 		layoutRoot.SetSize( w, h );
 
 		float contentH = h - m_TitleBarHeight;
@@ -1211,7 +1274,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.GetSize( winW, winH );
 
 		int openCount = GetCOTWindowManager().Count() - 1;
-		float cascade = Math.Clamp( openCount * JMUILayout.WINDOW_CASCADE_OFFSET, 0, JMUILayout.WINDOW_CASCADE_MAX );
+		float cascade = Math.Clamp( openCount * JMUILayout.Px( JMUILayout.WINDOW_CASCADE_OFFSET ), 0, JMUILayout.Px( JMUILayout.WINDOW_CASCADE_MAX ) );
 
 		SetPosition( ( screenW - winW ) * 0.5 + cascade, ( screenH - winH ) * 0.5 + cascade );
 	}
@@ -1268,7 +1331,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		float screenW, screenH;
 		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
 
-		float minHeight = m_TitleBarHeight + RESIZE_MIN_CONTENT_HEIGHT;
+		float minHeight = m_TitleBarHeight + JMUILayout.Px( RESIZE_MIN_CONTENT_HEIGHT );
 		float maxWidth  = screenW * RESIZE_MAX_SCREEN_FRACTION;
 		float maxHeight = screenH * RESIZE_MAX_SCREEN_FRACTION;
 
@@ -1287,30 +1350,30 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 				newHeight = Math.Clamp( m_StartResizeSizeH + deltaY, minHeight, maxHeight );
 				break;
 			case EResizeDirection.LEFT:
-				newWidth = Math.Clamp( m_StartResizeSizeW - deltaX, RESIZE_MIN_WIDTH, maxWidth );
+				newWidth = Math.Clamp( m_StartResizeSizeW - deltaX, JMUILayout.Px( RESIZE_MIN_WIDTH ), maxWidth );
 				newPosX  = m_StartWindowPosX + ( m_StartResizeSizeW - newWidth );
 				break;
 			case EResizeDirection.RIGHT:
-				newWidth = Math.Clamp( m_StartResizeSizeW + deltaX, RESIZE_MIN_WIDTH, maxWidth );
+				newWidth = Math.Clamp( m_StartResizeSizeW + deltaX, JMUILayout.Px( RESIZE_MIN_WIDTH ), maxWidth );
 				break;
 			case EResizeDirection.TOP_LEFT:
-				newWidth  = Math.Clamp( m_StartResizeSizeW - deltaX, RESIZE_MIN_WIDTH, maxWidth );
+				newWidth  = Math.Clamp( m_StartResizeSizeW - deltaX, JMUILayout.Px( RESIZE_MIN_WIDTH ), maxWidth );
 				newPosX   = m_StartWindowPosX + ( m_StartResizeSizeW - newWidth );
 				newHeight = Math.Clamp( m_StartResizeSizeH - deltaY, minHeight, maxHeight );
 				newPosY   = m_StartWindowPosY + ( m_StartResizeSizeH - newHeight );
 				break;
 			case EResizeDirection.TOP_RIGHT:
-				newWidth  = Math.Clamp( m_StartResizeSizeW + deltaX, RESIZE_MIN_WIDTH, maxWidth );
+				newWidth  = Math.Clamp( m_StartResizeSizeW + deltaX, JMUILayout.Px( RESIZE_MIN_WIDTH ), maxWidth );
 				newHeight = Math.Clamp( m_StartResizeSizeH - deltaY, minHeight, maxHeight );
 				newPosY   = m_StartWindowPosY + ( m_StartResizeSizeH - newHeight );
 				break;
 			case EResizeDirection.BOT_LEFT:
-				newWidth  = Math.Clamp( m_StartResizeSizeW - deltaX, RESIZE_MIN_WIDTH, maxWidth );
+				newWidth  = Math.Clamp( m_StartResizeSizeW - deltaX, JMUILayout.Px( RESIZE_MIN_WIDTH ), maxWidth );
 				newPosX   = m_StartWindowPosX + ( m_StartResizeSizeW - newWidth );
 				newHeight = Math.Clamp( m_StartResizeSizeH + deltaY, minHeight, maxHeight );
 				break;
 			case EResizeDirection.BOT_RIGHT:
-				newWidth  = Math.Clamp( m_StartResizeSizeW + deltaX, RESIZE_MIN_WIDTH, maxWidth );
+				newWidth  = Math.Clamp( m_StartResizeSizeW + deltaX, JMUILayout.Px( RESIZE_MIN_WIDTH ), maxWidth );
 				newHeight = Math.Clamp( m_StartResizeSizeH + deltaY, minHeight, maxHeight );
 				break;
 		}

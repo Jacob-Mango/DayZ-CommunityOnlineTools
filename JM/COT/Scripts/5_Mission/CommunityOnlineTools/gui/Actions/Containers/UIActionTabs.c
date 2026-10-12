@@ -264,7 +264,7 @@ class UIActionTabs: UIActionBase
 		if ( rows < 1 )
 			rows = 1;
 
-		return rows * TAB_ROW_HEIGHT;
+		return rows * JMUILayout.Px( TAB_ROW_HEIGHT );
 	}
 
 	//! Lay the tabs out for a strip `width` pixels wide: as many equal columns as the widest tab
@@ -285,7 +285,7 @@ class UIActionTabs: UIActionBase
 		{
 			int roomyCols;
 			int roomyRows;
-			ChooseGrid( width - UNWRAP_MARGIN, roomyCols, roomyRows );
+			ChooseGrid( width - JMUILayout.Px( UNWRAP_MARGIN ), roomyCols, roomyRows );
 
 			if ( roomyRows >= m_Rows )
 			{
@@ -301,7 +301,7 @@ class UIActionTabs: UIActionBase
 			RebuildBar();
 		}
 
-		return GetRequiredHeight() - TAB_ROW_HEIGHT;
+		return GetRequiredHeight() - JMUILayout.Px( TAB_ROW_HEIGHT );
 	}
 
 	override float COT_FitTabs( float width )
@@ -364,11 +364,11 @@ class UIActionTabs: UIActionBase
 		}
 
 		if ( textWidth <= 0 )
-			textWidth = entry.Caption.Length() * 8;
+			textWidth = entry.Caption.Length() * JMUILayout.Px( 8 );
 
-		float needed = textWidth + TAB_LABEL_PAD;
+		float needed = textWidth + JMUILayout.Px( TAB_LABEL_PAD );
 		if ( entry.IconPath != "" )
-			needed += ICON_RIGHT_EDGE + ICON_TEXT_GAP - 10;
+			needed += JMUILayout.Px( ICON_RIGHT_EDGE + ICON_TEXT_GAP - 10 );
 
 		return needed;
 	}
@@ -775,7 +775,7 @@ class UIActionTabs: UIActionBase
 				continue;
 
 			rowBar.SetFlags( WidgetFlags.VEXACTPOS, true );
-			rowBar.SetPos( 0, row * TAB_ROW_HEIGHT );
+			rowBar.SetPos( 0, row * JMUILayout.Px( TAB_ROW_HEIGHT ) );
 			rowBar.SetHandler( this );
 
 			m_ExtraBars.Insert( rowBar );
@@ -874,7 +874,7 @@ class UIActionTabs: UIActionBase
 		{
 			//! Glyphs move right by half the icon strip so the label stays centred beside it.
 			if ( entry.IconPath != "" )
-				entry.LabelWidget.SetTextOffset( LABEL_OFFSET_ICON, 0 );
+				entry.LabelWidget.SetTextOffset( JMUILayout.Px( LABEL_OFFSET_ICON ), 0 );
 			else
 				entry.LabelWidget.SetTextOffset( 0, 0 );
 		}

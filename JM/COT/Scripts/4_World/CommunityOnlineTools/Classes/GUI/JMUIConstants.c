@@ -49,6 +49,88 @@ class JMUIAnimations
 
 class JMUILayout
 {
+	//! Screen height the layout files' exact pixel values are authored against.
+	static const float REFERENCE_HEIGHT = 1080;
+
+	//! Screen pixels per authored pixel. The engine scales the exact values in a
+	//! layout file by this when it loads one, but SetSize / SetPos / GetSize /
+	//! GetPos on an exact-flag axis, GetScreenSize and the mouse all speak raw
+	//! screen pixels. So every pixel number written in SCRIPT (a button side, a
+	//! row height, a gap) is in authored pixels and has to go through Px() before
+	//! it is handed to a widget, or it comes out half size at 4K. Vanilla does the
+	//! same thing, see InventoryMenu.GetHeightMultiplied.
+	static float Scale()
+	{
+		float screenW, screenH;
+		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
+
+		if ( screenH < 1 )
+			return 1.0;
+
+		return screenH / REFERENCE_HEIGHT;
+	}
+
+	//! Authored pixels -> screen pixels.
+	static float Px( float authored )
+	{
+		return authored * Scale();
+	}
+
+	//! Screen pixels -> authored pixels, for anything that is persisted.
+	static float FromPx( float screenPx )
+	{
+		return screenPx / Scale();
+	}
+
+	//! The screen size last seen by ConsumeResolutionChange.
+	protected static float s_KnownScreenW;
+	protected static float s_KnownScreenH;
+
+	//! True once per change of the game's resolution (or window size), however it
+	//! came about - the options menu, a window drag, alt-enter. Scale() already
+	//! reads the live screen size on every call, so anything that computes a
+	//! pixel value fresh is always right; this is for the things that CACHE one
+	//! (a window rect, the sidebar width) and have to be told to redo it.
+	//! `ratio` is newScale / oldScale: multiply a cached screen-pixel value by it.
+	//! Poll it from a per-frame update. The first call only records the size.
+	//! The state is global and a change is reported once, so there must be a
+	//! single poller: JMCOTSideBar, which forwards it to the window manager. A
+	//! second poller would silently take the change from the first.
+	static bool ConsumeResolutionChange( out float ratio )
+	{
+		float screenW, screenH;
+		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
+
+		ratio = 1.0;
+
+		if ( screenH < 1 )
+			return false;
+
+		if ( s_KnownScreenH < 1 )
+		{
+			s_KnownScreenW = screenW;
+			s_KnownScreenH = screenH;
+			return false;
+		}
+
+		if ( screenW == s_KnownScreenW && screenH == s_KnownScreenH )
+			return false;
+
+		ratio = screenH / s_KnownScreenH;
+
+		s_KnownScreenW = screenW;
+		s_KnownScreenH = screenH;
+
+		return true;
+	}
+
+	//! Take the current screen size as the known one, dropping any change not yet
+	//! consumed. For the poller after it has (re)built itself at this resolution.
+	static void ResetResolutionWatch()
+	{
+		g_Game.GetWorkspace().GetScreenSize( s_KnownScreenW, s_KnownScreenH );
+	}
+
 	//! Pixels a newly opened window is offset from the previous one (cascade)
 	static const float WINDOW_CASCADE_OFFSET = 20;
 

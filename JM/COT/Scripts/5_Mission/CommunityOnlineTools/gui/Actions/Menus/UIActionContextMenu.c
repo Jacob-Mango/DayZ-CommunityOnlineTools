@@ -90,7 +90,11 @@ class UIActionContextMenu: UIActionBase
 	//! panel cannot be placed until its height is known, which is a frame later.
 	protected float m_PendingX;
 	protected float m_PendingY;
+	//! Width the panel is drawn at, in screen pixels. Derived every placement.
 	protected float m_MenuWidth;
+	//! Width a caller pinned with SetMenuWidth(), in authored pixels. Kept
+	//! unscaled so a resolution change while the menu exists is picked up.
+	protected float m_PinnedWidth;
 
 	//! Width is measured from the widest label unless a caller pinned it with
 	//! SetMenuWidth(). A fixed 160 clipped "Show unconscious" halfway through
@@ -338,9 +342,9 @@ class UIActionContextMenu: UIActionBase
 		//! The label sits where it does because of the glyph, so a row that
 		//! gains or loses one has to move it.
 		if ( icon == "" )
-			rowText.SetPos( TEXT_LEFT_PLAIN, 0 );
+			rowText.SetPos( JMUILayout.Px( TEXT_LEFT_PLAIN ), 0 );
 		else
-			rowText.SetPos( TEXT_LEFT_ICON, 0 );
+			rowText.SetPos( JMUILayout.Px( TEXT_LEFT_ICON ), 0 );
 	}
 
 	//! Recolour one entry in place. A toggle menu repaints itself on every click
@@ -360,10 +364,12 @@ class UIActionContextMenu: UIActionBase
 
 	//! Pin the panel width in pixels. Turns the automatic measurement off - a
 	//! caller that names a width means that width, not "at least that width".
+	//! `pixels` is in authored pixels (see JMUILayout.Px).
 	void SetMenuWidth( float pixels )
 	{
-		m_MenuWidth = pixels;
-		m_AutoWidth = false;
+		m_PinnedWidth = pixels;
+		m_MenuWidth   = JMUILayout.Px( pixels );
+		m_AutoWidth   = false;
 	}
 
 	//! Name the control that opens this menu so its own press is left alone -
@@ -412,7 +418,7 @@ class UIActionContextMenu: UIActionBase
 		m_HoveredRow    = -1;
 		m_Open          = false;
 		m_FullHeight    = 0;
-		m_MenuWidth     = DEFAULT_WIDTH;
+		m_MenuWidth     = JMUILayout.Px( DEFAULT_WIDTH );
 		m_AutoWidth     = true;
 		m_CloseOnClick  = true;
 		m_Columns       = 1;
@@ -645,9 +651,9 @@ class UIActionContextMenu: UIActionBase
 			{
 				rowText.SetText( entry.Text );
 				if ( entry.IconPath == "" )
-					rowText.SetPos( TEXT_LEFT_PLAIN, 0 );
+					rowText.SetPos( JMUILayout.Px( TEXT_LEFT_PLAIN ), 0 );
 				else
-					rowText.SetPos( TEXT_LEFT_ICON, 0 );
+					rowText.SetPos( JMUILayout.Px( TEXT_LEFT_ICON ), 0 );
 			}
 
 			// The row name carries its index, same as the dropdown rows - it is
@@ -834,13 +840,13 @@ class UIActionContextMenu: UIActionBase
 			{
 				rowText.GetTextSize( textW, textH );
 
-				left = TEXT_LEFT_PLAIN;
+				left = JMUILayout.Px( TEXT_LEFT_PLAIN );
 				if ( i < m_Entries.Count() && m_Entries[i].IconPath != "" )
-					left = TEXT_LEFT_ICON;
+					left = JMUILayout.Px( TEXT_LEFT_ICON );
 
-				float pad = TEXT_PAD_RIGHT;
+				float pad = JMUILayout.Px( TEXT_PAD_RIGHT );
 				if ( i < m_Entries.Count() && m_Entries[i].Submenu )
-					pad = TEXT_PAD_RIGHT + SUBMENU_PAD_RIGHT;
+					pad = JMUILayout.Px( TEXT_PAD_RIGHT + SUBMENU_PAD_RIGHT );
 
 				if ( left + textW + pad > widest )
 					widest = left + textW + pad;
@@ -855,8 +861,9 @@ class UIActionContextMenu: UIActionBase
 		if ( widest <= 0 )
 			return;
 
-		if ( widest < DEFAULT_WIDTH )
-			widest = DEFAULT_WIDTH;
+		float minWidth = JMUILayout.Px( DEFAULT_WIDTH );
+		if ( widest < minWidth )
+			widest = minWidth;
 
 		// `widest` is one COLUMN. The panel has to hold all of them.
 		m_MenuWidth = widest * m_Columns;
@@ -869,6 +876,8 @@ class UIActionContextMenu: UIActionBase
 
 		if ( m_AutoWidth )
 			MeasureWidth();
+		else
+			m_MenuWidth = JMUILayout.Px( m_PinnedWidth );
 
 		float ax, ay, aw, ah;
 		m_Anchor.GetScreenPos( ax, ay );
@@ -912,7 +921,7 @@ class UIActionContextMenu: UIActionBase
 		// running the bottom rows off the edge with no way to reach them,
 		// which is what a plain flip alone left it doing.
 		float drawHeight = m_FullHeight;
-		float available = screenH - ay - py - 8;
+		float available = screenH - ay - py - JMUILayout.Px( 8 );
 		if ( available > 0 && drawHeight > available )
 			drawHeight = available;
 

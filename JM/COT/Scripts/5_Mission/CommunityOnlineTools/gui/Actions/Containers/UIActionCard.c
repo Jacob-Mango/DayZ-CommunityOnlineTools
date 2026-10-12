@@ -155,7 +155,7 @@ class UIActionCard: UIActionBase
 		float rw, rh;
 		layoutRoot.GetSize( rw, rh );
 		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
-		layoutRoot.SetSize( rw, SEED_HEIGHT );
+		layoutRoot.SetSize( rw, JMUILayout.Px( SEED_HEIGHT ) );
 	}
 
 	// ---------------------------------------------------------------------------
@@ -270,9 +270,9 @@ class UIActionCard: UIActionBase
 		if ( m_Content )
 		{
 			if ( m_HasHeader )
-				m_Content.SetPos( 0, HEADER_HEIGHT + CONTENT_TOP_PADDING, true );
+				m_Content.SetPos( 0, JMUILayout.Px( HEADER_HEIGHT + CONTENT_TOP_PADDING ), true );
 			else
-				m_Content.SetPos( 0, CONTENT_TOP_PADDING, true );
+				m_Content.SetPos( 0, JMUILayout.Px( CONTENT_TOP_PADDING ), true );
 		}
 
 		if ( m_HasHeader && m_Title )
@@ -299,9 +299,9 @@ class UIActionCard: UIActionBase
 		if ( ch <= 0 )
 			return;
 
-		float height = ch + CONTENT_TOP_PADDING + BOTTOM_PADDING;
+		float height = ch + JMUILayout.Px( CONTENT_TOP_PADDING + BOTTOM_PADDING );
 		if ( m_HasHeader )
-			height = height + HEADER_HEIGHT;
+			height = height + JMUILayout.Px( HEADER_HEIGHT );
 
 		// Float compare against the last value we set, not against the root's
 		// current size: reading the root back gives layout units, and these are
@@ -309,7 +309,7 @@ class UIActionCard: UIActionBase
 		if ( Math.AbsFloat( height - m_AppliedHeight ) < 1 )
 			return;
 
-		height = Math.Clamp( height, 0, MAX_HEIGHT );
+		height = Math.Clamp( height, 0, JMUILayout.Px( MAX_HEIGHT ) );
 
 		m_AppliedHeight = height;
 

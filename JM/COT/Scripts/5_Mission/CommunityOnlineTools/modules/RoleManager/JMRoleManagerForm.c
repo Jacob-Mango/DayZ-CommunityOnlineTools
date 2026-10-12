@@ -33,6 +33,10 @@ class JMRoleManagerForm : JMFormBase
 	//! Height of the roster toolbar block pinned above the list.
 	static const int LEFT_TOOLBAR_HEIGHT  = 75;
 
+	//! Height of the players-mode toolbar pinned above the list, in authored
+	//! pixels. Roles mode has no toolbar there.
+	static const int PLAYER_TOOLBAR_HEIGHT = 40;
+
 	// -------------------------------------------------------------------------
 	//  Widgets
 	// -------------------------------------------------------------------------
@@ -179,14 +183,19 @@ class JMRoleManagerForm : JMFormBase
 			layoutRoot.GetScreenSize( w, h );
 		}
 
-		int toolbarH = 0;
-		if ( m_PlayerMode )
-			toolbarH = 40;
-
-		PinStripGeometry( m_LeftToolbar, m_LeftList, h - TAB_STRIP_HEIGHT, toolbarH );
+		PinStripGeometry( m_LeftToolbar, m_LeftList, h - JMUILayout.Px( TAB_STRIP_HEIGHT ), GetLeftToolbarHeight() );
 
 		if ( m_LeftScroller )
 			m_LeftScroller.UpdateScroller();
+	}
+
+	//! The toolbar pinned above the left list, in authored pixels.
+	protected int GetLeftToolbarHeight()
+	{
+		if ( m_PlayerMode )
+			return PLAYER_TOOLBAR_HEIGHT;
+
+		return 0;
 	}
 
 	void UpdateUI()
@@ -209,11 +218,7 @@ class JMRoleManagerForm : JMFormBase
 		PinRightPanelGeometry( h );
 		PinStripGeometry( m_LeftTabStrip, m_LeftBody, h, TAB_STRIP_HEIGHT );
 
-		int toolbarH = 0;
-		if ( m_PlayerMode )
-			toolbarH = 40;
-
-		PinStripGeometry( m_LeftToolbar, m_LeftList, h - TAB_STRIP_HEIGHT, toolbarH );
+		PinStripGeometry( m_LeftToolbar, m_LeftList, h - JMUILayout.Px( TAB_STRIP_HEIGHT ), GetLeftToolbarHeight() );
 
 		if ( m_LeftScroller  ) m_LeftScroller.UpdateScroller();
 		if ( m_RightScroller ) m_RightScroller.UpdateScroller();

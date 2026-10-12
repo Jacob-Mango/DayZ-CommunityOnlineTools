@@ -50,6 +50,8 @@ class UIActionDropdown: UIActionBase
 
 	//! Gap kept between an open list and the edges of its anchor.
 	static const float LIST_EDGE_MARGIN = 4;
+	//! Tallest an open list gets before it scrolls, in authored pixels.
+	static const float LIST_MAX_HEIGHT = 360;
 	static const int COLOR_ROW_NORMAL = JMTheme.SURFACE_OVERLAY;
 	static const int COLOR_ROW_HOVER  = JMTheme.ACCENT_WASH;
 	static const int COLOR_ROW_SELECT = JMTheme.SELECTED_FILL;
@@ -364,12 +366,12 @@ class UIActionDropdown: UIActionBase
 				m_SelectedIcon.SetImage( 0 );
 				m_SelectedIcon.SetColor( entry.IconColor );
 				m_SelectedIcon.Show( true );
-				if ( m_SelectedText ) m_SelectedText.SetTextOffset( TEXT_OFFSET_ICON, 0 );
+				if ( m_SelectedText ) m_SelectedText.SetTextOffset( JMUILayout.Px( TEXT_OFFSET_ICON ), 0 );
 			}
 			else
 			{
 				m_SelectedIcon.Show( false );
-				if ( m_SelectedText ) m_SelectedText.SetTextOffset( TEXT_OFFSET_PLAIN, 0 );
+				if ( m_SelectedText ) m_SelectedText.SetTextOffset( JMUILayout.Px( TEXT_OFFSET_PLAIN ), 0 );
 			}
 		}
 	}
@@ -421,9 +423,9 @@ class UIActionDropdown: UIActionBase
 			{
 				rowText.SetText( entry.Text );
 				if ( entry.IconPath == "" )
-					rowText.SetTextOffset( TEXT_OFFSET_PLAIN, 0 );
+					rowText.SetTextOffset( JMUILayout.Px( TEXT_OFFSET_PLAIN ), 0 );
 				else
-					rowText.SetTextOffset( TEXT_OFFSET_ICON, 0 );
+					rowText.SetTextOffset( JMUILayout.Px( TEXT_OFFSET_ICON ), 0 );
 			}
 
 			// Store index in the row widget name for retrieval on click
@@ -621,10 +623,11 @@ class UIActionDropdown: UIActionBase
 				// A list can be taller than the window it opens in - the object
 				// spawner's liquid list runs to sixteen entries - and nothing
 				// renders outside the anchor, so cap it there first.
-				float maxH = anchorH - LIST_EDGE_MARGIN * 2;
+				float edge = JMUILayout.Px( LIST_EDGE_MARGIN );
+				float maxH = anchorH - edge * 2;
 				float fullH = m_FullHeight;
 
-				float listCapH = 360.0;
+				float listCapH = JMUILayout.Px( LIST_MAX_HEIGHT );
 				if ( maxH > 0 && maxH < listCapH )
 					listCapH = maxH;
 
@@ -651,13 +654,13 @@ class UIActionDropdown: UIActionBase
 				// there is room above; a long list opening near the bottom used
 				// to flip straight past the top edge and lose its first rows to
 				// a region nothing draws in.
-				float maxY = anchorH - animH - LIST_EDGE_MARGIN;
+				float maxY = anchorH - animH - edge;
 
 				if ( posY > maxY )
 					posY = maxY;
 
-				if ( posY < LIST_EDGE_MARGIN )
-					posY = LIST_EDGE_MARGIN;
+				if ( posY < edge )
+					posY = edge;
 
 				m_ListPanel.SetPos( fx - ax, posY );
 			}

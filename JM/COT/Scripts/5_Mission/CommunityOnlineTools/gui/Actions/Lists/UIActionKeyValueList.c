@@ -121,7 +121,7 @@ class UIActionKeyValueList: UIActionBase
 		// the BOTTOM of the list, so the last row or two of every list were
 		// silently clipped. Ask the widget that actually did the layout.
 		float rowsW, rowsH;
-		float height = m_Keys.Count() * ROW_HEIGHT;
+		float height = m_Keys.Count() * JMUILayout.Px( ROW_HEIGHT );
 
 		if ( m_Rows )
 		{

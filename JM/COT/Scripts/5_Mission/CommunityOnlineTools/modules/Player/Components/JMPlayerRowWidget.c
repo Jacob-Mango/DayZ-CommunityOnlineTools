@@ -202,7 +202,7 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 		if ( !layoutRoot )
 			return;
 
-		layoutRoot.SetSize( 1.0, 28.0 * t );
+		layoutRoot.SetSize( 1.0, JMUILayout.Px( 28.0 ) * t );
 		layoutRoot.SetAlpha( t );
 	}
 

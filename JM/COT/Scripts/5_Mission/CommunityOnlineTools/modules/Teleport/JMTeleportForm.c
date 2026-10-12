@@ -278,7 +278,7 @@ class JMTeleportForm: JMFormBase
 	}
 
 	//! The list reaches as far down the left column as the window allows, which
-	//! is the only measurement on this form. h is real content-height layout
+	//! is the only measurement on this form. h is real content-height screen
 	//! pixels handed over by JMWindowBase, not a widget's own GetScreenSize -
 	//! that reads zero before the first render.
 	override void OnResize( float w, float h )
@@ -288,13 +288,15 @@ class JMTeleportForm: JMFormBase
 		m_FormW = w;
 		m_FormH = h;
 
-		PinBand( m_SearchWrapper, 0, SEARCH_H );
+		float searchH = JMUILayout.Px( SEARCH_H );
 
-		if ( m_ListWrapper && h > SEARCH_H )
+		PinBand( m_SearchWrapper, 0, searchH );
+
+		if ( m_ListWrapper && h > searchH )
 		{
-			float listH = h - SEARCH_H;
+			float listH = h - searchH;
 
-			PinBand( m_ListWrapper, SEARCH_H, listH );
+			PinBand( m_ListWrapper, searchH, listH );
 
 			//! The list is told the height rather than measuring it. Same
 			//! number, one source - and a widget cannot measure itself on the
@@ -400,8 +402,8 @@ class JMTeleportForm: JMFormBase
 
 		float mapH = m_FormH - coordsH;
 
-		if ( mapH < MAP_MIN_H )
-			mapH = MAP_MIN_H;
+		if ( mapH < JMUILayout.Px( MAP_MIN_H ) )
+			mapH = JMUILayout.Px( MAP_MIN_H );
 
 		PinBand( m_MapBand, 0, mapH );
 
@@ -412,7 +414,7 @@ class JMTeleportForm: JMFormBase
 		}
 
 		if ( m_Map )
-			m_Map.SetHeight( mapH - CARD_CHROME );
+			m_Map.SetHeight( mapH - JMUILayout.Px( CARD_CHROME ) );
 	}
 
 	//! Read the height the coordinates card settled on.

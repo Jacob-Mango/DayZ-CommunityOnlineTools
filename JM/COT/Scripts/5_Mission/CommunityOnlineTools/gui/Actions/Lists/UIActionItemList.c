@@ -23,7 +23,7 @@
 //
 //  Usage:
 //      m_List = UIActionManager.CreateItemList( parent, this, "OnClick_Row" );
-//      m_List.SetViewportHeight( listHeightInLayoutPixels );
+//      m_List.SetViewportHeight( listHeightInScreenPixels );
 //      m_List.SetItems( names, classnames );
 //
 //      void OnClick_Row( UIEvent eid, UIActionBase action )
@@ -57,12 +57,12 @@ class UIActionItemList: UIActionBase
 	protected int m_Selected;
 	protected int m_Hovered;
 
-	//! Viewport height in LAYOUT pixels, as handed over by the owner. Layout
-	//! pixels are the space SetPos and SetSize work in; they are not the screen
-	//! pixels GetScreenSize and the mouse report, and mixing the two is the
-	//! classic DPI trap. Everything positional here stays in layout pixels; the
-	//! only place screen pixels appear is the scrollbar drag, which measures
-	//! its own track at drag time so both sides of that sum are screen space.
+	//! Viewport height in SCREEN pixels, as handed over by the owner (a measured
+	//! height, e.g. the `h` given to OnResize). SetPos / SetSize on an exact axis,
+	//! GetScreenSize and the mouse all work in screen pixels; the authored pixel
+	//! constants here (ROW_H) go through JMUILayout.Px before they meet it, and
+	//! mixing the two is the classic DPI trap. The scrollbar drag measures its
+	//! own track at drag time, so both sides of that sum are screen space.
 	protected float m_ViewportH;
 	protected bool m_Dragging;
 	protected int  m_DragMouseY;
@@ -206,7 +206,7 @@ class UIActionItemList: UIActionBase
 	//  Geometry
 	// -------------------------------------------------------------------------
 
-	//! Tell the list how tall it is, in layout pixels. Call it from wherever the
+	//! Tell the list how tall it is, in screen pixels. Call it from wherever the
 	//! container's height is decided - the same number, not a re-measurement.
 	//!
 	//! This also APPLIES that height to the control. The layout authors the
@@ -226,7 +226,14 @@ class UIActionItemList: UIActionBase
 
 		m_ViewportH = pixels;
 
-		SetFixedHeight( pixels );
+		//! Not SetFixedHeight: `pixels` is a measured screen-pixel height, which
+		//! must not be scaled again.
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
+		layoutRoot.SetSize( w, pixels );
+		layoutRoot.Update();
 
 		SyncRowPool();
 		Refresh();
@@ -283,7 +290,7 @@ class UIActionItemList: UIActionBase
 		if ( m_ViewportH <= 0 )
 			return 0;
 
-		int rows = ( int ) Math.Ceil( m_ViewportH / ROW_H );
+		int rows = ( int ) Math.Ceil( m_ViewportH / JMUILayout.Px( ROW_H ) );
 
 		if ( rows < 1 )
 			return 1;
@@ -338,7 +345,7 @@ class UIActionItemList: UIActionBase
 		{
 			m_Rows[i].SetFlags( WidgetFlags.VEXACTPOS | WidgetFlags.VEXACTSIZE | WidgetFlags.HEXACTPOS, true );
 			m_Rows[i].ClearFlags( WidgetFlags.HEXACTSIZE );
-			m_Rows[i].SetPos( 0, i * ROW_H );
+			m_Rows[i].SetPos( 0, i * JMUILayout.Px( ROW_H ) );
 		}
 
 		ApplyRowWidth();
@@ -377,7 +384,7 @@ class UIActionItemList: UIActionBase
 
 		for ( int i = 0; i < m_Rows.Count(); i++ )
 		{
-			m_Rows[i].SetSize( rowW, ROW_H );
+			m_Rows[i].SetSize( rowW, JMUILayout.Px( ROW_H ) );
 			m_Rows[i].Update();
 		}
 	}

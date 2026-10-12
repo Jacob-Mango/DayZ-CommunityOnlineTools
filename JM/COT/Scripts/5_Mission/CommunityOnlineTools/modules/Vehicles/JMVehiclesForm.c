@@ -340,8 +340,8 @@ class JMVehiclesForm: JMFormBase
 
 			//! Trim the same gap off the bottom so a partly scrolled row is
 			//! clipped inside the window instead of against its frame.
-			if ( h > LEFT_GUTTER_PX )
-				h = h - LEFT_GUTTER_PX;
+			if ( h > JMUILayout.Px( LEFT_GUTTER_PX ) )
+				h = h - JMUILayout.Px( LEFT_GUTTER_PX );
 
 			m_LeftList.SetSize( 1.0 - ( LEFT_GUTTER * 2 ), h );
 		}

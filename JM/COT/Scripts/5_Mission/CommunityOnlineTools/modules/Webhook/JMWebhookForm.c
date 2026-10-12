@@ -117,13 +117,15 @@ class JMWebhookForm: JMFormBase
 		//! The roster's two bands are pinned here: the header is fixed, the
 		//! list takes the rest of the column and is told that height rather
 		//! than measuring it.
-		PinBand( m_HeaderWrapper, 0, HEADER_HEIGHT );
+		float headerH = JMUILayout.Px( HEADER_HEIGHT );
 
-		if ( m_ListWrapper && h > HEADER_HEIGHT )
+		PinBand( m_HeaderWrapper, 0, headerH );
+
+		if ( m_ListWrapper && h > headerH )
 		{
-			float listH = h - HEADER_HEIGHT;
+			float listH = h - headerH;
 
-			PinBand( m_ListWrapper, HEADER_HEIGHT, listH );
+			PinBand( m_ListWrapper, headerH, listH );
 
 			if ( m_List )
 				m_List.SetViewportHeight( listH );

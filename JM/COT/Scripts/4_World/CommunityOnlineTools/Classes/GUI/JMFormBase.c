@@ -1053,8 +1053,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! Used for tab strips and for filter/toolbar headers alike, which is why it
 	//! takes its widgets as parameters rather than reading the members.
 	//!
-	//! `contentHeight` is the form content height in LAYOUT PIXELS, as handed to
-	//! OnResize by the window. Do not try to derive it from the panel itself: a
+	//! `contentHeight` is the form content height in SCREEN PIXELS, as handed to
+	//! OnResize by the window. `stripHeight` and `bandHeight` are authored pixels
+	//! and are scaled here (see JMUILayout.Px), so the two kinds are not to be
+	//! mixed by the caller. Do not try to derive `contentHeight` from the panel itself: a
 	//! panel declared with hexactsize/vexactsize 0 returns its FRACTION of the
 	//! parent from GetSize(), and feeding those into an exact-size SetSize
 	//! collapses the strip to sub-pixel width and gives the content a negative
@@ -1074,12 +1076,14 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 		JMPinnedStrip pinned = RememberPinnedStrip( strip, content, contentHeight, stripHeight, band, bandHeight );
 
-		pinned.PinnedStripHeight = stripHeight + FitTabStrips( strip );
+		pinned.PinnedStripHeight = JMUILayout.Px( stripHeight ) + FitTabStrips( strip );
+
+		float bandPx = JMUILayout.Px( bandHeight );
 
 		// Below this the split is meaningless, and before the first real resize
 		// the value can arrive as a fraction. The layout's own fractional split
 		// is a reasonable stand-in until a true height shows up.
-		if ( contentHeight <= pinned.PinnedStripHeight + bandHeight )
+		if ( contentHeight <= pinned.PinnedStripHeight + bandPx )
 			return;
 
 		strip.SetFlags( WidgetFlags.VEXACTPOS | WidgetFlags.VEXACTSIZE, true );
@@ -1090,10 +1094,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		{
 			band.SetFlags( WidgetFlags.VEXACTPOS | WidgetFlags.VEXACTSIZE, true );
 			band.SetPos( 0, pinned.PinnedStripHeight );
-			band.SetSize( 1, bandHeight );
+			band.SetSize( 1, bandPx );
 		}
 
-		float contentTop = pinned.PinnedStripHeight + bandHeight;
+		float contentTop = pinned.PinnedStripHeight + bandPx;
 
 		content.SetFlags( WidgetFlags.VEXACTPOS | WidgetFlags.VEXACTSIZE, true );
 		content.SetPos( 0, contentTop );
@@ -1165,7 +1169,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	{
 		JMPinnedStrip pinned = FindPinnedStrip( strip );
 		if ( !pinned )
-			return TAB_STRIP_HEIGHT;
+			return JMUILayout.Px( TAB_STRIP_HEIGHT );
 
 		return pinned.PinnedStripHeight;
 	}

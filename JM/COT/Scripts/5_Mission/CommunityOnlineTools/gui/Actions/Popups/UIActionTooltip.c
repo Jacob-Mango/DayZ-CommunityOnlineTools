@@ -25,7 +25,7 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 	protected ImageWidget     m_Icon;
 	protected Widget          m_Swatch;
 	protected bool m_Visible;
-	protected int  m_TooltipW;
+	protected float m_TooltipW;
 
 	// Pending show request - tooltip appears after HOVER_DELAY_S of continuous hover.
 	protected bool   m_Pending;
@@ -112,11 +112,11 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 		bool hasSwatch = ( !hasIcon && swatchColor != 0 );
 
 		// Left offset for text container: icon/swatch = 26px, plain = 6px.
-		int leftDecor;
+		float leftDecor;
 		if ( hasIcon || hasSwatch )
-			leftDecor = 26;
+			leftDecor = JMUILayout.Px( 26 );
 		else
-			leftDecor = 6;
+			leftDecor = JMUILayout.Px( 6 );
 
 		if ( m_Icon )
 		{
@@ -155,19 +155,19 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 		static const int CHAR_W = 8;
 
 		// Max tooltip width = anchor width minus margins, fallback 500.
-		int maxW = 500;
+		float maxW = JMUILayout.Px( 500 );
 		Widget anchor = m_Root.GetParent();
 		if ( anchor )
 		{
 			float aw, ah;
 			anchor.GetScreenSize( aw, ah );
 			if ( aw > 100 )
-				maxW = (int)aw - MARGIN * 2;
+				maxW = aw - JMUILayout.Px( MARGIN * 2 );
 		}
 
 		// Total width: fit single line if possible, otherwise cap at maxW.
-		int singleW = ( text.Length() + 1 ) * CHAR_W + leftDecor + PAD_R;
-		int w;
+		float singleW = ( text.Length() + 1 ) * JMUILayout.Px( CHAR_W ) + leftDecor + JMUILayout.Px( PAD_R );
+		float w;
 		if ( singleW <= maxW )
 			w = singleW;
 		else
@@ -177,14 +177,14 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 
 		// Container fills available text width; RichTextWidget fills 100% of it and
 		// self-sizes vertically via "size to text v" - no manual line counting needed.
-		int containerW = w - leftDecor - PAD_R;
+		float containerW = w - leftDecor - JMUILayout.Px( PAD_R );
 		if ( m_TextContainer )
 		{
 			m_TextContainer.SetFlags( WidgetFlags.EXACTPOS,   true );
 			m_TextContainer.SetFlags( WidgetFlags.HEXACTSIZE, true );
 			m_TextContainer.SetFlags( WidgetFlags.VEXACTSIZE, true );
-			m_TextContainer.SetPos( leftDecor, PAD_Y );
-			m_TextContainer.SetSize( containerW, 10 );
+			m_TextContainer.SetPos( leftDecor, JMUILayout.Px( PAD_Y ) );
+			m_TextContainer.SetSize( containerW, JMUILayout.Px( 10 ) );
 		}
 
 		if ( m_Text )
@@ -199,7 +199,7 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 		// Show with a temporary height - Update() will read the real rendered height.
 		m_Root.SetFlags( WidgetFlags.HEXACTSIZE, true );
 		m_Root.SetFlags( WidgetFlags.VEXACTSIZE, true );
-		m_Root.SetSize( w, 40 );
+		m_Root.SetSize( w, JMUILayout.Px( 40 ) );
 		m_Root.Show( true );
 
 		// Raise above every sibling so nothing else in the form obscures it.
@@ -269,9 +269,9 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 			m_Text.GetScreenSize( tw, th );
 			if ( th > 1 )
 			{
-				int newH = (int)th + PAD_Y * 2;
+				float newH = th + JMUILayout.Px( PAD_Y * 2 );
 				m_Root.SetSize( m_TooltipW, newH );
-				m_TextContainer.SetSize( (float)( m_TooltipW - 14 ), th );
+				m_TextContainer.SetSize( m_TooltipW - JMUILayout.Px( 14 ), th );
 			}
 		}
 
@@ -292,13 +292,13 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 		float rw, rh;
 		m_Root.GetScreenSize( rw, rh );
 
-		float px = cx + 14;
-		float py = cy + 20;
+		float px = cx + JMUILayout.Px( 14 );
+		float py = cy + JMUILayout.Px( 20 );
 
-		if ( px + rw > aw - 4 )
-			px = cx - rw - 6;
-		if ( py + rh > ah - 4 )
-			py = cy - rh - 6;
+		if ( px + rw > aw - JMUILayout.Px( 4 ) )
+			px = cx - rw - JMUILayout.Px( 6 );
+		if ( py + rh > ah - JMUILayout.Px( 4 ) )
+			py = cy - rh - JMUILayout.Px( 6 );
 
 		if ( px < 0 ) px = 0;
 		if ( py < 0 ) py = 0;

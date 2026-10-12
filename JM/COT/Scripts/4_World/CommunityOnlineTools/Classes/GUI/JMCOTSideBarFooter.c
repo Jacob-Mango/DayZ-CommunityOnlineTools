@@ -78,6 +78,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	protected static const float POSITION_TEXT_LEFT    = 22;
 	protected static const float POSITION_TRAILING_PAD = 6;
 	protected static const float POSITION_ROW_HEIGHT   = 20;
+	//! ft_icon_cardinal in sidebar_menu.layout: `size 13 13`, `position _ 2`.
+	protected static const float CARDINAL_ICON_SIZE    = 13;
+	protected static const float CARDINAL_ICON_TOP     = 2;
 
 	//! Feedback icon fade phases, matching UIActionFeedbackButton's own.
 	protected static const int FEEDBACK_PHASE_IDLE        = 0;
@@ -182,7 +185,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		float anchorX, anchorY;
 		anchor.GetPos( anchorX, anchorY );
 
-		x = anchorX + textWidth + GROUP_GAP;
+		x = anchorX + textWidth + JMUILayout.Px( GROUP_GAP );
 		y = anchorY;
 
 		return true;
@@ -550,12 +553,12 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		if ( !GetRunEnd( m_TextWeather, x, y ) )
 			return;
 
-		x = PlaceIcon( m_IconNextArrow, x, y, m_TextWeather ) + PAIR_GAP;
+		x = PlaceIcon( m_IconNextArrow, x, y, m_TextWeather ) + JMUILayout.Px( PAIR_GAP );
 
 		//! The countdown has no icon of its own, so its slot is closed up rather
 		//! than left as a gap the arrow points across.
 		if ( m_IconNext.IsVisible() )
-			x = PlaceIcon( m_IconNext, x, y, m_TextWeather ) + PAIR_GAP;
+			x = PlaceIcon( m_IconNext, x, y, m_TextWeather ) + JMUILayout.Px( PAIR_GAP );
 
 		m_TextNext.SetPos( x, y );
 	}
@@ -572,7 +575,7 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		if ( !GetRunEnd( m_TextFPS, x, y ) )
 			return;
 
-		x = PlaceIcon( m_IconLow, x, y, m_TextFPS ) + PAIR_GAP;
+		x = PlaceIcon( m_IconLow, x, y, m_TextFPS ) + JMUILayout.Px( PAIR_GAP );
 		m_TextLow.SetPos( x, y );
 
 		//! Continue from the x just written rather than reading it back: the low
@@ -584,9 +587,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		if ( lowWidth <= 0 )
 			return;
 
-		x += lowWidth + GROUP_GAP;
+		x += lowWidth + JMUILayout.Px( GROUP_GAP );
 
-		x = PlaceIcon( m_IconHigh, x, y, m_TextFPS ) + PAIR_GAP;
+		x = PlaceIcon( m_IconHigh, x, y, m_TextFPS ) + JMUILayout.Px( PAIR_GAP );
 		m_TextHigh.SetPos( x, y );
 	}
 
@@ -1028,14 +1031,15 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		if ( textWidth <= 0 )
 			return;
 
-		float btnWidth = POSITION_TEXT_LEFT + textWidth + POSITION_TRAILING_PAD;
+		//! textWidth is rendered (screen) pixels, the constants are authored ones.
+		float btnWidth = JMUILayout.Px( POSITION_TEXT_LEFT + POSITION_TRAILING_PAD ) + textWidth;
 
-		m_BtnPosition.SetSize( btnWidth, POSITION_ROW_HEIGHT );
+		m_BtnPosition.SetSize( btnWidth, JMUILayout.Px( POSITION_ROW_HEIGHT ) );
 
-		float cardX = btnWidth + PAIR_GAP;
+		float cardX = btnWidth + JMUILayout.Px( PAIR_GAP );
 
-		m_IconCardinal.SetPos( cardX, 2 );
-		m_TextCardinal.SetPos( cardX + 13 + PAIR_GAP, 0 );
+		m_IconCardinal.SetPos( cardX, JMUILayout.Px( CARDINAL_ICON_TOP ) );
+		m_TextCardinal.SetPos( cardX + JMUILayout.Px( CARDINAL_ICON_SIZE + PAIR_GAP ), 0 );
 	}
 
 	// -------------------------------------------------------------------------

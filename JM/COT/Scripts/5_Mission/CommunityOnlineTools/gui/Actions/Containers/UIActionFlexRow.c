@@ -126,7 +126,7 @@ class UIActionFlexRow
 		int gaps = m_Entries.Count() - 1;
 		if ( gaps < 0 )
 			gaps = 0;
-		float padReserve = gaps * m_GapPx;
+		float padReserve = gaps * JMUILayout.Px( m_GapPx );
 
 		float leftover = rowW - reserved - padReserve;
 		if ( leftover < 0 )

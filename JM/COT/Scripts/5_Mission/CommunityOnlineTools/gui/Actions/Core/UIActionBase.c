@@ -118,11 +118,20 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		return m_Data;
 	}
 
-	float GetFlexBasis() { return m_FlexBasisPx; }
+	//! Held in authored pixels and scaled on the way out, so a resolution change
+	//! between SetFlex and the next layout pass is picked up.
+	float GetFlexBasis() { return JMUILayout.Px( m_FlexBasisPx ); }
 
 	float GetFlexGrow()  { return m_FlexGrow; }
 
-	float GetFlexMax()   { return m_FlexMaxPx; }
+	//! <= 0 means unbounded, so only a real ceiling is scaled.
+	float GetFlexMax()
+	{
+		if ( m_FlexMaxPx <= 0 )
+			return m_FlexMaxPx;
+
+		return JMUILayout.Px( m_FlexMaxPx );
+	}
 
 	float GetHeight()
 	{
@@ -254,21 +263,23 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		SetEnabled( condition );
 	}
 
+	//! `height` is in authored pixels, same as SetFixedSize.
 	void SetFixedHeight( float height )
 	{
 		float w;
 		float h;
 		layoutRoot.GetSize( w, h );
 		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
-		layoutRoot.SetSize( w, height );
+		layoutRoot.SetSize( w, JMUILayout.Px( height ) );
 		layoutRoot.Update();
 	}
 
+	//! `width` and `height` are in authored pixels (see JMUILayout.Px).
 	void SetFixedSize( float width, float height )
 	{
 		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
 		layoutRoot.SetFlags( WidgetFlags.HEXACTSIZE, true );
-		layoutRoot.SetSize( width, height );
+		layoutRoot.SetSize( JMUILayout.Px( width ), JMUILayout.Px( height ) );
 		layoutRoot.Update();
 	}
 

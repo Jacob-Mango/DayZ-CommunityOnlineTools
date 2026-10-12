@@ -201,14 +201,17 @@ class JMLootAnalysisForm: JMFormBase
 	{
 		super.OnResize(w, h);
 
-		PinBand(m_SearchWrapper, 0, SEARCH_H);
-		PinBand(m_RecentWrapper, SEARCH_H, RECENT_H);
+		float searchH = JMUILayout.Px(SEARCH_H);
+		float headerH = JMUILayout.Px(LEFT_HEADER_H);
 
-		if (m_ListWrapper && h > LEFT_HEADER_H)
+		PinBand(m_SearchWrapper, 0, searchH);
+		PinBand(m_RecentWrapper, searchH, JMUILayout.Px(RECENT_H));
+
+		if (m_ListWrapper && h > headerH)
 		{
-			float listH = h - LEFT_HEADER_H;
+			float listH = h - headerH;
 
-			PinBand(m_ListWrapper, LEFT_HEADER_H, listH);
+			PinBand(m_ListWrapper, headerH, listH);
 
 			//! The list is told the height rather than measuring it - same
 			//! number, one source.

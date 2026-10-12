@@ -20,10 +20,10 @@ class JMWindowManager
 		if ( !entry )
 			return false;
 
-		x = entry.X;
-		y = entry.Y;
-		w = entry.W;
-		h = entry.H;
+		x = JMUILayout.Px( entry.X );
+		y = JMUILayout.Px( entry.Y );
+		w = JMUILayout.Px( entry.W );
+		h = JMUILayout.Px( entry.H );
 		return true;
 	}
 
@@ -37,7 +37,7 @@ class JMWindowManager
 		window.GetPos( x, y );
 		window.GetExpandedSize( w, h );
 
-		m_LayoutStore.SetEntry( window.GetModule().GetModuleName(), window.GetName(), x, y, w, h );
+		m_LayoutStore.SetEntry( window.GetModule().GetModuleName(), window.GetName(), JMUILayout.FromPx( x ), JMUILayout.FromPx( y ), JMUILayout.FromPx( w ), JMUILayout.FromPx( h ) );
 		JMWindowLayoutStore.Save( m_LayoutStore );
 	}
 
@@ -134,6 +134,17 @@ class JMWindowManager
 			else
 			{
 			}
+		}
+	}
+
+	//! Every open window re-derives its rect for the new resolution, see
+	//! JMWindowBase.OnResolutionChanged.
+	void OnResolutionChanged( float ratio )
+	{
+		foreach ( JMWindowBase window: m_Windows )
+		{
+			if ( window )
+				window.OnResolutionChanged( ratio );
 		}
 	}
 
