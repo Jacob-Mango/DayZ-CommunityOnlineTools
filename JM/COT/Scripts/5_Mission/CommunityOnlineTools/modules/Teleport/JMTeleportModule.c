@@ -248,7 +248,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	protected void Exec_Load( PlayerIdentity ident )
+	protected void Server_Load( PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
 		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION, ident, instance ) )
@@ -265,7 +265,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			if ( !senderRPC )
 				return;
-			Exec_Load( senderRPC );
+			Server_Load( senderRPC );
 		}
 		else if ( m_Settings.Read( ctx ) )
 				OnSettingsUpdated();
