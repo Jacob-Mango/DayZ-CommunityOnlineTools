@@ -73,7 +73,9 @@ PanelWidgetClass icon_cell {
      vexactsize 0
      text ""
      color 0.925 0.976 1.000 0.900
-     font "gui/fonts/MetronLight14"
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 14
      "text offset" 0 0
      "text valign" center
      "text halign" left
