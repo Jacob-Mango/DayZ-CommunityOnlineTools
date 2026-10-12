@@ -504,6 +504,7 @@ class COTModule : JMModuleBase
 			case "CursorIcons":
 			case "HudFrameWidget":
 			case "HudPanel":
+			case "QuickbarGrid":
 				return true;
 		}
 
