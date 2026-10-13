@@ -1,6 +1,3 @@
-//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
-#define COT_DEBUGLOGS
-
 class JMPlayerForm: JMFormBase
 {
 	UIActionScroller m_ActionListScroller;

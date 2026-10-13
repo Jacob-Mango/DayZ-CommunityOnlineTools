@@ -1,6 +1,3 @@
-//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
-#define COT_DEBUGLOGS
-
 class JMRoleRowWidget: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG

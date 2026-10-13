@@ -1,8 +1,3 @@
-//! Enforce compiles GameLib/Game/World/Mission as SEPARATE modules - a
-//! #define in a 3_Game file (see StaticFunctions.c) is invisible here. Kept
-//! in exact sync with that file's block; both must change together.
-#define COT_DEBUGLOGS
-
 class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 {
 	static string s_HypeTrain_Loco_ClsName = "HypeTrain_LocomotiveBase";

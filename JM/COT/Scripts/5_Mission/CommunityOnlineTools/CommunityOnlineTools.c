@@ -1,8 +1,3 @@
-//! Enforce compiles GameLib/Game/World/Mission as SEPARATE modules - a
-//! #define in a 3_Game or 4_World file is invisible here. Kept in exact
-//! sync with StaticFunctions.c's block; all three must change together.
-#define COT_DEBUGLOGS
-
 class CommunityOnlineTools: CommunityOnlineToolsBase
 {
 	//! Floor on how often one admin's activation toggle may reach the webhook.

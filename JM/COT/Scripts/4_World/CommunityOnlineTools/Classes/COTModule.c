@@ -1,10 +1,3 @@
-//! #define scope in Enforce is per-file, NOT per compiled module - a file in
-//! the same 4_World module (e.g. CommunityOnlineToolsBase.c) defining this
-//! does NOT make it visible here. Every file that wants COT_DBG output needs
-//! its own copy of this line. Confirmed by zero COT_DBG output from this
-//! file for an entire debug session despite the ifdefs compiling in fine.
-#define COT_DEBUGLOGS
-
 class COTModule : JMModuleBase
 {
 	protected JMCOTSideBar m_COTMenu;

@@ -1,9 +1,3 @@
-//! #define scope in Enforce is per-file, NOT per compiled module - a file in
-//! the same 4_World module (e.g. CommunityOnlineToolsBase.c) defining this
-//! does NOT make it visible here. Every file that wants COT_DBG output needs
-//! its own copy of this line.
-#define COT_DEBUGLOGS
-
 class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 {
 	//! Fraction of the sidebar height taken by the title bar. Must match the

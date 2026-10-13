@@ -1,6 +1,3 @@
-//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
-#define COT_DEBUGLOGS
-
 class JMObjectSpawnerForm: JMFormBase
 {
 	//! Category chips for the few most recently used categories. The full set

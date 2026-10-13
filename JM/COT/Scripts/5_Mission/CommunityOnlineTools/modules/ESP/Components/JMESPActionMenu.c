@@ -1,6 +1,3 @@
-//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
-#define COT_DEBUGLOGS
-
 //! Every action that can be taken on a tracked object, as one context menu.
 //!
 //! Both entry points share this: right-clicking the world tag and right-clicking
