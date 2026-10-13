@@ -400,14 +400,14 @@ class COTModule : JMModuleBase
 	{
 		bool cotOpen = GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen();
 
-		bool windowsActive = GetCOTWindowManager().HasAnyActive();
+		bool windowsActive = GetCOTWindowManager().HasAnyUnpinnedActive();
 
 		GetCOTBase().CloseSharedMenu();
 
 		if ( !cotOpen && !windowsActive )
 			return;
 
-		JMWindowBase topWindow = GetCOTWindowManager().GetTopActive();
+		JMWindowBase topWindow = GetCOTWindowManager().GetTopUnpinnedActive();
 
 		if ( topWindow && topWindow.HasOpenPopup() )
 		{

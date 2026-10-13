@@ -49,6 +49,16 @@ class JMWindowManager
 	//! Escape priority tier 2 (module menu): the frontmost visible window, if
 	//! any. BringFront() keeps m_Windows ordered front-to-back (index 0 is
 	//! last-focused), so the first visible entry is the one on top.
+	JMWindowBase GetTopUnpinnedActive()
+	{
+		foreach (JMWindowBase window: m_Windows)
+		{
+			if ( window.IsVisible() && !window.IsPinned() )
+				return window;
+		}
+		return NULL;
+	}
+
 	JMWindowBase GetTopActive()
 	{
 		foreach (JMWindowBase window: m_Windows)
