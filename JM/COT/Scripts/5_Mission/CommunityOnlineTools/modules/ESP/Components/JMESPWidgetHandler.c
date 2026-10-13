@@ -1,10 +1,10 @@
 //! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
-//! COT_DEBUGLOGS is NOT defined here on purpose: this file's Print()s sit on the
+//! COT_DEBUGLOGS is guarded by additional JM_COT_ESP_DEBUG here on purpose: this file's Print()s sit on the
 //! ESP widget lifecycle (SetInfo/Show/Hide, one tag per tracked object), which
 //! fires in bursts of dozens to hundreds whenever the tracked set changes.
-//! An unconditional file-scope define here made every build pay that Print()
-//! volume - define both JM_COT_ESP_DEBUG and COT_DEBUGLOGS locally to opt in
-//! while chasing an ESP bug.
+//! An unguarded COT_DEBUGLOGS here made every build pay that Print()
+//! volume - uncomment JM_COT_ESP_DEBUG in config.cpp and COT_DEBUGLOGS in COTDefines.c
+//! to opt in while chasing an ESP bug.
 
 //! The world-space tag for one tracked object.
 //!
