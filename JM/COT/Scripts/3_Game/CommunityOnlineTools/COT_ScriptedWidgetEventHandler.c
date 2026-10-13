@@ -58,7 +58,7 @@ class COT_ScriptedWidgetEventHandler: ScriptedWidgetEventHandler
 		if (w && w.ToString() != "INVALID")
 		{
 		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", w.ToString(), ToString());
+			PrintFormat("Unlinking %1 of %2", w.ToString(), ToString());
 		#endif
 			w.Unlink();
 		}
@@ -178,7 +178,7 @@ class COT_WidgetHolder
 		if (w && w.ToString() != "INVALID")
 		{
 		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", w.ToString(), ToString());
+			PrintFormat("Unlinking %1 of %2", w.ToString(), ToString());
 		#endif
 			w.Unlink();
 		}
