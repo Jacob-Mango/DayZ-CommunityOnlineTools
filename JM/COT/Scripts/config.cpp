@@ -112,7 +112,6 @@ class CfgMods
 				files[] =
 				{
 					"JM/COT/Scripts/Common",
-					"VPPAdminTools/Definitions",
 					"JM/COT/Scripts/5_Mission"
 				};
 			};
