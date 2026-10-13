@@ -432,9 +432,21 @@ class JMLoadoutModule: JMRenderableModuleBase
 		else
 			pos = itemData.m_LocalPosition;
 
+		int flags = ECE_PLACE_ON_SURFACE;
+
+		if ( g_Game.IsKindOf( itemData.m_Classname, "DZ_LightAI" ) )
+			flags |= ECE_INITAI;
+
+		Object obj = g_Game.CreateObjectEx( itemData.m_Classname, pos, flags );
+
 		EntityAI ent;
-		if ( !Class.CastTo( ent, g_Game.CreateObject( itemData.m_Classname, pos ) ) )
+		if ( !Class.CastTo( ent, obj ) )
+		{
+			if ( obj )
+				g_Game.ObjectDelete( obj );
+
 			return NULL;
+		}
 
 		//! Orientation has to be set first, because it is used by PlaceOnSurfaceAtPosition
 		ent.SetOrientation(itemData.m_LocalRotation);

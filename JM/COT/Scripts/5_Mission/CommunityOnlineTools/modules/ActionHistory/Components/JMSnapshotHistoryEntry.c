@@ -96,7 +96,12 @@ class JMSnapshotHistoryEntry: JMActionHistoryEntry
 		}
 		else if ( m_ClassName != "" )
 		{
-			obj = g_Game.CreateObjectEx( m_ClassName, m_Position, ECE_PLACE_ON_SURFACE );
+			int flags = ECE_PLACE_ON_SURFACE;
+
+			if ( g_Game.IsKindOf( m_ClassName, "DZ_LightAI" ) )
+				flags |= ECE_INITAI;
+
+			obj = g_Game.CreateObjectEx( m_ClassName, m_Position, flags );
 			if ( obj )
 				obj.SetOrientation( m_Orientation );
 		}
