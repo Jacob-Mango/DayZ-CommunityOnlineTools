@@ -311,6 +311,7 @@ class UIActionSearchBox: UIActionBase
 		UpdateClearButton();
 		UpdatePlaceholder();
 		UpdatePreview();
+		CallEvent( UIEvent.CHANGE );
 	}
 
 	override bool IsFocusWidget( Widget widget )
