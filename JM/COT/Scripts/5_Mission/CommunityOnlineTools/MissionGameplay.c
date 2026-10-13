@@ -223,6 +223,11 @@ modded class MissionGameplay
 		if ( IsMissionOffline() )
 			GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance );
 
+		COT_DestroyWidgetHandlers();
+	}
+
+	void COT_DestroyWidgetHandlers()
+	{
 		int count;
 
 		auto node = COT_ScriptedWidgetEventHandler.s_COT_All.m_Head;
@@ -248,6 +253,14 @@ modded class MissionGameplay
 			EXError.Info(this, string.Format("Cleaned up %1 dangling COT ScriptedWidgetEventHandlers", count));
 	#endif
 	#endif
+	}
+
+	override void CloseAllMenus()
+	{
+		super.CloseAllMenus();
+
+		if (UIActionTooltip.s_Instance)
+			UIActionTooltip.s_Instance.Destroy();
 	}
 
 	override void OnUpdate( float timeslice )
