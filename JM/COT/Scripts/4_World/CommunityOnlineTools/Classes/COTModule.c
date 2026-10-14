@@ -15,30 +15,6 @@ class COTModule : JMModuleBase
 	//! change already does.
 	static const int STATS_FLUSH_INTERVAL_MS = 300000;
 
-	//! Own down/up edge tracking for the sidebar toggle, polled from raw
-	//! hardware KeyState() in OnUpdate() instead of going through the
-	//! UAInput/CF Bind() dispatch system (see PollToggleMenuKey()). Two
-	//! LocalPress()/LocalHold()-based attempts before this one both still
-	//! misfired: ForceDisable(true)/(false) - which every context menu and
-	//! list-row widget cycles on focus change via UIActionBase::Update - does
-	//! not just gate whether our callback gets invoked, it gates what the
-	//! UAInput itself REPORTS. So if Y was already held down when some
-	//! unrelated widget force-disabled inputs, the read on re-enable comes
-	//! back as a fresh "press" no matter which Local*() method or how the
-	//! edge bookkeeping is done - any state derived from that UAInput is
-	//! equally poisoned. Raw KeyState() reads the physical key directly and
-	//! is not part of COT's own ForceDisable plumbing, so it can't be
-	//! perturbed by a module or context menu opening/closing.
-	protected bool m_ToggleMenuKeyDown;
-
-	//! Same reasoning as m_ToggleMenuKeyDown: Escape used to go through
-	//! CloseCOT() (Bind()'d to UAUIBack), which is exactly the ForceDisable-
-	//! poisoned path the Y fix moved away from. Polled raw instead so it can't
-	//! misfire from a context menu or module window churning input-disable
-	//! state, and so it can implement the close priority below instead of the
-	//! single global toggle UAUIBack gave it.
-	protected bool m_EscapeKeyDown;
-
 	void COTModule()
 	{
 		MakeDirectory( JMConstants.DIR_COT );
@@ -204,9 +180,7 @@ class COTModule : JMModuleBase
 
 	override void RegisterKeyMouseBindings()
 	{
-		//! UACOTToggleButtons ("Y") is intentionally NOT bound here anymore -
-		//! see ToggleMenu()/OnUpdate() below for why it's polled from raw
-		//! hardware state instead of the CF dispatch system.
+		Bind( new JMModuleBinding( "ToggleMenu",	"UACOTToggleButtons",		true 	) );
 		Bind( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
 		Bind( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
@@ -229,9 +203,6 @@ class COTModule : JMModuleBase
 			Print("[COT_DBG] OnUpdate compiled branch = legacy OnMouseDown/UpdateMouseControls polling");
 		}
 		#endif
-
-		PollToggleMenuKey();
-		PollEscapeKey();
 
 		JMStatics.COT_MENU = null;
 		if ( m_COTMenu )
@@ -322,75 +293,17 @@ class COTModule : JMModuleBase
 		Print("[COT_DBG] CloseCOT fired (UAUIBack press)");
 		#endif
 
-		//! Only Y (ToggleMenu/UACOTToggleButtons) is allowed to close the
-		//! sidebar - UAUIBack (vanilla Escape/back) used to also SetOpen(false)
-		//! here, which closed the whole sidebar just for backing out of e.g.
-		//! the object spawner menu. Still cleans up input-disable state for
-		//! any open/closing windows, which is not "closing the sidebar".
-		if (GetCommunityOnlineToolsBase())
-		{
-			if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() || GetCOTWindowManager().PendingDeletionCount() > 0)
-				COT_Base.ForceDisableInputs(false);
-		}
-	}
+		//if (GetCommunityOnlineToolsBase())
+		//{
+			//if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() || GetCOTWindowManager().PendingDeletionCount() > 0)
+				//COT_Base.ForceDisableInputs(false);
+		//}
 
-	//! Client-only, called every frame from OnUpdate(). Bypasses Bind() /
-	//! ForceDisableInputs entirely - see m_ToggleMenuKeyDown's comment for why.
-	void PollToggleMenuKey()
-	{
-		if ( !g_Game )
-			return;
-
-		//! Same guard CF_InputBindings uses for UAUIMenu: don't treat typing
-		//! "y" into a chat/name/message box as the sidebar hotkey.
-		Widget focus = GetFocus();
-		if ( focus && ( focus.IsInherited( EditBoxWidget ) || focus.IsInherited( MultilineEditBoxWidget ) ) && focus.IsVisible() )
-			return;
-
-		bool keyDown = KeyState( KeyCode.KC_Y ) > 0;
-		bool isEdge = keyDown && !m_ToggleMenuKeyDown;
-		m_ToggleMenuKeyDown = keyDown;
-
-		if ( !isEdge )
-			return;
-
-		ToggleMenu();
-	}
-
-	void ToggleMenu()
-	{
-		#ifdef COT_DEBUGLOGS
-		Print("[COT_DBG] ToggleMenu fired (raw KC_Y press)");
-		#endif
-
-		GetCommunityOnlineToolsBase().ToggleOpen();
-	}
-
-	//! Client-only, called every frame from OnUpdate().
-	void PollEscapeKey()
-	{
-		if ( !g_Game )
-			return;
-
-		bool keyDown;
-		if (KeyState( KeyCode.KC_ESCAPE ) > 0)
-			keyDown = true;
-		bool isEdge = keyDown && !m_EscapeKeyDown;
-		m_EscapeKeyDown = keyDown;
-
-		if ( !isEdge )
-			return;
-
-		HandleEscape();
-	}
-
-	//! Priority: pop up (confirmation / context menu / dropdown / value
-	//! prompt) closes first, then the frontmost module window, then COT's
-	//! sidebar itself - each tier only acts if the one before it had nothing
-	//! to close. Leaves Escape alone entirely (falls through to the vanilla
-	//! pause menu etc.) when COT has nothing open at all.
-	void HandleEscape()
-	{
+		//! Priority: pop up (confirmation / context menu / dropdown / value
+		//! prompt) closes first, then the frontmost module window, then COT's
+		//! sidebar itself - each tier only acts if the one before it had nothing
+		//! to close. Leaves UAUIBack alone entirely (falls through to the vanilla
+		//! pause menu etc.) when COT has nothing open at all.
 		bool cotOpen = GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen();
 
 		bool windowsActive = GetCOTWindowManager().HasAnyUnpinnedActive();
@@ -419,6 +332,14 @@ class COTModule : JMModuleBase
 
 		if ( cotOpen )
 			ToggleMenu();
+	}
+
+	void ToggleMenu( UAInput input = NULL )
+	{
+		if ( input != NULL && !input.LocalPress() )
+			return;
+
+		GetCommunityOnlineToolsBase().ToggleOpen();
 	}
 
 	void OnMouseUp()
@@ -506,7 +427,7 @@ class COTModule : JMModuleBase
 
 	void ToggleCOT( UAInput input )
 	{
-		if ( !( input.LocalPress() ) )
+		if ( !input.LocalPress() )
 			return;
 
 		#ifdef COT_DEBUGLOGS
