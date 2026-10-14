@@ -13,8 +13,16 @@ class JMCompensationHelper
 		if ( steamID == "" )
 			return;
 
+		CreateCompensationBackup( player, steamID );
+	}
+
+	static void CreateCompensationBackup( EntityAI entity, string steamID )
+	{
+		if ( !entity || !g_Game.IsServer() )
+			return;
+
 	#ifdef DZ_Expansion_Core
-		ExpansionPrefab exploadout = CreateExpansionLoadout( player );
+		ExpansionPrefab exploadout = CreateExpansionLoadout( entity );
 		if ( exploadout )
 		{
 			string exptimestamp = JMDate.Now().ToString( "YYYY-MM-DD_hh-mm-ss" );
@@ -23,9 +31,7 @@ class JMCompensationHelper
 		}
 	#endif
 
-		JMLoadoutItem loadoutItem = ProcessPlayerLoadout( player );
-		if ( !loadoutItem )
-			return;
+		JMLoadoutItem loadoutItem = new JMLoadoutItem( entity );
 
 		array< ref JMLoadoutItem > loadouts = new array< ref JMLoadoutItem >;
 		loadouts.Insert( loadoutItem );
@@ -38,37 +44,10 @@ class JMCompensationHelper
 		JMLoadoutSettings.SaveCompensation( loadout, steamID, timestamp );
 	}
 
+	[Obsolete("Use CreateCompensationBackup( EntityAI entity, string ownerSteamID )")]
 	static void CreateVehicleCompensationBackup( EntityAI vehicle, string ownerSteamID )
 	{
-		if ( !vehicle || !g_Game.IsServer() )
-			return;
-
-		if ( ownerSteamID == "" )
-			return;
-
-	#ifdef DZ_Expansion_Core
-		ExpansionPrefab exploadout = CreateExpansionLoadout( vehicle );
-		if ( exploadout )
-		{
-			string exptimestamp = JMDate.Now().ToString( "YYYY-MM-DD_hh-mm-ss" );
-			SaveExpansionCompensation( exploadout, ownerSteamID, exptimestamp );
-			return;
-		}
-	#endif
-
-		JMLoadoutItem loadoutItem = ProcessVehicleLoadout( vehicle );
-		if ( !loadoutItem )
-			return;
-
-		array< ref JMLoadoutItem > loadouts = new array< ref JMLoadoutItem >;
-		loadouts.Insert( loadoutItem );
-
-		JMLoadout loadout = new JMLoadout;
-		loadout.m_Items = loadouts;
-		loadout.m_IsLocalPosition = false;
-
-		string timestamp = JMDate.Now().ToString( "YYYY-MM-DD_hh-mm-ss" );
-		JMLoadoutSettings.SaveCompensation( loadout, ownerSteamID, timestamp );
+		CreateCompensationBackup( vehicle, ownerSteamID );
 	}
 
 #ifdef DZ_Expansion_Core
@@ -188,152 +167,35 @@ class JMCompensationHelper
 	}
 #endif
 
+	[Obsolete("Use new JMLoadoutItem(player) instead")]
 	protected static JMLoadoutItem ProcessPlayerLoadout( PlayerBase player )
 	{
 		if ( !player )
 			return null;
 
-		JMLoadoutItem item = new JMLoadoutItem;
-		JMLoadoutItemData dataItem = new JMLoadoutItemData;
-
-		item.m_Classname = player.GetType();
-		item.m_LocalPosition = player.GetPosition();
-		item.m_LocalRotation = player.GetOrientation();
-
-		item.m_Data = dataItem;
-		item.m_Attachments = new array< ref JMLoadoutSubItem >;
-
-		if ( !player.IsInherited( Building ) && !player.IsInherited( AdvancedCommunication ) )
-			dataItem.m_Health = player.GetHealth();
-
-		if ( player.HasQuantity() )
-		{
-			dataItem.m_Quantity = player.GetQuantity();
-			dataItem.m_LiquidType = player.GetLiquidType();
-		}
-
-		dataItem.m_Temperature = player.GetTemperature();
-
-		GameInventory inventory = player.GetInventory();
-		if ( !inventory )
-			return item;
-
-		ItemBase child;
-		for ( int k = 0; k < inventory.AttachmentCount(); k++ )
-		{
-			child = ItemBase.Cast( inventory.GetAttachmentFromIndex( k ) );
-			if ( child )
-				item.m_Attachments.Insert( ProcessSubItem( child ) );
-		}
-
-		CargoBase cargo = inventory.GetCargo();
-		if ( cargo )
-		{
-			for ( int j = 0; j < cargo.GetItemCount(); j++ )
-			{
-				child = ItemBase.Cast( cargo.GetItem( j ) );
-				if ( child )
-					item.m_Attachments.Insert( ProcessSubItem( child ) );
-			}
-		}
+		JMLoadoutItem item = new JMLoadoutItem(player);
 
 		return item;
 	}
 
+	[Obsolete("Use new JMLoadoutItem(vehicle) instead")]
 	protected static JMLoadoutItem ProcessVehicleLoadout( EntityAI vehicle )
 	{
 		if ( !vehicle )
 			return null;
 
-		JMLoadoutItem item = new JMLoadoutItem;
-		JMLoadoutItemData dataItem = new JMLoadoutItemData;
-
-		item.m_Classname = vehicle.GetType();
-		item.m_LocalPosition = vehicle.GetPosition();
-		item.m_LocalRotation = vehicle.GetOrientation();
-
-		item.m_Data = dataItem;
-		item.m_Attachments = new array< ref JMLoadoutSubItem >;
-
-		dataItem.m_Health = vehicle.GetHealth();
-
-		GameInventory inventory = vehicle.GetInventory();
-		if ( !inventory )
-			return item;
-
-		EntityAI child;
-		for ( int k = 0; k < inventory.AttachmentCount(); k++ )
-		{
-			child = EntityAI.Cast( inventory.GetAttachmentFromIndex( k ) );
-			if ( child )
-				item.m_Attachments.Insert( ProcessSubItem( child ) );
-		}
-
-		CargoBase cargo = inventory.GetCargo();
-		if ( cargo )
-		{
-			for ( int j = 0; j < cargo.GetItemCount(); j++ )
-			{
-				child = EntityAI.Cast( cargo.GetItem( j ) );
-				if ( child )
-					item.m_Attachments.Insert( ProcessSubItem( child ) );
-			}
-		}
+		JMLoadoutItem item = new JMLoadoutItem(vehicle);
 
 		return item;
 	}
 
+	[Obsolete("Use new JMLoadoutSubItem(parent) instead")]
 	protected static JMLoadoutSubItem ProcessSubItem( EntityAI parent )
 	{
 		if ( !parent )
 			return null;
 
-		JMLoadoutSubItem item = new JMLoadoutSubItem;
-		JMLoadoutItemData dataItem = new JMLoadoutItemData;
-
-		item.m_Classname = parent.GetType();
-
-		ItemBase itembs;
-		if ( Class.CastTo( itembs, parent ) )
-		{
-			if ( !itembs.IsInherited( Building ) && !itembs.IsInherited( AdvancedCommunication ) )
-				dataItem.m_Health = itembs.GetHealth();
-
-			if ( itembs.HasQuantity() )
-			{
-				dataItem.m_Quantity = itembs.GetQuantity();
-				dataItem.m_LiquidType = itembs.GetLiquidType();
-			}
-
-			dataItem.m_Temperature = itembs.GetTemperature();
-		}
-
-		item.m_Data = dataItem;
-
-		item.m_Attachments = new array< ref JMLoadoutSubItem >;
-
-		GameInventory inventory = parent.GetInventory();
-		if ( !inventory )
-			return item;
-
-		EntityAI child;
-		for ( int k = 0; k < inventory.AttachmentCount(); k++ )
-		{
-			child = EntityAI.Cast( inventory.GetAttachmentFromIndex( k ) );
-			if ( child )
-				item.m_Attachments.Insert( ProcessSubItem( child ) );
-		}
-
-		CargoBase cargo = inventory.GetCargo();
-		if ( cargo )
-		{
-			for ( int j = 0; j < cargo.GetItemCount(); j++ )
-			{
-				child = EntityAI.Cast( cargo.GetItem( j ) );
-				if ( child )
-					item.m_Attachments.Insert( ProcessSubItem( child ) );
-			}
-		}
+		JMLoadoutSubItem item = new JMLoadoutSubItem(parent);
 
 		return item;
 	}

@@ -290,8 +290,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			int id = Math.RandomInt( 0, count );
 			if ( IsKindOfLoadout( file.m_Items[0].m_Classname, "SurvivorBase" ) )
 			{
-				foreach ( JMLoadoutSubItem itemSubData: file.m_Items[id].m_Attachments )
-					SpawnInItem( itemSubData, pData.PlayerObject );
+				SpawnAttachments(file.m_Items[id], pData.PlayerObject);
 			}
 			else
 			{
@@ -406,8 +405,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		int id = Math.RandomInt(0, count);
 		if (IsKindOfLoadout( file.m_Items[0].m_Classname, ent.GetType() ))
 		{
-			foreach(JMLoadoutSubItem itemSubData: file.m_Items[id].m_Attachments)
-				SpawnInItem(itemSubData, ent);
+			SpawnAttachments(file.m_Items[id], ent);
 		}
 		else
 		{
@@ -469,16 +467,14 @@ class JMLoadoutModule: JMRenderableModuleBase
 			bool wasOpen = itembs.IsOpen();
 			itembs.Open();
 
-			foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
-				SpawnInItem(subItemData, ent);
+			SpawnAttachments(itemData, ent);
 
 			if (!wasOpen)
 				itembs.Close();
 		}
 		else
 		{
-			foreach(JMLoadoutSubItem subItemData2: itemData.m_Attachments)
-				SpawnInItem(subItemData2, ent);
+			SpawnAttachments(itemData, ent);
 		}
 
 		return ent;
@@ -492,53 +488,75 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 		SetupItem(ent, itemData.m_Data);
 
-		foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
-			SpawnInItem(subItemData, ent);
+		SpawnAttachments(itemData, ent);
 
 		return ent;
 	}
 
 	EntityAI SpawnInItem( JMLoadoutSubItem itemData, EntityAI parent )
 	{
-		EntityAI ent = parent.GetInventory().CreateInInventory(itemData.m_Classname);
-		if (!ent)
+		EntityAI ent;
+
+		Weapon_Base weapon;
+		if ( Class.CastTo( weapon, parent ) && g_Game.IsKindOf(itemData.m_Classname, "Magazine_Base") )
 		{
-			Weapon_Base oWpn = Weapon_Base.Cast(parent);
-			if ( oWpn )
-			{
-				if (g_Game.IsKindOf(itemData.m_Classname, "Magazine_Base"))
-					oWpn.SpawnAmmo(itemData.m_Classname);
-			}
-			return NULL;
+			//! Treat quantity as bullets to chamber in mag
+			ent = weapon.COTSpawnAttachedMagazine(itemData.m_Classname, WeaponWithAmmoFlags.CHAMBER, (int)itemData.m_Data.m_Quantity);
 		}
 		else
 		{
+			ent = parent.GetInventory().CreateInInventory(itemData.m_Classname);
+		}
+
+		if (ent)
+		{
 			SetupItem(ent, itemData.m_Data);
 
-			foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
-				SpawnInItem(subItemData, ent);
+			SpawnAttachments(itemData, ent);
 		}
 
 		return ent;
 	}
 
+	protected void SpawnAttachments(JMLoadoutItem_Base itemData, EntityAI ent)
+	{
+		foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
+			SpawnInItem(subItemData, ent);
+	}
+
 	protected void SetupItem(EntityAI ent, JMLoadoutItemData data)
 	{
-		ItemBase item;
-		if ( Class.CastTo( item, ent ) )
-		{
-			if (data.m_Health != -1)
-				item.SetHealth(data.m_Health);
+		if (data.m_Health != -1)
+			ent.SetHealth(data.m_Health);
 
+		Weapon_Base weapon;
+		Magazine mag;
+		ItemBase item;
+		if ( Class.CastTo( weapon, ent ) )
+		{
+			if (weapon.HasInternalMagazine(-1))
+			{
+				//! Treat quantity as bullets to chamber in internal mag
+				string ammoType = weapon.COTGetFirstChamberableAmmoTypeName(0);
+				weapon.COTFillInnerMagazine(ammoType, WeaponWithAmmoFlags.CHAMBER, (int)data.m_Quantity);
+			}
+		}
+		else if ( Class.CastTo( mag, ent ) )
+		{
+			if (data.m_Quantity >= 0)
+				mag.ServerSetAmmoCount((int)Math.Min(data.m_Quantity, mag.GetAmmoMax()));
+		}
+		else if ( Class.CastTo( item, ent ) )
+		{
 			if (data.m_Quantity != -1)
 				item.SetQuantity(data.m_Quantity);
 
 			if (data.m_LiquidType != -1)
 				item.SetLiquidType(data.m_LiquidType, true);
-
-			if (data.m_Temperature != 0)
-				item.SetTemperature(data.m_Temperature);
 		}
+
+		if (data.m_Temperature != 0)
+			ent.SetTemperature(data.m_Temperature);
 	}
 
 	protected void SetupBaseBuilding(EntityAI ent, TStringArray builtParts)
@@ -646,9 +664,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	JMLoadoutItem LoadoutProcessObject(Object parent, vector pos = vector.Zero, vector rot = vector.Zero)
 	{
-		JMLoadoutItem item = new JMLoadoutItem;
-
-		item.m_Classname 	 = parent.GetType();
+		JMLoadoutItem item = new JMLoadoutItem(parent);
 		item.m_LocalPosition = pos;
 		item.m_LocalRotation = rot;
 
@@ -657,118 +673,13 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	JMLoadoutItem LoadoutProcessItem(EntityAI parent, vector pos = vector.Zero, vector rot = vector.Zero)
 	{
-		JMLoadoutItem item = new JMLoadoutItem;
-		JMLoadoutItemData dataItem = new JMLoadoutItemData;
-
-		item.m_Classname 		= parent.GetType();
-		item.m_LocalPosition = pos;
-		item.m_LocalRotation = rot;
-
-		item.m_Data = dataItem;
-		item.m_Attachments = new array< ref JMLoadoutSubItem >;
-
-		// We check the partname instead of the part ID for better readability for the users
-		// if its causing too much perf issues we might switch to the int ID instead
-		BaseBuildingBase bb;
-		if (Class.CastTo(bb, parent))
-		{
-			item.m_ConstructionParts = new TStringArray;
-			map<string, ref ConstructionPart> parts = bb.GetConstruction().GetConstructionParts();
-			foreach (string partName, ConstructionPart part: parts)
-			{
-				if (part.m_IsBuilt)
-				{
-					item.m_ConstructionParts.Insert(part.GetPartName());
-				}
-			}
-		}
-
-		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
-		{
-			if ( g_Game.IsServer() )
-				dataItem.m_Health 		= parent.GetHealth();
-			else
-				dataItem.m_Health 		= parent.GetHealthLevelValue(parent.GetHealthLevel());
-		}
-
-		if (parent.HasQuantity())
-		{
-			dataItem.m_Quantity 	= parent.GetQuantity();
-			dataItem.m_LiquidType 	= parent.GetLiquidType();
-		}
-		
-		dataItem.m_Temperature 	= parent.GetTemperature();
-
-		if (parent.GetInventory())
-		{
-			ItemBase child;
-			for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
-			{
-				child = ItemBase.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
-				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
-			}
-
-			CargoBase cargo = parent.GetInventory().GetCargo();
-			if(cargo)
-			{
-				for(int j=0; j < cargo.GetItemCount(); j++)
-				{
-					child = ItemBase.Cast(cargo.GetItem(j));
-					item.m_Attachments.Insert(LoadoutProcessSubItem(child));
-				}
-			}
-		}
-
-		return item;
+		return LoadoutProcessObject(parent, pos, rot);
 	}
 
+	[Obsolete("Use new JMLoadoutSubItem(parent) instead")]
 	JMLoadoutSubItem LoadoutProcessSubItem(EntityAI parent)
 	{
-		JMLoadoutSubItem item = new JMLoadoutSubItem;
-		JMLoadoutItemData dataItem = new JMLoadoutItemData;
-
-		item.m_Classname 		= parent.GetType();
-
-		ItemBase itembs;
-		if ( Class.CastTo( itembs, parent ) )
-		{
-			if (!itembs.IsInherited(Building) && !itembs.IsInherited(AdvancedCommunication))
-			{
-				if ( g_Game.IsServer() )
-					dataItem.m_Health 		= itembs.GetHealth();
-				else
-					dataItem.m_Health 		= itembs.GetHealthLevelValue(parent.GetHealthLevel());
-			}
-
-			if (itembs.HasQuantity())
-			{
-				dataItem.m_Quantity 	= itembs.GetQuantity();
-				dataItem.m_LiquidType 	= itembs.GetLiquidType();
-			}
-			
-			dataItem.m_Temperature 	= itembs.GetTemperature();
-		}
-
-		item.m_Data = dataItem;
-		
-		item.m_Attachments = new array< ref JMLoadoutSubItem >;
-
-		EntityAI child;
-		for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
-		{
-			child = EntityAI.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
-			item.m_Attachments.Insert(LoadoutProcessSubItem(child));
-		}
-
-		CargoBase cargo = parent.GetInventory().GetCargo();
-		if(cargo)
-		{
-			for(int j=0; j < cargo.GetItemCount(); j++)
-			{
-				child = EntityAI.Cast(cargo.GetItem(j));
-				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
-			}
-		}
+		JMLoadoutSubItem item = new JMLoadoutSubItem(parent);
 
 		return item;
 	}

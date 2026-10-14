@@ -1,0 +1,1 @@
+typedef JMLoadoutItem_Base JMLoadoutSubItem;

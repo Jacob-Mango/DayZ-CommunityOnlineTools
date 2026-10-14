@@ -115,30 +115,48 @@ modded class Weapon_Base
 		return magazineType;
 	}
 
+	string COTGetFirstChamberableAmmoTypeName(int muzzleIndex)
+	{
+		TStringArray chamberableFrom = COTGetMagazineTypesValidated("chamberableFrom", muzzleIndex);
+		string ammoType = chamberableFrom[0];
+
+		return COTGetAmmoTypeNameValidated(ammoType);
+	}
+
 	string COTGetRandomChamberableAmmoTypeName(int muzzleIndex)
 	{
 		TStringArray chamberableFrom = COTGetMagazineTypesValidated("chamberableFrom", muzzleIndex);
 		string ammoType = chamberableFrom.GetRandomElement();
-		
-		// Make sure the given ammoType is actually useable
+
+		return COTGetAmmoTypeNameValidated(ammoType);
+	}
+
+	string COTGetAmmoTypeNameValidated(string ammoType)
+	{
 		if (ammoType != "")
 		{
 			//! Ammo_XXX -> Bullet_XXX
 			if (!AmmoTypesAPI.MagazineTypeToAmmoType(ammoType, ammoType))
 			{
-				CF_Log.Info("%1::COTGetRandomChamberableAmmoTypeName - ammo type isn't usable %2", ToString(), ammoType);
+				CF_Log.Info("%1::COTGetAmmoTypeNameValidated - ammo type isn't usable %2", ToString(), ammoType);
 				return "";
 			}
 
-			CF_Log.Info("%1::COTGetRandomChamberableAmmoTypeName - cartridge type %2", ToString(), ammoType);
+			CF_Log.Info("%1::COTGetAmmoTypeNameValidated - cartridge type %2", ToString(), ammoType);
 		}
 
 		return ammoType;
 	}
 
-	//! @note this is a verbatim copy of the vanilla SpawnAttachedMagazine EXCEPT it doesn't use the vanilla GetMaxMagazineTypeName/GetRandomMagazineTypeName
-	//! because those CTD if there are entries in `magazines[]` whose rvConfig classes don't actually exist
 	override Magazine SpawnAttachedMagazine( string magazineType = "", int flags = WeaponWithAmmoFlags.CHAMBER )
+	{
+		return COTSpawnAttachedMagazine(magazineType, flags);
+	}
+
+	//! @note this is a verbatim copy of the vanilla SpawnAttachedMagazine EXCEPT it doesn't use the vanilla GetMaxMagazineTypeName/GetRandomMagazineTypeName
+	//! because those CTD if there are entries in `magazines[]` whose rvConfig classes don't actually exist,
+	//! and has an additional ammoWantedCount parameter
+	Magazine COTSpawnAttachedMagazine( string magazineType = "", int flags = WeaponWithAmmoFlags.CHAMBER, int ammoWantedCount = -1 )
 	{
 		// Check if the gun has any magazines registered in config
 		if ( GetMagazineTypeCount(0) == 0 )
@@ -172,10 +190,21 @@ modded class Weapon_Base
 			ErrorEx(string.Format("Expected magazine, created: %1", GetDebugName(magAI)));
 			return null;
 		}
+
 		
+		int ammoCount;
+		int ammoMax = mag.GetAmmoMax();
+
+		if (ammoWantedCount < 0)
+			ammoCount = ammoMax;
+		else
+			ammoCount = Math.Min(ammoWantedCount, ammoMax);
+
 		// Decide random quantity when enabled
 		if (flags & WeaponWithAmmoFlags.QUANTITY_RNG)
-			mag.ServerSetAmmoCount(Math.RandomIntInclusive(0, mag.GetAmmoMax()));
+			mag.ServerSetAmmoCount(Math.RandomIntInclusive(0, ammoCount));
+		else
+			mag.ServerSetAmmoCount(ammoCount);
 			
 		if(MustBeChambered(0))
 		{
@@ -188,7 +217,7 @@ modded class Weapon_Base
 		}
 		
 		// Fill chamber when flagged
-		if ((flags & WeaponWithAmmoFlags.CHAMBER) || (flags & WeaponWithAmmoFlags.CHAMBER_RNG))
+		if (ammoCount > 0 && ((flags & WeaponWithAmmoFlags.CHAMBER) || (flags & WeaponWithAmmoFlags.CHAMBER_RNG)))
 		{
 			FillChamber(magazineType, flags);
 		}
@@ -200,9 +229,15 @@ modded class Weapon_Base
 		return mag;
 	}
 
-	//! @note this is a verbatim copy of the vanilla FillInnerMagazine EXCEPT it doesn't use the vanilla GetRandomChamberableAmmoTypeName
-	//! because that CTDs if there are entries in `chamberableFrom[]` whose rvConfig classes don't actually exist
 	override bool FillInnerMagazine( string ammoType = "", int flags = WeaponWithAmmoFlags.CHAMBER )
+	{
+		return COTFillInnerMagazine(ammoType, flags);
+	}
+
+	//! @note this is a verbatim copy of the vanilla FillInnerMagazine EXCEPT it doesn't use the vanilla GetRandomChamberableAmmoTypeName
+	//! because that CTDs if there are entries in `chamberableFrom[]` whose rvConfig classes don't actually exist,
+	//! and has an additional ammoWantedCount parameter
+	bool COTFillInnerMagazine(string ammoType = "", int flags = WeaponWithAmmoFlags.CHAMBER, int ammoWantedCount = -1)
 	{
 		CF_Log.Info("%1::FillInnerMagazine(\"%2\", %3)", ToString(), ammoType, flags.ToString());
 	
@@ -243,7 +278,13 @@ modded class Weapon_Base
 		for (int i = 0; i < muzzCount; ++i)
 		{
 			bool loadAnyBullet = false;
-			int ammoCount = GetInternalMagazineMaxCartridgeCount(i);
+			int ammoCount;
+			int ammoMax = GetInternalMagazineMaxCartridgeCount(i);
+
+			if (ammoWantedCount < 0)
+				ammoCount = ammoMax;
+			else
+				ammoCount = Math.Min(ammoWantedCount, ammoMax);
 			
 			// Decide random quantity when enabled
 			if ( flags & WeaponWithAmmoFlags.QUANTITY_RNG )
@@ -284,7 +325,7 @@ modded class Weapon_Base
 		
 		// Call the chamber method if asked for
 		bool chamber = (flags & WeaponWithAmmoFlags.CHAMBER) || (flags & WeaponWithAmmoFlags.CHAMBER_RNG);
-		if (chamber && FillChamber(ammoType, flags))
+		if (ammoWantedCount != 0 && chamber && FillChamber(ammoType, flags))
 		{
 			didSomething = true;
 		}

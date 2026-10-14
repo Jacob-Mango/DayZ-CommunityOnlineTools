@@ -2944,7 +2944,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		string label = target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition();
 
-		GetCommunityOnlineToolsBase().RecolorEntityAndAttachments( entity, NULL, color, 2 );
+		GetCommunityOnlineToolsBase().RecolorEntityAndAttachments( entity, NULL, color, 0 );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=changecolor color=" + color );
 		SendWebhookColored( "ChangeColor", instance, "Changed color to " + color + " for " + label, JMConstants.WEBHOOK_COLOR_SUCCESS );

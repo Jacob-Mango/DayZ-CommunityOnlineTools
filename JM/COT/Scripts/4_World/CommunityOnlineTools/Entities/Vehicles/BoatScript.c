@@ -74,7 +74,7 @@ modded class BoatScript
 
 		if (ownerSteamID != "")
 		{
-			JMCompensationHelper.CreateVehicleCompensationBackup(this, ownerSteamID);
+			JMCompensationHelper.CreateCompensationBackup(this, ownerSteamID);
 		}
 	}
 

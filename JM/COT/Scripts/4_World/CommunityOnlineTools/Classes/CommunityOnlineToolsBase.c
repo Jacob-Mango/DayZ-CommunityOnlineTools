@@ -808,6 +808,137 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		return entity;
 	}
 
+	static TransferInventoryResult TransferInventory(EntityAI sourceItem, EntityAI targetItem, bool allowDrop = true, array<EntityAI> dropped = null, array<EntityAI> failed = null)
+	{
+		TransferInventoryResult result = TransferInventoryResult.Ok;
+
+		array<EntityAI> children = {};
+
+		sourceItem.GetInventory().EnumerateInventory(InventoryTraversalType.LEVELORDER, children);
+
+		int count = children.Count();
+		for (int i = 0; i < count; ++i)
+		{
+			EntityAI child = children[i];
+			if (!child)
+				continue;
+
+			InventoryLocation child_src = new InventoryLocation;
+			child.GetInventory().GetCurrentInventoryLocation(child_src);
+
+			InventoryLocation child_dst = new InventoryLocation;
+			if (child_src.GetType() != InventoryLocationType.HANDS)
+			{
+				child_dst.Copy(child_src);
+				child_dst.SetParent(targetItem);
+			}
+
+			float health;
+
+			if (g_Game.IsServer())
+			{
+				health = child.GetHealth();
+				child.SetHealth(child.GetMaxHealth()); //! Set item to max health, so we can move ruined items
+			}
+
+			if (child_src.GetType() != InventoryLocationType.HANDS && GameInventory.LocationCanAddEntity(child_dst))
+			{
+				if (g_Game.IsMultiplayer())
+					targetItem.GetInventory().TakeToDst(InventoryMode.SERVER, child_src, child_dst);
+				else
+					targetItem.GetInventory().TakeToDst(InventoryMode.LOCAL, child_src, child_dst);
+			}
+			else
+			{
+				if (allowDrop)
+				{
+					if (g_Game.IsMultiplayer())
+						sourceItem.GetInventory().DropEntity(InventoryMode.SERVER, sourceItem, child);
+					else
+						sourceItem.GetInventory().DropEntity(InventoryMode.LOCAL, sourceItem, child);
+
+					result = TransferInventoryResult.DroppedSome;
+
+					if (dropped)
+						dropped.Insert(child);
+				}
+				else if (failed)
+				{
+					failed.Insert(child);
+				}
+			}
+
+			if (g_Game.IsServer())
+				child.SetHealth(health);
+		}
+
+		return result;
+	}
+
+	static bool IsSameBaseKind(EntityAI src, EntityAI dst)
+	{
+		string srcType = src.GetType();
+		string dstType = dst.GetType();
+
+		if (src.IsKindOf(dstType) || dst.IsKindOf(srcType))
+			return true;
+
+		string srcPath;
+		string dstPath;
+
+		TStringArray paths = {CFG_VEHICLESPATH, CFG_WEAPONSPATH, CFG_MAGAZINESPATH};
+		foreach (string path: paths)
+		{
+			if (!srcPath)
+			{
+				string srcTest = string.Format("%1 %2", path, srcType);
+				if (g_Game.ConfigIsExisting(srcTest))
+					srcPath = srcTest;
+			}
+
+			if (!dstPath)
+			{
+				string dstTest = string.Format("%1 %2", path, dstType);
+				if (g_Game.ConfigIsExisting(dstTest))
+					dstPath = dstTest;
+			}
+
+			if (srcPath && dstPath)
+				break;
+		}
+
+		string srcBase;
+		string dstBase;
+		if (g_Game.ConfigGetBaseName(srcPath, srcBase) && g_Game.ConfigGetBaseName(dstPath, dstBase))
+		{
+			if (src.IsKindOf(dstBase) || dst.IsKindOf(srcBase))
+				return true;
+		}
+
+		return false;
+	}
+
+	//! Transfer persistent variables from source to destination entity (e.g. a clone or equivalent with different color/skin)
+	//! This is important so data added by mods doesn't get lost in transit
+	static void TransferPersistentVariables(EntityAI src, EntityAI dst)
+	{
+		ScriptReadWriteContext ctx = new ScriptReadWriteContext;
+		src.OnStoreSave(ctx.GetWriteContext());
+		dst.OnStoreLoad(ctx.GetReadContext(), g_Game.SaveVersion());
+
+	#ifdef DZ_Expansion_Core
+		//! Since dst may be a different color/skin than src, need to reset skin name for Expansion
+		string skinName;
+		EnScript.GetClassVar(dst, "m_CurrentSkinName", 0, skinName);
+		if (skinName != "")
+			EnScript.SetClassVar(dst, "m_CurrentSkinName", 0, "");
+	#endif
+
+		dst.AfterStoreLoad();
+		dst.SetSynchDirty();
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(dst.EEOnAfterLoad);  //! Using Call() makes sure EEOnAfterLoad gets called AFTER whole hierarchy has loaded
+	}
+
 	static void ForceTransportPositionAndOrientation(Transport transport, vector position, vector orientation)
 	{
 		vector velocity = GetVelocity(transport);

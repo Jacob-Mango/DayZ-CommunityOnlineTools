@@ -1307,6 +1307,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 					foreach (string inv_slot: inv_slots)
 					{
+						inv_slot.ToLower();
+						if (inv_slot == "weaponwrap")
+							continue;
+
 						slot_id = InventorySlots.GetSlotIdFromString(inv_slot);
 						if (slot_id != InventorySlots.INVALID)
 						{
@@ -1503,6 +1507,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 					foreach (string inv_slot: inv_slots)
 					{
+						inv_slot.ToLower();
+						if (inv_slot == "weaponwrap")
+							continue;
+
 						slot_id = InventorySlots.GetSlotIdFromString(inv_slot);
 						if (slot_id != InventorySlots.INVALID && slotCandidates.Contains(slot_id))
 						{
@@ -1732,19 +1740,86 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (!CF_Modules<JMLoadoutModule>.Get(loadoutModule))
 			return entity;
 
-		vector pos = entity.GetPosition();
-		vector ori = entity.GetOrientation();
+		//! Create a snapshot of only the entity + attachments, not cargo. Everything else is later transferred from the original entity
+		//! @note depth has a different meaning between JMLoadoutItem and SpawnCompatibleAttachments/WithColor
+		//! For JMLoadoutItem, depth = 0 means only this item, not its attachments
+		//! For SpawnCompatibleAttachments/WithColor, depth = 0 means spawn attachments on this entity, but not on the created child attachments
+		JMLoadoutItem snapshot = new JMLoadoutItem(entity, depth + 1, false);
+		RecolorLoadoutItem(snapshot, newColor, depth + 1);
 
-		JMLoadoutItem snapshot = loadoutModule.LoadoutProcessItem(entity, pos, ori);
-		if (!snapshot)
-			return entity;
+	#ifdef DIAG_DEVELOPER
+		string errMsg;
+		JsonFileLoader<JMLoadoutItem>.SaveFile("$profile:COT_Recolor_Snapshot.json", snapshot, errMsg);
+	#endif
 
+		//! Move old entity out of the way since we will recreate in same spot
 		entity.SetPosition(vector.Zero);
-		g_Game.ObjectDelete(entity);
 
-		RecolorLoadoutItem(snapshot, newColor, depth);
+		EntityAI recreated = loadoutModule.SpawnItem(snapshot, snapshot.m_LocalPosition, false);
+		if (!recreated)
+			return null;
 
-		EntityAI recreated = loadoutModule.SpawnItem(snapshot, pos, false);
+		//! JMLoadoutModule::SpawnItem may use PlaceOnSurfaceAtPosition which may alter position and orientation,
+		//! but we want exact values of original entity
+		recreated.SetPosition(snapshot.m_LocalPosition);
+		recreated.SetOrientation(snapshot.m_LocalRotation);
+
+		//! Transfer atts & cargo (atts only get transfered if the recreated entity has nothing in the respective slot)
+		//! @note it is completely expected and not an error for there to be attachments that failed to transfer because
+		//! JMLoadoutModule::SpawnItem will already have spawned recolored atts. We then use the failed array to transfer
+		//! att inventory (if any) and properties
+		array<EntityAI> failed = {};
+		TransferInventoryResult result = COT.TransferInventory(entity, recreated, false, null, failed);
+
+	#ifdef DIAG_DEVELOPER
+		PrintFormat("Transfered inventory of %1 to %2, result %3, failed %4", entity, recreated, typename.EnumToString(TransferInventoryResult, result), failed);
+	#endif
+
+		bool syncWeaponState;
+
+		//! JMLoadoutModule::SetupItem uses Weapon_Base::COTFillInnerMagazine which already syncs, so we only need to sync if gun has no internal mag or quantity (ammo count) is zero
+		Weapon_Base weapon;
+		if (Class.CastTo(weapon, recreated) && (!weapon.HasInternalMagazine(-1) || snapshot.m_Data.m_Quantity == 0))
+			syncWeaponState = true;
+
+		//! Check if each child that failed to transfer is an attachment,
+		//! and transfer its inventory (if any) to the attachment in same slot on recreated entity
+		foreach (EntityAI child: failed)
+		{
+			InventoryLocation il = new InventoryLocation();
+			if (!child.GetInventory().GetCurrentInventoryLocation(il))
+				continue;
+
+			if (il.GetType() == InventoryLocationType.ATTACHMENT)
+			{
+				int slot = il.GetSlot();
+				EntityAI recreatedAtt = recreated.GetInventory().FindAttachment(slot);
+				if (recreatedAtt)
+				{
+					if (!child.IsEmpty())
+					{
+						result = COT.TransferInventory(child, recreatedAtt, false);
+
+					#ifdef DIAG_DEVELOPER
+						PrintFormat("Transfered inventory of %1 to %2, result %3", child, recreatedAtt, typename.EnumToString(TransferInventoryResult, result));
+					#endif
+					}
+
+					if (syncWeaponState && child.IsMagazine())
+						syncWeaponState = false;  //! JMLoadoutModule::SpawnInItem uses Weapon_Base::COTSpawnAttachedMagazine which already syncs
+
+					if (COT.IsSameBaseKind(child, recreatedAtt))
+						COT.TransferPersistentVariables(child, recreatedAtt);
+				}
+			}
+			else
+			{
+				if (g_Game.IsMultiplayer())
+					recreated.GetInventory().DropEntity(InventoryMode.SERVER, recreated, child);
+				else
+					recreated.GetInventory().DropEntity(InventoryMode.LOCAL, recreated, child);
+			}
+		}
 
 		//! Anything still empty after the recolored respawn gets filled the
 		//! same way Repair & Fill Slots already does - e.g. a slot the
@@ -1753,13 +1828,35 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (recreated)
 			SpawnCompatibleAttachmentsWithColor(recreated, player, depth, newColor);
 
+		if (snapshot.m_Data && snapshot.m_Data.m_Health != -1)
+		{
+			//! Set health of individual damage zones
+			TStringArray dmgZonesSrc = {};
+			TStringArray dmgZonesDst = {};
+			entity.GetDamageZones(dmgZonesSrc);
+			recreated.GetDamageZones(dmgZonesDst);
+			foreach (string dmgZone: dmgZonesSrc)
+			{
+				if (dmgZonesDst.Find(dmgZone) > -1)
+					recreated.SetHealth(dmgZone, "Health", entity.GetHealth(dmgZone, "Health"));
+			}
+		}
+
+		if (COT.IsSameBaseKind(entity, recreated))
+			COT.TransferPersistentVariables(entity, recreated);
+
+		if (syncWeaponState)
+			weapon.Synchronize();
+		
+		g_Game.ObjectDelete(entity);
+
 		return recreated;
 	}
 
 	//! Mutate a captured snapshot's classname, and recursively every
 	//! attachment/cargo entry's, to the `newColor` sibling wherever one
 	//! exists - left as-is (contents intact) where there is none.
-	protected void RecolorLoadoutItem(JMLoadoutItem item, string newColor, int depth)
+	protected void RecolorLoadoutItem(JMLoadoutItem_Base item, string newColor, int depth)
 	{
 		if (!item)
 			return;
@@ -1772,23 +1869,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 
 		foreach (JMLoadoutSubItem sub: item.m_Attachments)
-			RecolorLoadoutSubItem(sub, newColor, depth - 1);
-	}
-
-	protected void RecolorLoadoutSubItem(JMLoadoutSubItem item, string newColor, int depth)
-	{
-		if (!item)
-			return;
-
-		string variant = FindColorVariant(item.m_Classname, newColor);
-		if (variant != "")
-			item.m_Classname = variant;
-
-		if (depth <= 0 || !item.m_Attachments)
-			return;
-
-		foreach (JMLoadoutSubItem sub: item.m_Attachments)
-			RecolorLoadoutSubItem(sub, newColor, depth - 1);
+			RecolorLoadoutItem(sub, newColor, depth - 1);
 	}
 
 	void Command_Spawn(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
