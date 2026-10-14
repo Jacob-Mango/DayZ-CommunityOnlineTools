@@ -245,15 +245,17 @@ modded class ConstructionBase
 	
 	void COT_DismantleRequiredParts(string part_name, PlayerBase player)
 	{
-		array<string> required_parts = new array<string>;
-		required_parts = GetValidDepenentPartsArray(part_name);
-		
-		for ( int i = 0; i < required_parts.Count(); ++i )
+		array<string> required_parts = GetValidDepenentPartsArray(part_name);
+
+		if ( required_parts )
 		{
-			if ( HasDependentPart( required_parts.Get( i ) ) )
-				COT_DismantleRequiredParts(required_parts.Get( i ), player);
-			else
-				COT_DismantlePart(required_parts.Get( i ), player);
+			for ( int i = 0; i < required_parts.Count(); ++i )
+			{
+				if ( HasDependentPart( required_parts.Get( i ) ) )
+					COT_DismantleRequiredParts(required_parts.Get( i ), player);
+				else
+					COT_DismantlePart(required_parts.Get( i ), player);
+			}
 		}
 
 		if ( !HasDependentPart( part_name ) )
