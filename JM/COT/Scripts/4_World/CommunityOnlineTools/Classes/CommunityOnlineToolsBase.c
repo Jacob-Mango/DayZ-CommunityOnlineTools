@@ -922,16 +922,18 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 	//! This is important so data added by mods doesn't get lost in transit
 	static void TransferPersistentVariables(EntityAI src, EntityAI dst)
 	{
+	#ifdef DZ_Expansion_Core
+		string skinName = dst.ConfigGetString("skinName");
+	#endif
+
 		ScriptReadWriteContext ctx = new ScriptReadWriteContext;
 		src.OnStoreSave(ctx.GetWriteContext());
 		dst.OnStoreLoad(ctx.GetReadContext(), g_Game.SaveVersion());
 
 	#ifdef DZ_Expansion_Core
-		//! Since dst may be a different color/skin than src, need to reset skin name for Expansion
-		string skinName;
-		EnScript.GetClassVar(dst, "m_CurrentSkinName", 0, skinName);
+		//! Since transferring persistent vars from src to dst will overwrite skin, reapply it
 		if (skinName != "")
-			EnScript.SetClassVar(dst, "m_CurrentSkinName", 0, "");
+			EnScript.SetClassVar(dst, "m_CurrentSkinName", 0, skinName);
 	#endif
 
 		dst.AfterStoreLoad();
