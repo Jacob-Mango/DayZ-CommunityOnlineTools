@@ -264,12 +264,6 @@ class COTModule : JMModuleBase
 		Print("[COT_DBG] CloseCOT fired (UAUIBack press)");
 		#endif
 
-		//if (GetCommunityOnlineToolsBase())
-		//{
-			//if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() || GetCOTWindowManager().PendingDeletionCount() > 0)
-				//COT_Base.ForceDisableInputs(false);
-		//}
-
 		//! Priority: pop up (confirmation / context menu / dropdown / value
 		//! prompt) closes first, then the frontmost module window, then COT's
 		//! sidebar itself - each tier only acts if the one before it had nothing
@@ -302,7 +296,7 @@ class COTModule : JMModuleBase
 		}
 
 		if ( cotOpen )
-			ToggleMenu();
+			GetCOTBase().SetOpen( false );
 	}
 
 	void ToggleMenu( UAInput input = NULL )

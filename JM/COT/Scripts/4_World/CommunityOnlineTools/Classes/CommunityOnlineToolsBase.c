@@ -338,6 +338,7 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		if ( !m_IsOpen )
 		{
 			JMScriptInvokers.COT_ON_CLOSE.Invoke();
+			ForceDisableInputs( false );
 		}
 	}
 
