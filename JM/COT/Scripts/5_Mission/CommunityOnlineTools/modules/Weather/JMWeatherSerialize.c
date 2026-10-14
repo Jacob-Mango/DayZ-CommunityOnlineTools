@@ -1,17 +1,9 @@
 class JMWeatherSerialize
 {
-	//! Seconds a bundled preset holds a phenomenon before the mission's own
-	//! weather controller is allowed to move it again.
-	//!
-	//! This was 21600 - SIX HOURS. WeatherPhenomenon.Set's third argument is
-	//! the minimum time the change will last, so one click of a bundled preset
-	//! took the phenomenon away from cfgweather.xml for a quarter of a day.
-	//! That is the single biggest reason COT looked like it was "ignoring
-	//! weather.xml". 240 matches what the form's Easy Mode already used.
-	//!
-	//! An admin who genuinely wants a long hold can still say so - these are
-	//! only the defaults written into Weather.json on first run, and the file
-	//! is theirs to edit afterwards.
+	//! Seconds a bundled preset holds a phenomenon before the mission's weather controller may
+	//! move it again (WeatherPhenomenon.Set's minimum-time argument). Keep it short: a long
+	//! value took the phenomenon away from cfgweather.xml for hours. Only the default written
+	//! into Weather.json on first run; admins may edit it.
 	static const float PRESET_MIN_DURATION = 240;
 
 	//! Seconds to fade to the requested value.
@@ -61,16 +53,10 @@ class JMWeatherSerialize
 	//! need migrating; see MigrateToStates.
 	int StatesVersion;
 
-	// --- Legacy, read once and then cleared ----------------------------------
-	//! These held the flat chain's position, timing and edges before all of it
-	//! moved into states and the runtime file. They stay DECLARED because
-	//! JsonFileLoader can only read a field the class still has - deleting them
-	//! would silently drop an existing configuration on the first load instead
-	//! of migrating it.
-	//!
-	//! MigrateDynamic folds the timing and edges into the presets, then
-	//! MigrateToStates folds those into states; both empty what they read, so a
-	//! file written after that carries zeros and empty arrays.
+	// --- Legacy, read once and then cleared ---
+	//! Old flat chain position, timing and edges. They stay DECLARED because JsonFileLoader only
+	//! reads fields the class still has; deleting them would silently drop existing configs.
+	//! MigrateDynamic then MigrateToStates fold them into states and empty them.
 	string CurrentPreset;
 	int DurationMin;
 	int DurationMax;
@@ -152,12 +138,9 @@ class JMWeatherSerialize
 			States[i].EnsureArrays();
 	}
 
-	//! Move a pre-per-preset dynamic configuration onto the presets it belongs
-	//! to, once, and empty the fields it came from. The first of the two hops
-	//! that end in states - see MigrateToStates.
-	//!
-	//! No-ops on a file that has already been through it, and on one that never
-	//! had a chain configured at all.
+	//! Move a pre-per-preset dynamic configuration onto its presets, once, and empty the source
+	//! fields. First of the two hops that end in states (see MigrateToStates). No-op on an
+	//! already migrated file or one that never had a chain.
 	void MigrateDynamic()
 	{
 		bool hasLegacyTiming = ( DurationMin > 0 || DurationMax > 0 || TransitionMin > 0 || TransitionMax > 0 );
@@ -224,17 +207,10 @@ class JMWeatherSerialize
 		Save();
 	}
 
-	//! Fold every preset's legacy chain block into a state of its own, once.
-	//!
-	//! A preset used to BE a node of the chain. It becomes a state with a single
-	//! phase that applies that same preset, carrying the preset's timing and
-	//! next-state list across unchanged - so an existing configuration behaves
-	//! exactly as it did, and can then be split into real phases by hand.
-	//!
-	//! A preset that was never given a chain block (all timing zero - the
-	//! constructor no longer sets defaults, and a file read by an older version
-	//! got them from NormalizePresets) joins the rotation with the default
-	//! timing, which is what that older normalisation gave it.
+	//! Fold every preset's legacy chain block into a state of its own, once: a single phase
+	//! applying that preset, keeping its timing and next-state list so behaviour is unchanged.
+	//! A preset never given a chain block (all timing zero) joins the rotation with the default
+	//! timing, as the older NormalizePresets gave it.
 	void MigrateToStates()
 	{
 		if ( StatesVersion >= STATES_VERSION_STATES )
@@ -311,14 +287,9 @@ class JMWeatherSerialize
 		NormalizeStates();
 	}
 
-	//! Fold every preset into the phases that used it, once, and empty Presets.
-	//!
-	//! A phase used to REFERENCE a stored preset by name; it now OWNS its weather,
-	//! so a preset and a state are one thing to the person editing them and there
-	//! is no second list to keep in step. Each phase gets its own copy - two phases
-	//! that named the same preset stop sharing it, which is the point: editing one
-	//! must not move the other. The date is dropped on the way: weather states do
-	//! not move the clock.
+	//! Fold every preset into the phases that used it, once, and empty Presets. A phase used to
+	//! REFERENCE a preset by name; it now OWNS its weather, so each phase gets its own copy
+	//! (editing one must not move the other). The date is dropped: weather states do not move the clock.
 	void MigrateToWeather()
 	{
 		if ( StatesVersion >= STATES_VERSION_WEATHER )
@@ -400,15 +371,10 @@ class JMWeatherSerialize
 		return GetState( name ) != NULL;
 	}
 
-	//! Make a state safe to store and to roll. Runs on the SERVER's own copy of
-	//! whatever a client sent - nothing a client wrote is trusted to be
-	//! well-formed.
-	//!
-	//! Phases get unique non-empty names (an empty name is the "leave the state"
-	//! marker on an edge), timing the machine can honour, a preset that exists,
-	//! and edges that lead somewhere real - every list ends up summing to 100.
-	//! The state must already be in States when this runs, so that a state may
-	//! name itself as a next state.
+	//! Make a state safe to store and roll, on the SERVER's copy of what a client sent (never
+	//! trusted). Phases get unique non-empty names ("" is the leave-the-state edge marker), valid
+	//! timing, an existing preset and real edges; every list sums to 100. The state must already
+	//! be in States so it may name itself as a next state.
 	void NormalizeState( JMWeatherState state )
 	{
 		if ( !state )
@@ -539,11 +505,9 @@ class JMWeatherSerialize
 			JMWeatherNextState.Remove( States[i].NextStates, name );
 	}
 
-	//! Where a phase leads, as flat percentages a person can read: every leave-
-	//! the-state edge is expanded through the state's next states and the entry
-	//! phase of each, so "Storm > Peak 60%" is a real chance of the very next
-	//! phase, not an intermediate hop. Entries that land on the same place are
-	//! merged. Runs on the client too, off the configuration it already holds.
+	//! Where a phase leads, as flat readable percentages: each leave-the-state edge is expanded
+	//! through the next states' entry phases, so "Storm > Peak 60%" is a real chance of the very
+	//! next phase. Same-place entries are merged. Also runs on the client.
 	void GetNextOdds( string stateName, string phaseName, array<string> labels, array<float> percents )
 	{
 		JMWeatherState state = GetState( stateName );
@@ -649,18 +613,10 @@ class JMWeatherSerialize
 		JMJsonFile<JMWeatherSerialize>.Save( JMConstants.FILE_WEATHER, this );
 	}
 
-	// -------------------------------------------------------------------------
-	//  The bundled weather flow
-	//
-	//  Six presets, each a small front of three phases (it builds, peaks, eases),
-	//  and percentages that lead each one into the others - so a server that just
-	//  switches the dynamic machine on gets weather that has a shape, not a coin
-	//  flip. Every value is a min/max span, rolled once each time a phase is
-	//  entered, so the same preset never plays out the same way twice.
-	//
-	//  Rain and snow are set in EVERY phase (to zero where they are not wanted):
-	//  a phase that left one alone would inherit whatever the last preset put on.
-	// -------------------------------------------------------------------------
+	//  The bundled weather flow: six presets of three phases (builds, peaks, eases) with
+	//  percentages leading into each other. Every value is a min/max span rolled on phase entry.
+	//  Rain and snow are set in EVERY phase (zero where unwanted): a phase that left one alone
+	//  would inherit whatever the last preset put on.
 
 	static const string PRESET_CLEAR    = "Clear and Sunny";
 	static const string PRESET_CLOUDY   = "Overcast and Fog";

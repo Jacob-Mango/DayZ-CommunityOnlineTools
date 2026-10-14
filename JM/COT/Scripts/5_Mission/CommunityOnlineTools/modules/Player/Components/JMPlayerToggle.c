@@ -1,24 +1,7 @@
-//! One on/off state an admin can put on a player: god mode, freeze, unlimited
-//! ammo and so on.
-//!
-//! The toggle owns everything that differs between them - the RPC it travels on,
-//! the permission that gates it, its wording, how it is applied to a player and
-//! how the client reads it back. Everything that is the SAME lives once elsewhere:
-//! JMPlayerModule.SetToggle() / Exec_Toggle() / RPC_Toggle() send, apply and receive
-//! it, and JMPlayerFormTabActions builds the checkbox, binds its permission and
-//! repaints it. Adding a toggle is therefore one subclass and one line in
-//! JMPlayerModule.RegisterToggles() - no RPC trio, no checkbox handler.
-//!
-//! A mod adds its own the same way:
-//!
-//!   modded class JMPlayerModule
-//!   {
-//!       override void RegisterToggles( array< ref JMPlayerToggle > toggles )
-//!       {
-//!           super.RegisterToggles( toggles );
-//!           DefineToggle( toggles, new MyToggle(), "MyToggle", MY_RPC, MY_PERM, "my toggle", "MYTOGGLE" ).WithIcon( "star" );
-//!       }
-//!   }
+//! One on/off state an admin can put on a player (god mode, freeze...). A subclass owns what differs
+//! (RPC, permission, wording, apply/read-back); JMPlayerModule SetToggle/Exec_Toggle/RPC_Toggle and
+//! JMPlayerFormTabActions are shared. A mod adds one by overriding JMPlayerModule.RegisterToggles()
+//! and calling DefineToggle( toggles, new MyToggle(), "MyToggle", MY_RPC, MY_PERM, "my toggle", "MYTOGGLE" ).
 class JMPlayerToggle
 {
 	//! Stable ids. Never reused: mods look toggles up by them.
@@ -95,11 +78,9 @@ class JMPlayerToggle
 		return true;
 	}
 
-	//! id           the stable id above
-	//! rpc          the JMPlayerModuleRPC that carries a change of this toggle
-	//! permission   node the SENDER needs, for the checkbox and for the server
-	//! name         lower-case wording for log and webhook lines ("god mode")
-	//! key          suffix of the STR_COT_PLAYER_MODULE_* localisation keys (see GetLabelKey)
+	//! id: stable id above; rpc: JMPlayerModuleRPC carrying a change; permission: node the SENDER needs
+	//! (checkbox and server); name: lower-case wording for log/webhook lines ("god mode");
+	//! key: suffix of the STR_COT_PLAYER_MODULE_* localisation keys (see GetLabelKey)
 	JMPlayerToggle Define( string id, int rpc, string permission, string name, string key )
 	{
 		m_Id = id;

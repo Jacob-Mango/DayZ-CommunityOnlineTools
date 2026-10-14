@@ -1,46 +1,7 @@
-// =============================================================================
-//  JMVehiclesHoverInfo
-//
-//  The floating readout the vehicle map shows while the cursor is over a
-//  marker: a model preview plus health, fuel, speed, lock state and who is
-//  sitting in it.
-//
-//  It is NOT parented to the map panel. vehicles_map_panel clips its children,
-//  so a panel anchored there would be cut off the moment a marker sits near an
-//  edge - which is exactly where the map is usually dragged to. It is anchored
-//  to the window root instead, the same way the marker context menu is, and
-//  placed in that anchor's coordinate space.
-//
-//  ---------------------------------------------------------------------------
-//  ONE PANEL, AND WHY ITS SORT IS 120 RATHER THAN SOMETHING COMFORTABLE
-//
-//  The card is a single opaque panel with the ItemPreviewWidget inside it. It
-//  took four measured configurations to get here, and the sort is pinned
-//  between two hard bounds:
-//
-//    below the default sort - the panel is behind the map and never draws at
-//        all, though the ItemPreviewWidget still appears, because its own
-//        priority 151 clears the map without help from its parent.
-//    at or above 151 - the panel's fill outranks its own child and paints over
-//        the model, leaving a flat rectangle where the vehicle should be.
-//
-//  120 sits in that window. Do not raise it to match the marker context menu
-//  or anything else "so it is safely on top": above 151 the model disappears.
-//
-//  The fill is fully opaque on purpose. At the 0.969 the rest of COT's popups
-//  use, map town labels and marker names ghosted through the card at ~3% - not
-//  as readable text, but as grey smudges that read like a rendering fault. A
-//  card over a map is the one place that alpha does not survive.
-//  ---------------------------------------------------------------------------
-//
-//  Every widget in the layout carries ignorepointer, including the roots: a
-//  panel that could take the cursor would steal it from the very marker whose
-//  hover is keeping the panel up, and the two would fight frame by frame.
-//
-//  The preview needs a real entity, and the client does not have one for a
-//  marker outside its network bubble, so a local throwaway is created from the
-//  class name and kept until a different class is hovered.
-// =============================================================================
+//  JMVehiclesHoverInfo - floating vehicle-map readout (preview, health, fuel, speed, lock, occupants),
+//  anchored to the window root, NOT the map panel (it clips children). Panel sort is 120: below the
+//  default it never draws; at/above 151 its fill paints over the ItemPreviewWidget. Never raise it.
+//  Fill is fully opaque (alpha ghosts map labels); all widgets ignorepointer so hover is not stolen.
 
 class JMVehiclesHoverInfo
 {

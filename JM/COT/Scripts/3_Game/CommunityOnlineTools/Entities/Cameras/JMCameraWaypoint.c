@@ -1,8 +1,6 @@
-// ============================================================
-//  JMCameraWaypoint
-//  Defined in 3_Game so both JMCinematicCamera (3_Game) and
-//  JMCameraSerialize / JMCameraForm (5_Mission) can reference it.
-// ============================================================
+// JMCameraWaypoint
+// Defined in 3_Game so JMCinematicCamera (3_Game) and
+// JMCameraSerialize / JMCameraForm (5_Mission) can reference it.
 
 enum JMCameraEasing
 {

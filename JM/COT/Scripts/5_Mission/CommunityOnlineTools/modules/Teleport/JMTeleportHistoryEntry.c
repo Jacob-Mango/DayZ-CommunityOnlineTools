@@ -1,9 +1,5 @@
-// =============================================================================
-//  JMTeleportHistoryEntry
-//
-//  One place something was moved away FROM - a single step an undo can walk
-//  back to.
-// =============================================================================
+//  JMTeleportHistoryEntry - one place something was moved away FROM; a single step an undo
+//  can walk back to.
 class JMTeleportHistoryEntry
 {
 	vector Position;
@@ -31,11 +27,8 @@ class JMTeleportHistoryEntry
 		return string.Format( "%1 %2 %3", x, y, z );
 	}
 
-	//! How long ago this was recorded, as "12s" / "4m" / "2h".
-	//!
-	//! Relative rather than absolute: what an admin needs off a row is which of
-	//! the five is the one they just did, and every one of them is from the
-	//! current session.
+	//! How long ago this was recorded, as "12s" / "4m" / "2h". Relative, since an admin needs
+	//! to know which row they just did and all are from the current session.
 	string FormatAge()
 	{
 		int seconds = ( g_Game.GetTime() - Time ) / 1000;

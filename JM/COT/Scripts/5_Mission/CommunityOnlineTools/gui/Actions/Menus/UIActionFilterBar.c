@@ -1,24 +1,7 @@
-// =============================================================================
-//  UIActionFilterBar
-//
-//  A horizontal row of labeled toggle-buttons acting as filters.
-//  Two modes:
-//    - Exclusive  (default): only one filter active at a time (like tabs).
-//    - Multi-select: any combination of filters can be active.
-//
-//  Fires UIEvent.CHANGE on every toggle.  Use GetActiveFilters() to read
-//  which labels are currently active, or GetActiveIndices() for indices.
-//
-//  Usage:
-//      m_Filter = UIActionManager.CreateFilterBar( parent,
-//          { "All", "Online", "Offline", "Banned" }, this, "OnChange_Filter" );
-//      m_Filter.SetActive( 0 );   // default to "All"
-//
-//      void OnChange_Filter( UIEvent eid, UIActionBase action )
-//      {
-//          array<string> active = m_Filter.GetActiveFilters();
-//      }
-// =============================================================================
+//  UIActionFilterBar - horizontal row of labeled toggle-buttons used as filters. Exclusive (default,
+//  like tabs) or multi-select. Fires UIEvent.CHANGE on every toggle; read state with
+//  GetActiveFilters() (labels) or GetActiveIndices(). SetActive( 0 ) picks the default.
+//  Create with UIActionManager.CreateFilterBar( parent, { "All", ... }, this, "OnChange_Filter" ).
 class UIActionFilterBar: UIActionBase
 {
 	protected Widget m_Bar;

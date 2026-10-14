@@ -4,13 +4,10 @@ class JMStatics
 	static Widget COT_MENU;
 	static Widget WINDOWS_CONTAINER;
 
-	//! Floating overlays: popups that live outside the window they belong to
-	//! (the colour picker's ARGB panel, for one) so the window cannot clip them.
-	//! COTModule decides "did this click land on COT UI or on the world" by
-	//! walking a widget's ancestors looking for a window; an overlay parented
-	//! next to the windows instead of inside one fails that test, the click is
-	//! read as a world click, and the game grabs the mouse back mid-drag.
-	//! Registering the overlay's root makes that walk recognise it.
+	//! Floating overlays: popups parented outside their window so it cannot clip them.
+	//! COTModule finds COT UI clicks by walking ancestors for a window; an overlay fails
+	//! that test, reads as a world click and the game grabs the mouse mid-drag.
+	//! Registering the overlay's root makes the walk recognise it.
 	static ref array<Widget> OVERLAY_WIDGETS;
 
 	static ref ScriptInvoker SERVER_STATS_TICK;

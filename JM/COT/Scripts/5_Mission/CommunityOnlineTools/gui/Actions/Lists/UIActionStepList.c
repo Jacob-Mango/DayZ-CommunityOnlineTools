@@ -1,21 +1,7 @@
-// =============================================================================
-//  UIActionStepList
-//
-//  An ordered list of string items, each displayed with its 1-based index,
-//  label text, and Up / Down / Remove buttons.  Fires UIEvent.CHANGE whenever
-//  the list order or content changes.  GetItems() returns the current order.
-//
-//  Usage:
-//      m_Steps = UIActionManager.CreateStepList( parent, "Spawn Sequence",
-//          this, "OnChange_Steps" );
-//      m_Steps.AddItem( "Give AK-74" );
-//      m_Steps.AddItem( "Give Vest"  );
-//
-//      void OnChange_Steps( UIEvent eid, UIActionBase action )
-//      {
-//          array<string> steps = m_Steps.GetItems();
-//      }
-// =============================================================================
+// UIActionStepList: ordered list of string items, each with 1-based index, label and
+// Up / Down / Remove buttons. Fires UIEvent.CHANGE when order or content changes;
+// GetItems() returns the current order.
+// Usage: m_Steps = UIActionManager.CreateStepList( parent, "Title", this, "OnChange_Steps" );
 
 class JMStepListRow
 {

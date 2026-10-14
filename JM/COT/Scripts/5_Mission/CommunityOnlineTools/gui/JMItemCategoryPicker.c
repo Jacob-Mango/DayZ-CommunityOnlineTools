@@ -1,24 +1,7 @@
-//! The item category filter - a filter button (id / group menu) plus a strip of the most recently used
-//! categories - shared by every form that filters a list of item classes (Object Spawner, Loot Analysis).
-//!
-//! One table of categories, one grouped menu (All + four groups, each a page of UIActionFilterMenu), one chip
-//! strip; a form owns a picker, points it at the strip's wrapper widget and is told which category is active:
-//!
-//!     m_Categories = new JMItemCategoryPicker( this, m_RecentWrapper, JMFilterRegistry.OBJECTS, this, "OnCategoryChanged" );
-//!     ...
-//!     void OnClick_CategoryFilter( UIEvent eid, UIActionBase action )
-//!     {
-//!         if ( eid == UIEvent.CLICK )
-//!             m_Categories.Toggle( m_FilterButton.GetLayoutRoot() );
-//!     }
-//!
-//!     void OnCategoryChanged( string categoryId )   // "" = everything, else the config base class to filter on
-//!     {
-//!         m_CurrentType = categoryId;
-//!         UpdateList();
-//!     }
-//!
-//! Mods add rows to the menu with JMFilterRegistry.Register( registryScope, ... ).
+//! The item category filter - a filter button (id / group menu) plus a strip of recently used
+//! categories - shared by forms that filter item classes (Object Spawner, Loot Analysis).
+//! A form owns a picker, points it at the strip's wrapper widget, calls Toggle( button ) on
+//! click and is told the active category id ("" = everything). Mods add menu rows with JMFilterRegistry.Register.
 class JMItemCategoryPicker
 {
 	//! Categories are presented in groups, each opening a submenu, the way the
@@ -102,11 +85,9 @@ class JMItemCategoryPicker
 	//  Categories
 	// -------------------------------------------------------------------------
 
-	//! Id / icon / label for every category, in menu order. The id is the config
-	//! base class the list filters on; "" is everything.
-	//!
-	//! One table, read by both the menu and the recent chips, so the two can
-	//! never drift apart.
+	//! Id / icon / label for every category, in menu order. The id is the config base
+	//! class the list filters on; "" is everything. One table read by both the menu and
+	//! the recent chips, so the two cannot drift apart.
 	static void CategoryTable( out TStringArray ids, out TStringArray icons, out TStringArray labels )
 	{
 		ids = new TStringArray;
@@ -266,11 +247,9 @@ class JMItemCategoryPicker
 	{
 		m_Current = id;
 
-		//! A chip press must never destroy the strip it landed on. Adding a
-		//! category the strip does not hold yet is the only thing that changes
-		//! its shape, and even then the rebuild is deferred a tick so it cannot
-		//! happen inside the click that caused it - the engine answers a
-		//! vanished press target by recentring the cursor.
+		//! A chip press must never destroy the strip it landed on. Adding a category the
+		//! strip lacks changes its shape, so the rebuild is deferred a tick; the engine
+		//! answers a vanished press target by recentring the cursor.
 		if ( PushRecent( id ) )
 			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Call( RebuildRecent );
 		else
@@ -394,12 +373,9 @@ class JMItemCategoryPicker
 	//  Recent chips
 	// -------------------------------------------------------------------------
 
-	//! Newest first, capped. Returns whether the strip's contents changed.
-	//!
-	//! Re-picking a category the strip ALREADY holds leaves the order alone.
-	//! Promoting it to the front would slide every other chip sideways under
-	//! the cursor that just pressed one, which is the last thing a shortcut
-	//! bar should do. "All" gets no chip - it is the first row of the menu.
+	//! Newest first, capped. Returns whether the strip's contents changed. Re-picking a
+	//! category the strip ALREADY holds leaves the order alone, as promoting it would slide
+	//! every other chip under the cursor. "All" gets no chip - it is the first menu row.
 	protected bool PushRecent( string id )
 	{
 		if ( id == "" )

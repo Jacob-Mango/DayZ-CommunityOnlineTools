@@ -1,11 +1,7 @@
-//! One tracked object: what the ESP knows about it and how to reach it.
-//!
-//! This used to own a panel of controls that unfolded under the tag. It does
-//! not any more - every action lives in JMESPActionMenu, reachable by
-//! right-clicking either the world tag or the object's row in the ESP form.
-//! One menu means one place to add an action and one set of permission checks,
-//! instead of a widget tree per visible object that had to be built, refreshed
-//! and torn down whether anyone ever opened it or not.
+//! One tracked object: what the ESP knows about it and how to reach it. Every
+//! action lives in JMESPActionMenu (right-click the world tag or the ESP row):
+//! one place to add an action and one set of permission checks, with no widget
+//! tree per visible object.
 class JMESPMeta: COT_WidgetHolder
 {
 #ifdef DIAG
@@ -99,12 +95,9 @@ class JMESPMeta: COT_WidgetHolder
 		targetType = GetType();
 	}
 
-	//! Construction parts, for the objects that have any. NULL everywhere else,
-	//! which is what keeps the base building page out of a rock's menu.
-	//!
-	//! Anything with a construction component answers, not only base building
-	//! objects: the rebuildable map buildings (irrigation tunnel entrance, wells,
-	//! rebuildable houses) build and dismantle through the same page.
+	//! Construction parts, for objects that have any (NULL elsewhere, which keeps
+	//! the base building page out of a rock's menu). Anything with a construction
+	//! component answers, e.g. rebuildable map buildings and wells.
 	map< string, ref JMConstructionPartData > GetConstructionParts()
 	{
 		ConstructionBase construction = JMESPModule.GetConstructionOf( target );
@@ -208,14 +201,10 @@ class JMESPMeta: COT_WidgetHolder
 		return true;
 	}
 
-	//! DEPRECATED. Kept only so third party mods that were written against the
-	//! old unfolding action panel still compile - DayZ Expansion overrides this
-	//! on JMESPMeta, JMESPMetaBaseBuilding and two meta types of its own.
-	//!
-	//! Nothing calls it any more: actions live in JMESPActionMenu, which builds
-	//! menu rows rather than widgets, so there is no `parent` to hand out. The
-	//! overrides are inert, not broken - the actions they used to add are all
-	//! reachable from the context menu instead.
+	//! DEPRECATED. Kept so third party mods written against the old action panel
+	//! still compile (Expansion overrides it on four meta types). Nothing calls it:
+	//! actions live in JMESPActionMenu, which has no `parent` widget, so the
+	//! overrides are inert, not broken.
 	void CreateActions( Widget parent )
 	{
 	}

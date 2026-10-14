@@ -1,19 +1,6 @@
-// =============================================================================
-//  UIActionSpinner
-//
-//  Label + value display + -/+ buttons for integer/float stepping.
-//  Mouse-wheel over the widget also increments/decrements.
-//  Fires UIEvent.CHANGE whenever the value changes.
-//
-//  Usage:
-//      m_Qty = UIActionManager.CreateSpinner( parent, "Quantity", 1, 100, 1, this, "OnChange_Qty" );
-//      m_Qty.SetValue( 10 );
-//
-//      void OnChange_Qty( UIEvent eid, UIActionBase action )
-//      {
-//          int qty = m_Qty.GetValueInt();
-//      }
-// =============================================================================
+//  UIActionSpinner - label + value + -/+ buttons for integer/float stepping; mouse
+//  wheel also steps. Fires UIEvent.CHANGE on change.
+//  CreateSpinner( parent, "Quantity", 1, 100, 1, this, "OnChange_Qty" );
 class UIActionSpinner: UIActionBase
 {
 	protected TextWidget   m_Label;
@@ -84,17 +71,9 @@ class UIActionSpinner: UIActionBase
 			m_Label.SetText( text );
 	}
 
-	//! Pull whatever is currently typed into the edit box into m_Value.
-	//!
-	//! The engine only fires OnChange( finished ) when the box loses focus or the
-	//! user presses enter. Clicking +/- (or scrolling) straight after typing does
-	//! neither, so the step used to be applied to the LAST committed value and the
-	//! typed number visibly reverted. Every entry point that steps the value calls
-	//! this first.
-	//!
-	//! An empty or non-numeric box is left alone rather than being read as 0,
-	//! which would otherwise snap the value to m_Min the moment the user cleared
-	//! the field and pressed a button.
+	//! Pull the typed edit box text into m_Value. OnChange( finished ) only fires on
+	//! focus loss or enter, so every stepping entry point calls this first.
+	//! Empty/non-numeric text is ignored, not read as 0 (which would snap to m_Min).
 	protected void CommitEditBox()
 	{
 		if ( !m_EditBox )

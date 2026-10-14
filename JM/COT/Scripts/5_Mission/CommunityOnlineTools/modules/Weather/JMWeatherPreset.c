@@ -130,15 +130,10 @@ class JMWeatherStorm: JMWeatherBase
 		}
 	}
 
-	//! Weather exposes SetStorm with no matching getter, so the storm state
-	//! genuinely cannot be read back. -1 is this class's "not set" marker and
-	//! makes Apply skip it, which is the only honest snapshot available.
-	//!
-	//! This used to hardcode 1.0 / 0.7 / 25.0 and present them as the world's
-	//! values. Anything that snapshots and re-applies - Freeze Time above all,
-	//! which re-applies once a second - was therefore CREATING a full-density
-	//! thunderstorm on a server that had none, and the form showed those
-	//! invented figures as if they were live.
+	//! Weather has SetStorm but no getter, so storm state cannot be read back. -1
+	//! is the "not set" marker and makes Apply skip it - the only honest snapshot.
+	//! Never hardcode values: snapshot-and-reapply (Freeze Time, every second)
+	//! would create a thunderstorm on a server that had none.
 	override void SetFromWorld()
 	{
 		Density = -1;
@@ -288,17 +283,10 @@ class JMWeatherSandstorm: JMWeatherBase
 	#ifndef DAYZ_1_29
 		//! 1.30+
 
-		//! Unlike Fog/Rain/etc (JMWeatherPhenomenon, reading vanilla
-		//! WeatherPhenomenon forecasts the engine replicates to clients),
-		//! SandstormController's active flag is server-only state with no
-		//! client replication. A client calling IsActive() always reads
-		//! false/stale, so this used to snap the checkbox back off on the
-		//! very next refresh after an admin turned it on - the refresh raced
-		//! JMWeatherForm's own m_DirtySandstorm guard, which ApplySandstorm()
-		//! clears right after sending the RPC, before there is any ack to
-		//! clear it on. Matches Apply()'s own client no-op above: a client
-		//! leaves Enabled at its last known value instead of trusting a read
-		//! it cannot make accurately.
+		//! Unlike Fog/Rain (replicated forecasts), SandstormController's active flag is
+		//! server-only: a client IsActive() reads false/stale and snapped the checkbox
+		//! off on refresh (racing JMWeatherForm's m_DirtySandstorm guard). Like Apply()'s
+		//! client no-op, a client keeps Enabled at its last known value.
 		if (!g_Game.IsServer())
 			return;
 
@@ -426,13 +414,9 @@ class JMWeatherPhenomenon: JMWeatherBase
 		}
 	}
 
-	//! Apply with a caller-supplied fade and hold, leaving the values the
-	//! preset was saved with untouched.
-	//!
-	//! The dynamic chain draws fresh timing on every roll. Writing that draw
-	//! into the stored preset would persist a random number into Weather.json
-	//! and quietly rewrite what the admin authored, so it is stamped for the
-	//! duration of the call and put back afterwards.
+	//! Apply with a caller-supplied fade and hold, leaving the saved values
+	//! untouched. The chain's random timing is stamped for the call and restored,
+	//! so it never persists into Weather.json and rewrites what the admin authored.
 	void ApplyTimed( float timeOverride, float durationOverride )
 	{
 		float savedTime     = Time;
@@ -452,11 +436,9 @@ class JMWeatherPhenomenon: JMWeatherBase
 		Forecast = GetPhenomenon().GetForecast();
 		ForecastHi = 0;
 
-		//! NOT GetNextChange(). That is the countdown until the weather
-		//! controller computes its next forecast - up to an hour - and Apply
-		//! feeds this field back in as the INTERPOLATION time. Reading the
-		//! world and re-applying it therefore produced multi-minute fades
-		//! nobody asked for. A captured state is applied as it stands.
+		//! NOT GetNextChange(): that is the countdown to the next forecast (up to
+		//! an hour) and Apply feeds this field back as INTERPOLATION time, giving
+		//! multi-minute fades. A captured state is applied as it stands.
 		Time = 0;
 
 		MinDuration = 240.0;
@@ -948,15 +930,10 @@ class JMWeatherPreset
 	autoptr JMWeatherWindDirection PWindDirection;
 	autoptr JMWeatherWindFunction WindFunc;
 
-	// --- Legacy dynamic block, read once and then cleared --------------------
-	//! Before the state machine, a preset carried its own chain settings: whether
-	//! it took part, how long it held, and where it could go next. That all lives
-	//! on JMWeatherState / JMWeatherPhase now - a preset is only weather values.
-	//!
-	//! The fields stay DECLARED because JsonFileLoader can only read a field the
-	//! class still has; deleting them would silently drop an existing
-	//! configuration on the first load instead of migrating it.
-	//! JMWeatherSerialize.MigrateToStates folds them into states and zeroes them.
+	//! Legacy dynamic block (chain settings now on JMWeatherState / JMWeatherPhase),
+	//! read once then cleared. Kept DECLARED so JsonFileLoader can still read old
+	//! configs; JMWeatherSerialize.MigrateToStates folds them into states and
+	//! zeroes them.
 	bool InRotation;
 	int DurationMin;
 	int DurationMax;
@@ -1033,11 +1010,9 @@ class JMWeatherPreset
 		}
 	}
 
-	//! Apply, but with the dynamic chain's timing rather than the preset's own.
-	//!
-	//! Only the phenomena take the override - they are the parts that fade. The
-	//! date, storm, threshold and wind-function blocks are stamped exactly as
-	//! they were authored.
+	//! Apply with the dynamic chain's timing rather than the preset's own. Only
+	//! the phenomena (the parts that fade) take the override; date, storm,
+	//! threshold and wind-function blocks are stamped as authored.
 	void ApplyTimed( float transition, float duration )
 	{
 		PDate.Apply();
@@ -1080,13 +1055,9 @@ class JMWeatherPreset
 		}
 	}
 
-	//! A preset that changes NOTHING: every marker field is -1, which is what each
-	//! JMWeatherBase.Apply checks before it writes. The caller opts into the one or
-	//! two phenomena it is actually about.
-	//!
-	//! The bundled presets used to set every field on every preset, so "No Rain"
-	//! also forced overcast, snow, wind magnitude and wind direction to zero and
-	//! held all of them - a preset doing four things its name does not mention.
+	//! A preset that changes NOTHING: every marker field is -1 (what each
+	//! JMWeatherBase.Apply checks before writing). The caller opts into only the
+	//! phenomena it is about, so "No Rain" no longer also zeroes snow and wind.
 	static JMWeatherPreset Neutral( string name )
 	{
 		JMWeatherPreset preset = new JMWeatherPreset;

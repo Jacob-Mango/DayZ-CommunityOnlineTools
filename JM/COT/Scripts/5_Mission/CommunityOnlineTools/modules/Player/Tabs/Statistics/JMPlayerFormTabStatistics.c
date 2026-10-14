@@ -1,9 +1,7 @@
 //! "Statistics" tab of JMPlayerForm - session, combat and (Expansion-only)
 //! wallet/faction/reputation/group readouts for the selected player.
-//! Back-reference to the owning form, same shape as JMPlayerRowWidget.Menu.
-//! Confirmation-bound methods stay off this file entirely - the Statistics
-//! tab has none - see JMPlayerForm.c's remaining General/Position/Inventory/
-//! Actions code for why those tabs could not be split the same way.
+//! Back-reference to the owning form. No confirmation-bound methods here (the tab has none); see
+//! JMPlayerForm.c for why the other tabs could not be split the same way.
 class JMPlayerFormTabStatistics: JMFormTab
 {
 	protected JMPlayerForm m_Form;
@@ -52,11 +50,8 @@ class JMPlayerFormTabStatistics: JMFormTab
 
 		Widget parent = UIActionManager.CreateGridSpacer( panel, 12, 1 );
 
-		// Refresh acts on both cards below it, so it sits in the session card
-		// title bar - the same place the Position and Inventory cards put
-		// theirs, spelled with the same glyph. It used to be a loose icon inside
-		// the card body nudged to x=0.9, which cost a row of height and drifted
-		// against the values column as the form was resized.
+		// Refresh acts on both cards below, so it sits in the session card title bar like the
+		// Position and Inventory cards' (same glyph); a loose icon in the body cost a row of height.
 		UIActionCard section0Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_SESSION" );
 		Widget section0 = section0Card.GetContent();
 		m_StatsRefreshButton = section0Card.AddRefreshButton( this, "" );
@@ -147,11 +142,8 @@ class JMPlayerFormTabStatistics: JMFormTab
 		RefreshStatisticsPanel();
 	}
 
-	//! Ask the anti-cheat module for its kill table.
-	//!
-	//! On a listen host RequestFlags() returns without sending anything - there
-	//! is no wire to send over - so the server-side map is read directly instead.
-	//! Only the request differs; both paths end up in RefreshStatisticsPanel.
+	//! Ask the anti-cheat module for its kill table. On a listen host RequestFlags() sends nothing
+	//! (no wire), so the server-side map is read directly; both paths end in RefreshStatisticsPanel.
 	protected void RequestKillStats()
 	{
 		if ( !m_AntiCheatModule )

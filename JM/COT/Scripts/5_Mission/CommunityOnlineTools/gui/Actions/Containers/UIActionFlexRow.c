@@ -1,44 +1,8 @@
-// -----------------------------------------------------------------------------
-//  UIActionFlexRow - CSS-flexbox-style row layout for COT UI.
-//
-//  WHY THIS EXISTS
-//  The DayZ WrapSpacer engine gives you two width modes per child:
-//    * SetFixedSize(px)   - never grows, never shrinks
-//    * SetWidth(fraction) - grows/shrinks with the row, but has NO floor
-//  There is no way to say "at least N px, but grow to fill leftover space"
-//  (CSS `min-width` + `flex-grow`). A pure fraction collapses to nothing on a
-//  narrow form; a pure fixed size never fills a wide one. This class adds that
-//  missing behaviour on top of the engine, without fighting it.
-//
-//  MODEL (mirrors flexbox)
-//    Each flex child has:  grow (weight), basisPx (min width floor), maxPx (ceiling).
-//    Layout pass:
-//      1. Measure the row's real inner width in EXACT pixels (GetScreenSize).
-//      2. Reserve every child's basisPx floor. Sum = reserved.
-//      3. leftover = rowWidth - reserved  (clamped >= 0).
-//      4. Distribute leftover across children by grow weight.
-//      5. Each child width = clamp( basisPx + share, basisPx, maxPx ).
-//      6. Apply via ApplyFlexWidthPx (exact-pixel space - same space we measured,
-//         so no screen/layout unit mismatch, i.e. no DPI trap).
-//
-//  DPI SAFETY
-//  We only ever mix values from the SAME coordinate space: GetScreenSize gives
-//  exact screen pixels, ApplyFlexWidthPx sets exact-size pixels, and the row's
-//  own children are measured and set in that one space. We never back-compute a
-//  fractional-fill dimension from a screen measurement (that was the historical
-//  UIActionScrollerH bug).
-//
-//  USAGE
-//    In OnInit:
-//      m_Footer = UIActionManager.CreateFlexRow( actionsWrap );
-//      UIActionConfirmInline del = UIActionManager.CreateConfirmInline( m_Footer.GetContent(), ... );
-//      del.SetFixedSize( 32, 32 );                 // non-flex child: fixed
-//      m_Footer.Add( del );                         // reserved at its fixed width
-//      m_SpawnBtn.SetFlex( 1.0, 160 );              // grow=1, min 160px, unbounded
-//      m_Footer.Add( m_SpawnBtn );
-//    In OnResize:
-//      if ( m_Footer ) m_Footer.Layout();
-// -----------------------------------------------------------------------------
+//  UIActionFlexRow - flexbox-style row (WrapSpacer lacks "min px but grow"): grow, basisPx
+//  floor, maxPx ceiling per child. Layout() works in exact pixels only (mixing
+//  spaces was the old UIActionScrollerH DPI bug); call it from OnResize.
+//  Usage: CreateFlexRow, child.SetFlex( 1.0, 160 ), Add( child ).
+
 class UIActionFlexRow
 {
 	protected Widget m_Row;                         // the WrapSpacer this row lays out
@@ -117,12 +81,9 @@ class UIActionFlexRow
 			reserved += e.floorPx;
 		}
 
-		// 3. Leftover space to distribute among growing children.
-		//    The WrapSpacer inserts padding BETWEEN children on top of the widths
-		//    we apply, so if we distributed the full rowW the total (widths +
-		//    padding) would exceed the row and the last child would wrap to a new
-		//    line. Reserve a gap allowance per inter-child boundary so the applied
-		//    widths plus padding stay within rowW.
+		// 3. Leftover space for growing children. WrapSpacer adds padding between
+		//    children on top of applied widths, so reserve a gap per boundary or
+		//    the last child wraps to a new line.
 		int gaps = m_Entries.Count() - 1;
 		if ( gaps < 0 )
 			gaps = 0;

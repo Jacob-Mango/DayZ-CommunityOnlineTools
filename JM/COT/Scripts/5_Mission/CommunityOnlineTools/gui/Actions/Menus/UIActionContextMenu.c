@@ -1,39 +1,7 @@
-// =============================================================================
-//  UIActionContextMenu
-//
-//  A right-click popup menu. Items carry a string ID, a label, an optional
-//  icon and an optional label colour; clicking one fires UIEvent.CLICK and
-//  GetLastClickedId() returns which. Closes on Escape or on a click outside
-//  itself.
-//
-//  The menu draws nothing until OpenAt() is called. Its own layoutRoot is a 1px
-//  transparent stub that only exists to keep the per-frame Update() running -
-//  the visible panel is a separate widget parented to the anchor passed to
-//  InitMenu(), so the popup floats above whatever the host is drawing instead
-//  of being clipped by it. Anchor to the window root, the way the dropdown list
-//  does.
-//
-//  Because the panel is NOT a child of the host content widget, hiding that
-//  content does not hide an open menu. A host that shows and hides panels (a
-//  tab bar, a collapsible section) must call Close() when it switches away.
-//
-//  Usage:
-//      m_Menu = UIActionManager.CreateContextMenu( parent, m_Window.GetWidgetRoot(), this, "OnClick_Menu" );
-//
-//      // on right-click, rebuild for whatever was hit and open at the cursor:
-//      m_Menu.ClearItems();
-//      m_Menu.AddItem( "take",   "Take",   JMConstants.Lucide( "hand" ) );
-//      m_Menu.AddItem( "delete", "Delete", JMConstants.ICON_TRASH_CAN, JMTheme.DANGER );
-//      m_Menu.SetItemEnabled( "delete", JMPermissions.Has( "..." ) );
-//      m_Menu.OpenAt( m_Table.GetLastRightClickX(), m_Table.GetLastRightClickY() );
-//
-//      void OnClick_Menu( UIEvent eid, UIActionBase action )
-//      {
-//          if ( eid != UIEvent.CLICK )
-//              return;
-//          string id = m_Menu.GetLastClickedId();
-//      }
-// =============================================================================
+//  UIActionContextMenu - right-click popup; items (id, label, icon, colour) fire UIEvent.CLICK and
+//  GetLastClickedId() says which. Closes on Escape or outside click. Draws nothing until OpenAt();
+//  layoutRoot is a 1px stub keeping Update() running, the panel is parented to the InitMenu() anchor
+//  (use the window root) so it is not clipped; hosts that hide panels must Close() it themselves.
 
 class JMContextMenuEntry
 {
@@ -124,14 +92,9 @@ class UIActionContextMenu: UIActionBase
 	static const int COLOR_TEXT         = JMTheme.TEXT_PRIMARY;
 	static const int COLOR_TEXT_OFF     = JMTheme.TEXT_DISABLED;
 
-	//! Left edge of the label, in pixels from the row's own left edge. The icon
-	//! strip is 12 (position) + 16 (size) = 28, so 38 clears it with a gap. A
-	//! row without an icon pulls its label back to a plain padding so text-only
-	//! menus are not indented for an icon that is not there.
-	//!
-	//! These are widget positions rather than SetTextOffset values on purpose:
-	//! the auto-width measurement adds one of them to the measured text width,
-	//! and it can only do that if the number is where the text actually starts.
+	//! Label left edge in pixels from the row's left. The icon strip is 12 + 16 = 28, so 38
+	//! clears it; icon-less rows use plain padding. Widget positions, not SetTextOffset:
+	//! auto-width adds one to the measured text width and needs where text actually starts.
 	static const int TEXT_LEFT_ICON     = 38;
 	static const int TEXT_LEFT_PLAIN    = 12;
 
@@ -196,12 +159,9 @@ class UIActionContextMenu: UIActionBase
 		m_CloseOnClick = closeOnClick;
 	}
 
-	//! `callback` on `target` is called with a Param1<string>: the id of the row
-	//! the pointer moved onto, or "" once it is on none.
-	//!
-	//! Its own callback rather than a hover UIEvent through the click callback:
-	//! not every existing click handler checks for UIEvent.CLICK, and a new event
-	//! reaching one of those would read as a click.
+	//! `callback` on `target` gets a Param1<string>: the id of the row hovered, or "" for none.
+	//! Its own callback, not a hover UIEvent via the click callback: handlers that do not
+	//! check for UIEvent.CLICK would read it as a click.
 	void SetHoverCallback( Class target, string callback )
 	{
 		m_HoverTarget = target;
@@ -224,12 +184,9 @@ class UIActionContextMenu: UIActionBase
 			GetGame().GameScript.CallFunctionParams( m_HoverTarget, m_HoverCallback, null, new Param1<string>( id ) );
 	}
 
-	//! Lay the entries out in `columns` columns (1 or 2). Call it before the
-	//! first AddItem.
-	//!
-	//! A GridSpacer's column count is fixed by its layout - there is no proto to
-	//! change it - so this swaps the panel for the two-column authoring of it
-	//! and rebuilds. Nothing else about the menu changes.
+	//! Lay the entries out in `columns` columns (1 or 2). Call before the first AddItem.
+	//! A GridSpacer's column count is fixed by its layout (no proto), so this swaps the panel
+	//! for the two-column authoring and rebuilds.
 	void SetColumns( int columns )
 	{
 		if ( columns < 1 )
@@ -277,13 +234,9 @@ class UIActionContextMenu: UIActionBase
 		RefreshRowColors();
 	}
 
-	//! Swap one item's glyph without rebuilding the menu.
-	//!
-	//! For a menu of toggles rather than a list of commands: the row has to
-	//! redraw the moment it is clicked, and it is still under the cursor when
-	//! that happens. Rebuilding would destroy the very row the press landed on,
-	//! which the engine answers by recentring the cursor - the same reason
-	//! RefreshTypeFilterColors exists rather than a rebuild.
+	//! Swap one item's glyph without rebuilding the menu, for toggle menus: rebuilding would
+	//! destroy the row under the cursor and the engine answers by recentring the cursor
+	//! (same reason RefreshTypeFilterColors exists).
 	void SetItemIcon( string id, string icon )
 	{
 		int index = -1;
@@ -376,17 +329,10 @@ class UIActionContextMenu: UIActionBase
 		m_OwnerWidget = owner;
 	}
 
-	//! The native scrollbar track/thumb is drawn by ScrollWidget itself, not
-	//! exposed as a separate child - there is no engine call to toggle it
-	//! (enwidgets.c only has the getters GetScrollbarWidth/IsScrollbarVisible,
-	//! no setter), and it reserves its gutter width regardless of whether
-	//! there is anything to scroll.
-	//!
-	//! So instead of hiding it, this pushes the scroller past the panel's
-	//! right edge by exactly that gutter width when it is not needed - the
-	//! panel has clipchildren 1, so the reserved column lands outside the
-	//! visible rect and gets cropped away instead of drawing as a bar with
-	//! nothing behind it.
+	//! The native scrollbar is drawn by ScrollWidget itself with no setter to hide it (only
+	//! GetScrollbarWidth/IsScrollbarVisible) and it reserves its gutter regardless. So when not
+	//! needed, push the scroller past the panel's right edge by the gutter width; clipchildren 1
+	//! crops the reserved column away.
 	protected void SetScrollbarVisible( bool visible )
 	{
 		if ( !m_Scroller )
@@ -447,11 +393,9 @@ class UIActionContextMenu: UIActionBase
 			if ( m_Scroller )
 				m_Scroller.SetHandler( this );
 
-			// The panel floats outside its anchor's normal hierarchy (see the
-			// class note above) so COTModule's "was this click on COT UI?"
-			// ancestor walk cannot find a window above it - without this every
-			// click on the menu reads as a world click and the game grabs the
-			// mouse back, which is what looks like "the menu/sidebar closed".
+			// The panel floats outside its anchor's hierarchy, so COTModule's ancestor walk finds
+			// no window above it; without this every menu click reads as a world click and the
+			// game grabs the mouse back (looks like "the menu/sidebar closed").
 			JMStatics.AddOverlay( m_Panel );
 		}
 		else
@@ -503,11 +447,9 @@ class UIActionContextMenu: UIActionBase
 		}
 	}
 
-	//! The base class's IsVisible() reads layoutRoot, which for this control is
-	//! a 1px stub that only exists to keep Update() running (see class note) -
-	//! it is not the actual popup panel and does not track open/closed. m_Open
-	//! does, so the Escape priority chain (JMFormBase.HasOpenOverlay) sees the
-	//! real state instead of the always-visible stub.
+	//! The base IsVisible() reads layoutRoot, a 1px always-visible stub, not the popup panel.
+	//! m_Open tracks open/closed, so the Escape chain (JMFormBase.HasOpenOverlay) sees the
+	//! real state.
 	override bool IsVisible()
 	{
 		return m_Open;
@@ -739,11 +681,9 @@ class UIActionContextMenu: UIActionBase
 		return -1;
 	}
 
-	//! Left button only. A menu is usually raised BY a right-click, and the
-	//! button is often still held when the rows appear under the cursor - so a
-	//! right press landing on a row must not count as picking it. The row is
-	//! still swallowed rather than passed on, so the press cannot reach
-	//! whatever the menu is covering either.
+	//! Left button only: a menu is raised BY a right-click that may still be held when rows
+	//! appear under the cursor, so a right press must not pick one. The press is still
+	//! swallowed so it cannot reach whatever the menu covers.
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		int idx = RowIndexOf( w );
@@ -880,12 +820,9 @@ class UIActionContextMenu: UIActionBase
 		m_Anchor.GetScreenPos( ax, ay );
 		m_Anchor.GetScreenSize( aw, ah );
 
-		//! The panel floats above the anchor's own container (see the class note
-		//! on CreateContextMenu), so it is not clipped to the anchor's box - a
-		//! form window shorter than the screen is not a ceiling for the menu.
-		//! Flip and fit are measured against the real screen instead, or a menu
-		//! opened near the bottom of a small window got a scrollbar it did not
-		//! need, with empty screen below the window doing nothing about it.
+		//! The panel floats above the anchor's container and is not clipped to it, so flip and
+		//! fit are measured against the real screen; against the window, a menu near the
+		//! bottom of a small window got a needless scrollbar.
 		float screenW, screenH;
 		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
 
@@ -912,11 +849,9 @@ class UIActionContextMenu: UIActionBase
 		if ( py < 0 )
 			py = 0;
 
-		// A menu taller than the screen still does not fit after flipping -
-		// there is nowhere left to flip it TO. Capping the panel at the room
-		// actually available and leaving the scroller to hold the rest beats
-		// running the bottom rows off the edge with no way to reach them,
-		// which is what a plain flip alone left it doing.
+		// A menu taller than the screen still does not fit after flipping. Cap the panel at the
+		// room available and let the scroller hold the rest, rather than running rows off the
+		// edge unreachably.
 		float drawHeight = m_FullHeight;
 		float available = screenH - ay - py - JMUILayout.Px( 8 );
 		if ( available > 0 && drawHeight > available )

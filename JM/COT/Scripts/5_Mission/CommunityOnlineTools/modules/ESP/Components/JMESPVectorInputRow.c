@@ -1,16 +1,7 @@
-//! X/Y/Z input row with no label or button column - JMESPTransformPopup
-//! puts the label on its own line above (next to the copy/paste/apply
-//! buttons) and wants the row below it to be nothing but the three fields,
-//! full width. UIActionEditableVector always reserves a label column, so
-//! this is that same field chrome (identical action_x/y/z markup) without
-//! it, rather than a wasted blank 30% of the row.
-//!
-//! Ring highlighting is NOT the inherited UIActionBase.OnRegisterChrome/
-//! ApplyChrome path - that system tracks ONE hovered/focused flag for the
-//! whole control and paints every registered ring the same colour, which
-//! for three side-by-side boxes means hovering X lights up Y and Z too.
-//! This class colours each ring from that one field's own hover/focus state
-//! instead, so only the box the cursor or caret is actually in lights up.
+//! X/Y/Z input row without UIActionEditableVector's label column (same action_x/y/z chrome), so
+//! JMESPTransformPopup gets three full-width fields. Rings are NOT the inherited OnRegisterChrome/
+//! ApplyChrome path (one hover flag for the whole control would light Y and Z when hovering X);
+//! each ring follows its own field's hover/focus state.
 class JMESPVectorInputRow: UIActionBase
 {
 	protected EditBoxWidget m_TextX;

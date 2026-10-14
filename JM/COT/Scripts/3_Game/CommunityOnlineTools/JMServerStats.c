@@ -1,15 +1,7 @@
-// =============================================================================
-//  JMServerStats.c
-//
-//  Client-side mirror of the server performance numbers, plus the thresholds
-//  and formatting every consumer of them shares.
-//
-//  Lives in 3_Game because the producer and the consumer sit on opposite sides
-//  of a layer boundary: JMServerStatsModule (5_Mission) samples on the server
-//  and writes here when the broadcast lands, JMCOTSideBarFooter (4_World) reads
-//  here to render. 4_World cannot name a 5_Mission type, so the values pass
-//  through a layer both can see.
-// =============================================================================
+//  JMServerStats.c - client-side mirror of the server performance numbers, plus shared
+//  thresholds and formatting. Lives in 3_Game because JMServerStatsModule (5_Mission)
+//  writes it and JMCOTSideBarFooter (4_World) reads it; 4_World cannot name 5_Mission
+//  types, so the values pass through a layer both can see.
 
 class JMServerStats
 {
@@ -40,11 +32,10 @@ class JMServerStats
 	//! At or above this it is drawn amber; below it, red.
 	static const float FPS_CAUTION = 25.0;
 
-	// --- Spread thresholds ---------------------------------------------------
-	//  The one-percent lows and highs are judged against the average, not
-	//  against a fixed number. A 1% low of 45 is healthy next to an average of
-	//  55 and alarming next to an average of 90: what a player feels is the
-	//  gap, because that gap is the frame that arrives late.
+	// --- Spread thresholds ---
+	//  One-percent lows/highs are judged against the average, not a fixed number:
+	//  a 1% low of 45 is fine next to avg 55 but alarming next to avg 90. The gap
+	//  is what a player feels.
 
 	//! Fraction of the average a one-percent value may sit away from it before
 	//! it is drawn amber.
@@ -103,15 +94,10 @@ class JMServerStats
 		return JMTheme.VALUE_BAD;
 	}
 
-	//! Colour for a one-percent low or high, from its distance to the average
-	//! and nothing else.
-	//!
-	//! The absolute thresholds deliberately play no part here. A tail sitting a
-	//! frame or two from the average is the same news whether the server runs
-	//! at 60 or at 30 - the server is steady - and running the absolute test as
-	//! well painted 29-against-an-average-of-30 amber purely because 29 is
-	//! under FPS_OK. How bad the server is in absolute terms is the average's
-	//! job to say, and it says it in the very next value along the row.
+	//! Colour for a one-percent low or high, from its distance to the average only.
+	//! Absolute thresholds deliberately play no part: a tail a frame or two from the
+	//! average is the same news at 60 or 30 fps (29 vs avg 30 must not go amber just
+	//! for being under FPS_OK). The average's own colour reports absolute health.
 	static int ColorForSpread( float fps )
 	{
 		return ColorForSeverity( SpreadSeverityFor( fps ) );

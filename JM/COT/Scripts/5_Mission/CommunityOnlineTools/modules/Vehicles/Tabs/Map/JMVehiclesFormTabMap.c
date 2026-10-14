@@ -1,12 +1,7 @@
-//! "Map" tab of JMVehiclesForm - the world map, one marker per vehicle the
-//! roster is showing, the hover readout, the selection ring and the right-click
-//! marker menu. Back-reference to the owning form, same shape as
-//! JMPlayerRowWidget.Menu.
-//!
-//! The roster (and its filters) stay on the form; it decides WHICH vehicles are
-//! on screen and tells this tab to add, patch or drop the matching markers.
-//! Picking a vehicle - from a marker here or a row there - goes back through
-//! JMVehiclesForm.SetVehicleInfo.
+//! "Map" tab of JMVehiclesForm - world map, vehicle markers, hover readout,
+//! selection ring and right-click menu. The roster stays on the form, which tells
+//! this tab which markers to add, patch or drop; picking a vehicle goes back
+//! through JMVehiclesForm.SetVehicleInfo.
 class JMVehiclesFormTabMap: JMFormTab
 {
 	protected JMVehiclesForm m_Form;
@@ -134,13 +129,9 @@ class JMVehiclesFormTabMap: JMFormTab
 		HideHoverInfo();
 	}
 
-	//! Marker sync runs off the window's per-frame Update() rather than a
-	//! Timer, same reasoning UIActionMap.TickMarkers() itself documents: a
-	//! 20 Hz Timer meant a marker only caught up with the map three frames
-	//! out of four, which reads as the markers lagging behind the terrain
-	//! while the map is being dragged. Per-frame is the only rate that
-	//! tracks a drag, and it stays cheap because TickMarkers() skips the
-	//! work whenever the view has not actually moved.
+	//! Marker sync runs off the per-frame Update(), not a Timer (see
+	//! UIActionMap.TickMarkers()): a 20 Hz Timer made markers lag the terrain while
+	//! dragging. Cheap, as TickMarkers() skips work when the view has not moved.
 	void Tick()
 	{
 		//! Ahead of the marker-placement early-out below: the hover poll is

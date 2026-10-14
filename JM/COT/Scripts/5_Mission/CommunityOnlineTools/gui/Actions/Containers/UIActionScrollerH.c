@@ -1,14 +1,6 @@
-// =============================================================================
-//  UIActionScrollerH
-//
-//  Horizontal-scrolling variant of UIActionScroller. Same widget pattern
-//  (Content GridSpacer + ScrollerContainer + Scroller thumb) but the geometry
-//  is flipped to the X axis: Content grows horizontally, thumb sits at the
-//  bottom edge, mouse wheel scrolls left/right.
-//
-//  Used by the Object Spawner category strip; could be reused for any
-//  horizontally-scrolling row of chips/buttons.
-// =============================================================================
+//  UIActionScrollerH: horizontal variant of UIActionScroller (Content grows along X,
+//  thumb at the bottom edge, wheel scrolls left/right). Used by the Object Spawner
+//  category strip.
 class UIActionScrollerH: UIActionBase
 {
 	const int WHEEL_STEP = 40;
@@ -81,12 +73,9 @@ class UIActionScrollerH: UIActionBase
 			m_ScrollerContainer.Show( false );
 			m_Scroller.Show( false );
 
-			// Do NOT set the content height here. The Content widget has
-			// vexactsize 0 (fractional) + "Size To Content H" in the layout, so
-			// it already fills the parent's height and sizes its width to the
-			// chips. Passing GetScreenSize values (screen px) into SetSize
-			// (layout px) shrinks the row on scaled displays - the "fixed short
-			// height" bug. Screen measurements are only for scroll math below.
+			// Do NOT set the content height: the layout already sizes it, and passing
+			// GetScreenSize values (screen px) into SetSize (layout px) shrinks the row
+			// on scaled displays. Screen measurements are only for the scroll math.
 			m_Position = 0;
 			return;
 		}

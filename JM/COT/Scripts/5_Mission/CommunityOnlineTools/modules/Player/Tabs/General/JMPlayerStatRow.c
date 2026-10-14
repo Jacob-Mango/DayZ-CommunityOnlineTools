@@ -1,8 +1,6 @@
 //! One stat slider on the General tab: the JMPlayerStat it edits, the slider that
-//! shows it, and whether the admin has dragged it since the last refresh.
-//!
-//! Until Apply sends it, a dragged value is the admin's, not the player's - so a
-//! refresh must not put the player's value back over it. That is Dirty.
+//! shows it, and Dirty: dragged since the last refresh. Until Apply sends it the
+//! value is the admin's, so a refresh must not overwrite it.
 class JMPlayerStatRow
 {
 	JMPlayerStat Stat;

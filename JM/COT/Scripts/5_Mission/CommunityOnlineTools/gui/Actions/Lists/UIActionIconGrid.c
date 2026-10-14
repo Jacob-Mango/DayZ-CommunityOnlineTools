@@ -1,22 +1,7 @@
-// =============================================================================
-//  UIActionIconGrid
-//
-//  A wrapping grid of 32x32 icon buttons.  Each icon has a string ID, an
-//  image path, an optional tooltip label, and an optional integer badge count.
-//  Fires UIEvent.CLICK when any icon is pressed; GetLastClickedId() returns
-//  the ID of the pressed icon.
-//
-//  Usage:
-//      m_Grid = UIActionManager.CreateIconGrid( parent, this, "OnClick_Icon" );
-//      m_Grid.AddIcon( "item_apple",  "set:dayz_inventory image:apple",  "Apple" );
-//      m_Grid.AddIcon( "item_bandage","set:dayz_inventory image:bandage","Bandage" );
-//      m_Grid.SetBadgeCount( "item_bandage", 3 );
-//
-//      void OnClick_Icon( UIEvent eid, UIActionBase action )
-//      {
-//          string id = m_Grid.GetLastClickedId();
-//      }
-// =============================================================================
+// UIActionIconGrid: wrapping grid of 32x32 icon buttons, each with a string ID, image path,
+// optional tooltip and optional badge count. Fires UIEvent.CLICK; GetLastClickedId() gives
+// the pressed ID.
+// Usage: m_Grid = UIActionManager.CreateIconGrid( parent, this, "OnClick_Icon" ); m_Grid.AddIcon(...).
 
 // Internal data for one icon slot
 class JMIconGridEntry
@@ -124,12 +109,9 @@ class UIActionIconGrid: UIActionBase
 		}
 	}
 
-	//! Turn off the latched highlight.
-	//!
-	//! A cell that stays blue is a claim that the thing it selected is still
-	//! in force. For a grid of one-shot commands that claim goes stale the
-	//! instant anything else changes the state, so those grids say so here and
-	//! the cell falls back to plain hover feedback.
+	//! Turn off the latched highlight. A cell that stays blue claims its selection is
+	//! still in force; for grids of one-shot commands that goes stale, so they call this
+	//! and the cell falls back to plain hover feedback.
 	void SetMomentary( bool momentary )
 	{
 		m_Momentary = momentary;
@@ -187,12 +169,9 @@ class UIActionIconGrid: UIActionBase
 		m_Grid = UIActionManager.CreateWrapSpacer( "JM/COT/GUI/layouts/uiactions/UIWrapSpacerH.layout", layoutRoot );
 	}
 
-	//! Force the inner WrapSpacer to a known pixel width and height. Useful
-	//! when the Size-To-Content-H chain through nested spacers fails to
-	//! propagate - call this AFTER all AddIcon() calls so the parent horizontal
-	//! scroller can compute content overflow against this size. The height
-	//! must be exact too, otherwise the WrapSpacer wraps chips into multiple
-	//! rows when the available vertical space is large.
+	//! Force the inner WrapSpacer to a known pixel width and height, for when the
+	//! Size-To-Content-H chain through nested spacers fails to propagate. Call AFTER all
+	//! AddIcon() calls. Height must be exact too, or chips wrap into multiple rows.
 	void ForceContentWidth( int pixelWidth, int pixelHeight = 40 )
 	{
 		if ( !m_Grid )
@@ -201,11 +180,9 @@ class UIActionIconGrid: UIActionBase
 		// constrains chips to a single row.
 		m_Grid.SetFlags( WidgetFlags.HEXACTSIZE | WidgetFlags.VEXACTSIZE );
 		m_Grid.SetSize( JMUILayout.Px( pixelWidth ), JMUILayout.Px( pixelHeight ) );
-		// IconGrid root: only force width (so the outer scroller measures
-		// content overflow correctly). Leave height fractional so the
-		// horizontal scroller's Content can size it naturally without conflict
-		// (forcing exact height here was causing the chip row to clip
-		// vertically when its computed size didn't match the parent cell).
+		// IconGrid root: only force width (so the outer scroller measures overflow
+		// correctly). Leave height fractional: forcing exact height clipped the chip row
+		// vertically when the computed size did not match the parent cell.
 		layoutRoot.SetFlags( WidgetFlags.HEXACTSIZE );
 		float lrW, lrH;
 		layoutRoot.GetSize( lrW, lrH );

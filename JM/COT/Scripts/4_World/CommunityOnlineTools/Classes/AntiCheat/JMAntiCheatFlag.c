@@ -1,18 +1,7 @@
-// =============================================================================
-//  JMAntiCheatFlag.c
-//
-//  Per-player rolling flag state. Server-only. The form shows the current
-//  score plus a recent-events list.
-//
-//  The score decays. A player who tripped one uncertain rule six hours ago and
-//  nothing since is not the same as one who tripped it six seconds ago, and a
-//  score that only ever goes up eventually flags everybody who has played on
-//  the server long enough - at which point the number means "hours played".
-//  Decay is what keeps the score a statement about the present.
-//
-//  Everything time-related here is UTC seconds, not g_Game.GetTime(), because
-//  this class is written to disk and read back after a restart.
-// =============================================================================
+// JMAntiCheatFlag.c - per-player rolling flag state. Server-only; the form shows the
+// score plus recent events. The score decays, else it eventually flags everybody
+// (it would mean 'hours played'). All times are UTC seconds, not g_Game.GetTime(),
+// because this class is written to disk and read back after a restart.
 
 class JMAntiCheatFlag
 {
@@ -66,10 +55,8 @@ class JMAntiCheatFlag
 	}
 
 	//! Bleed the score down at pointsPerHour. Returns true if the score moved,
-	//! so the caller knows the on-disk copy is now stale.
-	//!
-	//! Safe to call every poll: it charges for real elapsed time, so calling it
-	//! once an hour and 3600 times an hour cost the same points.
+	//! so the caller knows the on-disk copy is stale. Safe to call every poll: it
+	//! charges for real elapsed time.
 	bool ApplyDecay( int nowUnix, float pointsPerHour )
 	{
 		if ( pointsPerHour <= 0 || TotalScore <= 0 )

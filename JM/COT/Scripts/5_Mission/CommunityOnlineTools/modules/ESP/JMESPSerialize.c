@@ -1,11 +1,6 @@
-//! Client-side overrides for the per-category ESP overlay colours.
-//!
-//! JMESPViewType.Colour is set in each subclass constructor, so an edit made in
-//! the filter list would die on the next map load. This stores only the
-//! categories that were actually changed, keyed by the view type's Permission
-//! string rather than its typename - a typename is not stable across a mod
-//! update, and Permission is already the identity ESP uses for its keys.
-//!
+//! Client-side overrides for the per-category ESP overlay colours. JMESPViewType.Colour is
+//! set in each subclass constructor, so a filter-list edit would die on map load. Stores only
+//! changed categories, keyed by Permission (stable across mod updates, unlike a typename).
 //! Modelled on JMTeleportSerialize: static Load()/Create(), instance Save().
 class JMESPSerialize : Managed
 {

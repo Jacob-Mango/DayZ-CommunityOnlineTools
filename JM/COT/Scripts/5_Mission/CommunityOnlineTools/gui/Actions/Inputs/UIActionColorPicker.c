@@ -1,25 +1,7 @@
-// =============================================================================
-//  UIActionColorPicker
-//
-//  Label + hex input field + live color preview swatch.
-//  Accepts hex strings in the forms: "RRGGBB" or "AARRGGBB" (case-insensitive,
-//  with or without leading '#').  Fires UIEvent.CHANGE when a valid color
-//  is entered.  GetColor() returns the current ARGB int.
-//
-//  Clicking the swatch opens an ARGB popup with one slider per channel. The
-//  popup is created lazily on first use and parented to the top of the form so
-//  it floats over the rest of the UI instead of being clipped by the row.
-//
-//  Usage:
-//      m_Color = UIActionManager.CreateColorPicker( parent, "Highlight Color",
-//          this, "OnChange_Color" );
-//      m_Color.SetColor( ARGB(255, 255, 128, 0) );
-//
-//      void OnChange_Color( UIEvent eid, UIActionBase action )
-//      {
-//          int col = m_Color.GetColor();
-//      }
-// =============================================================================
+//  UIActionColorPicker: label + hex field ("RRGGBB" or "AARRGGBB", optional '#') + swatch.
+//  Fires UIEvent.CHANGE on a valid color; GetColor() returns ARGB. Swatch click opens a lazily
+//  created ARGB slider popup parented to the form top so the row does not clip it.
+//  Usage: m_Color = UIActionManager.CreateColorPicker( parent, "Label", this, "OnChange_Color" );
 class UIActionColorPicker: UIActionBase
 {
 	protected TextWidget    m_Label;
@@ -45,12 +27,9 @@ class UIActionColorPicker: UIActionBase
 	//! whole list - points it at that button instead, and the popup follows it.
 	protected Widget          m_PopupAnchorWidget;
 
-	//! True while this control is driving its own Update tick because it is
-	//! hidden. UIActionBase.Hide() routes through Deactivate(), which takes
-	//! Update off the GUI update queue - so a picker used purely as a popup
-	//! host (ESP keeps one hidden for the whole category list) would never
-	//! reposition its popup off the anchor and never notice an outside click.
-	//! The popup would sit wherever the layout left it: the top-left corner.
+	//! True while driving its own Update tick because it is hidden. Hide() takes Update off the GUI
+	//! queue, so a popup-host picker (ESP keeps one hidden) would never reposition off the anchor
+	//! or see outside clicks; the popup would sit at the top-left corner.
 	protected bool            m_HeadlessTick;
 	//! Swallows the click that opened the popup so it does not immediately
 	//! count as an outside click and close it again.
@@ -154,11 +133,8 @@ class UIActionColorPicker: UIActionBase
 			//! there on the next tick.
 			PositionPopup();
 
-			// The popup is a modal surface: the sliders never take keyboard
-			// focus, so UIActionBase's focus-driven input guard never trips and
-			// clicks/drags inside the popup reach the world (the camera turns).
-			// Hold the inputs down for as long as the popup is open, the same
-			// way JMConfirmation does.
+			// Modal surface: sliders never take focus, so the focus-driven input guard never trips
+			// and drags reach the world (camera turns). Hold inputs down while open, like JMConfirmation.
 			COT.ForceDisableInputs( true );
 		}
 		else

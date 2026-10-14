@@ -56,11 +56,9 @@ class JMCameraTravelPanel
 		m_EasingNames     = new TStringArray;
 		m_TravelModeNames = new TStringArray;
 
-		// Waypoint SelectBox is created during OnCreate, before any waypoints
-		// exist. OptionSelectorMultistate VME's on an empty options array,
-		// so seed a placeholder and let UpdateWaypoints replace it once
-		// real waypoints are loaded. (See also UIActionSelectBox.SetSelections
-		// guard against empty arrays.)
+		// Waypoint SelectBox is created before any waypoints exist and OptionSelectorMultistate
+		// VME's on an empty options array, so seed a placeholder; UpdateWaypoints replaces it
+		// (see also the UIActionSelectBox.SetSelections empty-array guard).
 		if ( m_WaypointNames.Count() == 0 )
 			m_WaypointNames.Insert( "(none)" );
 
@@ -106,11 +104,8 @@ class JMCameraTravelPanel
 		m_Form.GetModule().m_Waypoints = m_Waypoints;
 	}
 
-	//! Creates the panel inside the form's scroller content and fills it.
-	//!
-	//! One card per section. Actions that apply to the section as a whole
-	//! (add, reorder, delete, capture, clipboard, save/load) sit in the card's
-	//! title bar instead of a grid of buttons under it.
+	//! Creates and fills the panel in the form's scroller content. One card per section;
+	//! whole-section actions (add, reorder, delete, capture, save/load) sit in the card title bar.
 	void Build( Widget actions )
 	{
 		m_PanelTraveling = UIActionManager.CreateGridSpacer( actions, 1, 1 );

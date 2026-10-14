@@ -70,11 +70,9 @@ class JMTeleportModule: JMRenderableModuleBase
 			if (!Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
 				return;
 
-			//! GetForm() is null until the player has opened the real in-game map
-			//! at least once this session - expected, not an error, so this just
-			//! skips the sync rather than raising (Error() throws a VM exception
-			//! and would abort whatever called OnSelectLocation, e.g. a list or
-			//! map-marker click still trying to run ApplyMapSelection() after it).
+			//! GetForm() is null until the in-game map has been opened once this session: expected,
+			//! so skip the sync rather than Error() (throws a VM exception and would abort the
+			//! caller of OnSelectLocation, e.g. a click still running ApplyMapSelection()).
 			if (!Class.CastTo(m_MapMenu, m_MapModule.GetForm()) )
 				return;
 		}
@@ -671,16 +669,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		SendWebhookColored( "Location", instance, "Removed TP " + locName.Name + " (" + locName.Type + ")", JMConstants.WEBHOOK_COLOR_WARNING );
 	}
 
-	//! Rename and recategorise one saved location IN PLACE.
-	//!
-	//! A remove followed by an add would do the same job from the client, but
-	//! as two independent messages: a failure or a permission change between
-	//! them loses the location outright, and every other admin sees it vanish
-	//! and reappear. One message cannot half-happen.
-	//!
-	//! The position is deliberately not editable here. Moving a saved location
-	//! is a different intent from renaming one, and the coordinates panel plus
-	//! Save already covers it.
+	//! Rename and recategorise one saved location IN PLACE: remove+add is two messages, so a
+	//! failure between them loses the location and others see it flicker. Position is
+	//! deliberately not editable here; the coordinates panel plus Save covers moving.
 	void EditLocation( JMTeleportLocation target, string newName, string newCategory )
 	{
 		if ( !target )

@@ -1,9 +1,6 @@
-//! One place for the "did that work?" feedback an admin action gives.
-//!
-//! Anything that puts text on the clipboard should go through Copy() so the
-//! admin always sees that it happened; a button that can show its own state
-//! (UIActionFeedbackButton) should keep doing that instead and call
-//! g_Game.CopyToClipboard directly, otherwise the admin gets told twice.
+//! Admin action feedback. Clipboard writes go through Copy() so the admin sees it
+//! happened; buttons that show their own state (UIActionFeedbackButton) call
+//! g_Game.CopyToClipboard directly, else the admin is told twice.
 class COTFeedback
 {
 	//! Copy `text` to the clipboard and show a local "Copied to clipboard" toast.

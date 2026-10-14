@@ -1,8 +1,6 @@
-// =============================================================================
 //  Server-side tracking for vanilla contaminated / effect areas.
 //  EffectArea has no built-in static registry, so we maintain our own.
 //  EEInit runs on every host (server + singleplayer).
-// =============================================================================
 
 modded class EffectArea
 {

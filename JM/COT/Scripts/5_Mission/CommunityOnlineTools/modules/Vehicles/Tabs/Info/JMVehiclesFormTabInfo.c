@@ -1,10 +1,6 @@
-//! "Info" tab of JMVehiclesForm - the read-only detail card for whichever
-//! vehicle is currently selected (from either the roster or a map marker).
-//! Back-reference to the owning form, same shape as JMPlayerRowWidget.Menu.
-//!
-//! Sibling tabs: JMVehiclesFormTabMap and JMVehiclesFormTabActions. This one is
-//! fed one vehicle at a time through PopulateInfo() and touches nothing else
-//! on the form.
+//! "Info" tab of JMVehiclesForm - read-only detail card for the selected vehicle
+//! (roster or map marker). Siblings: JMVehiclesFormTabMap / TabActions. Fed one
+//! vehicle at a time via PopulateInfo(); touches nothing else on the form.
 class JMVehiclesFormTabInfo: JMFormTab
 {
 	protected JMVehiclesForm m_Form;

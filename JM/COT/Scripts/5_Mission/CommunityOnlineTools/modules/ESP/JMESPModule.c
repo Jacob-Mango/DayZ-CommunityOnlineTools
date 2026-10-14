@@ -227,12 +227,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected bool m_IknowWhatIamDoing;
 
-	//! Right-click-anything, for as long as COT's own interface is up.
-	//!
-	//! The button is polled rather than handled, because there is no widget
-	//! between the cursor and the world to hand a click to - the ESP container
-	//! ignores the pointer so the tags under it stay clickable, and a catcher
-	//! panel wide enough to hear the click would swallow every one of theirs.
+	//! Right-click-anything, for as long as COT's own interface is up. The button is
+	//! polled, not handled: the ESP container ignores the pointer so tags stay
+	//! clickable, and a catcher panel would swallow their clicks.
 	protected bool m_WorldMenuRightDown;
 
 	//! The construction part boxes the action menus draw into the world - see
@@ -251,15 +248,9 @@ class JMESPModule: JMRenderableModuleBase
 	static const int LOG_MIN_INTERVAL_MS = 1000;
 
 	//! How often a move or a turn is written down, per admin.
-	//!
-	//! Dragging a tag streams a position up to ten times a second, and each of
-	//! those used to append a line to the admin log and post a webhook - so a
-	//! ten second drag was a hundred file writes and a hundred HTTP requests,
-	//! which is enough to get a Discord endpoint rate limited by ordinary use,
-	//! never mind by a client sending them deliberately.
-	//!
-	//! The move itself still applies every time. Only the record of it is
-	//! sampled, which is what an audit trail of a continuous drag wants anyway.
+	//! A tag drag streams ~10 positions/s; logging and posting a webhook for each would
+	//! rate limit a Discord endpoint. The move still applies every time; only the
+	//! record of it is sampled.
 	static const int MOVE_RECORD_INTERVAL_MS = 2000;
 	string Filter;
 	float ESPRadius;
@@ -304,11 +295,9 @@ class JMESPModule: JMRenderableModuleBase
 		return m_ActiveESPObjects;
 	}
 
-	//! GetDoorIndex only means anything against a VIEW geometry component -
-	//! this fires its own ray, on the same axis PickWorldObject used, with
-	//! type pinned to ObjIntersectView so the component it reads is in the
-	//! space GetDoorIndex actually expects. Returns -1 if the view ray does
-	//! not land on this same building (a wall gap, the roof, ...) at all.
+	//! GetDoorIndex only means anything against a VIEW geometry component, so this fires
+	//! its own ObjIntersectView ray on PickWorldObject's axis. Returns -1 if that ray
+	//! does not land on this same building (wall gap, roof, ...).
 	protected int GetBuildingDoorIndexAtCursor( Building building )
 	{
 		if ( !building )
@@ -547,16 +536,9 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! Is COT on screen AND holding the mouse?
-	//!
-	//! Both halves of the first test matter: the sidebar can be up with no
-	//! window open, and a pinned window can be up with the sidebar hidden.
-	//!
-	//! The cursor test is the one that makes this safe. COT hands the mouse
-	//! back to the game when a click lands outside its own UI, and a pinned
-	//! window stays on screen through that - so "a window is visible" is not
-	//! the same question as "is the pointer the admin's". Without this, a
-	//! right-click meant as aim down sights would raise a menu nobody could
-	//! click.
+	//! The cursor test is what makes it safe: COT hands the mouse back to the game on an
+	//! outside click while a pinned window stays, so without it an aim-down-sights
+	//! right-click would raise an unclickable menu.
 	protected bool IsCOTInterfaceOpen()
 	{
 		if ( !g_Game.GetUIManager() || !g_Game.GetUIManager().IsCursorVisible() )
@@ -578,9 +560,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	//! Whether the thing under the cursor is COT's rather than the world's.
 	//!
-	//! Walked up the tree rather than tested directly: the widget the cursor is
-	//! actually over is a label or a panel deep inside a window, and only its
-	//! ancestors say which window - or which tag - it belongs to.
+	//! Walked up the tree: the widget under the cursor is deep inside a window, and
+	//! only its ancestors say which window or tag it belongs to.
 	protected bool IsCursorOverCOTUI()
 	{
 		Widget under = GetWidgetUnderCursor();
@@ -611,13 +592,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	// =========================================================================
-	//  Object actions
-	//
-	//  One RPC for every per-object property the panel can set. They share a
-	//  channel because they share a shape - an action id, an int and a float -
-	//  and a separate RPC each would be a dozen near-identical triples of
-	//  client call, exec and handler for no gain. The permission is still per
-	//  action, resolved server-side from the id.
+	//  Object actions: one RPC (action id, int, float) for every per-object property.
+	//  The permission is still per action, resolved server-side from the id.
 	// =========================================================================
 
 	//! Attach `className` in `slotId`, replacing whatever is already there.
@@ -1116,12 +1092,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	// =========================================================================
-	//  World context menu
-	//
-	//  The menu the ESP tags and the tracked list already raise, over whatever
-	//  the cursor is pointing at - tracked or not, ESP drawing or not. It only
-	//  listens while COT's own interface is up, because that is the only time
-	//  the cursor belongs to the admin rather than to the game.
+	//  World context menu: the ESP tag menu over whatever the cursor points at. It only
+	//  listens while COT's interface is up, the only time the cursor is the admin's.
 	// =========================================================================
 
 	protected void UpdateWorldContextMenu()
@@ -1174,12 +1146,10 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !CreateMetaForObject( obj, meta ) )
 			return;
 
-		//! Static map buildings only get door actions when the click actually
-		//! landed on one of their doors. GetDoorIndex needs a VIEW geometry
-		//! component specifically - PickWorldObject's component is whichever
-		//! of fire/view/geom answered first (fire usually wins on a building),
-		//! which is the wrong index space and silently maps to the wrong door
-		//! (or none at all), so this re-picks with a dedicated view-only ray.
+		//! Static map buildings only get door actions when the click landed on a door.
+		//! GetDoorIndex needs a VIEW geometry component; PickWorldObject's is whichever
+		//! answered first (usually fire), the wrong index space, so re-pick with a
+		//! view-only ray.
 		Building building = Building.Cast( obj );
 		if ( building )
 			meta.m_DoorIndex = GetBuildingDoorIndexAtCursor( building );
@@ -1206,16 +1176,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! What the mouse is pointing at.
-	//!
-	//! The pointer's direction, not the camera's: with the interface open the
-	//! cursor moves independently of where the camera looks, and a ray down the
-	//! camera axis would answer for the middle of the screen instead of for the
-	//! thing that was clicked.
-	//!
-	//! Three intersection types in order, because one alone misses things an
-	//! admin can plainly see: fire geometry finds most entities, view geometry
-	//! finds foliage and anything with no fire volume, and plain geometry finds
-	//! the rest.
+	//! Uses the pointer's direction, not the camera's. Intersects fire, view (foliage),
+	//! then plain geometry in that order.
 	//! Insertion sort - result lists here are only ever a handful of entries.
 	protected void SortRaycastResultsByDistance( array< ref RaycastRVResult > results, vector from )
 	{
@@ -1284,12 +1246,9 @@ class JMESPModule: JMRenderableModuleBase
 				if ( Class.CastTo( entity, obj ) && entity.GetHierarchyRoot() )
 					obj = entity.GetHierarchyRoot();
 
-				//! In first person the camera sits inside the admin's own
-				//! collision mesh, so the ray answers with self before it ever
-				//! reaches whatever is actually under the cursor - skip it. In
-				//! third person the camera is well clear of the body, and a
-				//! self-hit there is the admin deliberately pointing at their
-				//! own character; that is a legitimate right-click target.
+				//! In first person the camera is inside the admin's own collision mesh, so the
+				//! ray hits self first - skip it. In third person a self-hit is deliberate
+				//! and a legitimate right-click target.
 				PlayerBase selfPlayer = PlayerBase.Cast( g_Game.GetPlayer() );
 				if ( obj == g_Game.GetPlayer() && ( !selfPlayer || !selfPlayer.IsInThirdPerson() ) )
 					continue;
@@ -1309,18 +1268,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! A meta for an object nobody is tracking.
-	//!
-	//! Built through the view types rather than by a type switch here: they
-	//! already know which meta subclass an object needs - and third party mods
-	//! add their own - so the menu a right-click raises offers exactly the pages
-	//! it would have offered on a tag.
-	//!
-	//! The permission each view type carries is respected, but its View toggle
-	//! is not: the toggles say what to DRAW, and this draws nothing.
-	//!
-	//! Deliberately not put in m_MappedESPObjects - that map belongs to the ESP
-	//! worker thread, and an entry it did not make would be torn out from under
-	//! it on the next pass.
+	//! Built through the view types; their permission applies but not their View toggle.
+	//! NOT put in m_MappedESPObjects: that map belongs to the ESP worker thread.
 	bool CreateMetaForObject( Object obj, out JMESPMeta meta )
 	{
 		if ( !obj )
@@ -1499,13 +1448,10 @@ class JMESPModule: JMRenderableModuleBase
 
 		m_IsCreatingWidgets = true;
 
-		//! Time-budgeted rather than a flat item count: CreateWidgets() cost per
-		//! object varies a lot (measured ~3.5ms average during a dense-area
-		//! population burst, sometimes far more), so a fixed count either wastes
-		//! the pass on a cheap batch or spikes frame time on an expensive one.
-		//! CREATE_MAX_PER_PASS is still a hard ceiling in case the clock does
-		//! not advance (very low-res timer, or a single item's create call
-		//! blowing well past the budget on its own).
+		//! Time-budgeted, not a flat count: CreateWidgets() cost varies a lot per object
+		//! (~3.5ms average in a dense burst, sometimes far more). CREATE_MAX_PER_PASS
+		//! is still a hard ceiling in case the clock does not advance or one create
+		//! blows past the budget.
 		int startMs = g_Game.GetTime();
 
 		array<JMESPMeta> created = {};
@@ -1826,11 +1772,9 @@ class JMESPModule: JMRenderableModuleBase
 					bool requireAllKeywords;
 					TStringArray keywords = filter.KeywordSearch_Prepare(requireAllKeywords);
 
-					//! Hoisted out of the object loop below: HasPermission/View do
-					//! not change mid-scan, so this was rebuilding the exact same
-					//! filtered list once per untracked candidate object - with a
-					//! dense area meaning thousands of candidates, that is
-					//! thousands of redundant walks of every registered view type.
+					//! Hoisted out of the object loop: HasPermission/View do not change mid-scan,
+					//! and a dense area means thousands of candidates, so rebuilding this
+					//! per object would be thousands of redundant walks of every view type.
 					array< JMESPViewType > validViewTypes = new array< JMESPViewType >;
 					for ( int vt = 0; vt < m_ViewTypes.Count(); vt++ )
 					{
@@ -2164,16 +2108,9 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! An admin's ESP view state, written to the log and the webhook.
-	//!
-	//! Everything here is a guard against a client that is not the ESP form:
-	//! the handler appends to the admin log file and posts a webhook, so
-	//! unchecked it is a way for any player on the server to write whatever
-	//! they like into the audit trail, fill the log with it, and flood the
-	//! Discord endpoint from someone else's IP.
-	//!
-	//! The text is capped rather than rejected on length: the real sender only
-	//! ever writes a few fixed phrases, so anything longer is not a message
-	//! worth keeping whole.
+	//! Everything here guards against a client that is not the ESP form: unchecked, any
+	//! player could write into the audit trail and flood the Discord endpoint.
+	//! The text is capped, not rejected: the real sender writes only a few fixed phrases.
 	protected void RPC_Log( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		string log;
@@ -3071,11 +3008,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! Build every part that can be built right now.
-	//!
-	//! Only the parts the construction itself reports as buildable are passed
-	//! in: COT_BuildParts walks each one's required parts on its own, so a
-	//! wall's base is built by asking for the wall rather than by ordering the
-	//! list here.
+	//! Only parts the construction reports as buildable are passed in; COT_BuildParts
+	//! walks required parts itself, so ask for the wall, not its base.
 	protected int Exec_BuildAll( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
 	{
 		ConstructionBase construction = GetConstructionOf( target );
@@ -3175,11 +3109,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! Move a flag pole's mast to a fraction raised.
-	//!
-	//! The mast animation runs the other way round - 0 is fully raised - and
-	//! the refresher timer is moved with it, because in vanilla a flag's height
-	//! IS the remaining refresh time and leaving the two apart makes a raised
-	//! flag that refreshes nothing.
+	//! The mast animation is inverted (0 = fully raised) and the refresher timer moves
+	//! with it: in vanilla height IS the remaining refresh time.
 	protected bool Exec_SetFlagRaised( Object target, float raised01 )
 	{
 		TerritoryFlag flag;
@@ -3211,10 +3142,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! Arm or disarm a trap where it lies.
-	//!
-	//! Arming goes through StartActivate rather than SetActive so it takes the
-	//! trap's own arming delay and, through the COT override, records the admin
-	//! who armed it as the owner of whatever it later kills.
+	//! Arming uses StartActivate, not SetActive, so it takes the trap's arming delay and
+	//! (COT override) records the admin as owner of whatever it later kills.
 	protected bool Exec_SetTrapArmed( Object target, int armed, PlayerIdentity ident = NULL )
 	{
 		TrapBase trap;
@@ -3245,11 +3174,8 @@ class JMESPModule: JMRenderableModuleBase
 	// =========================================================================
 
 	//! Jam or clear a jam.
-	//!
-	//! Unjamming re-rolls the weapon's state machine the same way the player
-	//! manager's inventory unjam does - a weapon left in its jammed FSM state
-	//! with the flag cleared answers every later action as if it were still
-	//! stuck.
+	//! Unjamming re-rolls the weapon's state machine like the player manager's unjam: a
+	//! weapon left in its jammed FSM state with the flag cleared still acts as stuck.
 	protected bool Exec_SetJammed( Object target, int jammed )
 	{
 		Weapon_Base weapon;
@@ -3268,10 +3194,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! Put a round in the chamber or take one out.
-	//!
-	//! The cartridge to push is whatever the weapon itself says it can take -
-	//! GetRandomChamberableAmmoTypeName answers per muzzle, so a chambering
-	//! action never has to know what calibre it is looking at.
+	//! The cartridge is whatever GetRandomChamberableAmmoTypeName says (per muzzle), so
+	//! no calibre knowledge is needed.
 	protected bool Exec_SetChambered( Object target, int chambered )
 	{
 		Weapon_Base weapon;
@@ -3305,13 +3229,9 @@ class JMESPModule: JMRenderableModuleBase
 			changed = weapon.PushCartridgeToChamber( muzzle, 0, ammoType );
 		}
 
-		//! Push/PopCartridgeFromChamber only touch the chamber data - unlike
-		//! every other FSM-relevant change in this file, they don't drive the
-		//! state machine themselves. Vanilla always follows a chamber change
-		//! with this same pair ("FSM cares about chamber state", see
-		//! Weapon_Base.OnStoreSave-adjacent call sites in weapon_base.c) -
-		//! without it the chamber data changes on the server but the FSM/anim
-		//! state never catches up, so the action looks like it did nothing.
+		//! Push/PopCartridgeFromChamber only touch chamber data and do not drive the FSM.
+		//! Vanilla always follows a chamber change with this same pair (weapon_base.c);
+		//! without it the FSM/anim state never catches up and the action looks like a no-op.
 		if ( changed )
 		{
 			weapon.RandomizeFSMState();
@@ -3358,13 +3278,9 @@ class JMESPModule: JMRenderableModuleBase
 	// =========================================================================
 
 	//! Light or put out a fire.
-	//!
-	//! force_start is passed so a fireplace that thinks it is already burning
-	//! still re-runs its start path - an admin pressing ignite on something
-	//! that looks unlit means "be lit", not "toggle a flag".
-	//!
-	//! A fire with nothing to burn goes straight back out on its first heating
-	//! tick, which is why refuel exists beside this.
+	//! force_start re-runs the start path even if the fireplace thinks it is burning
+	//! ("be lit", not "toggle a flag"). A fire with nothing to burn goes out on its first
+	//! heating tick, hence refuel.
 	protected bool Exec_SetBurning( Object target, int burning )
 	{
 		FireplaceBase fireplace;
@@ -3381,10 +3297,7 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! Fill the fireplace with firewood.
-	//!
-	//! Created in its cargo rather than handed to the admin: the point is a fire
-	//! that will keep burning, and fuel in an inventory somewhere else does not
-	//! do that.
+	//! Created in its cargo, not handed to the admin: fuel elsewhere does not keep it burning.
 	protected bool Exec_FireplaceRefuel( Object target )
 	{
 		FireplaceBase fireplace;
@@ -3428,10 +3341,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	//! Finish every piece of food on the fireplace, and in anything standing on
 	//! it - a pot or a pan is an attachment holding its own cargo.
-	//!
-	//! Answers how many items it changed, which is what the log line wants: a
-	//! cook-all over an empty fireplace and one over a full pot are the same
-	//! action and should not read the same afterwards.
+	//! Answers how many items it changed, so the log line can tell an empty fireplace
+	//! from a full pot.
 	protected int Exec_CookAll( Object target )
 	{
 		FireplaceBase fireplace;
@@ -3489,10 +3400,8 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	//! The stage this class calls "cooked".
-	//!
-	//! Read off the config rather than assumed to be BAKED: there is no script
-	//! query for which stages a class declares, and asking for one it does not
-	//! have spawns it unchanged - the action would look like it did nothing.
+	//! Read off the config, not assumed BAKED: no script query lists a class's stages,
+	//! and asking for one it lacks spawns it unchanged (the action looks like a no-op).
 	protected int BestCookedStage( string classname )
 	{
 		TStringArray names  = { "Baked", "Boiled", "Dried" };
@@ -3512,13 +3421,8 @@ class JMESPModule: JMRenderableModuleBase
 	// =========================================================================
 
 	//! Lock or unlock every combination lock standing near the target.
-	//!
-	//! A base is not one entity - every gate, door and tower carries its own
-	//! lock - so "lock the base" cannot be addressed to a single object. The
-	//! radius is what makes it one action instead of one right-click per gate.
-	//!
-	//! Answers how many locks it touched so the log says what actually happened
-	//! rather than just that the button was pressed.
+	//! A base is not one entity (every gate, door and tower has its own lock), so the
+	//! radius makes it one action. Answers how many locks it touched, for the log.
 	protected int Exec_SetLockAll( Object target, int locked )
 	{
 		vector centre = target.GetPosition();
@@ -3555,11 +3459,9 @@ class JMESPModule: JMRenderableModuleBase
 		return touched;
 	}
 
-	//! Locking runs the vanilla server path so the slot lock and the shuffle
-	//! happen too. Unlocking does NOT: UnlockServer is the "take the lock off"
-	//! action and drops it on the ground. An admin unlocking a gate wants it
-	//! open, not disassembled, so the dial is simply turned back to the locked
-	//! combination - which is exactly what the lock itself calls unlocked.
+	//! Locking runs the vanilla server path (slot lock and shuffle). Unlocking does NOT:
+	//! UnlockServer drops the lock on the ground, and an admin wants the gate open, so
+	//! the dial is just turned back to the locked combination (what the lock calls unlocked).
 	protected void Exec_SetLock( Object target, int locked )
 	{
 		CombinationLock combo = GetCombinationLock( target );
@@ -4077,15 +3979,9 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 		//! Damage or restore ONE part of a base building object.
-	//!
-	//! Separate from SetHealth, which only ever addresses an object's global
-	//! health: a wall's parts are damage ZONES on one entity, so setting the
-	//! whole thing's health would flatten every part at once and there would be
-	//! no way to ruin a single gate.
-	//!
-	//! `health01` is a fraction of that zone's own maximum, because the maximum
-	//! differs per part and per material tier - a number of hit points would
-	//! mean something different on every row of the menu.
+	//! Separate from SetHealth (global only): a wall's parts are damage ZONES on one
+	//! entity. `health01` is a fraction of that zone's own maximum, which differs per
+	//! part and material tier.
 	void BaseBuilding_SetPartHealth( EntityAI target, string part, float health01 )
 	{
 		int netLow, netHigh;
@@ -4770,11 +4666,9 @@ class JMESPModule: JMRenderableModuleBase
 		COTFeedback.Copy(clipboardOutput);
 	}
 
-	//! cfgeconomycore types.xml - nominal/lifetime/restock/flags per selected
-	//! object, one <type> block per selection (duplicates and all, same as
-	//! the object spawner's own COPYLISTTYPES - a loot table author pastes
-	//! this into their own types.xml and edits the numbers from there, not a
-	//! ready-to-use file).
+	//! types.xml entries (nominal/lifetime/restock/flags), one <type> block per selection,
+	//! duplicates included (like the object spawner's COPYLISTTYPES); meant to be pasted
+	//! into a types.xml and edited, not used as is.
 	void CopyToClipboardTypes()
 	{
 		string clipboardOutput = "";
@@ -4803,11 +4697,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	//! DayZ Expansion's own object-placement file format - one pipe-delimited
 #ifdef DZ_Expansion_Core
-	//! line per object, read back by
-	//! ExpansionWorldObjectsModule.GetObjectFromFile/LoadObjectsFile:
+	//! line per object, read by ExpansionWorldObjectsModule.LoadObjectsFile:
 	//!   ClassName|X Y Z|RotX RotY RotZ|special|takeable
-	//! `special` off and `takeable` on are the safe defaults for a pasted
-	//! export - an admin editing the file by hand can flip either per line.
+	//! `special` off and `takeable` on are safe defaults for a pasted export.
 	void CopyToClipboardMap()
 	{
 		string clipboardOutput = "";

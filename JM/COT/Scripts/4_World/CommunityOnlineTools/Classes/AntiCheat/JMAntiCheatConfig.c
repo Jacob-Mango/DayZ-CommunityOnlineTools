@@ -1,19 +1,7 @@
-// =============================================================================
-//  JMAntiCheatConfig.c
-//
-//  Tunable thresholds for the anti-cheat module. Loaded once on mission start
-//  from $profile:CommunityOnlineTools/AntiCheat/config.json. Edit the file to
-//  tighten or loosen detection per server.
-//
-//  Defaults are conservative - false positives at the lower end, real cheats
-//  well above. Adjust to taste.
-//
-//  A note on weights: they are meant to be read as "how sure are we". A speed
-//  reading is 5 because a lagging client produces them; damage immunity is 25
-//  because nothing legitimate produces it. FlagThresholdHigh is 15, so one
-//  certain detection raises a flag on its own and the uncertain ones have to
-//  accumulate.
-// =============================================================================
+// JMAntiCheatConfig.c - tunable anti-cheat thresholds, loaded once on mission start
+// from $profile:CommunityOnlineTools/AntiCheat/config.json. Defaults are conservative.
+// Weights read as "how sure are we": speed is 5 (lag causes it), damage immunity 25
+// (nothing legitimate does). FlagThresholdHigh is 15, so uncertain signals must accumulate.
 
 class JMAntiCheatConfig
 {
@@ -74,12 +62,10 @@ class JMAntiCheatConfig
 	//  since the evidence is different (a jump, not a run of non-decrements).
 	int AmmoIncreaseFlagWeight = 20;
 
-	// -- Weapon jam suppression -----------------------------------------------
-	//  Observed jam rate compared against Weapon_Base.GetChanceToJam(). Ratio
-	//  rather than an absolute gap, since the expected rate itself varies
-	//  wildly by weapon condition. 0.25 means "less than a quarter of the
-	//  expected jams actually happened" - loose on purpose, jam chance is a
-	//  genuine per-shot roll and unlucky streaks of "no jams" do happen.
+	// -- Weapon jam suppression --
+	//  Observed jam rate vs Weapon_Base.GetChanceToJam(), as a ratio since the expected
+	//  rate varies wildly with condition. 0.25 = under a quarter of expected jams
+	//  happened; loose on purpose because unlucky streaks of no jams do happen.
 	float JamRateToleranceRatio = 0.25;
 	int   JamMinShotSamples = 40;
 	int   JamFlagWeight = 15;
@@ -91,11 +77,9 @@ class JMAntiCheatConfig
 	int   SpreadMinShotSamples = 20;
 	int   SpreadFlagWeight = 18;
 
-	// -- Projectile speed manipulation -----------------------------------------
-	//  Observed muzzle-to-impact speed compared against the ammo's configured
-	//  initSpeed. A ceiling rather than a floor - drag/drop only ever slow a
-	//  real shot down, so anything meaningfully faster than initSpeed itself
-	//  is not physically reachable without a speed hack.
+	// -- Projectile speed manipulation --
+	//  Muzzle-to-impact speed vs the ammo's configured initSpeed. A ceiling, since drag
+	//  and drop only slow a real shot; meaningfully faster than initSpeed needs a speed hack.
 	float ProjectileSpeedToleranceRatio = 1.15;
 	int   ProjectileSpeedFlagWeight = 18;
 
@@ -126,20 +110,17 @@ class JMAntiCheatConfig
 	float SilentAimMinDistance = 8.0;
 	int   SilentAimFlagWeight = 15;
 
-	// -- Unauthorized RPC ----------------------------------------------------
-	//  A legitimate client never calls an RPC it has no permission for: its own
-	//  UI does not offer the control. Repeated denials are a cheat menu probing
-	//  the mod. Counted in a window rather than flagged one at a time, so a
-	//  single denial from a permission changing mid-session is not evidence.
+	// -- Unauthorized RPC --
+	//  A legitimate client never calls an RPC it lacks permission for. Repeated denials
+	//  are counted in a window, so one denial from a mid-session permission change is
+	//  not evidence.
 	int   RpcDeniedBurstCount = 3;
 	float RpcDeniedWindowS = 30.0;
 	int   RpcDeniedFlagWeight = 22;
 
-	//  Staff are held to the same rules as everyone else, with one honest
-	//  exception: a COT client shows an admin every control their ROLE grants,
-	//  and clicking one whose permission was revoked mid-session is a denial
-	//  that means nothing. Players with COT access get a higher burst before
-	//  it counts - a different number, not a free pass.
+	//  Staff get the same rules, with one exception: a COT client shows every control
+	//  the ROLE grants, so clicking one revoked mid-session is a meaningless denial.
+	//  Players with COT access get a higher burst before it counts - not a free pass.
 	int   RpcDeniedBurstCountStaff = 10;
 
 	// -- Inventory -----------------------------------------------------------
@@ -154,13 +135,10 @@ class JMAntiCheatConfig
 	//  "how long were they online" rather than "how bad is this".
 	float DetectorCooldownS = 20.0;
 
-	// -- Decay ---------------------------------------------------------------
-	//  Points bled off the score per hour of real time since the last event.
-	//  Without this the score is cumulative for the lifetime of the server and
-	//  eventually flags every regular, at which point it measures hours played.
-	//
-	//  4/hour means one uncertain 5-point speed reading is gone in about 75
-	//  minutes, while a 25-point immunity flag still stands the next evening.
+	// -- Decay --
+	//  Points bled off per real-time hour since the last event, otherwise the score is
+	//  cumulative and eventually flags every regular. 4/hour clears a 5-point speed
+	//  reading in about 75 minutes while a 25-point immunity flag stands the next evening.
 	float FlagDecayPerHour = 4.0;
 
 	//  A flag that has decayed to zero and seen nothing since is dropped after

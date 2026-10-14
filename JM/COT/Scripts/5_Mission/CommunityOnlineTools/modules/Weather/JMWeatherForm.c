@@ -1,32 +1,7 @@
-// =============================================================================
-//  JMWeatherForm
-//
-//  Six tabs over one weather controller: Overview, Sky, Precipitation, Wind,
-//  Time, Presets.
-//
-//  ---------------------------------------------------------------------------
-//  WHAT REPLACED WHAT
-//
-//  The old form was a single scrolling page carrying every control at once,
-//  plus eight [x] show/hide buttons and an "Easy Mode" checkbox that existed
-//  only to make that page manageable. Both are gone: tabs do the job the
-//  toggles were doing, and Easy Mode's other half - forcing sane transition and
-//  duration numbers - is now simply the default.
-//
-//  That removal changes what Apply means. The old Apply read panel VISIBILITY
-//  as intent ("if ( m_PanelFog.IsVisible() ) SetFog(...)"), which only worked
-//  because the toggles could hide a section. With tabs, one tab is visible at a
-//  time and that rule would silently shrink Apply to the current tab. So intent
-//  is now tracked explicitly: every control marks its section dirty, each
-//  section card carries its own Apply, and the Overview's Apply All writes the
-//  sections that were actually touched. Nothing is written that the admin did
-//  not move.
-//  ---------------------------------------------------------------------------
-//
-//  The Overview's live readout is not new logic - JMWorldConditions already
-//  classifies current and forecast weather for the sidebar, and this consumes
-//  the same API so the two can never disagree about what "rain" means.
-// =============================================================================
+//  JMWeatherForm - six tabs over one weather controller (Overview, Sky, Precipitation, Wind, Time,
+//  Presets). Apply intent is tracked explicitly, not by panel visibility: every control marks its
+//  section dirty, each card has its own Apply, Overview's Apply All writes only touched sections.
+//  The Overview readout reuses JMWorldConditions so the sidebar and form agree on what "rain" means.
 
 class JMWeatherForm: JMFormBase
 {
@@ -38,11 +13,8 @@ class JMWeatherForm: JMFormBase
 	protected int m_TabIdTime;
 	protected int m_TabIdPresets;
 
-	//! UNUSED - kept only so an external reference does not break. The Presets
-	//! tab no longer pre-builds rows; see JMWeatherFormTabPresets.
-	//!
-	//! Rows of preset widgets built into the Presets tab. 100 was the old
-	//! ceiling and no server has come close to it.
+	//! UNUSED - kept only so an external reference does not break. The Presets tab no longer
+	//! pre-builds rows (was 100, the old ceiling); see JMWeatherFormTabPresets.
 	static const int PRESET_ROWS = 100;
 
 	//! Defaults for the two global timing fields. These were what Easy Mode
@@ -57,10 +29,8 @@ class JMWeatherForm: JMFormBase
 	//! TAB_STRIP_HEIGHT - the two are pinned together, see OnResize.
 	static const int BANNER_HEIGHT = 26;
 
-	//! Which block of controls an Apply covers. One per CARD, not per tab: a
-	//! card's Apply button writes that card and nothing else, so pressing Apply
-	//! on Fog cannot also push the overcast and storm sliders sitting on the
-	//! same tab.
+	//! Which block of controls an Apply covers. One per CARD, not per tab: Apply on Fog must not
+	//! also push the overcast and storm sliders on the same tab.
 	static const int SECTION_OVERCAST      = 0;
 	static const int SECTION_FOG           = 1;
 	static const int SECTION_STORM         = 2;
@@ -76,11 +46,9 @@ class JMWeatherForm: JMFormBase
 	JMWeatherModule m_Module;
 	protected UIActionTabs m_Tabs;
 
-	//! One class per tab, in its own file - only this form constructs/
-	//! dispatches to them. What every tab needs from the others stays here as
-	//! a thin forward: GlobalTransition/GlobalDuration (Overview's pickers),
-	//! PreviewSection and the dirty mask (the Presets selection decides whether an
-	//! Apply is a preview).
+	//! One class per tab, in its own file; only this form constructs/dispatches to them. What
+	//! tabs need from each other stays here as a thin forward: GlobalTransition/GlobalDuration,
+	//! PreviewSection and the dirty mask (Presets selection decides if Apply is a preview).
 	ref JMWeatherFormTabOverview      m_TabOverviewCtrl;
 	ref JMWeatherFormTabSky           m_TabSkyCtrl;
 	ref JMWeatherFormTabPrecipitation m_TabPrecipitationCtrl;
@@ -88,10 +56,9 @@ class JMWeatherForm: JMFormBase
 	ref JMWeatherFormTabTime          m_TabTimeCtrl;
 	ref JMWeatherFormTabPresets       m_TabPresetsCtrl;
 
-	//! How often the dynamic weather machine's position is asked for while the
-	//! form is open. The countdown runs locally in between - see
-	//! JMWeatherDynamicStatus.Remaining - so this only has to be often enough to
-	//! catch a phase change and a configuration revision.
+	//! How often the dynamic weather machine's position is polled while the form is open. The
+	//! countdown runs locally between polls (JMWeatherDynamicStatus.Remaining), so this only
+	//! has to catch a phase change and a configuration revision.
 	static const float DYNAMIC_POLL_INTERVAL = 2.0;
 	protected float m_LastDynamicPoll;
 
@@ -130,15 +97,9 @@ class JMWeatherForm: JMFormBase
 			m_TabWindCtrl.ReadInto( preset, transition, duration );
 	}
 
-	// -------------------------------------------------------------------------
-	//  Preset edit mode
-	//
-	//  With a preset picked on the Presets tab, every other tab edits THAT
-	//  preset instead of the live world: the controls are loaded from it, the
-	//  live poll stops writing over them, and Apply becomes a local preview.
-	//  The selection itself belongs to JMWeatherFormTabPresets; until that tab
-	//  has been opened nothing is selected and the answer is "live world".
-	// -------------------------------------------------------------------------
+	//  Preset edit mode: with a preset picked on the Presets tab, every other tab edits THAT preset,
+	//  the live poll stops writing over the controls and Apply becomes a local preview. The selection
+	//  belongs to JMWeatherFormTabPresets; until it is opened the answer is "live world".
 
 	bool IsPresetMode()
 	{
@@ -234,11 +195,9 @@ class JMWeatherForm: JMFormBase
 		ClearDirtySections();
 	}
 
-	//! Was called from SetSectionDirty()/ClearDirtySections() with no definition
-	//! anywhere in the codebase - a pre-existing dangling reference found while
-	//! splitting this form's tabs into their own classes, unrelated to that
-	//! split. Left as a no-op placeholder rather than guessed at, since there is
-	//! no existing per-section Apply-button visual state to restore.
+	//! Called from SetSectionDirty()/ClearDirtySections() but never defined (pre-existing
+	//! dangling reference). Left as a no-op placeholder: there is no per-section Apply-button
+	//! visual state to restore.
 	protected void UpdateApplyButtonStates()
 	{
 	}
@@ -483,27 +442,14 @@ class JMWeatherForm: JMFormBase
 		return DEFAULT_DURATION;
 	}
 
-	// -------------------------------------------------------------------------
-	//  Apply - per-section Apply buttons/logic live in their owning tab class
-	//  (JMWeatherFormTabSky/Precipitation/Wind/Time.c) and Apply All in
-	//  JMWeatherFormTabOverview. What they share - the preview switch below -
-	//  stays here.
-	// -------------------------------------------------------------------------
+	//  Apply - per-section Apply logic lives in the owning tab class (JMWeatherFormTabSky/
+	//  Precipitation/Wind/Time.c), Apply All in JMWeatherFormTabOverview. The shared preview
+	//  switch below stays here.
 
-	//! In preset mode Apply is a PREVIEW, and a local one.
-	//!
-	//! The values go straight into THIS CLIENT's weather instead of being sent
-	//! to the server, so an admin can look at the preset they are authoring
-	//! without changing the sky for everyone playing. Nothing is stored either
-	//! way - Save Preset on the Presets tab is what commits it.
-	//!
-	//! What makes it local is simply not going through the module: every
-	//! JMWeatherBase.Apply talks to g_Game.GetWeather() directly, while
-	//! m_Module.SetX RPCs to the server when called from a client.
-	//!
-	//! The server owns the weather and syncs it, so a preview lasts until the
-	//! next sync rather than forever. That is the right lifetime for a preview,
-	//! but it does mean a long fade may be overwritten part way through.
+	//! In preset mode Apply is a LOCAL PREVIEW: values go into THIS CLIENT's weather (via
+	//! JMWeatherBase.Apply on g_Game.GetWeather(), not m_Module.SetX which RPCs the server);
+	//! nothing is stored, Save Preset commits. The server syncs over it, so a long fade may be
+	//! overwritten part way through.
 	bool PreviewSection( int section )
 	{
 		if ( !IsPresetMode() )
@@ -608,15 +554,9 @@ class JMWeatherForm: JMFormBase
 		//! and the controls match what is stored the moment it lands.
 		ClearDirty();
 
-		//! The world goes in FIRST, then the preset over the top of it.
-		//!
-		//! A preset only stores the fields it actually drives; everything else
-		//! is -1, "leave this alone", and the setters skip those. Loading the
-		//! preset on its own would therefore leave every field it does not
-		//! drive showing whatever happened to be in the control - values from
-		//! the last preset looked at, or from a world poll minutes ago. The
-		//! world underneath gives those a real, current number, so every
-		//! control shows what this preset would actually produce.
+		//! The world goes in FIRST, then the preset over it. A preset's undriven fields are -1
+		//! ("leave alone") and setters skip them, which would leave stale values in those
+		//! controls; the world underneath gives every control the number this preset produces.
 		RefreshValues( true );
 
 		SetUIActionValues( preset );

@@ -1,24 +1,12 @@
-// =============================================================================
-//  JMActionHistoryEntry
-//
-//  One undoable/redoable action on JMActionHistory's shared stack. A subclass
-//  captures whatever "before" state its action type needs at construction
-//  time (before the action itself runs) and implements the inverse in
-//  Undo(); Redo() re-applies the original action.
-//
-//  A sub-mod adds its own action type by extending this class, setting
-//  RequiredPermission in the constructor, and pushing an instance from the
-//  server-side handler that performs the action:
-//
-//      JMActionHistory.Push( new MyEntry( target ), JMActionHistory.OwnerOf( ident ) );
-// =============================================================================
+// JMActionHistoryEntry - one undoable/redoable action on JMActionHistory's shared stack.
+// A subclass captures its "before" state at construction (before the action runs) and
+// implements the inverse in Undo(); Redo() re-applies. A sub-mod extends it, sets
+// RequiredPermission and calls JMActionHistory.Push( new MyEntry( target ), JMActionHistory.OwnerOf( ident ) ).
 class JMActionHistoryEntry
 {
-	//! Checked against the caller before Undo/Redo runs - the SAME permission
-	//! the original action itself needed, since undoing it is not a new grant
-	//! of capability, just replaying an admin's own already-authorized
-	//! change. MUST be set: an entry left "" is refused by Push and can never
-	//! be undone, rather than being undoable by anybody.
+	//! Checked against the caller before Undo/Redo - the SAME permission the original
+	//! action needed, since undoing is not a new grant. MUST be set: an entry left ""
+	//! is refused by Push and can never be undone, rather than undoable by anybody.
 	string RequiredPermission;
 
 	//! Who performed the action - filled in by JMActionHistory.Push. "" means

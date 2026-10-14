@@ -1,11 +1,6 @@
 //! A spinning loader drawn over the middle of a widget while something is being fetched.
-//!
-//!     m_Busy = new JMBusySpinner( someWidget );
-//!     ...every frame:  m_Busy.Update( isWaiting );
-//!
-//! It is created as the LAST child of `parent`, so it is drawn above whatever the parent
-//! already holds, and it takes the pointer while shown, so what is underneath cannot be
-//! clicked until it goes away.
+//! m_Busy = new JMBusySpinner( someWidget ); every frame: m_Busy.Update( isWaiting );
+//! Created as the LAST child of `parent` so it draws on top, and takes the pointer while shown.
 class JMBusySpinner
 {
 	static const float DEGREES_PER_SECOND = 300;

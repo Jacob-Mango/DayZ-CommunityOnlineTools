@@ -1,30 +1,7 @@
-// =============================================================================
-//  JMServerStatsModule.c
-//
-//  Measures server frame rate and pushes it to admin clients.
-//
-//  A dedicated server renders nothing, so its "fps" is its simulation tick
-//  rate - the same number the RPT reports as "Average server FPS". A module
-//  OnUpdate runs once per tick, so counting OnUpdate calls over a known window
-//  measures exactly that, and the per-call timeslice gives the per-frame times
-//  the one-percent figures are computed from.
-//
-//  Why one-percent lows matter more than the average: a server holding a 50 fps
-//  average while 1 percent of its ticks take 200ms is the server whose players
-//  report rubber-banding. The average hides that; the low does not.
-//
-//  RPCs (JMServerStatsModuleRPC @ 10940):
-//    Stats   server -> client, broadcast on a timer to COT.View holders only
-//
-//  This module has no UI of its own. The sidebar footer renders what it
-//  publishes, via the JMServerStats holder in 3_Game.
-//
-//  It also carries the anti-cheat flag count. That is not this module's data,
-//  but the footer badge that shows it needs to be live before anyone opens the
-//  AntiCheat form, and this is already a timer broadcasting to exactly the
-//  admins who would care. A second module-wide timer and a second RPC to move
-//  one int is the worse trade.
-// =============================================================================
+// JMServerStatsModule.c - measures server frame rate and pushes it to admin clients
+// (Stats RPC, JMServerStatsModuleRPC @ 10940, broadcast to COT.View holders only). A server's
+// "fps" is its tick rate; one-percent lows matter because the average hides rubber-banding.
+// Also carries the anti-cheat flag count for the footer badge, cheaper than a second timer/RPC.
 
 class JMServerStatsModule : JMModuleBase
 {
@@ -133,14 +110,9 @@ class JMServerStatsModule : JMModuleBase
 			m_MaxFPS = limitFPS.ToInt();
 	}
 
-	// -------------------------------------------------------------------------
-	//  Sampling
-	//
-	//  Called from DayZGame.OnUpdate rather than this module's own OnUpdate -
-	//  CF's module update loop is rate-limited to 40 Hz on server for
-	//  performance reasons, which would undercount ticks on a server actually
-	//  running faster than that.
-	// -------------------------------------------------------------------------
+	// ---- Sampling ----
+	//  Called from DayZGame.OnUpdate, not this module's OnUpdate: CF's module update loop is
+	//  rate-limited to 40 Hz on server, which would undercount ticks on a faster server.
 	void Tick( float timeslice )
 	{
 		if ( !g_Game.IsServer() )
@@ -178,15 +150,9 @@ class JMServerStatsModule : JMModuleBase
 		m_SampleWrapped = true;
 	}
 
-	// -------------------------------------------------------------------------
-	//  Percentiles
-	//
-	//  A full sort of the window every broadcast would be wasted work: only the
-	//  two tails are wanted. Instead each tail is kept as a small sorted array
-	//  and every sample is tested against that array worst entry first - one
-	//  compare for the overwhelming majority of samples, an O(TAIL) insert for
-	//  the few that make the cut.
-	// -------------------------------------------------------------------------
+	// ---- Percentiles ----
+	//  No full sort per broadcast: each tail is a small sorted array and every sample is tested
+	//  against its worst entry first - one compare for most samples, an O(TAIL) insert otherwise.
 	protected void Publish()
 	{
 		int count = GetSampleCount();
@@ -203,13 +169,9 @@ class JMServerStatsModule : JMModuleBase
 		if ( tail > TAIL_MAX )
 			tail = TAIL_MAX;
 
-		//! Slowest frames (largest frame times) and fastest frames (smallest),
-		//! each kept sorted worst-first / best-first. total is the plain sum,
-		//! folded into this loop rather than tracked incrementally per tick:
-		//! the loop already runs every broadcast for the tail scan below, so
-		//! summing here is free, and a fresh sum every 2s cannot drift the
-		//! way a running total kept across a 6-hour session's worth of ticks
-		//! would.
+		//! Slowest and fastest frames, each kept sorted worst-first / best-first. total is
+		//! summed in this loop (free, since the tail scan runs anyway), and a fresh sum every
+		//! 2s cannot drift like a running total over a 6-hour session.
 		array< float > slowest = new array< float >;
 		array< float > fastest = new array< float >;
 		float total = 0;

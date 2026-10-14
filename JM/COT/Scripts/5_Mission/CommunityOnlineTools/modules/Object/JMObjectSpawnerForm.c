@@ -1,11 +1,9 @@
 class JMObjectSpawnerForm: JMFormBase
 {
-	//! Category chips for the few most recently used categories. The full set
-	//! lives behind the filter button.
-	//!
-	//! Plain buttons in a wrap row, each a FRACTION of the row: the icon grid
-	//! this replaced had to be told a pixel width that stayed in step with the
-	//! chip count, and it rebuilt itself from inside its own click handler.
+	//! Category chips for the few most recently used categories; the full set lives behind
+	//! the filter button. Plain buttons in a wrap row, each a FRACTION of the row: the icon grid
+	//! this replaced needed a pixel width kept in step with the chip count and rebuilt itself
+	//! from inside its own click handler.
 	protected ref JMItemCategoryPicker m_Categories;
 
 	//! Categories moved out of a dropdown of their own and behind a filter
@@ -13,11 +11,9 @@ class JMObjectSpawnerForm: JMFormBase
 	//! column permanently for a control that is touched once per search.
 	protected UIActionImageButton m_FilterButton;
 
-	//! Class name for every row currently in the list.
-	//!
-	//! The visible text is NOT the class name once display names are switched
-	//! on, so a row index resolves through this - which is what spawning, and
-	//! every clipboard export, needs.
+	//! Class name for every row currently in the list. The visible text is NOT the class
+	//! name once display names are on, so spawning and every clipboard export resolve a row
+	//! index through this.
 	protected ref TStringArray m_ListClasses;
 	protected Widget m_SearchWrapper;
 	protected Widget m_FilterWrapper;
@@ -59,12 +55,10 @@ class JMObjectSpawnerForm: JMFormBase
 	//! Filter/Object/Categories actions the row's own buttons offer.
 	protected ref JMObjectSpawnerRowMenu m_RowMenu;
 
-	//! The preview's wrapper panel. The preview itself is no longer the layout
-	//! root: it now hangs inside a plainly-styled panel, the way vanilla's own
-	//! previews do, so it never inherits whatever style the engine has
-	//! registered as the default for a styleless widget - which is exactly what
-	//! COT's own style table changes. Geometry is applied to the WRAPPER; the
-	//! preview fills it fractionally.
+	//! The preview's wrapper panel. The preview hangs inside a plainly-styled panel (as
+	//! vanilla's do) so it never inherits the engine's default style for a styleless widget,
+	//! which COT's style table changes. Geometry is applied to the WRAPPER; the preview
+	//! fills it fractionally.
 	protected Widget m_ItemPreviewPanel;
 	protected EntityAI m_PreviewItem;
 
@@ -96,12 +90,9 @@ class JMObjectSpawnerForm: JMFormBase
 	//! Height of the preview inside its card.
 	static const int PREVIEW_H = 240;
 
-	//! The left column's bands, top to bottom, in layout pixels.
-	//!
-	//! Every one of them is pinned from OnResize rather than left to the layout
-	//! file. Two sources for the same four numbers is how the chip strip ended
-	//! up overlapping the class list: the file said one thing, the single
-	//! computed pin said another, and only the list moved.
+	//! The left column's bands, top to bottom, in layout pixels. All are pinned from
+	//! OnResize rather than the layout file: two sources for the same four numbers made the
+	//! chip strip overlap the class list (the file said one thing, the pin another).
 	static const int SEARCH_H = 34;
 	static const int FILTER_H = 36;
 	static const int RECENT_H = 36;
@@ -110,12 +101,10 @@ class JMObjectSpawnerForm: JMFormBase
 	//! destination + setup, then Spawn + Delete.
 	static const int FOOTER_H = 80;
 
-	//! Row splits, as FRACTIONS of the row. Never a measured flex pass and
-	//! never a fraction mixed with fixed pixels - see OnCreate.
-	//!
-	//! A fixed-pixel button beside a fractional field wraps the moment the row
-	//! is narrower than the two of them together, and this window can be
-	//! dragged down to RESIZE_MIN_WIDTH. Two fractions summing under 1 cannot.
+	//! Row splits, as FRACTIONS of the row; never a measured flex pass nor a fraction mixed
+	//! with fixed pixels (see OnCreate). A fixed-pixel button beside a fractional field wraps
+	//! once the row is narrower than both (window drags down to RESIZE_MIN_WIDTH); two
+	//! fractions summing under 1 cannot.
 	static const float MODE_ROW_W   = 0.5;
 	static const float MODE_ROW_W2  = 0.49;
 	static const float SEARCH_ROW_W = 0.86;
@@ -183,20 +172,10 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		super.OnResize( w, h );
 
-		//! The ONE thing that has to be computed: how far down the left column
-		//! the class list reaches. The three bands above it are fixed height
-		//! and the right column is a scroller that sizes itself, so nothing
-		//! else here depends on a measurement - except where the right
-		//! column's scroller ends and its fixed-height spawn footer begins,
-		//! which is the same subtraction from the same h.
-		//!
-		//! h is real content-height screen pixels handed over by JMWindowBase -
-		//! not a widget's own GetScreenSize, which reads zero before the first
-		//! render and is what made the old flex footer unreliable.
-		//! All four bands, from one place. Only the last of them has anything to
-		//! compute - the three above it are fixed - but they are pinned here too
-		//! so the layout file cannot quietly disagree with this about where the
-		//! list starts. When it did, the chip strip ran on underneath it.
+		//! The ONE computed thing: how far down the left column the class list reaches (the other
+		//! bands are fixed; the right scroller sizes itself, but its footer split uses the same h).
+		//! h is real content-height pixels from JMWindowBase, not a widget's GetScreenSize (zero
+		//! before first render). All four bands are pinned here so the layout file cannot disagree.
 		float searchH = JMUILayout.Px( SEARCH_H );
 		float filterH = JMUILayout.Px( FILTER_H );
 		float headerH = GetLeftHeaderHeight();
@@ -264,18 +243,10 @@ class JMObjectSpawnerForm: JMFormBase
 
 	override void OnCreate()
 	{
-		// ----------------------------------------------------------------------
-		// Two columns, modelled on player_form.layout.
-		//
-		//   panel_left  - search, filters, recent chips, class list
-		//   panel_right - preview, properties and spawn, as cards in a scroller
-		//
-		// The previous layout stacked four bands and computed all of their
-		// geometry by hand on every resize, re-pinning the list and the preview
-		// to measured pixel halves. Only ONE thing is computed now: how far the
-		// class list reaches down the left column. Everything else is either a
-		// fraction or sized by its own content.
-		// ----------------------------------------------------------------------
+		// Two columns, modelled on player_form.layout: panel_left (search, filters, recent chips,
+		// class list) and panel_right (preview, properties, spawn as cards in a scroller).
+		// Only ONE thing is computed: how far the class list reaches down the left column;
+		// everything else is a fraction or sized by its own content.
 
 		m_LeftPanel         = layoutRoot.FindAnyWidget( "panel_left" );
 		m_RightPanel        = layoutRoot.FindAnyWidget( "panel_right" );
@@ -320,10 +291,9 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( m_Module.m_AllowRestrictedClassNames )
 			m_UnsafeSelect.SetSelection( 1, false );
 
-		// --- Class list -------------------------------------------------------
-		//! COT's own list, not TextListboxWidget. That widget draws in the
-		//! engine's debug style and builds one entry per item - roughly 14000
-		//! widgets on every keystroke here. This one keeps a pool of the rows
+		// --- Class list ---
+		//! COT's own list, not TextListboxWidget: that draws in the engine's debug style and builds
+		//! one entry per item (~14000 widgets per keystroke here). This keeps a pool of the rows
 		//! that fit and moves the data through it.
 		m_ClassList = UIActionManager.CreateItemList( m_ListWrapper, this, "OnClick_ClassList" );
 		m_ClassList.SetEmptyText( "#STR_COT_OBJECT_MODULE_NO_RESULTS" );
@@ -347,12 +317,10 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( m_ItemPreviewPanel )
 			Class.CastTo( m_ItemPreview, m_ItemPreviewPanel.FindAnyWidget( "object_preview" ) );
 
-		//! ItemPreviewWidget is an RTT surface - it renders nothing outside the
-		//! narrow sort band the Preview Lab's live sweep found (2026-09-24; see
-		//! JMUILayout.SORT_PREVIEW's note). The earlier read - that it only
-		//! renders inside a UIScriptedMenu - was a red herring from only ever
-		//! having tried sort 0 or 32000, never this band; a plain window child
-		//! at the right sort works fine, no render-layer menu needed.
+		//! ItemPreviewWidget is an RTT surface that only renders inside the narrow sort band the
+		//! Preview Lab found (2026-09-24; see JMUILayout.SORT_PREVIEW). It does NOT need a
+		//! UIScriptedMenu: that was a red herring from only trying sort 0 or 32000. A plain
+		//! window child at the right sort works.
 		if ( m_ItemPreview )
 			m_ItemPreview.SetSort( JMUILayout.SORT_PREVIEW );
 
@@ -380,12 +348,9 @@ class JMObjectSpawnerForm: JMFormBase
 		UIActionManager.CreateDivider( spawnFooter, JMTheme.DIVIDER_MEDIUM, 1 );
 		Widget spawnBody = UIActionManager.CreateGridSpacer( spawnFooter, 2, 1 );
 
-		//! Every width in this card is a FRACTION of its row, never a measured
-		//! flex split. UIActionFlexRow can only divide a row it has already
-		//! measured, and it cannot measure one that has not been drawn - which
-		//! is the state every row is in on the frame it is built. This form used
-		//! to work around that with a CallLater one tick after OnShow; a
-		//! fraction is right on the first frame and needs no workaround.
+		//! Every width in this card is a FRACTION of its row, never a measured flex split:
+		//! UIActionFlexRow cannot measure a row that has not been drawn, which is every row on the
+		//! frame it is built. A fraction is right on the first frame, with no CallLater workaround.
 		Widget modeRow = UIActionManager.CreateWrapSpacerCompact( spawnBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
 		m_SpawnMode = UIActionManager.CreateDropdown( modeRow, "", layoutRoot, this, "ChangeSpawnMode", spawnModes );
@@ -422,11 +387,9 @@ class JMObjectSpawnerForm: JMFormBase
 
 		BindPermission( m_DeleteCursorBtn, JMConstants.PERM_ENTITY_DELETE );
 
-		// --- Export -----------------------------------------------------------
-		//! Its own card under Spawn. Copying a class list to the clipboard is
-		//! not a kind of spawning, and while it lived in the spawn dropdown the
-		//! Spawn button had to rename itself and disable the Setup control to
-		//! stop meaning what it said.
+		// --- Export ---
+		//! Its own card under Spawn: copying a class list is not spawning, and in the spawn dropdown
+		//! the Spawn button had to rename itself and disable Setup to stay truthful.
 		array<string> exportModes = new array<string>;
 		m_ExportModeIds.Clear();
 
@@ -680,11 +643,10 @@ class JMObjectSpawnerForm: JMFormBase
 		return super.OnMouseWheel( w, x, y, wheel );
 	}
 
-	// Reflect the current s_ObjSpawnMode on the Spawn button label + enable/disable
-	// the Setup dropdown (clipboard modes don't use setup options).
-	//! Add one entry to a dropdown and record which COT_ObjectSpawnerMode it
-	//! stands for. Entry text is printed verbatim by the dropdown - unlike its
-	//! label, it does not translate - so the key is resolved here.
+	// Reflect s_ObjSpawnMode on the Spawn button label and enable/disable the Setup dropdown.
+	//! Add one entry to a dropdown and record which COT_ObjectSpawnerMode it stands for.
+	//! Entry text is printed verbatim (unlike a label it does not translate), so the key is
+	//! resolved here.
 	protected void AddMode( TIntArray ids, array<string> labels, int mode, string label )
 	{
 		ids.Insert( mode );
@@ -778,11 +740,9 @@ class JMObjectSpawnerForm: JMFormBase
 		ExportList( s_ObjExportMode );
 	}
 
-	//! Put the CURRENT LIST on the clipboard in one of the export formats.
-	//!
-	//! Always from m_ListClasses, never from the row text: the rows carry
-	//! display names while that filter is on, and none of these formats is any
-	//! use full of display names.
+	//! Put the CURRENT LIST on the clipboard in one of the export formats. Always from
+	//! m_ListClasses, never the row text: rows carry display names while that filter is on,
+	//! useless in these formats.
 	void ExportList( int mode )
 	{
 		string clipboardOutput = "";
@@ -890,13 +850,10 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 		}
 
-		//! -1 is the module's "not specified" for all three, so a property the
-		//! selected class does not have simply is not sent.
-		//!
-		//! Health and quantity travel as a PAIR: the low end as the value, the
-		//! high end as module state alongside the setup mode. The server rolls
-		//! between them once per entity, so one call that fills five inventories
-		//! produces five different results.
+		//! -1 is the module's "not specified" for all three, so an absent property is not sent.
+		//! Health and quantity travel as a PAIR: low end as the value, high end as module state
+		//! alongside the setup mode. The server rolls between them once per entity, so one call
+		//! filling five inventories gives five different results.
 		float health;
 		float temp;
 		float quantity;

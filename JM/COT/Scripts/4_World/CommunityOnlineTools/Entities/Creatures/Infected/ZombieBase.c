@@ -9,11 +9,9 @@ modded class ZombieBase
 		RegisterNetSyncVariableBool("m_COT_Immobilized");
 	}
 
-	//! Hold this infected still without killing it.
-	//!
-	//! Two halves, and both are needed: the agent kept in idle stops the AI
-	//! deciding to go anywhere, and the input controller overrides stop the
-	//! command already running from carrying it the rest of the way.
+	//! Hold this infected still without killing it. Both halves are needed: the agent
+	//! kept in idle stops the AI choosing to go anywhere, and the input controller
+	//! overrides stop the already running command carrying it the rest of the way.
 	void COT_SetImmobilized(bool state)
 	{
 		m_COT_Immobilized = state;

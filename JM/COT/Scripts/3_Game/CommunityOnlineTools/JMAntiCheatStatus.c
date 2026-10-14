@@ -1,20 +1,7 @@
-// =============================================================================
-//  JMAntiCheatStatus.c
-//
-//  Client-side mirror of one number: how many players the anti-cheat currently
-//  has flagged hard enough to be worth looking at.
-//
-//  The anti-cheat module keeps its full flag table server-side and ships it to
-//  a client only while the AntiCheat form is open and asking. That is the right
-//  shape for a table of scores and event lists, and the wrong shape for a
-//  footer badge, which has to know something is wrong before anyone thinks to
-//  open the form. So the count - and only the count - rides along with the
-//  server-stats broadcast that already runs on a timer to the same audience.
-//
-//  Lives in 3_Game for the same reason JMServerStats does: the producer is a
-//  5_Mission module and the consumer is the 4_World sidebar footer, and those
-//  two cannot name each other's types.
-// =============================================================================
+//  JMAntiCheatStatus - client mirror of the flagged-player count. The flag table
+//  is only sent while the form is open, so the count rides the server-stats
+//  broadcast for the footer badge. In 3_Game as 5_Mission and 4_World cannot
+//  name each other's types (same as JMServerStats).
 
 class JMAntiCheatStatus
 {

@@ -1,16 +1,7 @@
-// =============================================================================
-//  JMEntityManagerForm
-//
-//  Generic entity-manager form. Delegates all data and per-action logic to a
-//  JMEntityManagerAdapter supplied by the owning module. The UI layout is
-//  shared across all concrete managers (vehicles, garage, territories, events).
-//
-//  Layout: archetype A (split-pane roster + tabbed detail). Left 35% is a
-//  searchable roster with a toolbar block above it; right 65% is a tab strip
-//  over Map / Actions / Info. Picking an entity moves to its Actions tab; the
-//  map keeps its markers either way. Actions and Info are covered by the
-//  disable overlay while nothing is selected.
-// =============================================================================
+//  JMEntityManagerForm - generic entity-manager form; data and actions are
+//  delegated to a JMEntityManagerAdapter from the owning module. Layout: left 35%
+//  searchable roster, right 65% tabs (Map / Actions / Info). Picking an entity
+//  opens Actions; Actions and Info are disabled while nothing is selected.
 class JMEntityManagerForm: JMFormBase
 {
 	protected JMEntityManagerModule m_Module;
@@ -353,16 +344,10 @@ class JMEntityManagerForm: JMFormBase
 		}
 	}
 
-	// -------------------------------------------------------------------------
-	//  Delta hooks - called by JMEntityManagerModule when a single-entity
-	//  upsert or remove arrives from the server after an admin action.
-	//
-	//  Implementation goal: avoid the full LoadEntities churn. If the user is
-	//  currently inspecting an entity, refresh just the info panel in place;
-	//  otherwise let LoadEntities run normally (it's gated behind
-	//  m_IsInEntityInfo anyway, so the upsert arrives into the cached list
-	//  and the next manual Refresh / filter click picks it up visually).
-	// -------------------------------------------------------------------------
+	//  Delta hooks - called by JMEntityManagerModule on a single-entity upsert/remove
+	//  from the server. Avoids full LoadEntities churn: refresh just the info panel
+	//  if inspecting an entity; otherwise the cached list updates (LoadEntities is
+	//  gated behind m_IsInEntityInfo) and the next Refresh / filter click shows it.
 
 	void OnDeltaUpsert( JMEntityMetaData fresh )
 	{

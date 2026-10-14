@@ -1,13 +1,6 @@
-// =============================================================================
-//  JMSideBarConfig.c
-//  Sidebar category display configuration.
-//  Add, remove or rename categories and their icons here.
-//
-//  Icons come from the Lucide set under GUI/textures/icons/lucide/ - a single
-//  line-art family, so a column of category tiles reads as one set rather than
-//  the mix of weights the old game-icons.net picks produced. Module tiles are
-//  drawn from the same family (see each module GetIconName override).
-// =============================================================================
+//  JMSideBarConfig.c - sidebar category display configuration: add, remove or rename
+//  categories and their icons here. Icons come from the Lucide set under
+//  GUI/textures/icons/lucide/, one line-art family; module tiles use it too (GetIconName).
 
 class JMSideBarConfig
 {

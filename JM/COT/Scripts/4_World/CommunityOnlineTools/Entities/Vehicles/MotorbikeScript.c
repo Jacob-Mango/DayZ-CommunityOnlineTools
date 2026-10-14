@@ -141,11 +141,8 @@ modded class MotorbikeScript
 			Leak( fluid, -delta );
 	}
 
-	//! FUEL only - unlike Car, Motorbike has no oil/brake/coolant tanks.
-	//! Vanilla's own motorbike_01.c/motorbike_02.c never touch anything but
-	//! MotorbikeFluid.FUEL; asking for the others throws "Can't find
-	//! variable" at runtime (confirmed on a live server, not caught by a
-	//! static compile check).
+	//! FUEL only - Motorbike has no oil/brake/coolant tanks. Asking for others throws
+	//! "Can't find variable" at runtime (not caught by a static compile check).
 	void COT_Refuel()
 	{
 		COT_FillBikeFluid( MotorbikeFluid.FUEL );

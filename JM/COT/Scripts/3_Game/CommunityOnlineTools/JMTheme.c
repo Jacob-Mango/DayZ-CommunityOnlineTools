@@ -1,34 +1,7 @@
-// =============================================================================
-//  JMTheme - the single source of truth for every colour in Community Online
-//  Tools.
-//
-//  The palette is daisyUI's "dark" theme, converted from OKLCH to sRGB once,
-//  here, so the rest of the mod keeps working in plain ARGB ints:
-//
-//    base-100  #1D232A   base-200  #191E24   base-300  #15191E
-//    base-content #ECF9FF                    neutral   #09090B
-//    primary   #605DFF   secondary #F43098   accent    #00D3BB
-//    info      #00BAFE   success   #00D390   warning   #FCB700   error #FF627D
-//
-//  Two habits carry over from daisyUI and are worth keeping:
-//
-//    1. Surfaces come from the base ramp, never from the accent ramp. base-300
-//       is the deepest (inputs, headers), base-100 the highest (cards, buttons).
-//    2. Borders and de-emphasised text are base-content at low alpha, not a
-//       separate grey. That keeps an edge readable on every surface in the ramp
-//       instead of only on the one it happened to be picked against.
-//
-//  Layers
-//  ------
-//    1. RAMPS      - the raw palette: base ladder, primary ladder, status set.
-//                    Prefer a semantic token below.
-//    2. SEMANTIC   - what a colour is FOR (surface, border, text, accent).
-//    3. COMPONENT  - the handful of places that need their own named value.
-//
-//  Lives in 3_Game so every layer (3_Game / 4_World / 5_Mission) can read it.
-//
-//  @note ARGB order, as everywhere else in Enfusion: 0xAARRGGBB.
-// =============================================================================
+// JMTheme - the single source of truth for every colour in COT. Palette is daisyUI
+// "dark" converted from OKLCH to sRGB once. Surfaces come from the base ramp, borders
+// and muted text are base-content at low alpha. Layers: RAMPS (raw), SEMANTIC, COMPONENT.
+// Lives in 3_Game so every layer can read it. @note ARGB order: 0xAARRGGBB.
 class JMTheme
 {
 	// -------------------------------------------------------------------------
@@ -69,23 +42,17 @@ class JMTheme
 	static const int DANGER                = 0xFFFF627D;  //!< error
 	static const int DANGER_DIM            = 0xFF4D0218;  //!< error-content
 	static const int DANGER_BRIGHT         = 0xFFF98FA4;
-	//! Fill for a FILLED destructive control. DANGER is tuned to read as text,
-	//! an icon or a badge on a dark surface; at button size that same value is a
-	//! slab of bright pink next to the calm base-100 pills around it. A red
-	//! button therefore fills with this darker step and lets SetColor() derive
-	//! its hover / pressed / ring shades from it, which keeps the ring in the
-	//! DANGER hue without the fill shouting.
+	//! Fill for a FILLED destructive control. DANGER is tuned for text/icons and looks
+	//! like a slab of pink at button size, so buttons fill with this darker step and
+	//! SetColor() derives hover / pressed / ring shades from it.
 	static const int DANGER_FILL           = 0xFF8C2438;
 	static const int WARNING               = 0xFFFCB700;  //!< warning
 	static const int WARNING_DIM           = 0xFF793205;  //!< warning-content
 	static const int SUCCESS               = 0xFF00D390;  //!< success
 	static const int SUCCESS_DIM           = 0xFF004C39;  //!< success-content
-	//! Fill for a FILLED confirming control, the green twin of DANGER_FILL.
-	//! SUCCESS is a bright mint tuned to read as text, an icon or a badge on a
-	//! dark surface; at button size that same value is a slab of neon next to
-	//! the calm base-100 pills around it. A green button therefore fills with
-	//! this deeper step and lets SetColor() derive its hover / pressed / ring
-	//! shades from it, which keeps the SUCCESS hue without the fill shouting.
+	//! Fill for a FILLED confirming control, the green twin of DANGER_FILL. SUCCESS is
+	//! tuned for text/icons and looks like neon at button size, so buttons fill with
+	//! this deeper step and SetColor() derives hover / pressed / ring shades from it.
 	static const int SUCCESS_FILL          = 0xFF0C6B4F;
 	static const int INFO                  = 0xFF00BAFE;  //!< info
 
@@ -173,16 +140,10 @@ class JMTheme
 	//! Close button hover - the one destructive affordance, so it stays red.
 	static const int TITLE_CLOSE_HOVER     = 0xCCFF627D;
 
-	//! The rounded pill, shared by every clickable surface in the mod: action
-	//! buttons, tab-bar tabs, filter chips, icon-grid cells. The SHAPE is what
-	//! makes them one family; the colour separates "you can click this" from
-	//! "this one is on".
-	//!
-	//!   SELECTED_*  the primary violet - reserved for the one thing that is ON
-	//!               (current tab, active filter, chosen icon).
-	//!   BUTTON_*    daisyUI's default button: a base-100 surface with a faint
-	//!               base-content border. A form is mostly buttons, so these stay
-	//!               calm and let the primary pill carry the meaning.
+	//! The rounded pill shared by every clickable surface (buttons, tabs, chips, icon
+	//! cells). SELECTED_* is the primary violet, reserved for the one thing that is ON.
+	//! BUTTON_* is daisyUI's default button: base-100 surface, faint base-content
+	//! border, kept calm so the primary pill carries the meaning.
 	static const int SELECTED_FILL         = 0xFF605DFF;
 	static const int SELECTED_FILL_HOVER   = 0xFF7979FF;
 	static const int SELECTED_OUTLINE      = 0xFF9194FF;
@@ -234,10 +195,8 @@ class JMTheme
 
 	//! Linear interpolate every channel (alpha included) of two ARGB colours.
 	//! t = 0 returns color, t = 1 returns target.
-	//!
-	//! @note the channel unpack MUST stay in int locals. Enforce resolves an
-	//! operator against the type of the assignment target, so a float target
-	//! makes the shift unresolvable ("Unknown operator '>>'").
+	//! @note the channel unpack MUST stay in int locals: a float assignment target makes
+	//! the shift unresolvable ("Unknown operator '>>'").
 	static int Mix( int color, int target, float t )
 	{
 		int ca = ( color  >> 24 ) & 0xFF;

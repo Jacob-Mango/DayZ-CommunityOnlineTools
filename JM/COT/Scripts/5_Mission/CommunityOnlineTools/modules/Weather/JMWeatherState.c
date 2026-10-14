@@ -1,14 +1,7 @@
-// =============================================================================
-//  JMWeatherState - a top-level node of the dynamic weather state machine
-//
-//  A state is a weather SYSTEM ("Storm front", "Fair weather") made of phases
-//  ("Building", "Peak", "Clearing"). While the machine is inside a state it
-//  moves between that state's phases along their edges; when a phase's edge
-//  says "leave", the state's own NextStates are rolled to pick the next state,
-//  and that state's Entry weights pick which of its phases it opens on.
-//
-//  Everything is a percentage list - see JMWeatherNextState.
-// =============================================================================
+//  JMWeatherState - top-level node of the dynamic weather state machine: a weather
+//  SYSTEM ("Storm front") made of phases ("Building", "Peak"). The machine moves
+//  between phases along their edges; a "leave" edge rolls NextStates for the next
+//  state, whose Entry weights pick its opening phase. All lists are percentages.
 class JMWeatherState
 {
 	string Name;

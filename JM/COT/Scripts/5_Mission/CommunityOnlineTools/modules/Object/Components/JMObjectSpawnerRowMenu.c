@@ -1,20 +1,7 @@
-// =============================================================================
-//  JMObjectSpawnerRowMenu.c
-//
-//  Right-click menu for a row in the object spawner's class list. Spawn at
-//  cursor / spawn at self are quick actions on the class the right-click
-//  landed on. Copy is a page of the same export formats ExportList already
-//  produces for the whole list, scoped to just this one classname.
-//
-//  Built on JMPagedActionMenu - the same paging tech the 3D world context
-//  menu (JMESPActionMenu, raised over ESP tags and the tracked list) already
-//  uses, rather than a second, separately-maintained page/back implementation
-//  for this 2D one.
-//
-//  The row is already selected by the time this opens (UIActionItemList
-//  selects on the press, left or right), so the spawn actions just call the
-//  form's existing SpawnObject() rather than re-deriving the classname.
-// =============================================================================
+//  JMObjectSpawnerRowMenu.c - right-click menu for a class-list row: spawn at
+//  cursor / self, and a Copy page of ExportList's formats for one classname.
+//  Built on JMPagedActionMenu. The row is already selected on press (left or
+//  right), so spawn actions just call the form's SpawnObject().
 class JMObjectSpawnerRowMenu: JMPagedActionMenu
 {
 	protected JMObjectSpawnerForm m_Form;

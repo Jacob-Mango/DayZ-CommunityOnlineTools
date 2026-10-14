@@ -1,15 +1,7 @@
-// =============================================================================
-//  JMEntityMetaData
-//
-//  Generic descriptor for anything the EntityManager UI can list: a vehicle,
-//  a territory, a crashed helicopter, a contaminated zone, an airdrop, etc.
-//
-//  Adapters fill this out from their source data. The UI only reads these
-//  fields - it never touches engine objects directly.
-//
-//  String map `m_Extra` holds arbitrary adapter-specific fields (owner UID,
-//  loot count, etc.) that are rendered in the info panel.
-// =============================================================================
+//  JMEntityMetaData - generic descriptor for anything the EntityManager UI can list (vehicle,
+//  territory, crashed helicopter, contaminated zone, airdrop...). Adapters fill it from their
+//  source data; the UI only reads it, never engine objects. String map `m_Extra` holds
+//  adapter-specific fields (owner UID, loot count) rendered in the info panel.
 class JMEntityMetaData
 {
 	// Identity - NetworkID for live entities, synthetic int for pure data rows.

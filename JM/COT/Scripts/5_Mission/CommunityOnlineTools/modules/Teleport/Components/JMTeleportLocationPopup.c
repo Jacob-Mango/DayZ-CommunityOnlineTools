@@ -59,13 +59,9 @@ class JMTeleportLocationPopup
 			m_PopupBody.Update();
 	}
 
-	// =========================================================================
-	//  Save / edit popup
-	//
-	//  One popup for both jobs. Saving and editing ask for the same two things,
-	//  and the only difference is whether there is an existing location to write
-	//  back to - which is what m_PopupEditing records.
-	// =========================================================================
+	// Save / edit popup: one popup for both jobs, as they ask for the same two things; the
+	// only difference is whether there is an existing location to write back to
+	// (m_PopupEditing).
 
 	protected void InitPopup()
 	{
@@ -189,11 +185,9 @@ class JMTeleportLocationPopup
 		HidePopup();
 	}
 
-	//! Fill the picker with the categories that exist plus the row that swaps
-	//! it for a text box, and select `select`.
-	//!
-	//! Rebuilt on every open rather than once: a category this popup creates
-	//! has to be pickable the next time it opens.
+	//! Fill the picker with the existing categories plus the row that swaps it for a text box,
+	//! and select `select`. Rebuilt on every open so a category this popup created is
+	//! pickable next time.
 	protected void RebuildPopupCategories( string select )
 	{
 		int i;

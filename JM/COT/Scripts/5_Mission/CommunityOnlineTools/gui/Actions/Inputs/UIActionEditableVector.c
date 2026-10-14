@@ -6,12 +6,9 @@ class UIActionEditableVector: UIActionBase
 	protected EditBoxWidget m_TextZ;
 	protected ButtonWidget m_Button;
 
-	//! Set the moment the user types or wheels a channel, cleared when the host
-	//! consumes the value. A caller that pushes a live value in on a timer -
-	//! JMESPMeta refreshes an object's position and orientation while its
-	//! overlay is open - has to skip a field the user has edited but stepped
-	//! away from. Focus alone is not enough: clicking off the box loses focus
-	//! without discarding what was typed into it.
+	//! Set when the user types or wheels a channel, cleared when the host consumes the value.
+	//! Callers pushing live values on a timer (JMESPMeta) must skip an edited field; focus alone
+	//! is not enough, since clicking off loses focus without discarding the typed text.
 	protected bool m_Edited;
 
 	bool IsEdited()

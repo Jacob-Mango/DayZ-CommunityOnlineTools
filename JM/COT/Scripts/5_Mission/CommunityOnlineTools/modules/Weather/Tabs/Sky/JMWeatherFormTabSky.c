@@ -1,14 +1,7 @@
-//! "Sky" tab of JMWeatherForm - Overcast, Fog (+dynamic fog), Storm and
-//! Sandstorm cards. Back-reference to the owning form, same shape as
-//! JMPlayerRowWidget.Menu.
-//!
+//! "Sky" tab of JMWeatherForm - Overcast, Fog (+dynamic fog), Storm and Sandstorm cards.
 //! Apply/dirty-tracking/preview mechanics (PreviewSection, SetSectionDirty,
-//! GlobalTransition/Duration) stay on the form - every tab's Apply routes
-//! through them, and preset edit mode hijacks them for every section at once,
-//! so they are not this tab's to own.
-//!
-//! Every numeric value here is a JMWeatherRangeControl: one value, or - with the
-//! card's title-bar switch on - a span the server rolls between on each apply.
+//! GlobalTransition/Duration) stay on the form: every tab's Apply routes through them and
+//! preset edit mode hijacks them. Values are JMWeatherRangeControls (one value or a span).
 class JMWeatherFormTabSky: JMFormTab
 {
 	protected JMWeatherForm m_Form;

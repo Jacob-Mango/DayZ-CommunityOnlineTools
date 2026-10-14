@@ -1,27 +1,7 @@
 //! One row of the ESP category filter list.
-//!
-//!     [palette] (=O) Players
-//!
-//! Laid out in a WrapSpacer, not a GridSpacer: a GridSpacer splits its width
-//! into equal columns and ignores a child's own SetWidth, which is what threw
-//! the palette button out to fill half the row. A WrapSpacer honours both
-//! SetFixedSize on the icon button and a SetWidth fraction on the label, the
-//! same combination this module's original toolbar rows used.
-//!
-//! The row is built from stock UIAction controls rather than from a layout of
-//! its own. The hand-rolled esp_type_widget.layout it replaces put a checkbox,
-//! a label and a swatch in a Size-To-Content-H grid whose fractional middle
-//! column ate the whole width, so the swatch column collapsed to nothing and
-//! could never be clicked. UIActionToggleSwitch and UIActionImageButton already
-//! own their hover and press feedback, which the raw CheckBoxWidget did not.
-//!
-//! The category glyph is baked into the switch thumb and tinted with that
-//! category's overlay colour, so the switch carries the on/off state and the
-//! colour at a glance.
-//!
-//! Derives from COT_ScriptedWidgetEventHandler so JMFormBase.RegisterPermission
-//! can hold it - the registry is typed to that class, and ESP registers one
-//! "ESP.View.<Permission>" key per view type.
+//! WrapSpacer, not GridSpacer (a GridSpacer ignores a child's SetWidth). Built from stock
+//! UIAction controls. Derives from COT_ScriptedWidgetEventHandler so
+//! JMFormBase.RegisterPermission can hold it.
 class JMESPViewTypeWidget: COT_ScriptedWidgetEventHandler
 {
 	//! Side of the square icon button in the row's left gutter. Group headers
@@ -258,9 +238,7 @@ class JMESPViewTypeWidget: COT_ScriptedWidgetEventHandler
 	//! Glyph baked into a category row's switch thumb. Keyed on typename the
 	//! same way GroupIndexFor is, and for the same reason: a sub-mod's own view
 	//! type falls through to the generic marker instead of rendering blank.
-	//!
-	//! Most-specific first - every weapon and item leaf also passes the base
-	//! test, so the bases have to be asked last.
+	//! Most-specific first: every weapon and item leaf also passes the base test.
 	static string IconForViewType( JMESPViewType viewType )
 	{
 		typename t = viewType.Type();

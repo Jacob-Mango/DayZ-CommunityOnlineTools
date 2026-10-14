@@ -1,12 +1,6 @@
-// =============================================================================
-//  CF type stubs.
-//
-//  DayZ's vanilla `scripts/3_Game/tools/jsonfileloader.c` provides
-//  `JsonFileLoader<T>`, and vanilla `scripts/1_core/param.c` provides
-//  `Param1` / `Param2`.  The @CF mod provides `CF_Modules`.  All three
-//  resolve via standard load order - no stubs needed.  This block is
-//  kept as a comment marker for future CF dependency audit.
-// =============================================================================
+//  CF type stubs: JsonFileLoader<T>, Param1/Param2 (vanilla) and CF_Modules (@CF)
+//  all resolve via standard load order, so no stubs are needed. Kept as a
+//  marker for future CF dependency audit.
 
 class JMConstants
 {
@@ -415,11 +409,9 @@ class JMConstants
 	static const string ICON_SAVE_ARROW            = "JM/COT/GUI/textures/icons/lucide/save.edds";
 	static const string ICON_SAWED_OFF_SHOTGUN     = "JM/COT/GUI/textures/icons/sawed-off-shotgun.edds";
 	static const string ICON_SCOOTER               = "JM/COT/GUI/textures/icons/scooter.edds";
-	//! Select-all / deselect-all pair. One source of truth: every list in COT
-	//! that can be bulk-selected uses these two, so the gesture looks the same
-	//! whether it is the player roster, the ESP categories or the tracked
-	//! objects. Both are list glyphs on purpose - a bare tick reads as "this
-	//! one item is on" rather than "act on the whole list".
+	//! Select-all / deselect-all pair, shared by every bulk-selectable list in COT.
+	//! Both are list glyphs on purpose - a bare tick reads as "this one item is
+	//! on" rather than "act on the whole list".
 	static const string ICON_SELECT_ALL            = "JM/COT/GUI/textures/icons/lucide/list-checks.edds";
 	static const string ICON_DESELECT_ALL          = "JM/COT/GUI/textures/icons/lucide/list-x.edds";
 	static const string ICON_SETTINGS_KNOBS        = "JM/COT/GUI/textures/icons/lucide/sliders-horizontal.edds";
@@ -457,31 +449,16 @@ class JMConstants
 	static const string ICON_WINTER_HAT            = "JM/COT/GUI/textures/icons/winter-hat.edds";
 	static const string ICON_WORLD                 = "JM/COT/GUI/textures/icons/lucide/globe.edds";
 
-	// -------------------------------------------------------------------------
-	//  Rounded surface textures
-	//
-	//  Pure white with a shaped alpha channel, so an ImageWidget using them can
-	//  be tinted with SetColor() exactly like the flat PanelWidgets they replace.
-	//  DayZ has no border-radius; a rounded control is an ImageWidget wearing one
-	//  of these instead of a PanelWidget.
-	//
-	//  Each texture's aspect is picked close to its real use so the corner radius
-	//  barely distorts when the widget stretches. Fixed-size controls (toggle
-	//  thumb, radio dot, swatch) get an exact-size texture and do not distort.
-	// -------------------------------------------------------------------------
+	//  Rounded surface textures: white with shaped alpha, tintable via SetColor()
+	//  like the PanelWidgets they replace (DayZ has no border-radius). Aspect is
+	//  picked close to real use so corners barely distort; fixed-size controls
+	//  (toggle thumb, radio dot, swatch) get exact-size textures.
 	static const string SURFACE_CHECK              = "JM/COT/GUI/textures/ui/surface_check.paa";
 
-	// -------------------------------------------------------------------------
-	//  Lucide icon set (2034 icons, ISC) under GUI/textures/icons/lucide/.
-	//
-	//  Addressed by name rather than by one constant per icon: 2034 static
-	//  strings would eat a pointless chunk of the 3_Game module's static memory
-	//  pool, and that pool failing is a compile error, not a runtime one.
-	//
-	//    image.LoadImageFile( 0, JMConstants.Lucide( "shield-check" ) );
-	//
+	//  Lucide icon set (2034 icons, ISC) in GUI/textures/icons/lucide/, addressed by
+	//  upstream name, e.g. JMConstants.Lucide( "shield-check" ). One constant per
+	//  icon would exhaust the 3_Game static string pool (a compile error).
 	//  Names are the upstream Lucide names verbatim - see lucide.dev/icons.
-	// -------------------------------------------------------------------------
 	static string Lucide( string name )
 	{
 		return "JM/COT/GUI/textures/icons/lucide/" + name + ".edds";

@@ -1,17 +1,7 @@
-// =============================================================================
-//  JMCompositeHistoryEntry
-//
-//  One undo step made of several: a bulk operation (delete every selected
-//  object) reverts with a single Ctrl+Z instead of one press per object.
-//
-//  It carries ONE RequiredPermission for the whole group - the permission the
-//  bulk action itself needed. The children's own permissions are not
-//  re-checked; the group is what the admin was authorised to do.
-//
-//  Undo runs the children newest-first, redo oldest-first, so a group that
-//  depends on its own order comes back the way it went. A group succeeds when
-//  at least one child did; a child that has lost its target is skipped.
-// =============================================================================
+//  JMCompositeHistoryEntry - one undo step of several (bulk delete = one Ctrl+Z).
+//  ONE RequiredPermission for the group, children not re-checked. Undo runs
+//  newest-first, redo oldest-first; succeeds if any child did, children that
+//  lost their target are skipped.
 class JMCompositeHistoryEntry: JMActionHistoryEntry
 {
 	protected string m_Description;

@@ -1,9 +1,5 @@
-// =============================================================================
-//  JMMapEditorAssetRowData.c
-//
-//  UIActionData carrier for an asset-browser row in the Map Editor's left
-//  sidebar. Holds the classname to spawn + a display name for tooltips.
-// =============================================================================
+//  JMMapEditorAssetRowData.c - UIActionData carrier for an asset-browser row in
+//  the Map Editor's left sidebar: classname to spawn + display name for tooltips.
 
 class JMMapEditorAssetRowData : UIActionData
 {

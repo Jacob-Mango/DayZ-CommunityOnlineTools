@@ -1,16 +1,6 @@
-// =============================================================================
-//  JMAntiCheatFlagStore.c
-//
-//  On-disk shape of the flag table:
-//  $profile:CommunityOnlineTools\AntiCheat\flags.json
-//
-//  A flat array rather than a map keyed by guid - the guid is already a field
-//  on the flag, and an array survives a hand-edit by an admin far better than
-//  a JSON object whose keys have to match a field inside each value.
-//
-//  Version exists so a later format change can migrate instead of silently
-//  loading garbage into a score that gets people kicked.
-// =============================================================================
+//  JMAntiCheatFlagStore.c - on-disk flag table: $profile:CommunityOnlineTools\AntiCheat\flags.json
+//  Flat array, not a guid-keyed map: survives admin hand-edits better.
+//  Version lets a format change migrate instead of loading garbage into scores.
 
 class JMAntiCheatFlagStore
 {

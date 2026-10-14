@@ -1,15 +1,7 @@
-//! Couples a UIActionSlider with a numeric UIActionEditableText so an admin can
-//! either drag or type an exact value.
-//!
-//! The slider stays the source of truth and OWNS this object (see
-//! UIActionSlider.SetSync), so:
-//!   - every existing consumer keeps working unchanged: SetCurrent/GetCurrent,
-//!     the SetCallback( instance, "OnChange_X" ) handler and SetOnChange all fire
-//!     exactly as before, whether the value came from a drag or from the box;
-//!   - a programmatic SetCurrent (loading values from the server) refreshes the
-//!     box too, without firing CHANGE.
-//!
-//! Use UIActionManager.CreateSyncedSlider to build the pair in one call.
+//! Couples a UIActionSlider with a numeric UIActionEditableText (drag or type).
+//! The slider stays the source of truth and OWNS this object (SetSync), so
+//! existing consumers work unchanged and programmatic SetCurrent refreshes the box
+//! without firing CHANGE. Build with UIActionManager.CreateSyncedSlider.
 class UIActionSliderSync
 {
 	protected UIActionSlider m_Slider;

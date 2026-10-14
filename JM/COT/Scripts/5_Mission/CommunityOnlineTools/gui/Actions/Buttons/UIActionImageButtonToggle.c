@@ -1,23 +1,7 @@
-// =============================================================================
-//  UIActionImageButtonToggle
-//
-//  What UIActionButtonToggle is to UIActionButton, this is to
-//  UIActionImageButton: one pill that flips between two states, showing an
-//  image for each instead of a label.
-//
-//  Meant for a control whose two states have an obvious glyph and no room for
-//  a word - a sort direction, a filter on/off, a lock. Give it a tooltip: an
-//  icon-only button says nothing until it is hovered.
-//
-//  Fires UIEvent.CLICK after the state has flipped, so the callback can read
-//  IsToggled() and get the new value.
-//
-//  Usage:
-//      m_Sort = UIActionManager.CreateImageButtonToggle( row,
-//          JMConstants.Lucide( "arrow-down-a-z" ),
-//          JMConstants.Lucide( "arrow-down-z-a" ),
-//          this, "Event_UpdatePlayerList", 0.2 );
-// =============================================================================
+//  UIActionImageButtonToggle - UIActionButtonToggle for UIActionImageButton: a
+//  two-state pill showing an image per state (give it a tooltip). Fires
+//  UIEvent.CLICK after the flip, so IsToggled() is the new value.
+//  CreateImageButtonToggle( row, imgA, imgB, this, "Event_X", 0.2 );
 class UIActionImageButtonToggle: UIActionImageButton
 {
 	protected bool   m_IsToggled;

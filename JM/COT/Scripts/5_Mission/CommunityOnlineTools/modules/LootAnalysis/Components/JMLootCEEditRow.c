@@ -1,19 +1,7 @@
-// =============================================================================
-//  JMLootCEEditRow
-//
-//  Four editable CE fields - Nominal, Min as plain integer text, Lifetime and
-//  Restock as HH:MM:SS time pickers - inside a card's content grid, next to
-//  the read-only Markers/Tiers rows a UIActionKeyValueList already shows. Its
-//  own small class rather than four more fields duplicated once per tab
-//  (Item Scan and Distribution each have one), the way JMLootScanItemDetail
-//  is its own class instead of four more parallel arrays.
-//
-//  Editing is local to the fields until the card's Save button (built by the
-//  form, not here - it lives in the card header, not the content) reads
-//  ReadValues() and sends it to the server. This class holds no permission
-//  logic of its own; the form gates the Save button with RegisterPermission
-//  the same way every other destructive action here is gated.
-// =============================================================================
+//  JMLootCEEditRow: four editable CE fields (Nominal, Min as integers; Lifetime, Restock as HH:MM:SS
+//  pickers), shared by the Item Scan and Distribution tabs. Editing is local until the form's Save
+//  button (in the card header) reads ReadValues() and sends it. No permission logic here; the
+//  form gates Save with RegisterPermission.
 class JMLootCEEditRow
 {
 	protected Widget m_Wrapper;
@@ -39,11 +27,8 @@ class JMLootCEEditRow
 		m_Wrapper.Show(false);
 	}
 
-	//! Repaint from a fresh server answer - always overwrites whatever the
-	//! admin was mid-typing, the same way picking a different row anywhere
-	//! else in COT drops an unsaved edit. There is no "dirty" state to
-	//! protect: Save reads the fields directly, so nothing is lost UNLESS a
-	//! new item's data arrives before Save is pressed.
+	//! Repaint from a fresh server answer; overwrites any in-progress typing (no "dirty" state,
+	//! Save reads the fields directly), so a new item's data arriving before Save loses the edit.
 	void SetValues(JMLootItemTypeInfo info)
 	{
 		bool found = (info != NULL && info.m_Found);

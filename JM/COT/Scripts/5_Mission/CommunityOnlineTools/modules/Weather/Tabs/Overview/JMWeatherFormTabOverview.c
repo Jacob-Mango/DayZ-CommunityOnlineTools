@@ -1,22 +1,15 @@
-//! "Overview" tab of JMWeatherForm - the live weather readout, quick actions,
-//! the global timing fields and Apply All. Back-reference to the owning form,
-//! same shape as JMPlayerRowWidget.Menu.
-//!
-//! The global transition/duration pickers live here but are READ by every other
-//! tab's Apply, so the form keeps GlobalTransition()/GlobalDuration() as thin
-//! forwards to this class. Apply/dirty-tracking/preview mechanics stay on the
-//! form for the reasons given in JMWeatherFormTabSky.c's header.
+//! "Overview" tab of JMWeatherForm - live readout, quick actions, global timing
+//! and Apply All. The global pickers are READ by every tab's Apply, so the form
+//! keeps GlobalTransition()/GlobalDuration() as forwards here; Apply/dirty/preview
+//! mechanics stay on the form (see JMWeatherFormTabSky.c header).
 class JMWeatherFormTabOverview: JMFormTab
 {
 	protected JMWeatherForm m_Form;
 	protected UIActionScroller m_ScrollerOverview;
 
-	//! Raw widgets from weather_state_row.layout rather than UIActions.
-	//!
-	//! "now -> next" is one line of five fixed-size pieces at known offsets,
-	//! which is exactly what the sidebar footer does and exactly what the
-	//! spacer-based UIAction widgets will not do - every one of them claims a
-	//! full row.
+	//! Raw widgets from weather_state_row.layout, not UIActions: "now -> next" is one
+	//! line of five fixed pieces at known offsets, which spacer-based UIAction
+	//! widgets (each claims a full row) cannot do.
 	protected ImageWidget m_StateIconNow;
 	protected TextWidget  m_StateTextNow;
 	protected ImageWidget m_StateArrow;
@@ -41,12 +34,9 @@ class JMWeatherFormTabOverview: JMFormTab
 	static const float SPECIAL_WEATHER_POLL_INTERVAL = 1.0;
 	protected UIActionText m_StateTextClock;
 
-	//! Range bars, not progress bars: the span between what a phenomenon is
-	//! doing now and what it is heading towards says more than a single fill,
-	//! and it is the same picture the "now -> next" row draws in words.
-	//!
-	//! They take no callback and are rewritten every frame, so a drag snaps
-	//! straight back - they read as live output rather than as controls.
+	//! Range bars (now vs heading towards), mirroring the "now -> next" row. No
+	//! callback and rewritten every frame, so a drag snaps back: live output, not
+	//! controls.
 	protected UIActionSliderRange m_StateOvercast;
 	protected UIActionSliderRange m_StateRain;
 	protected UIActionSliderRange m_StateSnow;
@@ -61,12 +51,9 @@ class JMWeatherFormTabOverview: JMFormTab
 	protected UIActionTimePicker m_PickerTransition;
 	protected UIActionTimePicker m_PickerDuration;
 
-	//! Rain and snowfall thresholds a Clear puts back. The quick actions for
-	//! rain and snow move the floor down to 0.5 so their precipitation starts
-	//! immediately; left there, the world keeps raining at half overcast long
-	//! after the admin asked for clear skies. These are the vanilla
-	//! cfgweather.xml values, so Clear restores normal behaviour rather than
-	//! inventing a policy of its own.
+	//! Rain/snowfall thresholds a Clear puts back. The rain and snow quick actions
+	//! lower the floor to 0.5, which would keep raining at half overcast. These are
+	//! the vanilla cfgweather.xml values.
 	static const float CLEAR_THRESHOLD_MIN = 0.6;
 	static const float CLEAR_THRESHOLD_MAX = 1.0;
 
@@ -116,14 +103,9 @@ class JMWeatherFormTabOverview: JMFormTab
 			m_PickerDuration.SetTotalSeconds( seconds );
 	}
 
-	//! Paint one phenomenon as the span between where it is and where it is
-	//! going. A range wants its ends ordered, and a forecast is as likely to be
-	//! below the current value as above it, so they are sorted before use.
-	//!
-	//! Sorting throws away the one thing the admin most wants to know, though -
-	//! WHICH end is the forecast - because the bar looks identical either way
-	//! round. So the direction is handed to the slider separately and its
-	//! arrows drift toward the target.
+	//! Paint one phenomenon as the span between now and its forecast. Ends are
+	//! sorted for the range, which hides WHICH end is the forecast, so the
+	//! direction is passed to the slider separately and its arrows drift to it.
 	protected void SetStateRange( UIActionSliderRange range, WeatherPhenomenon phenomenon, float scale, float ceiling )
 	{
 		if ( !range || !phenomenon )
@@ -216,23 +198,15 @@ class JMWeatherFormTabOverview: JMFormTab
 		// --- Quick actions ----------------------------------------------------
 		UIActionCard quickCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_QUICKACTIONS" );
 
-		//! Straight into the card body, with NO grid spacer of its own.
-		//! card_content is already a GridSpacer, and a GridSpacer re-sizes its
-		//! children to the cell on every layout pass - so an icon grid nested a
-		//! second time had both the exact width and the exact height that
-		//! ForceContentWidth set overwritten, which is what made the strip wrap
-		//! to two rows and then stretch down the card.
+		//! Straight into the card body, NO grid spacer of its own: card_content is
+		//! a GridSpacer that re-sizes children every pass, so a nested icon grid
+		//! lost ForceContentWidth's size and wrapped to two rows.
 		Widget quickBody = quickCard.GetContent();
 
-		//! Each strip sits in a panel of a FIXED PIXEL HEIGHT, and the icon grid
-		//! goes inside that rather than straight into the card.
-		//!
-		//! ForceContentWidth deliberately leaves the grid root height
-		//! fractional - it is written for a horizontal scroller host. card_content
-		//! is a GridSpacer with Size To Content V, which resolves a fractional
-		//! height against the whole tab, so the card grew to fill the page and
-		//! pushed the conditions card off the top. A pixel-height panel gives the
-		//! row a real number to size to.
+		//! Each strip sits in a FIXED PIXEL HEIGHT panel, not straight in the card:
+		//! ForceContentWidth leaves the grid height fractional, and card_content
+		//! (Size To Content V) resolves that against the whole tab, so the card
+		//! filled the page and pushed the conditions card off.
 		Widget quickWeatherRow = UIActionManager.CreateRow( quickBody, QUICK_ROW_H );
 
 		m_QuickWeather = UIActionManager.CreateIconGridHorizontal( quickWeatherRow, this, "OnClick_QuickWeather" );
@@ -316,14 +290,9 @@ class JMWeatherFormTabOverview: JMFormTab
 		PollSpecialWeatherStatus();
 	}
 
-	//! Flag the two timing values that are legal but surprising.
-	//!
-	//! Neither is an error and neither is blocked - a snap change is sometimes
-	//! exactly what an admin wants. They are called out because the result does
-	//! not look like a setting at all: a zero transition reads as the weather
-	//! glitching, and a zero hold reads as the weather ignoring what was just
-	//! applied. Both are worth a sentence before the admin goes looking for a
-	//! bug that is not there.
+	//! Flag the two legal-but-surprising timing values (not blocked): a zero
+	//! transition reads as the weather glitching, a zero hold as it ignoring what
+	//! was just applied. A sentence saves the admin hunting a bug.
 	protected void RefreshTimingWarnings()
 	{
 		if ( m_PickerTransition )
@@ -361,12 +330,9 @@ class JMWeatherFormTabOverview: JMFormTab
 
 		string countdown = JMWorldConditions.FormatSecondsToChange( JMWorldConditions.GetSecondsToWeatherChange() );
 
-		//! The engine exposes exactly ONE number here - GetNextChange, the wait
-		//! until the weather controller picks its next forecast. How long the
-		//! CURRENT weather lasts and how long until the NEXT one are therefore
-		//! the same number, so it is printed once, worded as a wait ("in 2m"),
-		//! and the second line says what that wait means for the current state
-		//! rather than repeating the figure.
+		//! The engine exposes ONE number, GetNextChange (wait until the next forecast),
+		//! so current-weather duration and time-to-next are the same: printed once as
+		//! a wait ("in 2m"); the second line says what it means, not the figure.
 		if ( countdown != "" )
 			nextLabel += "   " + COT_String.TranslateEx( "#STR_COT_WEATHER_IN", countdown );
 
@@ -621,12 +587,9 @@ class JMWeatherFormTabOverview: JMFormTab
 
 		if ( id == "clear" )
 		{
-			//! Setting rain and snow to 0 is not enough on its own. The rainy
-			//! and snowy actions drop the overcast threshold to 0.5 so their
-			//! precipitation starts at once, and a threshold is a standing
-			//! rule - left at 0.5 the world starts raining again as soon as
-			//! the cloud cover climbs back past half. Clear puts both rules
-			//! back to vanilla.
+			//! Rain/snow 0 is not enough: the rainy/snowy actions drop the overcast
+			//! threshold to 0.5, a standing rule that restarts rain once cloud cover
+			//! passes half. Clear puts both thresholds back to vanilla.
 			module.SetRainThresholds( CLEAR_THRESHOLD_MIN, CLEAR_THRESHOLD_MAX, transition );
 			module.SetSnowThresholds( CLEAR_THRESHOLD_MIN, CLEAR_THRESHOLD_MAX, transition );
 

@@ -1,17 +1,6 @@
-//! One weather value that can be a single number OR a span the server rolls
-//! between each time it is applied.
-//!
-//! It is a UIActionSliderRange - the same control the object spawner uses for
-//! quantity and health - working in the units the weather stores (a 0-1
-//! fraction, radians, m/s) while the bar shows the units a person reads (percent,
-//! degrees, m/s). The conversion is a plain scale and offset:
-//!
-//!     shown = stored * scale + offset
-//!
-//! In single mode there is one handle and Low() == High(), so a caller that only
-//! wants "the value" reads Low() and never has to ask which mode it is in; Hi()
-//! is what goes in the "Hi" twin of a stored field and is 0 - "not a range" -
-//! whenever the two ends coincide.
+//! One weather value: a single number OR a span the server rolls between on each
+//! apply. A UIActionSliderRange showing stored * scale + offset. In single mode
+//! Low() == High(); Hi() feeds the "Hi" twin field and is 0 when the ends coincide.
 class JMWeatherRangeControl
 {
 	protected UIActionSliderRange m_Slider;

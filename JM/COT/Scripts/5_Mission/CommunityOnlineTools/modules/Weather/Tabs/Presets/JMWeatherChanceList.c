@@ -1,15 +1,7 @@
-//! An editable list of weighted targets that always adds up to 100 - one slider
-//! per target, a delete button beside each, and a dropdown that adds another the
-//! moment it is picked.
-//!
-//! The dynamic weather editor has three of these (a phase's edges, a state's next
-//! states, a state's entry phases), and each is an instance of this class: an
-//! instance is its own callback target, so the three never see each other's
-//! events. It is the chance-row code that used to be hard-wired into the Presets
-//! tab, lifted out so it can be used more than once.
-//!
-//! A target name of "" is allowed and shown under a label of its own - that is
-//! how a phase's "leave this state" edge appears in the same list as the phases.
+//! Editable list of weighted targets summing to 100: a slider and delete button per target, and a
+//! dropdown that adds one. The dynamic weather editor has three instances (edges, next states,
+//! entry phases); each is its own callback target so they never see each other's events.
+//! A target "" is shown under its own label: a phase's "leave this state" edge.
 class JMWeatherChanceList
 {
 	//! The chance row reserves a tenth of its width for the 28px delete button beside
@@ -305,13 +297,9 @@ class JMWeatherChanceList
 			m_Sliders[i].SetCurrent( m_Values[i] );
 	}
 
-	//! The chances always add up to 100, so what is on screen is the real odds
-	//! rather than a weight that only means something next to a total the admin has
-	//! to add up themselves.
-	//!
-	//! The row that was just moved keeps its value and every other row is scaled
-	//! into what is left. Rounding drift is pushed onto the last scaled row, so the
-	//! column reads exactly 100 however the shares divide.
+	//! Chances always add up to 100 so the screen shows the real odds. The row just moved keeps
+	//! its value, the others are scaled into the remainder, and rounding drift lands on the
+	//! last scaled row so the column reads exactly 100.
 	protected void Balance( int keep )
 	{
 		int count = m_Values.Count();

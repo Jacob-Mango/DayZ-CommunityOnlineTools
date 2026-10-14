@@ -1,12 +1,7 @@
-//! "General" tab of JMPlayerForm - identity, vitals (stats) and active statuses of
-//! the selected player. Back-reference to the owning form, same shape as
-//! JMPlayerRowWidget.Menu.
-//!
-//! Extension points stay on the form: InitActionWidgetsIdentity(),
-//! InitActionWidgetsStats(), RefreshStats() and Click_ApplyStats() are virtual
-//! hooks there (modded classes override them and call super), and forward to
-//! this class. The stats sliders are mirrored on the form through
-//! JMPlayerForm.SetLegacyStatWidgets for the same reason.
+//! "General" tab of JMPlayerForm - identity, vitals and active statuses. Extension points stay
+//! on the form: InitActionWidgetsIdentity(), InitActionWidgetsStats(), RefreshStats() and
+//! Click_ApplyStats() are virtual hooks (modded classes override + call super) that forward
+//! here; stats sliders are mirrored via JMPlayerForm.SetLegacyStatWidgets for the same reason.
 class JMPlayerFormTabGeneral: JMFormTab
 {
 	protected JMPlayerForm m_Form;
@@ -74,23 +69,10 @@ class JMPlayerFormTabGeneral: JMFormTab
 	//! costs no per-stat code here. HeatComfort is read-only and stays outside them.
 	protected ref array< ref JMPlayerStatRow > m_StatRows = new array< ref JMPlayerStatRow >;
 
-	//! protected, not private: DayZ-Expansion's `modded class JMPlayerForm`
-	//! (DayZExpansion_AI, DayZExpansion_Hardline, DayZExpansion_PersonalStorage)
-	//! does, inside its InitActionWidgetsStats override:
-	//!
-	//!     m_ApplyStats.GetLayoutRoot().SetSort(sort + 1);
-	//!     m_RefreshStats.GetLayoutRoot().SetSort(sort + 2);
-	//!
-	//! COT dropped this button at some point and never kept the name, so all
-	//! three of those addons have failed to compile against COT ever since.
-	//!
-	//! It is a real button sitting beside Apply, NOT an alias of the Position
-	//! tab's refresh icon: SetSort reorders a widget among ITS OWN siblings, so
-	//! pointing this at the position toolbar would have Expansion silently
-	//! shuffling the coordinate icons instead. Both now live in the variables
-	//! card's title bar rather than in the slider grid, which makes Expansion's
-	//! SetSort a harmless no-op - the pair is already last in reading order -
-	//! and leaves the member names it compiles against intact.
+	//! protected, not private: DayZ-Expansion's modded JMPlayerForm calls SetSort on it in its
+	//! InitActionWidgetsStats override. It is a real button beside Apply, NOT an alias of the
+	//! Position tab's refresh icon (SetSort reorders among ITS OWN siblings). It lives in the
+	//! variables card title bar, so Expansion's SetSort is a harmless no-op.
 	UIActionImageButton m_RefreshStats;
 	static const float IDENTITY_SHORT_WIDTH  = 0.40;
 	static const float IDENTITY_BUTTON_LEFT  = 0.64;
@@ -100,15 +82,10 @@ class JMPlayerFormTabGeneral: JMFormTab
 	static const float IDENTITY_ROLE_VALUE_WIDTH = 0.92;
 	static const float IDENTITY_ROLE_EDIT_LEFT   = 0.93;
 
-	//! The edit glyph is SHORTER than the row it sits in - every other identity
-	//! value fills its row, so only this one has slack to distribute. Its
-	//! position is a fraction of the parent, so the pixel gap above and below is
-	//! converted here rather than hardcoded; left at the layout default of 0 the
-	//! button hung two pixels above the text it belongs to.
-	//! ( IDENTITY_ROW_HEIGHT 32 - HEADER_ACTION_PX 28 ) / 2, over the row height.
-	//! Written out rather than computed: these are another class's static consts
-	//! and a const initialiser is not the place to depend on their evaluation
-	//! order. Revisit if either constant moves.
+	//! The edit glyph is SHORTER than its row, so only it has slack; its position is a fraction
+	//! of the parent, so the pixel gap is converted here (left at 0 it hung two pixels high).
+	//! ( IDENTITY_ROW_HEIGHT 32 - HEADER_ACTION_PX 28 ) / 2 over row height, written out rather
+	//! than computed: const init order across classes is not safe. Revisit if either moves.
 	static const float IDENTITY_ROLE_EDIT_TOP = 0.0625;
 
 	//! Shock value the unconscious chip wakes a player with. The slider it
@@ -240,14 +217,10 @@ class JMPlayerFormTabGeneral: JMFormTab
 		#endif
 	}
 
-	//! Identity card: a section header, a strip of read-only state badges, then
-	//! one labelled row per identifier.
-	//!
-	//! The value of each identifier is the CAPTION of its copy button - both
-	//! UpdateUI (SetButton) and the Click_Copy* handlers (GetButton) go through
-	//! that, so the button is the value store as well as the affordance. Do not
-	//! "clean this up" into a separate text widget without moving all six call
-	//! sites with it.
+	//! Identity card: a section header, a strip of read-only state badges, then one labelled
+	//! row per identifier. The value is the CAPTION of its copy button (UpdateUI and the
+	//! Click_Copy* handlers both use it), so the button is the value store. Do not replace it
+	//! with a text widget without moving all six call sites.
 	Widget InitActionWidgetsIdentity( Widget actionsParent )
 	{
 		// header + 2 badge rows + name + guid + steam + role [+ cftools] + divider
@@ -255,11 +228,9 @@ class JMPlayerFormTabGeneral: JMFormTab
 
 		UIActionCard section0Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_IDENTITY" );
 		Widget section0 = section0Card.GetContent();
-		// Two rows of two, not one row of four. UIActionBadge reserves a fixed
-		// 80px pill on the right of whatever cell it lands in, so four cells
-		// across this panel leave about forty pixels for the label and every
-		// flag name is cut to four characters. Two per row gives the label the
-		// room it needs, and this tab has vertical space to spare.
+		// Two rows of two, not four across: UIActionBadge reserves a fixed 80px pill, so four
+		// cells leave ~40px for the label and flag names are cut to four characters. This tab
+		// has vertical space to spare.
 		Widget flagRowTop = UIActionManager.CreateRow( section0, JMFormBase.IDENTITY_ROW_HEIGHT );
 		m_FlagStrip = UIActionManager.CreateGridSpacer( flagRowTop, 1, 2 );
 		m_BadgeGodMode     = UIActionManager.CreateBadge( m_FlagStrip, "#STR_COT_PLAYER_MODULE_BADGE_GODMODE", "", JMTheme.SUCCESS_DIM );
@@ -270,22 +241,18 @@ class JMPlayerFormTabGeneral: JMFormTab
 		m_BadgeInvisible   = UIActionManager.CreateBadge( flagStripBottom, "#STR_COT_PLAYER_MODULE_BADGE_INVISIBLE", "", JMTheme.SUCCESS_DIM );
 		m_BadgeUnconscious = UIActionManager.CreateBadge( flagStripBottom, "#STR_COT_PLAYER_MODULE_BADGE_UNCONSCIOUS", "", JMTheme.SUCCESS_DIM );
 
-		// The four flags are not just a readout. An admin who has just read
-		// "GODMODE ON" is usually about to turn it off, and making them cross to
-		// the Actions tab for a checkbox that sets what they are already looking
-		// at is the long way round. The chips toggle it in place; the checkboxes
-		// stay, and both drive the same module call.
+		// The four flags are not just a readout: an admin who reads "GODMODE ON" usually wants
+		// to turn it off, so the chips toggle in place instead of sending them to the Actions tab.
+		// The checkboxes stay; both drive the same module call.
 		MakeFlagBadgeClickable( m_BadgeGodMode,     "Click_BadgeGodMode",     "#STR_COT_PLAYER_MODULE_TT_GODMODE"   );
 		MakeFlagBadgeClickable( m_BadgeFrozen,      "Click_BadgeFrozen",      "#STR_COT_PLAYER_MODULE_TT_FREEZE"    );
 		MakeFlagBadgeClickable( m_BadgeInvisible,   "Click_BadgeInvisible",   "#STR_COT_PLAYER_MODULE_TT_INVISIBLE" );
 		MakeFlagBadgeClickable( m_BadgeUnconscious, "Click_BadgeUnconscious", ""                                    );
 
-		// One row = ONE fixed-height panel holding the label and the value
-		// button, placed by fraction. NOT a nested grid per row: a grid row whose
-		// height is content-driven, holding a panel whose height is also
-		// content-driven, resolves circularly and the rows blow out to hundreds
-		// of pixels each - which is what put the GUID row a full screen below the
-		// Name row and gave the tab a scrollbar with nothing in it.
+		// One row = ONE fixed-height panel holding label and value button, placed by fraction.
+		// NOT a nested grid per row: a content-driven grid row holding a content-driven panel
+		// resolves circularly and rows blow out to hundreds of pixels (the GUID row ended up a
+		// screen below the Name row).
 		Widget rowName = UIActionManager.CreateRow( section0, JMFormBase.IDENTITY_ROW_HEIGHT );
 		UIActionManager.CreateText( rowName, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
 		m_Name = UIActionManager.CreateFeedbackButton( rowName, "", "#STR_COT_COPIED", JMConstants.ICON_CHECK_MARK, this, "Click_CopyPlayerName" );
@@ -314,12 +281,9 @@ class JMPlayerFormTabGeneral: JMFormTab
 		m_SteamProfile.SetPosition( IDENTITY_BUTTON_LEFT );
 		m_SteamProfile.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_OPEN_STEAM_PROFILE" );
 
-		// Which role bucket the player list filed this player under. It is the
-		// one piece of identity the admin cannot read off the card otherwise,
-		// and the General tab is exactly where "who is this" belongs.
-		// A row, not a bare CreateText, because the edit button has to sit on
-		// the same line as the value: the label/value pair stops short of the
-		// right edge and the button takes what is left.
+		// Which role bucket the player list filed this player under: the one piece of identity
+		// not readable off the card otherwise. A row, not a bare CreateText, because the edit
+		// button must sit on the same line as the value, taking the space the label/value leaves.
 		Widget rowRole = UIActionManager.CreateRow( section0, JMFormBase.IDENTITY_ROW_HEIGHT );
 		m_IdentityRole = UIActionManager.CreateText( rowRole, "#STR_COT_PLAYER_MODULE_IDENTITY_ROLE", "" );
 		m_IdentityRole.SetWidth( IDENTITY_ROLE_VALUE_WIDTH );
@@ -345,15 +309,10 @@ class JMPlayerFormTabGeneral: JMFormTab
 		return parent;
 	}
 
-	//! Glyphs, not chips. Each status is one bit of information - it is on or it
-	//! is not - and a labelled pill spent a whole cell saying a word the icon
-	//! says at a glance. The same glyphs the player list uses, so a row badge
-	//! and this card read as the same vocabulary; the word each one stood for
-	//! survives as its tooltip.
-	//!
-	//! Only the bad states are here. "Healthy" was a sixth glyph that meant
-	//! "none of the other five", which is what an empty card already says, and
-	//! it was the one entry with no action behind a right-click.
+	//! Glyphs, not chips: each status is one bit, and a pill spent a cell saying what the icon
+	//! says at a glance. Same glyphs as the player list; the word survives as the tooltip.
+	//! Only bad states are here: "Healthy" meant "none of the other five", which an empty
+	//! card already says, and it had no action behind a right-click.
 	Widget InitActionWidgetsStatuses( Widget actionsParent )
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 2, 1 );
@@ -432,11 +391,9 @@ class JMPlayerFormTabGeneral: JMFormTab
 		}
 	}
 
-	//! One status glyph for the Active Statuses card. A single stage: these do
-	//! not cycle, they are shown or hidden by RefreshIdentityBadges.
-	//!
-	//! `callback` answers UIEvent.CLICK_RIGHT and opens the repair menu for that
-	//! status. Pass "" for a status with nothing to undo - death is the only one.
+	//! One status glyph for the Active Statuses card. A single stage: shown or hidden by
+	//! RefreshIdentityBadges, not cycled. `callback` answers UIEvent.CLICK_RIGHT and opens the
+	//! repair menu for that status; pass "" for a status with nothing to undo (death only).
 	UIActionStagedIcon CreateStatusIcon( Widget parent, string icon, string tooltip, int color, string callback )
 	{
 		UIActionStagedIcon status = UIActionManager.CreateStagedIcon( parent, this, callback );
@@ -535,16 +492,10 @@ class JMPlayerFormTabGeneral: JMFormTab
 			badge.SetTooltip( tooltip );
 	}
 
-	//! Flip one flag from its chip.
-	//!
-	//! The new value is the negation of what the SELECTED PLAYER has right now,
-	//! not of what the chip is painted as: the paint is a frame of synced state
-	//! and can lag a refresh behind, and a toggle that read its own label would
-	//! send the value the player already has.
-	//!
-	//! The badge is repainted immediately rather than waiting for the next sync,
-	//! so the click has an answer; RefreshIdentityBadges overwrites it with the
-	//! truth a moment later, including when the server refused the change.
+	//! Flip one flag from its chip. The new value negates what the SELECTED PLAYER has now,
+	//! not the chip's paint (synced state can lag a refresh behind). The badge is repainted
+	//! immediately so the click has an answer; RefreshIdentityBadges overwrites it with the
+	//! truth a moment later, including when the server refused.
 	void Click_BadgeGodMode( UIEvent eid, UIActionBase action )
 	{
 		if ( eid == UIEvent.CLICK )
@@ -588,11 +539,9 @@ class JMPlayerFormTabGeneral: JMFormTab
 		SetFlagBadge( badge, value != 0 );
 	}
 
-	//! There is no "set unconscious" call anywhere in the module, because
-	//! consciousness IS shock: the engine drops a player as shock reaches zero
-	//! and brings them round as it climbs back. So this chip is the shock slider
-	//! driven to one end or the other, and it is gated on the shock permission
-	//! for exactly that reason.
+	//! There is no "set unconscious" call in the module because consciousness IS shock: the
+	//! engine drops a player as shock reaches zero and revives as it climbs. So this chip is
+	//! the shock slider driven to one end, gated on the shock permission for that reason.
 	void Click_BadgeUnconscious( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK || !m_Form.m_SelectedInstance )
@@ -647,13 +596,10 @@ class JMPlayerFormTabGeneral: JMFormTab
 		#endif
 	}
 
-	//! Vitals and temperatures.
-	//!
-	//! Name, signature and return type are frozen: DayZ-Expansion modded forms
-	//! override this exact shape, call super, then inject their own rows into
-	//! m_Stamina.GetLayoutRoot().GetParent() - the slider grid below - and
-	//! re-sort them against m_ApplyStats and m_RefreshStats. Which tab this is
-	//! called with does not matter to that; the anchor is internal.
+	//! Vitals and temperatures. Name, signature and return type are frozen: DayZ-Expansion
+	//! modded forms override this exact shape, call super, then inject rows into
+	//! m_Stamina.GetLayoutRoot().GetParent() (the slider grid) and re-sort against
+	//! m_ApplyStats and m_RefreshStats. The tab it is called with does not matter.
 	Widget InitActionWidgetsStats( Widget actionsParent )
 	{
 		// header + sliders + temp header + temps + apply + divider
@@ -703,13 +649,9 @@ class JMPlayerFormTabGeneral: JMFormTab
 		m_HeatComfort.SetSliderWidth(0.5);
 		m_HeatBuffer.SetSliderWidth(0.5);
 
-		// Apply and Refresh act on the whole card - every slider in it at once -
-		// so they sit in its title bar with the other card-level quick actions
-		// instead of costing a full row of height under the last slider.
-		// Icon-only, so both keep the caption they lost as their tooltip.
-		//
-		// Created on the VARIABLES card, not the temperatures one: that is the
-		// panel the sliders belong to and the one an admin reads them off.
+		// Apply and Refresh act on the whole card, so they sit in its title bar with the other
+		// card-level quick actions; icon-only, caption kept as tooltip. Created on the VARIABLES
+		// card, not the temperatures one: that is the panel the sliders belong to.
 		m_RefreshStats = section0Card.AddRefreshButton( this, "Click_RefreshVitals", "#STR_COT_PLAYER_MODULE_TT_REFRESH_STATS" );
 		m_ApplyStats   = section0Card.AddApplyButton( m_Form, "Click_ApplyStats", "#STR_COT_PLAYER_MODULE_APPLY" );
 
@@ -858,12 +800,9 @@ class JMPlayerFormTabGeneral: JMFormTab
 		}
 	}
 
-	//! Open the Role Manager on the selected player.
-	//!
-	//! The window is created by the module, exactly as the sidebar creates it,
-	//! so an already-open Role Manager is reused rather than duplicated - and
-	//! the deep link is handed over AFTER Show(), because the form does not
-	//! exist until the window has built it.
+	//! Open the Role Manager on the selected player. The window is created by the module, as
+	//! the sidebar does, so an open Role Manager is reused; the deep link is handed over AFTER
+	//! Show(), because the form does not exist until the window has built it.
 	void Click_EditPlayerRoles( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )

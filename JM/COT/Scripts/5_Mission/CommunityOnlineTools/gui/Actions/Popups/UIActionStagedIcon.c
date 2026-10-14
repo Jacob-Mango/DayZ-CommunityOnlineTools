@@ -1,19 +1,7 @@
-// =============================================================================
-//  UIActionStagedIcon
-//
-//  Displays one icon at a time from an ordered list of (imagePath, color) stages.
-//  Call SetStage(int) or NextStage() to advance.  Fires UIEvent.CHANGE when the
-//  stage changes.  Optionally clickable (fires UIEvent.CLICK on press and
-//  advances to the next stage automatically when m_CycleOnClick is true).
-//
-//  Usage:
-//      m_Battery = UIActionManager.CreateStagedIcon( parent, this, "OnChange_Battery" );
-//      m_Battery.AddStage( JMConstants.ICON_BATTERY_EMPTY,  0xFFFF4444 );
-//      m_Battery.AddStage( JMConstants.ICON_BATTERY_LOW,    0xFFFFAA00 );
-//      m_Battery.AddStage( JMConstants.ICON_BATTERY_MEDIUM, 0xFFFFFF44 );
-//      m_Battery.AddStage( JMConstants.ICON_BATTERY_FULL,   0xFF44FF44 );
-//      m_Battery.SetStage( 3 );
-// =============================================================================
+//  UIActionStagedIcon: one icon at a time from ordered (imagePath, color) stages.
+//  SetStage(int) / NextStage() advance; fires UIEvent.CHANGE on change, and CLICK on
+//  press (auto-advances when m_CycleOnClick). See UIActionManager.CreateStagedIcon.
+//  e.g. m_Battery.AddStage( JMConstants.ICON_BATTERY_EMPTY, 0xFFFF4444 );
 
 class JMStagedIconEntry
 {

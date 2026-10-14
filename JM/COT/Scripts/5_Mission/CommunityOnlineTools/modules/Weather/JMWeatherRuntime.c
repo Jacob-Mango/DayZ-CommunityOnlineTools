@@ -1,14 +1,6 @@
-// =============================================================================
-//  JMWeatherRuntime - where the dynamic weather machine is RIGHT NOW
-//
-//  Persisted on its own, apart from Weather.json. The authored configuration
-//  (presets, states, phases) is rewritten only when an admin edits it; this is
-//  rewritten on every phase change and on a heartbeat, and would otherwise turn
-//  each of those into a rewrite of every preset the server has.
-//
-//  Whether the machine is enabled is NOT here - that is configuration and stays
-//  in Weather.json (JMWeatherSerialize.DynamicEnabled).
-// =============================================================================
+// JMWeatherRuntime - where the dynamic weather machine is RIGHT NOW. Persisted apart from
+// Weather.json: configuration is rewritten only on admin edits, while this is rewritten on every
+// phase change and heartbeat. Whether the machine is enabled stays in Weather.json (DynamicEnabled).
 class JMWeatherRuntime
 {
 	string State;

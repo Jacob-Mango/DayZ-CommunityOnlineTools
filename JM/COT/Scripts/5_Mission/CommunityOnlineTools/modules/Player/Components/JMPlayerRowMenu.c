@@ -117,11 +117,9 @@ class JMPlayerRowMenu
 		//! the entry an admin opened the menu for is the one under the cursor.
 		AddStatusRepairItems( m_Menu, instance );
 
-		//! Two entries are meaningless on your own row and are left out rather
-		//! than greyed: "teleport me to" would be a no-op walk to where you are
-		//! already standing, and spectating yourself is what the game already
-		//! does. "Teleport to me" stays - it is how an admin recalls a character
-		//! they left somewhere, and it reads the same either way.
+		//! Two entries are left out on your own row rather than greyed: "teleport me to" is a
+		//! no-op walk to where you stand, and spectating yourself is what the game already does.
+		//! "Teleport to me" stays: it recalls a character the admin left somewhere.
 		bool isSelf = ( guid == GetPermissionsManager().GetClientGUID() );
 
 		m_Menu.AddItem( ROW_MENU_HEAL,     "#STR_COT_PLAYER_MODULE_ACTION_HEAL",     JMConstants.Lucide( "heart-pulse" ) );
@@ -201,12 +199,9 @@ class JMPlayerRowMenu
 		m_Menu.OpenAt( x, y );
 	}
 
-	//! Opens a text-entry prompt for one player, same as the ESP module's own
-	//! player menu already does. Used to read from the clipboard instead - "a
-	//! context menu cannot be typed into" - but a context menu can raise a
-	//! confirmation dialog just fine, which is exactly what JMESPForm's
-	//! PromptSendMessage does, so this matches it instead of asking the admin
-	//! to pre-copy the message text before right-clicking.
+	//! Opens a text-entry prompt for one player, like the ESP module's player menu. A context
+	//! menu cannot be typed into but can raise a confirmation dialog, as JMESPForm's
+	//! PromptSendMessage does, so the admin need not pre-copy the message to the clipboard.
 	protected void RunRowMessage( string guid )
 	{
 		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_MESSAGE ) )
@@ -234,12 +229,9 @@ class JMPlayerRowMenu
 		m_PendingRowMsgGuid = "";
 	}
 
-	//! The repair entries for whatever is currently wrong with a player, added
-	//! to `menu` in the order the list badges use. A healthy player contributes
-	//! nothing, which is the point: the menu is a list of what can be fixed.
-	//!
-	//! A corpse gets none of them - reviving is not one of these calls, and
-	//! stopping the bleeding of a dead man is not an action worth offering.
+	//! The repair entries for whatever is currently wrong with a player, added to `menu` in
+	//! the order the list badges use. A healthy player contributes nothing. A corpse gets
+	//! none: reviving is not one of these calls, and stopping a dead man's bleeding is no use.
 	protected void AddStatusRepairItems( UIActionContextMenu menu, JMPlayerInstance instance )
 	{
 		if ( !menu || !instance || instance.IsDead() )

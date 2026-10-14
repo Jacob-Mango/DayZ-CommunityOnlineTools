@@ -121,9 +121,8 @@ modded class CarScript
 
 	//! Move one fluid to an exact fraction of its capacity.
 	//!
-	//! Fill only ever adds and Leak only ever takes away, so which of the two
-	//! runs depends on where the tank already is - a "set to 25%" that only
-	//! filled would do nothing to a full tank.
+	//! Fill only adds and Leak only removes, so pick by current level; a fill-only
+	//! "set to 25%" would do nothing to a full tank.
 	void COT_SetCarFluid01( CarFluid fluid, float fraction )
 	{
 		float fluidCap = GetFluidCapacity( fluid );
@@ -152,17 +151,10 @@ modded class CarScript
 		COT_FillCarFluid( CarFluid.COOLANT );
 	}
 
-	//! Car doors are NOT separate openable inventory items - CarDoor
-	//! attachments are hitzone/health parts, and ItemBase.Open()/Close()/
-	//! IsOpen() are stub declarations for lidded CONTAINERS (cans, barrels)
-	//! that CarDoor never overrides, so calling them here was always a no-op,
-	//! and IsOpen()'s base default unconditionally returns true - which is why
-	//! detection always read every door as "open" too. Doors open/close by
-	//! setting animation phase on a model selection (see vanilla
-	//! ActionCarDoors.OnStartServer), and which selections exist is
-	//! per-vehicle (Van_01 has "doors_cargo3", a sedan doesn't, etc.) - so
-	//! this brute-forces every selection the model actually has, the same way
-	//! Transport.GetSelectionFromAnimSource does, instead of guessing names.
+	//! Car doors are not openable items (ItemBase.Open()/IsOpen() are unoverridden
+	//! stubs, IsOpen() is always true). They move by animation phase on a model
+	//! selection (vanilla ActionCarDoors), which is per-vehicle, so brute-force every
+	//! selection like Transport.GetSelectionFromAnimSource.
 	protected void COT_ForEachDoorAnimSource( out array<string> animSources )
 	{
 		animSources = new array<string>();

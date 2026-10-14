@@ -1,52 +1,7 @@
-//! One client -> server admin action, described once.
-//!
-//! An action owns everything that differs between actions - the RPC it travels on, the
-//! permission that gates it, its payload, what it does, and how it reads in the log and the
-//! webhook. Everything that is the SAME lives once in JMModuleBase: Submit() sends it (or runs it
-//! when this process is the host), RunAction() receives, reads, permission-gates and applies it,
-//! and the log line and webhook are written afterwards. Adding an action is therefore one
-//! subclass and one line in the module's RegisterActions() - no Send / Exec / RPC trio.
-//!
-//!   class JMMyModuleDelete: JMModuleAction
-//!   {
-//!       string Name;
-//!
-//!       override int GetRPC() { return JMMyModuleRPC.Delete; }
-//!       override string GetPermission() { return JMConstants.PERM_MYMODULE_DELETE; }
-//!       override string GetWebhookType() { return "Delete"; }
-//!
-//!       override void Write( ParamsWriteContext ctx ) { ctx.Write( Name ); }
-//!       override bool Read( ParamsReadContext ctx ) { return ctx.Read( Name ); }
-//!
-//!       override bool Apply( JMModuleBase module, PlayerIdentity sender, JMPlayerInstance admin )
-//!       {
-//!           JMMyModule mine = JMMyModule.Cast( module );
-//!           return mine && mine.DeleteByName( Name );
-//!       }
-//!
-//!       override string Describe() { return "Deleted " + Name; }
-//!   }
-//!
-//!   //! In the module:
-//!   override void RegisterActions()
-//!   {
-//!       super.RegisterActions();
-//!       DefineAction( JMMyModuleDelete );
-//!   }
-//!
-//!   //! Where the OnRPC() switch has no case for the id:
-//!   default:
-//!       RunAction( sender, rpc_type, ctx );
-//!       break;
-//!
-//!   //! From the client (or the host):
-//!   JMMyModuleDelete action = new JMMyModuleDelete();
-//!   action.Name = name;
-//!   Submit( action );
-//!
-//! An action needs a constructor that takes no arguments: the server builds one to read the
-//! payload into. Its wire format is whatever Write() puts down and Read() takes back, in the same
-//! order, so a migrated action keeps the bytes the hand-written trio used.
+//! One client -> server admin action, described once; JMModuleBase does Submit() / RunAction().
+//! Add via a subclass plus DefineAction( Cls ) in RegisterActions() and `default: RunAction(
+//! sender, rpc_type, ctx );` in OnRPC(). Needs a no-arg constructor; wire format is the order
+//! of Write()/Read().
 class JMModuleAction
 {
 	//! The RPC that carries this action from an admin's client to the server.

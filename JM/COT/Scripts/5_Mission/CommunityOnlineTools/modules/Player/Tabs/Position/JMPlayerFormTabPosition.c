@@ -31,10 +31,8 @@ class JMPlayerFormTabPosition: JMFormTab
 
 	//! The last few places the selected player was moved away FROM, most recent
 	//! first, one button per entry - a click sends them back to that row.
-	//!
-	//! The rows are REBUILT rather than updated: the list is at most
-	//! JMTeleportHistory.MAX_ENTRIES long, and an undo several steps deep drops
-	//! every row above the one it lands on in a single go.
+	//! Rows are REBUILT, not updated: at most JMTeleportHistory.MAX_ENTRIES, and a deep
+	//! undo drops every row above its landing in one go.
 	UIActionCard m_TeleportHistoryCard;
 	UIActionImageButton m_TeleportHistoryClear;
 	UIActionImageButton m_TeleportHistoryRedo;
@@ -56,10 +54,8 @@ class JMPlayerFormTabPosition: JMFormTab
 	int    m_TeleportHistoryCount;
 
 	//! Timestamp of the newest row the panel was built from.
-	//!
-	//! The count alone is not enough to notice a change: once five steps are
-	//! recorded the list is capped, so a sixth teleport pushes one off the
-	//! bottom and leaves the count at five.
+	//! The count alone misses a change: the list is capped at five, so a sixth teleport
+	//! pushes one off the bottom and leaves the count unchanged.
 	int    m_TeleportHistoryTop;
 
 	//! Whether the coordinates on screen came from the player's entity on this
@@ -67,10 +63,8 @@ class JMPlayerFormTabPosition: JMFormTab
 	bool m_PositionIsLive;
 
 	//! Widths of the three controls in a history row, as FRACTIONS of the row.
-	//!
-	//! Never a fixed pixel size beside a fraction: a WrapSpacer wraps the moment
-	//! its children total more than the row, and mixing the two units makes that
-	//! edge impossible to reason about. These sum to less than 1.
+	//! Never mix a fixed pixel size with a fraction: a WrapSpacer wraps once children
+	//! exceed the row. These sum to less than 1.
 	static const float HISTORY_GO_W  = 0.70;
 	static const float HISTORY_BTN_W = 0.13;
 
@@ -191,15 +185,9 @@ class JMPlayerFormTabPosition: JMFormTab
 		Widget section0 = section0Card.GetContent();
 
 		// -- Card quick actions ---------------------------------------------
-		//  Every verb that acts on the three coordinate fields lives in the
-		//  card's own title bar - the same place the Inventory and Session
-		//  cards put theirs. Refresh re-reads the player's live coordinates
-		//  into the boxes, the clipboard trio copies or pastes them, and the
-		//  map pin pushes whatever is typed back to the server. Left to right
-		//  that reads reload, clipboard tools, apply.
-		//
-		//  Icon-only, so each keeps the label it lost as its tooltip, and the
-		//  three clipboard buttons answer a click by flashing a check mark.
+		//  Every verb on the coordinate fields lives in the card's title bar: refresh,
+		//  clipboard trio, then apply. Icon-only (label as tooltip); clipboard buttons
+		//  flash a check mark.
 		m_PositionRefresh     = section0Card.AddRefreshButton( this, "Click_RefreshTeleports", "#STR_COT_PLAYER_MODULE_TT_REFRESH_COORDS" );
 		m_CopyRotationPlayer  = section0Card.AddCardHeaderAction( JMConstants.Lucide( "rotate-3d" ), this, "Click_CopyPlayerRotation", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_ORIENTATION_COPY" );
 		m_CopyPositionPlayer  = section0Card.AddCopyButton( this, "Click_CopyPlayerPostion", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_COPY" );
@@ -219,17 +207,9 @@ class JMPlayerFormTabPosition: JMFormTab
 		UpdatePositionSourceHint();
 
 		// -- Map ------------------------------------------------------------
-		//  Built here rather than lazily into a reserved slot: every panel this
-		//  form can reserve space with is a "Size To Content V" UIPanel, and a
-		//  MapWidget reports no content height, so the slot collapses to
-		//  nothing and the map is created inside a zero-height box - present,
-		//  handled and invisible. Its own layout carries an exact height, so
-		//  parenting it directly to the tab grid is both simpler and correct,
-		//  and it lands between the two section headers instead of being
-		//  appended to the end of the grid on first open.
-		//
-		//  It starts hidden and is only shown while the tab is up: a MapWidget
-		//  left visible keeps rendering behind everything else.
+		//  Built in the tab grid, not a reserved slot (a MapWidget reports no content
+		//  height, so a "Size To Content V" slot collapses to zero). Starts hidden; shown
+		//  only while the tab is up (a visible MapWidget keeps rendering).
 		UIActionCard section1Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_MAP" );
 		Widget section1 = section1Card.GetContent();
 
@@ -250,19 +230,14 @@ class JMPlayerFormTabPosition: JMFormTab
 		m_TeleportMeTo.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_TELEPORT_ME_TO" );
 
 		// -- Teleport history ------------------------------------------------
-		//  Where this player has been moved away from, newest first. Recorded on
-		//  this client as the admin issues the moves - it is a record of what
-		//  THIS session did, not a server-side audit trail, so it is empty for
-		//  teleports another admin issued or ones from before this connection.
+		//  Where this player was moved away from, newest first. Recorded on this client:
+		//  not a server-side audit trail, so empty for other admins' or earlier teleports.
 		m_TeleportHistoryCard = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_TELEPORT_HISTORY" );
 		m_TeleportHistoryHost = m_TeleportHistoryCard.GetContent();
 
-		//  Clearing is card-level - it wipes every row at once - so it sits in
-		//  the title bar with the other card-level wipes and keeps the caption
-		//  it lost as an icon-only button's tooltip.
-		//  Redo is card-level too: it acts on the stack, not on any one row -
-		//  the rows are the steps still ahead of the target, and a redone step
-		//  is by definition not one of them.
+		//  Clear and Redo are card-level (they act on the whole stack, not one row), so they
+		//  sit in the title bar; Clear keeps its caption as the icon's tooltip. A redone
+		//  step is by definition not one of the rows.
 		m_TeleportHistoryRedo = m_TeleportHistoryCard.AddCardHeaderAction( JMConstants.Lucide( "redo-2" ), this, "Click_RedoTeleport", "#STR_COT_TELEPORT_REDO" );
 
 		m_TeleportHistoryClear = m_TeleportHistoryCard.AddDeleteButton( this, "Click_ClearTeleportHistory", "#STR_COT_TELEPORT_HISTORY_CLEAR" );
@@ -274,11 +249,8 @@ class JMPlayerFormTabPosition: JMFormTab
 	}
 
 	//! Rebuild the history rows for whoever is selected.
-	//!
-	//! Cheap enough to call outright - it is at most five buttons - but never
-	//! from inside one of their own click handlers: the engine answers a
-	//! vanished press target by recentring the cursor, so a rebuild caused by a
-	//! click is deferred a tick.
+	//! Cheap (at most five buttons) but never call it from one of their own click
+	//! handlers: a vanished press target recentres the cursor, so defer it a tick.
 	void RebuildTeleportHistory()
 	{
 		if ( !m_TeleportHistoryHost )
@@ -370,11 +342,8 @@ class JMPlayerFormTabPosition: JMFormTab
 	}
 
 	//! Rebuild only when there is something new to show.
-	//!
-	//! Called off the ten-a-second refresh, so it compares first: who is
-	//! selected, how many steps are recorded, and when the newest of them was
-	//! recorded. The last of those is what catches a push at the cap, where a
-	//! new step drops one off the bottom and the count does not move.
+	//! Called ten times a second, so it compares first: selected player, step count and
+	//! newest timestamp (the last catches a push at the cap, where the count stays).
 	void SyncTeleportHistory()
 	{
 		if ( !m_TeleportHistoryHost )
@@ -403,10 +372,8 @@ class JMPlayerFormTabPosition: JMFormTab
 	}
 
 	//! Send the selected player back to the place this row names.
-	//!
-	//! The rows ABOVE the one clicked go with it - they are places the player
-	//! only passed through on the way here, and leaving them in would make the
-	//! next undo walk forwards. See JMTeleportHistory.Pop.
+	//! The rows ABOVE the one clicked go with it (places only passed through; keeping
+	//! them would make the next undo walk forwards). See JMTeleportHistory.Pop.
 	void OnClick_TeleportHistory( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -482,10 +449,8 @@ class JMPlayerFormTabPosition: JMFormTab
 
 	//! Point the position tab's map at a coordinate, closer in than the default
 	//! so the step is placed rather than just centred.
-	//!
-	//! Split out of RecenterMap because the two differ only in what they centre
-	//! on, and the map is a MapWidget either way - nothing is moved, nothing is
-	//! sent, the view just changes.
+	//! Split out of RecenterMap: they differ only in what they centre on. Only the view
+	//! changes; nothing is moved or sent.
 	void FocusMap( vector position )
 	{
 		if ( !m_PositionMap || position == vector.Zero )
@@ -528,11 +493,8 @@ class JMPlayerFormTabPosition: JMFormTab
 
 		RecenterMap();
 
-		//! First open only: CenterOn lands before the widget has been laid out
-		//! on the very first show and is discarded - the map came up on the
-		//! world origin and stayed there until the recentre button was pressed
-		//! by hand. Every later visit re-enters an already-laid-out map, which
-		//! is why this only ever looked broken the first time.
+		//! First open only: CenterOn lands before the widget is laid out and is discarded
+		//! (the map stuck on the world origin). Later visits re-enter a laid-out map.
 		if ( !m_PositionMapCentered )
 		{
 			m_PositionMapCentered = true;
@@ -574,13 +536,9 @@ class JMPlayerFormTabPosition: JMFormTab
 		m_PositionMap.CenterOn( center, MAP_DEFAULT_SCALE );
 	}
 
-	//! Draw the selected player and the admin, and nothing else. The COT map
-	//! module already exists for a whole-server view; sixty marks a second here
-	//! would only duplicate it.
-	//!
-	//! Both live under stable ids and get moved in place rather than cleared
-	//! and redrawn every poll - UIActionMap.AddMarker replaces the marker
-	//! already under an id, so this only ever touches its own two widgets.
+	//! Draw only the selected player and the admin (the COT map module covers the whole
+	//! server). Stable ids, moved in place: UIActionMap.AddMarker replaces the marker
+	//! under an id, so only these two widgets are touched.
 	void UpdateMapMarkers()
 	{
 		if ( !m_PositionMap || !m_Form.m_SelectedInstance )
@@ -700,11 +658,8 @@ class JMPlayerFormTabPosition: JMFormTab
 
 		vector pos = clipboard.BeautifiedToVector();
 
-		// The copies answer a click with a check mark, so the paste has to
-		// answer one too - otherwise the only button in the strip that can
-		// fail is also the only one that says nothing when it works. A
-		// clipboard holding anything that is not a vector flashes a red cross
-		// instead: the fields are left alone and nothing is sent.
+		// The paste answers a click with a check mark like the copies; a clipboard that is
+		// not a vector flashes a red cross instead (fields left alone, nothing sent).
 		if (pos == vector.Zero)
 		{
 			m_PastePositionPlayer.SetFeedbackIcon( JMConstants.Lucide( "x" ) );

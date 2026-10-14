@@ -1,8 +1,6 @@
 //! One collapsible group of ESP category filters.
-//!
-//! Carried as the header button's UIActionData so the click handler knows which
-//! group it just folded without a lookup - the same trick JMRoleManagerForm's
-//! permission tree uses for its branch rows.
+//! Carried as the header button's UIActionData so the click handler knows which group it folded
+//! (same trick as JMRoleManagerForm's permission tree).
 class JMESPFilterGroup: UIActionData
 {
 	//! All four are prefixed: bare Header/Label/Rows collide with existing
@@ -31,13 +29,8 @@ class JMESPFilterGroup: UIActionData
 	}
 }
 
-//! "Filters" tab of JMESPForm - the ~30 view types grouped by their own
-//! inheritance tree, each foldable, with a search box, bulk select/deselect
-//! and a per-row context menu (colour, only-this, group on/off, copy
-//! permission). Back-reference to the owning form, same shape as
-//! JMPlayerRowWidget.Menu.
-//!
-//! Each JMESPViewTypeWidget row holds this class as its owner and calls
+//! "Filters" tab of JMESPForm - ~30 view types in foldable groups with search, bulk select and a
+//! per-row context menu. Each JMESPViewTypeWidget row owns this class and calls
 //! OnRightClick_CategoryRow / OnChange_CategoryRow / OpenCategoryColourPopup on it.
 class JMESPFormTabFilters: JMFormTab
 {
@@ -185,11 +178,8 @@ class JMESPFormTabFilters: JMFormTab
 		return labels;
 	}
 
-	//! Group icons in GROUP_* order, shared with the objects tab's category
-	//! filter for the same reason GroupLabels is.
-	//!
-	//! One line, not a block: Enforce cannot span an initializer that holds
-	//! calls across lines.
+	//! Group icons in GROUP_* order, shared with the objects tab's category filter.
+	//! One line: Enforce cannot span an initializer holding calls across lines.
 	static TStringArray GroupIcons()
 	{
 		TStringArray icons = { JMConstants.Lucide( "users" ), JMConstants.Lucide( "car" ), JMConstants.Lucide( "swords" ), JMConstants.Lucide( "package" ), JMConstants.Lucide( "mountain" ), JMConstants.Lucide( "shapes" ) };
@@ -275,11 +265,8 @@ class JMESPFormTabFilters: JMFormTab
 		RefreshGroupHeaders();
 	}
 
-	//! A group no view type landed in has nothing to fold open, so its
-	//! header and hairline are all it would contribute - which is what the
-	//! stray line under the last group was. The last group still standing
-	//! drops its hairline too: a divider is there to separate one block
-	//! from the next, and past the final block there is no next.
+	//! A group no view type landed in is hidden (only a header and hairline). The last visible group
+	//! drops its hairline too: a divider separates blocks and there is no next one.
 	protected void HideEmptyGroups()
 	{
 		int lastVisible = -1;

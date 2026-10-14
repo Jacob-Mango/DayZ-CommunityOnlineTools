@@ -4,18 +4,10 @@ const int JMVT_BOAT = 4;
 const int JMVT_HELICOPTER = 8;
 const int JMVT_PLANE = 32;
 const int JMVT_BIKE = 512;
-//! Every type the module knows how to classify. A vehicle carrying none of
-//! these bits is an unclassified mod vehicle, which the UI filters separately.
-//!
-//! WRITTEN OUT AS A LITERAL ON PURPOSE. This was
-//!     JMVT_CAR | JMVT_BOAT | JMVT_HELICOPTER | JMVT_PLANE | JMVT_BIKE
-//! which Enforce does not fold - a global const initialised from other global
-//! consts comes out 0. The failure is quiet and reads as something else
-//! entirely: every row of the type filter draws greyed, while the map still
-//! shows everything, because PassesTypeFilter's "(type & JMVT_ALL) == 0" test
-//! then matches EVERY vehicle and hands them all to the Unclassified toggle.
-//!
-//! 2 | 4 | 8 | 32 | 512 = 558. Keep this in step with the bits above.
+//! Every classifiable type; a vehicle with none of these bits is an unclassified
+//! mod vehicle. A LITERAL ON PURPOSE (2 | 4 | 8 | 32 | 512 = 558, keep in step):
+//! Enforce does not fold a global const built from other consts - it comes out 0,
+//! which makes PassesTypeFilter send EVERY vehicle to the Unclassified toggle.
 const int JMVT_ALL = 558;
 
 const int JMDT_NONE = 0;
@@ -198,13 +190,10 @@ class JMVehicleMetaData
 	#endif
 	}
 
-	//! Health / fuel / speed / crew, read straight off the entity. Server side
-	//! only - the client never has the vehicle object for a marker outside its
-	//! network bubble, which is exactly why these travel as metadata.
-	//!
-	//! Every read is behind a cast rather than a type check: a vehicle cover
-	//! and an unclassified mod vehicle both land here, and neither is a
-	//! Transport. Enforce has no block scope, so each cast gets its own name.
+	//! Health / fuel / speed / crew, read off the entity. Server side only (the
+	//! client lacks vehicles outside its network bubble, hence metadata). Reads go
+	//! behind casts, not type checks: covers and unclassified mod vehicles land
+	//! here and are not Transports. No block scope, so each cast gets its own name.
 	void AcquireLiveState( EntityAI entity )
 	{
 		m_HealthPct = entity.GetHealth01( "", "" );
@@ -523,11 +512,8 @@ class JMVehiclesModule: JMRenderableModuleBase
 		}
 		#endif
 
-		// Resolve last driver Steam/GUID from online players where possible.
-		// A single session-scoped cache keeps the cost at O(unique_drivers)
-		// instead of O(vehicles). On a 200-vehicle server where most drivers
-		// repeat (or are null), this is typically ~5-10 map lookups instead
-		// of 200.
+		// Resolve last driver Steam/GUID from online players where possible. A
+		// session-scoped cache keeps cost at O(unique_drivers), not O(vehicles).
 		map<string, JMPlayerInstance> driverCache = new map<string, JMPlayerInstance>;
 
 		foreach ( JMVehicleMetaData meta: m_Vehicles )
@@ -1291,11 +1277,8 @@ class JMVehiclesModule: JMRenderableModuleBase
 		obj.SetPosition( pos );
 	}
 
-	//! Move a vehicle to an exact position.
-	//!
-	//! The undo path. Every other vehicle teleport works out its destination on
-	//! the server - the admin's feet, the surface under the vehicle - so this is
-	//! the only one that has to carry a position on the wire.
+	//! Move a vehicle to an exact position (the undo path). Every other teleport
+	//! computes its destination server-side, so only this one carries a position.
 	void RequestTeleportVehicleTo( JMVehicleMetaData meta, vector position )
 	{
 		if (g_Game.IsClient())
@@ -1850,11 +1833,8 @@ class JMVehiclesModule: JMRenderableModuleBase
 	// Cargo
 	// -------------------------------------------------------------------------
 
-	//! Empty a vehicle's trunk and seats.
-	//!
-	//! Its own permission rather than Vehicles.Delete: deleting a vehicle and
-	//! emptying one are different sizes of mistake, and an admin trusted to
-	//! tidy a trunk is not necessarily trusted to remove the car.
+	//! Empty a vehicle's trunk and seats. Own permission, not Vehicles.Delete:
+	//! an admin trusted to tidy a trunk is not necessarily trusted to remove the car.
 	void RequestClearVehicleCargo( JMVehicleMetaData meta )
 	{
 		if (g_Game.IsClient())
@@ -1899,12 +1879,9 @@ class JMVehiclesModule: JMRenderableModuleBase
 		SendWebhookColored( "Vehicle", instance, "Cleared " + removed + " item(s) from vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_WARNING );
 	}
 
-	//! Answers how many items it removed, which is what the log wants: emptying
-	//! a full truck and emptying an empty one are the same action and should
-	//! not read the same afterwards.
-	//!
-	//! Walked BACKWARDS: deleting an item shifts every index above it down, so
-	//! a forward loop skips every second one.
+	//! Answers how many items it removed, for the log (emptying a full and an
+	//! empty truck must not read the same). Walked BACKWARDS: deleting shifts
+	//! higher indices down, so a forward loop skips every second item.
 	int Exec_ClearVehicleCargo( Object obj )
 	{
 		EntityAI entity = EntityAI.Cast( obj );
@@ -1937,11 +1914,8 @@ class JMVehiclesModule: JMRenderableModuleBase
 	// Keys (Expansion only)
 	// -------------------------------------------------------------------------
 
-	//! Spawn a key already paired to this vehicle, into the admin's inventory.
-	//!
-	//! The counterpart to UnPair: that one orphans a vehicle whose keys are
-	//! lost, this one gets back into one whose keys are lost without having to
-	//! orphan it first.
+	//! Spawn a key already paired to this vehicle into the admin's inventory.
+	//! Counterpart to UnPair: gets into a keyless vehicle without orphaning it.
 	void RequestSpawnVehicleKey( JMVehicleMetaData meta )
 	{
 		if (g_Game.IsClient())

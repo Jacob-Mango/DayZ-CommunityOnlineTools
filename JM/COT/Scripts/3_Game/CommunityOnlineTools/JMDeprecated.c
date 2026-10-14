@@ -1,17 +1,6 @@
 //! Runtime deprecation notice for APIs that still work but have a replacement.
-//!
-//! Follows the same convention as DayZ Expansion (`EXError.WarnOnce`): the old
-//! method stays as a thin forwarding wrapper, warns exactly once per message,
-//! then calls the new one. Use `[Obsolete("Use X")]` instead when the old
-//! signature no longer does anything.
-//!
-//!     //! DEPRECATED - use BindPermission
-//!     void UpdatePermission( UIActionBase c, string p )
-//!     {
-//!         JMDeprecated.WarnOnce( this, "UpdatePermission() is deprecated. Please use BindPermission()." );
-//!         BindPermission( c, p );
-//!     }
-//!
+//! Same convention as Expansion's EXError.WarnOnce: the old method stays as a thin
+//! wrapper that warns once, then forwards. Use [Obsolete("Use X")] if it does nothing.
 //! Every deprecation is also listed in Docs/systems/deprecations.md.
 class JMDeprecated
 {

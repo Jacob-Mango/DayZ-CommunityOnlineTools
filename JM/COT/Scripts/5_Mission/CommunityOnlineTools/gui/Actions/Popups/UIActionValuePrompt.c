@@ -1,35 +1,7 @@
-// =============================================================================
-//  UIActionValuePrompt
-//
-//  A small modal that asks for ONE value and answers with Confirm or Cancel.
-//  Two shapes, one widget: a slider for a number, a dropdown for a choice out
-//  of a fixed list. Both carry a caller-supplied id, so a single host callback
-//  can serve every prompt a form raises.
-//
-//  Like the context menu, the script's own layoutRoot is a 1px transparent stub
-//  that exists only to keep Update() ticking; the visible panel is a separate
-//  widget parented to the anchor passed to InitPrompt(), so it floats above the
-//  host instead of being clipped by it. Anchor it to the window root.
-//
-//  It is MODAL: while it is up the game's inputs are held down and a click
-//  outside it does nothing. That is the difference between this and the popup
-//  on a colour picker - a click landing elsewhere on a form that is halfway
-//  through answering a question is a misclick, not a decision, and dismissing
-//  a prompt on one loses whatever was dialled in.
-//
-//  Usage:
-//      m_Prompt = UIActionManager.CreateValuePrompt( layoutRoot, m_Window.GetWidgetRoot(), this, "OnConfirm_Prompt" );
-//
-//      m_Prompt.ShowSlider( "quantity", "Set Quantity", "Rounds", 0, 30, 12, 1, "%1" );
-//
-//      void OnConfirm_Prompt( UIEvent eid, UIActionBase action )
-//      {
-//          if ( eid != UIEvent.CLICK )
-//              return;
-//          if ( m_Prompt.GetPromptId() == "quantity" )
-//              Apply( m_Prompt.GetSliderValue() );
-//      }
-// =============================================================================
+//  UIActionValuePrompt: modal asking for ONE value (slider or dropdown) with Confirm/Cancel;
+//  a caller-supplied id lets one host callback serve every prompt. layoutRoot is a 1px stub
+//  keeping Update() ticking; the visible panel hangs off the InitPrompt() anchor (use the window root).
+//  MODAL: inputs are held and outside clicks do nothing, so a misclick cannot lose the dialled value.
 
 class UIActionValuePrompt: UIActionBase
 {
@@ -385,12 +357,9 @@ class UIActionValuePrompt: UIActionBase
 		m_Panel.SetFlags( WidgetFlags.VEXACTSIZE );
 		m_Panel.SetSize( width, m_FullHeight );
 
-		// The layout hardcodes the grid's width, so a panel that is any size
-		// other than the layout's own leaves the content sized for the old one.
-		// Drive it from the panel instead and the two can never disagree.
-		//
-		// Only once the grid has a real measured height: passing the 0 it
-		// answers before it is laid out would collapse it.
+		// The layout hardcodes the grid's width, so drive it from the panel size instead.
+		// Only once the grid has a measured height: the 0 it reports before layout
+		// would collapse it.
 		if ( gh >= 1 )
 		{
 			m_Grid.SetFlags( WidgetFlags.HEXACTSIZE );

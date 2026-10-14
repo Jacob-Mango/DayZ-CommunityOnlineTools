@@ -1,40 +1,7 @@
-// =============================================================================
-//  UIActionTimePicker
-//
-//  Three edit boxes - HH : MM : SS - for entering a duration or time of day.
-//  Overflow carries upward, so 90 typed into seconds becomes 00:01:30 and 90
-//  typed into minutes becomes 01:30:00. Fires UIEvent.CHANGE whenever the total
-//  changes. GetTotalSeconds() converts to a single integer for easy use in ban
-//  durations etc.
-//
-//  Usage:
-//      m_Duration = UIActionManager.CreateTimePicker( parent, "Ban Duration",
-//          this, "OnChange_Duration" );
-//      m_Duration.SetTotalSeconds( 3600 );   // 01:00:00
-//
-//      void OnChange_Duration( UIEvent eid, UIActionBase action )
-//      {
-//          int secs = m_Duration.GetTotalSeconds();
-//      }
-//
-//  -- Why this control polls instead of handling events --------------------
-//
-//  Two things this widget cannot rely on, both confirmed from client logs
-//  rather than assumed:
-//
-//    * OnMouseButtonDown / OnClick never fire for these fields. A diagnostic
-//      build logged every press and produced no lines at all while the fields
-//      were being clicked, so nothing that depends on a press event can decide
-//      which field the user is working in.
-//    * GetScreenPos on the fields returns coordinates relative to their
-//      right-aligned parent (measured: x = -234, -152, -69), not screen space,
-//      so a mouse-rect hit test can never match an absolute cursor position.
-//      That is what used to pin every scroll onto hours.
-//
-//  What does work is polling in Update: GetWidgetUnderCursor() for what the
-//  pointer is over, and reading each box's text to see what the user typed. The
-//  whole control is driven from those two signals.
-// =============================================================================
+//  UIActionTimePicker - HH : MM : SS edit boxes; overflow carries upward (90 in seconds -> 00:01:30).
+//  Fires UIEvent.CHANGE on total change; GetTotalSeconds() / SetTotalSeconds().
+//  Polls in Update (GetWidgetUnderCursor + box text) because OnMouseButtonDown / OnClick never fire
+//  for these fields and GetScreenPos is parent-relative (x = -234..), so rect hit tests fail.
 class UIActionTimePicker: UIActionBase
 {
 	protected TextWidget    m_Label;

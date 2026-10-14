@@ -1,18 +1,7 @@
-//! Client-local copies of items, built to feed an ItemPreviewWidget.
-//!
-//! DayZ cannot draw an item that is not a real entity, and the items COT shows (another player's
-//! inventory, world items found by a scan) are usually not replicated to this client. So a preview is a
-//! local copy spawned from the classname, with the state the server reported applied on top - health,
-//! quantity, food stage - so a ruined, half-eaten or rotten item is drawn as it really is instead of
-//! pristine. It is never the real item; nothing done to it goes anywhere near the server.
-//!
-//! Shared by the Player Manager's inventory and the Loot Analysis hover preview:
-//!
-//!     EntityAI ent = JMLocalPreview.Spawn( "Apple", health, quantity, stage );
-//!     JMLocalPreview.Attach( ent, "PistolSuppressor", health, quantity, stage );
-//!     JMLocalPreview.Freeze( ent );      // LAST - see Freeze
-//!     ...
-//!     JMLocalPreview.Destroy( ent );
+//! Client-local copies of items, built to feed an ItemPreviewWidget. DayZ cannot draw a
+//! non-entity and the items COT shows (other players' inventory, scanned world items) are
+//! usually not replicated here, so a preview is a local copy spawned from the classname with
+//! the reported state (health, quantity, food stage) applied. Never the real item. Order: Spawn, Attach, Freeze LAST, Destroy.
 class JMLocalPreview
 {
 	//! Spawn `type` with the reported state. Pass a negative value for anything that does not
@@ -72,11 +61,9 @@ class JMLocalPreview
 			ent.SetHealth01( zone, "Health", health01 );
 	}
 
-	//! Give `parent` a child copy, with the reported state. A slot id (or -1) is tried first so a
-	//! thing that fits several slots lands in the one it was in; then any attachment slot; then the
-	//! LOCAL inventory operation, which is the client-side path vanilla itself uses and the one that
-	//! seats a magazine the Create* calls refuse. `attachmentsOnly` skips the cargo fallback (a
-	//! container's contents never show through its model). Returns null when nothing took it.
+	//! Give `parent` a child copy with the reported state. Tries the slot id (or -1) first,
+	//! then any attachment slot, then the LOCAL inventory operation (seats a magazine the
+	//! Create* calls refuse). `attachmentsOnly` skips the cargo fallback. Null when nothing took it.
 	static EntityAI Attach( EntityAI parent, string type, float health = -1, float quantity = -1, int foodStage = -1, int slotId = -1, bool attachmentsOnly = true )
 	{
 		if ( !parent )
@@ -130,11 +117,9 @@ class JMLocalPreview
 		return ent;
 	}
 
-	//! Freeze a preview tree once it is fully built.
-	//!
-	//! Simulation is switched off LAST, not at spawn: a weapon whose simulation is already off does
-	//! not run the state change that seats a magazine, so a rifle built the other way round came up
-	//! with its optic and no mag.
+	//! Freeze a preview tree once fully built. Simulation is switched off LAST, not at
+	//! spawn: a weapon with simulation already off does not run the state change that
+	//! seats a magazine, so it came up with its optic and no mag.
 	static void Freeze( EntityAI ent )
 	{
 		if ( !ent )

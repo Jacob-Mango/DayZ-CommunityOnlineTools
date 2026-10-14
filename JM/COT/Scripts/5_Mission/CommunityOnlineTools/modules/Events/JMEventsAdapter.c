@@ -1,16 +1,7 @@
-// =============================================================================
-//  JMEventsAdapter
-//
-//  Aggregates dynamic + static world events into a single admin list:
-//    - Helicopter crashes      (CrashBase, Expansion-tracked when available)
-//    - Contaminated zones      (ExpansionContaminatedArea)
-//    - Airdrops                (live ExpansionAirdropContainerBase, modded)
-//    - Static loot containers  (Land_ContainerLocked_*_DE, Sakhal map)
-//    - Static map characters   (StaticObj_FrozenScientist_DE, Sakhal map)
-//
-//  Static objects are gathered with a one-shot world scan and cached. Dynamic
-//  events use static tracking arrays populated by modded class hooks.
-// =============================================================================
+//  JMEventsAdapter - one admin list of world events: heli crashes (CrashBase),
+//  contaminated zones, airdrops (Expansion), and Sakhal static loot containers /
+//  frozen scientists. Static objects come from a cached one-shot world scan;
+//  dynamic events from tracking arrays populated by modded class hooks.
 
 enum JMEventsCategory
 {
@@ -181,12 +172,9 @@ class JMEventsAdapter: JMEntityManagerAdapter
 #endif
 	}
 
-	// ---------------------------------------------------------------------------
-	//  Static map object cache - one-shot world scan, runs only on "Rescan" or
-	//  first open. All target classnames are checked in a single pass over the
-	//  result set. On non-Sakhal maps every IsKindOf check fails immediately,
-	//  so the loop body is never entered.
-	// ---------------------------------------------------------------------------
+	//  Static map object cache - one-shot world scan on "Rescan" or first open,
+	//  all classnames checked in a single pass. On non-Sakhal maps every IsKindOf
+	//  fails immediately, so the loop body is never entered.
 
 	protected void BuildStaticCache()
 	{

@@ -1,20 +1,7 @@
-// =============================================================================
-//  JMWeatherNextState
-//
-//  One weighted edge of the dynamic weather state machine: a target name and
-//  the chance it is picked.
-//
-//  Three lists use it, and all three are rolled and validated the same way:
-//
-//    - JMWeatherPhase.Edges       To = a phase of the SAME state, or "" to leave
-//                                 the state.
-//    - JMWeatherState.NextStates  To = another state.
-//    - JMWeatherState.Entry       To = a phase of the state, drawn on entering it.
-//
-//  The edges live on the node they lead OUT of, so there is no "from" to store -
-//  the owning node is the from. A rename or a delete only ever disturbs the
-//  nodes that actually name the one that changed.
-// =============================================================================
+//  JMWeatherNextState - one weighted edge of the dynamic weather state machine (target + chance).
+//  Used by JMWeatherPhase.Edges (To = phase of the SAME state, or "" to leave it),
+//  JMWeatherState.NextStates (To = another state) and JMWeatherState.Entry (phase drawn on entry).
+//  Edges live on the node they leave, so there is no "from"; renames only touch naming nodes.
 class JMWeatherNextState
 {
 	string To;
@@ -47,12 +34,9 @@ class JMWeatherNextState
 		return total;
 	}
 
-	//! Index of the edge drawn, or -1 when there is nothing to draw from.
-	//!
-	//! Candidates are WEIGHTS drawn against their own total rather than against a
-	//! fixed 100 - two candidates at 30 and 10 pick the first three times in four.
-	//! -1 and "the drawn edge's To is empty" are different answers: the first
-	//! means no candidates at all, the second is a valid pick of "leave the state".
+	//! Index of the edge drawn, or -1 when there is nothing to draw from. Chances are WEIGHTS
+	//! against their own total, not a fixed 100 (30 and 10 pick the first 3 times in 4). -1
+	//! means no candidates; an empty To on the drawn edge is a valid "leave the state".
 	static int Roll( array< ref JMWeatherNextState > edges )
 	{
 		int total = Total( edges );

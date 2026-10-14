@@ -136,12 +136,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !senderRPC )
 			return;
 
-		//! Same permission the sidebar needs to open at all.
-		//!
-		//! Without it this handler is one webhook post and one log line per
-		//! packet, from any player on the server, announcing an admin
-		//! activation that never happened - forged audit entries and a flooded
-		//! Discord endpoint in the same call.
+		//! Same permission the sidebar needs to open at all. Without it any player could forge
+		//! admin-activation audit entries and flood the Discord endpoint, one post per packet.
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC, instance ) )
 			return;

@@ -1,23 +1,7 @@
-// =============================================================================
-//  JMActionHistory
-//
-//  A single chronological undo/redo stack spanning every action type that
-//  pushes onto it, so a global Ctrl+Z always undoes whatever actually
-//  happened last, regardless of which module did it - not "the last thing
-//  this one module did", the way each module's own bespoke history (Map
-//  Editor's, the teleport history's per-target one) works.
-//
-//  Server-side and global for the whole session, the same scope
-//  JMMapEditorModule's own undo stack already uses. Each entry does record who
-//  performed it, though: a caller steps back their OWN most recent action, and
-//  only a holder of ActionHistory.UndoOthers can touch another admin's.
-//
-//  Usage (server side, from whatever handler performs the action):
-//      JMActionHistory.Push( new JMHealHistoryEntry( target, includeAttachments, includeCargo ), JMActionHistory.OwnerOf( ident ) );  // before healing
-//
-//  Undo/Redo are driven by JMActionHistoryModule, which also does the
-//  notification, log line and webhook for each step.
-// =============================================================================
+//  JMActionHistory: one chronological, server-side, session-global undo/redo stack across
+//  all action types, so Ctrl+Z undoes whatever happened last, whichever module did it.
+//  Each entry records its owner: callers undo their OWN last action; only ActionHistory.UndoOthers
+//  can touch another admin's. Push before acting; Undo/Redo are driven by JMActionHistoryModule.
 enum JMActionHistoryResult
 {
 	//! Stepped an entry; `entry` is what was undone/redone.

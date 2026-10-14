@@ -11,10 +11,7 @@ class UIActionText: UIActionBase
 	protected ImageWidget m_IconRight;
 
 	//! Glyph on the FAR RIGHT of the row, after the value: label - value - icon.
-	//!
-	//! The left slot puts the icon between the row edge and the label, which
-	//! crowds the text on a narrow panel. A right-hand glyph reads as a suffix
-	//! to the number instead and leaves the label column alone. The value is
+	//! Avoids the left slot, which crowds the label on a narrow panel; the value is
 	//! pushed left to clear it.
 	void SetIconRight( string imagePath )
 	{

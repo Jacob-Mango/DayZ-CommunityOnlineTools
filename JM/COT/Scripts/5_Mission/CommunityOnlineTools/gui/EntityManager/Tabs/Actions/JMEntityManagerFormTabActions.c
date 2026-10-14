@@ -1,9 +1,6 @@
-//! "Actions" tab of JMEntityManagerForm - one button per per-entity action the
-//! adapter exposes, for whichever entity is currently selected. Back-reference
-//! to the owning form, same shape as JMPlayerRowWidget.Menu.
-//!
-//! The action descriptors (JMEntityAction) are owned by the form: the roster's
-//! bulk buttons hold weak UserData refs into the same array.
+//! "Actions" tab of JMEntityManagerForm - one button per adapter action for the selected
+//! entity. The JMEntityAction descriptors are owned by the form: the roster's bulk
+//! buttons hold weak UserData refs into the same array.
 class JMEntityManagerFormTabActions: JMFormTab
 {
 	protected JMEntityManagerForm m_Form;
@@ -42,12 +39,9 @@ class JMEntityManagerFormTabActions: JMFormTab
 			if ( act.m_IsBulk )
 				continue;
 
-			//! Every adapter's actions carry their own permission key, and the
-			//! server already refuses one the caller does not hold
-			//! (JMEntityManagerModule). Binding here means the button reflects
-			//! that instead of failing silently on click. An empty key means
-			//! the action is deliberately ungated - do not bind it, or
-			//! HasPermission("") would disable it for everyone.
+			//! Actions carry their own permission key (server enforces it); binding makes the
+			//! button reflect that. An empty key means deliberately ungated - do not bind it,
+			//! or HasPermission("") would disable it for everyone.
 			if ( act.m_IsDestructive )
 			{
 				UIActionConfirmInline btn = UIActionManager.CreateConfirmInline( optGrid, act.m_Label, this, "OnEntityClick" );

@@ -78,11 +78,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	protected ref map<string, ref array<vector>>  m_CEPositions;  // group name -> world positions
 	protected bool m_CEDataLoaded = false;
 
-	//! Classname the last RequestItemScan was for (client only). The scan
-	//! reply carries per-entity health/quantity/lifetime/attachments but not
-	//! the classname itself - every entity in one reply is the same class the
-	//! client already asked for, so it is cheaper to remember it here than to
-	//! round-trip it back over the RPC.
+	//! Classname the last RequestItemScan was for (client only). The reply has per-entity stats but
+	//! not the classname (all one class), so it is remembered here instead of round-tripped.
 	protected string m_LastScanClassName;
 
 	//! Client: the filter menu's "allow non loot" checkbox, sent with each scan request.
@@ -178,19 +175,9 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		m_CEDataLoaded = true;
 	}
 
-	// Discover every types.xml the mission registers, not just the vanilla one.
-	//
-	// $mission:db/types.xml is only the base game's list. Mods and custom maps
-	// register their own via cfgeconomycore.xml:
-	//
-	//   <economycore>
-	//     <ce folder="mymod">
-	//       <file name="mymod_types.xml" type="types" />
-	//     </ce>
-	//   </economycore>
-	//
-	// Parsing only the hardcoded path silently drops every modded item from the
-	// analysis. See docs/audits/2026-07-15-todo-mods-audit.md.
+	// Discover every types.xml the mission registers; mods/maps add theirs via cfgeconomycore.xml
+	// (<ce folder="mymod"><file name="mymod_types.xml" type="types"/></ce>). Parsing only
+	// $mission:db/types.xml silently drops modded items. See docs/audits/2026-07-15-todo-mods-audit.md.
 	protected void Exec_ParseAllTypesXml()
 	{
 		array<string> files = new array<string>;
@@ -266,14 +253,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		}
 	}
 
-	// Parse one types.xml using CF_XML. Later files override earlier entries,
-	// matching the CE's own last-registered-wins behaviour.
-	// <types>
-	//   <type name="AK101">
-	//     <category name="weapons"/>
-	//     <usage name="Military"/>
-	//   </type>
-	// </types>
+	// Parse one types.xml using CF_XML. Later files override earlier entries (CE last-registered-wins).
+	// <types><type name="AK101"><category name="weapons"/><usage name="Military"/></type></types>
 	protected bool Exec_ParseTypesXml(string path)
 	{
 		CF_XML_Document doc;
@@ -400,12 +381,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	}
 
 	// Parse $mission:mapgroupproto.xml using CF_XML
-	// <prototype>
-	//   <group name="Land_Shed_M1" lootmax="2">
-	//     <usage name="Industrial"/>
-	//     <usage name="Farm"/>
-	//   </group>
-	// </prototype>
+	// <prototype><group name="Land_Shed_M1" lootmax="2"><usage name="Industrial"/>...</group></prototype>
 	protected void Exec_ParseMapGroupProtoXml()
 	{
 		CF_XML_Document doc;
@@ -553,14 +529,9 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		Exec_SendItemTypeInfo(className, senderRPC);
 	}
 
-	// Server -> Client: Send item scan results
-	//
-	// Health/quantity/lifetime/attachments ride as three more parallel arrays
-	// rather than one array<ref DTO> - this codebase has no precedent for
-	// serializing an array of custom classes over a Param, and parallel
-	// primitive arrays are the pattern AddDistributionMarkers already proved
-	// working for per-marker usage types. Attachments are ";"-joined per
-	// entity, one string per entry, and split back out client-side.
+	// Server -> Client: Send item scan results. Health/quantity/lifetime/attachments ride as parallel
+	// primitive arrays, not array<ref DTO> (no precedent for serializing custom classes over a Param).
+	// Attachments are ";"-joined per entity and split back out client-side.
 	protected void RPC_SendItemScanResults(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
 		if (!JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN))
@@ -1036,17 +1007,9 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemTypeInfo", new Param1<ref JMLootItemTypeInfo>(info), true, senderRPC);
 	}
 
-	// -----------------------------------------------------------------------
-	//  Server: save edited CE values back to their source types.xml
-	//
-	//  CF_XML is read-only, so this does not re-serialize the document - it
-	//  patches the raw file TEXT instead, replacing only the inner text of
-	//  the four tags that changed inside the one <type name="X">...</type>
-	//  block, byte-identical everywhere else (comments, spacing, every other
-	//  type untouched). A full re-serialize would risk losing whatever an
-	//  admin's own CE tooling wrote into that file; a targeted text patch
-	//  cannot touch anything it was not told to.
-	// -----------------------------------------------------------------------
+	//  Server: save edited CE values back to their source types.xml. CF_XML is read-only, so the
+	//  raw file TEXT is patched (only the four changed tags in one <type> block), byte-identical
+	//  elsewhere; a full re-serialize could lose what an admin's CE tooling wrote.
 
 	protected bool Exec_SaveTypeXmlValues(string className, int nominal, int min, int lifetime, int restock)
 	{
@@ -1127,13 +1090,9 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		return true;
 	}
 
-	//! Replaces the inner text of the FIRST <tagName>...</tagName> found in
-	//! `block` - safe to call unscoped like this only because the caller
-	//! already scoped `block` to one <type> element, so there is exactly one
-	//! nominal/min/lifetime/restock tag to find. Leaves `block` untouched if
-	//! the tag is not present at all rather than inventing one - a type with
-	//! no <min> today gets no <min> written in, matching how ParseIntTag
-	//! reads it as -1 rather than 0.
+	//! Replaces the inner text of the FIRST <tagName> in `block` (safe because the caller scoped it
+	//! to one <type>). Leaves `block` untouched if the tag is absent rather than inventing one,
+	//! matching ParseIntTag reading a missing <min> as -1.
 	protected string ReplaceTagValue(string block, string tagName, int newValue)
 	{
 		string openTag  = "<" + tagName + ">";

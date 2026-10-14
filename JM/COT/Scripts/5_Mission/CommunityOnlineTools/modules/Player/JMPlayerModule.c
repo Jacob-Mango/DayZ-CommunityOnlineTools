@@ -5,38 +5,23 @@ class JMPlayerModule: JMRenderableModuleBase
 	ref set<string> m_SpectatorsWaitingToFinish = new set<string>();
 	JMCameraBase m_SpectatorCamera;
 
-	// -----------------------------------------------------------------------
-	// Batched stat setter - single RPC replaces 7 individual SetX methods.
-	// Public entry points below are kept as thin wrappers so call sites and
-	// form code don't need to change. Each stat is a JMPlayerStat (JMPlayerStat.c).
-	// -----------------------------------------------------------------------
+	// ---- Batched stat setter ----
+	// A single RPC replaces 7 individual SetX methods; the public entry points stay as
+	// thin wrappers. Each stat is a JMPlayerStat (JMPlayerStat.c).
 
 	protected ref array< ref JMPlayerStat > m_Stats;
 
-	// -----------------------------------------------------------------------
-	//  Toggles
-	//
-	//  Every on/off state an admin can set on a player is a JMPlayerToggle (see
-	//  JMPlayerToggle.c). Sending, applying and receiving one is the same code
-	//  for all of them, so it lives here once. The named setters below are thin
-	//  wrappers kept so call sites and mods do not need to change.
-	// -----------------------------------------------------------------------
+	// ---- Toggles ----
+	// Every on/off admin state on a player is a JMPlayerToggle (JMPlayerToggle.c); send,
+	// apply and receive live here once. The named setters are thin wrappers kept so call
+	// sites and mods do not need to change.
 
 	protected ref array< ref JMPlayerToggle > m_Toggles;
 
-	// ---------------- Expansion player info (server -> client) ----------------
-	//
-	// Money, faction, reputation and group all live on the SERVER: the ATM
-	// balance is a JSON file, the group is a server-side party object, and the
-	// two PlayerBase getters only answer for a player the caller has in its
-	// network bubble - which an admin looking at a roster row generally does
-	// not. So this is a request/response pair like the session statistics, and
-	// like them it is only sent when the Statistics tab is actually open.
-	//
-	// The payload is a list of id/value string pairs rather than a fixed struct
-	// so that which of the four Expansion mods happen to be loaded changes the
-	// LENGTH of the answer and nothing else - a server with only Hardline sends
-	// one row, and no build of the client has to agree about the shape.
+	// ---- Expansion player info (server -> client) ----
+	// Money, faction, reputation and group live on the SERVER and the PlayerBase getters only
+	// answer inside the network bubble, so this is a request/response pair, sent only while the
+	// Statistics tab is open. The payload is id/value string pairs, so which Expansion mods are loaded changes only its LENGTH.
 
 	//! Sanity bound on a payload the client has not built itself. Four rows are
 	//! defined today; the slack is for a sub-mod that adds its own.
@@ -165,12 +150,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		return m_Toggles;
 	}
 
-	//! Is `target` the player who sent this RPC?
-	//!
-	//! The voice RPCs carry the speaking player as their target, and a client
-	//! chooses what it puts there. Without this check any player can name an
-	//! invisible admin as the target and flip that admin's invisibility mode
-	//! from across the map, by sending a packet they never spoke into.
+	//! Is `target` the player who sent this RPC? Voice RPCs carry the speaking player as
+	//! target, which a client chooses. Without this check any player could name an
+	//! invisible admin and flip that admin's invisibility from across the map.
 	protected bool IsOwnPlayer( Object target, PlayerIdentity senderRPC )
 	{
 		if ( !target || !senderRPC )
@@ -435,11 +417,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPermissions.Register( JMConstants.PERM_PLAYER_INVENTORY_REPAIR );
 		JMPermissions.Register( JMConstants.PERM_PLAYER_INVENTORY_TAKE );
 
-		//! Covers every in-place edit of an item the admin already sees:
-		//! unjamming, quantity, temperature, food stage and liquid type. They
-		//! are one permission because they are one kind of act - rewriting a
-		//! carried item's state - and splitting them would leave a role able to
-		//! set a canned bean rotten but not burned.
+		//! Covers every in-place edit of an item the admin already sees: unjamming,
+		//! quantity, temperature, food stage and liquid type. One permission because it is
+		//! one kind of act; splitting would allow a canned bean rotten but not burned.
 		JMPermissions.Register( JMConstants.PERM_PLAYER_INVENTORY_MODIFY );
 
 		JMPermissions.Register( JMConstants.PERM_PLAYER_STATISTICS_VIEW );
@@ -3110,15 +3090,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		// Removed - combined into RPC_SendDiseaseMask above.
 	}
 
-	// ---------------- Session statistics (server -> client) ----------------
-	//
-	// Playtime, deaths and lifespan live in the per-player JSON on the server
-	// and are pulled on demand, the same way the disease mask is.
-	//
-	// Deliberately NOT folded into JMPlayerInstance.OnSendHealth: that runs for
-	// every roster entry several times a second, so seven more ints per player
-	// would be a real bandwidth cost on a full server for numbers nobody is
-	// looking at unless the Statistics tab happens to be open.
+	// ---- Session statistics (server -> client) ----
+	// Playtime, deaths and lifespan live in the server's per-player JSON and are pulled on
+	// demand. NOT folded into JMPlayerInstance.OnSendHealth: that runs for every roster
+	// entry several times a second, a bandwidth cost for numbers rarely looked at.
 
 	void RequestPlayerStats( string guid )
 	{
@@ -3360,16 +3335,10 @@ class JMPlayerModule: JMRenderableModuleBase
 	}
 #endif
 
-	// ---------------- Inventory listing and item operations ----------------
-	//
-	// The client has no inventory data of its own: JMPlayerInstance syncs stats
-	// and position, never cargo. So the tab asks for a snapshot when it is
-	// opened and after every operation, and never on a timer - an unrequested
-	// ~10 KB per second per connected admin is not something a full server can
-	// afford for a panel nobody may be looking at.
-	//
-	// Same request/response shape as SendDiseaseMask: one RPC id, one handler,
-	// branching on IsMissionHost() for the server and client halves.
+	// ---- Inventory listing and item operations ----
+	// The client has no inventory data of its own, so the tab asks for a snapshot on open and
+	// after every operation, never on a timer (~10 KB/s per admin is unaffordable). Same
+	// request/response shape as SendDiseaseMask: one RPC id, branching on IsMissionHost().
 
 	void RequestInventory( string guid )
 	{
@@ -3461,12 +3430,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMPlayerModuleRPC.RequestInventory, true, to );
 	}
 
-	//! Flatten the player inventory into `items`. Returns true when the cap cut
-	//! the listing short.
-	//!
-	//! PREORDER visits a parent before its children, so by the time a child is
-	//! reached its parent is already in `indexOf` and ParentIndex resolves with
-	//! no recursion and no second pass.
+	//! Flatten the player inventory into `items`. Returns true when the cap cut the listing
+	//! short. PREORDER visits a parent before its children, so ParentIndex resolves via
+	//! `indexOf` with no recursion and no second pass.
 	protected bool CollectInventory( PlayerBase player, array< ref JMPlayerInventoryItem > items )
 	{
 		array< EntityAI > entities = {};
@@ -3596,12 +3562,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	}
 
 	//! Resolve a client-supplied network ID to an entity.
-	//!
-	//! SECURITY: the ID is matched ONLY against the named target player own
-	//! inventory. Resolving it against the world instead would let a client
-	//! delete or take any object on the server by guessing an ID, with the
-	//! permission check passing because the permission is per-admin, not
-	//! per-object.
+	//! SECURITY: matched ONLY against the target player's own inventory. Resolving against
+	//! the world would let a client delete or take any object by guessing an ID, as the
+	//! permission is per-admin, not per-object.
 	protected EntityAI ResolveInventoryItem( PlayerBase player, int netLow, int netHigh )
 	{
 		if ( !player || !player.GetInventory() )
@@ -3687,12 +3650,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		entity.DeleteSafe();
 	}
 
-	// ---------------- Whole-container operations ----------------
-	//
-	// The per-item RPCs answer with a full listing each, so "delete everything
-	// in this backpack" sent one request and got one listing back PER ITEM -
-	// thirty round trips and thirty listings for one click. One request that
-	// names the CONTAINER does the whole band server-side and answers once.
+	// ---- Whole-container operations ----
+	// Per-item RPCs each answer with a full listing, so deleting a backpack cost one round
+	// trip per item. One request naming the CONTAINER does it server-side and answers once.
 
 	void InventoryGroupOp( string guid, int netLow, int netHigh, int op )
 	{
@@ -3931,16 +3891,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		entity.SetPosition( admin.GetPosition() );
 	}
 
-	// ---------------- In-place item edits ----------------
-	//
-	// One request shape for all five: the item is addressed by the same network
-	// ID, checked against the same permission, and answered with the same fresh
-	// listing. Only the op code and the value differ, so they share a handler
-	// instead of being five near-identical copies of the take/repair pair.
-	//
-	// The value is a float on the wire even for the three ops that are really
-	// integers - a quantity, a food stage, a liquid type. Rounding once on the
-	// server is cheaper than a second numeric field nothing else would use.
+	// ---- In-place item edits ----
+	// One request shape for all five ops: same network ID, same permission, same fresh
+	// listing; only the op code and value differ, so they share a handler. The value is a
+	// float on the wire even for integer ops; rounding once on the server is cheaper.
 
 	void InventoryModify( string guid, int netLow, int netHigh, int op, float value )
 	{
@@ -4005,12 +3959,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		FinishInventoryOp( verb, entity.GetType(), guid, targetInstance, senderRPC, instance, senderRPC );
 	}
 
-	//! Apply one edit. Returns false when the op does not apply to this item -
-	//! a caller then logs nothing, because nothing happened.
-	//!
-	//! Every op re-checks the item against the request rather than trusting the
-	//! client's menu: the listing the admin right-clicked can be seconds old,
-	//! and by now the canteen may be a rifle.
+	//! Apply one edit. Returns false when the op does not apply to this item (nothing
+	//! happened, so the caller logs nothing). Every op re-checks the item against the
+	//! request: the admin's listing can be seconds old and the canteen may now be a rifle.
 	protected bool ApplyInventoryModify( EntityAI entity, int op, float value, out string verb )
 	{
 		ItemBase asItem;
@@ -4050,13 +4001,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		return false;
 	}
 
-	//! Clear a jam without the player having to hold the weapon.
-	//!
-	//! SetJammed alone is not enough: the jam is also a state the weapon's FSM
-	//! is sitting in, and the next stable state re-reads it back out of there.
-	//! RandomizeFSMState reselects a stable state from what the weapon is now -
-	//! same magazine, same chambers, no jam - which is the only script-side way
-	//! to leave that state for a weapon nobody is holding.
+	//! Clear a jam without the player holding the weapon. SetJammed alone is not enough:
+	//! the weapon's FSM sits in a jam state and re-reads it on the next stable state.
+	//! RandomizeFSMState reselects one from the weapon's current state, the only script-side
+	//! way to leave it for an unheld weapon.
 	protected bool UnjamWeapon( EntityAI entity, out string verb )
 	{
 		Weapon_Base weapon;
@@ -4074,11 +4022,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		return true;
 	}
 
-	//! Log, webhook, and push a fresh listing back to whoever asked.
-	//!
-	//! The refresh is unconditional and happens on every operation including the
-	//! ones that half-worked, because it is the only way the admin finds out
-	//! whether the item actually moved.
+	//! Log, webhook, and push a fresh listing back to whoever asked. The refresh is
+	//! unconditional, even for operations that half-worked, since it is how the admin
+	//! learns whether the item actually moved.
 	protected void FinishInventoryOp( string verb, string type, string guid, JMPlayerInstance targetInstance, PlayerIdentity ident, JMPlayerInstance instance, PlayerIdentity replyTo )
 	{
 		GetCommunityOnlineToolsBase().Log( ident, "Inventory " + verb + " [guid=" + guid + "] [item=" + type + "]" );
@@ -4089,11 +4035,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		SendInventoryTo( replyTo, guid );
 	}
 
-	// ---------------- Bleed-from-body-part ----------------
-	// Body-part selections are looked up by name (string) end-to-end. Server
-	// resolves the selectionName -> bit via the COT mod of the bleeding manager
-	// (COT_GetZoneSelectionName / COT_GetZoneBit), guaranteeing the part
-	// the admin picks matches the part that actually starts bleeding.
+	// ---- Bleed-from-body-part ----
+	// Body-part selections are looked up by name end-to-end. The server resolves
+	// selectionName -> bit via COT_GetZoneSelectionName / COT_GetZoneBit so the picked part
+	// is the part that actually bleeds.
 
 	void AddBleedingPart( string selectionName, array< string > guids )
 	{
@@ -4273,17 +4218,10 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
-		// Client receives the populated state.
-		//
-		// Read order MUST match SendBleedingStateTo's write order exactly:
-		//   guid, names.Count, names[], bits[], bleedingBits,
-		//   activePartIndices.Count, activePartIndices[]
-		//
-		// A single misaligned read corrupts every subsequent field and the
-		// engine's string deserializer throws "String CORRUPTED". Every read
-		// is checked and we `return` (not `break`) on the first failure so a
-		// desync surfaces at the exact field rather than cascading into a
-		// garbage string-length read.
+		// Client receives the populated state. Read order MUST match SendBleedingStateTo's
+		// write order: guid, names.Count, names[], bits[], bleedingBits, activePartIndices.Count,
+		// activePartIndices[]. One misaligned read makes the string deserializer throw
+		// "String CORRUPTED", so every read is checked and we `return` (not `break`) on the first failure.
 		string guidIn;
 		int count;
 		int activePartCount;

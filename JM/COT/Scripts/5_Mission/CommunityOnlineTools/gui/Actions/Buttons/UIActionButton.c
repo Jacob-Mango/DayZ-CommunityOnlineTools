@@ -1,18 +1,7 @@
-// =============================================================================
-//  UIActionButton
-//
-//  The mod's standard button: a rounded pill - a filled surface plus a ring -
-//  which is the same shape the tab bar, the filter bar and the icon grid use,
-//  so everything clickable in the mod reads as one family.
-//
-//  At rest the pill is deliberately quiet (raised surface, half-lit ring): a
-//  form is mostly buttons, and painting them all in the selected-blue turns the
-//  window into a slab of colour. Hover lights the ring; JMTheme owns both.
-//
-//  The ButtonWidget itself paints nothing; it is only the hit area. Every
-//  colour lands on the "fill" / "outline" images, which is also why
-//  SetColor() retints the fill instead of the button.
-// =============================================================================
+// UIActionButton - the mod's standard button: a rounded pill (filled surface plus ring),
+// the same shape as the tab bar, filter bar and icon grid. Quiet at rest, ring lights on
+// hover; JMTheme owns both. The ButtonWidget is only the hit area: colour lands on the
+// "fill" / "outline" images, so SetColor() retints the fill instead of the button.
 class UIActionButton: UIActionBase
 {
 	//! Flat-mode icon slot: the gap before the glyph, and the total width the
@@ -80,13 +69,9 @@ class UIActionButton: UIActionBase
 		ApplyContentIndent();
 	}
 
-	//! Drop the pill chrome and left-align the label, keeping the hit area and
-	//! the click event intact.
-	//!
-	//! A tree is read by its indentation, and a filled, ringed pill per node
-	//! draws a hard box around every row, which competes with that. Flat rows
-	//! stay quiet at rest and light up with a faint accent wash on hover, so
-	//! the affordance survives without the chrome.
+	//! Drop the pill chrome and left-align the label, keeping the hit area and click
+	//! event. A tree is read by indentation and a ringed pill per node draws a hard box
+	//! around every row, so flat rows stay quiet at rest and get a faint accent wash on hover.
 	void SetFlat( bool flat )
 	{
 		m_Flat = flat;

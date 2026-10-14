@@ -1,9 +1,7 @@
 //! The built-in JMPlayerStat implementations. Only what is specific to each stat is
-//! here; its id, permission, range and colour bands are supplied where it is
-//! registered, in JMPlayerModule.RegisterStats().
-//!
-//! Kept together in one file because each is a handful of lines. A stat a mod adds
-//! should live in its own file.
+//! here; id, permission, range and colour bands are supplied in
+//! JMPlayerModule.RegisterStats(). Kept in one file because each is tiny; a mod's
+//! own stat should live in its own file.
 
 class JMPlayerStatHealth: JMPlayerStat
 {

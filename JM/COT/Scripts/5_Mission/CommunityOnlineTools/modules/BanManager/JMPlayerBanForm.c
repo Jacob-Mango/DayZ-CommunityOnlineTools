@@ -38,14 +38,9 @@ class JMBanForm : JMFormBase
     protected UIActionButton                m_EditDurationBtn;
     protected UIActionConfirmInline         m_UnbanBtn;
 
-    // Pending flow state for the offline-ban confirmation chain
-    // (OnClick_ManualBan(Selected) -> OnManualBan_GotSteamID -> OpenBanReasonPopup
-    // -> OnManualBan_GotReason). Public: JMBanFormTabOffline writes it, and it
-    // has to stay readable by the confirmation-callback methods below, which
-    // in turn have to stay on the form - JMConfirmation dispatches its named
-    // callbacks against whatever object it was Init()'d with, not against
-    // whichever widget/tab raised the popup, so moving these off the form
-    // would silently break the callback.
+    // Pending state for the offline-ban confirmation chain (OnClick_ManualBan -> OnManualBan_GotSteamID
+    // -> OpenBanReasonPopup -> OnManualBan_GotReason). Public: JMBanFormTabOffline writes it. The
+    // callbacks must stay on the form (JMConfirmation dispatches against the object it was Init()'d with).
     string                        m_PendingSteamID;
     string                        m_PendingPlayerName;
 
@@ -91,11 +86,8 @@ class JMBanForm : JMFormBase
         return -1;
     }
 
-    // -------------------------------------------------------------------------
-    //  Selection actions - Unban and Edit Duration. Built onto the Active Bans
-    //  detail card, but their handlers stay here and forward into whichever
-    //  tab actually owns the selection/duration state.
-    // -------------------------------------------------------------------------
+    //  Selection actions - Unban and Edit Duration. Built onto the Active Bans detail card;
+    //  handlers stay here and forward to the tab that owns the selection/duration state.
 
     //! Build Unban (a confirm icon in `card`'s title bar) and Edit Duration
     //! (a full-width button in `content`). Called by JMBanFormTabBans when it
@@ -337,16 +329,10 @@ class JMBanForm : JMFormBase
             m_TabBans.Rebuild( filter );
     }
 
-    // -------------------------------------------------------------------------
-    //  Ban Offline - confirmation-callback chain
-    //
-    //  These three stay on the form (not on JMBanFormTabOffline) because
-    //  JMConfirmation dispatches its named callbacks against the object its
-    //  owning window was Init()'d with, not against whatever raised the
-    //  popup - moving them to the tab class would silently break the chain.
-    //  JMBanFormTabOffline still triggers the chain by calling
+    //  Ban Offline - confirmation-callback chain. These three stay on the form because
+    //  JMConfirmation dispatches callbacks against the object its window was Init()'d with;
+    //  moving them to the tab breaks the chain. JMBanFormTabOffline triggers it via
     //  CreateConfirmation_Two(...) on this form through its back-reference.
-    // -------------------------------------------------------------------------
 
     void OnManualBan_GotSteamID( JMConfirmation confirmation )
     {
@@ -368,12 +354,9 @@ class JMBanForm : JMFormBase
             }
         }
 
-        // NOTE: chaining a second EDIT-type CreateConfirmation_Two from the
-        // callback of the first EDIT-type confirmation was silently failing
-        // to open the popup (engine bug - the inner modal handler doesn't
-        // release the focus lock before the chained CreateConfirmation_Two
-        // tries to acquire it again). Workaround: defer the second popup
-        // by one CallLater tick so the first modal is fully torn down.
+        // NOTE: chaining a second EDIT-type CreateConfirmation_Two from the first's callback
+        // silently fails (engine bug: the focus lock is not released yet). Workaround: defer
+        // the second popup one CallLater tick so the first modal is fully torn down.
         DeferCall( "OpenBanReasonPopup", 50 );
     }
 

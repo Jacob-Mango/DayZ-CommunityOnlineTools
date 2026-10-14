@@ -1,9 +1,6 @@
-// =============================================================================
-//  JMWeatherDynamicControl - a one-shot command to the running machine
-//
-//  Separate from JMWeatherDynamicConfig on purpose: that edits the machine's
-//  configuration, this only moves it. Neither touches the other's data.
-// =============================================================================
+//  JMWeatherDynamicControl - a one-shot command to the running machine.
+//  Separate from JMWeatherDynamicConfig: that edits configuration, this only
+//  moves the machine. Neither touches the other's data.
 class JMWeatherDynamicControl
 {
 	//! Leave the current phase now, by the same roll a natural expiry would use.

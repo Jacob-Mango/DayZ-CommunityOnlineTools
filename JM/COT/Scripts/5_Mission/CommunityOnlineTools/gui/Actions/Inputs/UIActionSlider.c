@@ -22,12 +22,9 @@ class UIActionSlider: UIActionBase
 	//! dies with the slider; see UIActionSliderSync.
 	protected ref UIActionSliderSync m_Sync;
 
-	//! Track width the handle position was last computed against. The handle is
-	//! centred on its value using the track's SCREEN width, which is still 0
-	//! while OnInit runs - the widget has not been laid out yet - so the first
-	//! placement is uncentred and stayed that way until something moved the
-	//! slider. Re-running once the real width appears (and whenever it changes,
-	//! e.g. the window is resized) fixes it without polling every frame.
+	//! Track width the handle position was last computed against. The handle is centred
+	//! using the track's SCREEN width, which is 0 during OnInit (not laid out yet), so
+	//! re-run once the real width appears and whenever it changes, without per-frame polling.
 	protected float m_LastTrackWidth;
 
 	TextWidget GetLabelWidget()  { return m_Label;  }
@@ -348,11 +345,9 @@ class UIActionSlider: UIActionBase
 			m_Fill.SetSize( t, m_FillThickness );
 		}
 
-		// The handle's position is relative to the track, but its size is in
-		// pixels, so SetPos( t, 0 ) puts its LEFT edge at the value and the
-		// whole handle ends up sitting after the fill. Shift it back by half
-		// its own width so it is centred on the value, then keep it inside the
-		// track at both ends.
+		// The handle's position is relative to the track but its size is in pixels, so
+		// SetPos( t, 0 ) puts its LEFT edge at the value. Shift back by half its width
+		// to centre it, then clamp inside the track at both ends.
 		if ( m_Handle && m_Track )
 		{
 			float trackW, trackH;

@@ -12,32 +12,21 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	bool m_IsShown;
 
-	// ---------------------------------------------------------------------------
-	//  Shared design tokens
-	//
-	//  Every form measures its chrome from these, so a tab strip is the same
-	//  height in the player manager and in the ESP manager. Do NOT redeclare
-	//  them in a subclass: a same-named constant in a derived class is a
-	//  redefinition, not an override.
-	// ---------------------------------------------------------------------------
+	//  Shared design tokens: every form measures its chrome from these. Do NOT redeclare
+	//  them in a subclass: a same-named constant in a derived class is a redefinition,
+	//  not an override.
 
-	//! Drawn height of every control in a panel's header block - the toolbar
-	//! pills, the sort toggle, the filter box. Their layouts default to a 32px
-	//! square, which is three rows of dead height above a list that wants all
-	//! of it. 24 rather than the search box's own 22, because UIActionSearchBox
-	//! centres a 22px chrome inside its root and a root of exactly 22 clips the
-	//! chrome's top and bottom border.
+	//! Drawn height of every control in a panel's header block (toolbar pills, sort toggle,
+	//! filter box); layouts default to 32px squares, too tall. Not the search box's own 22:
+	//! UIActionSearchBox centres a 22px chrome, so a root of exactly 22 clips its borders.
 	static const float HEADER_CONTROL_HEIGHT = 30;
 
 	//! Drawn height of a tab strip. The strip's own layout is a fixed 30px row;
 	//! 34 leaves it 2px of breathing room top and bottom.
 	static const int TAB_STRIP_HEIGHT = 34;
 
-	//! Side of an icon-only button. A glyph pill carries a 16px icon, so 32
-	//! square is the whole control - matching UIActionImageButton.layout's own
-	//! declared size and the 30px word-button row it sits next to. Anything
-	//! that puts one of these in a grid stretches it to the cell, so icon
-	//! strips belong in a wrap / flex row instead.
+	//! Side of an icon-only button: 16px glyph in a 32 square, matching UIActionImageButton.layout.
+	//! A grid stretches it to the cell, so icon strips belong in a wrap / flex row.
 	static const int ICON_BUTTON_PX = 32;
 
 	//! Side of a button living in a card's title bar. The glyph inside stays
@@ -49,13 +38,8 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! Drawn height of one identity / property row, in layout pixels.
 	static const int IDENTITY_ROW_HEIGHT = 32;
 
-	// ---------------------------------------------------------------------------
-	//  Structural panels
-	//
-	//  Resolved by the subclass in OnInit() with FindAnyWidget(). A form whose
-	//  archetype does not use a given panel leaves it null - everything below
-	//  null-guards.
-	// ---------------------------------------------------------------------------
+	//  Structural panels: resolved by the subclass in OnInit() with FindAnyWidget().
+	//  A panel the form's archetype does not use stays null; everything below null-guards.
 	protected Widget m_LeftPanel;
 	protected Widget m_RightPanel;
 	protected Widget m_RightPanelDisable;
@@ -67,16 +51,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	protected Widget m_BottomTabStrip;
 	protected Widget m_BottomContent;
 
-	// ---------------------------------------------------------------------------
-	//  Registries
-	//
-	//  Typed to COT_ScriptedWidgetEventHandler rather than UIActionBase on
-	//  purpose: this class lives in 4_World and cannot see 5_Mission types.
-	//  COT_ScriptedWidgetEventHandler is the common ancestor of both this class
-	//  and UIActionBase, and declares the Close()/UpdatePermission() contract
-	//  these walks rely on. Call sites still pass UIActionBase - the upcast is
-	//  implicit.
-	// ---------------------------------------------------------------------------
+	//  Registries. Typed to COT_ScriptedWidgetEventHandler, not UIActionBase, because 4_World
+	//  cannot see 5_Mission types; it is the common ancestor and declares the
+	//  Close()/UpdatePermission() contract these walks rely on. Callers pass UIActionBase as-is.
 
 	//! Overlays that anchor their popup to the window root rather than to their
 	//! own parent, so hiding the tab they live on does not hide them. Register
@@ -106,25 +83,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! Tabs whose panel this form created (AddTab) - unlinked again by RemoveTabById.
 	protected ref array<int> m_OwnedTabs;
 
-	// -------------------------------------------------------------------------
-	//  Player targeting. An action on players used to need a Multi / Single /
-	//  Self trio of methods, each repeating the same call with a different GUID
-	//  list, plus a forwarding stub on the form when the trio lived in a tab.
-	//  ConfirmPlayerAction asks the same question as CreateAdvancedPlayerConfirm
-	//  but resolves the answer to a GUID list itself, so the action is written
-	//  once:
-	//
-	//      m_Form.ConfirmPlayerAction( "Heal", this, "HealTargets", false );
-	//
-	//      void HealTargets( array<string> targets, JMConfirmation confirmation = NULL )
-	//      {
-	//          m_Form.m_Module.Heal( targets );
-	//      }
-	//
-	//  `handler` is the object that owns the callback (a tab, or the form
-	//  itself). `confirmSelf` / `executeOnNoConfirmation` are as for
-	//  CreateAdvancedPlayerConfirm.
-	// -------------------------------------------------------------------------
+	//  Player targeting. ConfirmPlayerAction is CreateAdvancedPlayerConfirm resolving to a GUID
+	//  list itself, so an action is written once: m_Form.ConfirmPlayerAction( "Heal", this,
+	//  "HealTargets", false ) calls void HealTargets( array<string> targets, JMConfirmation
+	//  confirmation = NULL ) on `handler`; other params as for CreateAdvancedPlayerConfirm.
 	protected Class m_PlayerTargetHandler;
 	protected string m_PlayerTargetCallback;
 
@@ -219,11 +181,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		return m_Window;
 	}
 
-	//! Escape priority tier 1 (popup). Whether any registered overlay -
-	//! context menu, dropdown list, value prompt - is currently open on this
-	//! form, as opposed to merely registered. Used by COTModule's Escape
-	//! handler to decide whether Escape closes a popup here or falls through
-	//! to closing the window/sidebar instead.
+	//! Escape priority tier 1 (popup). Whether any registered overlay (context menu, dropdown,
+	//! value prompt) is currently open, not merely registered. COTModule's Escape handler uses
+	//! it to close a popup here or fall through to closing the window/sidebar.
 	bool HasOpenOverlay()
 	{
 		if ( !m_FloatingOverlays )
@@ -275,12 +235,8 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  Selection / disable overlay
-	//
-	//  UpdateUI() stays in the subclass - deciding whether anything is selected
-	//  is domain logic. These two only own the panel and the overlays.
-	// ---------------------------------------------------------------------------
+	//  Selection / disable overlay. UpdateUI() stays in the subclass (deciding whether
+	//  anything is selected is domain logic); these only own the panel and overlays.
 
 	//! Enable or disable the right-hand panel: disabled shows the "nothing
 	//! selected" overlay over it and dismisses popups. Same grammar as
@@ -337,15 +293,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.SetHandler( this );
 	}
 
-	//! Run `method` (a method of this form) after `delayMs` on the GUI queue,
-	//! once or repeating. Scheduling a name again replaces the pending call
-	//! instead of stacking a second one, so a repaint or re-measure that fires
-	//! on every resize event runs once, after the last.
-	//!
-	//! Prefer this to g_Game.GetCallQueue( ... ).CallLater( Method, ... ): the
-	//! queue does not know when its target dies, and only the form knows which
-	//! calls it has pending - so it cancels them all on destruction. `params`
-	//! carries the method's arguments, e.g. new Param2< bool, vector >( true, vector.Zero ).
+	//! Run `method` (of this form) after `delayMs` on the GUI queue, once or repeating. Scheduling
+	//! a name again replaces the pending call, so per-resize repaints run once, after the last.
+	//! Prefer over CallLater: the queue does not know when its target dies; the form cancels all
+	//! its pending calls on destruction. `params` carries the arguments (Param2<...> etc).
 	void DeferCall( string method, int delayMs = 0, bool repeat = false, Param params = null )
 	{
 		if ( !m_DeferredCalls )
@@ -394,11 +345,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 			OnCreate();
 
-			//! A form that overrides OnCreate() without calling super never reaches the
-			//! legacy OnInit(), so a third-party `modded class` `override void OnInit()`
-			//! (ZenCOT on JMObjectSpawnerForm, ...) would silently stop running. Run it
-			//! here instead, after the form's own widgets exist, which is the order
-			//! those overrides were written for.
+			//! A form overriding OnCreate() without super never reaches the legacy OnInit(), so
+			//! third-party `override void OnInit()` (ZenCOT, ...) would silently stop running.
+			//! Run it here, after the form's own widgets exist.
 			if ( !m_LegacyInitRan )
 				OnInit();
 
@@ -409,30 +358,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		}
 	}
 
-	/**
-	 * @brief Called once when the form is created.
-	 *
-	 * Recommended structure for subclass overrides:
-	 *
-	 *   override void OnInit()
-	 *   {
-	 *       // 1. Create widgets (UIActionManager calls, FindAnyWidget, etc.)
-	 *       InitWidgets();          // optional helper(s) - split by panel if large
-	 *
-	 *       // 2. Bind permissions to widgets (after widgets exist).
-	 *       //    BindPermission() calls here; evaluated now and on every
-	 *       //    subsequent OnClientPermissionsUpdated().
-	 *       //    Only needed if you override OnClientPermissionsUpdated() with
-	 *       //    bindings NOT covered by InitWidgets().
-	 *
-	 *       // 3. Perform any one-time data fetches / state initialisation.
-	 *   }
-	 *
-	 * Do NOT call super.OnInit() - the base implementation is intentionally empty.
-	 *
-	 * NOTE: OnClientPermissionsUpdated() is called by Init() immediately after
-	 * OnInit(), so widgets must exist before OnInit() returns.
-	 */
+	//! Called once when the form is created: create widgets, BindPermission() (re-evaluated on
+	//! every OnClientPermissionsUpdated()), then one-time data fetches. Do NOT call super.OnInit()
+	//! (intentionally empty). Init() calls OnClientPermissionsUpdated() right after, so widgets
+	//! must exist before OnInit() returns.
 	void OnInit()
 	{
 	}
@@ -610,16 +539,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		BindPermission( panel, permissionKey );
 	}
 
-	//! Evaluate a control against a permission ONCE, without tracking it.
-	//!
-	//! BindPermission() is the normal choice: it evaluates now and keeps the
-	//! control in step on every permission change. Use this only for controls
-	//! that are rebuilt on every refresh (a row list) and so must not sit in the
-	//! binding map, or for a third-party form that re-applies its own controls
-	//! from an OnClientPermissionsUpdated() override - which is exactly what
-	//! DayZ-Expansion's PersonalStorage, AI and Hardline modules do, so this
-	//! name stays. Takes the 3_Game base type because JMFormBase lives in
-	//! 4_World and cannot see UIActionBase.
+	//! Evaluate a control against a permission ONCE, without tracking it. Prefer BindPermission();
+	//! use this only for controls rebuilt on every refresh, or by third-party forms (Expansion
+	//! PersonalStorage/AI/Hardline call it, so the name stays). Takes the 3_Game base type
+	//! because 4_World cannot see UIActionBase.
 	void UpdatePermission( COT_ScriptedWidgetEventHandler control, string permission )
 	{
 		if ( !control )
@@ -722,11 +645,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 			controller.SetFocused( true );
 	}
 
-	// -- Tab lifecycle hooks -----------------------------------------------------
-	//  Same grammar as the form's own OnCreate / OnShow / OnHide / OnResize /
-	//  OnDestruct, with the tab index added. Each forwards to the JMFormTab
-	//  registered for the index (if any), so a form with tab classes needs no
-	//  per-tab switch; a form without them overrides these and switches on `tab`.
+	// -- Tab lifecycle hooks: the form's own OnCreate / OnShow / ... plus the tab index.
+	//  Each forwards to the JMFormTab registered for the index (if any); a form
+	//  without tab classes overrides these and switches on `tab`.
 
 	//! First time the tab is selected: build its widgets into `panel`.
 	protected void OnTabCreate( int tab, Widget panel )
@@ -849,15 +770,8 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	//! True the FIRST time a tab index is asked about, false every time after.
 	//! Prefer EnsureTabCreated(), which calls this and then OnTabCreate(); use this
-	//! directly only for the older per-form BuildTabIfNeeded() shape:
-	//!
-	//!     private void BuildTabIfNeeded( int tabIdx )
-	//!     {
-	//!         if ( !ShouldBuildTab( tabIdx ) )
-	//!             return;
-	//!
-	//!         switch ( tabIdx ) { ... }
-	//!     }
+	//! directly only for the older per-form BuildTabIfNeeded() shape
+	//! ( if ( !ShouldBuildTab( tabIdx ) ) return; switch ( tabIdx ) { ... } ).
 	bool ShouldBuildTab( int tabIdx )
 	{
 		if ( !m_TabBuilt )
@@ -874,17 +788,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		return true;
 	}
 
-	//! Append a tab and return its id (-1 if the form has no strip / content host). The id is
-	//! assigned by the strip - keep it, never write a number down: another mod may append tabs to
-	//! the same form, and removing a tab never renumbers the others.
-	//!
-	//! The tab is built lazily, the first time it is shown, by whichever of these is given:
-	//!  - `buildCallbackFn`, called as `void Fn( Widget parentPanel )` on `instance` (default: the
-	//!    form itself) - build the tab's widgets into that panel;
-	//!  - `controller`, a JMFormTab: its OnCreate( panel ) / OnFocus / OnUpdate / ... are driven.
-	//!
-	//!     AddTab( "Extras", JMConstants.Lucide( "star" ), "BuildExtrasTab" );
-	//!     AddTab( "Extras", JMConstants.Lucide( "star" ), "", null, new MyTab() );
+	//! Append a tab and return its id (-1 if no strip / content host). Keep the id, never hardcode
+	//! a number: other mods may append tabs and removal never renumbers. Built lazily on first show
+	//! by `buildCallbackFn` (void Fn( Widget parentPanel ) on `instance`, default the form) or by
+	//! `controller`, a JMFormTab. E.g. AddTab( "Extras", JMConstants.Lucide( "star" ), "BuildExtrasTab" );
 	int AddTab( string label, string icon, string buildCallbackFn = "", Class instance = null, JMFormTab controller = null )
 	{
 		COT_ScriptedWidgetEventHandler strip = GetTabStrip();
@@ -1012,19 +919,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		g_Game.GameScript.CallFunctionParams( entry.m_Instance, entry.m_FuncName, null, new Param1<Widget>( strip.COT_TabContent( tabIdx ) ) );
 	}
 
-	//! Everything a tab-strip change handler has to do, in one call: dismiss
-	//! popups, unfocus the tab being left, create the new one on first visit,
-	//! focus it and update it. The strip's own callback still lives in the form
-	//! (its signature needs 5_Mission types), so the whole handler is:
-	//!
-	//!     void OnChange_Tab( UIEvent eid, UIActionBase action )
-	//!     {
-	//!         if ( eid == UIEvent.CHANGE )
-	//!             HandleTabChange();
-	//!     }
-	//!
-	//! Order: OnTabUnfocus( previous ), OnTabCreate( new, first time only ),
-	//! OnTabFocus( new ), OnTabUpdate( new ).
+	//! Everything a tab-strip change handler has to do: dismiss popups, then OnTabUnfocus( previous ),
+	//! OnTabCreate( new, first time only ), OnTabFocus( new ), OnTabUpdate( new ). The strip's own
+	//! callback stays in the form (5_Mission types): call this when eid == UIEvent.CHANGE.
 	void HandleTabChange()
 	{
 		CloseAllOverlays();
@@ -1045,30 +942,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		OnTabUpdate( sel );
 	}
 
-	// ---------------------------------------------------------------------------
-	//  Geometry pinning
-	// ---------------------------------------------------------------------------
-
-	//! Pin a fixed-height strip above a content pane that takes the remainder.
-	//! Used for tab strips and for filter/toolbar headers alike, which is why it
-	//! takes its widgets as parameters rather than reading the members.
-	//!
-	//! `contentHeight` is the form content height in SCREEN PIXELS, as handed to
-	//! OnResize by the window. `stripHeight` and `bandHeight` are authored pixels
-	//! and are scaled here (see JMUILayout.Px), so the two kinds are not to be
-	//! mixed by the caller. Do not try to derive `contentHeight` from the panel itself: a
-	//! panel declared with hexactsize/vexactsize 0 returns its FRACTION of the
-	//! parent from GetSize(), and feeding those into an exact-size SetSize
-	//! collapses the strip to sub-pixel width and gives the content a negative
-	//! height - which renders as an empty panel.
-	//!
-	//! Only the vertical axis is pinned. Width stays fractional at 1, so both
-	//! frames keep filling their parent on their own and there is no second
-	//! unit to get wrong.
-	//!
-	//! A tab strip inside `strip` that does not fit on one row wraps onto more, and the strip is
-	//! pinned taller by the rows it gained (see FitTabStrips), so the content moves down instead of
-	//! being overlapped. `stripHeight` is the single-row height.
+	//! Pin a fixed-height strip above a content pane (vertical axis only). `contentHeight` is in
+	//! SCREEN PIXELS as given to OnResize; `stripHeight`/`bandHeight` are authored pixels, scaled
+	//! here. Never derive contentHeight from the panel: GetSize() of a 0-exact-size panel returns
+	//! a FRACTION and collapses the content. A wrapped tab strip is pinned taller (FitTabStrips).
 	protected void PinStripGeometry( Widget strip, Widget content, float contentHeight, int stripHeight, Widget band = null, float bandHeight = 0 )
 	{
 		if ( !strip || !content )
@@ -1271,15 +1148,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		return CreateConfirmation_Three( type, title, message, callBackOneName, "", callBackTwoName, "", callBackThreeName, "" );
 	}
 
-	// -------------------------------------------------------------------------
-	//  Standard dialogs. The CreateConfirmation_* family above is the raw form
-	//  (button titles and callbacks in a fixed, easy-to-misorder argument list);
-	//  nearly every caller wants one of these three shapes, so use these.
-	//
-	//  The callback names a method ON THIS FORM taking ( JMConfirmation confirmation = NULL ),
-	//  the same as before - read the edit box value with confirmation.GetEditBoxValue().
+	//  Standard dialogs: prefer these over the raw CreateConfirmation_* family above.
+	//  The callback names a method ON THIS FORM taking ( JMConfirmation confirmation = NULL );
+	//  read the edit box value with confirmation.GetEditBoxValue().
 	//  Labels default to the localized Confirm / Cancel / OK.
-	// -------------------------------------------------------------------------
 
 	//! Cancel / Confirm. `confirmCallback` runs only if the admin confirms.
 	JMConfirmation ConfirmAction( string title, string message, string confirmCallback, string confirmLabel = "", string cancelLabel = "" )

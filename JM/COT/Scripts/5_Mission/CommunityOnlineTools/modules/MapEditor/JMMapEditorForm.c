@@ -1,17 +1,7 @@
-// =============================================================================
-//  JMMapEditorForm.c
-//
-//  In-game map editor. UI shell with:
-//    - Top toolbar: mode (Select/Move/Rotate/Scale/Spawn) + Save/Load/Undo/Redo + Refresh
-//    - Snap toggles: Terrain / Grid / Surface
-//    - Left sidebar: search + asset browser (built from JMMapEditorCatalog)
-//    - Right panel: list of placed objects (server-driven)
-//
-//  This file is intentionally minimal and written from scratch. Earlier
-//  versions had accumulated structural damage from incremental edits. The
-//  goal here is a known-good starting point; 3D gizmos / freecam / drag
-//  hooks are added in follow-up patches after this base compiles.
-// =============================================================================
+// JMMapEditorForm.c - in-game map editor UI shell: top toolbar (mode, Save/Load/Undo/Redo,
+// Refresh), snap toggles (Terrain/Grid/Surface), left asset browser (JMMapEditorCatalog),
+// right placed-object list (server-driven). Intentionally minimal, written from scratch;
+// 3D gizmos / freecam / drag hooks come in follow-up patches.
 
 // Per-render state. Class-scope static const is the pattern that worked in
 // JMVehiclesModule (file-scope const + auto-import into class).
@@ -104,11 +94,9 @@ class JMMapEditorForm : JMFormBase
 	protected bool    m_UndoKeyWasDown;
 	protected bool    m_RedoKeyWasDown;
 
-	//! Set whenever this form opens ITS OWN confirmation dialog (Delete /
-	//! Clear All). The dialog widget is one shared, reused instance per
-	//! window rather than a fresh one per call, so a hotkey firing while it
-	//! is still up would race whatever the user is mid-click on - hence the
-	//! guard in HandleKeyboardShortcuts.
+	//! Set whenever this form opens ITS OWN confirmation dialog (Delete / Clear All). The
+	//! dialog widget is one shared, reused instance per window, so a hotkey firing while it is
+	//! up would race the user's click - hence the guard in HandleKeyboardShortcuts.
 	protected JMConfirmation m_ActiveConfirmation;
 	protected const int  TICK_HANDLE = 0;
 	protected const int  TICK_PERIOD_MS = 33;  // ~30 fps UI tick
@@ -316,11 +304,9 @@ class JMMapEditorForm : JMFormBase
 		UIActionManager.CreateText( help, "#STR_COT_MAPEDITOR_HOW_TO_USE", "#STR_COT_MAPEDITOR_1_OPEN_THE_FREECAM_CAMERA_MODULE" );
 
 		// ---- Permissions ----
-		//! Mirrors exactly what JMMapEditorModule's own RPC handlers enforce, so
-		//! a control is only offered when the matching server call would be
-		//! accepted. The module is already behind Admin.MapEditor.View via
-		//! HasAccess(), so read-only controls (Refresh, Copy, the snap toggles)
-		//! need nothing further.
+		//! Mirrors what JMMapEditorModule's RPC handlers enforce, so a control is only offered when
+		//! the server call would be accepted. The module is already behind Admin.MapEditor.View via
+		//! HasAccess(), so read-only controls (Refresh, Copy, snap toggles) need nothing further.
 		BindPermission( m_ApplyTransform, JMConstants.PERM_MAPEDITOR_TRANSFORM );
 		BindPermission( m_BulkMove,       JMConstants.PERM_MAPEDITOR_TRANSFORM );
 		BindPermission( m_BulkRotate,     JMConstants.PERM_MAPEDITOR_TRANSFORM );
@@ -372,19 +358,10 @@ class JMMapEditorForm : JMFormBase
 		super.OnHide();
 	}
 
-	// ========================================================================
-	//  Per-frame tick (called via CallLater from OnShow)
-	//
-	//  This is the 3D-only interaction surface: the user's cursor in 3D
-	//  world space drives everything.  Per-frame we:
-	//    1. Compute the cursor's world position (Pick3D)
-	//    2. Drive gizmo drag (when active) and update server-side transform
-	//    3. Render the gizmo + selection wireframe
-	//    4. Auto-pick: if a placed object is under the cursor and the
-	//       user is in SELECT mode, select it on LMB up
-	//    5. Click-to-place: in SPAWN mode, drop a pending asset at the
-	//       cursor's world position on LMB up
-	// ========================================================================
+	// Per-frame tick (called via CallLater from OnShow): the 3D-only interaction surface.
+	// Each frame: Pick3D cursor world position; drive gizmo drag and update the server
+	// transform; render gizmo + selection wireframe; in SELECT mode select the object under
+	// the cursor on LMB up; in SPAWN mode drop the pending asset at the cursor on LMB up.
 
 	// Static dispatcher: the per-class CallLater form only resolves
 	// method names that are static class members, so the call queue
@@ -537,12 +514,10 @@ class JMMapEditorForm : JMFormBase
 			m_DragAxis = -1;
 	}
 
-	// Delete / Undo / Redo hotkeys. Skipped while the user is typing in one of
-	// this form's own text fields (position / yaw / asset search), the same
-	// EditBoxWidget check CF_InputBindings uses to gate its own global input,
-	// and skipped while this form's own confirmation dialog is up so a
-	// hotkey can never race whatever the user is mid-click on.
-	// Edge-detected against last tick so a held key fires once, not 30x/sec.
+	// Delete / Undo / Redo hotkeys. Skipped while typing in this form's own text fields (same
+	// EditBoxWidget check CF_InputBindings uses) and while its confirmation dialog is up, so a
+	// hotkey never races the user's click. Edge-detected against last tick so a held key
+	// fires once, not 30x/sec.
 	void HandleKeyboardShortcuts()
 	{
 		Widget focus = GetFocus();

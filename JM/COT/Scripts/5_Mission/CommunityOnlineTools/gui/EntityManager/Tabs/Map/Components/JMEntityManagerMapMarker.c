@@ -1,12 +1,6 @@
-// =============================================================================
-//  JMEntityManagerMapMarker
-//
-//  Generic map marker. Identical behaviour to JMVehiclesMapMarker but takes
-//  a JMEntityMetaData instead of a vehicle-specific struct.
-//
-//  Positioning is driven by the owning form's consolidated 20 Hz tick via
-//  UpdatePosition(). No per-marker Timer.
-// =============================================================================
+//  JMEntityManagerMapMarker: generic map marker (like JMVehiclesMapMarker but takes a
+//  JMEntityMetaData). Positioned by the owning form's 20 Hz tick via UpdatePosition();
+//  no per-marker Timer.
 class JMEntityManagerMapMarker: COT_ScriptedWidgetEventHandler
 {
 	protected Widget       m_Root;

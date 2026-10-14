@@ -1,17 +1,7 @@
-// =============================================================================
-//  UIActionDropdown
-//
-//  A dropdown that supports entries with an optional icon + label text.
-//  The selected entry is shown in the collapsed header.
-//  Fires UIEvent.CHANGE when the selection changes.
-//
-//  Usage:
-//      m_Drop = UIActionManager.CreateDropdown( parent, "Status", this, "OnChange_Status" );
-//      m_Drop.AddEntry( "Healthy",   JMConstants.ICON_HEALTH_NORMAL,  0xFF44FF44 );
-//      m_Drop.AddEntry( "Wounded",   JMConstants.ICON_HEALTH_DECREASE, 0xFFFF8800 );
-//      m_Drop.AddEntry( "Critical",  JMConstants.ICON_HEALTH_DECREASE, 0xFFFF3333 );
-//      m_Drop.SetSelection( 0 );
-// =============================================================================
+//  UIActionDropdown - entries with optional icon + label; the selection shows in
+//  the collapsed header. Fires UIEvent.CHANGE on selection change.
+//  CreateDropdown( parent, "Status", this, "OnChange_Status" ), then
+//  AddEntry( "Healthy", JMConstants.ICON_HEALTH_NORMAL, 0xFF44FF44 ).
 
 class JMDropdownEntry
 {
@@ -56,33 +46,22 @@ class UIActionDropdown: UIActionBase
 	static const int COLOR_ROW_HOVER  = JMTheme.ACCENT_WASH;
 	static const int COLOR_ROW_SELECT = JMTheme.SELECTED_FILL;
 
-	// Where the label glyphs start, in layout pixels. Both the field's
-	// action_selected_icon and the row's row_icon sit at x=4 and are 16 wide, so
-	// their right edge is at 20. TEXT_OFFSET_ICON must clear that edge by
-	// TEXT_ICON_GAP; the original value of 28 left only 8px and the icon visibly
-	// ran into the text.
-	//
-	// These override whatever "text offset" the .layout declares, so change them
-	// here - editing the layout alone has no effect at runtime.
+	// Where label glyphs start (layout px). action_selected_icon and row_icon sit at
+	// x=4, 16 wide (right edge 20); TEXT_OFFSET_ICON must clear it by TEXT_ICON_GAP.
+	// These override the .layout "text offset": change them here, not in the layout.
 	static const int ICON_RIGHT_EDGE   = 20;   // 4 (position) + 16 (size)
 	static const int TEXT_ICON_GAP     = 20;
 	static const int TEXT_OFFSET_ICON  = ICON_RIGHT_EDGE + TEXT_ICON_GAP;   // 40
 	static const int TEXT_OFFSET_PLAIN = 8;    // no icon: just a left padding
 
-	//! Pixels per wheel notch. A direct GetVScrollPos/VScrollToPos move rather
-	//! than VScrollStep: VScrollStep's own step size is engine-controlled and
-	//! landed several rows at once per notch, which read as the list jumping
-	//! rather than scrolling; this also sidesteps VScrollStep's step direction
-	//! disagreeing with `wheel`'s own sign, which is what had the wheel scroll
-	//! backwards from what it showed - scrolling up moved the list down.
+	//! Pixels per wheel notch. Uses GetVScrollPos/VScrollToPos, not VScrollStep: its
+	//! engine-controlled step jumped several rows and its direction disagreed with
+	//! the sign of `wheel` (scrolling up moved the list down).
 	static const float WHEEL_PIXEL_STEP = 40.0;
 
-	//! The open list is parented to the ANCHOR, not to this control, so that it
-	//! floats above whatever the host is drawing instead of being clipped by
-	//! it. That also means unlinking the control does not take the panel with
-	//! it - a dropdown built inside a section that gets rebuilt would leave one
-	//! orphan panel behind per rebuild, still handled by a dead script. Take it
-	//! down here.
+	//! The open list is parented to the ANCHOR so it is not clipped by the host, so
+	//! unlinking the control leaves an orphan panel (handled by a dead script) per
+	//! rebuild. Take it down here.
 	void ~UIActionDropdown()
 	{
 		if ( !g_Game )
@@ -241,14 +220,9 @@ class UIActionDropdown: UIActionBase
 		}
 	}
 
-	//! Take the open list down with the control.
-	//!
-	//! The list panel is parented to the ANCHOR, not to this control, so hiding
-	//! the control does not hide it. Neither does the deferred hide in Update()
-	//! - a hidden action is off the update queue, so the frame that would have
-	//! closed the list never arrives and the panel is left floating over
-	//! whatever the host put in this control's place. Close it here, without
-	//! the animation, because there is nothing left on screen to animate from.
+	//! Take the open list down with the control: it is parented to the ANCHOR, so
+	//! hiding the control does not hide it and the deferred hide in Update() never
+	//! runs (hidden actions leave the update queue). Closed here, no animation.
 	override void OnHide()
 	{
 		super.OnHide();
@@ -311,14 +285,9 @@ class UIActionDropdown: UIActionBase
 		return m_Open;
 	}
 
-	//! Close the popup from outside the control.
-	//!
-	//! The list panel is parented to the anchor passed to InitList(), which for
-	//! every current caller is the window root rather than the control's own
-	//! parent. Hiding the container the dropdown sits in therefore does not hide
-	//! the open list - a tab switch would leave it floating over the new tab. A
-	//! host that hides its content has to close the dropdown explicitly, and
-	//! SetOpen is private, so this is the way in.
+	//! Close the popup from outside. The list hangs off the InitList() anchor (the
+	//! window root), so hiding the container leaves it floating (e.g. over a new
+	//! tab). Hosts that hide content must call this; SetOpen is private.
 	override void Close()
 	{
 		SetOpen( false );
@@ -540,14 +509,9 @@ class UIActionDropdown: UIActionBase
 		}
 	}
 
-	//! The whole control opens the list, not just the 24px chevron.
-	//!
-	//! On mouse-down rather than through OnClick: action_field is a PanelWidget
-	//! and action_label a TextWidget, and neither raises a click at all - only
-	//! the chevron, which is the one ButtonWidget here, ever did. Handling the
-	//! press means every pixel of the row answers, and it is why OnClick no
-	//! longer toggles: doing both would open on the way down and shut on the
-	//! way up.
+	//! The whole control opens the list, not just the chevron. Handled on mouse-down
+	//! because action_field (Panel) and action_label (Text) raise no click, only the
+	//! chevron ButtonWidget does; OnClick must not also toggle or it would reopen/shut.
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{
 		if ( button != MouseState.LEFT || !IsHeaderWidget( w ) )

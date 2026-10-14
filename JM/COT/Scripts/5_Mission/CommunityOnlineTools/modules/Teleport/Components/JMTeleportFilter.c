@@ -108,20 +108,10 @@ class JMTeleportFilter
 		m_FilterButton = button;
 	}
 
-	// =========================================================================
-	//  Category filter
-	//
-	//  A popup hung off the filter button, the way the object spawner and the
-	//  vehicle form do it: needed for one click per search and costing nothing
-	//  in between, where a selector parked on the form costs a band of the left
-	//  column forever.
-	//
-	//  One UIActionFilterMenu (see its class header), not a menu plus a
-	//  second UIActionContextMenu for the drill-down - two live overlay
-	//  menus sharing one anchor is what used to leave the drill-down dead
-	//  to clicks and hover until the whole COT window was closed and
-	//  reopened.
-	// =========================================================================
+	// ---- Category filter ----
+	//  A popup off the filter button (like the object spawner and vehicle form): one click
+	//  per search, no permanent form space. One UIActionFilterMenu, not a menu plus a second
+	//  UIActionContextMenu: two live overlay menus on one anchor left the drill-down dead to clicks.
 
 	void OnClick_CategoryFilter( UIEvent eid, UIActionBase action )
 	{

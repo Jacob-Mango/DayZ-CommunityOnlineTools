@@ -1,18 +1,7 @@
-// =============================================================================
-//  JMMapEditorModule.c
-//
-//  Map Editor module - places, transforms, and removes world objects via the
-//  in-game map widget. Server is authoritative; clients request the list
-//  and dispatch mutations as RPCs. Persisted across mission restarts.
-//
-//  RPCs (JMMapEditorModuleRPC @ 10900):
-//    RequestList     client -> server
-//    SpawnObject     client -> server
-//    TransformObject client -> server
-//    DeleteObject    client -> server
-//    ClearAll        client -> server
-//    List            server -> client
-// =============================================================================
+//  JMMapEditorModule.c - places, transforms and removes world objects via the in-game map widget.
+//  Server authoritative, persisted across restarts. RPCs (JMMapEditorModuleRPC @ 10900), all
+//  client -> server except List: RequestList, SpawnObject, TransformObject, DeleteObject, ClearAll,
+//  List (server -> client).
 
 class JMMapEditorModule : JMRenderableModuleBase
 {
@@ -96,11 +85,8 @@ class JMMapEditorModule : JMRenderableModuleBase
 		// driven by AttachFreecam / DetachFreecam below).
 	}
 
-	// -----------------------------------------------------------------------
-	//  Freecam attach / detach - auto-engaged when the module is opened
-	//  on the client, restored when closed. Player input is locked while
-	//  the editor is open so WASD goes to the freecam, not the player.
-	// -----------------------------------------------------------------------
+	//  Freecam attach / detach - auto-engaged when the module opens on the client, restored on
+	//  close. Player input is locked while open so WASD goes to the freecam, not the player.
 
 	void AttachFreecam()
 	{

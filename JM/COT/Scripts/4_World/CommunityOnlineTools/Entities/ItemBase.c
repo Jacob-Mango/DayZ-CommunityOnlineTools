@@ -3,12 +3,9 @@ modded class ItemBase
 	static bool s_COT_IsServerCheck_AllowClientOverride;
 
 	//! Last player to throw or place this item, for kill attribution.
-	//! ItemBase is the common ancestor of both ExplosivesBase and TrapBase, so
-	//! tagging here covers grenades, mines, claymores and bear traps in one
-	//! place. Only set for trackable items -- see COT_IsKillTrackable().
-	//!
-	//! Needed because the thrower is long gone (and the explosive itself is
-	//! deleted) by the time EEKilled fires on the victim.
+	//! ItemBase is the common ancestor of ExplosivesBase and TrapBase. Only set for
+	//! trackable items (COT_IsKillTrackable()). Needed because the thrower and the
+	//! explosive are gone by the time EEKilled fires on the victim.
 	protected PlayerBase m_COT_KillOwner;
 
 	//! Only explosives and traps can kill someone after leaving the owner's

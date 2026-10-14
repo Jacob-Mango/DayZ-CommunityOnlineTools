@@ -1,9 +1,5 @@
-// =============================================================================
-//  JMUIConstants.c
-//
-//  Central registry of UI constants shared across the COT window/form system.
-//  Use these instead of inline magic numbers so changes propagate everywhere.
-// =============================================================================
+//  JMUIConstants.c - central registry of UI constants shared across the COT
+//  window/form system. Use these instead of inline magic numbers.
 
 class JMUIColors
 {
@@ -18,10 +14,9 @@ class JMUIColors
 	static const float BG_FOCUSED_G   = 0.08;
 	static const float BG_FOCUSED_B   = 0.11;
 
-	//! Unfocused windows are meant to read as "behind" the one being worked in.
-	//! At 0.95 the drop was invisible - the tab strip and the empty parts of a
-	//! form sit directly on `background`, so that widget's alpha IS the window's
-	//! transparency, and it has to fall far enough to let the world through.
+	//! Unfocused windows must read as "behind". `background` alpha IS the window's
+	//! transparency (tab strip and form sit directly on it); 0.95 was invisible,
+	//! so it has to fall far enough to let the world through.
 	static const float BG_UNFOCUSED_A = 0.62;
 	static const float BG_UNFOCUSED_R = 0.042;
 	static const float BG_UNFOCUSED_G = 0.056;
@@ -52,13 +47,10 @@ class JMUILayout
 	//! Screen height the layout files' exact pixel values are authored against.
 	static const float REFERENCE_HEIGHT = 1080;
 
-	//! Screen pixels per authored pixel. The engine scales the exact values in a
-	//! layout file by this when it loads one, but SetSize / SetPos / GetSize /
-	//! GetPos on an exact-flag axis, GetScreenSize and the mouse all speak raw
-	//! screen pixels. So every pixel number written in SCRIPT (a button side, a
-	//! row height, a gap) is in authored pixels and has to go through Px() before
-	//! it is handed to a widget, or it comes out half size at 4K. Vanilla does the
-	//! same thing, see InventoryMenu.GetHeightMultiplied.
+	//! Screen pixels per authored pixel. Layout files are scaled by the engine, but
+	//! SetSize/SetPos/GetSize/GetPos (exact axes), GetScreenSize and the mouse use
+	//! raw screen pixels. Pixel numbers written in script are authored pixels and
+	//! must go through Px() or they come out half size at 4K (as vanilla does).
 	static float Scale()
 	{
 		float screenW, screenH;
@@ -86,16 +78,10 @@ class JMUILayout
 	protected static float s_KnownScreenW;
 	protected static float s_KnownScreenH;
 
-	//! True once per change of the game's resolution (or window size), however it
-	//! came about - the options menu, a window drag, alt-enter. Scale() already
-	//! reads the live screen size on every call, so anything that computes a
-	//! pixel value fresh is always right; this is for the things that CACHE one
-	//! (a window rect, the sidebar width) and have to be told to redo it.
-	//! `ratio` is newScale / oldScale: multiply a cached screen-pixel value by it.
-	//! Poll it from a per-frame update. The first call only records the size.
-	//! The state is global and a change is reported once, so there must be a
-	//! single poller: JMCOTSideBar, which forwards it to the window manager. A
-	//! second poller would silently take the change from the first.
+	//! True once per resolution/window size change. For things that CACHE a pixel
+	//! value (window rect, sidebar width); `ratio` is newScale / oldScale. The
+	//! first call only records the size. State is global and reported once, so
+	//! keep a single poller (JMCOTSideBar) or a second would steal the change.
 	static bool ConsumeResolutionChange( out float ratio )
 	{
 		float screenW, screenH;
@@ -152,23 +138,10 @@ class JMUILayout
 	//! Small refresh/action button width when paired with a search bar
 	static const float REFRESH_BTN_W      = 0.22;
 
-	// --- Workspace draw order -----------------------------------------------
-	//  Every COT screen widget is a direct child of the workspace, and so is the
-	//  in-game HUD. Siblings draw in sort order, and the layout files' `priority`
-	//  field is NOT that order - it only weights input routing. Left at the
-	//  default sort the HUD wins, which is why the stance/quickbar arrows drew on
-	//  top of the sidebar. These are set explicitly with SetSort().
-	//
-	//  Ordering rationale: the sidebar is the floor, a category flyout must clear
-	//  the sidebar it springs from, and a module window must clear both.
-	//
-	//  All three sit above 999 - DayZ-Expansion's map marker widget
-	//  (ExpansionMapMarker.SetSort(999)) is also a direct workspace child, and
-	//  used to draw over every one of these. Do NOT raise WINDOWS_CONTAINER's
-	//  own sort to clear it instead - that blanks any descendant MapWidget /
-	//  ItemPreviewWidget (see the comment in COTModule.c where the container is
-	//  created); these constants only ever get applied to individual window/
-	//  sidebar/flyout layoutRoots, never the container itself.
+	// Workspace draw order via SetSort() (layout `priority` only weights input):
+	// sidebar < flyout < window, all above 999 (Expansion map markers). Never raise
+	// WINDOWS_CONTAINER's own sort (blanks MapWidget/ItemPreviewWidget descendants,
+	// see COTModule.c); apply these to individual layoutRoots only.
 	static const int SORT_SIDEBAR = 1000;
 	static const int SORT_FLYOUT  = 10;
 	static const int SORT_WINDOW  = 20;
@@ -178,19 +151,10 @@ class JMUILayout
 	//! by a margin of 1.
 	static const int SORT_WINDOW_STEP = 10;
 
-	//! The earlier "200-299 narrow band, or the RTT pass produces nothing"
-	//! reading (2026-09-24) was measured through a Preview Lab slider that
-	//! had a bug of its own: it defaulted to SORT_WINDOW (1020) and silently
-	//! applied that to JMStatics.WINDOWS_CONTAINER on first use, even though
-	//! COTModule.c deliberately never raises that container (see its own
-	//! creation comment - a raised WINDOWS_CONTAINER blanks descendant RTT
-	//! widgets). Every "band" measurement was taken with the container
-	//! already wrongly at 1020, not at its real default of 0. With the lab
-	//! slider fixed to read the real starting value, sort 0 - the plain
-	//! engine default, no override at all - renders correctly. Left at 0
-	//! rather than removing the SetSort call sites entirely, so a future
-	//! finding that some other value is genuinely required is a one-line
-	//! change, not a rewrite.
+	//! Sort 0 (the engine default) renders RTT previews correctly. An earlier
+	//! "200-299 band" finding was a Preview Lab slider bug that raised
+	//! WINDOWS_CONTAINER (which blanks descendant RTT widgets, see COTModule.c).
+	//! Kept as a constant so another value stays a one-line change.
 	static const int SORT_PREVIEW = 0;
 
 	//! See SORT_PREVIEW's note above - the same false "narrow band" reading
@@ -198,11 +162,9 @@ class JMUILayout
 	static const int SORT_PREVIEW_OVERLAY = 0;
 }
 
-// =============================================================================
-//  JMUIStyle - visual style constants for form content.
-//  Use these in UIActionManager.CreatePanel / CreateSectionHeader calls so the
-//  whole mod's form chrome changes from one place.
-// =============================================================================
+//  JMUIStyle - visual style constants for form content. Use in
+//  UIActionManager.CreatePanel / CreateSectionHeader so form chrome changes
+//  from one place.
 class JMUIStyle
 {
 	//! Section divider line colors (pass to CreatePanel / CreateSectionHeader)
@@ -217,25 +179,10 @@ class JMUIStyle
 	static const float LABEL_WIDTH  = 0.30;
 }
 
-// =============================================================================
-//  JMUISurfaceStyle - one palette for every skinned surface in the mod.
-//
-//  Every control paints the same four layers: a fill, a 1px border frame with
-//  a bevel (one edge lit, the opposite sunk), an optional accent bar, and the
-//  label/icon tint. What changes between controls is the ROLE:
-//
-//    ROLE_BUTTON   raised   - lit top edge, sunk bottom. "Click me."
-//    ROLE_INPUT    recessed - sunk top edge, lit bottom, darker fill, accent
-//                             border while focused. "Type here."
-//    ROLE_ROW      flat     - transparent at rest, tinted on hover, accent
-//                             fill + bar when selected. List and table rows.
-//    ROLE_SURFACE  flat     - static panel background, no hover response.
-//    ROLE_HEADER   flat     - slightly lifted surface with an accent underline.
-//
-//  Variants (default / primary / danger / success / ghost) pick a base fill.
-//  Every other colour is derived from that base with Blend(), so a caller
-//  passing a custom SetColor( ARGB(...) ) gets the same treatment for free.
-// =============================================================================
+//  JMUISurfaceStyle - one palette for every skinned surface (fill, 1px bevel
+//  border, accent bar, label tint). ROLE picks behaviour (BUTTON raised, INPUT
+//  recessed, ROW tint, SURFACE static, HEADER lifted); variants pick the base fill
+//  and everything else derives from it via Blend().
 class JMUISurfaceStyle
 {
 	//! Roles - pass to UIActionSurfaceSkin.SetRole()
@@ -321,16 +268,10 @@ class JMUISurfaceStyle
 		return role == ROLE_BUTTON || role == ROLE_HEADER;
 	}
 
-	// -------------------------------------------------------------------------
-	//  Blend - linear interpolate every channel (alpha included) of two ARGB
-	//  colours. t = 0 returns color, t = 1 returns target.
-	//
-	//  @note the channel unpacks MUST land in int locals. Enforce resolves an
-	//  operator against the type of the assignment target, so
-	//  `float x = ( color >> 24 ) & 0xFF;` fails to compile with
-	//  "Unknown operator '>>'" - there is no float shift. Unpack as int, then
-	//  let the int -> float promotion happen inside the arithmetic.
-	// -------------------------------------------------------------------------
+	//  Blend - lerp every channel (alpha included) of two ARGB colours; t = 0 is
+	//  color, t = 1 is target. @note unpack channels into int locals: Enforce
+	//  resolves operators by the assignment target type, so a float local fails
+	//  with "Unknown operator '>>'".
 	static int Blend( int color, int target, float t )
 	{
 		int ca = ( color  >> 24 ) & 0xFF;

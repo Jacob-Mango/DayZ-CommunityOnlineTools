@@ -1,8 +1,5 @@
-// =============================================================================
-//  Server-side tracking for contaminated areas. Expansion's vanilla
-//  s_ContaminatedAreas list is client-only, so we keep our own array and
-//  push/pop ourselves on EEInit/EEDelete on every host.
-// =============================================================================
+//  Server-side contaminated area tracking: Expansion's s_ContaminatedAreas is
+//  client-only, so we keep our own array, updated on EEInit/EEDelete.
 
 #ifdef EXPANSIONMODMISSIONS
 

@@ -1,10 +1,7 @@
-//! "Map" tab of JMEntityManagerForm - the world map and one marker per entity
-//! the roster is showing. Back-reference to the owning form, same shape as
-//! JMPlayerRowWidget.Menu.
-//!
-//! The roster (and its filters) stay on the form; it decides WHICH entities are
-//! on screen and tells this tab to rebuild the matching markers. A marker click
-//! goes back through JMEntityManagerForm.SetEntityInfo.
+//! "Map" tab of JMEntityManagerForm - the world map and one marker per rostered
+//! entity. The roster and filters stay on the form, which decides WHICH entities
+//! show and tells this tab to rebuild markers; a marker click goes back through
+//! JMEntityManagerForm.SetEntityInfo.
 class JMEntityManagerFormTabMap: JMFormTab
 {
 	protected JMEntityManagerForm m_Form;

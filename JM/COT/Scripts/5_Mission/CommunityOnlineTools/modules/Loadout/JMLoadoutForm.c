@@ -100,12 +100,9 @@ class JMLoadoutForm: JMFormBase
 			//! to be destroyed.
 			UpdatePermission( delbttn, JMConstants.PERM_LOADOUTS_DELETE );
 
-			//! Spawn has no single permission - which one the server checks
-			//! depends on the spawn-mode dropdown at click time (Cursor,
-			//! Target or SelectedPlayers). Offer the button if any of the
-			//! three is held and let the server enforce the specific one,
-			//! rather than hiding a button the admin could legitimately use
-			//! after changing mode.
+			//! Spawn has no single permission: the server checks one by the spawn-mode dropdown at
+			//! click time (Cursor, Target, SelectedPlayers). Offer the button if any is held and
+			//! let the server enforce the specific one.
 			bool canSpawnAny = JMPermissions.Has( JMConstants.PERM_LOADOUTS_SPAWN_CURSOR );
 			if ( !canSpawnAny )
 				canSpawnAny = JMPermissions.Has( JMConstants.PERM_LOADOUTS_SPAWN_TARGET );

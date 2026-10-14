@@ -10,15 +10,10 @@ class JMWebhookTypeData : UIActionData
 	}
 }
 
-// =============================================================================
-//  One webhook group (name + URL + event type list)
-//
-//  The detail pane of JMWebhookForm. Only the webhook selected in the form's
-//  roster is built, as two cards:
-//
-//    Connection   [save] [delete]   name, URL, GUID filter, role filter
-//    Event Types  (enabled / total) add row, then one row per event type
-// =============================================================================
+//  One webhook group (name + URL + event type list) - the detail pane of
+//  JMWebhookForm; only the selected webhook is built, as two cards:
+//  Connection ([save] [delete], name, URL, GUID/role filters) and
+//  Event Types ((enabled / total), add row, one row per type).
 
 class JMWebhookSection : Managed
 {
@@ -244,11 +239,9 @@ class JMWebhookSection : Managed
 
 	protected void Build( JMWebhookConnectionGroup group, array< string > allTypes )
 	{
-		// ---- Connection card ------------------------------------------------
-		//! Save and delete live in the card's title bar rather than in a row of
-		//! their own under the fields. Delete is a confirm icon: it raises
-		//! CHANGE only once confirmed, which is what Action_RemoveWebhook waits
-		//! for - a plain image button raises CLICK and never got through.
+		// ---- Connection card: save and delete live in the title bar. Delete is a
+		//! confirm icon: it raises CHANGE only once confirmed, which is what
+		//! Action_RemoveWebhook waits for (a plain image button raises CLICK).
 		m_Card = UIActionManager.CreateCard( m_Parent, group.Name );
 
 		UIActionImageButton saveBtn = m_Card.AddSaveButton( m_Form, "Action_SaveWebhook", "#STR_COT_WEBHOOK_SAVE_CHANGES_TO_THIS_WEBHOOK" );
@@ -359,22 +352,10 @@ class JMWebhookSection : Managed
 		return list;
 	}
 
-	//! Refreshes everything server-derived (event types, the "add type"
-	//! dropdown, the card title) without touching m_NameEdit / m_URLEdit /
-	//! m_FilterGUIDEdit / m_FilterRoleEdit.
-	//!
-	//! Those four are plain text boxes the admin edits locally and commits
-	//! with the Save button - JMWebhookForm.OnSettingsUpdated() used to tear
-	//! down and rebuild every section from scratch on ANY webhook settings
-	//! change, so toggling one event type checkbox on webhook A wiped
-	//! whatever an admin had half-typed into webhook B's Name/URL fields (or
-	//! their own, if it hadn't been saved yet). Called instead of a full
-	//! rebuild whenever the section already exists for this group's name.
-	//!
-	//! The type tree itself is only rebuilt when the SET of types changed
-	//! (added or removed). A toggle flipped - the common case - is pushed into
-	//! the existing switches, so the rows are not torn down and recreated
-	//! under the cursor, which is what made the delete buttons flicker.
+	//! Refreshes server-derived state (types, "add type" dropdown, card title)
+	//! without touching the locally edited text boxes, so a full rebuild cannot
+	//! wipe half-typed text. The type tree is rebuilt only when the SET of types
+	//! changes; toggles are pushed into existing switches (no flicker).
 	void UpdateState( JMWebhookConnectionGroup group, array< string > allTypes )
 	{
 		m_Name = group.Name;

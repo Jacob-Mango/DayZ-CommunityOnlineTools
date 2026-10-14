@@ -1,16 +1,6 @@
-// =============================================================================
-//  UIActionToggle
-//
-//  Custom checkbox replacement. Two visual modes:
-//    - Square (default) - multi-choice style, rounded-corner box + checkmark
-//    - Round            - single-choice / radio style (ring + filled dot)
-//
-//  Unchecked: grey box / empty ring. Checked: the box fills with the accent
-//  colour and a white tick fades in, or the ring gains a coloured dot.
-//
-//  Fires UIEvent.CHANGE when the value changes.
-//  Fires UIEvent.CLICK on every click (before the state change).
-// =============================================================================
+//  UIActionToggle - custom checkbox: Square (default, multi-choice) or Round
+//  (radio-style ring + dot). Fires UIEvent.CHANGE on value change and
+//  UIEvent.CLICK on every click (before the state change).
 
 class UIActionToggle: UIActionBase
 {

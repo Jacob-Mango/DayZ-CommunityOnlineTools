@@ -1,16 +1,7 @@
-// =============================================================================
-//  JMLootScanItemDetail
-//
-//  Per-marker detail for one Item Scan result, built client-side from the
-//  parallel arrays RPC_SendItemScanResults sends (health/quantity/lifetime/
-//  attachments-per-entity) - the same "several primitive arrays, same
-//  index" shape AddDistributionMarkers already uses for usage types, chosen
-//  over a ref array<ref DTO> Param because this codebase has no precedent
-//  for serializing an array of custom classes over RPC and parallel
-//  primitive arrays are a proven pattern here.
-//
-//  Kept client-side only; never sent over RPC itself.
-// =============================================================================
+//  JMLootScanItemDetail - per-marker detail for one Item Scan result, built client-side from the
+//  parallel primitive arrays RPC_SendItemScanResults sends (same shape as AddDistributionMarkers;
+//  no precedent here for serializing arrays of custom classes over RPC).
+//  Client-side only; never sent over RPC itself.
 class JMLootScanItemDetail
 {
 	string m_ClassName;

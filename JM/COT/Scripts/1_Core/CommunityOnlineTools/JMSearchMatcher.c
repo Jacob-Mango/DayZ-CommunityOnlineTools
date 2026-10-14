@@ -1,21 +1,7 @@
 //! One search box's needle, prepared once, matched against many rows.
-//!
-//! Wraps COT_String's keyword search (all words must match, or any of them when
-//! the needle uses `|` / `OR`) so a list builder no longer carries the
-//! needle / keywords / requireAll / closestMatch quartet around:
-//!
-//!     JMSearchMatcher matcher = new JMSearchMatcher( m_SearchBox.GetText() );
-//!
-//!     foreach ( Row row: rows )
-//!     {
-//!         if ( !matcher.Matches( row.Name ) )
-//!             continue;
-//!         ...
-//!     }
-//!
-//!     m_SearchBox.SetTextPreview( matcher.GetClosestMatch() );
-//!
-//! Matching is case-insensitive; an empty needle matches everything.
+//! Wraps COT_String's keyword search (all words, or any when the needle uses `|` / `OR`).
+//! Case-insensitive; an empty needle matches everything.
+//! Use: matcher = new JMSearchMatcher( text ); if ( matcher.Matches( row.Name ) ) ...
 class JMSearchMatcher: Managed
 {
 	protected string m_Search;

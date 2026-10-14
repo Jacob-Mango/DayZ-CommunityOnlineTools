@@ -5,40 +5,21 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 	protected bool m_Loaded;
 	protected JMWebhookModule m_Webhook;
 
-	//! Below this gap between two accepted SetOpen() calls, a new request is
-	//! dropped instead of applied. Two independent input bindings reach this
-	//! method - ToggleMenu ("Toggle
-	//! Sidebar") and CloseCOT (vanilla UI-back) - and a real repro showed
-	//! SetOpen(true)/SetOpen(false) alternating multiple times with no gap
-	//! at all in the log between them (no unrelated engine/script lines
-	//! interleaved), each full cycle playing the sidebar's slide-open and
-	//! slide-closed animation back to back - the "open close open close"
-	//! flicker. Whatever combination of bindings/held keys produces that
-	//! burst, a plain minimum-interval debounce on the single chokepoint
-	//! both paths already go through stops it outright, and 250ms is far
-	//! below anything a deliberate toggle-close-toggle sequence would need.
+	//! Below this gap between accepted SetOpen() calls a request is dropped. ToggleMenu and CloseCOT
+	//! both reach it and could alternate SetOpen(true/false) with no gap, flickering the slide
+	//! animation. 250ms is far below any deliberate toggle sequence.
 	protected static const int MIN_TOGGLE_INTERVAL_MS = 250;
 	protected int m_LastOpenChangeMs;
 
 	//! Anything a client sends as a position, orientation or scale has to pass
-	//! through here before it reaches an entity.
-	//!
-	//! A permission says an admin may move things. It does not say the numbers
-	//! arrived intact - and a hand-written packet, or a mod sending garbage,
-	//! can carry NaN or an astronomical coordinate. Those do not fail loudly:
-	//! they put an entity somewhere physics cannot resolve, which desyncs or
-	//! crashes the clients that stream it in, not the sender.
-	//!
-	//! NaN needs its own test. Every comparison against NaN is false, so a
-	//! plain range check passes it - the value is neither below the floor nor
-	//! above the ceiling. Only "is it equal to itself" catches it.
+	//! through here before it reaches an entity. NaN or huge coordinates crash/desync
+	//! the clients streaming the entity, not the sender. NaN needs its own test: every
+	//! comparison with NaN is false, so a range check passes it; only self-equality catches it.
 	static const float COT_SANE_MAGNITUDE = 1000000000;
 
 	//! A position the map can actually hold.
-	//!
-	//! The margin is generous on purpose - offshore boats, objects staged past
-	//! the coastline and modded maps that spawn outside their own bounds are
-	//! all legitimate. This rejects the impossible, not the unusual.
+	//! Margin is generous on purpose (offshore boats, modded maps outside their bounds).
+	//! Rejects the impossible, not the unusual.
 	static const float COT_WORLD_MARGIN = 5000;
 	static const float COT_WORLD_FLOOR = -2000;
 	static const float COT_WORLD_CEILING = 20000;
@@ -723,12 +704,9 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 	}
 
 	//! Delete everything in an object's cargo, the object itself kept.
-	//!
-	//! The traversal walks nested containers too, so a backpack inside a tent
-	//! goes with the tent's contents rather than surviving inside it. The
-	//! entity the clear was asked for is skipped explicitly: an item sitting in
-	//! somebody else's cargo answers IsInCargo about ITSELF, and without this
-	//! "clear this crate" would delete the crate.
+	//! Walks nested containers too. The entity itself is skipped explicitly: an item in
+	//! somebody else's cargo answers IsInCargo about ITSELF, so "clear this crate"
+	//! would otherwise delete the crate.
 	static int ClearCargo(EntityAI entity)
 	{
 		if (!entity || !entity.GetInventory())

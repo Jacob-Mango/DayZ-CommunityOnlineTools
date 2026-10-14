@@ -1,10 +1,6 @@
-//! The built-in JMPlayerToggle implementations. Only what is specific to each
-//! toggle is here - how it is applied to the entity and how it reads back;
-//! wording, RPC and permission are supplied where the toggle is registered, in
-//! JMPlayerModule.RegisterToggles().
-//!
-//! Kept together in one file because each is a handful of lines. A toggle a mod
-//! adds should live in its own file.
+//! The built-in JMPlayerToggle implementations: only how each is applied and read back;
+//! wording, RPC and permission come from JMPlayerModule.RegisterToggles().
+//! Together here because each is tiny; a mod's own toggle should live in its own file.
 
 class JMPlayerToggleBloodyHands: JMPlayerToggle
 {

@@ -8,25 +8,17 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	protected Widget m_Disable;
 
 	//! Focus and hover chrome.
-	//!
-	//! 19 controls carry a fill/ring pair and 19 call sites detect focus, but
-	//! nothing painted a focus ring anywhere in the UI. Rather than hand-roll
-	//! that in every component, the ring is driven from here: a control
-	//! registers its ring widget(s) and the base class paints idle / hover /
-	//! focus on them. The resting colour is read back off the widget, so a
-	//! control keeps whatever its layout specified and only the states are new.
+	//! A control registers its ring widget(s) and the base class paints idle / hover /
+	//! focus on them. The resting colour is read back off the widget, so the layout's
+	//! colour is kept.
 	protected ref array<Widget> m_ChromeRing;
 	protected ref array<int>    m_ChromeRingRest;
 	protected bool m_ChromeHovered;
 	protected bool m_ChromeFocused;
 
-	//! A control whose current value is legal but has a consequence worth
-	//! stopping for. The rings pulse red and an "action_warn" icon, where the
-	//! layout provides one, fades in step with them and carries its own
-	//! tooltip explaining what the value will do.
-	//!
-	//! This is not an error state: the value is accepted and applied either
-	//! way, so nothing is disabled and nothing is blocked.
+	//! Value is legal but has a consequence worth stopping for: rings pulse red and an
+	//! optional "action_warn" icon fades in with a tooltip. Not an error state; the
+	//! value is still applied and nothing is disabled.
 	protected ImageWidget m_WarnIcon;
 	protected bool        m_Warning;
 	protected string      m_WarnTooltip;
@@ -281,14 +273,9 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	}
 
 	//! Mark this element as a flex child of a UIActionFlexRow.
-	//!   grow   - proportional share of the row's leftover space (after every
-	//!            child's basis floor is reserved). 0 = never grows past basis.
-	//!   minPx  - pixel floor; the element never renders narrower than this,
-	//!            even on a very narrow form. This is the "min size" guarantee
-	//!            the raw fractional SetWidth could not express.
-	//!   maxPx  - pixel ceiling; <= 0 means unbounded.
-	//! Elements that never call SetFlex are untouched by the flex pass, so
-	//! existing forms keep their current behaviour.
+	//! grow: share of leftover row space (0 = never grows past basis). minPx: pixel
+	//! floor, never narrower. maxPx: pixel ceiling, <= 0 unbounded.
+	//! Elements that never call SetFlex are untouched by the flex pass.
 	void SetFlex( float grow, float minPx, float maxPx = -1 )
 	{
 		m_HasFlex     = true;
@@ -322,13 +309,9 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		m_OnChangeFunc = funcname;
 	}
 
-	//! Single-event callbacks: the handler is `void Fn( UIActionBase action )`
-	//! and runs only for that event, so it never needs the
-	//! `if ( eid != UIEvent.CLICK ) return;` guard the general (UIEvent,
-	//! UIActionBase) callback requires. Both kinds can be set on one control.
-	//!
-	//!     UIActionManager.CreateButton( parent, "Go", null, "" ).SetOnClick( this, "OnGo" );
-	//!     void OnGo( UIActionBase action ) { ... }
+	//! Single-event callback: handler is `void Fn( UIActionBase action )`, runs only for
+	//! that event (no UIEvent guard needed). Both kinds can be set on one control.
+	//! e.g. CreateButton( parent, "Go", null, "" ).SetOnClick( this, "OnGo" );
 	void SetOnClick( Class instance, string funcname )
 	{
 		m_OnClickInstance = instance;
@@ -402,12 +385,8 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	}
 
 	//! Show or hide from a condition, without the caller writing the branch.
-	//!
-	//! NOT an overload of Show(). Enforce has no method overloading: a second
-	//! Show taking a bool made the two indistinguishable to the call resolver,
-	//! and resolving a call to it crashed the script compiler outright - a
-	//! native access violation while the Mission module was still compiling,
-	//! so no script error was ever printed and the server died before boot.
+	//! NOT an overload of Show(): Enforce has no overloading, and a second Show(bool)
+	//! crashed the script compiler natively (no script error, server died before boot).
 	//! Keep this name distinct from Show()/Hide().
 	void SetVisible( bool show )
 	{
@@ -418,10 +397,8 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	}
 
 	//! Flag or clear the warning.
-	//!
-	//! `tooltip` is what the icon says on hover - the CONSEQUENCE of the
-	//! current value, not a restatement of the value itself. Passing an empty
-	//! tooltip leaves the icon with nothing to explain, so pass one.
+	//! `tooltip` is the CONSEQUENCE of the current value, not a restatement of it;
+	//! pass a non-empty one.
 	void SetWarning( bool warning, string tooltip = "" )
 	{
 		if ( tooltip != "" )
@@ -694,17 +671,10 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		}
 	}
 
-	//! The name every caller uses on a control. Kept as its own declaration
-	//! rather than an override so JMFormBase is free to expose the unrelated
-	//! two-argument UpdatePermission( control, permission ) helper without the
-	//! two colliding on a shared ancestor - see COT_ScriptedWidgetEventHandler.
-	//!
-	//! Hidden rather than shown-disabled without the permission: a control
-	//! that only ever sits there grayed out teaches nothing about what the
-	//! tool can do, and every caller already re-runs this on permission
-	//! changes (OnClientPermissionsUpdated), so a later grant reveals it same
-	//! as before. SetVisible, not layoutRoot.Show(bool) - see SetVisible's own
-	//! comment for why a second Show(bool) is not safe to add here.
+	//! Own declaration, not an override, so JMFormBase can expose the unrelated
+	//! UpdatePermission( control, permission ) without colliding (COT_ScriptedWidgetEventHandler).
+	//! Hidden, not shown-disabled, without the permission; callers re-run this on
+	//! permission changes. SetVisible, not Show(bool) - see SetVisible.
 	void UpdatePermission( string permission )
 	{
 		bool allowed = JMPermissions.Has( permission );
@@ -740,12 +710,9 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 			m_Disable.Show( false );
 	}
 
-	//! Apply an exact pixel width while preserving the current height. Used by
-	//! UIActionFlexRow to lay out flex children deterministically. The value is
-	//! in the engine's exact-size space (same space as GetScreenSize / SetFixedSize),
-	//! so callers measuring a container with GetScreenSize can pass those pixels
-	//! directly - no unit mismatch, unlike mixing fractional-fill widgets (the
-	//! classic DPI trap). Height is left untouched (fractional or exact as-is).
+	//! Apply an exact pixel width, keeping the height. Used by UIActionFlexRow. The value
+	//! is in exact-size space (same as GetScreenSize / SetFixedSize), so measured pixels
+	//! can be passed directly.
 	void ApplyFlexWidthPx( float px )
 	{
 		float w;
@@ -783,9 +750,8 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	}
 
 	// ---------------------------------------------------------------------------
-	//  Universal Animation & Feedback Triggers
-	//  Enables calling action.AnimateFeedback() or action.AnimateSpin() on any
-	//  UIActionBase reference without casting to a specific button subclass.
+	//  Universal Animation & Feedback Triggers: AnimateFeedback() / AnimateSpin()
+	//  callable on any UIActionBase without casting.
 	// ---------------------------------------------------------------------------
 	void AnimateFeedback()
 	{

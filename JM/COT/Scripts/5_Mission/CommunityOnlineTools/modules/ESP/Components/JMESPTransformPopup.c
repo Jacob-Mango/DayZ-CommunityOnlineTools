@@ -1,17 +1,7 @@
-//! Floating "edit exact values" popup for a tracked object's Position and
-//! Orientation - reached from JMESPActionMenu's Transform page. The menu
-//! itself is a plain string-item list (UIActionContextMenu.AddItem) with no
-//! room for input fields, so free-form entry lives here instead, following
-//! the same floating-panel-over-a-stub-widget shape UIActionContextMenu uses
-//! (see that class's header comment) rather than trying to embed a text box
-//! in a menu row.
-//!
-//! Every small icon button here (close, refresh, copy, paste, apply) is
-//! built and hover-handled the same way JMWindowBase's own close/minimize/
-//! pin title-bar buttons are: a plain ButtonWidget with a translucent
-//! "*_hover" backdrop panel shown on OnMouseEnter and hidden on OnMouseLeave,
-//! not a UIActionImageButton - see JMWindowBase.OnMouseEnter/OnMouseLeave/
-//! GetTitleButtonHover for the pattern this mirrors.
+//! Floating "edit exact values" popup for a tracked object's Position/Orientation (JMESPActionMenu
+//! Transform page). The menu is a plain string list with no room for inputs, so this uses the same
+//! floating-panel-over-a-stub shape as UIActionContextMenu. Icon buttons are plain ButtonWidgets
+//! with a "*_hover" backdrop, like JMWindowBase title buttons (see GetTitleButtonHover).
 class JMESPTransformPopup: UIActionBase
 {
 	protected ref JMWindowBase m_Window;
@@ -19,10 +9,8 @@ class JMESPTransformPopup: UIActionBase
 	protected Widget m_Panel;
 	protected Widget m_Content;
 
-	//! Parallel arrays: button widget, its hover backdrop, which field-action
-	//! it fires. Index-matched rather than eight named field pairs so
-	//! OnMouseEnter/OnMouseLeave/OnClick can each be one small loop, the same
-	//! shape GetTitleButtonHover uses for the three title-bar buttons.
+	//! Parallel arrays: button widget, hover backdrop, field-action fired. Index-matched so
+	//! OnMouseEnter/OnMouseLeave/OnClick are each one small loop (like GetTitleButtonHover).
 	protected ref array<Widget> m_Buttons = new array<Widget>;
 	protected ref array<Widget> m_ButtonHovers = new array<Widget>;
 	protected ref array<int> m_ButtonActions = new array<int>;
@@ -38,14 +26,9 @@ class JMESPTransformPopup: UIActionBase
 	static const float FEEDBACK_HOLD = 0.6;
 	static const float SPIN_DURATION = 0.5;
 
-	//! Double click to arm a spin button (refresh) to fire itself each
-	//! update, double click again to stop - the same feature
-	//! UIActionImageButton's CreateRefreshButton gets, reimplemented here
-	//! because these are plain ButtonWidgets (see the class note on why).
-	//! Index-matched to m_Buttons like every other per-button array; only
-	//! ever true for the one spin (refresh) button, but kept general rather
-	//! than a single field so a second auto-repeatable action needs no new
-	//! plumbing.
+	//! Double click arms a spin (refresh) button to fire each update, again to stop; same as
+	//! UIActionImageButton's CreateRefreshButton, reimplemented for plain ButtonWidgets.
+	//! Index-matched to m_Buttons; kept an array so a second auto-repeat action needs no plumbing.
 	static const int   AUTO_REPEAT_DOUBLE_CLICK_MS = 400;
 	static const int   ICON_REST_COLOR             = 0xBFD4DBE6;
 	protected ref array<bool>  m_ButtonAutoRepeatEnabled = new array<bool>;
@@ -172,13 +155,9 @@ class JMESPTransformPopup: UIActionBase
 			if ( Class.CastTo( label, header.FindAnyWidget( "field_label" ) ) )
 				label.SetText( labelKey );
 
-			//! field_buttons is deliberately an exact structural twin of
-			//! popup_titlebar_buttons - same width-fits-its-buttons box,
-			//! same halign/-10 offset, sitting on a row that spans the
-			//! panel's full width just as the titlebar does. That is the
-			//! one arrangement in this popup known to land flush, so the
-			//! copy/paste/apply group lines up with the close button by
-			//! construction rather than by an offset tuned against it.
+			//! field_buttons is deliberately a structural twin of popup_titlebar_buttons (same box,
+			//! halign/-10 offset, full-width row), the one arrangement known to land flush, so it
+			//! lines up with the close button by construction rather than a tuned offset.
 			Widget buttons = header.FindAnyWidget( "field_buttons" );
 			if ( buttons )
 			{
@@ -302,12 +281,9 @@ class JMESPTransformPopup: UIActionBase
 		return true;
 	}
 
-	//! A second click on an auto-repeatable button inside the double-click
-	//! window arms or disarms it. The click above already fired the action
-	//! once, same as UIActionImageButton's own version of this.
-	//! Arming needs a double click; stopping does not - see
-	//! UIActionImageButton.OnClick's identical note, this button gets the
-	//! same behaviour manually since it is a plain ButtonWidget.
+	//! A second click inside the double-click window arms or disarms auto-repeat (the first click
+	//! already fired once). Arming needs a double click, stopping does not; mirrors
+	//! UIActionImageButton.OnClick for a plain ButtonWidget.
 	protected void ToggleButtonAutoRepeat( int idx )
 	{
 		if ( m_ButtonAutoRepeatActive[idx] )
@@ -499,14 +475,9 @@ class JMESPTransformPopup: UIActionBase
 		float screenW, screenH;
 		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
 
-		//! Height is measured, not derived from the titlebar height plus
-		//! whatever popup_root's Padding/Margin are currently set to. Those
-		//! two do not contribute the way a constant can track - Padding
-		//! spaces vertically, Margin horizontally - and every hand-tuned
-		//! constant here has eventually clipped the last row. The content's
-		//! own offset below the panel top covers all of it at once, and
-		//! both values move with the panel, so the difference stays stable
-		//! and cannot feed back into the flip-up placement below.
+		//! Height is measured, not derived from titlebar plus popup_root Padding/Margin (they do not
+		//! add up like a constant; hand-tuned values eventually clipped the last row). Content offset
+		//! below the panel top covers it all and cannot feed back into the flip-up placement.
 		float panelHeight = 150;
 		if ( m_Content )
 		{
@@ -544,12 +515,9 @@ class JMESPTransformPopup: UIActionBase
 		m_Window.SetPosition( px, py );
 	}
 
-	//! Reads the target's current Position/Orientation into the fields. Runs
-	//! when the popup opens and when the refresh button fires (a click, or the
-	//! auto-repeat armed by double clicking it) - never on a per-frame timer, so
-	//! the fields hold still while the object moves and only change when asked.
-	//! See UIActionEditableVector's class note on why SetValue no-ops while the
-	//! user is mid-edit; DoRefreshAll drops that flag first.
+	//! Reads the target's Position/Orientation into the fields on open and on refresh (click or
+	//! auto-repeat), never per frame, so fields hold still. SetValue no-ops mid-edit (see
+	//! UIActionEditableVector); DoRefreshAll drops that flag first.
 	protected void RefreshValues()
 	{
 		if ( !m_Target )

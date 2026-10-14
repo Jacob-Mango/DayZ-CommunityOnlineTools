@@ -38,13 +38,10 @@ class JMWeatherModule: JMRenderableModuleBase
 	//! Where Input_CyclePreset has got to in the state list.
 	protected int m_CycleIndex = -1;
 
-	//! Sandstorm (SandstormController.IsActive()) and, on Namalsk, EVR storm
-	//! state are server-only - neither replicates to clients the way the
-	//! vanilla WeatherPhenomenon forecasts (fog/rain/overcast/etc) do, so the
-	//! Overview tab's live readout - which reads everything else straight off
-	//! the client's own g_Game.GetWeather() - has no accurate client-side
-	//! source for these two. Same request/response shape as Load() above:
-	//! one RPC id, client sends empty, server answers with the two flags.
+	//! Sandstorm (SandstormController.IsActive()) and Namalsk EVR storm state are server-only
+	//! and do not replicate like vanilla WeatherPhenomenon forecasts, so the Overview tab has
+	//! no client-side source for them. Same request/response shape as Load() above: client
+	//! sends empty, server answers with the two flags.
 	bool m_LastSandstormActive;
 	bool m_LastEVRStormActive;
 
@@ -491,14 +488,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		SendDynamicControl( control );
 	}
 
-	// -------------------------------------------------------------------------
-	//  Payloads
-	//
-	//  Every setter above ends in Submit(). A JMWeatherBase names its own RPC,
-	//  permission and webhook line (see JMWeatherPreset.c), so adding a payload is
-	//  the class itself plus one case in ReadPayload() - there is no Send / Exec /
-	//  RPC trio per phenomenon to write.
-	// -------------------------------------------------------------------------
+	// ---- Payloads ----
+	//  Every setter above ends in Submit(). A JMWeatherBase names its own RPC, permission and
+	//  webhook line (JMWeatherPreset.c), so a new payload is the class plus one case in
+	//  ReadPayload() - no Send / Exec / RPC trio per phenomenon.
 
 	protected void SubmitPhenomenon( JMWeatherPhenomenon payload, float forecast, float time, float minDuration, float forecastHi = 0 )
 	{
@@ -515,12 +508,9 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		if ( g_Game.IsServer() )
 		{
-			//! A listen-server host calling this directly (server console, or the
-			//! host's own admin UI) has no RPC round trip to piggyback the client
-			//! push on - without this, already-connected clients only pick up a
-			//! pushed payload (the date) once the engine's own slow native
-			//! replication catches up, same as the bug RPC_Payload's push exists
-			//! to avoid.
+			//! A listen-server host calling this directly has no RPC round trip to piggyback the
+			//! client push on; without this, connected clients only get a pushed payload (the
+			//! date) after the engine's slow native replication catches up.
 			if ( payload.IsPushedToClients() && g_Game.IsMultiplayer() )
 				Send_Payload( payload );
 
@@ -596,12 +586,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !payload )
 			return;
 
-		//! A NULL senderRPC here isn't a missing-identity request - it's the server's own
-		//! instant-sync push (see below) arriving on each client, which the engine delivers
-		//! with no player attached. Apply it directly instead of falling into the permission
-		//! gate below, which is for client -> server requests only. Without this branch the
-		//! push was a silent no-op and clients only ever saw the new date once the engine's
-		//! own slow native calendar replication eventually caught up.
+		//! A NULL senderRPC here is not a missing identity: it is the server's own instant-sync
+		//! push arriving on a client, delivered with no player attached. Apply it directly rather
+		//! than hitting the permission gate below (client -> server only), or the push was a
+		//! silent no-op until native calendar replication caught up.
 		if ( !senderRPC )
 		{
 			if ( payload.IsPushedToClients() && !g_Game.IsServer() )
@@ -914,13 +902,9 @@ class JMWeatherModule: JMRenderableModuleBase
 		m_MissionWeather = weather.GetMissionWeather();
 	}
 
-	//! What the weather starts as when the settings load.
-	//!
-	//! With the dynamic machine on it carries on from the position it was saved
-	//! at - same state, same phase, same time left on it - or begins from a
-	//! random state when there is nothing valid to carry on from. With it off,
-	//! InitialPreset keeps its original "apply this on startup" meaning for
-	//! anyone still setting it in Weather.json.
+	//! What the weather starts as when the settings load. With the dynamic machine on it
+	//! carries on from its saved state, phase and time left (or a random state if none is
+	//! valid). With it off, InitialPreset keeps its "apply on startup" meaning for Weather.json.
 	protected void SeedWeather()
 	{
 		if ( !settings )

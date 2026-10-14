@@ -1,11 +1,7 @@
-//! "Precipitation" tab of JMWeatherForm - Rain and Snow cards. Back-reference
-//! to the owning form, same shape as JMPlayerRowWidget.Menu. See
-//! JMWeatherFormTabSky.c's header for why Apply/dirty-tracking/preview
-//! mechanics stay on the form.
-//!
-//! The amount is a JMWeatherRangeControl (one value, or a span the server rolls
-//! between). The thresholds are already a min/max pair of their own - "rain is
-//! possible between these overcast levels" - so they stay a plain range.
+//! "Precipitation" tab of JMWeatherForm - Rain and Snow cards. See JMWeatherFormTabSky.c's
+//! header for why Apply/dirty-tracking/preview stay on the form. The amount is a
+//! JMWeatherRangeControl; the thresholds are already a min/max pair ("rain is possible
+//! between these overcast levels"), so they stay a plain range.
 class JMWeatherFormTabPrecipitation: JMFormTab
 {
 	protected JMWeatherForm m_Form;

@@ -1,21 +1,7 @@
-// =============================================================================
-//  JMRoleManagerForm.c
-//
-//  Role management + player role assignment view.
-//  Archetype A: Split-Pane (Left Roster + Right Detail Editor).
-//
-//  Unlike the lazy-tab-container forms elsewhere in COT, this one has no
-//  per-mode content panel: Roles and Players share the same two containers
-//  (m_ListWrapper / m_EditorWrapper below) and the tab focus hook tears down and
-//  rebuilds whichever is active. JMRoleManagerFormTabRoles.c and
-//  JMRoleManagerFormTabPlayers.c each own one mode's rebuild logic and
-//  state; this form owns the containers, the mode switch, and the
-//  JMConfirmation-bound callbacks (OnCreateRole_Confirm / OnDeleteRole_Confirm
-//  / ConfirmRenameRole / ConfirmRoleNameRestriction) - those can't move to
-//  either tab class because JMConfirmation dispatches its named callbacks
-//  against whatever object its window was Init()'d with, not against
-//  whichever object raised the popup.
-// =============================================================================
+//  JMRoleManagerForm.c - role management + player role assignment, Split-Pane (roster + editor).
+//  Roles and Players share the same two containers (m_ListWrapper / m_EditorWrapper), rebuilt on
+//  tab focus by the tab classes. The JMConfirmation callbacks (OnCreateRole_Confirm, ...) must
+//  stay here: JMConfirmation dispatches against the object its window was Init()'d with.
 
 class JMRoleManagerForm : JMFormBase
 {
@@ -70,12 +56,9 @@ class JMRoleManagerForm : JMFormBase
 	ref JMRoleManagerFormTabRoles   m_TabRoles;
 	ref JMRoleManagerFormTabPlayers m_TabPlayers;
 
-	//! A role list arrives from the server every time the tab is reopened, not
-	//! just when the admin clicks Refresh - JMRoleManagerModule.RequestRoleList()
-	//! is called from OnShow() (through RequestData()) and from the Player Manager deep link too. That
-	//! response must not blow away an editor the admin is mid-edit in, so
-	//! PopulateRoleList() only forces a full editor rebuild when this is set -
-	//! i.e. right before a call that came from an explicit Refresh click.
+	//! A role list also arrives on every reopen (OnShow) and the Player Manager deep link, not
+	//! just Refresh, and must not blow away an editor mid-edit. PopulateRoleList() only forces
+	//! a full editor rebuild when this is set, i.e. right before an explicit Refresh click.
 	bool                        m_ForceEditorRefresh = false;
 
 	//! protected, not private: sub-mods reach for the module through the form.
@@ -297,11 +280,8 @@ class JMRoleManagerForm : JMFormBase
 		m_TabPlayers.OnRoleListArrived( forceEditor );
 	}
 
-	//! Deep link from another form - the Player Manager's identity card sends
-	//! the admin here to change the role they are looking at.
-	//!
-	//! Switches to the Players tab if needed (a no-op when it is already up, the
-	//! common case for a second jump), then selects the player.
+	//! Deep link from another form (the Player Manager's identity card): switches to the
+	//! Players tab if needed (no-op when already up), then selects the player.
 	void OpenPlayer( string guid )
 	{
 		if ( guid == "" )
@@ -411,12 +391,9 @@ class JMStringData : UIActionData
 	}
 }
 
-//! One row of the permission tree: the permission it stands for, the widgets
-//! drawn for it, and the rows nested under it.
-//!
-//! It is a UIActionData so the row's switch and its fold button can both carry
-//! it, which is what lets either of them reach the whole subtree. Children are
-//! owned here; the widget pointers are not - the widgets own their own scripts.
+//! One row of the permission tree: its permission, its widgets and its nested rows. A
+//! UIActionData so both the row's switch and fold button can carry it and reach the subtree.
+//! Children are owned here; the widget pointers are not (widgets own their own scripts).
 class JMPermTreeNode : UIActionData
 {
 	JMPermission          Perm;

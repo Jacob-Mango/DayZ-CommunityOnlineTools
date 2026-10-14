@@ -1,17 +1,7 @@
-//! "Roles" mode of JMRoleManagerForm - the role roster, the permission-tree
-//! editor, and role create/rename/delete. Back-reference to the owning form,
-//! same shape as JMPlayerRowWidget.Menu.
-//!
-//! Unlike the lazy-tab-container forms elsewhere in COT, RoleManager has no
-//! per-mode content panel: Roles and Players share the same two containers
-//! (m_ListWrapper/m_EditorWrapper on the form) and the form's tab focus hook tears down and
-//! rebuilds whichever one is active. This class owns everything Roles-mode
-//! rebuilds into them, but not the containers themselves.
-//!
-//! OnCreateRole_Confirm / OnDeleteRole_Confirm / ConfirmRenameRole stay on
-//! the FORM, not here - JMConfirmation dispatches its named callbacks
-//! against whatever object its window was Init()'d with, not against
-//! whichever object raised the popup.
+//! "Roles" mode of JMRoleManagerForm: role roster, permission-tree editor, create/rename/delete.
+//! Shares m_ListWrapper/m_EditorWrapper with Players (rebuilt by the form's tab focus hook).
+//! OnCreateRole_Confirm / OnDeleteRole_Confirm / ConfirmRenameRole stay on the FORM
+//! (JMConfirmation dispatches against the object its window was Init()'d with).
 class JMRoleManagerFormTabRoles: JMFormTab
 {
 	protected JMRoleManagerForm m_Form;
@@ -19,11 +9,8 @@ class JMRoleManagerFormTabRoles: JMFormTab
 	// ---- Roles mode state --------------------------------------------------
 	protected string                      m_SelectedRole;
 	protected ref JMRole                  m_TempRole;
-	//! Role name m_TempRole was built for. Compared against m_SelectedRole
-	//! rather than just checking "is m_TempRole set" so a rename - which moves
-	//! m_SelectedRole onto a new name while the editor is still open - is
-	//! detected as a change and redrawn, instead of being mistaken for "already
-	//! showing this role, leave it alone".
+	//! Role name m_TempRole was built for. Compared against m_SelectedRole so a rename (which
+	//! moves it while the editor is open) redraws instead of looking "already showing this role".
 	protected string                      m_TempRoleBuiltFor = "";
 	protected string                      m_PendingDeleteRole;
 	protected string                      m_EditingRenameRole;
@@ -526,11 +513,8 @@ class JMRoleManagerFormTabRoles: JMFormTab
 		else
 			node.Perm.Type = JMPermissionType.DISALLOW;
 
-		//! Turning a branch off turns its subtree off for real, not just
-		//! visually. A child left ALLOW under a DISALLOW parent is a
-		//! contradiction, and the save would carry it.
-		//! Turning a branch on cascades the same way: enabling a permission
-		//! enables everything nested under it too.
+		//! Turning a branch off turns its subtree off for real (an ALLOW child under a DISALLOW
+		//! parent is a contradiction the save would carry); turning it on cascades the same way.
 		if ( on )
 			AllowSubtree( node );
 		else

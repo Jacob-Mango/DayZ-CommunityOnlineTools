@@ -6,10 +6,8 @@ class JMPlayerForm: JMFormBase
 	//! new tab panels onto the scroller without a fragile widget-tree walk.
 	protected Widget m_ActionsWrapper;
 
-	//! The right-hand panel is a tab strip over a scroller, not one long
-	//! scroller. The strip has to sit OUTSIDE the scroller or it scrolls away
-	//! with the content, which is why player_form.layout splits panel_right
-	//! into panel_right_tabs and panel_right_content.
+	//! The tab strip sits OUTSIDE the scroller or it scrolls away (player_form.layout
+	//! splits panel_right into panel_right_tabs and panel_right_content).
 	//! protected so modded-class fragments can call AddTab / AddPanel / SetSelection.
 	protected UIActionTabs m_Tabs;
 
@@ -32,23 +30,10 @@ class JMPlayerForm: JMFormBase
 	//! m_Stamina.GetLayoutRoot().GetParent() as the anchor to inject its own rows.
 	protected UIActionSlider m_Stamina;
 
-	//! protected, not private: DayZ-Expansion's `modded class JMPlayerForm`
-	//! (DayZExpansion_AI, DayZExpansion_Hardline, DayZExpansion_PersonalStorage)
-	//! does, inside its InitActionWidgetsStats override:
-	//!
-	//!     m_ApplyStats.GetLayoutRoot().SetSort(sort + 1);
-	//!     m_RefreshStats.GetLayoutRoot().SetSort(sort + 2);
-	//!
-	//! COT dropped this button at some point and never kept the name, so all
-	//! three of those addons have failed to compile against COT ever since.
-	//!
-	//! It is a real button sitting beside Apply, NOT an alias of the Position
-	//! tab's refresh icon: SetSort reorders a widget among ITS OWN siblings, so
-	//! pointing this at the position toolbar would have Expansion silently
-	//! shuffling the coordinate icons instead. Both now live in the variables
-	//! card's title bar rather than in the slider grid, which makes Expansion's
-	//! SetSort a harmless no-op - the pair is already last in reading order -
-	//! and leaves the member names it compiles against intact.
+	//! protected: Expansion's modded JMPlayerForm SetSort()s m_ApplyStats / m_RefreshStats.
+	//! A real button beside Apply, NOT an alias of the Position tab's refresh icon
+	//! (SetSort reorders among a widget's OWN siblings). Both sit in the variables card's
+	//! title bar, so Expansion's SetSort is a harmless no-op that still compiles.
 	protected UIActionImageButton m_RefreshStats;
 
 	// -- Statistics tab ----------------------------------------------------
@@ -233,11 +218,9 @@ class JMPlayerForm: JMFormBase
 		// for yet on the very first pass.
 		m_Tabs.SetSelection( m_TabIdGeneral, false );
 
-		// Only the tab that is about to be on screen gets built. The other four
-		// cost nothing until the user asks for them, which is most of what the
-		// form used to spend on being opened. Everything that touches a widget
-		// from a tab it does not own null-guards it - that convention is what
-		// makes deferring safe, so keep it when adding to this form.
+		// Only the tab about to be shown is built; the rest cost nothing until asked for.
+		// Everything touching a widget of a tab it does not own null-guards it; that is
+		// what makes deferring safe, so keep it.
 		InitTabFocus( m_TabIdGeneral );
 
 		// No geometry pin here: the true content height is only known once
@@ -337,11 +320,8 @@ class JMPlayerForm: JMFormBase
 	}
 
 	//! Turn the glyph of whichever refresh button was clicked.
-	//!
-	//! Every one of these actions can complete with nothing on screen changing -
-	//! a listing that came back identical, a stat block that has not moved - and
-	//! a button that produces no feedback reads as a button that did not work.
-	//! Two revolutions, matching every other refresh button in COT.
+	//! These actions can complete with nothing visibly changing, and a button with no
+	//! feedback reads as broken. Two revolutions, like every other refresh button.
 	void SpinRefreshIcon( UIActionBase action )
 	{
 		UIActionImageButton button;
@@ -483,11 +463,9 @@ class JMPlayerForm: JMFormBase
 			return;
 		}
 
-		//! Do NOT concatenate "this" into a Print() here - that implicit
-		//! object-to-string conversion inside this override crashes the real
-		//! DayZ Tools script compiler natively at module load (confirmed by
-		//! bisection: this file alone, with only this pattern active,
-		//! reproduces the crash). The custom lint tool does not catch it.
+		//! Do NOT concatenate "this" into a Print() here: the implicit object-to-string
+		//! conversion in this override crashes the DayZ Tools script compiler natively at
+		//! module load (bisected). The custom lint tool does not catch it.
 		#ifdef COT_DEBUGLOGS
 		Print( "[COT_DBG] JMPlayerForm::SetPanelEnabled false enter" );
 		#endif
@@ -554,13 +532,10 @@ class JMPlayerForm: JMFormBase
 			m_SelectedInstance = instance;
 		}
 
-		// Push disease mask + bleeding state sync on selection change so dropdown
-		// icons update for both panels.
-		// UpdateUI is called from a lot more than a selection change -
-		// OnClientPermissionsUpdated runs it every time the server pushes
-		// permissions - so nothing below may fire an RPC unconditionally.
-		// Unguarded, the Statistics panel rebuilt roughly once a second and read
-		// as flashing, and the disease/bleeding requests went out just as often.
+		// Push disease mask + bleeding state sync on selection change so dropdown icons update.
+		// UpdateUI also runs on every permissions push (OnClientPermissionsUpdated), so
+		// nothing below may fire an RPC unconditionally (the Statistics panel flashed
+		// about once a second).
 		string selectedGuid = instance.GetGUID();
 		bool selectionChanged = ( selectedGuid != m_LastSelectedGuid );
 		m_LastSelectedGuid = selectedGuid;
@@ -720,13 +695,8 @@ class JMPlayerForm: JMFormBase
 	}
 
 	// -------------------------------------------------------------------------
-	//  Extension points
-	//
-	//  Modded classes (DayZ-Expansion AI / Hardline / PersonalStorage, and the
-	//  ExampleScriptOverride samples) override these exact shapes, call super and
-	//  inject their own rows. The widgets themselves are built by the tab
-	//  classes; these forward to them, and the tabs call them through the
-	//  CallInit* wrappers so an override always wraps the build.
+	//  Extension points: modded classes override these exact shapes; tabs call them
+	//  through the CallInit* wrappers so an override always wraps the build.
 	// -------------------------------------------------------------------------
 
 	protected Widget InitActionWidgetsIdentity( Widget actionsParent )

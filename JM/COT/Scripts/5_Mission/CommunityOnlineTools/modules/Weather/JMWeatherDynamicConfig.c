@@ -1,22 +1,7 @@
-// =============================================================================
-//  JMWeatherDynamicConfig
-//
-//  One dynamic weather edit as a single RPC payload, the same way a phenomenon
-//  is sent as one JMWeatherBase rather than as loose scalars. Sending it whole
-//  means the server never has to merge a half-applied edit - it either takes
-//  the new configuration or keeps the old one.
-//
-//  It carries the master switch, which is global and always applied, and at
-//  most one state, applied according to Op:
-//
-//    OP_TOGGLE  Enabled only. How the switch is sent with no state selected.
-//    OP_SAVE    Enabled, plus State written under TargetName (new when the
-//               name is empty; renamed when it differs from State.Name).
-//    OP_REMOVE  Enabled, plus the state named TargetName deleted.
-//
-//  What the server keeps is its own validated copy - see
-//  JMWeatherSerialize.NormalizeState - never the objects that arrived.
-// =============================================================================
+//  JMWeatherDynamicConfig - one dynamic weather edit as a single RPC payload (no
+//  half-applied merges). Master switch always applied, plus at most one state per
+//  Op: OP_TOGGLE none; OP_SAVE State under TargetName (new if empty, rename if
+//  differs); OP_REMOVE delete it. Server keeps its own NormalizeState copy.
 class JMWeatherDynamicConfig
 {
 	static const int OP_TOGGLE = 0;

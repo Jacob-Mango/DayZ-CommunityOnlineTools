@@ -2,20 +2,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 {
 	int m_ObjSetupMode = COT_ObjectSetupMode.DEBUGSPAWN;
 
-	//! Which ammo a spawned magazine is filled with, as the classname of an
-	//! entry from its own ammoItems list. "" leaves the magazine on whatever it
-	//! is configured to hold.
-	//!
-	//! It rides the spawn RPC as module state rather than as another parameter
-	//! on nine signatures, exactly as m_ObjSetupMode already does.
+	//! Ammo classname (from the magazine's ammoItems) a spawned magazine is filled with; ""
+	//! keeps its configured ammo. Rides the spawn RPC as module state, like m_ObjSetupMode.
 	string m_SpawnAmmoType;
 
-	//! Upper bounds for a randomised spawn. -1 means "not a range": the value
-	//! passed as quantity / health is used exactly.
-	//!
-	//! The roll happens per ENTITY, on the server, so spawning into five
-	//! inventories at once gives five different values rather than one value
-	//! five times - which is the whole point of asking for a range.
+	//! Upper bounds for a randomised spawn; -1 means "not a range" (value used exactly).
+	//! Rolled per ENTITY on the server, so five inventories get five different values.
 	float m_SpawnQuantityMax = -1;
 	float m_SpawnHealthMax   = -1;
 	bool m_AutoShow;
@@ -32,21 +24,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	static ref TStringArray s_ColorTokens = { "darkblue", "white", "black", "blue", "red", "green", "tan", "camo", "orange", "grey", "gray", "yellow", "wine", "beige", "rust", "gold", "plum" };
 
-	//! classname (lowercased, color token stripped) -> { token -> real classname }.
-	//! Built once from CfgVehicles + CfgWeapons and kept for the module's
-	//! whole lifetime - those trees are static game data, so re-scanning tens
-	//! of thousands of config entries on every "Change Colors" click (once
-	//! per candidate color, as FindColorVariant used to) is pure waste and
-	//! was the whole of the "big lag opening the menu" complaint.
+	//! classname (lowercased, color token stripped) -> { token -> real classname }. Built once
+	//! from CfgVehicles + CfgWeapons for the module's lifetime (static game data); rescanning
+	//! tens of thousands of entries per "Change Colors" click caused the menu-open lag.
 	protected static ref map<string, ref map<string, string>> s_ColorVariantsByBase;
 
-	//! Which colors "Change Colors" can actually offer for `entity` - not the
-	//! full token list, only the ones a real sibling classname exists for,
-	//! either on the entity itself or on one of its already-attached
-	//! children. Most vanilla bodies (a car chassis, for instance) have no
-	//! color-suffixed sibling at all - only mods/attachments that were built
-	//! with one do - so an unfiltered list would mostly be dead rows that do
-	//! nothing when clicked.
+	//! Which colors "Change Colors" can offer for `entity`: only tokens with a real sibling
+	//! classname on the entity or its attached children. Most vanilla bodies (a car chassis)
+	//! have none, so the full list would be mostly dead rows.
 	array<string> GetAvailableColorVariants(EntityAI entity, int depth = 3)
 	{
 		//auto trace = EXTrace.Start(true);
@@ -97,14 +82,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return GetColorTokens().Find(token);
 	}
 
-	//! The color tokens this mod recognizes in a classname, e.g. the "blue" in
-	//! "CivilianSedan_Blue". Shared by DetectColorToken and the "Change Colors"
-	//! context-menu action so both sides of that wire agree on what index N
-	//! means.
-	//! "darkblue" before "blue": Contains() matches the first hit, and every
-	//! "darkblue" classname also contains "blue" as a substring - checking
-	//! the longer token first is what keeps a darkblue part from being
-	//! mis-tokenized as a blue one with "dark" left dangling in its base name.
+	//! The color tokens recognized in a classname (the "blue" in "CivilianSedan_Blue"), shared by
+	//! DetectColorToken and "Change Colors" so both agree what index N means. "darkblue" must
+	//! precede "blue": Contains() takes the first hit and darkblue names contain "blue".
 	static ref array<string> GetColorTokens()
 	{
 		return s_ColorTokens;
@@ -399,12 +379,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (!obj)
 			return;
 
-		//! Only stamp m_AutoShow on the press that actually opens the panel.
-		//! The confirm flow now spans two presses (arm, then confirm) with the
-		//! panel already visible for the second one - recomputing this from
-		//! IsVisible() on every press would flip it back to false right as the
-		//! confirm press lands, and the panel we auto-opened would never
-		//! auto-close after the delete goes through.
+		//! Only stamp m_AutoShow on the press that opens the panel. The confirm flow spans two
+		//! presses with the panel already visible for the second; recomputing from IsVisible()
+		//! would flip it false and the panel would never auto-close after the delete.
 		if ( !IsVisible() )
 		{
 			m_AutoShow = true;
@@ -510,11 +487,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		Server_DeleteEntity( obj, ident );
 	}
 
-	//! DEPRECATED - override Exec_DeleteEntity( obj, ident ) instead.
-	//!
-	//! This is the old name of Exec_DeleteEntity and it still holds the body, so a
-	//! third-party `override Server_DeleteEntity` (ZenCOT) keeps running. An
-	//! override point is not a call, so there is no runtime warning.
+	//! DEPRECATED - override Exec_DeleteEntity( obj, ident ) instead. Old name, still holds
+	//! the body so a third-party `override Server_DeleteEntity` (ZenCOT) keeps running; an
+	//! override point is not a call, so no runtime warning.
 	protected void Server_DeleteEntity( notnull Object obj, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
@@ -871,14 +846,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return ent;
 	}
 
-	//! Apply the attachment half of a setup mode - and nothing else. Kept apart
-	//! from SetupEntity so the spawner form can run the exact same pass over the
-	//! local entity behind its item preview: the preview then shows the
-	//! attachments and magazine the real spawn would produce, instead of a bare
-	//! model that never matches what lands in the world.
-	//!
-	//! Quantity / health / temperature deliberately stay in SetupEntity - the
-	//! preview drives those from its own sliders.
+	//! Apply the attachment half of a setup mode, nothing else. Apart from SetupEntity so the
+	//! form runs the same pass over its preview entity. Quantity / health / temperature stay
+	//! in SetupEntity: the preview drives those from its own sliders.
 	void SetupEntityForMode( EntityAI entity, PlayerBase player, COT_ObjectSetupMode mode )
 	{
 		switch (mode)
@@ -991,15 +961,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				}
 				else if ( item.CanBeDisinfected() )
 				{
-					// itemState is already "whatever state this kind of item
-					// has": a liquid type for a container, a cooking stage for
-					// food. For a rag, a bandage or a sewing kit it is the
-					// cleanness flag, and the three are mutually exclusive -
-					// nothing that can be disinfected is also food or a liquid
-					// container.
-					//
-					// allow_client stays false: this runs on the server, and the
-					// value reaches the client through the item's own sync.
+					// itemState is "whatever state this item has": liquid type, cooking stage, or for a
+					// rag/bandage/sewing kit the cleanness flag (mutually exclusive with food/liquid).
+					// allow_client stays false: this runs on the server and the item's own sync
+					// carries the value.
 					item.SetCleanness( itemState );
 				}
 			}
@@ -1008,15 +973,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SetupEntityHealth( entity, health, temp );
 	}
 
-	//! Refill a magazine with one specific kind of cartridge.
-	//!
-	//! A magazine's ammoItems config lists AMMO PILE classes (Ammo_762x39 and
-	//! friends); what a cartridge inside the magazine is identified by is the
-	//! CfgAmmo class those piles name in their own "ammo" entry. There is no
-	//! script call that takes the pile, so the pile is resolved to its cartridge
-	//! here and the rounds are stored one at a time - which is the only way to
-	//! choose what a magazine is loaded with.
-	//!
+	//! Refill a magazine with one kind of cartridge. ammoItems lists AMMO PILE classes; cartridges
+	//! are identified by the CfgAmmo class the pile names in its "ammo" entry, and no script call
+	//! takes the pile, so resolve it and store rounds one at a time.
 	//! @param count -1 means "fill it".
 	protected void FillMagazine(Magazine mag, string ammoPile, float count)
 	{
@@ -1041,18 +1000,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		mag.SetSynchDirty();
 	}
 
-	//! Push a global health value onto an entity, its damage zones, and
-	//! everything hanging off it - attachments take the same PERCENTAGE of their
-	//! own max health rather than the raw number, so a 50% rifle carries a 50%
-	//! optic and not an optic pinned to the rifle's HP value.
-	//!
-	//! Recurses, so an attachment's own attachments follow too.
-	//!
-	//! Split out of SetupEntity so the spawner form can run the identical pass
-	//! over its local preview entity: the preview spawns the same attachments
-	//! the real spawn would, and they have to answer to the health slider the
-	//! same way.
-	//!
+	//! Push a global health value onto an entity, its damage zones and, recursively, attachments
+	//! (same PERCENTAGE of their own max health, not the raw number). Split out of SetupEntity
+	//! so the form can run the identical pass over its local preview entity.
 	//! @param health -1 means "full". @param temp -1 means "leave alone".
 	void SetupEntityHealth( EntityAI entity, float health, float temp )
 	{
@@ -1112,11 +1062,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		else if (Class.CastTo(boat, entity))
 			boat.COT_OnDebugSpawn(player);
 #ifndef DAYZ_1_29
-		//! CarScript/BoatScript both get COT_OnDebugSpawn (refuel, etc) via
-		//! their own modded-class override - Motorbike never got the same
-		//! branch here despite MotorbikeScript.c already defining its own
-		//! COT_OnDebugSpawn (refuel via COT_Refuel), so a spawned bike fell
-		//! through to nothing and came out with an empty tank.
+		//! CarScript/BoatScript get COT_OnDebugSpawn (refuel, etc) via their modded-class override;
+		//! Motorbike needs its own branch too (MotorbikeScript defines COT_OnDebugSpawn), or a
+		//! spawned bike came out with an empty tank.
 		else if (Class.CastTo(bike, entity))
 			bike.COT_OnDebugSpawn(player);
 #endif
@@ -1354,14 +1302,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	//! Plain Contains() lets a color token match as a coincidental substring
-	//! of an unrelated word (e.g. "tan" inside some classname that has
-	//! nothing to do with color) - that false match then poisons the whole
-	//! base-name bucket in the variant index, so real DayZ vehicles ended up
-	//! with "available" colors that don't actually exist for them. DayZ's
-	//! real color-variant naming is always an underscore-delimited suffix
-	//! (e.g. "Hatchback_02_White"), so require the token to be bordered by
-	//! "_" (or the string's start/end) on both sides.
+	//! Plain Contains() matches tokens as coincidental substrings ("tan" in an unrelated name),
+	//! poisoning the variant index bucket with colors that do not exist. Real variants are
+	//! underscore-delimited ("Hatchback_02_White"), so require "_" (or string start/end) on both sides.
 	protected static int FindDelimitedTokenIndex(string lower, string token)
 	{
 		//auto trace = EXTrace.Profile(true, JMObjectSpawnerModule, "FindDelimitedTokenIndex");
@@ -1648,16 +1591,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	//! Find the classname that is `sourceClass` with its color token swapped
-	//! for `newColor` - e.g. "CivilianSedan_Blue" -> "CivilianSedan_White".
-	//! Empty string if there's no color token to swap or no such classname is
-	//! configured.
-	//!
-	//! `allowUntokened` also resolves a classname that carries no color token
-	//! at all, e.g. "M4_OEBttstck" -> "M4_OEBttstck_Green". "Change Colors" must
-	//! not do that (it only recolors what is already colored), but a fresh
-	//! spawn of a colored item wants its default, token-less attachments
-	//! swapped for the matching variant.
+	//! Find `sourceClass` with its color token swapped for `newColor` ("CivilianSedan_Blue" ->
+	//! "..._White"); "" if no token to swap or no such classname. `allowUntokened` also resolves
+	//! token-less names ("M4_OEBttstck" -> "..._Green"): off for "Change Colors", on for a fresh
+	//! spawn whose default attachments should match.
 	string FindColorVariant(string sourceClass, string newColor, bool allowUntokened = false)
 	{
 		//auto trace = EXTrace.Start(true);
@@ -1720,17 +1657,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return variant;
 	}
 
-	//! "Change Colors": snapshot `entity` (classname, health/quantity/liquid/
-	//! temperature, and every attachment/cargo item recursively - the same
-	//! capture JMLoadoutModule uses for its own deletion backups), swap the
-	//! classname of the snapshot's root and every part in it for the
-	//! `newColor` sibling wherever one exists, then respawn the whole tree
-	//! from that snapshot. There is no in-place "retype" API in this engine,
-	//! so this is delete-old/spawn-new - but going through the loadout
-	//! snapshot instead of a bare CreateObjectEx is what keeps everything
-	//! that was inside or attached to it intact across the swap.
-	//!
-	//! Returns the newly-spawned entity: the one passed in does not survive.
+	//! "Change Colors": snapshot `entity` and all attachments/cargo recursively (the capture
+	//! JMLoadoutModule uses for deletion backups), swap each classname for its `newColor`
+	//! sibling, then respawn (no in-place retype API). Returns the new entity; the old one dies.
 	EntityAI RecolorEntityAndAttachments(EntityAI entity, PlayerBase player, string newColor, int depth = 3)
 	{
 		if (!entity || newColor == "")

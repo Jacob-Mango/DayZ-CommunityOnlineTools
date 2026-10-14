@@ -1,19 +1,7 @@
-// =============================================================================
-//  JMEntityManagerModule
-//
-//  Generic base module for any "list + map + act on entities" admin UI.
-//  Subclass to provide an adapter (GetAdapter) and an RPC range
-//  (GetRPCRequest / GetRPCSend / GetRPCAction). Everything else - permission
-//  registration, refresh dispatch, action RPC - is done here.
-//
-//  Subclasses override:
-//    - CreateAdapter()                     create the adapter (one-time)
-//    - GetRPCRequest/Send/Action()         ints from the module's own RPC enum
-//    - GetLayoutRoot/Title/IconName/etc.   standard JMRenderableModuleBase
-//
-//  The shared layout and form come from:
-//    "JM/COT/GUI/layouts/entitymanager/EntityManager_Menu.layout"
-// =============================================================================
+//  JMEntityManagerModule - generic base for "list + map + act on entities" admin UIs. Subclasses
+//  override CreateAdapter(), GetRPCRequest/Send/Action() (ints from their own RPC enum) and the
+//  usual JMRenderableModuleBase members; permissions, refresh and action RPC live here.
+//  Shared layout: "JM/COT/GUI/layouts/entitymanager/EntityManager_Menu.layout"
 class JMEntityManagerModule: JMRenderableModuleBase
 {
 	protected ref JMEntityManagerAdapter m_Adapter;

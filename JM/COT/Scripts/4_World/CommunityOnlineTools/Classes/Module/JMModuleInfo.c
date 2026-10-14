@@ -1,27 +1,7 @@
-//! Everything a module declares about itself, in one place.
-//!
-//! A module used to override a dozen getters to say the same handful of facts (title, icon,
-//! layout, category, the permission that opens it, its RPC range, its webhook wording). It now
-//! fills one of these in Describe() and JMModuleBase / JMRenderableModuleBase answer every getter
-//! from it:
-//!
-//!   override void Describe( JMModuleInfo info )
-//!   {
-//!       info.Title = "My Module";
-//!       info.Icon = "sparkles";
-//!       info.Layout = "JM\\COT\\GUI\\layouts\\my_form.layout";
-//!       info.Category = JMSideBarConfig.CATEGORY_OTHER;
-//!       info.ViewPermission = JMConstants.PERM_MYMODULE_VIEW;
-//!       info.InputToggle = "UACOTToggleMyModule";
-//!       info.WebhookTitle = "My Module";
-//!       info.SetRPCRange( JMMyModuleRPC.INVALID, JMMyModuleRPC.COUNT );
-//!       info.AddPermission( JMConstants.PERM_MYMODULE_ACTION );
-//!       info.AddWebhookType( "Something" );
-//!   }
-//!
-//! A getter the module still overrides wins, so a module can migrate one getter at a time and a
-//! mod's `modded class` override keeps working. Describe() runs once and must be pure data: it is
-//! called before the mission loads, on both the client and the server.
+//! Everything a module declares about itself (title, icon, layout, category, permissions, RPC
+//! range, webhook wording), filled in Describe(); JMModuleBase / JMRenderableModuleBase answer
+//! every getter from it, but a getter the module still overrides wins. Describe() runs once,
+//! before the mission loads, on client and server: it must be pure data.
 class JMModuleInfo
 {
 	//! Window title and sidebar label. A localisation key without the leading '#', or plain text.

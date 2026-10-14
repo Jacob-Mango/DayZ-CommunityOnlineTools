@@ -1,18 +1,6 @@
-// =============================================================================
-//  JMLootAnalysisHoverInfo
-//
-//  The floating readout the Item Scan map shows while the cursor is over a
-//  marker: a model preview plus health, quantity, remaining lifetime and
-//  attachments - modelled directly on JMVehiclesHoverInfo, minus the parts
-//  that only make sense for a live-polled vehicle (fuel/coolant/speed/lock/
-//  crew, and the periodic re-fetch that keeps those current). A scanned
-//  item's numbers are a snapshot from the scan itself, not something worth
-//  polling the server for on every hover.
-//
-//  Not parented to the map panel, for the same reason JMVehiclesHoverInfo
-//  is not: the map clips its children, and a marker near the edge would clip
-//  the panel with it. Anchored to the window root instead.
-// =============================================================================
+//  JMLootAnalysisHoverInfo - Item Scan map hover readout (preview, health, quantity,
+//  lifetime, attachments) from the scan snapshot, no live polling. Anchored to the
+//  window root, not the map panel, which clips children near edges.
 class JMLootAnalysisHoverInfo
 {
 	protected Widget m_Anchor;
@@ -95,10 +83,8 @@ class JMLootAnalysisHoverInfo
 		return m_Open && m_ShownMarkerId == markerId;
 	}
 
-	// -------------------------------------------------------------------------
-	//  Attachment icons - one small ItemPreviewWidget per attachment, instead
-	//  of a comma-joined classname line. Rebuilt every ShowAt call: hovers are
-	//  driven by mouse enter/leave, not per-frame, so this never runs hot.
+	//  Attachment icons - one ItemPreviewWidget per attachment, not a classname
+	//  line. Rebuilt every ShowAt call; hovers are enter/leave driven, never hot.
 	// -------------------------------------------------------------------------
 
 	protected void SetAttachmentIcons(JMLootScanItemDetail detail)
@@ -222,11 +208,10 @@ class JMLootAnalysisHoverInfo
 	//  Model preview
 	// -------------------------------------------------------------------------
 
-	//! Build (or reuse) a local copy of the scanned item in the state it was found in - health,
-	//! quantity, food stage - with the attachments it actually has, each in its own state. The
-	//! same construction the Player Manager's inventory preview uses (JMLocalPreview), so a ruined
-	//! rifle or a rotten apple is drawn as it really is, and a backpack shows the pouches it was
-	//! found with rather than a bare, pristine model.
+	//! Build (or reuse) a local copy of the scanned item in its found state (health,
+	//! quantity, food stage) with its real attachments, each in its own state. Same
+	//! construction as the Player Manager inventory preview (JMLocalPreview), so
+	//! ruined or rotten items are drawn as they are.
 	protected void SetPreview(JMLootScanItemDetail detail)
 	{
 		if (!m_Preview)

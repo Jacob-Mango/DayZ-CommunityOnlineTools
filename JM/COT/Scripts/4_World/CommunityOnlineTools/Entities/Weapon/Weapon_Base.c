@@ -34,21 +34,10 @@ modded class Weapon_Base
 		}
 	}
 
-	//! Feed the anti-cheat infinite-ammo and jam-suppression rules: who fired,
-	//! how many cartridges are left afterwards, whether this shot came out
-	//! jammed, and the weapon's own chance to jam at the moment it fired.
-	//! Ammo rule: the cartridge count has to move; a magazine that never
-	//! empties (or grows) across many shots is not one the game produced.
-	//! Jam rule: the module compares how often shots actually jammed against
-	//! this chance over many samples.
-	//!
-	//! COT's own unlimited-ammo grant is refilled a few lines above, so it has
-	//! to be excluded here or every admin using it flags themselves. Same
-	//! reasoning as godmode: an admin decision is not a cheat.
-	//!
-	//! Reporting only - the rules live in JMAntiCheatModule. This runs inside
-	//! the firing path of every weapon on the server, so anything expensive
-	//! here is paid for by every player on every trigger pull.
+	//! Feed the anti-cheat infinite-ammo and jam rules: shooter, cartridges left,
+	//! whether this shot jammed, and the weapon's jam chance. COT's own unlimited
+	//! ammo is excluded (an admin decision, like godmode). Reporting only; rules
+	//! live in JMAntiCheatModule. Runs on every trigger pull, keep it cheap.
 	protected void COT_ReportShotToAntiCheat( PlayerBase player, int muzzleType )
 	{
 		if ( !g_Game.IsServer() )

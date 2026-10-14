@@ -1,19 +1,7 @@
-// =============================================================================
-//  JMAntiCheatForm.c
-//
-//  Anti-cheat flag monitoring view with quick actions, detection sorting,
-//  human-friendly detection descriptions, context menu, and combat metrics.
-//
-//  Per-tab widget building/rendering lives in JMAntiCheatFormTabFlagged.c and
-//  JMAntiCheatFormTabKillStats.c. What stays here: the shared top toolbar
-//  (name filter + sort, which filters BOTH tabs), tab-strip mechanics, the
-//  module's OnFlagsUpdated/OnKillStatsUpdated contract (module calls back on
-//  the form, so these can't move), OnMouseButtonDown (a JMFormBase virtual
-//  override), and the three Confirm* methods - JMConfirmation dispatches its
-//  named callbacks against whatever object its window was Init()'d with, not
-//  against whichever tab raised the popup, so moving them would silently
-//  break the confirm flow.
-// =============================================================================
+// JMAntiCheatForm.c - anti-cheat flag monitoring view. Per-tab rendering lives in the
+// FormTab* files; this keeps the shared toolbar, tab-strip mechanics, the module's
+// OnFlagsUpdated/OnKillStatsUpdated callbacks, OnMouseButtonDown and the three Confirm*
+// methods - JMConfirmation dispatches callbacks on the object its window was Init()'d with.
 
 class JMAntiCheatForm : JMFormBase
 {

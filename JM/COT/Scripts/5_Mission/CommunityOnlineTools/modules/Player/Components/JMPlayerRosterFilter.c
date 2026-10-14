@@ -52,13 +52,9 @@ class JMPlayerRosterFilter
 		return m_PlayerListFilters;
 	}
 
-	//! Open the advanced-filter dropdown under the toolbar button.
-	//!
-	//! A context menu rather than a panel of checkboxes: the whole row - glyph
-	//! and word together - is already one hit area here, which is exactly the
-	//! behaviour asked for, and it floats over the list instead of costing the
-	//! list a permanent strip of height it only needs while being changed.
-	//! Mods add rows with JMFilterRegistry.Register( JMFilterRegistry.PLAYERS, ... ).
+	//! Open the advanced-filter dropdown under the toolbar button. A context menu rather than a
+	//! checkbox panel: each row is one hit area and it floats over the list instead of costing
+	//! it permanent height. Mods add rows with JMFilterRegistry.Register( JMFilterRegistry.PLAYERS, ... ).
 	void OnClick_PlayerListFilters( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )

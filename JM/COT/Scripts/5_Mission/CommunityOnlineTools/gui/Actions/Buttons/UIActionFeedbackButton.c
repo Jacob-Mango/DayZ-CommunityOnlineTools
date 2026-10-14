@@ -1,31 +1,7 @@
-// =============================================================================
-//  UIActionFeedbackButton
-//
-//  A standard pill button that answers its own click: the resting label and
-//  icon fade out, a feedback pair - "Copied!" plus a check mark - fades in,
-//  holds for a moment, then fades back. The widget tree never changes, only
-//  the text, the image and their alpha, so the button keeps its width and the
-//  row it lives in never jumps.
-//
-//  Meant for actions whose result is otherwise invisible: copy a Steam ID,
-//  copy coordinates, save a preset.
-//
-//  Usage:
-//      m_CopyBtn = UIActionManager.CreateFeedbackButton( parent,
-//          "Copy Steam ID", "Copied!", JMConstants.ICON_CHECK_MARK,
-//          this, "OnClick_CopySteamID" );
-//
-//      void OnClick_CopySteamID( UIEvent eid, UIActionBase action )
-//      {
-//          if ( eid != UIEvent.CLICK )
-//              return;
-//          g_Game.CopyToClipboard( m_SteamID );
-//      }
-//
-//  The swap runs on click by default. When the action can fail, turn that off
-//  with SetAutoFeedback( false ) and call ShowFeedback() yourself once it
-//  actually worked.
-// =============================================================================
+// UIActionFeedbackButton: a pill button that answers its own click - label/icon fade out,
+// a feedback pair ("Copied!" + check mark) fades in, holds, fades back. Only text, image and
+// alpha change, so the row never jumps. Swap runs on click; for actions that can fail use
+// SetAutoFeedback( false ) and call ShowFeedback() once it worked.
 class UIActionFeedbackButton: UIActionButton
 {
 	//! Idle - the resting label is showing and nothing is animating.

@@ -1,21 +1,6 @@
-// =============================================================================
-//  UIActionPaginator
-//
-//  Prev/Next buttons + "page X / N" label.  The caller sets the total page
-//  count and responds to CHANGE events to re-render their list's visible slice.
-//  GetCurrentPage() is 0-based internally; display is 1-based.
-//
-//  Usage:
-//      m_Pages = UIActionManager.CreatePaginator( parent, this, "OnChange_Page" );
-//      m_Pages.SetPageCount( Math.Ceil( items.Count() / ITEMS_PER_PAGE ) );
-//      m_Pages.SetPage( 0 );
-//
-//      void OnChange_Page( UIEvent eid, UIActionBase action )
-//      {
-//          int first = m_Pages.GetCurrentPage() * ITEMS_PER_PAGE;
-//          RebuildList( first, ITEMS_PER_PAGE );
-//      }
-// =============================================================================
+//  UIActionPaginator - Prev/Next buttons + "page X / N" label. The caller sets
+//  SetPageCount() and re-renders its list slice on CHANGE. GetCurrentPage() is
+//  0-based; the display is 1-based.
 class UIActionPaginator: UIActionBase
 {
 	protected ButtonWidget m_BtnPrev;

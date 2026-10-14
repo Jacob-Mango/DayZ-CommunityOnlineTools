@@ -1,18 +1,7 @@
-// =============================================================================
-//  JMAntiCheatModule.c
-//
-//  Server-side cheat detection. Runs a periodic poll (default 1 Hz) that
-//  evaluates every connected player against the rules in JMAntiCheatDetector
-//  and accumulates flags. When the score crosses the configured threshold the
-//  module fires a webhook (severity-based colour) and optionally auto-kicks.
-//
-//  RPCs (JMAntiCheatModuleRPC @ 10920):
-//    RequestFlags   client -> server
-//    Flags          server -> client
-//
-//  Client RPC traffic only happens when an admin opens the form (one-shot
-//  fetch). Per-frame server polling never produces client RPCs.
-// =============================================================================
+//  JMAntiCheatModule.c: server-side cheat detection. A periodic poll (default 1 Hz) runs
+//  JMAntiCheatDetector rules and accumulates flags; over threshold it fires a webhook
+//  and optionally auto-kicks. RPCs (@ 10920): RequestFlags (c->s), Flags (s->c); client
+//  traffic only when an admin opens the form.
 
 class JMAntiCheatModule : JMRenderableModuleBase
 {
@@ -143,16 +132,8 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	}
 
 	//! How many players are flagged hard enough to be worth an admin's time.
-	//!
-	//! A flag entry exists the moment a player trips anything at all, and on a
-	//! busy server that is most of them - counting entries would light a footer
-	//! badge permanently and teach everyone to ignore it. The bar used here is
-	//! the module's own FlagThresholdHigh, the score at which it already
-	//! considers the detection worth a WARNING webhook.
-	//!
-	//! Flags decay, so this clears itself if nothing else happens - but only
-	//! slowly, and a certain detection outlives an admin's whole shift. The
-	//! intended reading is unchanged: while it is raised, somebody has to look.
+	//! Counting every entry would light the footer badge permanently, so the bar is
+	//! FlagThresholdHigh (the WARNING webhook score). Flags decay slowly.
 	int GetFlaggedCount()
 	{
 		array< string > guids = new array< string >;
@@ -197,14 +178,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	// -----------------------------------------------------------------------
 
 	//! Does this player hold COT access at all.
-	//!
-	//! This used to be an exemption: anyone with COT was skipped by every rule,
-	//! which meant a stolen admin account was invisible to the whole module.
-	//! It is not an exemption any more. Admins are scanned like everybody else,
-	//! and the things an admin legitimately does that look like cheats are
-	//! excused per ACTION instead - see JMAntiCheatSanction. The one place this
-	//! is still consulted is the denied-RPC burst, where holding COT genuinely
-	//! changes what a denial means.
+	//! Not an exemption: admins are scanned like everybody else (a stolen admin account
+	//! must not be invisible); legitimate admin actions are excused per ACTION, see
+	//! JMAntiCheatSanction. Only the denied-RPC burst still consults this.
 	protected bool HasCOTAccess( string guid )
 	{
 		if ( guid == "" )
@@ -327,11 +303,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		if ( JMAntiCheatKillHook.Pending.Count() > 0 )
 			DrainKillEventQueue();
 
-		// Signals posted from 4_World: refused RPCs and fired shots. Drained
-		// every frame rather than on the poll cadence, because both queues are
-		// bounded and a backlog would start dropping the oldest evidence.
-		// Count-checked first so an idle server does not allocate the drain's
-		// out arrays every single frame for nothing.
+		// Signals from 4_World (refused RPCs, fired shots): drained every frame since both
+		// queues are bounded and a backlog drops the oldest evidence. Count-checked first
+		// so an idle server does not allocate the out arrays every frame.
 		if ( JMAntiCheatSignals.DeniedRpcGuids.Count() > 0 )
 			DrainDeniedRpcQueue();
 
@@ -389,11 +363,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 			if ( JMAntiCheatSanction.IsActive( guid, JMAntiCheatSanction.RPC ) )
 				continue;
 
-			//! Staff are counted, not skipped. The one allowance they get is a
-			//! higher burst: a COT client shows an admin every control their
-			//! role grants, so clicking one whose permission changed
-			//! mid-session is a denial that means nothing. A cheat menu
-			//! probing the mod clears either number in seconds.
+			//! Staff are counted, not skipped, but get a higher burst: a permission changing
+			//! mid-session makes a denial meaningless. A cheat menu probing the mod
+			//! clears either number in seconds.
 			int burst = m_Config.RpcDeniedBurstCount;
 			if ( HasCOTAccess( guid ) )
 				burst = m_Config.RpcDeniedBurstCountStaff;
@@ -467,15 +439,10 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 			m_LastAmmoCount.Set( guid, ammo );
 
-			//! First shot seen for this player, or a reload / weapon swap put
-			//! more rounds in than there were. Either way the run restarts.
-			//!
-			//! A rising count is NOT flagged as an ammo-add cheat here: a real
-			//! reload or weapon swap produces exactly the same reading (a
-			//! bigger magazine's worth of cartridges appearing at once), and
-			//! this signal has no way to tell the two apart. Flagging it would
-			//! score every normal reload. JMAntiCheatDetector.DetectAmmoIncrease
-			//! exists for when a real reload signal is wired in to gate it.
+			//! First shot seen, or a reload / weapon swap raised the count: the run restarts.
+			//! A rising count is NOT flagged as an ammo-add cheat: a real reload gives the
+			//! same reading and this signal cannot tell them apart. See
+			//! JMAntiCheatDetector.DetectAmmoIncrease for when a reload signal is wired in.
 			if ( previous < 0 || ammo > previous )
 			{
 				m_ShotsNoDecrement.Set( guid, 0 );
@@ -506,11 +473,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		}
 	}
 
-	//! Accumulates one shot's jam outcome into the player's running batch and
-	//! evaluates once the batch reaches JamMinShotSamples. Evaluating in
-	//! batches (rather than a lifetime running average) keeps the expected
-	//! rate representative of current weapon condition instead of being
-	//! diluted by shots fired hours ago on a different weapon.
+	//! Accumulates one shot's jam outcome into the player's batch and evaluates at
+	//! JamMinShotSamples. Batches (not a lifetime average) keep the expected rate
+	//! tied to current weapon condition, not diluted by old shots on another weapon.
 	protected void EvaluateJamSuppression( string guid, bool wasJammed, float jamChance, int nowMs )
 	{
 		if ( jamChance <= 0 )
@@ -671,12 +636,8 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	}
 
 	// -----------------------------------------------------------------------
-	//  Movement
-	//
-	//  Speed and teleport are two rules over the same two samples, and both
-	//  have to know about vehicles. A player in a car is legitimately doing
-	//  30 m/s; without the exemption every vehicle on the server trips the
-	//  speed rule on every poll and the flag list stops meaning anything.
+	//  Movement: speed and teleport rules share two samples and both must exempt
+	//  vehicles (a car legitimately does 30 m/s), or every vehicle trips the speed rule.
 	// -----------------------------------------------------------------------
 	protected void PollMovement( string guid, PlayerBase pb, int nowMs )
 	{
@@ -705,11 +666,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 			return;
 		}
 
-		//! Somebody moved this player rather than the player moving: an admin
-		//! teleport, a respawn, a vehicle unstuck, another mod's warp. The code
-		//! that did it said so, which is the whole difference between a
-		//! scripted relocation and a teleport cheat - the cheat announces
-		//! nothing, because the client is what moved.
+		//! Somebody moved this player (admin teleport, respawn, unstuck, another mod's
+		//! warp) and said so; a teleport cheat announces nothing because the client
+		//! itself moved.
 		if ( JMAntiCheatSanction.IsActive( guid, JMAntiCheatSanction.MOVEMENT ) )
 			return;
 
@@ -747,11 +706,8 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	}
 
 	// -----------------------------------------------------------------------
-	//  Inventory
-	//
-	//  Sampled on its own slower cadence: walking the inventory of every
-	//  player once a second is real server cost for a signal that does not
-	//  move that fast, and the rule is a rate over a window anyway.
+	//  Inventory: sampled on a slower cadence; walking every player's inventory each
+	//  second is real server cost and the rule is a rate over a window anyway.
 	// -----------------------------------------------------------------------
 	protected void PollInventories( array< Man > players, float windowS, int nowMs )
 	{
@@ -905,15 +861,8 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	}
 
 	// -----------------------------------------------------------------------
-	//  Decay and persistence
-	//
-	//  Both exist for the same reason: a score is only useful if it describes
-	//  the present. A number that only ever rises ends up measuring how long
-	//  somebody has played here, and a number that resets on every restart
-	//  lets anyone launder a flag by waiting for the nightly reboot.
-	//
-	//  Real UTC seconds throughout, never g_Game.GetTime() - that clock starts
-	//  again at zero with the mission, which is exactly the gap being closed.
+	//  Decay and persistence: scores must survive restarts (no flag laundering).
+	//  Real UTC seconds, never g_Game.GetTime() (restarts at zero with the mission).
 	// -----------------------------------------------------------------------
 
 	//! Bleed every score down, and forget entries that have been at zero for
@@ -1283,11 +1232,8 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	}
 
 	// -----------------------------------------------------------------------
-	//  Rules over combat events
-	//
-	//  Run from the kill/hit drain rather than the poll: these are judgements
-	//  about single events, and the event carries context - aim direction,
-	//  delivery class, victim health - that is gone a frame later.
+	//  Rules over combat events: run from the kill/hit drain, not the poll, because
+	//  the event's context (aim, delivery class, victim health) is gone a frame later.
 	// -----------------------------------------------------------------------
 
 	//! Rules that judge the ATTACKER, on every hit and kill.
@@ -1423,12 +1369,8 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	}
 
 	// -----------------------------------------------------------------------
-	//  Kill-stats integration
-	//
-	//  Called from the static forwarder in 4_World/Entities/Player/
-	//  JMAntiCheatKillHook.c which is wired to PlayerBase.EEKilled / EEHitBy.
-	//  Both run on the server; on a dedicated server this is the only path
-	//  that fires, on a listen server the server side is what we use.
+	//  Kill-stats integration: called from 4_World JMAntiCheatKillHook.c, wired to
+	//  PlayerBase.EEKilled / EEHitBy (server only; the only path on a dedicated server).
 	// -----------------------------------------------------------------------
 
 	void RecordHit( PlayerBase attacker, PlayerBase victim, string dmgZone )

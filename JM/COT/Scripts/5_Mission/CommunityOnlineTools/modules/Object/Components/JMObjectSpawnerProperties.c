@@ -3,36 +3,21 @@ class JMObjectSpawnerProperties
 {
 	protected JMObjectSpawnerForm m_Form;
 
-	//! Property rows are rebuilt per selection rather than shown and hidden: a
-	//! hidden child still owns its cell in a GridSpacer, which would leave a
-	//! gap where an inapplicable slider used to be. m_PropsHost stays put so
-	//! the rows keep their place in the card; m_PropsGrid is what gets
-	//! replaced.
+	//! Property rows are rebuilt per selection, not hidden (a hidden child still owns its GridSpacer
+	//! cell, leaving a gap). m_PropsHost stays put; m_PropsGrid is what gets replaced.
 	protected Widget m_PropsHost;
 	protected Widget m_PropsGrid;
 	protected UIActionText m_PropsNone;
 
-	//! Ranges, not single values: the low and high handles are the bounds the
-	//! server rolls between, per spawned entity. Dragging them together is how
-	//! you ask for one exact value.
-	//!
-	//! Both start COLLAPSED to one handle - see m_RangeToggle.
+	//! Ranges: low and high handles are the bounds the server rolls between per entity; drag them
+	//! together for one exact value. Both start COLLAPSED to one handle - see m_RangeToggle.
 	protected UIActionSliderRange m_QuantityItem;
 	protected UIActionSliderRange m_HealthItem;
 
-	//! Switches the two spannable rows above between one value and a range.
-	//!
-	//! Off by default: rolling a spawn between two bounds is the advanced case,
-	//! and the pair of handles reads as a range whether or not the admin meant
-	//! one - a full magazine asked for by dragging both ends together is easy
-	//! to leave a round short by accident. With it off the rows keep exactly
-	//! the same look, minus the second handle.
-	//!
-	//! It lives in the card's TITLE BAR rather than in a row of its own: it is
-	//! a mode for the whole card, not a property of the item being spawned, and
-	//! a row would have put it in the same list as quantity and health where it
-	//! reads as one more thing that gets spawned. It also outlives the rows -
-	//! the grid under it is destroyed on every selection, the header is not.
+	//! Switches the two rows above between one value and a range. Off by default (rolling between
+	//! bounds is the advanced case; a range is easy to leave a round short by accident).
+	//! Lives in the card TITLE BAR: it is a mode for the whole card, not a spawned property, and it
+	//! outlives the rows (the grid is destroyed on every selection, the header is not).
 	protected UIActionImageButton m_RangeToggle;
 	protected bool m_RangesEnabled;
 
@@ -45,12 +30,8 @@ class JMObjectSpawnerProperties
 	//! number, and there is no sensible name for a range.
 	protected UIActionSlider m_TemperatureItem;
 
-	//! Cooking state for food.
-	//!
-	//! A dropdown built into a card that is torn down on every selection is only
-	//! safe because UIActionDropdown now unlinks its floating list panel with
-	//! itself - the panel is parented to the FORM root, not to the control, so
-	//! before that it would have been left behind once per rebuild.
+	//! Cooking state for food. A dropdown in a card torn down per selection is safe only because
+	//! UIActionDropdown unlinks its floating list panel (parented to the FORM root) with itself.
 	protected UIActionDropdown m_FoodStage;
 
 	//! FoodStageType for each entry of m_FoodStage, in the same order. Only the
@@ -76,11 +57,8 @@ class JMObjectSpawnerProperties
 	protected UIActionToggleSwitch m_Disinfect;
 	protected bool m_DisinfectValue;
 
-	//! The sliders are destroyed on every rebuild, so what the admin chose has
-	//! to outlive them. Health and quantity are kept as FRACTIONS of their own
-	//! span - the span changes with the class, and 30 rounds of one calibre
-	//! should come back as 30 rounds of the next, not as the number 30 against
-	//! a different maximum. Temperature has a fixed range, so it is absolute.
+	//! Sliders are destroyed on every rebuild, so the admin's choice outlives them. Health and quantity
+	//! are kept as FRACTIONS of their own span (it changes per class); temperature is absolute.
 	protected float m_HealthLowPct;
 	protected float m_HealthHighPct;
 	protected float m_QuantityLowPct;
@@ -131,14 +109,9 @@ class JMObjectSpawnerProperties
 		PaintRangeToggle();
 	}
 
-	//! Everything a spawn takes from the card. -1 is the module's "not specified" for
-	//! health, temperature and quantity, so a property the selected class does not
-	//! have simply is not sent.
-	//!
-	//! Health and quantity travel as a PAIR: the low end as the return value, the
-	//! high end as module state alongside the setup mode. The server rolls between
-	//! them once per entity, so one call that fills five inventories produces five
-	//! different results.
+	//! Everything a spawn takes from the card. -1 is the module's "not specified" (property not sent).
+	//! Health and quantity travel as a PAIR: low end as return value, high end as module state; the
+	//! server rolls between them once per entity.
 	void ReadSpawnValues( out float health, out float temp, out float quantity, out int itemState )
 	{
 		JMObjectSpawnerModule module = m_Form.GetModule();
@@ -193,12 +166,9 @@ class JMObjectSpawnerProperties
 		UpdateTemperatureItemColor();
 	}
 
-	//! Push the health slider onto the entity already being previewed.
-	//!
-	//! Same pass the spawn runs: the value lands on the item, on its damage
-	//! zones, and on every attachment at the same PERCENTAGE of that
-	//! attachment's own max health. Without the cascade a ruined rifle previews
-	//! with a pristine optic and magazine hanging off it.
+	//! Push the health slider onto the entity being previewed, same pass as the spawn: item, damage
+	//! zones and every attachment at the same PERCENTAGE of its own max (else a ruined rifle shows a
+	//! pristine optic).
 	void RefreshPreviewHealth()
 	{
 		if ( !m_Form.GetPreviewItem() || !m_HealthItem )
@@ -217,14 +187,8 @@ class JMObjectSpawnerProperties
 		if ( !m_HealthItem )
 			return;
 
-		//! The bar is SHADED across itself rather than given one colour: a range
-		//! that runs from ruined to pristine is not any single condition, and
-		//! painting it one colour could only ever describe one end of it.
-		//!
-		//! The ramp is sampled densely rather than handed over as the five
-		//! condition colours, because the vanilla bands are not evenly spaced -
-		//! they break at 30%, 50% and 70% - and evenly spaced stops would put
-		//! the colour changes in the wrong places.
+		//! The bar is SHADED across itself: a ruined-to-pristine range is no single condition. The ramp
+		//! is sampled densely, not five stops, because the vanilla bands are uneven (30%, 50%, 70%).
 		TIntArray stops = new TIntArray;
 
 		for ( int i = 0; i < HEALTH_GRADIENT_STOPS; i++ )
@@ -234,18 +198,9 @@ class JMObjectSpawnerProperties
 		m_HealthItem.SetAlpha( 1.0 );
 	}
 
-	//! Force a vanilla colour constant opaque.
-	//!
-	//! The condition and temperature constants in Colors are written with an
-	//! alpha byte of ZERO - COLOR_PRISTINE is 0x0040FF00. They are meant for
-	//! text colouring, where the alpha is supplied separately. Handed to
-	//! Widget.SetColor, which reads plain ARGB, every one of them paints a
-	//! fully transparent widget: the colour is applied exactly as asked and
-	//! nothing appears.
-	//!
-	//! The single-value slider hid this by calling SetAlpha(1.0) straight after
-	//! SetColor - but that only reaches the one widget SetAlpha touches, so
-	//! anything else painted from these constants stays invisible.
+	//! Force a vanilla colour constant opaque. The Colors condition/temperature constants have alpha
+	//! ZERO (COLOR_PRISTINE is 0x0040FF00, meant for text), so Widget.SetColor paints them fully
+	//! transparent. A following SetAlpha(1.0) only fixes the one widget it touches.
 	static int Opaque( int color )
 	{
 		return color | 0xFF000000;
@@ -290,16 +245,9 @@ class JMObjectSpawnerProperties
 	//  Properties
 	// -------------------------------------------------------------------------
 
-	//! Build only the sliders that mean something for this class.
-	//!
-	//! The old form kept all three on screen and called Disable() on whichever
-	//! did not apply - but a disabled UIAction is painted under a 90%-opaque
-	//! panel, so "not applicable" and "unreadable" looked the same. The rows
-	//! are built instead, and a row that does not apply is simply absent.
-	//!
-	//! They are REBUILT rather than shown and hidden because a hidden child
-	//! still owns its cell in a GridSpacer, which would leave a gap exactly
-	//! where the missing slider used to be.
+	//! Build only the sliders that mean something for this class. Inapplicable rows are absent, not
+	//! Disable()d (a disabled UIAction sits under a 90% panel, unreadable), and REBUILT not hidden
+	//! (a hidden child still owns its GridSpacer cell, leaving a gap).
 	void Rebuild( string classname )
 	{
 		if ( !m_PropsHost )
@@ -424,12 +372,8 @@ class JMObjectSpawnerProperties
 			}
 		}
 
-		//! Which cartridge, for a magazine that lists more than the one.
-		//!
-		//! Read from the class rather than from the preview entity: ammoItems is
-		//! declared on each magazine directly, so the config answers even when
-		//! there is no entity to ask, and a class that is not a magazine simply
-		//! has none.
+		//! Which cartridge, for a magazine listing more than one. Read from the class config, not the
+		//! preview entity (ammoItems is declared on the magazine; non-magazines simply have none).
 		CollectAmmoTypes( classname, ammoTypes );
 		wantsAmmo = ( ammoTypes.Count() > 1 );
 
@@ -556,12 +500,8 @@ class JMObjectSpawnerProperties
 			m_Form.GetRightScroller().UpdateScroller();
 	}
 
-	//! Fill m_FoodStageTypes and `labels` with the cooking stages `classname`
-	//! declares, in enum order.
-	//!
-	//! A food class lists its stages under Food FoodStages, one subclass per
-	//! stage, and there is no script-side query for them - so the config is the
-	//! only place that knows which of the six a given item has.
+	//! Fill m_FoodStageTypes and `labels` with the cooking stages `classname` declares, in enum order.
+	//! No script-side query exists; only the config (Food FoodStages subclasses) knows them.
 	protected void CollectFoodStages( string classname, out array<string> labels )
 	{
 		m_FoodStageTypes.Clear();
@@ -663,13 +603,9 @@ class JMObjectSpawnerProperties
 			return;
 		}
 
-		//! From the ITEM, never from "CfgVehicles <class> liquidContainerType".
-		//!
-		//! That absolute path answers 0 for every container in the game -
-		//! measured, not assumed - because liquidContainerType is declared on a
-		//! base class and g_Game.ConfigGetInt does not walk the inheritance
-		//! chain. The entity's own relative lookup does, and GetLiquidContainerMask
-		//! is the result of it.
+		//! From the ITEM, never "CfgVehicles <class> liquidContainerType": that absolute path answers 0
+		//! for every container (measured) as g_Game.ConfigGetInt does not walk inheritance; the entity's
+		//! own lookup does, via GetLiquidContainerMask.
 		int mask = item.GetLiquidContainerMask();
 
 		if ( mask == 0 )
@@ -829,11 +765,8 @@ class JMObjectSpawnerProperties
 		food.GetFoodStage().UpdateVisualsEx( true );
 	}
 
-	//! Remember what the sliders were set to before they are destroyed.
-	//!
-	//! Health and quantity are kept as a fraction of their own range: the range
-	//! is a property of the class, so a full magazine stays full when the next
-	//! class holds a different number of rounds.
+	//! Remember what the sliders were set to before they are destroyed. Health and quantity are kept
+	//! as a fraction of their own range, so a full magazine stays full for the next class.
 	protected void CaptureProperties()
 	{
 		//! While a slider is collapsed its low bound is PINNED to the value, so
@@ -933,11 +866,8 @@ class JMObjectSpawnerProperties
 		}
 	}
 
-	//! Hide the header switch for a class with nothing to switch.
-	//!
-	//! Hidden rather than disabled: a disabled UIAction is painted under a
-	//! 90%-opaque panel, which in a 30px title bar is a grey smudge that reads
-	//! as a broken icon rather than as an inapplicable one.
+	//! Hide the header switch for a class with nothing to switch. Hidden, not disabled: a disabled
+	//! UIAction sits under a 90%-opaque panel, a grey smudge in a 30px title bar.
 	protected void ShowRangeToggle( bool show )
 	{
 		if ( !m_RangeToggle )
@@ -946,17 +876,10 @@ class JMObjectSpawnerProperties
 		m_RangeToggle.GetLayoutRoot().Show( show );
 	}
 
-	//! Put the quantity and health rows into whichever mode the switch is in.
-	//!
-	//! The rows are changed IN PLACE rather than rebuilt: Rebuild
-	//! destroys every row in the card, and one of them is the switch that was
-	//! just clicked - the engine answers a vanished press target by recentring
-	//! the cursor, which is the same reason dragging a slider does not refresh
-	//! the preview.
-	//!
-	//! Reopening a span has to put the low handle BACK: collapsing pinned it
-	//! onto the value, and the fraction it was left at is the only record of
-	//! where the admin had it.
+	//! Put the quantity and health rows into the switch's mode, IN PLACE: Rebuild would destroy the
+	//! just-clicked switch and the engine answers a vanished press target by recentring the cursor.
+	//! Reopening a span must put the low handle BACK (collapsing pinned it; the stored fraction is
+	//! the only record of where it was).
 	protected void ApplyRangeMode()
 	{
 		if ( m_QuantityItem )

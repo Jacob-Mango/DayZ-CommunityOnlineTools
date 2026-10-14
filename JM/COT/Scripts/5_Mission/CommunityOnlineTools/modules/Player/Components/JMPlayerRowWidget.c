@@ -297,11 +297,8 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 
 	//! Pack the visible status glyphs against the row's right edge in a fixed
 	//! order, closing the gaps left by the ones that are hidden. Called after
-	//! every pass that changes which badges are up.
-	//!
-	//! badge_role is deliberately not in here: it belongs to a header row, sits
-	//! beside the chevron rather than in the player row's status strip, and the
-	//! two are never on screen together.
+	//! every pass that changes which badges are up. badge_role is deliberately not
+	//! here: it belongs to a header row, beside the chevron, never shown with this strip.
 	protected void StackBadges()
 	{
 		float slot = BADGE_STACK_ORIGIN;

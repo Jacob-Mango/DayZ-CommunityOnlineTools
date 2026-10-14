@@ -121,12 +121,9 @@ modded class ConstructionBase
 	}
 
 	//! A model-space box around one part, for drawing it on the client.
-	//!
-	//! The part's own collision_data box comes first: it is per part, where the
-	//! view geometry selection is usually shared by every part of one main part
-	//! (all the walls of a fence answer to "wall"). Then the view geometry of
-	//! the selection named after the part, then after its main part. False when
-	//! the model has none of the three.
+	//! Tries the part's own collision_data box first (per part, where the view geometry
+	//! is usually shared by a whole main part), then view geometry of the selection named
+	//! after the part, then after its main part. False when none exist.
 	bool COT_GetPartBounds( string partName, out vector min, out vector max )
 	{
 		ConstructionPart part = GetConstructionPart( partName );

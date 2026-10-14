@@ -1,9 +1,5 @@
-// =============================================================================
-//  JMEntityManagerListEntry
-//
-//  Generic left-panel list row for an entity. Click the row to open its info
-//  panel on the right.
-// =============================================================================
+// JMEntityManagerListEntry: generic left-panel list row for an entity.
+// Click the row to open its info panel on the right.
 class JMEntityManagerListEntry: COT_ScriptedWidgetEventHandler
 {
 	protected Widget       m_Root;

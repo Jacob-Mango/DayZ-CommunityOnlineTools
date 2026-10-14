@@ -33,8 +33,7 @@ class JMCameraBookmark
 }
 
 // ============================================================
-//  JMCameraSerialize
-//  Root JSON object - holds all saved paths and bookmarks.
+//  JMCameraSerialize - root JSON object holding all saved paths and bookmarks.
 //  Stored at $profile:CommunityOnlineTools\CameraPaths.json
 // ============================================================
 class JMCameraSerialize : Managed

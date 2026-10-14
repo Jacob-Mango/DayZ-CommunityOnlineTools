@@ -1,14 +1,7 @@
-//! "Active Bans" tab of JMBanForm - the ban list, its selection, and the
-//! inline duration picker. Holds a back-reference to the owning form (same
-//! shape as JMPlayerRowWidget.Menu) so it can reach the form's module and
-//! toolbar without either class needing to inherit the other.
-//!
-//! Laid out as a roster over a detail pane (ban_form.layout):
-//!
-//!   ban_list_left    one row per ban - player name, expiry
-//!   ban_list_detail  the selected ban as a card: who, why, until when,
-//!                    by whom; Unban in its title bar, Edit Duration and
-//!                    the duration picker under it
+//! "Active Bans" tab of JMBanForm - ban list, selection and inline duration
+//! picker; back-references the owning form for its module and toolbar. Layout
+//! (ban_form.layout): ban_list_left is a row per ban, ban_list_detail is the
+//! selected ban as a card (Unban in title bar, Edit Duration under it).
 class JMBanFormTabBans: JMFormTab
 {
     protected JMBanForm m_Form;
@@ -267,11 +260,8 @@ class JMBanFormTabBans: JMFormTab
         ShowDetail( FindBan( data.Value ) );
     }
 
-    // -------------------------------------------------------------------------
-    //  Toolbar state - the buttons themselves are the form's (built onto the
-    //  detail card by JMBanForm.BuildSelectionActions), so this only computes
-    //  whether they should be enabled.
-    // -------------------------------------------------------------------------
+    //  Toolbar state - the buttons are the form's (built by JMBanForm.
+    //  BuildSelectionActions), so this only computes whether they are enabled.
 
     protected void UpdateToolbarState()
     {

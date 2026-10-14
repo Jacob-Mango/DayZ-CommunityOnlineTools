@@ -1,15 +1,7 @@
-//! Every action that can be taken on a tracked object, as one context menu.
-//!
-//! Both entry points share this: right-clicking the world tag and right-clicking
-//! a row in the ESP form's tracked list. They used to be two different menus
-//! over two different action sets - the tag had an unfolding panel of controls,
-//! the list had four items - which meant an action was either in one place, the
-//! other, or written twice.
-//!
-//! Anything that needs a value is a page of choices rather than a text box: a
-//! menu cannot be typed into, and for health, quantity and the rest the useful
-//! values are a short list anyway. Anything genuinely free-form - an exact
-//! position, an exact lock code - goes through the clipboard.
+//! Every action on a tracked object as one context menu, shared by the world tag and the ESP
+//! form's tracked list. Anything needing a value is a page of choices (a menu cannot be
+//! typed into); genuinely free-form values (exact position, lock code) go through the
+//! clipboard.
 class JMESPActionMenu
 {
 	//! Pages. The id of a row is its whole routing: "p:" navigates, "a:" acts,
@@ -55,13 +47,9 @@ class JMESPActionMenu
 	//! synced state, short enough to read as one action.
 	static const int DIGITAL_CODE_LOCK_MENU_DELAY = 500;
 
-	//! The one menu that floats over the world.
-	//!
-	//! Both world entry points - a tag's right-click and a right-click on the
-	//! object itself - raise this same instance, because only one menu can be
-	//! open at a time anyway and two would have to be told about each other.
-	//! The ESP form keeps its own, anchored inside its window so the list does
-	//! not clip it.
+	//! The one menu that floats over the world: both world entry points raise this same
+	//! instance, as only one menu can be open at a time. The ESP form keeps its own,
+	//! anchored inside its window so the list does not clip it.
 	protected static ref JMESPActionMenu s_Shared;
 	protected UIActionContextMenu m_Menu;
 	protected ref JMESPMeta m_Meta;
@@ -81,21 +69,10 @@ class JMESPActionMenu
 	protected float m_X;
 	protected float m_Y;
 
-	// -------------------------------------------------------------------------
-	//  Attachments: per-slot add/remove/swap. Works on anything with attachment
-	//  slots - weapons, vehicles, clothing - not just weapons, since they all
-	//  expose the same GameInventory slot API.
-	//
-	//  Candidates are gathered the same way JMObjectSpawnerModule's spawn-with-
-	//  color fill does - every scope==2 CfgWeapons/CfgVehicles entry whose
-	//  inventorySlot[] names this slot - rather than trying to duplicate the
-	//  target's own attachments[] compatibility rules here. The list can be
-	//  broader than what this specific target actually accepts; the engine's
-	//  own CreateAttachmentEx() on the server is what actually enforces
-	//  compatibility, so an incompatible pick just fails there instead of
-	//  silently misattaching, same as every other create-by-classname action
-	//  in this menu.
-	// -------------------------------------------------------------------------
+	// Attachments: per-slot add/remove/swap on anything with attachment slots (GameInventory
+	// slot API). Candidates are every scope==2 CfgWeapons/CfgVehicles entry whose inventorySlot[]
+	// names the slot, so the list can be broader than the target accepts; the server's
+	// CreateAttachmentEx() enforces compatibility, so a bad pick just fails there.
 
 	//! Candidate classnames for whatever slot PAGE_ATTACH_SLOT is currently
 	//! showing - built by BuildAttachSlot(), read by index when "setattach:N"
@@ -201,11 +178,9 @@ class JMESPActionMenu
 		return m_Meta.m_TransformPopup;
 	}
 
-	//! Whether this thing has a cargo space at all.
-	//!
-	//! The structure, not the contents: a client is not told what is inside a
-	//! container it has never opened, so counting items here would hide the row
-	//! on exactly the full crates it is for.
+	//! Whether this thing has a cargo space at all. The structure, not the contents: a
+	//! client is not told what is inside a container it never opened, so counting items
+	//! would hide the row on exactly the full crates it is for.
 	protected bool HasCargo( EntityAI entity )
 	{
 		if ( !entity || !entity.GetInventory() )
@@ -289,12 +264,9 @@ class JMESPActionMenu
 		return m_Menu;
 	}
 
-	//! The world menu, built on first use.
-	//!
-	//! Parented to the ESP container rather than to whatever raised it: that
-	//! container is created once per client at mission load and outlives every
-	//! tag, so a menu living in it cannot be torn out from under itself when
-	//! the thing that opened it stops being tracked.
+	//! The world menu, built on first use. Parented to the ESP container (created once per
+	//! client at mission load) rather than the raiser, so it cannot be torn out from under
+	//! itself when the opening thing stops being tracked.
 	static JMESPActionMenu Shared()
 	{
 		if ( !JMStatics.ESP_CONTAINER )
@@ -415,12 +387,9 @@ class JMESPActionMenu
 		m_Menu.OpenAt( m_X, m_Y );
 	}
 
-	//! `enabled` is (almost) always a permission check, sometimes ANDed with a
-	//! state condition - either way, false means the row is not something
-	//! this admin can do right now, and a row that only ever sits there
-	//! grayed out teaches nothing. Skipped entirely rather than added
-	//! disabled; the menu is rebuilt from scratch on every Show() (see
-	//! ClearItems() above), so there is no stale row to worry about.
+	//! `enabled` is (almost) always a permission check, sometimes ANDed with state; false
+	//! means the row is not doable now, so it is skipped rather than added disabled.
+	//! The menu is rebuilt on every Show() (see ClearItems()), so no stale row remains.
 	protected void Add( string id, string label, string icon, bool enabled = true, int colour = 0 )
 	{
 		if ( !enabled )
@@ -451,11 +420,9 @@ class JMESPActionMenu
 		Add( id, label, icon, enabled );
 	}
 
-	//! The five rows every "how much of it" page is made of.
-	//!
-	//! The two ends are named rather than numbered: "Full" and "100%" say the
-	//! same thing, and only one of them reads as an answer to the question the
-	//! page is asking.
+	//! The five rows every "how much of it" page is made of. The two ends are named
+	//! ("Full") rather than numbered ("100%"): only the name reads as an answer to the
+	//! page's question.
 	protected void AddPercentRows( string action, string fullLabel, string emptyLabel, string icon, bool enabled, int emptyColour = 0 )
 	{
 		Add( PREFIX_ACTION + action + ":100", fullLabel, icon, enabled );
@@ -523,13 +490,9 @@ class JMESPActionMenu
 			if ( item.CanBeDisinfected() )
 				AddToggle( PREFIX_ACTION + "disinfect", "#STR_COT_ESP_MODULE_ACTION_DISINFECTED", item.GetCleanness() > 0, Perm( JMConstants.PERM_ESP_OBJECT_SETCLEANNESS ) );
 
-			//! Open and Close are no-op virtuals on a plain ItemBase, so this is
-			//! limited to the containers that actually override them rather than
-			//! offered everywhere and quietly doing nothing.
-			//!
-			//! The row names what it will do, not what the thing currently is:
-			//! a menu entry is a verb, and "Open" on an already-open container
-			//! reads as a statement rather than a button.
+			//! Open and Close are no-op virtuals on a plain ItemBase, so this is limited to
+			//! containers that override them. The row names the action, not the current state:
+			//! a menu entry is a verb, and "Open" on an open container reads as a statement.
 			if ( item.IsInherited( Container_Base ) )
 			{
 				if ( item.IsOpen() )
@@ -554,13 +517,10 @@ class JMESPActionMenu
 		if ( target.IsInherited( Transport ) )
 			AddPage( PAGE_VEHICLE, "#STR_COT_ESP_MODULE_PAGE_VEHICLE", JMConstants.Lucide( "car" ) );
 
-		//! Recolors the target and, best-effort, any already-attached child
-		//! that carries a color token of its own - offered on anything with
-		//! an inventory, not just vehicles, since clothing and gear can be
-		//! color-suffixed too. Never on a player - a character has no color
-		//! token to change - and hidden entirely rather than shown-disabled
-		//! when the classname has no variants: a page that only ever says "no
-		//! variants" teaches nothing about what the tool can do.
+		//! Recolors the target and, best-effort, attached children with their own color token.
+		//! Offered on anything with an inventory (clothing and gear can be color-suffixed),
+		//! never on a player (no color token), and hidden rather than shown-disabled when the
+		//! classname has no variants.
 		EntityAI colorEntity = EntityAI.Cast( target );
 		if ( colorEntity && !PlayerBase.Cast( target ) && Perm( JMConstants.PERM_ESP_OBJECT_CHANGECOLOR ) )
 		{
@@ -657,11 +617,9 @@ class JMESPActionMenu
 			}
 		}
 
-		//! Weapons, vehicles and clothing all expose attachment slots through
-		//! the same GameInventory API - one page covers all three rather than
-		//! duplicating this per target type. A player has no attachment slots
-		//! of its own here (its gear is reached through its inventory, not
-		//! this menu), so it is excluded the same way color-change is above.
+		//! Weapons, vehicles and clothing expose attachment slots through the same GameInventory
+		//! API, so one page covers all three. A player is excluded (its gear is reached through
+		//! its inventory), same as color-change above.
 		EntityAI attachEntity = EntityAI.Cast( target );
 		GameInventory attachInv;
 		if ( attachEntity )
@@ -852,10 +810,9 @@ class JMESPActionMenu
 
 #ifndef DAYZ_1_29
 	//! 1.30+
-	//! The digital code lock's own verbs. Locking needs a code to lock against, so
-	//! it is only offered once one is set; setting one hands over to the lock's
-	//! own keypad (see DoSetDigitalCode), since a code is free-form digits and a
-	//! menu has no way to ask for them.
+	//! The digital code lock's own verbs. Locking is only offered once a code is set; setting
+	//! one hands over to the lock's own keypad (see DoSetDigitalCode), as a menu cannot ask
+	//! for free-form digits.
 	protected void BuildDigitalCodeLock( DigitalCodeLock codeLock )
 	{
 		if ( codeLock.IsLocked() )
@@ -1055,11 +1012,9 @@ class JMESPActionMenu
 		AddPercentRows( "coolant", "#STR_COT_ESP_MODULE_MENU_FULL", "#STR_COT_ESP_MODULE_MENU_EMPTY", JMConstants.Lucide( "thermometer" ), Perm( JMConstants.PERM_ESP_OBJECT_CAR_REFUEL ) );
 	}
 
-	//! How far up the mast the flag sits.
-	//!
-	//! A percentage rather than raise/lower because that is what the pole
-	//! actually stores - vanilla's own raise action moves it one step at a time
-	//! - and because the refresher time it carries moves with it.
+	//! How far up the mast the flag sits. A percentage rather than raise/lower because that is
+	//! what the pole stores (vanilla's raise moves one step at a time) and the refresher time
+	//! it carries moves with it.
 	protected void BuildFlag()
 	{
 		AddBack();
@@ -1076,11 +1031,8 @@ class JMESPActionMenu
 		AddPercentRows( "flag", "#STR_COT_ESP_MODULE_MENU_FLAG_RAISED", "#STR_COT_ESP_MODULE_MENU_FLAG_LOWERED", JMConstants.Lucide( "flag" ), canSet );
 	}
 
-	//! Damage one built part without dismantling it.
-	//!
-	//! Percentages rather than hit points: every part and every material tier
-	//! has a different maximum, so a number would mean something different on
-	//! each row.
+	//! Damage one built part without dismantling it. Percentages rather than hit points:
+	//! every part and material tier has a different maximum.
 	protected void BuildPartHealth()
 	{
 		Add( PREFIX_PAGE + PAGE_PART + ":" + m_PageArg, "#STR_COT_ESP_MODULE_MENU_BACK", JMConstants.Lucide( "chevron-left" ) );
@@ -1094,12 +1046,9 @@ class JMESPActionMenu
 		Add( PREFIX_ACTION + "parthp:0", "#STR_COT_ESP_MODULE_MENU_RUIN", "", canSet, JMTheme.DANGER );
 	}
 
-	//! Everything that can be done to a firearm lying in the world.
-	//!
-	//! The jam row reports its state because a weapon syncs that flag; the two
-	//! chamber rows do not, because chamber contents are not something a client
-	//! can read off an object it is not holding - a row that claimed to know
-	//! would be lying half the time.
+	//! Everything that can be done to a firearm lying in the world. The jam row reports its
+	//! state because a weapon syncs that flag; the chamber rows do not, as a client cannot
+	//! read chamber contents off an object it is not holding.
 	protected void BuildWeapon()
 	{
 		AddBack();
@@ -1118,14 +1067,10 @@ class JMESPActionMenu
 		else
 			Add( PREFIX_ACTION + "chamber", "#STR_COT_ESP_MODULE_MENU_CHAMBER", JMConstants.Lucide( "circle-dot" ), canSet );
 
-		//! A weapon is one or the other: it takes a detachable magazine, or it
-		//! holds its rounds itself. Offering both would put a dead row on every
-		//! gun in the game.
-		//!
-		//! Exec_LoadMagazine already refills an already-attached magazine
-		//! instead of stacking a second one in a slot that only holds one -
-		//! the label just didn't say so. Same check, client-side, so the row
-		//! reads "Refill" instead of "Attach" when that is what it will do.
+		//! A weapon takes a detachable magazine or holds its rounds itself; offering both would
+		//! put a dead row on every gun. Exec_LoadMagazine refills an already-attached magazine
+		//! instead of stacking a second, so the same check runs client-side and the row reads
+		//! "Refill" instead of "Attach" when that is what it will do.
 		if ( WeaponAcceptsMagazine( weapon ) )
 		{
 			if ( WeaponHasMagazineAttached( weapon ) )
@@ -1136,14 +1081,10 @@ class JMESPActionMenu
 		else if ( weapon.HasInternalMagazine( -1 ) )
 			Add( PREFIX_ACTION + "fillinternal", "#STR_COT_ESP_MODULE_MENU_FILL_INTERNAL", JMConstants.Lucide( "layers-plus" ), canSet );
 
-		//! "Repair & Fill Slots" removed here on purpose - Refill/Attach
-		//! Magazine above is the weapon's ammo-filling action; a separate
-		//! Repair row that ALSO fills the (same) empty magazine slot was
-		//! redundant with it for the one attachment that actually matters.
-		//!
-		//! The Attachments page itself is offered from BuildMain, not here -
-		//! it is not weapon-specific (vehicles and clothing have attachment
-		//! slots too), so every target with any gets the same one entry point.
+		//! "Repair & Fill Slots" removed on purpose: Refill/Attach Magazine above is the ammo-filling
+		//! action, and a Repair row that also filled the empty magazine slot was redundant.
+		//! The Attachments page is offered from BuildMain, not here: it is not weapon-specific
+		//! (vehicles and clothing have slots too).
 	}
 
 	//! One row per attachment slot the target's model declares, whether or
@@ -1224,11 +1165,9 @@ class JMESPActionMenu
 		return count;
 	}
 
-	//! A fireplace's whole lifecycle.
-	//!
-	//! Refuel is listed above ignite on purpose: a fire with nothing to burn
-	//! goes straight back out on its first heating tick, so lighting an empty
-	//! one looks like the button did nothing.
+	//! A fireplace's whole lifecycle. Refuel is listed above ignite on purpose: a fire with
+	//! nothing to burn goes out on its first heating tick, so lighting an empty one looks
+	//! like the button did nothing.
 	protected void BuildFire()
 	{
 		AddBack();
@@ -1966,13 +1905,10 @@ class JMESPActionMenu
 		m_Meta.module.SetPosition( pos, m_Meta.target );
 	}
 
-	//! The tracked player, however this client can name one.
-	//!
-	//! m_Meta.player comes from the target's identity, and a client only holds
-	//! identities for players it can see - so it is null for most of the roster.
-	//! Falling back to the shared lookup keeps this menu acting on the same
-	//! player the player manager does, which is what makes one teleport history
-	//! serve both.
+	//! The tracked player, however this client can name one. m_Meta.player comes from the
+	//! target's identity, and a client only holds identities for players it can see, so it is
+	//! null for most of the roster. The shared lookup fallback keeps this menu acting on the
+	//! same player as the player manager, so one teleport history serves both.
 	protected JMPlayerInstance TargetPlayer()
 	{
 		if ( m_Meta.player )
@@ -1992,11 +1928,9 @@ class JMESPActionMenu
 	//  Weapons and fireplaces
 	// =========================================================================
 
-	//! The int that toggles a state.
-	//!
-	//! These actions carry their on/off as the ivalue of a generic action, and
-	//! Enforce will not narrow a bool into an int parameter - so the negation
-	//! has to become a number here rather than at the call site.
+	//! The int that toggles a state. These actions carry on/off as the ivalue of a generic
+	//! action, and Enforce will not narrow a bool into an int parameter, so the negation
+	//! becomes a number here rather than at the call site.
 	protected int Flip( bool state )
 	{
 		if ( state )
@@ -2135,13 +2069,8 @@ class JMESPActionMenu
 		m_Meta.module.BaseBuilding_SetPartHealth( bb, m_PageArg, health01 );
 	}
 
-	// =========================================================================
-	//  Player verbs
-	//
-	//  Routed through JMPlayerModule rather than reimplemented here, so each one
-	//  is logged, webhooked and permissioned exactly as the same button in the
-	//  player manager is.
-	// =========================================================================
+	// Player verbs: routed through JMPlayerModule rather than reimplemented, so each one is
+	// logged, webhooked and permissioned exactly as the same button in the player manager.
 
 	protected JMPlayerModule PlayerModule()
 	{
@@ -2164,11 +2093,8 @@ class JMESPActionMenu
 		playerModule.SetScale( scale, { instance.GetGUID() } );
 	}
 
-	//! Send whatever is on the clipboard as a message.
-	//!
-	//! A context menu cannot be typed into, and this file already says so: the
-	//! genuinely free-form values - an exact position, an exact lock code - go
-	//! through the clipboard, and a message body is one more of those.
+	//! Send whatever is on the clipboard as a message. A context menu cannot be typed into,
+	//! so free-form values (a message body included) go through the clipboard.
 	protected void DoMessage()
 	{
 		JMPlayerInstance instance = TargetPlayer();
@@ -2242,11 +2168,9 @@ class JMESPActionMenu
 		COTFeedback.Copy( Widget.TranslateString( m_Meta.type.Localisation ) );
 	}
 
-	//! The four destructive player verbs, by name.
-	//!
-	//! One function rather than four near-identical ones: they differ only in
-	//! the permission they need and the call they make, and every one of them
-	//! resolves the same target the same way first.
+	//! The four destructive player verbs, by name. One function rather than four: they
+	//! differ only in the permission needed and the call made, and all resolve the same
+	//! target first.
 	protected void DoPlayerVerb( string verb )
 	{
 		JMPlayerInstance instance = TargetPlayer();
@@ -2267,12 +2191,10 @@ class JMESPActionMenu
 			playerModule.Ban( guids, "" );
 	}
 
-	//! Put this target back where it was before its last move. Each click walks
-	//! one more step back, up to JMTeleportHistory.MAX_ENTRIES.
-	//!
-	//! Routed by what the target IS, not by this being the ESP menu - so a
-	//! player teleported from the player manager is undone from here, and a
-	//! vehicle moved from here is undone from the vehicle list.
+	//! Put this target back where it was before its last move; each click walks one more
+	//! step back, up to JMTeleportHistory.MAX_ENTRIES. Routed by what the target IS, not by
+	//! this being the ESP menu, so a player teleported from the player manager is undone
+	//! from here too.
 	protected void DoTeleportUndo()
 	{
 		JMTeleportHistory.UndoTarget( m_Meta.target, 0 );

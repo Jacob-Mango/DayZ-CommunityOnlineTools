@@ -1,24 +1,7 @@
-// =============================================================================
-//  JMFreecam.c
-//
-//  Free-roam 6-DOF camera used by the Map Editor module when the admin
-//  opens the editor. Detaches the player's view and lets the admin fly
-//  around the world to inspect + place / move / rotate objects in 3D.
-//
-//  Controls:
-//    Movement:  W / S   - forward / back along camera direction
-//               A / D   - strafe left / right
-//               Q / E   - down / up (world Y axis)
-//    Rotation:  Mouse   - yaw + pitch (held RMB to rotate)
-//    Boost:     Shift   - 5x speed multiplier
-//    Slow:      Ctrl    - 0.2x speed multiplier for precision
-//
-//  Input binding convention: every action name MUST exist in
-//  JM/COT/Scripts/Data/Inputs.xml under the Map Editor module's binding
-//  scope. The bindings are looked up each tick via GetUApi().GetInputByName().
-//
-//  Frame-rate independent: velocity is computed from speed * dt (not per-tick).
-// =============================================================================
+//  JMFreecam.c - free-roam 6-DOF camera for the Map Editor. WASD/QE move, RMB+mouse rotate,
+//  Shift 5x speed, Ctrl 0.2x. Every action name MUST exist in Scripts/Data/Inputs.xml under
+//  the Map Editor binding scope (looked up each tick via GetUApi().GetInputByName()).
+//  Frame-rate independent: velocity = speed * dt.
 
 class JMFreecam : JMCameraBase
 {

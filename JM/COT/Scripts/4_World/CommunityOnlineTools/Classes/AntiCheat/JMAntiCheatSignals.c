@@ -1,17 +1,7 @@
-// =============================================================================
-//  JMAntiCheatSignals.c
-//
-//  Static 4_World-side queues for events the anti-cheat module cannot hook
-//  directly. Same pattern, and the same reason, as JMAntiCheatKillHook: the
-//  producers here are 4_World types (the permission manager, Weapon_Base) and
-//  4_World compiles before 5_Mission, so they cannot name JMAntiCheatModule.
-//  They post here instead and the module drains the queues in its OnUpdate.
-//
-//  Everything is bounded. A disabled or crashed anti-cheat module must not
-//  turn a queue into a memory leak, and a client spamming denied RPCs must not
-//  be able to make the server allocate on its behalf - which would turn a
-//  detector into the very thing it is there to stop.
-// =============================================================================
+// JMAntiCheatSignals.c - static 4_World queues for events the anti-cheat module cannot
+// hook directly (same pattern as JMAntiCheatKillHook): producers are 4_World and compile
+// before 5_Mission, so they post here and the module drains in OnUpdate.
+// Everything is bounded so a dead module or a spamming client cannot grow server memory.
 
 class JMAntiCheatSignals
 {

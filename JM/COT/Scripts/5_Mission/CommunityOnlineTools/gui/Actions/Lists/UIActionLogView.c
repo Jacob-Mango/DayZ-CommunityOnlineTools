@@ -1,18 +1,6 @@
-// =============================================================================
-//  UIActionLogView
-//
-//  A scrollable read-only text log.  Lines are appended with AppendLine();
-//  each line can have its own color.  When the buffer exceeds m_MaxLines,
-//  the oldest line is dropped.  Auto-scrolls to the bottom on each append
-//  unless the user has scrolled up manually.
-//
-//  Usage:
-//      m_Log = UIActionManager.CreateLogView( parent, 100 );
-//      m_Log.AppendLine( "Player joined",  ARGB(255, 100,200,100) );
-//      m_Log.AppendLine( "Vehicle deleted",ARGB(255, 200,100,100) );
-//      m_Log.AppendLine( "RPC received"  );   // default white
-//      m_Log.Clear();
-// =============================================================================
+//  UIActionLogView - scrollable read-only text log. AppendLine( text, color = white ); the oldest
+//  line is dropped past m_MaxLines. Auto-scrolls to the bottom on append unless the user has
+//  scrolled up. m_Log = UIActionManager.CreateLogView( parent, 100 ); Clear() empties it.
 
 class JMLogLine
 {

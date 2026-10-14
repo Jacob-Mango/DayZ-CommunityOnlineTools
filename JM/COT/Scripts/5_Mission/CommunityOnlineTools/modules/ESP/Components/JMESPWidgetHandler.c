@@ -1,16 +1,12 @@
-//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
-//! COT_DEBUGLOGS is guarded by additional JM_COT_ESP_DEBUG here on purpose: this file's Print()s sit on the
-//! ESP widget lifecycle (SetInfo/Show/Hide, one tag per tracked object), which
-//! fires in bursts of dozens to hundreds whenever the tracked set changes.
-//! An unguarded COT_DEBUGLOGS here made every build pay that Print()
-//! volume - uncomment JM_COT_ESP_DEBUG in config.cpp and COT_DEBUGLOGS in COTDefines.c
-//! to opt in while chasing an ESP bug.
+//! Prints here also need JM_COT_ESP_DEBUG, not just COT_DEBUGLOGS: the ESP widget
+//! lifecycle fires in bursts of hundreds whenever the tracked set changes.
+//! To opt in, uncomment JM_COT_ESP_DEBUG in config.cpp and COT_DEBUGLOGS in COTDefines.c.
+//! #define scope in Enforce is per-file, not per compiled module.
 
 //! The world-space tag for one tracked object.
 //!
-//! One line - dot, state markers, name, distance - and a right-click. The tag
-//! used to unfold a panel of controls under itself; every action lives in
-//! JMESPActionMenu now, which the ESP form's tracked list shares.
+//! One line - dot, state markers, name, distance - and a right-click; every action lives in
+//! JMESPActionMenu, which the ESP form's tracked list shares.
 class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 {
 	static JMESPForm espMenu;
@@ -72,20 +68,14 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 	protected Widget m_pnl_Header;
 	protected Widget m_pnl_Accent;
 
-	//! The tag's opaque backdrop, its own widget rather than the root's
-	//! colour. The category tint the header carries is nearly transparent
-	//! (see ApplyCategoryColour) and counts on something solid behind it;
-	//! the root stopped providing that when it became a plain panel, which
-	//! left the tag see-through. A sibling panel with `style Colorable`
-	//! paints reliably - esp_object_header proves that much.
+	//! The tag's opaque backdrop, its own widget rather than the root's colour: the header's
+	//! category tint is nearly transparent (see ApplyCategoryColour) and needs something solid
+	//! behind it. A sibling panel with `style Colorable` paints reliably.
 	protected Widget m_pnl_Background;
 
-	//! Full-size 9-slice outline (hollow centre, border-only texture) laid
-	//! over the whole tag as a SIBLING of the header, so it traces the
-	//! panel's own outer edge. Nested inside the header it could only ever
-	//! draw within the content's bounds, which is what kept reading as an
-	//! inside border. Selection toggles only this widget's visibility and
-	//! colour - header/accent/text paint exactly as they always do.
+	//! Full-size 9-slice outline (hollow centre) over the whole tag as a SIBLING of the header,
+	//! so it traces the outer edge; nested inside the header it would only reach the content
+	//! bounds. Selection toggles only this widget's visibility and colour.
 	protected Widget m_pnl_SelectedBorder;
 
 	//! Second ring one px further out. The stroke width lives in the
@@ -230,11 +220,9 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		ApplyCategoryColour();
 
-		//! Forces Update()'s next tick to do a full repaint rather than skip it
-		//! as unchanged - this handler may be a pooled one that just belonged
-		//! to a different object, whose text/width/health could otherwise
-		//! coincidentally match this one's first frame (same name and rounded
-		//! distance is common in a stack of identical loot).
+		//! Forces Update()'s next tick to fully repaint: a pooled handler may have belonged to
+		//! another object whose text/width/health coincidentally match this one's first frame
+		//! (common in a stack of identical loot).
 		m_LastRenderedText = "";
 		m_LastRenderedWidth = 0;
 		m_LastHealthVisible = false;
@@ -428,12 +416,9 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 		return position;
 	}
 
-	//! JM_COT_ESP_DEBUG diagnostics: how often Update() actually redoes the
-	//! expensive on-screen work (text measure + resize) vs how often the same
-	//! text/width was already there - one active ESP session runs this for
-	//! every tracked tag, every client frame. Aggregated and printed once a
-	//! second (not per call) so turning this on does not itself become the
-	//! next thing tanking the framerate.
+	//! JM_COT_ESP_DEBUG diagnostics: how often Update() redoes the expensive on-screen work
+	//! (text measure + resize) vs finding the same text/width already there. Aggregated and
+	//! printed once a second so the diagnostics do not tank the framerate themselves.
 	static int s_UpdateTicks;
 	static int s_OnScreenTicks;
 	static int s_RedundantTextSets;
@@ -445,11 +430,9 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 	protected bool m_LastHealthVisible;
 	protected int m_LastHealthLevel = -1;
 
-	//! Whether layoutRoot's engine-side Show() state is currently true - kept
-	//! in sync by every path that changes it (Update(), Show(), Hide()), so
-	//! Show(true)/Show(false) only actually reaches the engine on the frame
-	//! the tag's visibility edge changes, not on every one of thousands of
-	//! frames it stays exactly as it already was.
+	//! Whether layoutRoot's engine-side Show() state is currently true, kept in sync by every
+	//! path that changes it (Update(), Show(), Hide()) so Show() only reaches the engine on
+	//! the visibility edge.
 	protected bool m_WasShown;
 
 	//! Screen resolution is one engine-wide value, not a per-tag one. Shared
@@ -584,11 +567,9 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 			if ( ShowDistance )
 				text += " (" + distance + " m)";
 
-			//! Proven redundant ~99% of the time (distance rounds to the same
-			//! 0.1m most frames): SetText()/GetScreenSize() is a text-shaping,
-			//! engine-side layout pass, so it and the row repack below only run
-			//! when the label or the health icon's visibility actually changed,
-			//! not on every one of possibly thousands of tags every frame.
+			//! Redundant ~99% of the time (distance rounds to the same 0.1m): SetText()/
+			//! GetScreenSize() is an engine-side layout pass, so it and the row repack below
+			//! only run when the label or health icon visibility changed.
 			bool textChanged = ( text != m_LastRenderedText );
 
 			if ( textChanged )
@@ -636,30 +617,15 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 			#endif
 			#endif
 
-			//! Selection is purely this outline widget - header/accent/text above
-			//! are never touched by it, so nothing "inside" changes.
-			//!
-			//! Placed entirely in screen pixels, never SetPos/SetSize: a layout
-			//! declares sizes in units the workspace scales by the player's UI
-			//! scale, so a local-unit size next to the root's SetScreenSize
-			//! disagree at any scale but 1:1 - that mismatch already drew this
-			//! ring as a rectangle larger than the tag once. Screen pixels are
-			//! the one space where positioning it and sizing it mean the same
-			//! thing (see JMPlayerForm.MeasureInventoryCell for the same rule).
-			//! The root carries clipchildren 0 so the outset is not cut off.
-			//!
-			//! Called here rather than from LayoutRow(): it uses the tag's live
-			//! screen position, which moves every frame even when the label/row
-			//! layout above did not - it has to stay unconditional, while the
-			//! measure-and-repack above is what is safe to skip.
+			//! Selection is purely this outline widget. Placed in screen pixels, never
+			//! SetPos/SetSize: local units scale with the UI scale and disagree with the root's
+			//! SetScreenSize (see JMPlayerForm.MeasureInventoryCell); root has clipchildren 0.
+			//! Unconditional, not in LayoutRow(): the tag's screen position moves every frame.
 			PlaceSelectionRing( m_pnl_SelectedBorder, BORDER_OUTSET );
 			PlaceSelectionRing( m_pnl_SelectedBorderOuter, BORDER_OUTSET + 1 );
 
-			//! Same shape as the text/size/colour skips above: Show(true) is a
-			//! redundant engine call on every frame a tag was already on
-			//! screen last frame too, which for a steadily on-screen tag is
-			//! effectively always. Only the widget's own edge-driven state
-			//! change needs it.
+			//! Same skip as above: Show(true) is a redundant engine call on every frame a
+			//! tag was already on screen last frame; only the visibility edge needs it.
 			if ( !m_WasShown )
 			{
 				layoutRoot.Show( true );
@@ -769,13 +735,9 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 		return x + JMUILayout.Px( ROW_ICON_W + ROW_GAP );
 	}
 
-	//! Paint the tag from its category: a solid accent strip down the left edge
-	//! and a ground the category colour can actually be read against.
-	//!
-	//! A bright category keeps the dark ground with a weak wash of its own hue
-	//! - a full-strength fill would take the contrast with it. A dark one has
-	//! nowhere to go on a dark ground, so the row flips to a light ground and
-	//! the colour is left to carry the text instead of fighting it.
+	//! Paint the tag from its category: a solid accent strip down the left edge and a readable
+	//! ground. A bright category keeps the dark ground with a weak wash of its hue (a full fill
+	//! would lose contrast); a dark one flips the row to a light ground and the colour carries the text.
 	void ApplyCategoryColour()
 	{
 		if ( !Info || !Info.type )
@@ -843,12 +805,9 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 		SetSelected( false );
 	}
 
-	//! Left-click toggles selection. NOTE this cannot be done from OnClick -
-	//! m_pnl_Header is a plain PanelWidgetClass, and per the engine (see
-	//! UIActionItemList's own note on the same lesson) a panel never raises
-	//! OnClick - only a ButtonWidget does. Selection has to run off the
-	//! PRESS instead, the same way the right-press gesture below already
-	//! does for this exact widget.
+	//! Left-click toggles selection. NOT from OnClick: m_pnl_Header is a plain PanelWidgetClass
+	//! and a panel never raises OnClick (only a ButtonWidget does; see UIActionItemList).
+	//! Selection runs off the PRESS instead, like the right-press gesture below.
 	protected bool OnLeftPress( Widget w, int button )
 	{
 		if ( w != m_pnl_Header || button != MouseState.LEFT )
@@ -977,13 +936,9 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 			return;
 
 
-		//! One undo step per gesture, not per throttled RPC during the drag -
-		//! this is the one point a move/rotate gesture actually commits, so
-		//! it's the only safe place to record it without spamming the stack.
-		//! Routed through the module (a server-side RPC, same as SetPosition/
-		//! SetOrientation below) rather than pushed to JMActionHistory
-		//! directly - this code runs on the dragging admin's client, and the
-		//! shared undo stack only exists on the server.
+		//! One undo step per gesture, not per throttled RPC: this is the one commit point.
+		//! Routed through the module (server RPC) rather than JMActionHistory directly, since
+		//! this runs on the admin's client and the shared undo stack only exists on the server.
 		if ( m_DidMove || m_DidRotate )
 			Info.module.RecordTransformHistory( Info.target, m_GestureStartPosition, m_GestureStartOrientation );
 
@@ -996,18 +951,10 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 			Info.module.SetOrientation( m_DragOrientation, Info.target );
 	}
 
-	//! Where the cursor is pointing in the world: a ray from the camera through
-	//! the pointer.
-	//!
-	//! Three things have to be invisible to it - the object being handled, the
-	//! admin's own body, and whatever they are sitting in - or the gesture
-	//! lands on one of those instead of on the ground behind. RaycastRVParams
-	//! carries a single ignore, which is why this goes through the proxy call
-	//! and its exclusion list rather than the plain RaycastRV.
-	//!
-	//! A ray into open sky hits nothing, and an object cannot be placed at
-	//! infinity - so it holds the camera distance it was grabbed at and slides
-	//! along the ray instead of snapping away.
+	//! World point under the cursor: a ray from the camera through the pointer. The handled
+	//! object, the admin's body and their vehicle must be ignored (RaycastRVParams carries a
+	//! single ignore, hence the proxy call with an exclusion list). A ray into open sky hits
+	//! nothing, so it holds the grab distance and slides along the ray instead of snapping away.
 	protected vector CursorWorldPosition()
 	{
 		vector from = g_Game.GetCurrentCameraPosition();
@@ -1134,12 +1081,9 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 
 		if ( mode == DRAG_MODE_VERTICAL )
 		{
-			//! Height comes off the mouse, NOT off the cursor ray. The ray
-			//! answers "what is under the pointer", and pointing at the sky to
-			//! raise something has nothing under it at all - which is what made
-			//! this jump. Travel is measured from where the lock began and
-			//! scaled by the distance to the object, so the lift tracks the
-			//! hand at any range.
+			//! Height comes off the mouse, NOT the cursor ray: pointing at the sky has nothing
+			//! under it, which made this jump. Travel is measured from where the lock began,
+			//! scaled by distance to the object, so the lift tracks the hand at any range.
 			float lift = ( my - m_DragMouseY ) * m_DragDistance * DRAG_VERTICAL_SCALE;
 
 			pos = m_DragOrigin;
@@ -1207,16 +1151,10 @@ class JMESPWidgetHandler: COT_ScriptedWidgetEventHandler
 		Info.module.SetOrientation( m_DragOrientation, Info.target );
 	}
 
-	//! Local, cosmetic only - it just makes the gesture track the cursor while
-	//! the button is held. The server owns the real transform and gets it from
-	//! the throttled sends plus EndDrag's final commit, so anything wrong here
-	//! is corrected the moment the drag ends.
-	//!
-	//! A vehicle needs its velocities cleared on the way through. Its rigid
-	//! body keeps simulating locally between our updates, so a bare
-	//! SetPosition leaves gravity and whatever momentum the body already had
-	//! to drag it back out of place before the next frame re-places it, which
-	//! reads as jitter. Zeroing both each frame pins it under the cursor.
+	//! Local, cosmetic only: the server owns the real transform (throttled sends plus EndDrag's
+	//! final commit), so anything wrong here is corrected when the drag ends.
+	//! A vehicle needs its velocities cleared each frame: its rigid body keeps simulating
+	//! between updates, and gravity/momentum drag it out of place after a bare SetPosition.
 	protected void PreviewTransform( vector position, vector orientation )
 	{
 		Transport transport;

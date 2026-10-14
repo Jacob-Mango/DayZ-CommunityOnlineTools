@@ -1,14 +1,7 @@
-// =============================================================================
-//  JMSpawnHistoryEntry
-//
-//  Undo/redo for an Object Spawner spawn into the world: undo removes what was
-//  spawned, redo puts it back (see JMSnapshotHistoryEntry). The exact mirror of
-//  JMDeleteHistoryEntry, built from the same snapshot machinery.
-//
-//  Constructed AFTER the spawn, from the spawned object. Only ground spawns
-//  push one - an item spawned into an inventory has no world position to
-//  restore it to.
-// =============================================================================
+//  JMSpawnHistoryEntry - undo/redo for an Object Spawner world spawn: undo removes what was
+//  spawned, redo puts it back (mirror of JMDeleteHistoryEntry, see JMSnapshotHistoryEntry).
+//  Constructed AFTER the spawn, from the spawned object. Only ground spawns push one: an item
+//  spawned into an inventory has no world position to restore.
 class JMSpawnHistoryEntry: JMSnapshotHistoryEntry
 {
 	void JMSpawnHistoryEntry( Object spawned )

@@ -1,18 +1,7 @@
-// =============================================================================
-//  JMAntiCheatKillStats.c
-//
-//  Per-player kill statistics for the anti-cheat module. Server-side only;
-//  mirrored to admin clients on demand. The form renders hit/miss ratio,
-//  body-part distribution, and engagement distance as a compact panel.
-//
-//  Data sources:
-//    - hit/miss  : `EntityAI.GetDamageHistory()` (last N damage events)
-//    - body-part : damage record's `DamageType` + `DamageZone` strings
-//    - distance  : attacker position (captured at death time) vs victim
-//                   last-known alive position
-//
-//  Window: last 50 kills. Older entries fall off the back to bound memory.
-// =============================================================================
+// JMAntiCheatKillStats.c - per-player kill statistics. Server-side only; mirrored to
+// admin clients on demand. Sources: hit/miss from EntityAI.GetDamageHistory(),
+// body-part from DamageType + DamageZone, distance from attacker position at death.
+// Window: last 50 kills; older entries fall off to bound memory.
 
 class JMAntiCheatKillStats
 {

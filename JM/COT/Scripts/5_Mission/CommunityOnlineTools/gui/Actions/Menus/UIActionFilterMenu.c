@@ -1,62 +1,7 @@
-// =============================================================================
-//  UIActionFilterMenu
-//
-//  A single UIActionContextMenu driven as a small stack of named PAGES, for
-//  the "filter button next to a search box, opens Categories/toggles, one of
-//  which drills into a list of checkboxes" shape used by the ESP tracked-
-//  object list, the teleport list and the object spawner. All three used to
-//  hand-roll this with a SECOND UIActionContextMenu for the drill-down
-//  (locations/vehicles/players, or a category group) - two live overlay
-//  menus sharing one anchor, which is what left the drill-down menu dead to
-//  clicks and hover until the whole COT window was closed and reopened. This
-//  class never opens a second menu; a drill-down is just another page of the
-//  same one.
-//
-//  It also owns the other half of that same bug class: UIActionContextMenu.
-//  AddItem()/ClearItems() destroy and recreate every row widget, and doing
-//  that from inside the row's OWN click handler - which every one of the
-//  three callers used to do, rebuilding the very menu whose click was still
-//  on the call stack - corrupts the engine's hit-test state the same way.
-//  Every page switch and toggle here goes through Refresh()/GoToPage(),
-//  which defer the rebuild with `CALL_CATEGORY_GUI.CallLater` so it runs
-//  after the click has finished unwinding rather than inside it.
-//
-//  A page is built by a caller-supplied callback that calls AddRow() back
-//  into this menu - the same Target/Callback shape UIActionContextMenu's own
-//  JMContextMenuEntry already carries (see its Target/Callback fields) - so
-//  the row's icon/colour/enabled state stays 100% caller-decided (a
-//  checkbox for teleport, the category's own glyph for ESP, an accent tint
-//  for the spawner's radio selection) and this class never has to know
-//  which presentation convention a given page is using.
-//
-//  Rows a mod registers with JMFilterRegistry appear on the ROOT page of any menu that names a
-//  scope (SetRegistryScope), and their callbacks run when clicked - so every filter menu in COT
-//  is extensible the same way, without the mod overriding the form's page builder.
-//
-//  Usage (from a form; the helper also registers the menu as one of the form's overlays):
-//      m_FilterMenu = UIActionManager.CreateOverlayFilterMenu( this, m_FilterButton.GetLayoutRoot(), JMFilterRegistry.OBJECTS );
-//      m_FilterMenu.AddPage( "root", this, "BuildRootPage", "", false, "", this, "OnRootPageChange" );
-//      ...
-//      m_FilterMenu.ToggleAt( m_FilterButton.GetLayoutRoot() );
-//
-//  or, when you manage parent and anchor yourself:
-//      m_FilterMenu = UIActionManager.CreateFilterMenu( parent, anchor );
-//      m_FilterMenu.AddPage( "root", this, "BuildRootPage", "", false, "", this, "OnRootPageChange" );
-//      m_FilterMenu.AddPage( "categories", this, "BuildCategoriesPage", "root", true, "#STR_...", this, "OnCategoriesChange" );
-//      m_FilterMenu.SetRootPage( "root" );
-//
-//      void BuildRootPage( UIActionFilterMenu menu )
-//      {
-//          menu.AddRow( "categories", "Categories", icon, color, true, "categories" ); // drill-down
-//          menu.AddRow( "selected", "Selected only", UIActionFilterMenu.CheckIcon( m_SelectedOnly ), UIActionFilterMenu.ToggleTextColor( m_SelectedOnly ) );
-//      }
-//
-//      void OnRootPageChange( string id )
-//      {
-//          if ( id == "selected" )
-//              m_SelectedOnly = !m_SelectedOnly;
-//      }
-// =============================================================================
+//  UIActionFilterMenu: one UIActionContextMenu driven as a stack of named PAGES (filter button
+//  next to a search box); a drill-down is a page, never a second overlay menu (that went dead to clicks).
+//  AddItem()/ClearItems() recreate row widgets; doing that inside the row's own click corrupts hit-testing,
+//  so Refresh()/GoToPage() defer via CALL_CATEGORY_GUI.CallLater. Rows from JMFilterRegistry show on the root page (SetRegistryScope).
 
 class JMFilterMenuRow
 {
@@ -152,22 +97,14 @@ class UIActionFilterMenu
 			return;
 		}
 
-		//! A row picking a value does not close the menu here by default -
-		//! ToggleAtButton/GoToPage/Refresh all rebuild in place instead, the
-		//! same "stays open, repaints" behaviour every existing caller wants
-		//! for its toggle rows. SetPageCloseOnPick() opts a page (the
-		//! spawner's radio pages) out of that.
+		//! A picked row does not close the menu by default (rebuilds in place, as toggle rows want).
+		//! SetPageCloseOnPick() opts a page (the spawner's radio pages) out.
 		m_Menu.SetCloseOnClick( false );
 	}
 
-	//! `buildTarget`/`buildFn` is called as `void BuildFn( UIActionFilterMenu menu )`
-	//! every time this page needs to redraw; it must call menu.AddRow() for
-	//! each row (Back/Toggle-All rows are added automatically, not by the
-	//! callback). `changeTarget`/`changeFn` is called as `void ChangeFn( string id )`
-	//! - `id` is the clicked row's id, or ID_TOGGLE_ALL - whenever a leaf row
-	//! on this page is picked; the callback owns mutating whatever state
-	//! that row represents. The first page added becomes the root page
-	//! unless SetRootPage() says otherwise.
+	//! `BuildFn( UIActionFilterMenu menu )` runs on every redraw and must call menu.AddRow() per row
+	//! (Back/Toggle-All are automatic). `ChangeFn( string id )` gets the picked row id or ID_TOGGLE_ALL
+	//! and owns mutating state. The first page added becomes root unless SetRootPage() says otherwise.
 	void AddPage( string key, Class buildTarget, string buildFn, string backToPage = "", bool showToggleAll = false, string toggleAllLabel = "#STR_COT_TELEPORT_MODULE_TOGGLE_ALL", Class changeTarget = null, string changeFn = "", bool closeOnPick = false )
 	{
 		JMFilterMenuPage page = new JMFilterMenuPage();
@@ -218,10 +155,7 @@ class UIActionFilterMenu
 			m_Menu.Close();
 	}
 
-	//! Opens flush under `button`'s own rect, always back on the root page -
-	//! a menu that reopens mid-drill-down from last time is surprising, not
-	//! useful. Closes instead if already open, so the button doubles as its
-	//! own toggle.
+	//! Opens flush under `button`, always on the root page; closes if already open (toggle).
 	//! DEPRECATED - use ToggleAt
 	void ToggleAtButton( notnull Widget button )
 	{

@@ -1,11 +1,6 @@
-// =============================================================================
-//  JMLiquidHistoryEntry
-//
-//  Undo/redo for ESP's Set Liquid Type on an item. The type is an int (a
-//  single-bit liquid id); it rides in the float slot of JMPropertyHistoryEntry
-//  and is cast back on the way out - every liquid id is far below 2^24, so it
-//  survives the round trip exactly.
-// =============================================================================
+//  JMLiquidHistoryEntry - undo/redo for ESP's Set Liquid Type. The int liquid id rides in the
+//  float slot of JMPropertyHistoryEntry and is cast back; ids are far below 2^24, so the
+//  round trip is exact.
 class JMLiquidHistoryEntry: JMPropertyHistoryEntry
 {
 	void JMLiquidHistoryEntry( Object target, int before, int after )

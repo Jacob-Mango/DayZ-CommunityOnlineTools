@@ -1,24 +1,7 @@
-// =============================================================================
-//  JMEditorGizmos.c
-//
-//  Renders 3D transform handles for the selected object in the Map Editor:
-//
-//    MOVE    -- three axis arrows (X red, Y green, Z blue) starting at the
-//               object origin and pointing along each axis. 1 m long.
-//    ROTATE  -- a Y-axis ring at the object origin, 1.5 m radius.
-//    SCALE   -- a unit-cube outline centred on the origin, edges coloured
-//               per-axis.
-//
-//  Rendering uses the vanilla DayZ Debug.DrawLine / Debug.DrawArrow API
-//  (the same one COT's JMESPModule uses for its bone overlay). These take
-//  ShapeFlags for one-shot vs persistent, which the form's per-frame Draw()
-//  call refreshes each tick.
-//
-//  Hit testing is screen-space: a click position is compared against the
-//  projected screen position of each axis's tip via g_Game.GetScreenPos.
-//  The currently-hovered axis is set so the form can render a hover
-//  highlight (brighter colour).
-// =============================================================================
+//  JMEditorGizmos.c - 3D handles for the selected Map Editor object: MOVE (1 m axis arrows X red,
+//  Y green, Z blue), ROTATE (Y ring, 1.5 m), SCALE (unit-cube outline). Drawn with Debug.DrawLine /
+//  DrawArrow, refreshed by the form's per-frame Draw(). Hit testing is screen-space (axis tip via
+//  g_Game.GetScreenPos); the hovered axis is exposed so the form can highlight it.
 
 class JMEditorGizmos
 {

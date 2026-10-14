@@ -4,11 +4,8 @@ modded class MissionGameplay
 	protected JMPlayerInstance m_OfflineInstance;
 	protected bool m_COT_DebugMonitorWasVisible;
 
-	//! Global Ctrl+Z/Ctrl+Y - undoes/redoes the shared JMActionHistory stack
-	//! (delete, heal, teleport, ...) from anywhere in COT. Edge-detected so a
-	//! held key fires once, not every frame. Map Editor keeps its own
-	//! separate shortcut for its own placed-object stack while its tab is
-	//! shown - see JMMapEditorForm.IsShown().
+	//! Global Ctrl+Z/Ctrl+Y undo/redo of the shared JMActionHistory stack. Edge-detected so a held
+	//! key fires once. Map Editor keeps its own shortcut for its object stack while shown.
 	protected bool m_ActionHistoryUndoKeyWasDown;
 	protected bool m_ActionHistoryRedoKeyWasDown;
 

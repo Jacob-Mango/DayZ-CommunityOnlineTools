@@ -119,17 +119,9 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	//  Load
 	// -------------------------------------------------------------------------
 
-	//! These settings carry the Discord webhook URLs, which are secrets - anyone
-	//! holding one can post to the server's Discord. So this is permission
-	//! gated like every other module's Exec_Load (Weather, Compensations,
-	//! Loadout, Teleport all do the same).
-	//!
-	//! This used to skip the check because the client requests Load from
-	//! OnMissionStart, which can land before the player is registered
-	//! server-side - and HasPermission denies when it cannot find the instance.
-	//! Denying is the right answer there; the fix for the race is to ask again
-	//! rather than to hand the URLs to everyone. See OnClientPermissionsUpdated
-	//! below, which re-requests once permissions actually arrive.
+	//! The settings carry secret Discord webhook URLs, so this is permission gated like every other
+	//! module's Exec_Load. A Load from OnMissionStart can land before the player is registered and is
+	//! rightly denied; OnClientPermissionsUpdated re-requests once permissions arrive.
 	protected void Exec_Load( notnull PlayerIdentity ident )
 	{
 		if ( !GetPermissionsManager().GetPlayer( ident.GetId() ) )

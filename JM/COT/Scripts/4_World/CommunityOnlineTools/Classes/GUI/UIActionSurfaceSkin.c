@@ -1,28 +1,7 @@
-// =============================================================================
-//  UIActionSurfaceSkin
-//
-//  Shared painter for every skinned surface in the COT UI. It owns no events -
-//  the owning UIAction feeds it state (hover / press / focus / selected /
-//  enabled) and the skin repaints the fill, the bevelled border frame, the
-//  accent bar and the label + icon tint from the JMUISurfaceStyle palette.
-//
-//  A skin binds to a *frame container*: any widget holding children named
-//  "fill", "border_top", "border_left", "border_bottom", "border_right" and
-//  optionally "accent". A layout can therefore carry several independent
-//  skinned regions - a labelled row can skin just its input field and leave
-//  the label area untouched.
-//
-//  Why a helper object instead of a base class: the skinned UIActions are
-//  siblings under UIActionBase, not a chain, and Enforce Script has no
-//  multiple inheritance. So the shared paint code lives here and each control
-//  composes it.
-//
-//  Usage:
-//      m_Skin = new UIActionSurfaceSkin();
-//      m_Skin.SetRole( JMUISurfaceStyle.ROLE_INPUT );
-//      m_Skin.Attach( layoutRoot.FindAnyWidget( "action_field" ) );
-//      ... m_Skin.SetHovered( true ) / SetFocused( true ) / SetEnabled( false )
-// =============================================================================
+//  UIActionSurfaceSkin - shared painter for skinned COT surfaces; owns no events, the owning UIAction
+//  feeds it state. Binds to a frame container with children "fill", "border_top/left/bottom/right"
+//  and optional "accent" (a layout may hold several). A helper, not a base class: skinned UIActions
+//  are siblings and Enforce has no multiple inheritance. Use: m_Skin.SetRole(..); m_Skin.Attach(widget);
 class UIActionSurfaceSkin
 {
 	protected Widget      m_Fill;

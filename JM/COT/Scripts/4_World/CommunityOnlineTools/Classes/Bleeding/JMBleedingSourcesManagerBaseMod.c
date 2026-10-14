@@ -1,13 +1,7 @@
-// =============================================================================
-//  JMBleedingSourcesManagerBaseMod.c
-//
-//  COT-side mod of the vanilla bleeding source manager. Exposes protected
-//  zone enumeration so the COT Player module can build a body-part dropdown
-//  matching vanilla's actual registration order. Critical: the int-index -> bit
-//  mapping in DebugActivateBleedingSource(int) is internal and not aligned
-//  with the m_BleedingSourceZone map keys; this mod lets us round-trip by
-//  selection name instead, which is guaranteed to match vanilla.
-// =============================================================================
+//  JMBleedingSourcesManagerBaseMod - exposes protected zone enumeration for the
+//  Player body-part dropdown. The int-index -> bit mapping in
+//  DebugActivateBleedingSource(int) is not aligned with m_BleedingSourceZone keys,
+//  so we round-trip by selection name instead.
 
 modded class BleedingSourcesManagerBase
 {

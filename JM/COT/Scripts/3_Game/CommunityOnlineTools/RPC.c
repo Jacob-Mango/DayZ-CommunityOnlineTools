@@ -286,11 +286,10 @@ enum JMESPObjectAction
 	SetHouseDoorOpen,
 	SetHouseDoorLocked,
 
-	//! A digital code lock - the gate's, the one on a building door, or the lock
-	//! itself. fvalue carries the Building door index the raycast picked (-1 when
-	//! there was none). GetDigitalCode answers through ObjectActionResult as text,
-	//! since a code can start with zeros. ResetDigitalCode unlocks the lock and
-	//! clears its code so a new one can be dialled in.
+	//! A digital code lock (gate, building door or the lock itself). fvalue is the
+	//! raycast Building door index (-1 if none). GetDigitalCode answers as text via
+	//! ObjectActionResult (codes can start with zeros). ResetDigitalCode unlocks
+	//! and clears the code.
 	SetDigitalLock,
 	GetDigitalCode,
 	ResetDigitalCode,
@@ -312,11 +311,8 @@ enum JMStatType
 
 enum JMPlayerModuleRPC
 {
-	//! Was 10320 - JMESPModuleRPC grew past that boundary once SetAttachment/
-	//! RemoveAttachment were appended (23 entries from its own INVALID=10300),
-	//! so its wire values collided with this block's (SetAttachment/
-	//! RemoveAttachment landed on SetBloodyHands/RepairTransport). Bumped with
-	//! headroom for both blocks; still well under JMNamalskEventManagerRPC's 10400.
+	//! Was 10320, which collided with JMESPModuleRPC (10300, 23 entries) once its
+	//! SetAttachment/RemoveAttachment were appended. Bumped; stays under 10400.
 	INVALID = 10340,
 
 	SetStat,
@@ -379,11 +375,8 @@ enum JMPlayerModuleRPC
 	COUNT
 }
 
-//! Which edit an InventoryModify request is asking for. One RPC covers all of
-//! them because they share every argument but the value: the item is addressed
-//! the same way, checked against the same permission and answered with the same
-//! refreshed listing, so five ids would have been five copies of one handler.
-//!
+//! Which edit an InventoryModify request asks for. One RPC covers all: they share
+//! item addressing, permission and refreshed-listing reply, differing only in value.
 //! Wire values - append only.
 enum JMInventoryModifyOp
 {
@@ -396,10 +389,8 @@ enum JMInventoryModifyOp
 	COUNT
 }
 
-//! What an InventoryGroupOp request is asking for. The item addressed by the
-//! request is the CONTAINER; the operation is applied to everything it holds
-//! directly - its cargo and its attachments - and never to the container itself.
-//!
+//! What an InventoryGroupOp asks for. The addressed item is the CONTAINER; the op
+//! applies to its cargo and attachments, never the container itself.
 //! Wire values - append only.
 enum JMInventoryGroupOp
 {
@@ -494,15 +485,9 @@ enum JMLootAnalysisModuleRPC
 	COUNT
 }
 
-// Generic JMEntityManagerModule RPCs. Every concrete manager (events, garage,
-// territory) gets its own range below that reuses the same three slots:
-//   Request  - client -> server: "send me entities"
-//   Send     - server -> client: "here are the entities"
-//   Action   - client -> server: "perform action id X on entity Y"
-//
-// SendUpsert / SendRemove were appended afterwards for the delta-refresh path
-// (server -> client). They MUST stay at the end of each enum so pre-delta
-// clients still match on the first four slots.
+// Generic JMEntityManagerModule RPCs, same slots per manager: Request (c->s),
+// Send (s->c), Action (c->s, action id on entity). SendUpsert/SendRemove (delta
+// refresh, s->c) MUST stay at the end so pre-delta clients match the first four.
 
 enum JMEventsModuleRPC
 {
@@ -563,10 +548,8 @@ enum JMMapEditorModuleRPC
 
 	// Server -> Client
 	List,
-	//! RESERVED, not yet implemented: intended to push undo/redo stack depth to
-	//! the client so the form can grey out unavailable buttons. The stacks are
-	//! server-side (m_UndoStack), so the client currently cannot know. Never
-	//! sent and deliberately has no OnRPC case -- rpc_check flags this, see
+	//! RESERVED, not implemented: would push undo/redo depth to the client. Never
+	//! sent, deliberately no OnRPC case -- rpc_check flags this, see
 	//! ai/tools/README.md.
 	UndoState,
 

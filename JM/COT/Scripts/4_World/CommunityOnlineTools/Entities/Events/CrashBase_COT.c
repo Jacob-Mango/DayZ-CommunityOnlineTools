@@ -1,8 +1,6 @@
-// =============================================================================
 //  Server-side tracking for vanilla heli crash sites (CrashBase and subclasses).
-//  Mirrors the CarScript pattern: a CF doubly-linked weak-ref list keeps track
-//  of every live instance without a world scan.
-// =============================================================================
+//  Mirrors the CarScript pattern: a CF weak-ref linked list tracks every live
+//  instance without a world scan.
 
 #ifndef EXPANSIONMODAI
 

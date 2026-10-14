@@ -1,13 +1,7 @@
-// =============================================================================
-//  JMHealHistoryEntry
-//
-//  Undo/redo for ESP's Heal action. Restores the health value Heal wiped out
-//  (and, for a player, stamina/water) - bleeding sources, broken legs and
-//  diseases are not restored, since Heal clears several independent systems
-//  at once and only the health value is worth an inverse here.
-//
-//  Must be constructed BEFORE the target is actually healed.
-// =============================================================================
+// JMHealHistoryEntry: undo/redo for ESP's Heal. Restores the wiped health value (and
+// stamina/water for a player); bleeding, broken legs and diseases are not restored since
+// Heal clears several independent systems at once.
+// Must be constructed BEFORE the target is actually healed.
 class JMHealHistoryEntry: JMActionHistoryEntry
 {
 	protected EntityAI m_Target;

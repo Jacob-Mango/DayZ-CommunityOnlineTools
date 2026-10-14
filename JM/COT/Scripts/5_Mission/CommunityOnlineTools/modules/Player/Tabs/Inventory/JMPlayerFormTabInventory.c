@@ -6,10 +6,8 @@ class JMPlayerFormTabInventory: JMFormTab
 	protected JMPlayerForm m_Form;
 
 	// -- Inventory tab -----------------------------------------------------
-	//! Preview entities and the classname each was spawned from, indexed by
-	//! ITEM index - the position in m_InventoryItems, not the position on
-	//! screen. Keying by item means expanding or collapsing a container moves
-	//! no entities at all.
+	//! Preview entities and their spawn classnames, indexed by ITEM index (position
+	//! in m_InventoryItems, not on screen), so expanding a container moves none.
 	ref array<EntityAI> m_InvCellEntities;
 	ref array<string>   m_InvCellTypes;
 
@@ -102,14 +100,9 @@ class JMPlayerFormTabInventory: JMFormTab
 	static const string INV_MENU_TAKE   = "take";
 	static const string INV_MENU_DELETE = "delete";
 
-	//! Item-specific entries. Unlike the four above they are only listed when
-	//! the row that was hit can actually take them - a "Set Liquid" greyed out
-	//! on every rifle in the loadout would be noise on the common case, and
-	//! these are properties of the item, not of the admin's permissions.
-	//!
-	//! Doubles as the prompt id the confirm callback branches on: one menu
-	//! entry raises exactly one prompt, so a second set of ids would only be a
-	//! second thing to keep in step.
+	//! Item-specific entries, listed only when the row can take them (a greyed
+	//! "Set Liquid" on every rifle is noise). Doubles as the prompt id the confirm
+	//! callback branches on: one entry raises one prompt.
 	static const string INV_MENU_UNJAM       = "unjam";
 	static const string INV_MENU_QUANTITY    = "quantity";
 	static const string INV_MENU_HEALTH      = "health";
@@ -134,17 +127,12 @@ class JMPlayerFormTabInventory: JMFormTab
 	static const int INV_BAND_LABEL = 26;
 	static const int INV_BAND_GAP   = 6;
 
-	//! Header action size. Smaller than the cards' HEADER_ACTION_PX because the
-	//! band strip is a band strip, not a card title bar - three 28px buttons
-	//! would be taller than the row they label.
+	//! Header action size. Smaller than the cards' HEADER_ACTION_PX: three 28px
+	//! buttons would be taller than the band strip they label.
 	static const int INV_BAND_ACTION_PX = 22;
 
-	//! Glyph size inside one of those buttons.
-	//!
-	//! The pill's image is an EXACT 16px in UIActionImageButton.layout - it does
-	//! NOT scale with the button - so a button shrunk below the card size keeps
-	//! a full-size glyph and ends up as a solid disc with a picture jammed edge
-	//! to edge. Kept near the layout's own ratio of 16 in 28.
+	//! Glyph size in those buttons. The pill's image is an EXACT 16px in the layout
+	//! and does NOT scale, so shrunk buttons need a smaller glyph; near 16 in 28.
 	static const int INV_BAND_ICON_PX = 12;
 
 	//! How a cell prints its quantity. See InventoryQuantityMode.
@@ -282,14 +270,10 @@ class JMPlayerFormTabInventory: JMFormTab
 		return false;
 	}
 
-	//! Inventory tab: a flat table of everything the player is carrying, with a
-	//! right-click menu per row.
-	//!
-	//! A table rather than an icon grid because DayZ has no 2D item icon - the
-	//! only way to draw an item picture is an ItemPreviewWidget fed a real
-	//! client-local entity, and spawning one per row for an 80-item loadout,
-	//! rebuilt on every refresh, is a frame-time problem. Nesting is shown by
-	//! indenting the name instead.
+	//! Inventory tab: a table of everything carried, right-click menu per row.
+	//! No 2D item icon exists, so a picture needs an ItemPreviewWidget on a
+	//! client-local entity; one per row for 80 items on every refresh costs frame
+	//! time. Nesting is shown by indenting the name.
 	Widget InitActionWidgetsInventory( Widget actionsParent )
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 6, 1 );
@@ -297,27 +281,21 @@ class JMPlayerFormTabInventory: JMFormTab
 		UIActionCard section0Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_INVENTORY" );
 		Widget section0 = section0Card.GetContent();
 
-		// Both controls act on the whole listing, so they live in the card's
-		// own title bar rather than in a toolbar row above the grid - a row of
-		// their own cost a full line of height and pushed the items down.
-		// Created refresh-first: the strip packs right, so the first child is
-		// the leftmost and the destructive one ends up on the outside edge.
+		// Both act on the whole listing, so they sit in the card title bar (a
+		// toolbar row cost a line of height). Refresh first: the strip packs right,
+		// so the destructive one ends up on the outside edge.
 		m_InventoryRefresh = section0Card.AddRefreshButton( this, "Click_RefreshInventory", "#STR_COT_PLAYER_MODULE_TT_INV_REFRESH" );
 
-		// ClearCargo has existed on the module since forever with no UI anywhere.
-		// It belongs on this tab; Strip stays with the destructive actions.
-		// Icon-only, so the caption it lost becomes its tooltip. Always targets
-		// m_SelectedInstance - the player list's own checkbox selection is a
-		// separate concept and has nothing to do with the inventory on screen.
+		// ClearCargo belongs on this tab; Strip stays with the destructive actions.
+		// Icon-only, so its caption is the tooltip. Always targets m_SelectedInstance,
+		// not the player list's checkbox selection.
 		m_InventoryClearCargo = section0Card.AddDeleteButton( this, "Click_ClearCargoOnly", "#STR_COT_PLAYER_MODULE_TT_INV_CLEAR_CARGO" );
 		m_InventoryClearCargo.SetColor( JMTheme.DANGER_FILL );
 
 
-		// A wrap spacer, not a grid with a fixed column count: the form is
-		// resizable, and a wrap spacer reflows the cells to whatever width the
-		// tab currently has, the way the vanilla inventory does. It sizes to its
-		// content vertically, so the tab's existing scroller handles overflow
-		// with no extra work.
+		// A wrap spacer, not a fixed-column grid: the form is resizable and it
+		// reflows cells like vanilla. It sizes to content vertically, so the tab's
+		// scroller handles overflow.
 		m_InventoryCanvas = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_inventory_canvas.layout", section0 );
 
 		// Hidden unless the server stopped short of the whole loadout - a count
@@ -336,16 +314,10 @@ class JMPlayerFormTabInventory: JMFormTab
 		// over the tab rather than scroll with it.
 		m_InventoryPrompt = UIActionManager.CreateOverlayPrompt( m_Form, this, "OnConfirm_InventoryPrompt" );
 
-		// Vanilla's inventory tooltip, verbatim. It is filled by the static
-		// InspectMenuNew.UpdateItemInfo, so nothing here depends on ItemManager
-		// or on the inventory menu being open - which it never is while COT has
-		// the screen.
-		//
-		// Created at the TOP of the workspace with no section0, not inside the COT
-		// window: as a child of the window it was clipped at the window's edge
-		// and its position was relative to the window, so it drifted as soon as
-		// the form was dragged. A tooltip follows the cursor across the whole
-		// screen, so it has to be positioned in screen space.
+		// Vanilla's inventory tooltip, filled by static InspectMenuNew.UpdateItemInfo
+		// (no ItemManager or open inventory menu needed). Created at the workspace
+		// TOP, not in the COT window: as a child it was clipped at the window edge
+		// and drifted when dragged; it follows the cursor so needs screen space.
 		m_InvTooltip = g_Game.GetWorkspace().CreateWidgets( "gui/layouts/inventory_new/day_z_inventory_new_tooltip.layout", NULL );
 		if ( m_InvTooltip )
 		{
@@ -357,12 +329,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		return parent;
 	}
 
-	//! Ask the server for a fresh listing of the selected player.
-	//!
-	//! Only ever called on tab entry, on a selection change while the tab is up,
-	//! from the refresh button, and after an operation - never on a timer. An
-	//! unrequested listing per connected admin per second is real bandwidth for
-	//! a panel that may not even be open.
+	//! Ask the server for a fresh listing of the selected player. Called on tab
+	//! entry, selection change, refresh and after an operation - never on a timer
+	//! (per-admin per-second listings are real bandwidth for a maybe-closed panel).
 	void RequestInventory()
 	{
 		if ( !m_Form.m_Module || !m_Form.m_SelectedInstance )
@@ -381,12 +350,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		if ( !m_Form.m_SelectedInstance || guid != m_Form.m_SelectedInstance.GetGUID() )
 			return;
 
-		// Item indices only mean anything within one listing, so which
-		// containers were open is carried across by NET ID instead - stable
-		// across a refresh unless the tree itself changed, which is what a
-		// routine edit (health, quantity, temperature, ...) never does. Losing
-		// the expansion on every refresh made editing anything inside an open
-		// bag or vest close it right back up.
+		// Item indices only mean something within one listing, so open containers
+		// are carried across by NET ID (stable unless the tree changed). Else any
+		// edit inside an open bag or vest would close it again.
 		array<int> expandedLow  = {};
 		array<int> expandedHigh = {};
 
@@ -423,12 +389,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		RebuildInventoryTable( truncated );
 	}
 
-	//! Rebuild the cell grid from the cached listing.
-	//!
-	//! Cells are recreated wholesale but the PREVIEW ENTITIES are reused: an
-	//! entity is only respawned when what that index is showing changes. A
-	//! refresh after a repair or a take otherwise means deleting and recreating
-	//! up to ninety-six objects for a listing that barely moved.
+	//! Rebuild the cell grid from the cached listing. Cells are recreated but
+	//! PREVIEW ENTITIES are reused, respawned only when an index's content changes
+	//! (else a refresh recreates up to 96 objects for a barely changed listing).
 	void RebuildInventoryTable( bool truncated )
 	{
 		if ( !m_InventoryCanvas )
@@ -498,11 +461,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		m_InventoryNotice.GetLayoutRoot().Show( truncated );
 	}
 
-	//! Drawn width of the cell area, in screen pixels.
-	//!
-	//! Falls back up the parent chain and then to a sane default: a listing can
-	//! arrive before the tab has ever been laid out, and a width of zero would
-	//! collapse the grid to a single column.
+	//! Drawn width of the cell area, in screen pixels. Falls back to the parent, then
+	//! a default: a listing can arrive before first layout and zero width would
+	//! collapse the grid to one column.
 	float InventoryCanvasWidth()
 	{
 		float w, h;
@@ -517,15 +478,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		return w;
 	}
 
-	//! Drawn width of one cell, in screen pixels.
-	//!
-	//! The whole layout pass works in screen pixels and places everything with
-	//! SetScreenPos / SetScreenSize. It has to: a layout declares its sizes in
-	//! units the workspace then scales by the player's UI scale, and stepping
-	//! the grid by the DECLARED 72 while the engine draws the cell at the SCALED
-	//! width is exactly how the cells ended up overlapping each other. Screen
-	//! pixels are the one space where the number that positions a cell and the
-	//! number that sizes it mean the same thing.
+	//! Drawn width of one cell, in screen pixels. The layout pass uses screen pixels
+	//! throughout (SetScreenPos/SetScreenSize): stepping by the DECLARED 72 while
+	//! the engine draws at the UI-SCALED width made cells overlap.
 	float MeasureInventoryCell()
 	{
 		Widget probe = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_inventory_cell.layout", m_InventoryCanvas );
@@ -586,17 +541,9 @@ class JMPlayerFormTabInventory: JMFormTab
 
 		Print( "[COT-PREVIEW] first: visible=" + first.IsVisible().ToString() + " pos=" + px + "," + py + " size=" + pw + "x" + ph + " item=" + itemState );
 
-		// The three states this has to tell apart, and what each looks like:
-		//
-		//   size 0x0 or item=NULL   the preview never had anything to draw -
-		//                           geometry or the local entity, our bug.
-		//   sane size, item set     the engine IS drawing it and something is
-		//                           on top of it, or the model is out of frame.
-		//   an ancestor invisible
-		//   or alpha 0              the chain hides it, whatever the leaf says.
-		//
-		// So walk up and print the chain: a widget that reports itself visible
-		// inside an invisible parent is the classic false positive here.
+		// Tells apart: size 0x0 or item=NULL (nothing to draw, our bug); sane size and
+		// item set (drawn but covered or out of frame); invisible/alpha 0 ancestor
+		// (hides it whatever the leaf says). So print the parent chain.
 		Widget walk = first.GetParent();
 		int depth = 0;
 
@@ -609,19 +556,10 @@ class JMPlayerFormTabInventory: JMFormTab
 		}
 	}
 
-	//! Place one level of the tree, and answer how tall it came out.
-	//!
-	//! Everything is positioned by hand onto one flat canvas rather than handed
-	//! to a spacer. A band has to be exactly as tall as what it contains, and
-	//! the items after it have to carry on underneath - which is the one thing a
-	//! wrap spacer will not do: it sized the band against the whole panel, so
-	//! one open container swallowed the rest of the list.
-	//!
-	//! Cells and bands are all siblings on the canvas; a band is simply the
-	//! ground drawn under a run of cells, created BEFORE them so it stays
-	//! behind. Only an opened container is descended into, so a listing that
-	//! describes a cycle cannot be walked twice; the depth guard covers a
-	//! ParentIndex chain that loops back on itself.
+	//! Place one level of the tree, answering its height. Hand-positioned on a flat
+	//! canvas (a spacer sized a band against the whole panel). Bands are created
+	//! BEFORE their cells to stay behind; only opened containers are descended into,
+	//! and the depth guard covers a looping ParentIndex chain.
 	float LayoutInventoryLevel( int parentIndex, float originX, float originY, float width, int depth )
 	{
 		if ( depth > INV_MAX_DEPTH )
@@ -634,13 +572,9 @@ class JMPlayerFormTabInventory: JMFormTab
 
 		array<int> order = InventoryLevelOrder( parentIndex );
 
-		// Two passes, not one. Interleaving a band with the cells - dropping it
-		// in right under the container it belongs to - splits the grid in half
-		// the moment anything in the first row is opened, and at the root that
-		// grid is the equipment slot layout: an admin loses the shape of the
-		// loadout as soon as they look inside a backpack. So every cell of this
-		// level is placed first, and the open containers spill out underneath
-		// the complete grid, in the order they appear in it.
+		// Two passes: a band right under its container would split the grid (at the
+		// root, the equipment slot layout) as soon as one is opened. So all cells go
+		// first and open containers spill out under the full grid, in grid order.
 		for ( int i = 0; i < order.Count(); i++ )
 		{
 			int entry = order[i];
@@ -686,19 +620,10 @@ class JMPlayerFormTabInventory: JMFormTab
 		return y - originY;
 	}
 
-	//! What one level draws, in the order it draws it.
-	//!
-	//! Below the root that is simply listing order: the server walked the tree
-	//! PREORDER, so a container's contents already arrive in the order it holds
-	//! them.
-	//!
-	//! The ROOT is different. An admin reads a loadout by SLOT, and an EMPTY
-	//! slot is information - "no vest", "no backpack" - that a list of whatever
-	//! happens to be worn cannot express at all. So the root is the survivor's
-	//! full equipment list in the vanilla order, with the worn item dropped into
-	//! each slot and the slot's own ghost icon where there is nothing. Anything
-	//! the slot table does not account for - the item in hands, a slot added by
-	//! a mod - follows after it rather than being dropped.
+	//! What one level draws, in order. Below the root: listing order (the server
+	//! walked PREORDER). The ROOT is by SLOT in vanilla order, since an EMPTY slot
+	//! ("no vest") is information: worn item per slot, else its ghost icon. Items
+	//! the slot table misses (hands, mod slots) follow rather than being dropped.
 	array<int> InventoryLevelOrder( int parentIndex )
 	{
 		array<int> order = new array<int>;
@@ -759,12 +684,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		return order;
 	}
 
-	//! Index of the root-level item worn in this slot, or -1.
-	//!
-	//! Matched on slot ID rather than on the strings: the listing's slot name
-	//! comes back out of InventorySlots and the table's comes out of CfgSlots,
-	//! and resolving both to the id the engine assigned is the one comparison
-	//! that cannot be tripped by a difference in case.
+	//! Index of the root-level item worn in this slot, or -1. Matched on slot ID, not
+	//! strings (listing names come from InventorySlots, the table's from CfgSlots),
+	//! so case differences cannot break it.
 	int InventoryItemInSlot( string slotName )
 	{
 		int wanted = InventorySlots.GetSlotIdFromString( slotName );
@@ -790,12 +712,8 @@ class JMPlayerFormTabInventory: JMFormTab
 		return -1;
 	}
 
-	//! Read the survivor's equipment slots out of config, once.
-	//!
-	//! playerSlots is the same list, in the same order, that the vanilla
-	//! inventory draws down its left edge - so a loadout looks here the way it
-	//! looks in the game's own screen. Reading it rather than hardcoding it also
-	//! means a mod that adds a slot to the survivor gets one here for free.
+	//! Read the survivor's equipment slots out of config, once. playerSlots matches
+	//! the vanilla inventory's order, and a mod-added slot appears for free.
 	void EnsureInventorySlotTable()
 	{
 		if ( m_InvSlotsBuilt )
@@ -832,13 +750,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		}
 	}
 
-	//! An equipment slot with nothing in it: the slot's own ghost glyph on a
-	//! sunken tile.
-	//!
-	//! It is inserted with an item index of -1, which every handler that
-	//! resolves a widget back through InventoryCellIndexOf already treats as
-	//! "not a cell" - so an empty slot cannot be selected, opened, hovered for
-	//! a tooltip, or acted on by the context menu without a single extra guard.
+	//! An empty equipment slot: its ghost glyph on a sunken tile. Inserted with item
+	//! index -1, which InventoryCellIndexOf handlers treat as "not a cell", so it
+	//! cannot be selected, opened, hovered or acted on, with no extra guard.
 	Widget BuildInventoryGhostCell( int slotIndex )
 	{
 		Widget cell = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_inventory_cell.layout", m_InventoryCanvas );
@@ -945,32 +859,15 @@ class JMPlayerFormTabInventory: JMFormTab
 		return bandHeight + ( INV_BAND_GAP * m_InvScale );
 	}
 
-	//! The three whole-band operations, in the band's own header strip. They act
-	//! on what the band DRAWS - everything this container holds directly - which
-	//! is the scope an admin looking at an open backpack means by "all of it",
-	//! and the reason they are here rather than on the container's own cell.
-	//!
-	//! Real UIActionImageButtons, the same ones the card headers use, so they
-	//! carry the hover fill, the border and the tooltip every other icon button
-	//! in COT has. They were raw ImageWidgets routed through OnMouseButtonUp,
-	//! which drew the right glyph and answered a click but was dead on hover.
-	//!
-	//! Created per rebuild rather than cached: the band and everything on it is
-	//! destroyed with the canvas on every refresh, so a cached button would be a
-	//! dangling widget by the next listing.
-	//!
-	//! An action the admin lacks the permission for is not created at all.
-	//! Hidden rather than greyed, unlike the context menu: the menu keeps one
-	//! shape so a missing entry reads as a missing PERMISSION, but a band header
-	//! is three unlabelled glyphs over someone else's backpack, and a dead one
-	//! there just reads as broken.
+	//! The three whole-band operations in the band header; they act on what the band
+	//! DRAWS (the container's direct contents). Real UIActionImageButtons for hover,
+	//! border and tooltip. Created per rebuild (the canvas destroys them each
+	//! refresh). Without permission they are hidden, not greyed: a dead glyph reads as broken.
 	void BuildInventoryBandActions( Widget band, int index )
 	{
-		//! Packed right and centred in the strip. The spacer lays a right-aligned
-		//! run out from the right edge INWARDS, so the FIRST button created is
-		//! the rightmost one - delete is declared first here to land on the
-		//! outside edge, away from the two harmless actions, which is where
-		//! every other destructive control in COT sits.
+		//! Packed right, centred. A right-aligned run lays out inwards, so the FIRST
+		//! button is rightmost: delete is first to sit on the outside edge, as every
+		//! destructive control in COT does.
 		WrapSpacerWidget host;
 		if ( !Class.CastTo( host, band.FindAnyWidget( "group_actions" ) ) )
 			return;
@@ -982,11 +879,8 @@ class JMPlayerFormTabInventory: JMFormTab
 		{
 			UIActionImageButton wipe = UIActionManager.CreateDeleteButton( host, this, "Click_BandDeleteAll", "#STR_COT_PLAYER_MODULE_TT_INV_GROUP_DELETE" );
 
-			//! CreateDeleteButton paints the pill in the bright DANGER accent,
-			//! which is the colour COT uses for TEXT and rings, not for a filled
-			//! control. Every other delete button in the mod overrides it to the
-			//! deeper DANGER_FILL right after creating it - see the Inventory
-			//! card's own clear-cargo button - so this one does too.
+			//! CreateDeleteButton uses the bright DANGER accent (for text/rings); like
+			//! every delete button in the mod, override to the deeper DANGER_FILL.
 			wipe.SetColor( JMTheme.DANGER_FILL );
 
 			PrepareInventoryBandAction( wipe, index, "" );
@@ -1244,13 +1138,9 @@ class JMPlayerFormTabInventory: JMFormTab
 			return cell;
 		}
 
-		// Exactly the call sequence vanilla's own inventory icon uses, in the
-		// same order. The engine frames the model itself from the config's
-		// bounding box and invView - which is why an item here now fills its
-		// cell the way it does in the game's inventory. COT used to push the
-		// model back with SetModelPosition to "fit" it, and that was the whole
-		// reason these previews came out a fraction of vanilla's size: it was
-		// overriding the auto-fit, not helping it.
+		// Exactly vanilla's inventory icon call sequence, same order. The engine frames
+		// the model from the config bounding box and invView; do NOT override with
+		// SetModelPosition, which made previews a fraction of vanilla's size.
 		preview.SetForceFlipEnable( true );
 		preview.SetForceFlip( false );
 		preview.SetItem( entity );
@@ -1262,13 +1152,10 @@ class JMPlayerFormTabInventory: JMFormTab
 		return cell;
 	}
 
-	//! What a cell's preview entity was built from. Two items of the same type
-	//! holding different things must not share one cached model, and neither
-	//! may two states of the SAME item: health, quantity, temperature and food
-	//! stage are all baked into the spawned entity at SpawnLocalPreview time,
-	//! not re-applied afterward, so a key that ignored them kept showing the
-	//! item's state as of whenever the preview first spawned - pristine, full
-	//! and room temperature - no matter how many edits landed on it since.
+	//! What a cell's preview entity was built from. Same-type items holding different
+	//! things, or the SAME item in different states, must not share a cached model:
+	//! health, quantity, temperature and food stage are baked in at SpawnLocalPreview
+	//! time, so a key ignoring them showed the first-spawn state forever.
 	string InventoryPreviewKey( int index )
 	{
 		JMPlayerInventoryItem item = m_InventoryItems[index];
@@ -1276,11 +1163,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		return item.Type + "|" + InventoryChildCount( index ).ToString() + "|" + item.Health.ToString() + "|" + item.Quantity.ToString() + "|" + item.Temperature.ToString() + "|" + item.Stage.ToString();
 	}
 
-	//! Quantity is drawn the way the item's own config asks for it - vanilla's
-	//! rule, out of QuantityConversions: a magazine counts rounds, a config that
-	//! sets quantityBar (or that has a max of one, which is a percentage in
-	//! disguise) gets a bar, anything else with a max prints the number. A
-	//! bandage stack reads "4/4"; a pear and a chemlight are bars.
+	//! Quantity is drawn per the item's config (vanilla QuantityConversions rule):
+	//! magazines count rounds, quantityBar or max of one gets a bar, anything else
+	//! with a max prints the number ("4/4" bandages; pear and chemlight are bars).
 	int InventoryQuantityMode( JMPlayerInventoryItem item )
 	{
 		if ( item.QuantityMax <= 0 )
@@ -1364,14 +1249,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		dot.SetColor( InventoryHealthColour( item ) );
 	}
 
-	//! The condition dot uses VANILLA's colours, straight from
-	//! ItemManager.GetItemHealthColor - green / yellow-green / yellow / amber /
-	//! red - so a dot here means exactly what the same colour means in the
-	//! player's own inventory. Those constants carry no alpha, hence the OR.
-	//!
-	//! The level comes from the server, where the item's own healthLevels
-	//! config decided it. The threshold fallback is only for a listing from an
-	//! older build, which sends no level at all.
+	//! The condition dot uses VANILLA's colours (ItemManager.GetItemHealthColor, no
+	//! alpha, hence the OR). The level comes from the server's healthLevels config;
+	//! the threshold fallback is only for listings from older builds.
 	int InventoryHealthColour( JMPlayerInventoryItem item )
 	{
 		if ( item.HealthLevel >= 0 )
@@ -1480,13 +1360,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		PaintInventoryCellInnerRing( inner, false, JMTheme.BORDER_SUBTLE );
 	}
 
-	//! The second, inset ring, drawn one pixel inside the first.
-	//!
-	//! COT's 8-slice border texture is a single pixel wide and there is no
-	//! heavier variant of it, so an open container is marked by drawing the ring
-	//! TWICE rather than by authoring another image set. Two concentric strokes
-	//! read as one thick edge, which is what separates the container being
-	//! looked into from the rest of the grid.
+	//! The second, inset ring, one pixel inside the first. The 8-slice border is one
+	//! pixel wide with no heavier variant, so an open container draws the ring TWICE
+	//! to read as a thick edge.
 	void PaintInventoryCellInnerRing( Widget inner, bool show, int color )
 	{
 		if ( !inner )
@@ -1507,11 +1383,8 @@ class JMPlayerFormTabInventory: JMFormTab
 		RequestInventory();
 	}
 
-	//! Unlike the player-list quick actions, this button lives inside the
-	//! inventory panel itself - it always means the player whose inventory is
-	//! open (m_SelectedInstance), never whatever else is checkbox-selected in
-	//! the list behind it. Going through JM_GetSelected() here meant clicking
-	//! it could wipe cargo on a different player than the one on screen.
+	//! Always the player whose inventory is open (m_SelectedInstance), never the
+	//! list's checkbox selection: JM_GetSelected() could wipe a different player.
 	void Click_ClearCargoOnly( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -1532,23 +1405,10 @@ class JMPlayerFormTabInventory: JMFormTab
 		RequestInventory();
 	}
 
-	//! Cells are plain widgets under the form's own handler, so their pointer
-	//! events arrive here rather than through a UIAction callback. Returns false
-	//! for anything that is not a cell so the rest of the form still sees it.
-	//!
-	//! WHICH EVENT DOES WHAT, and why it matters:
-	//!
-	//!   down  - selection, and the right-click menu. Cheap, and touches no
-	//!           widget the pointer is currently over.
-	//!   up    - the container toggle, because that REBUILDS THE GRID. Doing it
-	//!           on the way down destroys the very widget the press started on,
-	//!           and the engine answers a vanished press target by recentring
-	//!           the cursor - the pointer jumps to the middle of the screen
-	//!           mid-click.
-	//!
-	//! OnClick is deliberately not the toggle either: a PanelWidget is not a
-	//! ButtonWidget and does not reliably raise a click at all, which is what
-	//! left containers that never opened in the first place.
+	//! Cell pointer events arrive here (plain widgets), false if not a cell. Down =
+	//! select and right-click menu. Up = container toggle, as it REBUILDS THE GRID:
+	//! on down, the vanished press target recentres the cursor mid-click. Not
+	//! OnClick: a PanelWidget does not reliably raise one.
 	bool OnInventoryCellPressed( Widget w, int button )
 	{
 		int index = InventoryCellIndexOf( w );
@@ -1611,13 +1471,10 @@ class JMPlayerFormTabInventory: JMFormTab
 		return true;
 	}
 
-	//! DayZ cannot draw an item that is not a real entity, and these items are
-	//! in ANOTHER player's inventory on the server - they are not replicated to
-	//! this client unless the admin happens to be standing on top of them. So
-	//! the preview is a client-local copy spawned from the classname with the
-	//! health and quantity the listing carried applied on top. It is never the
-	//! real item and no operation ever goes near it; only the network ID does,
-	//! and only server-side.
+	//! DayZ only draws real entities, and these items sit in ANOTHER player's server
+	//! inventory (not replicated here). So the preview is a client-local copy from the
+	//! classname plus the listing's health/quantity. Never the real item; only the
+	//! network ID is used for operations, server-side.
 	EntityAI SpawnLocalPreview( JMPlayerInventoryItem item )
 	{
 		float health = -1;
@@ -1662,13 +1519,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		return JMLocalPreview.AttachLocal( parent, child.Type, slotId );
 	}
 
-	//! Rebuild an item's attachments and cargo onto its local copy.
-	//!
-	//! The listing is a PREORDER flat array - a parent always appears before its
-	//! children, and a whole subtree is contiguous - so one forward pass is
-	//! enough and the subtree ends at the first entry back at or above the
-	//! root's depth. Without this a rifle inspects as a bare receiver with no
-	//! optic, no magazine and no suppressor.
+	//! Rebuild an item's attachments and cargo onto its local copy. The listing is
+	//! a PREORDER flat array (parents before children, subtrees contiguous), so one
+	//! forward pass suffices. Without it a rifle inspects as a bare receiver.
 	void BuildLocalPreviewChildren( int rootIndex, EntityAI rootEntity, bool attachmentsOnly = false )
 	{
 		if ( !rootEntity || rootIndex < 0 || rootIndex >= m_InventoryItems.Count() )
@@ -1686,12 +1539,10 @@ class JMPlayerFormTabInventory: JMFormTab
 		EntityAI childEntity;
 		ItemBase asItem;
 
-		// No early exit on depth. The subtree IS contiguous under a PREORDER
-		// walk, but bailing out on the first entry back at the root's depth
-		// meant one unexpected ordering dropped the rest of the subtree - which
-		// is how a rifle came up with its optic but no magazine. Membership in
-		// `spawned` already restricts this to the root's descendants, and the
-		// listing is capped at 256 entries, so just walk the whole thing.
+		// No early exit on depth: bailing at the first entry back at root depth
+		// dropped the rest of the subtree on odd ordering (optic but no magazine).
+		// `spawned` membership already limits this to descendants; the listing is
+		// capped at 256, so walk it all.
 		for ( int i = rootIndex + 1; i < m_InventoryItems.Count(); i++ )
 		{
 			child = m_InventoryItems[i];
@@ -1715,12 +1566,10 @@ class JMPlayerFormTabInventory: JMFormTab
 			if ( child.SlotName != "" )
 				slotId = InventorySlots.GetSlotIdFromString( child.SlotName );
 
-			// By slot id first, so a thing that can live in more than one slot
-			// lands in the one it was actually in. By type second, because a
-			// magazine's slot name does not always resolve to an id the target
-			// weapon accepts. Then the LOCAL inventory operation, which is the
-			// client-side path vanilla itself uses and the one that seats a
-			// magazine the CreateAttachment calls refuse. Cargo last.
+			// Slot id first (right slot for multi-slot items), then type (a magazine's
+			// slot name may not resolve to an id the weapon accepts), then the LOCAL
+			// inventory operation (vanilla's client path, seats magazines
+			// CreateAttachment refuses). Cargo last.
 			if ( slotId >= 0 )
 				childEntity = parentEntity.GetInventory().CreateAttachmentEx( child.Type, slotId );
 
@@ -2042,13 +1891,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		m_InventoryPrompt.OpenSlider( INV_MENU_TEMPERATURE, "#STR_COT_PLAYER_MODULE_INV_SET_TEMPERATURE", item.GetDisplayName(), GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, item.Temperature, 1, "#STR_COT_FORMAT_DEGREE", UIActionValuePrompt.SLIDER_COLOR_TEMPERATURE );
 	}
 
-	//! Replaces the old one-shot "repair to full" action: an admin can now set
-	//! any health, not only max, coloured the same way the condition dot and
-	//! the object spawner's own health slider are.
-	//!
-	//! Range is the ITEM's own MaxHealth, not a flat 0-100 - most carried items
-	//! happen to top out at 100, but not all of them do, and a slider that
-	//! could not reach an item's real ceiling would silently cap it below full.
+	//! Set any health (coloured like the condition dot and object spawner slider).
+	//! Range is the ITEM's own MaxHealth, not a flat 0-100: not all items top out at
+	//! 100 and a lower ceiling would silently cap below full.
 	void ShowInventoryHealthPrompt( JMPlayerInventoryItem item )
 	{
 		float max = item.MaxHealth;
@@ -2058,11 +1903,8 @@ class JMPlayerFormTabInventory: JMFormTab
 		m_InventoryPrompt.OpenSlider( INV_MENU_HEALTH, "#STR_COT_PLAYER_MODULE_INV_SET_HEALTH", item.GetDisplayName(), 0, max, item.Health, 1, "%1", UIActionValuePrompt.SLIDER_COLOR_HEALTH );
 	}
 
-	//! Only the stages this item's own config defines.
-	//!
-	//! The full enum would offer a boiled steak a "dried" it has no visual,
-	//! nutrition or transition data for, and the server would take it: nothing
-	//! below ChangeFoodStage checks that the stage was ever configured.
+	//! Only the stages this item's config defines: the full enum would offer a steak
+	//! a "dried" with no data, and nothing below ChangeFoodStage checks it exists.
 	void ShowInventoryStatePrompt( JMPlayerInventoryItem item )
 	{
 		array<string> labels = {};
@@ -2088,12 +1930,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		m_InventoryPrompt.OpenOptions( INV_MENU_STATE, "#STR_COT_PLAYER_MODULE_INV_SET_STATE", item.GetDisplayName(), labels, values, item.Stage );
 	}
 
-	//! Only the liquids this container's config accepts.
-	//!
-	//! The list is built from the game's own liquid definitions rather than
-	//! from a hard-coded table, so a mod that adds one gets it for free, and
-	//! filtered by the container's mask because the server rejects anything
-	//! outside it anyway.
+	//! Only the liquids this container's config accepts: built from the game's liquid
+	//! definitions (mods add for free), filtered by the container mask as the server
+	//! rejects anything outside it.
 	void ShowInventoryLiquidPrompt( JMPlayerInventoryItem item )
 	{
 		int mask = item.GetLiquidContainerMask();
@@ -2184,11 +2023,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		}
 	}
 
-	//! Open DayZ's own inspect screen on a local copy of the item.
-	//!
-	//! MENU_INSPECT is an ordinary UIScriptedMenu and COT is not a menu at all -
-	//! it draws straight onto the workspace - so entering it stacks on top of
-	//! the COT window and its own close button returns the admin here.
+	//! Open DayZ's inspect screen on a local copy of the item. MENU_INSPECT is a
+	//! UIScriptedMenu and COT is not a menu (draws onto the workspace), so it stacks
+	//! over the COT window and its close button returns here.
 	void InspectInventoryItem( int row, JMPlayerInventoryItem item )
 	{
 		// The tooltip and the inspect screen would otherwise be looking at the
@@ -2237,11 +2074,9 @@ class JMPlayerFormTabInventory: JMFormTab
 
 		CloseInventoryInspect();
 
-		// UIScriptedMenu.UnlockControls hands the cursor back to a PARENT MENU
-		// and hides it when there is not one. COT is drawn straight onto the
-		// workspace and is not a menu at all, so closing the inspect screen
-		// leaves the admin with a COT window up and no pointer until something
-		// else happens to re-show it.
+		// UIScriptedMenu.UnlockControls hides the cursor when there is no PARENT MENU,
+		// and COT is not one, so closing inspect would leave the window up with no
+		// pointer until something re-shows it.
 		RestoreCursorAfterMenu();
 	}
 
@@ -2273,11 +2108,9 @@ class JMPlayerFormTabInventory: JMFormTab
 		m_InvInspectEntity = NULL;
 	}
 
-	//! Everything known about one item, as a block of lines. No longer used by
-	//! the inspect action - that opens the vanilla screen now - but kept as the
-	//! text form of an entry, and it is the only place the classname is spelt
-	//! out, which is what an admin needs for a types.xml entry or a spawn
-	//! command.
+	//! Everything known about one item, as lines. No longer used by inspect (vanilla
+	//! screen now) but kept as the text form, the only place the classname is spelt
+	//! out (types.xml entry, spawn command).
 	string BuildInspectText( JMPlayerInventoryItem item )
 	{
 		string text = item.GetDisplayName();

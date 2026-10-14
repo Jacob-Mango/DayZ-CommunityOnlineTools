@@ -1,19 +1,6 @@
-// =============================================================================
 //  JMPlayerBanStore.c
-//
-//  Container class whose single public member is the ban array.
-//  JsonFileLoader<JMPlayerBanStore> reflects this automatically, producing:
-//
-//    {
-//      "Bans": [
-//        { "SteamID": "...", "PlayerName": "...", ... },
-//        ...
-//      ]
-//    }
-//
-//  This is exactly the same pattern COT uses for its settings / loadout
-//  classes - one wrapper class, one array member, JsonFileLoader does the rest.
-// =============================================================================
+//  Wrapper whose single public member is the ban array; JsonFileLoader reflects it
+//  as { "Bans": [ { "SteamID": "...", ... } ] }, same pattern as COT settings classes.
 
 class JMPlayerBanStore
 {

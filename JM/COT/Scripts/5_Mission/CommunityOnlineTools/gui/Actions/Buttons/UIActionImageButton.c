@@ -1,10 +1,8 @@
 class UIActionImageButton: UIActionButton
 {
-	//! Icon-only confirmation, the twin of UIActionFeedbackButton's "Copied!".
-	//  A 32px pill has no room for a label, so the glyph itself is the receipt:
-	//  the resting icon is swapped for a check mark, the pill is retinted, and
-	//  both come back once the hold is over. No fade - there is nothing here to
-	//  read, and a cut is what makes a fast second click still register.
+	//! Icon-only confirmation, twin of UIActionFeedbackButton's "Copied!". The icon swaps to a
+	//  check mark and the pill is retinted until the hold ends. No fade: a cut lets a fast
+	//  second click still register.
 	static const float FEEDBACK_HOLD = 1.0;
 	protected ImageWidget m_Image;
 	protected string m_RestImage;
@@ -222,11 +220,8 @@ class UIActionImageButton: UIActionButton
 		SetColor( JMTheme.ACCENT );
 	}
 
-	//! Arming needs a double click (a single click on a refresh button has
-	//! to stay a single refresh, not a trap that starts looping). Stopping
-	//! does not - once it is already firing on its own, any click is
-	//! obviously meant to stop that, not to start counting toward a second
-	//! double click.
+	//! Arming needs a double click (a single click on a refresh button must stay a single
+	//! refresh). Stopping does not: once auto-firing, any click is meant to stop it.
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		bool ret = super.OnClick( w, x, y, button );

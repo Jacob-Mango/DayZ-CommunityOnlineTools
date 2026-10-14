@@ -118,12 +118,8 @@ class JMRenderableModuleBase: JMModuleBase
 	}
 
 	//! Legacy float overload, kept so external callers keep compiling.
-	//!
-	//! @note this used to build its value as ARGB( r, g, b, alpha ) - but ARGB
-	//! takes ( a, r, g, b ). Every call therefore packed the red channel from
-	//! `r`, the green from `g`... and the ALPHA from `r` too, so the intended
-	//! fully transparent SetMenuButtonColour( 1, 1, 0, 0 ) came out as opaque
-	//! RED over every sidebar entry. The channels are ordered correctly now.
+	//! @note ARGB takes ( a, r, g, b ); an earlier version passed ( r, g, b, alpha ),
+	//! so SetMenuButtonColour( 1, 1, 0, 0 ) came out opaque red. Order is fixed now.
 	void SetMenuButtonColour( float r, float g, float b, float alpha )
 	{
 		SetMenuButtonColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
@@ -199,13 +195,9 @@ class JMRenderableModuleBase: JMModuleBase
 		return true;
 	}
 
-	//! Ask for whatever the module's form displays. The form's base OnShow() calls this every
-	//! time the window opens, so a module that fetches its list from the server overrides it
-	//! and its form needs no OnShow() of its own:
-	//!
-	//!   override void RequestData() { RequestBanList(); }
-	//!
-	//! The named request stays public - a refresh button and other callers still use it.
+	//! Ask for whatever the module's form displays. The form's base OnShow() calls this
+	//! on every open, so a module needs only: override void RequestData() { RequestBanList(); }
+	//! The named request stays public for refresh buttons and other callers.
 	void RequestData()
 	{
 	}

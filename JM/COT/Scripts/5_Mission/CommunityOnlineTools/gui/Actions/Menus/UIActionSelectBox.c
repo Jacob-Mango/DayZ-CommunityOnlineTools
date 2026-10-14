@@ -1,10 +1,5 @@
-// =============================================================================
-//  UIActionSelectBox
-//
-//  Inline cycle-arrow selector backed by OptionSelectorMultistate. Good for
-//  short fixed sets (modes, levels) where a full dropdown popup is overkill.
-//  For larger lists use UIActionDropdown / CreateDropdownBox instead.
-// =============================================================================
+// UIActionSelectBox - inline cycle-arrow selector backed by OptionSelectorMultistate,
+// for short fixed sets (modes, levels). For larger lists use UIActionDropdown / CreateDropdownBox.
 class UIActionSelectBox: UIActionBase
 {
 	protected Widget m_Frame;

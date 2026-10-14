@@ -1,10 +1,5 @@
-// =============================================================================
-//  Airdrop tracking - modded class keeps a global list of active airdrop
-//  container objects so the Events Manager can enumerate them.
-//
-//  ExpansionAirdropContainerBase is the base class for every airdrop loot box.
-//  We hook EEInit / EEDelete and push/pop ourselves in a static array.
-// =============================================================================
+//  Airdrop tracking: hooks EEInit / EEDelete on ExpansionAirdropContainerBase (base of every
+//  airdrop loot box) to keep a static list of active containers for the Events Manager.
 
 #ifdef EXPANSIONMODMISSIONS
 

@@ -56,14 +56,9 @@ class JMWebhookForm: JMFormBase
 
 	override void OnCreate()
 	{
-		// ----------------------------------------------------------------------
-		// Webhook form layout map (760 x 480 px) - split pane, roster + detail
-		// ----------------------------------------------------------------------
-		// LEFT  header (34 px): [search .................] [+]
-		// LEFT  list:           one row per webhook - name, event count
-		// RIGHT detail:         the selected webhook as JMWebhookSection cards
-		//                       (Connection, Event Types) in a scroller.
-		// ----------------------------------------------------------------------
+		// Webhook form layout (760 x 480 px), split pane. LEFT: 34 px header [search] [+] over one
+		// row per webhook (name, event count). RIGHT: selected webhook as JMWebhookSection cards
+		// (Connection, Event Types) in a scroller.
 
 		m_LeftPanel         = layoutRoot.FindAnyWidget( "panel_left" );
 		m_RightPanel        = layoutRoot.FindAnyWidget( "panel_right" );
@@ -146,16 +141,10 @@ class JMWebhookForm: JMFormBase
 		band.SetSize( 1, height );
 	}
 
-	//! The selected webhook carries its own unsaved Name/URL/filter edits
-	//! until its Save button is clicked. This fires on ANY webhook settings
-	//! change - including one admin flipping an event-type checkbox - so
-	//! tearing down and rebuilding the detail from scratch here used to wipe
-	//! whatever another admin (or this one) had half-typed into it.
-	//!
-	//! The roster is cheap and always refreshed. The detail is refreshed in
-	//! place via JMWebhookSection.UpdateState() while the selected name still
-	//! exists, leaving any unsaved edits sitting in it untouched; only a
-	//! selection change (add, rename, remove, click) rebuilds it.
+	//! The selected webhook holds unsaved Name/URL/filter edits until Save, and this fires on ANY
+	//! webhook settings change, so rebuilding the detail would wipe half-typed input. The roster
+	//! always refreshes; the detail refreshes in place via JMWebhookSection.UpdateState() while
+	//! the selection exists, and only a selection change rebuilds it.
 	override void OnSettingsUpdated()
 	{
 		if ( !m_Module || !m_ActionsWrapper )

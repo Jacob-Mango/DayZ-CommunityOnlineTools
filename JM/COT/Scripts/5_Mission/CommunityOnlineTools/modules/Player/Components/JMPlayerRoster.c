@@ -50,28 +50,16 @@ class JMPlayerRoster
 	protected autoptr TStringArray m_PlayersPref1 = {};
 	protected autoptr TStringArray m_PlayersPref2 = {};
 
-	// -------------------------------------------------------------------------
-	//  Role grouping
-	//
-	//  The list is grouped by role: a header per role, its members underneath,
-	//  and the header collapses the group. Grouping happens after filtering, so
-	//  a header's count is the number of rows actually under it and a group
-	//  nothing matched does not show up at all.
-	// -------------------------------------------------------------------------
+	//  Role grouping: a header per role that collapses its members. Grouping happens after filtering,
+	//  so a header's count is the rows under it and a group nothing matched does not show.
 
 	//! Every player carries "everyone", so anything past it is a role somebody
 	//! granted on purpose. A player with nothing else granted groups under
 	//! "everyone" itself rather than under a made-up bucket name.
 	static const string ROLE_UNGROUPED = "everyone";
 
-	// -------------------------------------------------------------------------
-	//  Fold animation
-	//
-	//  The rows sit in a GridSpacer, which lays them out by their size - so
-	//  driving a row's height to zero IS the animation: everything below it
-	//  slides up to fill the gap. Alpha rides along so a half-height row does
-	//  not read as a clipped one.
-	// -------------------------------------------------------------------------
+	//  Fold animation: rows sit in a GridSpacer, so driving a row's height to zero IS the animation
+	//  (rows below slide up). Alpha rides along so a half-height row does not read as clipped.
 
 	static const float GROUP_ANIM_DURATION = 0.16;
 
@@ -180,15 +168,9 @@ class JMPlayerRoster
 			m_PlayerListScroller.UpdateScroller();
 	}
 
-	//! One roster counter: a Lucide glyph where the word label used to be, the
-	//! number immediately after it, and the word itself demoted to the tooltip
-	//! so the meaning is still one hover away.
-	//!
-	//! The number is drawn left, next to its glyph, rather than on the cell's
-	//! right edge - three icon/number pairs read as three pairs that way, where
-	//! right-aligned numbers read as a column that has drifted away from its
-	//! labels. STAT_TEXT_OFFSET is the player list's own name indent, so the
-	//! glyph-to-text gap up here matches the checkbox-to-name gap down there.
+	//! One roster counter: a Lucide glyph, then the number, with the word in the tooltip. The number
+	//! sits next to its glyph (not right-aligned) so pairs read as pairs. STAT_TEXT_OFFSET is the
+	//! list's name indent, so the glyph gap matches the checkbox-to-name gap below.
 	protected UIActionText CreateRosterStat( Widget parent, string icon, string tooltip, float width, bool valueLeftAligned = true )
 	{
 		UIActionText stat = UIActionManager.CreateText( parent, "" );
@@ -208,50 +190,25 @@ class JMPlayerRoster
 	{
 		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "panel_left_top" ), 3, 1 );
 
-		// -- Roster stats ---------------------------------------------------
-		//  Four numbers instead of one: how many are on the server right now
-		//  (against the slot count where the client knows it), the high-water
-		//  mark for the session, how many rows survived the filter, and how many
-		//  are ticked. A single count could not answer "is the list short because
-		//  the server is empty, or because I am still filtering?".
-		//
-		//  All three on one line: the words "Online:"/"Peak:"/"Selected:" are what
-		//  forced two rows, and each of them is a single noun a glyph can carry. The label becomes the icon, the value keeps the cell's right
-		//  edge, and the row that frees up goes back to the list. Every one carries
-		//  a tooltip, because an icon says nothing until it is hovered.
-		//
-		//  A WrapSpacer rather than a 1x4 grid, because the four values are not
-		//  four equal numbers: online is the only one that carries a slot count
-		//  with it ("127 / 128"), so an even quarter of the column clips it while
-		//  the other three sit on empty space. The fractions below hand that space
-		//  over, and have to sum to under 1.0 - a WrapSpacer wraps its last child
-		//  at exactly 1.0.
+		// -- Roster stats: online vs slots, session peak, rows after filter, ticked; icons with tooltips.
+		//  A WrapSpacer, not a 1x4 grid, as online alone carries a slot count ("127 / 128"); the
+		//  fractions must sum to under 1.0 because a WrapSpacer wraps its last child at exactly 1.0.
 		m_MaxPlayers = 0;
 		GetServersResultRow hostData = g_Game.GetHostData();
 		if ( hostData )
 			m_MaxPlayers = hostData.m_MaxPlayers;
 
-		//! Not three equal thirds. Online is the only one carrying a slot count
-		//! ("61 / 128"), and an even third clipped it against the peak cell that
-		//! followed. It takes the space the other two do not need, and those two
-		//! right-align their value so they sit as a pair on the right edge
-		//! instead of drifting into the room online just took.
+		//! Not equal thirds: Online alone carries a slot count ("61 / 128") and an even third clipped it.
+		//! It takes the space the others do not need; those right-align as a pair on the right edge.
 		Widget countRowGrid = UIActionManager.CreateWrapSpacerCompact( leftPanelGrid );
 		m_PlayerListCount 	= CreateRosterStat( countRowGrid, "users",        "#STR_COT_PLAYER_MODULE_TT_STAT_ONLINE",   0.46 );
 		m_PlayerListPeak 	= CreateRosterStat( countRowGrid, "trending-up",  "#STR_COT_PLAYER_MODULE_TT_STAT_PEAK",     0.26, false );
 		m_PlayerListSelected 	= CreateRosterStat( countRowGrid, "square-check", "#STR_COT_PLAYER_MODULE_TT_STAT_SELECTED", 0.26, false );
 
 		// -- Toolbar --------------------------------------------------------
-		//  Icon-only pills, all four on one line: save and load a selection,
-		//  select all and deselect all are the same kind of verb over the same
-		//  list, so they read as one strip rather than two stacked pairs - and
-		//  the row that frees up carries the second stats line above.
-		//  Each carries a tooltip, because an icon-only button says nothing until
-		//  it is hovered.
-		//
-		//  GridSpacer rather than WrapSpacer: a WrapSpacer reserves margin and
-		//  padding around every child, so four children at 0.24 each overflow and
-		//  the fourth wraps onto its own line.
+		//  Four icon-only pills on one line (each has a tooltip). GridSpacer, not WrapSpacer: a
+		//  WrapSpacer reserves margin and padding per child, so four children at 0.24 overflow and
+		//  the fourth wraps.
 		Widget toolbarRowGrid = UIActionManager.CreateGridSpacer( leftPanelGrid, 1, 5 );
 		m_PlayerPrefSave 	= UIActionManager.CreateIconButton( toolbarRowGrid, JMConstants.Lucide( "save" ), this, "" );
 		if ( m_PlayerPrefSave ) m_PlayerPrefSave.SetOnClick( this, "OnClick_PlayerPrefSave" );
@@ -274,11 +231,8 @@ class JMPlayerRoster
 		if ( m_PlayerListDeSelectAll ) m_PlayerListDeSelectAll.SetFixedHeight( JMFormBase.HEADER_CONTROL_HEIGHT );
 
 		// -- Filter row -----------------------------------------------------
-		//  Sort direction and the filter share a line: both narrow the list down
-		//  to what you are looking for, and the sort is one glyph wide. The
-		//  compact spacer is the one with no margin or padding, so the two
-		//  fractions here are the whole story - they still have to sum to under
-		//  1.0, because a WrapSpacer wraps its last child at exactly 1.0.
+		//  Sort direction and filter share a line. The compact spacer has no margin or padding, so the
+		//  two fractions are the whole story; they must sum to under 1.0 (a WrapSpacer wraps at exactly 1.0).
 		Widget filterPanelGrid = UIActionManager.CreateWrapSpacerCompact( leftPanelGrid );
 
 		m_PlayerListSort = UIActionManager.CreateImageButtonToggle( filterPanelGrid, JMConstants.Lucide( "arrow-down-a-z" ), JMConstants.Lucide( "arrow-down-z-a" ), this, "Event_UpdatePlayerList", 0.13 );
@@ -506,17 +460,9 @@ class JMPlayerRoster
 		UpdatePlayerCount();
 	}
 
-	//! Sorts by display name. array<T>.Sort() only knows how to order plain
-	//! strings, not an object by a derived key, so the name list is sorted on
-	//! its own and matched back to its owner afterward.
-	//!
-	//! Matched by CONSUMING one remaining player per sorted name, not by a bare
-	//! string comparison against the whole list: two players sharing a display
-	//! name (a fake test player happens to share a name with someone real, or
-	//! any two real players named the same) used to match the SAME source index
-	//! for both of them, which left one array slot written twice and another
-	//! never written at all - a player silently dropped from the list, and no
-	//! error anywhere to say why.
+	//! Sorts by display name. array<T>.Sort() only orders plain strings, so the names are sorted alone
+	//! and matched back by CONSUMING one remaining player per name; a bare comparison matched the SAME
+	//! index for two players sharing a name and silently dropped one from the list.
 	protected void SortPlayersArray( out array< JMPlayerInstance > players, bool isReversed )
 	{
 		int count = players.Count();
@@ -638,13 +584,9 @@ class JMPlayerRoster
 		}
 	}
 
-	//! Called by a header row's chevron, or by a click anywhere else on it.
-	//!
-	//! Expanding and collapsing are not symmetrical. To expand, the rows have to
-	//! be built before they can be animated in, so the state flips first and the
-	//! rebuild runs before the animation. To collapse, the rows have to survive
-	//! until the animation is over, so the state flips at the END - see
-	//! FinishGroupAnimation.
+	//! Called by a header row's chevron or a click on it. Not symmetrical: expand flips state and
+	//! rebuilds BEFORE animating in; collapse keeps the rows until the animation ends and flips
+	//! state at the END - see FinishGroupAnimation.
 	void OnRoleHeader_Toggled( string role )
 	{
 
@@ -813,11 +755,8 @@ class JMPlayerRoster
 		return true;
 	}
 
-	//! force=true rebuilds unconditionally - use it for anything the roster
-	//! version can't see (search/sort/filter changes, fold state, selection
-	//! checkboxes). The 1500ms poll calls this with force=false so an
-	//! unchanged roster is a cheap no-op instead of a full re-sort and
-	//! re-render of every row.
+	//! force=true rebuilds unconditionally, for what the roster version can't see (search/sort/filter,
+	//! fold state, checkboxes). The 1500ms poll uses force=false so an unchanged roster is a cheap no-op.
 	void UpdatePlayerList( bool force = false )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -866,11 +805,8 @@ class JMPlayerRoster
 		array< JMPlayerInstance > bucket;
 		TStringArray bucketGuids;
 
-		//! One row per guid. Rows are keyed by guid everywhere downstream - the
-		//! checkbox, the focus bar and the row menu all match on it - so a guid
-		//! emitted twice produced rows that ticked, focused and acted as one,
-		//! which reads as the list being broken rather than as a roster with a
-		//! duplicate in it.
+		//! One row per guid: checkbox, focus bar and row menu all key on it, so a guid emitted twice
+		//! produced rows that ticked, focused and acted as one.
 		map< string, bool > seenGuids = new map< string, bool >;
 
 		foreach ( JMPlayerInstance cPlayer: players )
@@ -908,13 +844,9 @@ class JMPlayerRoster
 
 		roleOrder.Sort( isReversed );
 
-		//! You are always the first row of your own category, whichever way the
-		//! sort is pointing. An admin acting on themselves should not have to
-		//! hunt their own name out of sixty, and the alphabetical order that
-		//! decides everyone else has no opinion about that.
-		//!
-		//! The guid list is reordered in step: the header's "all selected" test
-		//! reads it positionally against the bucket.
+		//! You are always the first row of your own category, whichever way the sort points.
+		//! The guid list is reordered in step: the header's "all selected" test reads it
+		//! positionally against the bucket.
 		string selfGUID = GetPermissionsManager().GetClientGUID();
 		if ( selfGUID != "" )
 		{

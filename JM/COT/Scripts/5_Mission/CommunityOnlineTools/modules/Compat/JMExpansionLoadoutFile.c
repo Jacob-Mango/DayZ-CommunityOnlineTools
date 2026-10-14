@@ -1,9 +1,7 @@
 #ifdef DZ_Expansion_Core
-//! Reads a loadout saved in Expansion's prefab format from DIR_LOADOUTS.
-//!
-//! The spawn paths of JMLoadoutModule try this first and fall back to COT's own JMLoadout
-//! format when it answers false: a missing file, an unreadable one and one that is not an
-//! ExpansionPrefab are all "not an Expansion loadout" to the caller.
+//! Reads a loadout saved in Expansion's prefab format from DIR_LOADOUTS. JMLoadoutModule
+//! tries this first and falls back to COT's JMLoadout format when it answers false
+//! (missing, unreadable or non-ExpansionPrefab file all mean "not an Expansion loadout").
 class JMExpansionLoadoutFile
 {
 	static string GetPath( string loadoutName )

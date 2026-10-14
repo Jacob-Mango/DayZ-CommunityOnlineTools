@@ -1,27 +1,15 @@
 class UIActionManager
 {
-	// ---------------------------------------------------------------------------
-	//  CreateSectionHeaderAction - a section header with a single icon button on
-	//  the right of the title. Returns the button.
-	//
-	//  The title row is ONE fixed-height panel with both children placed by
-	//  fraction, not a grid: a grid row sizes to its content and the content
-	//  sizes to the row, which resolves circularly and blows the row out.
-	//
-	//  Example:
-	//      m_Refresh = UIActionManager.CreateSectionHeaderAction( parent, "#STR_...", JMConstants.Lucide( "refresh-cw" ), this, "Click_Refresh" );
-	// ---------------------------------------------------------------------------
+	//  CreateSectionHeaderAction - section header with one icon button right of the
+	//  title; returns the button. The title row is ONE fixed-height panel with
+	//  children placed by fraction, not a grid: a grid row sizes to its content and
+	//  vice versa, which resolves circularly and blows the row out.
 	static const int SECTION_HEADER_ROW_HEIGHT = 30;
 
-	// ---------------------------------------------------------------------------
-	//  Layout primitives. Prefer these to a bare CreatePanel: the name says what
-	//  the panel is for, and the colours / sizes live here instead of in every form.
-	//
-	//    CreateRowDivider  - the 1px hairline between rows of a list
-	//    CreateSpacerPx    - an empty gap of `height` pixels
-	//    CreateRow         - a transparent fixed-height host for one row of controls
-	//    CreateEmptyState  - a fixed-height "nothing here" message; returns its host
-	// ---------------------------------------------------------------------------
+	//  Layout primitives; prefer these to a bare CreatePanel (colours/sizes live here).
+	//    CreateRowDivider (1px hairline), CreateSpacerPx (gap of `height` px),
+	//    CreateRow (transparent fixed-height row host),
+	//    CreateEmptyState (fixed-height "nothing here" message; returns its host)
 	static const int ROW_DIVIDER_COLOR = 0x22FFFFFF;
 	static const float EMPTY_STATE_HEIGHT = 60;
 
@@ -106,13 +94,9 @@ class UIActionManager
 		return CreateWrapSpacer("JM/COT/GUI/layouts/uiactions/UIWrapSpacerFit.layout", parent, halign, valign);
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateFlexRow - a WrapSpacer wrapped in a UIActionFlexRow so children can
-	//  use SetFlex(grow, minPx, maxPx) for CSS-flexbox-style "min width + grow to
-	//  fill" layout the raw WrapSpacer cannot express. Add children with
-	//  row.Add(action) and call row.Layout() from the form's OnResize.
-	//  See UIActionFlexRow.c for the full model.
-	// ---------------------------------------------------------------------------
+	//  CreateFlexRow - WrapSpacer wrapped in a UIActionFlexRow; children use
+	//  SetFlex(grow, minPx, maxPx) for flexbox-style sizing. Add via row.Add(action),
+	//  call row.Layout() from OnResize. See UIActionFlexRow.c.
 	static ref UIActionFlexRow CreateFlexRow( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_CENTER )
 	{
 		WrapSpacerWidget row = CreateWrapSpacer( parent, halign, valign );
@@ -196,15 +180,10 @@ class UIActionManager
 		return NULL;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateFeedbackButton - standard pill button that briefly cross-fades its
-	//  own label and icon to a confirmation ("Copy Steam ID" -> "Copied!") after
-	//  a click, then fades back. For actions with no other visible result.
-	//
-	//  Pass feedbackIcon "" to keep the default check mark. Tune with
-	//  action.SetFeedbackDuration() / SetFeedbackColor(), or take manual control
-	//  with action.SetAutoFeedback( false ) + action.ShowFeedback().
-	// ---------------------------------------------------------------------------
+	//  CreateFeedbackButton - pill button that briefly cross-fades its label/icon to
+	//  a confirmation ("Copied!") after a click, for actions with no other visible
+	//  result. feedbackIcon "" keeps the check mark. Tune via SetFeedbackDuration(),
+	//  SetFeedbackColor(), or SetAutoFeedback( false ) + ShowFeedback().
 	static UIActionFeedbackButton CreateFeedbackButton( notnull Widget parent, string button, string feedback, string feedbackIcon, Class instance, string funcname, float width = 1 )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionFeedbackButton.layout";
@@ -619,16 +598,10 @@ class UIActionManager
 		return NULL;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateSyncedSlider - a slider with a numeric box beside it, so the admin
-	//  can drag OR type an exact value. Drop-in for CreateSlider: it returns the
-	//  same UIActionSlider, the ( UIEvent, UIActionBase ) callback fires for both
-	//  input paths, and SetCurrent keeps the box in step. The slider owns the
-	//  UIActionSliderSync, and hiding / disabling the slider does the same to the
-	//  box. Set step and format on the returned slider exactly as before.
-	//
-	//  editWidth is the box's share of the row (0-1); the slider takes the rest.
-	// ---------------------------------------------------------------------------
+	//  CreateSyncedSlider - drop-in for CreateSlider with a numeric box beside it
+	//  (drag or type). The callback fires for both paths, SetCurrent keeps the box
+	//  in step, and hide/disable on the slider applies to the box. The slider owns
+	//  the UIActionSliderSync. editWidth is the box's share of the row (0-1).
 	static UIActionSlider CreateSyncedSlider( notnull Widget parent, string label, float min, float max, Class instance = NULL, string funcname = "", float editWidth = 0.16 )
 	{
 		Widget row = CreateWrapSpacerCompact( parent, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
@@ -653,12 +626,9 @@ class UIActionManager
 		return slider;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateScrollCard - a scroller holding one titled card, for the common
-	//  "whole tab is one card" layout. `scroller` receives the scroller (keep it
-	//  to call UpdateScroller after a rebuild); put rows in the returned card's
-	//  GetContent().
-	// ---------------------------------------------------------------------------
+	//  CreateScrollCard - a scroller holding one titled card ("whole tab is one
+	//  card"). Keep `scroller` to call UpdateScroller after a rebuild; put rows in
+	//  the returned card's GetContent().
 	static UIActionCard CreateScrollCard( notnull Widget parent, string title, out UIActionScroller scroller )
 	{
 		scroller = CreateScroller( parent );
@@ -888,11 +858,9 @@ class UIActionManager
 		return btn;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateImageButtonToggle - one pill flipping between two images. Read the
-	//  new value with action.IsToggled() from the callback. Give it a tooltip:
-	//  an icon-only control says nothing until it is hovered.
-	// ---------------------------------------------------------------------------
+	//  CreateImageButtonToggle - one pill flipping between two images; read
+	//  action.IsToggled() in the callback. Give it a tooltip: an icon-only control
+	//  says nothing until hovered.
 	static UIActionImageButtonToggle CreateImageButtonToggle( notnull Widget parent, string imageOff, string imageOn, Class instance, string funcname, float width = 1 )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionImageButtonToggle.layout";
@@ -1033,22 +1001,9 @@ class UIActionManager
 		return CreateEditableText( row, "", instance, callback );
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateScrollableSection - scroller + inner content grid in one call.
-	//  Returns a JMScrollableSection whose GetContent() is ready for children.
+	//  CreateScrollableSection - scroller + inner content grid (innerRows rows) in
+	//  one call; returns a JMScrollableSection whose GetContent() takes children.
 	//  Call section.UpdateScroller() from OnResize() to keep the scroller live.
-	//
-	//  innerRows controls how many rows the inner GridSpacer has (default 1).
-	//
-	//  Example:
-	//      m_Scroller = UIActionManager.CreateScrollableSection( layoutRoot.FindAnyWidget("panel") );
-	//      Widget content = m_Scroller.GetContent();
-	//      UIActionManager.CreateSectionHeader( content, "General" );
-	//      m_MyButton = UIActionManager.CreateButton( content, "Do thing", this, "OnClick_DoThing" );
-	//
-	//  OnResize:
-	//      override void OnResize( float w, float h ) { m_Scroller.UpdateScroller(); }
-	// ---------------------------------------------------------------------------
 	static JMScrollableSection CreateScrollableSection( notnull Widget parent, int innerRows = 1 )
 	{
 		UIActionScroller scroller = CreateScroller( parent );
@@ -1059,15 +1014,9 @@ class UIActionManager
 		return new JMScrollableSection( scroller, content );
 	}
 
-	// ---------------------------------------------------------------------------
-	//  ClearChildren - detach all immediate children of a widget without
-	//  deleting them.  Use this to rebuild dynamic lists safely instead of
-	//  calling `delete widget` which can leave dangling references.
-	//
-	//  Example:
-	//      UIActionManager.ClearChildren( m_ListContainer );
-	//      foreach ( MyData d : m_Data ) BuildRow( m_ListContainer, d );
-	// ---------------------------------------------------------------------------
+	//  ClearChildren - detach all immediate children without deleting them. Use it
+	//  to rebuild dynamic lists; `delete widget` can leave dangling references.
+	//  Example: ClearChildren( m_ListContainer ); then rebuild the rows.
 	static void ClearChildren( Widget parent )
 	{
 		if ( !parent )
@@ -1082,16 +1031,9 @@ class UIActionManager
 		}
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateSectionHeader - title text row + thin divider line.
-	//  Returns the container widget (2-row grid).
-	//
-	//  dividerColor defaults to JMUIStyle.DIVIDER_MEDIUM.
-	//
-	//  Example:
-	//      UIActionManager.CreateSectionHeader( parent, "Teleport" );
-	//      UIActionManager.CreateSectionHeader( parent, "Danger Zone", JMUIStyle.DIVIDER_LIGHT );
-	// ---------------------------------------------------------------------------
+	//  CreateSectionHeader - title text row + thin divider line; returns the 2-row
+	//  grid container. dividerColor defaults to JMUIStyle.DIVIDER_MEDIUM.
+	//  Example: CreateSectionHeader( parent, "Danger Zone", JMUIStyle.DIVIDER_LIGHT );
 	static Widget CreateSectionHeader( notnull Widget parent, string title, int dividerColor = JMTheme.DIVIDER_MEDIUM )
 	{
 		Widget container = CreateGridSpacer( parent, 2, 1 );
@@ -1100,19 +1042,10 @@ class UIActionManager
 		return container;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateCard - a bordered container with an optional title bar. This is the
-	//  "category" chrome; put the section's rows into card.GetContent().
-	//
-	//  Prefer this over CreateSectionHeader for anything that is a group of
-	//  related rows. A rule under a title does not group anything - with several
-	//  sections stacked in one scroller there is nothing to say where one ends
-	//  and the next begins. Pass "" for a card with no header.
-	//
-	//  Example:
-	//      UIActionCard card = UIActionManager.CreateCard( parent, "#STR_..._VITALS" );
-	//      UIActionManager.CreateSlider( card.GetContent(), ... );
-	// ---------------------------------------------------------------------------
+	//  CreateCard - bordered container with optional title bar ("" = none); put rows
+	//  into card.GetContent(). Prefer it over CreateSectionHeader for groups of
+	//  rows: a rule under a title does not show where one section ends and the
+	//  next begins when several are stacked in one scroller.
 	static UIActionCard CreateCard( notnull Widget parent, string title = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionCard.layout";
@@ -1130,17 +1063,10 @@ class UIActionManager
 		return action;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateSection - a titled card, returned as its content widget: the one
-	//  call a tab builder needs instead of CreateCard + null check + GetContent
-	//  + null check. Use CreateCard when the card itself is needed (header
-	//  buttons, collapse).
-	//
-	//  Example:
-	//      Widget body = UIActionManager.CreateSection( parent, "Settings" );
-	//      if ( body )
-	//          UIActionManager.CreateButton( body, "Go", this, "OnClick_Go" );
-	// ---------------------------------------------------------------------------
+	//  CreateSection - a titled card returned as its content widget (replaces
+	//  CreateCard + null check + GetContent). Use CreateCard when the card itself
+	//  is needed (header buttons, collapse).
+	//  Example: Widget body = CreateSection( parent, "Settings" );
 	static Widget CreateSection( notnull Widget parent, string title = "" )
 	{
 		UIActionCard card = CreateCard( parent, title );
@@ -1169,20 +1095,10 @@ class UIActionManager
 		return button;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateLabeledRow - a 1x2 grid with a text label on the left and an empty
-	//  panel cell on the right.  Returns the right-hand cell so the caller can
-	//  place any widget inside it.
-	//
-	//  labelFraction controls how wide the label column is (0..1, default 0.30).
-	//
-	//  Example:
-	//      Widget cell = UIActionManager.CreateLabeledRow( parent, "Duration (s):" );
-	//      m_DurationInput = UIActionManager.CreateEditableText( cell, "", this, "OnChange_Duration" );
-	//
-	//      Widget cell2 = UIActionManager.CreateLabeledRow( parent, "Mode:", 0.4 );
-	//      m_ModeDropdown = UIActionManager.CreateDropdownBox( cell2, layoutRoot, "", options, this, "OnChange_Mode" );
-	// ---------------------------------------------------------------------------
+	//  CreateLabeledRow - 1x2 grid: text label left, empty panel cell right (returned
+	//  for the caller's widget). labelFraction is the label column width (0..1).
+	//  Example: Widget cell = CreateLabeledRow( parent, "Duration (s):" );
+	//           m_Input = CreateEditableText( cell, "", this, "OnChange_Duration" );
 	static Widget CreateLabeledRow( notnull Widget parent, string label, float labelFraction = 0.30 )
 	{
 		Widget row = CreateGridSpacer( parent, 1, 2 );
@@ -1195,17 +1111,10 @@ class UIActionManager
 		return inputCell;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateButtonPair - two equally-spaced buttons side by side inside a
-	//  1x2 grid.  Both out-params are optional; pass null variables if you don't
-	//  need one of the buttons back.
-	//
-	//  Example:
-	//      UIActionButton btnApply, btnCancel;
-	//      UIActionManager.CreateButtonPair( parent,
-	//          "Apply",  this, "OnClick_Apply",  btnApply,
-	//          "Cancel", this, "OnClick_Cancel", btnCancel );
-	// ---------------------------------------------------------------------------
+	//  CreateButtonPair - two equally-spaced buttons in a 1x2 grid. Both out-params
+	//  are optional. Example:
+	//      CreateButtonPair( parent, "Apply", this, "OnClick_Apply", btnApply,
+	//                        "Cancel", this, "OnClick_Cancel", btnCancel );
 	static void CreateButtonPair( notnull Widget parent, string labelA, Class instA, string cbA, out UIActionButton btnA, string labelB, Class instB, string cbB, out UIActionButton btnB )
 	{
 		Widget row = CreateGridSpacer( parent, 1, 2 );
@@ -1213,18 +1122,9 @@ class UIActionManager
 		btnB = CreateButton( row, labelB, instB, cbB );
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateButtonPair (colored) - two side-by-side buttons with explicit
-	//  widths and optional colors (pass 0 for no color change).
-	//  widthA + widthB should sum to 1.0.
-	//
-	//  Example:
-	//      UIActionButton btnBan, btnUnban;
-	//      UIActionManager.CreateButtonPair( parent,
-	//          "Ban",   this, "OnClick_Ban",   COLOR_RED, JMUILayout.BTN_PAIR_WIDE,
-	//          "Unban", this, "OnClick_Unban", 0,         JMUILayout.BTN_PAIR_NARROW,
-	//          btnBan, btnUnban );
-	// ---------------------------------------------------------------------------
+	//  CreateButtonPair (colored) - two side-by-side buttons with explicit widths
+	//  (should sum to 1.0) and optional colors (0 = no color change). See the
+	//  plain overload above for the call shape.
 	static void CreateButtonPair( notnull Widget parent, string labelA, Class instA, string cbA, int colorA, float widthA, string labelB, Class instB, string cbB, int colorB, float widthB, out UIActionButton btnA, out UIActionButton btnB )
 	{
 		Widget row = CreateGridSpacer( parent, 1, 2 );
@@ -1243,15 +1143,8 @@ class UIActionManager
 		}
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateDivider - thin horizontal rule with no label.
-	//  Shorthand for CreatePanel with sensible defaults so callers don't need
-	//  to remember magic color values or heights.
-	//
-	//  Example:
-	//      UIActionManager.CreateDivider( parent );
-	//      UIActionManager.CreateDivider( parent, JMUIStyle.DIVIDER_LIGHT, 1 );
-	// ---------------------------------------------------------------------------
+	//  CreateDivider - thin unlabeled horizontal rule; CreatePanel shorthand with
+	//  default color and height. Example: CreateDivider( parent, JMUIStyle.DIVIDER_LIGHT, 1 );
 	static Widget CreateDivider( notnull Widget parent, int color = JMTheme.DIVIDER_MEDIUM, int height = 2 )
 	{
 		return CreatePanel( parent, color, height );
@@ -1338,14 +1231,9 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateMap - a world map with markers the caller can add, move and remove
-	//  one at a time. `height` is in layout pixels; the map is not fractional
-	//  because a MapWidget reports no content height and a size-to-content host
-	//  would collapse it to nothing.
-	//  Fires CLICK on a press and DOUBLE_CLICK on a double press; read what was
-	//  hit off the action. See UIActionMap.
-	// ---------------------------------------------------------------------------
+	//  CreateMap - world map with add/move/remove markers. `height` is in layout
+	//  pixels, not fractional: a MapWidget reports no content height, so a
+	//  size-to-content host would collapse it. Fires CLICK / DOUBLE_CLICK; see UIActionMap.
 	static UIActionMap CreateMap( notnull Widget parent, Class instance = null, string funcname = "", int height = 220 )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionMap.layout";
@@ -1374,12 +1262,9 @@ class UIActionManager
 		return action;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateMapFill - a world map that fills whatever parent it is given,
-	//  rather than the fixed pixel band CreateMap pins a card's map to. For a
-	//  map that IS the whole tab, like Vehicle Manager's, not one dropped into
-	//  a card alongside other content.
-	// ---------------------------------------------------------------------------
+	//  CreateMapFill - a world map that fills its parent instead of CreateMap's
+	//  fixed pixel band; for a map that IS the whole tab (Vehicle Manager), not
+	//  one inside a card.
 	static UIActionMap CreateMapFill( notnull Widget parent, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionMap.layout";
@@ -1399,24 +1284,18 @@ class UIActionManager
 
 		action.SetCallback( instance, funcname );
 
-		//! Overrides the layout's own exact-220px sizing (authored for
-		//! CreateMap's card use) with a fraction that fills the parent instead.
-		//! SetFlags only ever ADDS a flag - VEXACTSIZE has to come off through
-		//! ClearFlags, or this SetSize(1, 1) is read as an exact 1x1 PIXEL size
-		//! instead of "100% of parent" and the map collapses to a sliver.
+		//! Overrides the layout's exact-220px sizing (for CreateMap) to fill the
+		//! parent. VEXACTSIZE must come off via ClearFlags (SetFlags only adds), or
+		//! SetSize(1, 1) is read as 1x1 PIXEL and the map collapses.
 		widget.ClearFlags( WidgetFlags.VEXACTSIZE );
 		widget.SetSize( 1, 1 );
 
 		return action;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateFoldPanel - headerless container that slides open and shut.
-	//  Rows go into action.GetContent(); the panel measures them itself. Unlike
-	//  CreateCollapsibleSection it brings no header of its own, so the control
-	//  that opens it can live wherever the host's layout wants it.
-	//  Fires CHANGE while the height is moving.
-	// ---------------------------------------------------------------------------
+	//  CreateFoldPanel - headerless container that slides open and shut; rows go
+	//  into action.GetContent(). Unlike CreateCollapsibleSection it has no header,
+	//  so its opener can live anywhere. Fires CHANGE while the height moves.
 	static UIActionFoldPanel CreateFoldPanel( notnull Widget parent, Class instance = null, string funcname = "", bool startExpanded = false )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionFoldPanel.layout";
@@ -1561,12 +1440,9 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateDropdown - styled dropdown with per-entry icon + text.
-	//  Pass the overlay widget (e.g. a FrameWidget above form content) as
-	//  listAnchor so the open list floats over other widgets.
-	//  Call action.AddEntry(text, iconPath, iconColor) to populate.
-	// ---------------------------------------------------------------------------
+	//  CreateDropdown - styled dropdown with per-entry icon + text. Pass an overlay
+	//  widget as listAnchor so the open list floats over others; populate with
+	//  action.AddEntry(text, iconPath, iconColor).
 	static UIActionDropdown CreateDropdown( notnull Widget parent, string label, notnull Widget listAnchor, Class instance = null, string funcname = "", array<string> items = null )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionDropdown.layout";
@@ -1595,13 +1471,9 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateContextMenu - right-click popup menu.
-	//  `parent` only holds the 1px stub that keeps the menu ticking; pass the
-	//  window root as `anchor` so the popup floats above the form instead of
-	//  being clipped by whatever container it was created in.
-	//  Call action.AddItem(id, label, icon, color) then action.OpenAt(x, y).
-	// ---------------------------------------------------------------------------
+	//  CreateContextMenu - right-click popup. `parent` only holds the 1px stub that
+	//  keeps it ticking; pass the window root as `anchor` so the popup is not
+	//  clipped by its creation container. AddItem(id, label, icon, color), OpenAt(x, y).
 	static UIActionContextMenu CreateContextMenu( notnull Widget parent, notnull Widget anchor, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionContextMenu.layout";
@@ -1624,13 +1496,9 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateFilterMenu - a filter button's dropdown, as a stack of named
-	//  pages (root list, drill down into a checkbox list, back). See
-	//  UIActionFilterMenu.c's class header for why this exists instead of
-	//  the menu-plus-submenu shape it replaces. `parent`/`anchor` are the
-	//  same pair CreateContextMenu takes and mean the same thing.
-	// ---------------------------------------------------------------------------
+	//  CreateFilterMenu - a filter button's dropdown as a stack of named pages
+	//  (root list, drill into a checkbox list, back); see UIActionFilterMenu.c.
+	//  `parent`/`anchor` mean the same as in CreateContextMenu.
 	static UIActionFilterMenu CreateFilterMenu( notnull Widget parent, notnull Widget anchor )
 	{
 		UIActionFilterMenu menu = new UIActionFilterMenu();
@@ -1638,13 +1506,9 @@ class UIActionManager
 		return menu;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateValuePrompt - modal "pick one value" dialog.
-	//  `parent` only holds the 1px stub that keeps the prompt ticking; pass the
-	//  window root as `anchor` so the panel floats over the form.
-	//  Call action.OpenSlider(...) or action.OpenOptions(...) to raise it; the
-	//  callback fires on Confirm only.
-	// ---------------------------------------------------------------------------
+	//  CreateValuePrompt - modal "pick one value" dialog. `parent` only holds the
+	//  1px stub that keeps it ticking; pass the window root as `anchor`. Raise it
+	//  with OpenSlider(...) / OpenOptions(...); the callback fires on Confirm only.
 	static UIActionValuePrompt CreateValuePrompt( notnull Widget parent, notnull Widget anchor, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionValuePrompt.layout";
@@ -1667,17 +1531,9 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateSearchRow - the toolbar above a list: [refresh] [search box] [filter],
-	//  in one compact wrap row. Pass "" for refreshFn / filterFn to leave that
-	//  button out. Widths are fractions of the row (0 keeps the control's own
-	//  width); the search callback is the usual (UIEvent, UIActionBase) one.
-	//
-	//  Example:
-	//      JMSearchRow bar = UIActionManager.CreateSearchRow( parent, "#STR_..._SEARCH", this, "OnSearch", "OnFilterClick", "#STR_..._FILTER_TOOLTIP" );
-	//      m_Search = bar.Search;
-	//      m_FilterButton = bar.Filter;
-	// ---------------------------------------------------------------------------
+	//  CreateSearchRow - list toolbar [refresh] [search box] [filter] in one compact
+	//  wrap row. "" for refreshFn / filterFn omits that button. Widths are row
+	//  fractions (0 keeps the control's own width).
 	static JMSearchRow CreateSearchRow( notnull Widget parent, string placeholder, Class instance, string searchFn, string filterFn = "", string filterTooltip = "", string refreshFn = "", float searchWidth = 0, float filterWidth = 0, float refreshWidth = 0 )
 	{
 		//! A WrapSpacer packs left to right in creation order, so this IS the
@@ -1713,23 +1569,10 @@ class UIActionManager
 		return bar;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateSearchFlexRow - the same [refresh] [search box] toolbar as CreateSearchRow,
-	//  but as a flex row: the refresh button keeps a fixed pixel size and the search box
-	//  takes whatever width is left. Use it when the search box has to end on the same right
-	//  edge as full-width controls under it - a fraction width cannot do that, because it is a
-	//  fraction of the whole block, so a fixed-size button in front of it always leaves the
-	//  field short of the edge.
-	//
-	//  Pass "" for refreshFn to leave the button out; refreshSize fixes it to a square of that
-	//  many pixels (0 keeps the layout's own size). bar.Row is the flex row, for adding more
-	//  controls and calling SetGap() again. The result's Filter is always null.
-	//
-	//  Example:
-	//      JMSearchRow bar = UIActionManager.CreateSearchFlexRow( panel, "#STR_COT_GENERIC_SEARCH", this, "OnChange_Search", "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH", 30 );
-	//      m_SearchRow = bar.Row;
-	//      m_SearchBar = bar.Search;
-	// ---------------------------------------------------------------------------
+	//  CreateSearchFlexRow - [refresh] [search box] as a flex row: the button keeps a
+	//  fixed pixel size and the search box takes the rest, so it ends flush with
+	//  full-width controls below (a fraction width cannot). "" refreshFn omits the
+	//  button; refreshSize 0 keeps layout size. bar.Row is the flex row; Filter is null.
 	static JMSearchRow CreateSearchFlexRow( notnull Widget parent, string placeholder, Class instance, string searchFn, string refreshFn = "", string refreshTooltip = "#STR_COT_GENERIC_REFRESH", int refreshSize = 0, int gap = 14 )
 	{
 		JMSearchRow bar = new JMSearchRow();
@@ -1761,21 +1604,10 @@ class UIActionManager
 		return bar;
 	}
 
-	// ---------------------------------------------------------------------------
 	//  CreateOverlayMenu / CreateOverlayPrompt - a context menu or value prompt
-	//  for a form, anchored to the form's window and registered as one of its
-	//  overlays in a single call. A popup anchors to the window root, not to the
-	//  tab it was opened from, so an unregistered one floats over the next tab;
-	//  registering is what makes tab changes and hiding the form dismiss it.
-	//
-	//  CreateValuePrompt already builds the prompt's panel - never call
-	//  InitPrompt() on the result.
-	//
-	//  Example:
-	//      m_Menu = UIActionManager.CreateOverlayMenu( this, this, "OnPick" );
-	//      m_Menu.AddItem( "heal", "Heal", JMConstants.Lucide( "heart-pulse" ) );
-	//      m_Menu.OpenAtMouse();
-	// ---------------------------------------------------------------------------
+	//  anchored to the form's window and registered as a form overlay. Registering
+	//  is what makes tab changes and hiding the form dismiss it; an unregistered
+	//  popup floats over the next tab. Never call InitPrompt() on the result.
 	static UIActionContextMenu CreateOverlayMenu( notnull JMFormBase form, Class instance = null, string funcname = "" )
 	{
 		Widget root = form.GetLayoutRoot();
@@ -1802,13 +1634,10 @@ class UIActionManager
 		return menu;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateOverlayFilterMenu - the same for a UIActionFilterMenu: created under the form,
-	//  anchored above every window, registered as an overlay, opening under `owner` (the
-	//  filter button's layout root) and serving the JMFilterRegistry `registryScope` ("" = none).
-	//  `anchor` overrides what the panel hangs off (default: JMStatics.WINDOWS_CONTAINER).
+	//  CreateOverlayFilterMenu - the same for a UIActionFilterMenu, opening under
+	//  `owner` (the filter button's root) and serving JMFilterRegistry `registryScope`
+	//  ("" = none). `anchor` overrides the default JMStatics.WINDOWS_CONTAINER.
 	//  Add pages, then call ToggleAt( owner ) from the button's handler.
-	// ---------------------------------------------------------------------------
 	static UIActionFilterMenu CreateOverlayFilterMenu( notnull JMFormBase form, notnull Widget owner, string registryScope = "", Widget anchor = null )
 	{
 		Widget root = form.GetLayoutRoot();
@@ -1823,13 +1652,10 @@ class UIActionManager
 			return null;
 		}
 
-		//! JMStatics.WINDOWS_CONTAINER unless the caller has a better place for
-		//! the panel to hang off. Every COT window's own layoutRoot is a direct
-		//! child of WINDOWS_CONTAINER (see JMWindowManager.c) - parenting the
-		//! panel there instead of `wnd.GetWidgetRoot()` puts its SetSort(9999)
-		//! in the same sibling group as every window, not just this form's own,
-		//! so the menu no longer gets buried by whichever window last got
-		//! focus. Falls back to the window root if the container isn't up yet.
+		//! Default anchor is JMStatics.WINDOWS_CONTAINER: every window layoutRoot is
+		//! its direct child (see JMWindowManager.c), so SetSort(9999) competes with
+		//! all windows and the menu is not buried by the last-focused one. Falls
+		//! back to the window root if the container isn't up yet.
 		Widget panelAnchor = anchor;
 		if ( !panelAnchor )
 			panelAnchor = JMStatics.WINDOWS_CONTAINER;
@@ -1876,11 +1702,8 @@ class UIActionManager
 		return prompt;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateToggle - custom checkbox / radio button.
-	//  SetRound(true) for radio (single-choice) style.
-	//  SetChecked(bool) to set state programmatically.
-	// ---------------------------------------------------------------------------
+	//  CreateToggle - custom checkbox / radio button. SetRound(true) for radio
+	//  (single-choice) style; SetChecked(bool) sets state from code.
 	static UIActionToggle CreateToggle( notnull Widget parent, string label, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionToggle.layout";
@@ -1903,11 +1726,9 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateTabStrip - an empty row of tab buttons. Add tabs one at a time with
-	//  action.AddTab( label, icon, panel ) and keep the id it returns; the panels
-	//  are shown and hidden with their tab. See UIActionTabs.c.
-	// ---------------------------------------------------------------------------
+	//  CreateTabStrip - an empty row of tab buttons. Add tabs with
+	//  action.AddTab( label, icon, panel ) and keep the returned id; panels show
+	//  and hide with their tab. See UIActionTabs.c.
 	static UIActionTabs CreateTabStrip( notnull Widget parent, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionTabs.layout";
@@ -2119,11 +1940,8 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateFilterBar - row of toggle filter buttons.
-	//  Exclusive by default; call SetMultiSelect(true) for multi-select mode.
-	//  Fires CHANGE on any toggle.  Use GetActiveFilters() / GetActiveIndices().
-	// ---------------------------------------------------------------------------
+	//  CreateFilterBar - row of toggle filter buttons, exclusive by default
+	//  (SetMultiSelect(true) to change). CHANGE on toggle; GetActiveFilters() / GetActiveIndices().
 	static UIActionFilterBar CreateFilterBar( notnull Widget parent, notnull array<string> filters, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionFilterBar.layout";
@@ -2199,12 +2017,9 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateIconGridHorizontal - variant of CreateIconGrid where the root
-	//  GridSpacer has "Size To Content H" 1 so the icon row grows
-	//  horizontally instead of wrapping. Pair with UseHorizontalLayout() on
-	//  the returned grid and an outer horizontal scroller.
-	// ---------------------------------------------------------------------------
+	//  CreateIconGridHorizontal - CreateIconGrid whose root GridSpacer has "Size To
+	//  Content H" 1, so the row grows instead of wrapping. Pair with
+	//  UseHorizontalLayout() on the grid and an outer horizontal scroller.
 	static UIActionIconGrid CreateIconGridHorizontal( notnull Widget parent, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionIconGridH.layout";
@@ -2226,21 +2041,10 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateTimePicker - HH:MM:SS duration / time input.
-	//  Fires CHANGE on field commit.  Use GetTotalSeconds() / SetTotalSeconds().
-	// ---------------------------------------------------------------------------
-	// ---------------------------------------------------------------------------
-	//  CreateItemList - themed, virtualised single-column list.
-	//
-	//  Only the rows that fit on screen exist; scrolling moves the data through
-	//  them. Use it wherever a set is too large to give a widget each - the
-	//  object spawner's ~14000 classes, for one.
-	//
-	//  The list cannot measure itself on the frame it is built, so tell it how
-	//  tall its viewport is with SetViewportHeight() from wherever that height
-	//  is decided.
-	// ---------------------------------------------------------------------------
+	//  CreateItemList - themed, virtualised single-column list: only on-screen rows
+	//  exist, for sets too large for a widget each (object spawner, ~14000 classes).
+	//  It cannot measure itself on the build frame; call SetViewportHeight() from
+	//  wherever that height is decided.
 	static UIActionItemList CreateItemList( notnull Widget parent, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionItemList.layout";
@@ -2262,6 +2066,7 @@ class UIActionManager
 		return NULL;
 	}
 
+	// CreateTimePicker - HH:MM:SS input. CHANGE on commit; GetTotalSeconds() / SetTotalSeconds().
 	static UIActionTimePicker CreateTimePicker( notnull Widget parent, string label, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionTimePicker.layout";
@@ -2284,16 +2089,9 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateConfirmInline - button that expands to Confirm/Cancel on first click.
-	//  Fires CLICK on initial press, CHANGE on confirm, nothing on cancel/timeout.
-	// ---------------------------------------------------------------------------
-	// ---------------------------------------------------------------------------
-	//  CreateDeleteConfirmIcon - the icon-only "trash, click twice" button used in
-	//  row lists: trash glyph, danger fill, compact O / X confirm labels (the
-	//  full words clip in a square button), ICON_BUTTON_PX square. Set the
-	//  tooltip and SetData on the result as usual.
-	// ---------------------------------------------------------------------------
+	//  CreateDeleteConfirmIcon - icon-only "trash, click twice" row button: danger
+	//  fill, compact O / X confirm labels (full words clip in a square button),
+	//  ICON_BUTTON_PX square. Set the tooltip and SetData on the result as usual.
 	static UIActionConfirmInline CreateDeleteConfirmIcon( notnull Widget parent, Class instance, string funcname )
 	{
 		UIActionConfirmInline btn = CreateConfirmInline( parent, "", instance, funcname );
@@ -2310,6 +2108,8 @@ class UIActionManager
 		return btn;
 	}
 
+	// CreateConfirmInline - button expanding to Confirm/Cancel on first click.
+	// CLICK on first press, CHANGE on confirm, nothing on cancel/timeout.
 	static UIActionConfirmInline CreateConfirmInline( notnull Widget parent, string label, Class instance = null, string funcname = "", float timeout = 4.0 )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionConfirmInline.layout";
@@ -2360,11 +2160,8 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateLogView - scrollable read-only text log with per-line colors.
-	//  Call AppendLine(text, color) to add entries.  Oldest lines drop when
-	//  maxLines is exceeded.
-	// ---------------------------------------------------------------------------
+	//  CreateLogView - scrollable read-only log with per-line colors; AppendLine(text,
+	//  color) adds entries, oldest lines drop past maxLines.
 	static UIActionLogView CreateLogView( notnull Widget parent, int maxLines = 200 )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionLogView.layout";
@@ -2386,11 +2183,8 @@ class UIActionManager
 		return null;
 	}
 
-	// ---------------------------------------------------------------------------
-	//  CreateTooltip - create the global tooltip overlay for a form.
-	//  Call once per form in OnInit, passing the form's layoutRoot.
-	//  Any UIActionBase with SetTooltip("text") will then show a hover tooltip.
-	// ---------------------------------------------------------------------------
+	//  CreateTooltip - global tooltip overlay for a form; call once in OnInit with
+	//  the form's layoutRoot. Any UIActionBase with SetTooltip("text") then shows it.
 	static UIActionTooltip CreateTooltip( notnull Widget anchor )
 	{
 		return new UIActionTooltip( anchor );

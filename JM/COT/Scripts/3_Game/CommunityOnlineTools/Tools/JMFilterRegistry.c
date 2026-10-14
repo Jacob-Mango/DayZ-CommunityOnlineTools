@@ -1,14 +1,7 @@
-//! The one place a mod adds rows to COT's filter menus.
-//!
-//!     JMFilterRegistry.Register( JMFilterRegistry.PLAYERS, "only_admins", "Only Admins", "shield", 0, this, "OnFilterAdmins", "IsFilterAdmins" );
-//!
-//! Every filter menu built with UIActionFilterMenu (Player list, Vehicles, Teleport, Object Spawner, ESP objects,
-//! Loot Analysis categories) names the scope it serves with SetRegistryScope(); rows registered for that scope
-//! are appended to the menu's root page and their callbacks run when clicked. Registering the same id again
-//! replaces the entry, so a form that registers from OnCreate() can be created more than once per session.
-//!
-//! Callback shapes:   void OnFilterAdmins( string id )    - the row was clicked, flip your state here
-//!                    bool IsFilterAdmins()               - optional; makes the row a checkbox
+//! The one place a mod adds rows to COT's filter menus, e.g. Register( JMFilterRegistry.PLAYERS, "only_admins",
+//! "Only Admins", "shield", 0, this, "OnFilterAdmins", "IsFilterAdmins" ). Rows go on the root page of menus
+//! whose SetRegistryScope() matches; re-registering an id replaces it (safe from OnCreate()).
+//! Callbacks: void OnFilterAdmins( string id ) on click; optional bool IsFilterAdmins() makes a checkbox.
 class JMFilterRegistry
 {
 	//! Scopes - one per filter menu. Any other string works too, for a menu of your own.

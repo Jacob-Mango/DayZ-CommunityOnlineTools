@@ -1,8 +1,5 @@
-//! "Actions" tab of JMPlayerForm - state toggles, disease/bleeding controls and
-//! the one-shot commands (heal, kill, strip, kick, ban ...) for the selected
-//! player. Back-reference to the owning form, same shape as JMPlayerRowWidget.Menu.
-//!
-//! Confirmation callbacks (the Multi/Single/Self trios) are looked up by name on
+//! "Actions" tab of JMPlayerForm: toggles, disease/bleeding controls, one-shot
+//! commands. Confirmation callbacks (Multi/Single/Self) are looked up by name on
 //! the FORM, so each keeps a thin forwarder there.
 class JMPlayerFormTabActions: JMFormTab
 {
@@ -194,11 +191,8 @@ class JMPlayerFormTabActions: JMFormTab
 		// Default-state rows: all green (no data until selection pushes mask)
 		RebuildDiseaseDropdown( 0, 0, 0, 0, 0, 0, 0, 0, 0 );
 
-		// Add and Remove act on whichever agent the dropdown is showing, so they
-		// stay in the body under it. Clear-all does not read the dropdown at all
-		// - it wipes the card - so it moves up into the title bar with the other
-		// card-level destructive actions, and keeps the caption it lost as the
-		// tooltip an icon-only button needs.
+		// Add/Remove act on the dropdown's agent, so they stay under it. Clear-all
+		// wipes the card, so it is a title-bar icon button (caption is its tooltip).
 		m_DiseaseClear = section0Card.AddDeleteButton( this, "Click_ClearAllDiseases" );
 		m_DiseaseClear.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_DISEASE_CLEAR" );
 		m_DiseaseClear.SetColor( JMTheme.DANGER_FILL );
@@ -213,11 +207,8 @@ class JMPlayerFormTabActions: JMFormTab
 		UIActionCard section1Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_BLEEDING" );
 		Widget section1 = section1Card.GetContent();
 
-		// Stop-all does not read the part dropdown - it clears the whole card -
-		// so it belongs in the title bar next to the other card-level wipes,
-		// exactly where Diseases puts its own. Bound straight to the existing
-		// Click_StopBleeding: "stop every bleed on this player" already had a
-		// handler and a confirmation, it just had no button on this card.
+		// Stop-all clears the whole card, so it sits in the title bar like Diseases'
+		// wipe, bound to the existing Click_StopBleeding (has a confirmation).
 		m_BleedClear = section1Card.AddDeleteButton( this, "Click_StopBleeding" );
 		m_BleedClear.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_BLEED_CLEAR" );
 		m_BleedClear.SetColor( JMTheme.DANGER_FILL );
@@ -774,13 +765,9 @@ class JMPlayerFormTabActions: JMFormTab
 			restore = 0;
 		m_DiseaseAgent.SetSelection( restore, false );
 
-		//! This arrives from a server RPC round-trip kicked off by OnChange_Tab,
-		//! strictly after OnChange_Tab's own one-shot UpdateScroller() call has
-		//! already measured and settled the Actions tab's content height. Nine
-		//! freshly-added dropdown rows can change that height, so the scroller
-		//! needs telling again or it's stuck showing the pre-response size
-		//! (typically "no scrollbar yet" on the very first open, before this
-		//! response has ever arrived).
+		//! This arrives via a server RPC after OnChange_Tab's one-shot UpdateScroller()
+		//! already measured the content. The new dropdown rows change the height, so
+		//! the scroller must be told again (else no scrollbar on first open).
 		if ( m_Form.m_ActionListScroller )
 			m_Form.m_ActionListScroller.UpdateScroller();
 	}

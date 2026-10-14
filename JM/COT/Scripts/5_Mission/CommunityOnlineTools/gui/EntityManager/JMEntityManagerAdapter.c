@@ -1,13 +1,6 @@
-// =============================================================================
-//  JMEntityManagerAdapter
-//
-//  Abstract adapter that a concrete manager (vehicles, garage, territories,
-//  events) implements to supply data and handlers to the generic
-//  JMEntityManagerForm / JMEntityManagerModule pair.
-//
-//  Lifecycle: the Module owns one adapter. Server-side it collects entities
-//  and serializes them. Client-side it deserializes incoming data and renders.
-// =============================================================================
+//  JMEntityManagerAdapter - abstract adapter a concrete manager implements to
+//  feed the generic JMEntityManagerForm / Module pair. The Module owns one:
+//  server-side collects and serializes entities, client-side renders them.
 
 //! How to refresh the client after an action. Set inside HandleServerAction
 //! via ReportUpsert / ReportRemove. Default (NONE) means a full resend.
@@ -42,11 +35,8 @@ class JMEntityManagerAdapter
 	}
 
 	// ---------------------------------------------------------------------------
-	//  Action catalog
-	//
-	//  Per-entity actions appear in the right-hand options panel when an
-	//  entity is selected. Bulk actions (m_IsBulk=true) appear in the
-	//  left-hand list header.
+	//  Action catalog: per-entity actions go in the right options panel, bulk
+	//  actions (m_IsBulk=true) in the left list header.
 	// ---------------------------------------------------------------------------
 	void GetActions( out array<ref JMEntityAction> outActions )
 	{
@@ -126,9 +116,8 @@ class JMEntityManagerAdapter
 	}
 
 	// ---------------------------------------------------------------------------
-	//  Data collection - SERVER SIDE
-	//  Called when a client requests a refresh. Implementations should populate
-	//  `out` with JMEntityMetaData instances describing every visible entity.
+	//  Data collection - SERVER SIDE, on client refresh request. Populate `out`
+	//  with JMEntityMetaData for every visible entity.
 	// ---------------------------------------------------------------------------
 	void CollectEntities( out array<ref JMEntityMetaData> outEntities )
 	{
@@ -150,27 +139,23 @@ class JMEntityManagerAdapter
 	}
 
 	// ---------------------------------------------------------------------------
-	//  Server-side action handler - called by the module RPC after permission
-	//  check. Default is no-op. entity may be null for bulk actions.
-	// ---------------------------------------------------------------------------
+	//  Server-side action handler, called by the module RPC after the permission
+	//  check. Default no-op; entity may be null for bulk actions.
 	void HandleServerAction( string actionId, JMEntityMetaData entity, PlayerIdentity sender )
 	{
 	}
 
 	// ---------------------------------------------------------------------------
-	//  Info panel - optional custom widgets appended after extra rows.
-	//  Adapter can build a DataTable, scroller, etc. inside `infoContent`,
-	//  and should call `form.TrackDynamicWidget(w)` for any widget it creates
-	//  so the form can tear them down on entity switch.
+	//  Info panel - custom widgets after the extra rows, built in `infoContent`;
+	//  call `form.TrackDynamicWidget(w)` for each so entity switches tear them down.
 	// ---------------------------------------------------------------------------
 	void OnBuildInfoExtras( Widget infoContent, JMEntityMetaData entity, JMEntityManagerForm form )
 	{
 	}
 
 	// ---------------------------------------------------------------------------
-	//  Delta-refresh helpers - call from inside HandleServerAction to tell the
-	//  module it only needs to upsert or remove one entity (skipping the
-	//  full CollectEntities + resend path).
+	//  Delta-refresh helpers - call inside HandleServerAction to upsert/remove
+	//  one entity instead of the full CollectEntities + resend.
 	// ---------------------------------------------------------------------------
 	void ReportUpsert()
 	{
@@ -188,10 +173,8 @@ class JMEntityManagerAdapter
 	}
 
 	// ---------------------------------------------------------------------------
-	//  Build fresh metadata for ONE entity id. Used by the delta upsert path
-	//  after an action mutates that entity. Default: walk CollectEntities and
-	//  pick the matching one (cheap for small adapters). Subclasses should
-	//  override with a direct lookup when CollectEntities is expensive.
+	//  Fresh metadata for ONE entity id (delta upsert path). Default walks
+	//  CollectEntities; override with a direct lookup when that is expensive.
 	// ---------------------------------------------------------------------------
 	JMEntityMetaData BuildMetaForId( string id )
 	{

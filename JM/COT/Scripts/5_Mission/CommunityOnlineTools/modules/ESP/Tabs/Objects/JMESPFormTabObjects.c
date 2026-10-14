@@ -97,12 +97,9 @@ class JMESPFormTabObjects: JMFormTab
 		return IsGroupShown( JMESPFormTabFilters.GroupIndexFor( meta.type ) );
 	}
 
-	//! True while the list must not be rebuilt under the admin.
-	//!
-	//! A 500ms rebuild re-sorts and re-indexes every row, which makes the list
-	//! impossible to work: the entry under the cursor is gone by the time it is
-	//! clicked. Touching the list holds it automatically, and the lock button
-	//! holds it indefinitely.
+	//! True while the list must not be rebuilt under the admin: the 500ms rebuild re-sorts every
+	//! row, so the entry under the cursor is gone by the click. Touching the list holds it
+	//! automatically; the lock button holds it indefinitely.
 	bool IsObjectListHeld()
 	{
 		if ( m_ObjectListPinned )
@@ -118,14 +115,9 @@ class JMESPFormTabObjects: JMFormTab
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( panel );
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 
-		//! The list and the things you do to a selection are two different
-		//! jobs, so they get a card each rather than a loose search row over a
-		//! bare list. The count lives in the card's own title, which is where
-		//! the eye already is and costs no row of its own.
-		//!
-		//! Selection first, tracked objects under it: the actions are a fixed
-		//! three rows while the list grows to whatever the scan returned, so
-		//! putting the list first pushes the buttons off the bottom of the tab.
+		//! The list and the selection actions are different jobs, so a card each; the count
+		//! lives in the card title. Selection first: its actions are a fixed three rows while
+		//! the list grows, so list-first pushes the buttons off the bottom of the tab.
 		UIActionCard card = UIActionManager.CreateCard( container, "#STR_COT_ESP_MODULE_SELECTION_HEADER" );
 		Widget cardContent = card.GetContent();
 
@@ -192,11 +184,8 @@ class JMESPFormTabObjects: JMFormTab
 		m_ObjectListLockButton = m_ObjectsCard.AddCardHeaderAction( JMConstants.Lucide( "lock-open" ), this, "", "#STR_COT_ESP_MODULE_LIST_LOCK" );
 		if ( m_ObjectListLockButton ) m_ObjectListLockButton.SetOnClick( this, "OnClick_ToggleListLock" );
 
-		//! Search box with its filter button on the right, the same shape
-		//! JMTeleportForm uses - the filters narrow the same list the box
-		//! does, so they belong on its row rather than as controls of their
-		//! own, and a menu holds the categories without costing a row per
-		//! category.
+		//! Search box with its filter button on the right, same shape as JMTeleportForm: the
+		//! filters narrow the same list, and a menu holds categories without a row each.
 		JMSearchRow toolbar = UIActionManager.CreateSearchRow( objectsContent, "#STR_COT_ESP_MODULE_OBJECT_FILTER", this, "OnChange_ObjectFilter", "OnClick_FilterButton", "#STR_COT_ESP_MODULE_TT_OBJECT_FILTER_BUTTON", "", SEARCH_ROW_W );
 		m_ObjectSearch = toolbar.Search;
 		m_ObjectSearch.SetTooltip( "#STR_COT_ESP_MODULE_TT_OBJECT_FILTER" );
@@ -242,12 +231,9 @@ class JMESPFormTabObjects: JMFormTab
 
 		if ( !force && IsObjectListHeld() )
 		{
-			//! Still re-derive the ticks while held. Selection is no longer
-			//! something this list does itself - it happens in the row's
-			//! context menu or on the object's world tag - so without this
-			//! a held list (and any click holds it) would go on showing a
-			//! stale selection until it was unlocked. Only flags on rows
-			//! that already exist, so it does not rebuild anything.
+			//! Still re-derive the ticks while held: selection happens in the row's context menu or
+			//! the world tag, so a held list (any click holds it) would show a stale selection.
+			//! Only flags existing rows, no rebuild.
 			RefreshObjectListSelectionHighlight();
 			return;
 		}
@@ -466,18 +452,10 @@ class JMESPFormTabObjects: JMFormTab
 		RefreshObjectCardTitle( m_ObjectRows.Count() );
 	}
 
-	//! Height of the object list: as many rows as it actually holds, clamped to
-	//! [MIN_ROWS, MAX_ROWS] and then to whatever the window can spare. An empty
-	//! list is four rows tall, not half the form.
-	//! Squares the filter button against the search box's RENDERED height.
-	//!
-	//! Not SetFixedSize with the box's authored 30: that writes widget-local
-	//! units, which the workspace then scales by the player's UI scale, so
-	//! the button came out a different size on screen than the box it sits
-	//! beside. Screen pixels are the one space where the number that sizes
-	//! one widget means the same for the other (the same rule as
-	//! JMPlayerForm.MeasureInventoryCell). Re-checked rather than set once,
-	//! because at Build time nothing has been measured yet.
+	//! Height of the object list: rows held, clamped to [MIN_ROWS, MAX_ROWS] then to window room.
+	//! Squares the filter button against the search box's RENDERED height, in screen pixels
+	//! (SetFixedSize writes UI-scaled local units; see JMPlayerForm.MeasureInventoryCell).
+	//! Re-checked, not set once: nothing is measured at Build time.
 	protected void SyncFilterButtonSize()
 	{
 		if ( !m_FilterButton || !m_ObjectSearch )
@@ -539,17 +517,10 @@ class JMESPFormTabObjects: JMFormTab
 		return true;
 	}
 
-	//! Opens under the filter button, same as JMTeleportForm's and the
-	//! object spawner's - all three now share UIActionFilterMenu (see its
-	//! class header) instead of each hand-rolling a menu-plus-submenu pair,
-	//! which is what used to leave the drill-down page dead to clicks and
-	//! hover until the whole COT window was closed and reopened. Anchored
-	//! the same way as the other two (default: the window root) rather than
-	//! JMStatics.ESP_CONTAINER - ESP_CONTAINER and JMStatics.WINDOWS_CONTAINER
-	//! are workspace-root siblings created at equal (default) sort with
-	//! WINDOWS_CONTAINER second, so on a sort tie it always wins and every COT
-	//! window drew over the whole ESP layer, menu included, regardless of the
-	//! menu's own SetSort(9999).
+	//! Opens under the filter button via the shared UIActionFilterMenu (as JMTeleportForm and the
+	//! object spawner). Anchored to the window root, not JMStatics.ESP_CONTAINER: it and
+	//! WINDOWS_CONTAINER are equal-sort siblings and the second wins ties, so COT windows drew
+	//! over the whole ESP layer, menu included, whatever the menu's SetSort(9999).
 	void OnClick_FilterButton( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -571,11 +542,9 @@ class JMESPFormTabObjects: JMFormTab
 				return;
 			}
 
-			//! Pinned rather than measured. The automatic width is what
-			//! clipped the labels to "Liv"/"Ve", and the menu's own
-			//! off-screen flip is decided from that same width - too
-			//! narrow a measurement and it does not realise it needs to
-			//! flip, so it ran off the edge instead.
+			//! Pinned, not measured: the automatic width clipped labels to "Liv"/"Ve", and the
+			//! menu's off-screen flip uses the same width, so too narrow a measurement ran it
+			//! off the edge.
 			m_FilterMenu.SetMenuWidth( FILTER_MENU_W );
 
 			m_FilterMenu.AddPage( PAGE_ROOT, this, "BuildFilterRootPage", "", false, "", this, "OnFilterRootChange" );
@@ -668,12 +637,9 @@ class JMESPFormTabObjects: JMFormTab
 		if ( m_ObjectList.GetLastClickButton() == MouseState.RIGHT )
 			ShowObjectMenu( meta );
 
-		//! A SINGLE left click deliberately does NOT toggle selection. Rows
-		//! shift under the cursor as the list refreshes and scrolls, so a
-		//! plain click - or one that lands while scrolling - was selecting
-		//! whatever happened to be under the pointer. Selecting is an
-		//! explicit act: a double click below, the right click menu here,
-		//! or clicking the object's own world tag.
+		//! A SINGLE left click deliberately does NOT toggle selection: rows shift under the cursor
+		//! as the list refreshes/scrolls. Select via double click, the right click menu, or the
+		//! object's own world tag.
 	}
 
 	//! Deliberate enough to mean selection, where a single click is not.

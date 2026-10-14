@@ -1,13 +1,6 @@
-// =============================================================================
-//  JMDeleteHistoryEntry
-//
-//  Undo/redo for ESP's generic object delete: undo brings the object back
-//  (see JMSnapshotHistoryEntry for what is captured), redo deletes the
-//  restored stand-in again.
-//
-//  Must be constructed BEFORE the target is actually deleted - it reads the
-//  target's own state to know what to bring back.
-// =============================================================================
+//  JMDeleteHistoryEntry - undo/redo for ESP's generic object delete (undo restores
+//  the object, see JMSnapshotHistoryEntry; redo deletes the stand-in again).
+//  Must be constructed BEFORE the target is deleted - it reads the target's state.
 class JMDeleteHistoryEntry: JMSnapshotHistoryEntry
 {
 	void JMDeleteHistoryEntry( Object target )

@@ -1,9 +1,5 @@
-// =============================================================================
-//  JMMapEditorStore.c
-//
-//  JSON-serialisable container for persisted Map Editor objects.
-//  Per-mission save lives at $profile:CommunityOnlineTools/MapEditor/map.json
-// =============================================================================
+// JMMapEditorStore.c - JSON-serialisable container for persisted Map Editor objects.
+// Per-mission save: $profile:CommunityOnlineTools/MapEditor/map.json
 
 class JMMapEditorStore
 {

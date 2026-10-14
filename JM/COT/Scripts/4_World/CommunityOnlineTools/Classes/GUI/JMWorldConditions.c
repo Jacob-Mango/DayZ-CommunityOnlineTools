@@ -1,13 +1,5 @@
-// =============================================================================
-//  JMWorldConditions.c
-//
-//  Reads the live world state - weather phenomena and the in-game clock - and
-//  turns it into something a UI can show: a localisation key and an icon.
-//
-//  Kept out of the sidebar footer so anything else that wants to render "what
-//  is the weather doing right now" (a server-info panel, a webhook embed, the
-//  weather module's own header) classifies it the same way.
-// =============================================================================
+//  JMWorldConditions.c: reads live weather and clock into a localisation key and icon.
+//  Kept out of the sidebar footer so every UI classifies the weather the same way.
 
 class JMWorldConditions
 {

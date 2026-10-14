@@ -1,9 +1,5 @@
-// =============================================================================
-//  UIActionToggleSwitch
-//
-//  A visual on/off switch with an animated thumb that slides across the track
-//  (track + thumb colour also cross-fade).  Fires UIEvent.CLICK on every toggle.
-// =============================================================================
+//  UIActionToggleSwitch: on/off switch with an animated sliding thumb (colours
+//  cross-fade). Fires UIEvent.CLICK on every toggle.
 class UIActionToggleSwitch: UIActionBase
 {
 	protected TextWidget   m_Label;
@@ -27,14 +23,9 @@ class UIActionToggleSwitch: UIActionBase
 	static const int COLOR_THUMB_ON  = JMTheme.TEXT_ON_ACCENT;
 	static const int COLOR_THUMB_OFF = JMTheme.INK_200;
 
-	// Thumb travel fallbacks, in layout pixels, matching UIActionToggleSwitch.layout:
-	// track 44 wide, thumb 18 across, 2px inset at each end.
-	//   OFF = inset            = 2
-	//   ON  = 44 - 18 - inset  = 24   (flush with the right end)
-	// These are only fallbacks. The button does not always render at the
-	// authored 44 units, so a travel hardcoded from that number leaves the thumb
-	// short of the right end. Measure() replaces both values with the button's
-	// real size.
+	// Thumb travel fallbacks in layout pixels (track 44, thumb 18, 2px inset): OFF = 2,
+	// ON = 44 - 18 - 2 = 24. Only fallbacks: the button may not render at 44 units, so
+	// Measure() replaces both with its real size.
 	static const float THUMB_X_ON  = 24;
 	static const float THUMB_X_OFF =  2;
 	protected float m_ThumbXOn  = THUMB_X_ON;
@@ -156,18 +147,10 @@ class UIActionToggleSwitch: UIActionBase
 			m_Thumb.SetColor( m_AnimThumb.Value );
 	}
 
-	// Derive the thumb's end positions from the track's real size, so the ON
-	// position sits flush with the right end even when the button does not
-	// render at the width the layout authored.
-	//
-	// GetSize (NOT GetScreenSize) is required here: it reports in the widget's
-	// own flag space, which is the same space SetPos writes in. GetScreenSize
-	// returns monitor pixels, a different space at any workspace scale other
-	// than 1:1, and feeding those back into SetPos would overshoot.
-	//
-	// GetSize returns 0 until the widget has been laid out, hence the bail-out;
-	// the width check makes this a no-op on every frame but the first and any
-	// subsequent resize.
+	// Derive thumb end positions from the track's real size (it may not render at the
+	// authored width). GetSize, NOT GetScreenSize: GetSize is in SetPos's own space,
+	// GetScreenSize is monitor pixels and overshoots at any workspace scale != 1:1.
+	// GetSize is 0 until laid out, hence the bail-out; no-op except first frame/resize.
 	protected void Measure()
 	{
 		if ( !m_Button || !m_Thumb )

@@ -232,11 +232,9 @@ class JMWindowManager
 
 		for ( int i = 0; i < m_Windows.Count(); i++ )
 		{
-			//! Offset above JMUILayout.SORT_WINDOW, not just 1..N, so an open
-			//! window clears DayZ-Expansion's map marker sort (999) too. Spaced
-			//! by SORT_WINDOW_STEP rather than 1, so the just-focused window
-			//! (index 0, the highest number here) sits a clean 10 above the
-			//! next one down rather than by a margin nothing else respects.
+			//! Offset above JMUILayout.SORT_WINDOW so an open window clears Expansion's map
+			//! marker sort (999). Spaced by SORT_WINDOW_STEP so the focused window (index 0,
+			//! highest) sits a clean step above the next.
 			m_Windows[i].GetLayoutRoot().SetSort( JMUILayout.SORT_WINDOW + ( m_Windows.Count() - i ) * JMUILayout.SORT_WINDOW_STEP );
 
 			m_Windows[i].Unfocus();

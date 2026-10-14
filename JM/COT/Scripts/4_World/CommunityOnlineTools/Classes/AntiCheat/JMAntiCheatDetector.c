@@ -1,15 +1,7 @@
-// =============================================================================
-//  JMAntiCheatDetector.c
-//
-//  Pure detector functions - one per rule. They never call RPC / webhook
-//  directly; they return a struct describing what they found and let the
-//  module decide policy. Server-side only.
-//
-//  Everything here is a function of numbers the module already has. Nothing in
-//  this file reads the world, allocates beyond the hit it reports, or knows
-//  what a flag is - which is what makes the rules readable and testable in
-//  isolation.
-// =============================================================================
+// JMAntiCheatDetector.c - pure detector functions, one per rule. Server-side only.
+// They never call RPC / webhook; they return a struct describing the hit and
+// the module decides policy. Functions of numbers the module already has: no
+// world reads, no allocation beyond the reported hit, no knowledge of flags.
 
 class JMAntiCheatHit
 {
@@ -97,10 +89,8 @@ class JMAntiCheatDetector
 	// -------------------------------------------------------------------------
 
 	//! Real damage landing on a player whose health does not move.
-	//!
-	//! Counted rather than flagged on the first occurrence: one hit that lands
-	//! in the same tick as a bandage or a regen tick can genuinely net out to
-	//! zero. A run of them cannot.
+	//! Counted rather than flagged on first occurrence: one hit in the same tick as
+	//! a bandage or regen tick can net out to zero. A run of them cannot.
 	static void DetectDamageImmunity( int consecutiveNoDrop, int threshold, int weight, out array< ref JMAntiCheatHit > hits )
 	{
 		if ( threshold <= 0 )
@@ -117,10 +107,8 @@ class JMAntiCheatDetector
 	// -------------------------------------------------------------------------
 
 	//! Shots fired with the cartridge count never falling.
-	//!
-	//! A reload raises the count and resets the run, so this cannot be tripped
-	//! by normal play: firing N times without the magazine ever going down is
-	//! not something the game produces.
+	//! A reload raises the count and resets the run, so normal play cannot trip
+	//! this: firing N times without the magazine going down is not producible.
 	static void DetectInfiniteAmmo( int shotsWithoutDecrement, int threshold, int weight, out array< ref JMAntiCheatHit > hits )
 	{
 		if ( threshold <= 0 )
@@ -143,16 +131,10 @@ class JMAntiCheatDetector
 		hits.Insert( new JMAntiCheatHit( weight, "Ammo increase: " + prevCount.ToString() + " -> " + nowCount.ToString() + " outside a reload" ) );
 	}
 
-	// -------------------------------------------------------------------------
-	//  Weapon jam suppression
-	//
-	//  Every weapon has a server-authoritative chance to jam on a given shot
-	//  (Weapon_Base.GetChanceToJam()). A client that patches that check out
-	//  locally cannot change the number the server rolled against - what it
-	//  can do is suppress the JAMMED state client-side well enough that its
-	//  own reported jam count never rises. Judged over a minimum sample count
-	//  so a merely lucky run of shots is not evidence.
-	// -------------------------------------------------------------------------
+	// Weapon jam suppression: the server rolls Weapon_Base.GetChanceToJam() per shot;
+	// a client cannot change that roll but can suppress the JAMMED state so its own
+	// reported jam count never rises. Judged over a minimum sample count so a lucky
+	// run of shots is not evidence.
 	static void DetectJamSuppression( int shotsFired, int jamsObserved, float expectedJamChance, float toleranceRatio, int minSamples, int weight, out array< ref JMAntiCheatHit > hits )
 	{
 		if ( shotsFired < minSamples || expectedJamChance <= 0 )
@@ -167,16 +149,10 @@ class JMAntiCheatDetector
 		}
 	}
 
-	// -------------------------------------------------------------------------
-	//  Spread / accuracy manipulation
-	//
-	//  A weapon's configured dispersion is the standard deviation of shot
-	//  angle it should produce; a no-spread hack removes that scatter, so the
-	//  player's actual dispersion over many shots comes out far tighter than
-	//  configured. Judged over a minimum sample count for the same reason
-	//  headshot ratio is - a handful of tight shots is a good burst, not a
-	//  cheat.
-	// -------------------------------------------------------------------------
+	// Spread / accuracy manipulation: configured dispersion is the std deviation of
+	// shot angle; a no-spread hack removes it, so actual dispersion over many shots
+	// comes out far tighter. Needs a minimum sample count (a tight burst is not a
+	// cheat), same as headshot ratio.
 	static void DetectSpreadAnomaly( float observedStdDevDeg, float configuredDispersionDeg, float toleranceRatio, int sampleCount, int minSamples, int weight, out array< ref JMAntiCheatHit > hits )
 	{
 		if ( sampleCount < minSamples || configuredDispersionDeg <= 0 )
@@ -190,14 +166,9 @@ class JMAntiCheatDetector
 		}
 	}
 
-	// -------------------------------------------------------------------------
-	//  Projectile speed manipulation
-	//
-	//  Compares a shot's observed muzzle-to-impact speed against the ammo's
-	//  configured initSpeed. A speed hack that accelerates its own projectiles
-	//  (or removes drop/drag) shows up as a shot that covered its distance
-	//  faster than the ammo's own config says it can leave the barrel.
-	// -------------------------------------------------------------------------
+	// Projectile speed manipulation: compares a shot's observed muzzle-to-impact
+	// speed against the ammo's configured initSpeed. A shot covering its distance
+	// faster than the ammo config allows indicates a speed hack (or removed drop/drag).
 	static void DetectProjectileSpeedAnomaly( float observedSpeed, float configuredInitSpeed, float toleranceRatio, int weight, out array< ref JMAntiCheatHit > hits )
 	{
 		if ( configuredInitSpeed <= 0 )
@@ -216,11 +187,9 @@ class JMAntiCheatDetector
 	// -------------------------------------------------------------------------
 
 	//! A client asking the server for something its own UI never offers it.
-	//!
-	//! The burst count exists so a permission revoked mid-session - where an
-	//! already-open form can legitimately fire one stale request - is not
-	//! evidence. Past that this is the highest-confidence signal the mod has:
-	//! nothing a legitimate client does produces a run of refusals.
+	//! The burst count lets a permission revoked mid-session (one stale request from
+	//! an open form) pass. Past that it is the highest-confidence signal the mod has:
+	//! a legitimate client never produces a run of refusals.
 	static void DetectDeniedRpcBurst( int deniedInWindow, int threshold, float windowS, string lastPermission, int weight, out array< ref JMAntiCheatHit > hits )
 	{
 		if ( threshold <= 0 )
@@ -232,13 +201,9 @@ class JMAntiCheatDetector
 		}
 	}
 
-	// -------------------------------------------------------------------------
-	//  Kill statistics
-	//
-	//  These read numbers JMAntiCheatKillStats already collects. Every one of
-	//  them needs a sample size first: a player with two kills, both headshots,
-	//  is a lucky player, not an aimbot.
-	// -------------------------------------------------------------------------
+	// Kill statistics: these read numbers JMAntiCheatKillStats already collects.
+	// Each needs a sample size first: two kills, both headshots, is a lucky player,
+	// not an aimbot.
 
 	static void DetectHeadshotRatio( int headshots, int totalKills, int minKills, float maxRatio, int weight, out array< ref JMAntiCheatHit > hits )
 	{
@@ -254,10 +219,8 @@ class JMAntiCheatDetector
 	}
 
 	//! Distance rules, judged per delivery class.
-	//!
-	//! Explosives are exempt outright: the "distance" of a grenade hit is blast
-	//! radius, and a mine kills whoever walks onto it from wherever its owner
-	//! was standing when they placed it - possibly the far side of the map.
+	//! Explosives are exempt: a grenade's 'distance' is blast radius, and a mine kills
+	//! whoever walks onto it from wherever its owner stood when placing it.
 	static void DetectKillDistance( float distance, bool isMelee, bool isExplosive, float maxMelee, float maxAny, int weight, out array< ref JMAntiCheatHit > hits )
 	{
 		if ( isExplosive )
@@ -286,13 +249,10 @@ class JMAntiCheatDetector
 		}
 	}
 
-	//! Silent aim: a ranged hit that landed on somebody the shooter was not
-	//! pointing at.
-	//!
-	//! The cone is deliberately wide, and flattened to the horizontal plane. It
-	//! is not an accuracy check - a player whose body has not caught up with a
-	//! fast flick would fail a tight cone constantly. It is here to catch a hit
-	//! landing behind the shooter, which nothing legitimate produces.
+	//! Silent aim: a ranged hit that landed on somebody the shooter was not pointing at.
+	//! The cone is deliberately wide and flattened to the horizontal plane; it is not
+	//! an accuracy check (a fast flick would fail a tight cone). It catches hits landing
+	//! behind the shooter, which nothing legitimate produces.
 	static void DetectSilentAim( vector attackerPos, vector attackerDir, vector victimPos, bool isRanged, float minDistance, float coneDeg, int weight, out array< ref JMAntiCheatHit > hits )
 	{
 		if ( !isRanged )

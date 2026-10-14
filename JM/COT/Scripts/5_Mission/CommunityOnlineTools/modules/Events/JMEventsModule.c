@@ -1,10 +1,5 @@
-// =============================================================================
-//  JMEventsModule
-//
-//  Admin UI over dynamic + static world events: heli crashes, contaminated
-//  zones, airdrops, and a few static map objects. Delegates everything to
-//  JMEventsAdapter.
-// =============================================================================
+// JMEventsModule: admin UI over dynamic + static world events (heli crashes, contaminated
+// zones, airdrops, a few static map objects). Delegates everything to JMEventsAdapter.
 class JMEventsModule: JMEntityManagerModule
 {
 	// Temporarily hidden from the sidebar.

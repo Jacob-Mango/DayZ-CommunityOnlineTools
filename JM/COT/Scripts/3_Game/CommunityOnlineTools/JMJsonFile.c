@@ -1,20 +1,7 @@
-//! The one way COT reads and writes a settings / data file as JSON.
-//!
-//! Modules used to each carry their own FileExist + MakeDirectory + JsonFileLoader trio, and they
-//! disagreed: some created the directory before saving and some did not (so the first save of a
-//! fresh profile silently wrote nothing), some reported a parse error and some swallowed it.
-//! Load() and Save() here do the same three things every time: make sure the folder exists,
-//! call the loader, and say why on failure.
-//!
-//!   ref MySettings settings = new MySettings();
-//!   if ( !JMJsonFile<MySettings>.Load( path, settings ) )
-//!       settings.Defaults();
-//!
-//!   JMJsonFile<MySettings>.Save( path, settings );
-//!
-//! Load() fills the object it is handed rather than returning a new one, so a class keeps its
-//! own constructor defaults: JsonFileLoader does NOT run the constructor for a field the file
-//! does not mention, and this way the caller has already built the object the way it wants.
+//! The one way COT reads and writes a settings / data file as JSON. Load() and Save() always
+//! make sure the folder exists (else a first save silently writes nothing), call the loader, and
+//! say why on failure. Load() fills the object it is handed: JsonFileLoader does NOT run the
+//! constructor for a field the file omits, so constructor defaults must already be set.
 class JMJsonFile<Class T>
 {
 	//! True when the file existed and was read into `data`. False for a missing file (not an error:

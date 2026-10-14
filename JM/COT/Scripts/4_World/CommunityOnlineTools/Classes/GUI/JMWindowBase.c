@@ -684,11 +684,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		SetPosition( x * ratio, y * ratio );
 	}
 
-	//! The confirmation scrim is sized in pixels by the open/resize animations,
-	//! so a dialog raised before either has run would still be at the layout's
-	//! default size - and the inner panel centres itself inside whatever this
-	//! is, so getting it wrong puts the dialog off-screen with only the scrim
-	//! visible. Cheap enough to just re-derive on every raise.
+	//! The confirmation scrim is sized in pixels by the open/resize animations, so a
+	//! dialog raised before either has run sits at the layout default size and the
+	//! centred inner panel can end up off-screen. Cheap, so re-derive on every raise.
 	protected void SyncConfirmationPanel()
 	{
 		if ( !m_ConfirmationPanel )
@@ -770,11 +768,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		SyncPinIcon();
 	}
 
-	//! Point the pin button at the state it is currently in: a plain pin while
-	//! the window is pinned, a struck-through pin while it is not. The colour
-	//! swap stays - it is what makes the state readable at a glance - but the
-	//! glyph now carries it too, so the button is not two identical pins that
-	//! only differ in tint.
+	//! Point the pin button at its current state: plain pin while pinned, struck-through
+	//! pin while not. The colour swap stays, but the glyph carries the state too so the
+	//! two states are not identical pins differing only in tint.
 	protected void SyncPinIcon()
 	{
 		if ( !m_PinButtonLabel )
@@ -794,13 +790,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_PinButtonLabel.SetImage( 0 );
 	}
 
-	//! Same idea for the collapse button: chevrons pointing at each other while
-	//! the window is open (click to collapse), pointing apart while it is
-	//! collapsed (click to restore).
-	//! @param collapsed the state the window is heading INTO. Minimize() and
-	//!        Restore() both start an animation and only flip m_IsMinimized when
-	//!        it finishes, so the caller says where it is going rather than
-	//!        letting this read a flag that has not moved yet.
+	//! Same idea for the collapse button: chevrons point at each other while open
+	//! (click to collapse), apart while collapsed (click to restore).
+	//! @param collapsed the state the window is heading INTO. Minimize()/Restore() only
+	//!        flip m_IsMinimized when their animation ends, so the caller says where it goes.
 	protected void SyncMinimizeIcon( bool collapsed )
 	{
 		if ( !m_MinimizeButtonLabel )
@@ -1225,12 +1218,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	// --- Private helpers --------------------------------------------------------
 
-	//! Applies a saved window rect on first Show(), including everything a
-	//! live resize normally propagates (content widget, form root,
-	//! confirmation panel, m_Form.OnResize). A plain layoutRoot.SetSize()
-	//! here left the restored window at the right outer size with its form
-	//! content still laid out for whatever size SetModule() gave it, since
-	//! only Resize()/SetSize() ever pushed the size further down.
+	//! Applies a saved window rect on first Show(), including everything a live resize
+	//! propagates (content widget, form root, confirmation panel, m_Form.OnResize). A
+	//! plain layoutRoot.SetSize() left the form content laid out for SetModule()'s size.
 	protected void ApplyRestoredSize( float w, float h )
 	{
 		//! The saved rect may come from a bigger screen (the layout file is

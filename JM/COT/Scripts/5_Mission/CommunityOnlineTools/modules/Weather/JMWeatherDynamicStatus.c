@@ -1,16 +1,7 @@
-// =============================================================================
-//  JMWeatherDynamicStatus - the machine's live position, as one RPC payload
-//
-//  The server owns the machine; clients only ever see this. It is asked for
-//  (like SpecialWeatherStatus) rather than pushed, so it costs nothing while
-//  nobody has the weather form open and needs no per-client bookkeeping.
-//
-//  Revision is the point of the poll beyond the countdown: it changes whenever
-//  the state machine's CONFIGURATION changes, so a client that sees a revision
-//  it did not load simply asks for the settings again. That is what keeps a
-//  second admin's form (and the editor's own after a save) current without the
-//  server having to broadcast every edit.
-// =============================================================================
+// JMWeatherDynamicStatus - the machine's live position, as one RPC payload. The server owns
+// the machine; clients ask for this (no push, no per-client bookkeeping). Revision changes whenever
+// the configuration does, so a client seeing an unknown revision re-requests settings; that keeps
+// other admins' forms current without broadcasting every edit.
 class JMWeatherDynamicStatus
 {
 	bool Enabled;

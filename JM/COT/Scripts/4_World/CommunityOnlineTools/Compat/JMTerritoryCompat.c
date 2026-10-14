@@ -1,44 +1,7 @@
 /**
- * JMTerritoryCompat.c
- *
- * Compatibility shims for JMTerritoryModule -> ExpansionTerritoryModule.
- *
- * JMTerritoryModule calls two methods that DayZ-Expansion does not ship:
- *
- *   Exec_AdminSetTerritoryLevel( territoryID, newLevel, sender )
- *   JM_COT_GetTerritories( out territories )
- *
- * Without them the Mission module fails to compile:
- *
- *   jmterritorymodule.c(169): Undefined function
- *   'ExpansionTerritoryModule.Exec_AdminSetTerritoryLevel'
- *
- * Rather than stub them empty, they are implemented here against Expansion's
- * real API via `modded class`.
- *
- * Two details drive the implementation:
- *
- *  - Territories come from GetAllTerritoryFlags() ("Called server side"), NOT
- *    from m_Territories. The latter is client-only ("Contains only territories
- *    which a client is member of"), populated solely by Exec_UpdateClient, so
- *    it is empty on the server where this admin path runs.
- *
- *  - ExpansionTerritory.TerritoryLevel is protected with a getter but no
- *    setter, so JM_COT_SetTerritoryLevel is added alongside. Persistence needs
- *    no explicit save: the level lives on the flag entity and is written by
- *    TerritoryFlag.CF_OnStoreSave -> ExpansionTerritory.OnStoreSave.
- *
- * Guarded on EXPANSIONMODBASEBUILDING to match JMTerritoryModule, so COT still
- * builds standalone (Expansion is not in COT's requiredAddons).
- *
- * LAYER: must live in 4_World, not 5_Mission, because ExpansionTerritory and
- * ExpansionTerritoryModule are both 4_World classes -- a modded class has to be
- * declared in the same layer as its base. Placing this in 5_Mission fails with
- * "Unknown type 'ExpansionTerritory'". JMTerritoryModule (5_Mission) can still
- * call into it: later layers see earlier ones, not the reverse.
- *
- * See docs/systems/mod-compatibility.md.
- */
+ * JMTerritoryCompat.c - shims for JMTerritoryModule -> ExpansionTerritoryModule. Guarded on
+ * EXPANSIONMODBASEBUILDING; must be 4_World (a modded class needs its base's layer). Territories
+ * come from GetAllTerritoryFlags() (server), not m_Territories. See docs/systems/mod-compatibility.md. */
 
 #ifdef EXPANSIONMODBASEBUILDING
 
@@ -94,11 +57,9 @@ modded class ExpansionTerritoryModule
 	}
 
 	//! Admin-forced territory level change. Permission is already checked by
-	//! JMTerritoryModule ("Expansion.Territory.SetLevel") before this is
-	//! called, so unlike Exec_DeleteTerritoryAdmin there is no
-	//! IsSenderTerritoryAdmin() gate -- a COT admin is not necessarily a
-	//! member of the territory being edited. `sender` is kept for signature
-	//! symmetry with Expansion's other Exec_* admin methods and for logging.
+	//! JMTerritoryModule, so no IsSenderTerritoryAdmin() gate (a COT admin need not be a
+	//! member). `sender` is kept for signature symmetry with Expansion's Exec_* methods
+	//! and for logging.
 	void Exec_AdminSetTerritoryLevel( int territoryID, int newLevel, PlayerIdentity sender )
 	{
 		map< int, TerritoryFlag > flags = GetAllTerritoryFlags();

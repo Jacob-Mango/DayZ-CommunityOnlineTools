@@ -1,8 +1,4 @@
-// =============================================================================
-//  JMQuantityHistoryEntry
-//
-//  Undo/redo for ESP's Set Quantity on an item.
-// =============================================================================
+//  JMQuantityHistoryEntry - undo/redo for ESP's Set Quantity on an item.
 class JMQuantityHistoryEntry: JMPropertyHistoryEntry
 {
 	void JMQuantityHistoryEntry( Object target, float before, float after )

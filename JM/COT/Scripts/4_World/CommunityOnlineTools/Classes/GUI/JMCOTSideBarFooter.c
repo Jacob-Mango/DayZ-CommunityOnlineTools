@@ -1,20 +1,6 @@
-// =============================================================================
-//  JMCOTSideBarFooter.c
-//
-//  The status strip pinned to the bottom of the sidebar. Shows the handful of
-//  facts an admin wants visible at all times without opening a module: which
-//  server they are on, how many players are connected, the in-game clock, the
-//  weather and where it is heading, server performance and the COT build.
-//
-//  Two layouts, one set of values. The full strip is what the expanded sidebar
-//  shows; the compact rail is what survives when the sidebar collapses to its
-//  60px icon column, where there is room for icons and short numbers and
-//  nothing else. Both are built in sidebar_menu.layout and swapped by Show().
-//
-//  This is a plain helper, not a widget scriptclass: JMCOTSideBar owns it and
-//  hands it the already-created Footer subtree, so there is no second script
-//  init to order against the sidebar own.
-// =============================================================================
+//  JMCOTSideBarFooter.c - status strip at the bottom of the sidebar. Two layouts, one set of values: full strip
+//  (expanded) and compact rail (60px collapsed), both in sidebar_menu.layout, swapped by Show().
+//  Plain helper, not a widget scriptclass: JMCOTSideBar owns it and hands it the Footer subtree.
 
 class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 {
@@ -23,21 +9,17 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	//! screen height to size the module scroller above it.
 	static const float HEIGHT = 152;
 
-	//! Seconds between refreshes. Player count, world clock, weather and the
-	//! server stats all move slowly enough that once a second looks live, and it
-	//! keeps the sidebar per-frame cost to one float add and one compare.
+	//! Seconds between refreshes. Everything shown moves slowly enough that 1s looks live,
+	//! and per-frame cost stays one float add and one compare.
 	protected static const float REFRESH_INTERVAL = 1.0;
 
 	//! Longest server name rendered before it is cut short with an ellipsis.
 	//! The name row is 254px wide at 15pt, which fits roughly this many glyphs.
 	protected static const int SERVER_NAME_MAX = 34;
 
-	// --- Run-time packing ----------------------------------------------------
-	//  Two rows hold text whose width is not known until it is set - the weather
-	//  label, and an average that is "39 FPS" uncapped but "39 / 60 FPS" capped.
-	//  Laying those out with fixed boxes leaves whatever follows stranded 40px
-	//  away on the short spelling, so both rows are packed from the measured
-	//  text width instead (TextWidget.GetTextSize reports rendered pixels).
+	// --- Run-time packing: weather label and FPS average have unknown text width, so rows are
+	//  packed from the measured width (TextWidget.GetTextSize reports rendered pixels)
+	//  rather than fixed boxes that strand what follows.
 
 	//! Gap between an icon and the value it labels.
 	protected static const int PAIR_GAP  = 6;
@@ -51,20 +33,10 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 	protected ImageWidget  m_IconAntiCheat;
 	protected Widget       m_AntiCheatHover;
 
-	//! Local admin position, click to copy. Full sidebar only - a collapsed
-	//! sidebar drops the row entirely rather than shrinking it to an icon;
-	//! there is no compact widget pair to fall back to. Hover/click only
-	//! ever land on the button (icon + coordinate text) - the cardinal
-	//! reading beside it is informational and sits outside the button.
-	//!
-	//! Click feedback fades the icon out, swaps it to a check mark, fades it
-	//! back in, holds, then reverses - the same animated shape
-	//! UIActionFeedbackButton uses for the GUID/Steam64 copy buttons - rather
-	//! than COTFeedback.Copy's toast, which this bypasses entirely.
-	//!
-	//! The row shows whole-metre coordinates, but the clipboard gets the full
-	//! precision reading - a copy-paste into a teleport field should not lose
-	//! the fractional metre the display rounds away.
+	//! Local admin position, click to copy. Full sidebar only (collapsed drops the row; no compact
+	//! pair). Hover/click land only on the button; the cardinal reading sits outside it.
+	//! Click feedback is the icon check-mark animation, not COTFeedback.Copy's toast.
+	//! Row shows whole metres, clipboard gets full precision for teleport fields.
 	protected ButtonWidget m_BtnPosition;
 	protected TextWidget   m_TextPosition;
 	protected ImageWidget  m_IconPosition;
@@ -156,16 +128,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		m_LastForecastKind = -1;
 	}
 
-	// -------------------------------------------------------------------------
-	//  Packing primitives
-	//
-	//  Everything here reads the ANCHOR widget position rather than working from
-	//  the row coordinates in the layout file. Those two do not agree: laying the
-	//  forecast and the tails out from the layout `position` values put both
-	//  groups exactly one row above the text they belong to. GetPos and SetPos
-	//  are symmetric, so measuring and placing in the same frame is correct
-	//  whatever that frame turns out to be.
-	// -------------------------------------------------------------------------
+	//  Packing primitives: read the ANCHOR widget position, not the layout row coordinates
+	//  (they disagree and put groups one row too high). GetPos/SetPos are symmetric, so
+	//  measuring and placing in the same frame is correct.
 
 	//! Position just past the end of a widget rendered text, and the row y to
 	//! place at. False when the widget has not been laid out yet - GetTextSize
@@ -206,13 +171,8 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		world.GetDate( year, month, day, hour, minute );
 	}
 
-	// -------------------------------------------------------------------------
-	//  Collapsed / expanded
-	//
-	//  A collapsed sidebar leaves only its leftmost 60px on screen. The full
-	//  strip is not narrowed to fit that - it is replaced, because a 254px
-	//  server name and a weather word have nothing useful to say in 60px.
-	// -------------------------------------------------------------------------
+	//  Collapsed / expanded: a collapsed sidebar leaves only 60px, so the full strip is
+	//  replaced (not narrowed) by the compact rail.
 	void SetCompact( bool compact )
 	{
 		m_IsCompact = compact;
@@ -455,19 +415,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		UpdateForecastIndicator( kind, forecast, isNight );
 	}
 
-	//! Arrow, icon, then label - the reading order of a transition.
-	//!
-	//! Two things can follow the arrow. When the forecast is heading for a
-	//! different kind of weather, it is that kind: icon and name. When it is
-	//! not - which is most of the time, since a forecast that drifts from
-	//! overcast 0.4 to 0.55 never leaves "cloudy" - naming the same weather
-	//! twice says nothing, so the slot carries the wait until the weather
-	//! controller picks its next forecast instead. Either way the row answers
-	//! "and then what", which is the only reason it exists.
-	//!
-	//! The collapsed rail has no text at all, so it shows the arrow only for a
-	//! real change of kind; a bare arrow pointing at nothing is worse than no
-	//! arrow.
+	//! Arrow, icon, then label. After the arrow: the next weather kind (icon and name) if it
+	//! differs, otherwise the wait until the controller picks its next forecast (naming the same
+	//! weather twice says nothing). The collapsed rail shows the arrow only for a real change.
 	protected void UpdateForecastIndicator( int kind, int forecast, bool isNight )
 	{
 		bool changing = ( forecast != kind );
@@ -535,15 +485,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		widget.LoadImageFile( 0, icon );
 	}
 
-	// -------------------------------------------------------------------------
-	//  Run-time packing
-	//
-	//  Both of these rows sit behind text whose rendered width is not knowable
-	//  from the layout: a weather label is "Fog" or "Overcast", an average is
-	//  "39 FPS" or "39 / 60 FPS". Fixed boxes sized for the longest spelling
-	//  leave the rest of the row stranded on the short one, so what follows is
-	//  positioned from the measured width instead.
-	// -------------------------------------------------------------------------
+	//  Run-time packing: text width is not knowable from the layout ("Fog" vs "Overcast",
+	//  "39 FPS" vs "39 / 60 FPS"); fixed boxes strand what follows, so position from the
+	//  measured width instead.
 	protected void PackWeatherRow()
 	{
 		if ( !m_TextWeather || !m_IconNextArrow || !m_IconNext || !m_TextNext )
@@ -639,16 +583,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		UpdateAntiCheatBadge();
 	}
 
-	// -------------------------------------------------------------------------
-	//  Anti-cheat alarm
-	//
-	//  Hidden unless the server has someone flagged at or above the anti-cheat
-	//  module's own warning score, which is also the only state worth a badge:
-	//  a footer that is red all the time is a footer nobody reads. The count
-	//  arrives with the server-stats broadcast, so it is live whether or not the
-	//  AntiCheat form has ever been opened, and it is 0 for admins without the
-	//  permission to be told.
-	// -------------------------------------------------------------------------
+	//  Anti-cheat alarm: hidden unless someone is flagged at or above the module's warning
+	//  score (a footer red all the time is never read). Count arrives with the server-stats
+	//  broadcast; it is 0 for admins without the permission to be told.
 	protected void UpdateAntiCheatBadge()
 	{
 		if ( !m_BtnAntiCheat )
@@ -734,11 +671,8 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	//! Fades the icon's own tint toward JMTheme.ACCENT and back, ticked every
-	//! frame from OnUpdate. Skipped while the click feedback animation owns
-	//! the icon (texture swap + its own alpha fade) - the two would otherwise
-	//! fight over the same widget; the hover tint simply resumes once that
-	//! finishes and picks up wherever the mouse actually is by then.
+	//! Fades the icon tint toward JMTheme.ACCENT and back, ticked from OnUpdate. Skipped while
+	//! the click feedback animation owns the icon (they would fight); hover resumes afterwards.
 	protected void UpdatePositionHover( float timeslice )
 	{
 		if ( !m_IconPosition || m_PositionFeedbackPhase != FEEDBACK_PHASE_IDLE )
@@ -790,12 +724,8 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		return ( a << 24 ) | ( r << 16 ) | ( g << 8 ) | b;
 	}
 
-	//! Same animated shape UIActionFeedbackButton uses for the GUID/Steam64
-	//! copy buttons: the icon fades out, swaps to a check mark while
-	//! invisible, fades back in, holds, then reverses - no separate toast.
-	//! COTFeedback.Copy exists for controls that cannot show their own
-	//! state; this one can, so it bypasses it (see COTFeedback.c's header).
-	//! Ticked from OnUpdate every frame - see UpdatePositionFeedback.
+	//! Same shape as UIActionFeedbackButton: icon fades out, swaps to a check mark, fades in,
+	//! holds, reverses; no toast (bypasses COTFeedback.Copy). Ticked from UpdatePositionFeedback.
 	protected void ShowPositionCopiedFeedback()
 	{
 		if ( !m_IconPosition )
@@ -906,17 +836,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		}
 	}
 
-	// -------------------------------------------------------------------------
-	//  Server performance
-	//
-	//  These are the SERVER numbers, sampled by JMServerStatsModule on the host
-	//  and broadcast to admin clients - not this client render rate, which says
-	//  nothing about whether the server is keeping up.
-	//
-	//  The one-percent low is the number worth watching: a server holding a
-	//  healthy average while one tick in a hundred takes 200ms is the server
-	//  whose players report rubber-banding, and only the low shows it.
-	// -------------------------------------------------------------------------
+	//  Server performance: SERVER numbers sampled by JMServerStatsModule and broadcast to
+	//  admins, not the client render rate. The one-percent low is the one to watch: a healthy
+	//  average can hide rubber-banding ticks, and only the low shows it.
 	protected void UpdateServerStats()
 	{
 		bool valid = JMServerStats.IsValid();
@@ -960,18 +882,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		PackPerformanceRow();
 	}
 
-	// -------------------------------------------------------------------------
-	//  Position
-	//
-	//  The viewing admin's own position - raw vector.ToString() with the
-	//  "<" ">" wrapper stripped, plus which way they are facing as an
-	//  8-point compass reading to its right (JMCompass, shared with the
-	//  weather tab's wind heading). The compass reading sits OUTSIDE
-	//  ft_btn_position, so it is never part of the button's hover/click -
-	//  only the icon and the coordinate text are. Click copies the position
-	//  straight to the clipboard and shows its own check-mark feedback -
-	//  see ShowPositionCopiedFeedback.
-	// -------------------------------------------------------------------------
+	//  Position: the admin's own coordinates plus an 8-point compass reading (JMCompass) to
+	//  its right, OUTSIDE ft_btn_position so it is not part of hover/click. Click copies the
+	//  position and shows check-mark feedback - see ShowPositionCopiedFeedback.
 	protected string m_LastPositionText;
 	protected string m_LastPositionCopyText;
 
@@ -986,12 +899,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		float posYFloat = pos[1];
 		float posZFloat = pos[2];
 
-		//! vector.ToString() rounds to whole metres, float.ToString() only
-		//! keeps a handful of significant digits, and string.Format's "%.Nf"
-		//! is not actually implemented (it silently drops the value and
-		//! leaves the literal ".Nf" behind) - FormatFixed builds the decimal
-		//! string by hand instead, which is what actually preserves
-		//! sub-millimetre precision on the clipboard.
+		//! vector.ToString() rounds to metres, float.ToString() loses digits, and string.Format's
+		//! "%.Nf" is not implemented (leaves literal ".Nf"); FormatFixed builds the string by hand
+		//! to keep sub-millimetre precision.
 		string copyX = FormatFixed( posXFloat, 6 );
 		string copyY = FormatFixed( posYFloat, 6 );
 		string copyZ = FormatFixed( posZFloat, 6 );
@@ -1012,14 +922,9 @@ class JMCOTSideBarFooter: COT_ScriptedWidgetEventHandler
 		PackPositionRow();
 	}
 
-	//! Hugs ft_btn_position to the measured text so its hover/click never
-	//! reaches past the coordinate string, then places the cardinal
-	//! reading - a sibling of the button, not a child of it - right after.
-	//! Everything here is in ft_position_row's own local frame: the button
-	//! sits at local (0,0) inside that row, so the text's position relative
-	//! to the button (POSITION_TEXT_LEFT) already IS its position relative
-	//! to the row, and the cardinal reading can be placed directly off the
-	//! button's new width with no extra translation.
+	//! Hugs ft_btn_position to the measured text, then places the cardinal reading (a sibling,
+	//! not a child) right after. All in the row's local frame: the button sits at (0,0), so
+	//! POSITION_TEXT_LEFT is already relative to the row.
 	protected void PackPositionRow()
 	{
 		if ( !m_TextPosition || !m_BtnPosition || !m_IconCardinal || !m_TextCardinal )

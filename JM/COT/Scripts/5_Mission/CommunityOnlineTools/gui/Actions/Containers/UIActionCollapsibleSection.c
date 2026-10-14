@@ -1,17 +1,7 @@
-// =============================================================================
-//  UIActionCollapsibleSection
-//
-//  A header button that shows/hides a content panel below it.
-//  The content panel is a plain Widget - add children to it via GetContent().
-//
-//  Usage:
-//      UIActionCollapsibleSection sec = UIActionManager.CreateCollapsibleSection(
-//          parent, "Teleport Options" );
-//      Widget content = sec.GetContent();
-//      UIActionManager.CreateButton( content, "Teleport To Me", this, "OnClick_TeleportToMe" );
-//
-//  The section starts expanded. Call SetExpanded(false) to start collapsed.
-// =============================================================================
+// UIActionCollapsibleSection: a header button that shows/hides a content panel below it.
+// Add children to the plain Widget returned by GetContent().
+// Usage: UIActionManager.CreateCollapsibleSection( parent, "Title" ).
+// Starts expanded; call SetExpanded(false) to start collapsed.
 class UIActionCollapsibleSection: UIActionBase
 {
 	protected TextWidget  m_Label;

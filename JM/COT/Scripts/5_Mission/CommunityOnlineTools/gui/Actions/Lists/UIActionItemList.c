@@ -1,37 +1,7 @@
-// =============================================================================
-//  UIActionItemList
-//
-//  A COT-styled, single-column list for sets far too large to give a widget
-//  each. Only the rows that fit on screen exist; scrolling moves the DATA
-//  through a fixed pool of row widgets rather than moving widgets past a
-//  viewport.
-//
-//  This is what replaced TextListboxWidget in the object spawner. That widget
-//  draws in the engine's debug style, cannot be themed, and builds one entry
-//  per item - which for the ~14000 spawnable classes is 14000 widgets on every
-//  keystroke. A pool of ~20 costs the same at 20 items as at 20000.
-//
-//  Every row carries a primary label and an optional secondary one, drawn
-//  dimmed and right-aligned. The spawner uses it to show the class name beside
-//  the display name, so switching to display names does not hide the thing an
-//  admin actually needs to type.
-//
-//  The list NEVER measures itself to lay out. Its owner tells it how tall its
-//  viewport is - which the owner already knows, because it is the same number
-//  it used to size the list's container. A widget cannot measure itself on the
-//  frame it is built, and a list that got that wrong would show one row.
-//
-//  Usage:
-//      m_List = UIActionManager.CreateItemList( parent, this, "OnClick_Row" );
-//      m_List.SetViewportHeight( listHeightInScreenPixels );
-//      m_List.SetItems( names, classnames );
-//
-//      void OnClick_Row( UIEvent eid, UIActionBase action )
-//      {
-//          if ( eid == UIEvent.CLICK )        Select( m_List.GetSelectedIndex() );
-//          if ( eid == UIEvent.DOUBLE_CLICK ) Confirm();
-//      }
-// =============================================================================
+// UIActionItemList - COT-styled single-column list for huge sets (~14000 spawnable
+// classes). Only the rows that fit exist; scrolling moves DATA through a fixed widget pool.
+// Rows have a primary label and an optional dimmed right-aligned secondary one.
+// The list NEVER measures itself: the owner passes the viewport height (SetViewportHeight).
 class UIActionItemList: UIActionBase
 {
 	protected Widget     m_Body;
@@ -41,11 +11,9 @@ class UIActionItemList: UIActionBase
 	protected ref array<string> m_Items;
 	protected ref array<string> m_Subs;
 
-	//! Per-item selection state OWNED BY THE HOST, distinct from m_Selected
-	//! (the row this widget itself last clicked/pressed). A host tracking its
-	//! own multi-select data (e.g. ESP's tracked-object list) marks entries
-	//! here to get a left-edge accent instead of borrowing the click-highlight,
-	//! which only ever fits one row at a time.
+	//! Per-item selection state OWNED BY THE HOST, distinct from m_Selected (the row
+	//! this widget last clicked). Lets a host with its own multi-select data (e.g. ESP)
+	//! mark entries with a left-edge accent instead of the one-row click-highlight.
 	protected ref array<bool> m_Highlighted;
 
 	//! The row widgets. Never more than fit on screen, never rebuilt on a data
@@ -57,12 +25,10 @@ class UIActionItemList: UIActionBase
 	protected int m_Selected;
 	protected int m_Hovered;
 
-	//! Viewport height in SCREEN pixels, as handed over by the owner (a measured
-	//! height, e.g. the `h` given to OnResize). SetPos / SetSize on an exact axis,
-	//! GetScreenSize and the mouse all work in screen pixels; the authored pixel
-	//! constants here (ROW_H) go through JMUILayout.Px before they meet it, and
-	//! mixing the two is the classic DPI trap. The scrollbar drag measures its
-	//! own track at drag time, so both sides of that sum are screen space.
+	//! Viewport height in SCREEN pixels, as handed over by the owner. Authored pixel
+	//! constants (ROW_H) go through JMUILayout.Px before meeting it; mixing the two is
+	//! the classic DPI trap. The scrollbar drag measures its track at drag time, so
+	//! both sides of that sum are screen space.
 	protected float m_ViewportH;
 	protected bool m_Dragging;
 	protected int  m_DragMouseY;
@@ -206,16 +172,10 @@ class UIActionItemList: UIActionBase
 	//  Geometry
 	// -------------------------------------------------------------------------
 
-	//! Tell the list how tall it is, in screen pixels. Call it from wherever the
-	//! container's height is decided - the same number, not a re-measurement.
-	//!
-	//! This also APPLIES that height to the control. The layout authors the
-	//! root as `size 1 1` with vexactsize 0, i.e. a fraction of its parent, so
-	//! a list left to itself claims the parent's full height no matter how many
-	//! rows it holds. Under a parent that sizes itself to its content - a
-	//! UIActionCard - that resolves as "card fits list, list fills card" and
-	//! the card grows without bound. Callers that size a wrapper and pass its
-	//! height are unaffected: the number they pass is the height it already had.
+	//! Tell the list how tall it is, in screen pixels - the same number the container
+	//! height was decided with, not a re-measurement. This also APPLIES it: the layout
+	//! root is `size 1 1` (a fraction of its parent), so under a content-sized parent
+	//! such as UIActionCard the card would grow without bound.
 	void SetViewportHeight( float pixels )
 	{
 		if ( pixels <= 0 )
@@ -351,16 +311,10 @@ class UIActionItemList: UIActionBase
 		ApplyRowWidth();
 	}
 
-	//! How far short of the right edge a row stops, measured rather than
-	//! assumed.
-	//!
-	//! The gutter the scrollbar needs is a FIXED number of layout pixels, so
-	//! expressing it as a fixed FRACTION of the row was wrong: 0.028 of the
-	//! object spawner's wide column clears the bar, and 0.028 of the teleport
-	//! form's narrow one does not - which is why only the narrow list had its
-	//! right-hand column sliced by the bar. The bar measures itself here, so
-	//! the fraction is derived per list instead of guessed once. Both sides of
-	//! the division are screen space, so UI scaling cancels out of it.
+	//! How far short of the right edge a row stops, measured rather than assumed. The
+	//! scrollbar gutter is a FIXED number of layout pixels, so a fixed fraction of the
+	//! row cleared the bar in a wide column but not the narrow teleport list. The bar
+	//! measures itself here; both sides are screen space so UI scaling cancels out.
 	protected void ApplyRowWidth()
 	{
 		float rowW = ROW_W;
@@ -611,17 +565,10 @@ class UIActionItemList: UIActionBase
 		return -1;
 	}
 
-	//! Selection runs off the PRESS, not off OnClick.
-	//!
-	//! OnClick is a ButtonWidget event. These rows are plain panels - which is
-	//! what lets the mouse wheel through to the list at all, since a button
-	//! consumes it - and a panel never raises a click. The press is the event
-	//! every widget gets, and it is what UIActionDataTable already uses to hit
-	//! its own non-button rows.
-	//!
-	//! Selecting on the way down rather than the way up is also what a list is
-	//! expected to do: press, drag, release elsewhere still selects what was
-	//! pressed.
+	//! Selection runs off the PRESS, not off OnClick. OnClick is a ButtonWidget event;
+	//! these rows are plain panels (which lets the mouse wheel through, since a button
+	//! consumes it) and never raise a click. Press-time selection also lets press, drag,
+	//! release elsewhere select what was pressed. UIActionDataTable does the same.
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{
 		//! A right press selects the row and reports itself, so a host can open
@@ -711,12 +658,9 @@ class UIActionItemList: UIActionBase
 		return true;
 	}
 
-	//! The wheel moves the SELECTION, and the view follows it.
-	//!
-	//! It does not pan the list out from under the selected row. Scrolling walks
-	//! the highlight down one entry at a time, and only once that reaches the
-	//! last visible row does the list itself start moving - which is what makes
-	//! a wheel notch mean the same thing as an arrow key.
+	//! The wheel moves the SELECTION and the view follows. The highlight walks down one
+	//! entry at a time and the list only moves once it reaches the last visible row, so
+	//! a wheel notch means the same as an arrow key.
 	override bool OnMouseWheel( Widget w, int x, int y, int wheel )
 	{
 		if ( m_Items.Count() == 0 )

@@ -1,8 +1,6 @@
 //! One tab strip a form has pinned over its content, and what it was pinned with.
-//!
-//! JMFormBase keeps one per strip so it can pin again when the tab strip wraps or unwraps after
-//! the window's own OnResize has come and gone (see JMFormBase.OnTabStripFitted), and so a form
-//! can ask how tall a strip really is now (JMFormBase.GetPinnedStripHeight).
+//! JMFormBase keeps one per strip to re-pin when the strip wraps after OnResize has passed
+//! (see JMFormBase.OnTabStripFitted) and to report its height (JMFormBase.GetPinnedStripHeight).
 class JMPinnedStrip
 {
 	Widget Strip;

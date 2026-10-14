@@ -15,9 +15,7 @@ class JMLootAnalysisFormTabItemScan: JMFormTab
 
 	//! Real height of m_ScanStatsCard, corrected from STATS_H (a seed, not a
 	//! measurement) once the card has something to measure - see Measure().
-	//! A card sizes itself to its rows, and the row count here varies with
-	//! whether CE data was found, so a fixed band either cut the Tiers row
-	//! off or left dead space under a short one.
+	//! The row count varies with whether CE data was found, so a fixed band cuts rows off.
 	protected float m_ScanStatsH = JMLootAnalysisForm.STATS_H;
 	protected ref JMLootCEEditRow m_ScanCEEdit;
 	protected UIActionImageButton m_ScanSaveCEButton;
@@ -112,12 +110,9 @@ class JMLootAnalysisFormTabItemScan: JMFormTab
 		}
 	}
 
-	//! m_ScanStatsH starts at the STATS_H seed and is corrected here once the
-	//! card has laid out its rows for real - it cannot know that on the frame
-	//! it is built, and the row count itself only settles once a scan result
-	//! actually arrives. Re-checked every OnUpdate() while the tab is focused; the
-	//! comparison is a cheap float read, and it only ever relayouts when the
-	//! measured height actually moved.
+	//! m_ScanStatsH starts at the STATS_H seed and is corrected once the card has laid
+	//! out its rows (unknown when built; row count settles when a scan result arrives).
+	//! Re-checked every OnUpdate() while focused; relayouts only if the height moved.
 	override void OnUpdate()
 	{
 		if (m_ItemScanMap)

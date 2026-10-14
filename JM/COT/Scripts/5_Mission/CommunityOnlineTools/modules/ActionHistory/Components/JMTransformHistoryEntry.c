@@ -1,12 +1,6 @@
-// =============================================================================
-//  JMTransformHistoryEntry
-//
-//  Undo/redo for one ESP move/rotate gesture, on the shared global stack.
-//  Pushed once per gesture (JMESPWidgetHandler.EndDrag, via JMESPModule.
-//  RecordTransformHistory) rather than per throttled position/orientation
-//  RPC sent during the drag - the drag itself has no natural single point
-//  to record an undo step at, but its end does.
-// =============================================================================
+//  JMTransformHistoryEntry - undo/redo for one ESP move/rotate gesture, on the shared global
+//  stack. Pushed once per gesture (JMESPWidgetHandler.EndDrag via JMESPModule.RecordTransformHistory),
+//  not per throttled RPC during the drag, which has no single point to record an undo step but its end.
 class JMTransformHistoryEntry: JMActionHistoryEntry
 {
 	protected Object m_Target;

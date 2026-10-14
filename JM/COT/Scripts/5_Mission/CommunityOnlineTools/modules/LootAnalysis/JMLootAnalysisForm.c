@@ -1,37 +1,7 @@
-// =============================================================================
-//  JMLootAnalysisForm
-//
-//  Search / category filter / recent chips and the shared item picker on the
-//  left, modelled directly on the object spawner's own left column. A tab
-//  strip over Item Scan and Loot Distribution on the right - each tab's own
-//  map/stats/CE-edit widgets live in JMLootAnalysisFormTabItemScan.c /
-//  JMLootAnalysisFormTabDistribution.c. What stays here: the left column
-//  (shared by both tabs), the CE-save confirmation chain (SaveCEData_Yes is
-//  a JMConfirmation named callback - it dispatches against whatever object
-//  its window was Init()'d with, not against whichever tab raised the
-//  popup, so it and its DeleteAll_Yes sibling have to stay on the form), and
-//  the right-click marker menu shared by both tabs' maps.
-//
-//  ---------------------------------------------------------------------------
-//  WHAT REPLACED WHAT
-//
-//  "Show On Map" / "Find CE Spawn Locations" used to open JMMapModule and hand
-//  it the results - a second window for what is fundamentally this module's
-//  own output. Each tab now owns a UIActionMap, so the list, the actions and
-//  the result markers stay in one window.
-//
-//  The item list was TextListboxWidget, which draws in the engine's debug
-//  style and builds one widget per row - for the ~14000 spawnable classes this
-//  scan walks, that is 14000 widgets rebuilt on every keystroke. UIActionItemList
-//  is what the object spawner already moved to for the identical scan; a pool
-//  of ~20 rows costs the same at 20 items as at 20000.
-//
-//  The category grid (two rows of eight buttons) is gone in favour of the
-//  object spawner's own shape: a filter button beside the search box opens a
-//  category menu, and the categories actually used land on a "recent" chip
-//  row underneath - one row of chrome instead of two, and it does not run out
-//  of room as usages/tiers get added below it.
-// =============================================================================
+//  JMLootAnalysisForm - left column (search, category filter, recent chips, shared item list)
+//  mirrors the object spawner's; tabs (Item Scan / Loot Distribution) own their map/stats/CE-edit
+//  widgets. Stays here: the CE-save chain (SaveCEData_Yes / DeleteAll_Yes dispatch against the
+//  form's window, not the tab that raised the popup) and the marker menu shared by both maps.
 
 class JMLootAnalysisForm: JMFormBase
 {
@@ -367,13 +337,10 @@ class JMLootAnalysisForm: JMFormBase
 		DeferCall( "UpdateItemList", 300 );
 	}
 
-	// -------------------------------------------------------------------------
-	//  UpdateItemList - iterate CfgVehicles / CfgWeapons / CfgMagazines, apply
-	//  category + keyword search, set autocomplete preview on the search box.
-	//  Note: JMEntityTracker is server-side only and always returns 0 on the
-	//  client, so we scan config directly here. The server scan (ShowItemsOnMap)
-	//  filters to actually-spawned entities when the user requests map markers.
-	// -------------------------------------------------------------------------
+	//  UpdateItemList - iterate CfgVehicles / CfgWeapons / CfgMagazines, apply category + keyword
+	//  search, set the autocomplete preview. JMEntityTracker is server-side only (0 on the
+	//  client), so config is scanned directly; the server scan (ShowItemsOnMap) filters to
+	//  actually-spawned entities for map markers.
 	void UpdateItemList()
 	{
 		if (!m_ItemList)
@@ -556,11 +523,9 @@ class JMLootAnalysisForm: JMFormBase
 		}
 	}
 
-	//! Whichever classname Item Info is currently showing - the last lookup's
-	//! own answer if there is one, falling back to the list/search selection
-	//! so Reload still works before any lookup has happened yet. Shared by
-	//! both tabs' Reload button, which is why it lives here rather than on
-	//! either tab class.
+	//! Whichever classname Item Info is showing: the last lookup's answer, else the list/search
+	//! selection so Reload works before any lookup. Shared by both tabs' Reload button, so it
+	//! lives here.
 	void RequestTypeInfoReload()
 	{
 		if (!m_Module)
@@ -615,11 +580,9 @@ class JMLootAnalysisForm: JMFormBase
 
 		list.SetValue("Tiers", JoinOrDash(info.m_Tiers));
 
-		//! The type's own <usage name="Military"/> etc - what the user calls
-		//! "values" (military/village/...). Independent of the clickable
-		//! legend badges in Distribution, which only reflect a completed
-		//! spawn-location search - this shows immediately, on either tab, as
-		//! soon as CE data is found for the classname.
+		//! The type's own <usage name="Military"/> etc (what the user calls "values"). Independent
+		//! of the Distribution legend badges, which need a completed spawn-location search; this
+		//! shows immediately, on either tab, once CE data is found.
 		list.SetValue("Values", JoinOrDash(info.m_Usages));
 	}
 
@@ -657,11 +620,9 @@ class JMLootAnalysisForm: JMFormBase
 	//  Map interaction - right-click marker menu (shared by both maps)
 	// =========================================================================
 
-	//! Ground click on either map. Left clicks are informational only; a
-	//! right press on a marker opens the action menu. Also the callback for
-	//! marker hover (MOUSE_ENTER/MOUSE_LEAVE) - shared with the click
-	//! handling because both maps were already wired to one callback and a
-	//! UIActionBase callback is one function per action, not one per event.
+	//! Ground click on either map (left is informational; right press on a marker opens the
+	//! action menu), also the marker hover callback (MOUSE_ENTER/MOUSE_LEAVE): a UIActionBase
+	//! callback is one function per action, not per event.
 	void OnClick_Map(UIEvent eid, UIActionBase action)
 	{
 		if (eid == UIEvent.MOUSE_ENTER)

@@ -1,24 +1,7 @@
-// =============================================================================
-//  JMBanModule.c
-//
-//  Standalone ban management module for COT.
-//
-//  Structure confirmed from real source:
-//    * Extends JMRenderableModuleBase
-//    * Constructor registers permissions via GetPermissionsManager()
-//    * GetLayoutRoot / GetTitle / GetIconName / ImageIsIcon / GetWebhookTitle
-//    * GetRPCMin / GetRPCMax bracket the enum
-//    * OnRPC with internal switch (matching JMPlayerModule / JMLoadoutModule)
-//    * OnMissionLoaded for server-side init (matching JMLoadoutModule)
-//    * OnUpdate( float timeslice ) for the prune sweep (matching JMESPModule)
-//    * EnableUpdate() overridden empty to disable client-side ticking
-//    * GetForm() cast to JMBanForm to push data to the open panel
-//    * Registered in JMModuleConstructor via modules.Insert( JMBanModule )
-//
-//  Ban-on-connect enforcement: JMPlayerBan.Save() writes a per-player file
-//  that COT's mission connect code checks automatically - we don't need a
-//  separate connect hook here.
-// =============================================================================
+//  JMBanModule.c - standalone ban management module. OnUpdate runs the prune
+//  sweep; EnableUpdate() is emptied to disable client-side ticking. Ban-on-connect
+//  needs no hook here: JMPlayerBan.Save() writes a per-player file that COT's
+//  mission connect code already checks.
 
 class JMBanModule : JMRenderableModuleBase
 {
@@ -277,11 +260,9 @@ class JMBanModule : JMRenderableModuleBase
         if ( !IsMissionHost() )
             return;
 
-        //! Issuing a ban is gated on the execute permission, NOT on
-        //! Admin.Ban.View. View only grants sight of the ban list - a role
-        //! given read-only access to this panel must not be able to ban
-        //! through it. Admin.Player.Ban is the same key the Player module's
-        //! own ban RPC and the ESP action menu already check.
+        //! Banning is gated on Admin.Player.Ban (as in the Player module and ESP
+        //! menu), NOT Admin.Ban.View: View only grants sight of the list, so a
+        //! read-only role must not be able to ban through this panel.
         JMPlayerInstance instance;
         if ( !sender ) return;
         if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BAN, sender, instance ) )

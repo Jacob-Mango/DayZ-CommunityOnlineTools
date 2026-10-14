@@ -7,10 +7,8 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 	protected JMAntiCheatForm m_Form;
 
 	//! A flagged player is two fixed-height rows: score+name+actions, then the
-	//! guid and its fold button. Fixed-height PANELS, not wrap spacers - a wrap
-	//! spacer pushes a child that does not fit onto a line of its own, which is
-	//! what put the action strip and the fold button on rows by themselves. A
-	//! panel positions its children outright and never wraps.
+	//! guid and its fold button. Fixed-height PANELS, not wrap spacers (a wrap spacer
+	//! pushes a child that does not fit onto its own line); a panel never wraps.
 	static const float ROW_IDENTITY_PX  = 34;
 	static const float ROW_GUID_PX      = 30;
 
@@ -168,13 +166,8 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 	}
 
 	// -----------------------------------------------------------------------
-	//  Detection line parsing
-	//
-	//  A raw event reads:
-	//      [2026-08-28 17:16Z] (+22) Unauthorized RPC: 3 denied in 30s
-	//
-	//  The stamp goes to the clock's tooltip and the delta gets its own red
-	//  cell, so the line itself is left with the part that is actually prose.
+	//  Detection line parsing: "[2026-08-28 17:16Z] (+22) Unauthorized RPC: 3 denied in 30s"
+	//  The stamp goes to the clock tooltip and the delta to its own cell, leaving the prose.
 	// -----------------------------------------------------------------------
 
 	//! The bracketed stamp a detection line opens with, for the clock's tooltip.
@@ -289,15 +282,8 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 	}
 
 	// -----------------------------------------------------------------------
-	//  Destructive quick actions
-	//
-	//  Clear, Kick and Ban used to be inline confirm buttons, which is what made
-	//  them look unlike Freeze and Page. They are plain icon buttons now, so the
-	//  guard they used to carry has to live somewhere - it moved to the window's
-	//  confirmation dialog. The guid is parked on the form because the dialog
-	//  callbacks are named methods and take no argument of their own, and those
-	//  callbacks (Confirm*) have to stay on the form - see JMAntiCheatForm's
-	//  file header.
+	//  Destructive quick actions: guarded by the window's confirmation dialog. The guid is
+	//  parked on the form (callbacks take no argument); Confirm* must stay on the form.
 	// -----------------------------------------------------------------------
 
 	void OnClick_Clear( UIActionBase action )
@@ -528,10 +514,8 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 			bool hasEvents = ( flag.RecentEvents && flag.RecentEvents.Count() > 0 );
 
 			// -- Line 1: score, name, quick actions hard right ------------------
-			//
-			// Name and GUID were one UIActionText, whose label sits hard left and
-			// whose value sits hard right; a 64-character GUID reached back far
-			// enough to be drawn over the name. Two lines, one string each.
+			// Name and GUID are separate lines: as one UIActionText a 64-character GUID
+			// was drawn over the name.
 			Widget rowIdentity = UIActionManager.CreateRow( body, ROW_IDENTITY_PX );
 			rowIdentity.SetUserData( new JMAntiCheatClearData( guid ) );
 
@@ -545,9 +529,8 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 
 			// Quick actions: Freeze / Kick / Ban / Player Page + Clear Flag, all
 			// plain 32px icon buttons so the row reads as one set of controls.
-			//
-			// Created in reverse of how they read - the wrap spacer is aligned
-			// right, so the first one built ends up furthest right.
+			// Created in reverse of reading order: the wrap spacer is right-aligned, so the
+			// first one built ends up furthest right.
 			Widget actionWrap = UIActionManager.CreateWrapSpacer( rowIdentity, WidgetAlignment.WA_RIGHT, WidgetAlignment.WA_CENTER );
 
 			// A plain Widget has no SetWidth/SetPosition - those are UIActionBase
@@ -593,10 +576,8 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 			guidText.SetWidth( 0.96 );
 
 			// -- Detections ------------------------------------------------------
-			//
-			// Always on screen: a per-player fold on top of the per-group folds
-			// was one layer of opening too many, and every row under it was one
-			// an admin had already asked to see by opening the tab.
+			// Always on screen: a per-player fold over the per-group folds was one layer
+			// of opening too many.
 			if ( hasEvents )
 			{
 				array<ref JMAntiCheatGroupEntry> detectionGroups = GroupDetections( flag.RecentEvents );
@@ -614,11 +595,9 @@ class JMAntiCheatFormTabFlagged: JMFormTab
 					evtText.SetPosition( 0.02 );
 					evtText.SetLabelColor( JMTheme.TEXT_PRIMARY );
 
-					// The weight these detections ADDED, which is deliberately not
-					// the score above and cannot be made to match it: the score
-					// decays hour by hour, and only the last 25 events are kept,
-					// so the sum runs high after a quiet spell and low after a
-					// busy one. Saying which number is which is the honest fix.
+					// The weight these detections ADDED; deliberately not the score above (it
+					// decays hourly and only the last 25 events are kept, so the sum drifts).
+					// Labelling which number is which is the honest fix.
 					if ( group.TotalPoints > 0 )
 					{
 						UIActionText evtDelta = UIActionManager.CreateText( groupRow, "+" + group.TotalPoints.ToString() );

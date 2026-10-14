@@ -1,18 +1,7 @@
-// =============================================================================
-//  JMActionHistoryModule
-//
-//  The trigger for JMActionHistory's shared undo/redo stack: a parameterless
-//  client -> server request (Ctrl+Z / Ctrl+Y in MissionGameplay), and the
-//  place each step is reported - a notification to the admin, a log line and a
-//  webhook, the same trail the original action left.
-//
-//  No UI of its own. It is a module, rather than living on the ESP module that
-//  used to host the RPC, so sub-mods that push their own entries do not have to
-//  depend on ESP being there.
-//
-//  RPCs (JMActionHistoryModuleRPC @ 10960):
-//    Undo, Redo   client -> server, no payload
-// =============================================================================
+//  JMActionHistoryModule: trigger for JMActionHistory's undo/redo (Ctrl+Z / Ctrl+Y request,
+//  client -> server, no payload) and reports each step (notification, log, webhook).
+//  No UI; a separate module so sub-mods need not depend on ESP.
+//  RPCs (JMActionHistoryModuleRPC @ 10960): Undo, Redo
 class JMActionHistoryModule: JMModuleBase
 {
 	override void DescribeModule( JMModuleInfo info )

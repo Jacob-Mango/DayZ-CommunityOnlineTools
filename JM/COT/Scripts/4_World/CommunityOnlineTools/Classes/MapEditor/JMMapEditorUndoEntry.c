@@ -1,10 +1,6 @@
-// =============================================================================
-//  JMMapEditorUndoEntry.c
-//
-//  Per-mutation snapshot for the map editor's undo/redo stack. Captures the
-//  state of one or more objects at the moment a mutation fires so a replay
+//  JMMapEditorUndoEntry.c - per-mutation snapshot for the map editor's undo/redo stack.
+//  Captures the state of one or more objects when a mutation fires so a replay
 //  restores them. Server-side only.
-// =============================================================================
 
 class JMMapEditorUndoEntry
 {

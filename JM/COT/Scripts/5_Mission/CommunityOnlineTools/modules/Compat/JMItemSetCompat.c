@@ -1,23 +1,6 @@
 /**
- * JMItemSetCompat.c
- *
- * Compatibility stubs for the removed ItemSetSpawner module.
- *
- * COT's ItemSetSpawner module (form, module, RPC and JSON persistence) was
- * deleted in 893b62e5. DayZ-Expansion still ships
- * `modded class JMItemSetSettings` behind `#ifdef JM_COT`, so without these
- * types Expansion fails to compile whenever COT is loaded:
- *
- *   dayzexpansion\classes\modules\itemsets\jmitemsetsettings.c(14):
- *   Unknown type 'JMItemSetSettings'
- *
- * These are data carriers only. Nothing in COT constructs or reads them --
- * Expansion's override populates ItemSets and no consumer ever drains it.
- * The persistence half of the original API (Load/Save/Create) is intentionally
- * absent: it depended on JMConstants.DIR_ITEMS / EXT_ITEM, which were removed
- * with the module. Expansion never calls it.
- *
- * See docs/systems/mod-compatibility.md.
+ * Stubs for the removed ItemSetSpawner: Expansion's `modded class JMItemSetSettings`
+ * (#ifdef JM_COT) fails to compile without them. Data only. See docs/systems/mod-compatibility.md.
  */
 
 class JMItemSetItemInfo

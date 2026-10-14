@@ -1,9 +1,5 @@
-// =============================================================================
-//  JMEntityAction
-//
-//  Describes one button the UI will render in the entity options panel.
-//  Adapter returns a list of these; the form wires them up.
-// =============================================================================
+//  JMEntityAction - one button for the entity options panel; the adapter
+//  returns a list of these.
 class JMEntityAction
 {
 	string  m_Id;            // stable id passed back to adapter.OnAction()

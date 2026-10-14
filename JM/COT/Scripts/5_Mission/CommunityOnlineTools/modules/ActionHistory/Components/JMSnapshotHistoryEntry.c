@@ -1,23 +1,7 @@
-// =============================================================================
-//  JMSnapshotHistoryEntry
-//
-//  Shared machinery for the two entries that move an object in and out of the
-//  world: JMDeleteHistoryEntry (undo brings it back) and JMSpawnHistoryEntry
-//  (undo removes it). Both are the same pair of operations run in opposite
-//  order, so they share one implementation of each.
-//
-//  For an EntityAI, the snapshot is the same full recursive capture
-//  JMLoadoutModule uses for its own deletion backups - classname, health/
-//  quantity/liquid/temperature, and every attachment/cargo item recursively -
-//  so a restored object has what was inside or attached to it, not just an
-//  empty shell. A plain Object (not an EntityAI) falls back to classname +
-//  transform only, since the loadout system has nothing to capture on one.
-//
-//  A restored object is a NEW object. Every other entry on the stack that
-//  pointed at the old one is recorded (m_Dependents) before it goes away and
-//  handed the replacement, so an earlier "move this crate" or "heal this
-//  vehicle" still works after the crate or vehicle is deleted and un-deleted.
-// =============================================================================
+// JMSnapshotHistoryEntry: shared machinery for JMDeleteHistoryEntry and JMSpawnHistoryEntry
+// (same operations in opposite order). EntityAI snapshots are JMLoadoutModule's full recursive
+// capture; a plain Object keeps only classname + transform. A restored object is NEW, so
+// other stack entries pointing at the old one are recorded (m_Dependents) and re-pointed.
 class JMSnapshotHistoryEntry: JMActionHistoryEntry
 {
 	protected ref JMLoadoutItem m_Snapshot;

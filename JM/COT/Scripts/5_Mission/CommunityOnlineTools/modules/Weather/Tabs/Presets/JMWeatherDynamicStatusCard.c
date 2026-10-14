@@ -1,17 +1,7 @@
-//! The dynamic weather master switch and the machine's live position: which
-//! preset and phase the weather is in, how long that phase has left, and where it
-//! can go next.
-//!
-//! The controls that move the machine - pause / resume, advance, restart - are
-//! icons in the card's title bar, like every other action in this tab. The body
-//! is only what is being shown: the switch, where the weather is now, a bar that
-//! reads "time left / hold length", and a small table of the places it can go next
-//! with the odds of each.
-//!
-//! The position is the server's - this only ever paints what the module last
-//! heard (JMWeatherModule.GetDynamicStatus), counting the clock down locally
-//! between polls. The switch itself saves the moment it is flipped: there is
-//! nothing else on this card to batch it with.
+//! The dynamic weather master switch and the machine's live position (preset, phase, time
+//! left, possible next places with odds). Machine controls are icons in the title bar. The
+//! position is the server's: this paints what JMWeatherModule.GetDynamicStatus last heard,
+//! counting the clock down locally. The switch saves the moment it is flipped.
 class JMWeatherDynamicStatusCard
 {
 	//! Repaint no more often than this - a countdown to the second does not need frames.

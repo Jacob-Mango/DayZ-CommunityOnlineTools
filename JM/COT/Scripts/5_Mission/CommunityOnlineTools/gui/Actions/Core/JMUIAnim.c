@@ -1,19 +1,7 @@
-// =============================================================================
-//  JMUIAnim - Unified animation utilities for COT UI.
-//
-//  Color interpolation:
-//      int c = JMUIAnim.LerpColor( from, to, t );   // t in [0,1]
-//
-//  Animated float (drives a single value toward a target each frame):
-//      JMAnimFloat anim;
-//      anim.Set( 0 );             // initial value
-//      anim.SetTarget( 1, 8.0 ); // target, speed (units/sec)
-//      float v = anim.Step( timeSlice );  // call in Update(), reads .Value
-//
-//  Easing:
-//      float e = JMUIAnim.EaseOut( t );   // smooth deceleration
-//      float e = JMUIAnim.EaseInOut( t ); // smooth both ends
-// =============================================================================
+//  JMUIAnim - unified animation utilities for COT UI: LerpColor( from, to, t ) with t in [0,1];
+//  EaseOut( t ) / EaseInOut( t ); and JMAnimFloat, which drives a value toward a target:
+//  anim.Set( 0 ); anim.SetTarget( 1, 8.0 ) (target, units/sec); call anim.Step( timeSlice )
+//  from Update().
 
 class JMUIAnim
 {

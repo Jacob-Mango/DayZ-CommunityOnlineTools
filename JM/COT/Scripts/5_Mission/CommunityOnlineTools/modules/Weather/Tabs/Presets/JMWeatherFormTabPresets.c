@@ -1,19 +1,7 @@
-//! "Dynamic Presets" tab of JMWeatherForm - the live status of the dynamic weather
-//! machine and the preset editor. Back-reference to the owning form, same shape as
-//! JMPlayerRowWidget.Menu.
-//!
-//! ---------------------------------------------------------------------------
-//!  Preset edit mode
-//!
-//!  With a preset selected here, every other tab edits
-//!  THAT preset's weather - the phase selected in the editor - instead of the live
-//!  world: the controls are loaded from it, the live poll stops writing over them,
-//!  every value becomes a min/max span, the Time tab is disabled and Apply becomes
-//!  a local preview. Selecting a preset IS entering this mode; the banner's Close
-//!  un-selects it. The selection and the mode belong to JMWeatherDynamicEditor;
-//!  this tab only hosts it and answers the form's questions through it, and until
-//!  the tab has been opened there is no selection and the answer is "live world".
-//! ---------------------------------------------------------------------------
+//! "Dynamic Presets" tab of JMWeatherForm - dynamic weather machine status and preset editor.
+//! Preset edit mode: with a preset selected, every other tab edits THAT preset's phase (live
+//! poll stopped, Time tab disabled, Apply is a local preview). Owned by JMWeatherDynamicEditor;
+//! until this tab is opened the answer is "live world".
 class JMWeatherFormTabPresets: JMFormTab
 {
 	protected JMWeatherForm m_Form;

@@ -1,57 +1,27 @@
-// =============================================================================
-//  JMTeleportHistory
-//
-//  Where things were before the admin moved them, so a teleport can be taken
-//  back.
-//
-//  Client-side and per-session on purpose. This is a record of what THIS admin
-//  moved, which is exactly what an undo is, and keeping it on the client costs
-//  no netcode, no serialisation and no per-tick bandwidth in the player list.
-//  It is NOT a server audit trail: teleports another admin issued, or ones from
-//  before this client connected, are not in here and are not undoable.
-//
-//  Every target is keyed by a string - a player GUID, or an object's network id
-//  - so players, vehicles and anything ESP tracks share one store and one cap.
-//
-//  Usage:
-//      // before moving something:
-//      JMTeleportHistory.PushPlayers( guids );
-//      JMTeleportHistory.PushObject( vehicleObject );
-//
-//      // undoing, most recent first - and putting it back:
-//      JMTeleportHistory.UndoTarget( object, 0 );
-//      JMTeleportHistory.RedoTarget( object, 0 );
-// =============================================================================
+//  JMTeleportHistory - where things were before THIS admin moved them, so a
+//  teleport can be undone. Client-side, per-session (no netcode); not a server
+//  audit trail. Targets are keyed by string (player GUID or object network id)
+//  and share one store/cap. PushPlayers/PushObject before moving; UndoTarget/RedoTarget.
 class JMTeleportHistory
 {
 	//! How far back an undo can walk. Five is the ask, and it is also about as
 	//! many positions as anyone can still tell apart by their coordinates.
 	static const int MAX_ENTRIES = 5;
 
-	//! Two teleports landing this close together are the same move. Squared
-	//! metres, so 4 is two metres.
-	//!
-	//! Holding the cursor-teleport key fires once per frame, and without this
-	//! the whole history fills with one spot and buries the position that was
-	//! actually worth going back to.
+	//! Teleports this close are the same move (squared metres, 4 = two metres).
+	//! Holding the cursor-teleport key fires every frame and would fill the history
+	//! with one spot.
 	static const float SAME_PLACE_SQ = 4.0;
 	protected static ref map<string, ref array<ref JMTeleportHistoryEntry>> s_Targets;
 
-	//! Where an undone step was going, so it can be put back.
-	//!
-	//! Same shape and same keys as s_Targets, and the two behave as one control:
-	//! undoing moves a step from the history onto here, redoing moves it back,
-	//! and a NEW teleport throws this away - the future the admin had undone is
-	//! not reachable once they have gone somewhere else instead, which is how
-	//! every other undo/redo pair in software behaves.
+	//! Where an undone step was going. Same shape/keys as s_Targets: undo moves a
+	//! step here, redo moves it back, and a NEW teleport discards this (the undone
+	//! future is unreachable, as in any undo/redo pair).
 	protected static ref map<string, ref array<ref JMTeleportHistoryEntry>> s_Redo;
 
-	//! Set while an undo is being applied.
-	//!
-	//! An undo goes out through the same module call every other teleport uses,
-	//! and that call is where the history is written - without this it would
-	//! record the position it is undoing FROM and the stack could never get
-	//! shorter.
+	//! Set while an undo is applied. An undo uses the same module call that writes
+	//! history, so without this it would record the position it undoes FROM and the
+	//! stack could never shrink.
 	protected static bool s_Applying;
 
 	static bool HasRedo( string key )
@@ -134,18 +104,10 @@ class JMTeleportHistory
 		return ObjectKey( networkLow, networkHigh );
 	}
 
-	//! The player `object` IS, as far as this client can name one.
-	//!
-	//! This is what makes the history SHARED rather than one stack per window.
-	//! JMESPMeta fills its own `player` from the target's identity, and a client
-	//! only has identities for players it can see - so a tracked player often
-	//! arrives with it null, the ESP menu would key that player by network id,
-	//! and a teleport issued from the player manager would be filed under a GUID
-	//! the ESP menu never looks up.
-	//!
-	//! The roster the permissions manager keeps is populated for every player on
-	//! the server, so matching the object against it names the same player from
-	//! either window.
+	//! The player `object` IS, as far as this client can name one. Makes the history
+	//! SHARED across windows: JMESPMeta's `player` is often null (a client only has
+	//! identities for visible players), so ESP would key by network id and miss a GUID
+	//! filed from the player manager. The permissions roster covers every player.
 	static JMPlayerInstance PlayerOf( Object object )
 	{
 		if ( !object || !object.IsMan() )
@@ -351,12 +313,9 @@ class JMTeleportHistory
 	//  Undoing
 	// =========================================================================
 
-	//! Take everything down to and including `index` off the stack and answer
-	//! where it says to go. vector.Zero when there is nothing that far back.
-	//!
-	//! The skipped entries are DISCARDED, not kept: they are places the target
-	//! only passed through, and leaving them in would make the next undo walk
-	//! forwards again.
+	//! Take everything down to and including `index` off the stack and answer where
+	//! to go (vector.Zero if nothing that far back). Skipped entries are DISCARDED:
+	//! keeping them would make the next undo walk forwards.
 	static vector Pop( string key, int index, vector current = vector.Zero )
 	{
 		return Transfer( Targets(), Redos(), key, index, current );
@@ -369,18 +328,10 @@ class JMTeleportHistory
 		return Transfer( Redos(), Targets(), key, index, current );
 	}
 
-	//! Walk `from` back `index` + 1 steps, parking everything the move skipped
-	//! on `to` so the opposite button can retrace it exactly.
-	//!
-	//! `current` is where the target is right NOW - the one position neither
-	//! stack holds, because a stack only ever records places something has
-	//! LEFT. It becomes the far end of the other stack, so the first press of
-	//! the opposite button comes straight back here.
-	//!
-	//! The order matters: pushing current first and then the skipped steps in
-	//! the order they were passed leaves the nearest one on top, so undoing
-	//! three steps and pressing redo three times retraces them one at a time
-	//! rather than jumping the whole way in one go.
+	//! Walk `from` back `index` + 1 steps, parking the skipped ones on `to`.
+	//! `current` (where the target is NOW, held by neither stack) becomes the far
+	//! end of `to`. Order matters: push current, then skipped steps in the order
+	//! passed, so redo retraces them one at a time.
 	protected static vector Transfer( map<string, ref array<ref JMTeleportHistoryEntry>> from, map<string, ref array<ref JMTeleportHistoryEntry>> to, string key, int index, vector current )
 	{
 		array<ref JMTeleportHistoryEntry> entries = from.Get( key );
@@ -440,11 +391,8 @@ class JMTeleportHistory
 		Redos().Remove( key );
 	}
 
-	//! Send a player back to where they were `index` + 1 teleports ago.
-	//!
-	//! Goes out through JMPlayerModule like every other teleport of a player,
-	//! so an undo is logged, webhooked and permissioned exactly as the move it
-	//! is taking back was.
+	//! Send a player back to where they were `index` + 1 teleports ago, through
+	//! JMPlayerModule like any teleport, so it is logged, webhooked and permissioned.
 	static bool UndoPlayer( string guid, int index )
 	{
 		if ( guid == "" )
@@ -497,11 +445,8 @@ class JMTeleportHistory
 		return true;
 	}
 
-	//! Undo one step for whatever `object` is, routed by WHAT it is rather than
-	//! by which window asked.
-	//!
-	//! Every surface that can undo an object calls this, so an undo means the
-	//! same thing and spends the same step in all of them.
+	//! Undo one step for `object`, routed by WHAT it is, not which window asked, so
+	//! an undo spends the same step from every surface.
 	static bool UndoTarget( Object object, int index )
 	{
 		string guid = GUIDOf( object );
@@ -574,14 +519,10 @@ class JMTeleportHistory
 		return true;
 	}
 
-	//! Wrap a move that is itself an undo, for the targets that do not go
-	//! through JMPlayerModule or JMESPModule - a vehicle named only by its
-	//! network id, which the vehicle manager can reach when this client has no
-	//! object for it at all.
-	//!
-	//! Their forward move records the history at its own call site rather than
-	//! inside a shared module call, so without this the undo would push the
-	//! position it is leaving and the stack would never shrink.
+	//! Wrap a move that is itself an undo, for targets not going through
+	//! JMPlayerModule/JMESPModule (e.g. a vehicle known only by network id). Their
+	//! forward move records history at its own call site, so without this the undo
+	//! would push the position it leaves and the stack would never shrink.
 	static void BeginApply()
 	{
 		s_Applying = true;

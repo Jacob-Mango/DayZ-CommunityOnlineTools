@@ -1,30 +1,7 @@
-// =============================================================================
-//  UIActionTabs
-//
-//  A row of tab buttons plus the content panels they switch between. Fires
-//  UIEvent.CHANGE when the active tab changes; GetSelection() returns the new
-//  tab's id.
-//
-//  Tabs and panels are added and removed one at a time, each with a stable id
-//  that only ever grows and is never reused - keep the id AddTab() returns
-//  instead of writing a number down (another mod may append tabs to the same
-//  strip, and removing a tab never renumbers the others):
-//
-//      m_Tabs = UIActionManager.CreateTabStrip( parent, this, "OnChange_Tab" );
-//      m_TabIdGeneral = m_Tabs.AddTab( "General", JMConstants.Lucide( "user" ), m_PanelGeneral );
-//      m_TabIdStats   = m_Tabs.AddTab( "Stats",   JMConstants.Lucide( "chart-column" ), m_PanelStats );
-//      m_Tabs.AddPanel( m_TabIdStats, m_ExtraStatsPanel );     // a tab may show several panels
-//      m_Tabs.SetSelection( m_TabIdGeneral );
-//
-//      m_Tabs.RemoveTabById( m_TabIdStats );                   // or RemoveTab( m_PanelStats )
-//      m_Tabs.RemovePanelById( id );                           // or RemovePanel( m_ExtraStatsPanel )
-//
-//  The strip only shows and hides panels; the widgets stay the caller's.
-//
-//  Tabs that do not fit on one row wrap onto more (see the Wrapping constants). The strip
-//  fits itself to its width every WIDTH_POLL_MS, and a form that pins the strip's height gets
-//  the extra rows from COT_FitTabs() and is told to pin again through OnTabStripFitted().
-// =============================================================================
+//  UIActionTabs: tab buttons plus content panels; fires UIEvent.CHANGE, GetSelection() = tab id.
+//  Ids only grow, never reused: keep what AddTab() returns (other mods may append tabs).
+//  e.g. m_TabId = m_Tabs.AddTab( "General", JMConstants.Lucide( "user" ), m_Panel ); SetSelection( m_TabId );
+//  Strip wraps and refits every WIDTH_POLL_MS; forms pinning its height use COT_FitTabs()/OnTabStripFitted().
 class UIActionTabs: UIActionBase
 {
 	protected Widget                          m_TabBar;      // the first row of tabs
@@ -52,27 +29,17 @@ class UIActionTabs: UIActionBase
 	static const int ICON_ACTIVE    = JMTheme.BUTTON_TEXT;
 	static const int ICON_INACTIVE  = JMTheme.BUTTON_TEXT_INACTIVE;
 
-	// The tab label is centred across the WHOLE button, while the icon sits at a
-	// fixed x=10 on the left (see UIActionTabButton.layout). A centred label
-	// therefore grows leftwards straight into the icon as soon as the text is
-	// wide enough - which is what made the tab bar's icons and text collide.
-	//
-	// Shifting the glyphs right by half the reserved strip re-centres the label
-	// in the space LEFT OF nothing / RIGHT OF the icon instead:
-	//   glyph centre moves from  W/2  to  W/2 + LABEL_OFFSET_ICON
-	//   which is the centre of [ICON_RIGHT_EDGE + ICON_TEXT_GAP, W]
-	// Tabs are equal-width grid columns, so a label that is wider than
-	// W - (ICON_RIGHT_EDGE + ICON_TEXT_GAP) can still reach the icon; keep tab
-	// captions short.
+	// The label is centred across the WHOLE button but the icon sits at fixed x=10, so wide text
+	// collides with it. Shifting glyphs right by LABEL_OFFSET_ICON (W/2 -> W/2 + offset) re-centres
+	// the label in [ICON_RIGHT_EDGE + ICON_TEXT_GAP, W]. Labels wider than that still reach the
+	// icon; keep tab captions short.
 	static const int ICON_RIGHT_EDGE    = 26;   // 10 (position) + 16 (size)
 	static const int ICON_TEXT_GAP      = 8;
 	static const int LABEL_OFFSET_ICON  = ( ICON_RIGHT_EDGE + ICON_TEXT_GAP ) / 2;   // 17
 
-	// Wrapping. Tabs stay equal-width columns; when the widest tab no longer fits its column the
-	// strip gains a row instead of letting icons and captions collide. The tabs are spread evenly
-	// over the rows, so nine tabs become 5 + 4, not 8 + 1. Each row is its own single-row bar
-	// (TabBarN.layout), stacked TAB_ROW_HEIGHT apart - a multi-row grid spacer makes every row
-	// taller than a single-row bar and the strip then clips it.
+	// Wrapping: equal-width columns; when the widest tab no longer fits, the strip gains a row,
+	// tabs spread evenly (9 -> 5 + 4). Each row is its own single-row bar (TabBarN.layout),
+	// TAB_ROW_HEIGHT apart - a multi-row grid spacer makes rows taller and the strip clips it.
 	static const float TAB_ROW_HEIGHT   = 30;   // must match UIActionTabButton.layout / TabBarN.layout
 	static const float TAB_LABEL_PAD    = 20;   // breathing room around a caption, left and right together
 	static const int   MAX_COLUMNS      = 9;    // the widest TabBarN layout there is

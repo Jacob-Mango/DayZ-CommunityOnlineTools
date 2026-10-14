@@ -43,21 +43,10 @@ modded class PlayerBase
 	protected bool m_COT_IsLeavingFreeCam;
 	protected bool m_COT_TempDisableOnSelectPlayer;
 
-	// ========================================================================
-	//  COT kill-tracking hooks
-	//
-	//  Two events fire on the entity by the engine:
-	//    EEHitBy  -- every damage hit from a real source; we record body-part
-	//                and approximate hit/miss by checking if the source was
-	//                a real player vs the world
-	//    EEKilled  -- final death; killer is the entity that landed the
-	//                killing blow.  Body-part + distance captured here.
-	//
-	//  The static methods on JMAntiCheatKillHook (defined in this same file)
-	//  forward the events to the anti-cheat module.  A static forwarder
-	//  avoids a cross-file class reference that the Mission module's compile
-	//  scope has to keep clean.
-	// ========================================================================
+	//  COT kill-tracking hooks: EEHitBy records body-part and approximate hit/miss (real player vs
+	//  world); EEKilled records killer, body-part and distance. Static methods on JMAntiCheatKillHook
+	//  forward both to the anti-cheat module, avoiding a cross-file class reference that the
+	//  Mission module's compile scope has to keep clean.
 
 	//! State of the last hit this player took, captured while it is still
 	//! accurate. EEKilled can fire minutes later (bleed-out, shock) by which
@@ -452,12 +441,9 @@ modded class PlayerBase
 		}
 
 	#ifndef DAYZ_1_29
-		//! COTSetRagdoll() only calls PhysicsSetRagdoll() where it runs - the
-		//! server. That correctly ragdolls the entity everywhere else (other
-		//! clients see it via normal object/physics replication), but the
-		//! OWNING client simulates its own player locally and never got told,
-		//! same as Frozen/AdminNVG above needing their own client-side apply
-		//! here rather than relying on physics replication alone.
+		//! COTSetRagdoll() only runs PhysicsSetRagdoll() on the server. Other clients get it via
+		//! replication, but the OWNING client simulates locally and never got told, so it needs
+		//! its own client-side apply (like Frozen/AdminNVG above).
 		if ( m_JMIsRagdollRemoteSynch != m_JMIsRagdoll )
 		{
 			m_JMIsRagdoll = m_JMIsRagdollRemoteSynch;
@@ -620,24 +606,17 @@ modded class PlayerBase
 		return true;
 	}
 
-	//! Excuse the next movement samples for this player. Safe to call from any
-	//! side and at any time - the anti-cheat only acts on it server-side.
-	//!
-	//! Because this sits on PlayerBase.SetWorldPosition, ANY mod that teleports
-	//! a player through that method is covered without knowing COT exists. Mods
-	//! that move a player some other way - a raw SetPosition, a sync juncture -
-	//! should call COT_GrantAction themselves.
+	//! Excuse the next movement samples for this player. Safe from any side; anti-cheat acts
+	//! server-side only. Covers any mod teleporting via PlayerBase.SetWorldPosition; mods
+	//! using raw SetPosition or a sync juncture should call COT_GrantAction themselves.
 	void COT_GrantMove()
 	{
 		COT_GrantAction(JMAntiCheatSanction.MOVEMENT, JMAntiCheatSanction.MoveGraceSeconds);
 	}
 
-	//! Declare that the server is about to do something to this player that an
-	//! anti-cheat rule would otherwise read as a cheat. Call it BEFORE acting.
-	//!
-	//! This is how a scripted action is told apart from a cheat: not by who the
-	//! player is, but by whether our own code announced the action. See
-	//! JMAntiCheatSanction for the buckets.
+	//! Declare that the server is about to do something an anti-cheat rule would read as a
+	//! cheat. Call it BEFORE acting; a scripted action is told apart from a cheat by whether
+	//! our code announced it. See JMAntiCheatSanction for the buckets.
 	void COT_GrantAction(string bucket, float seconds)
 	{
 		if (!g_Game || !g_Game.IsServer())
@@ -827,11 +806,9 @@ modded class PlayerBase
 		return m_JMIsRagdoll;
 	}
 
-	//! Cached rather than read live off PhysicsIsRagdoll(): this runs from
-	//! COT_UpdatePlayerVars, which COTOnConnect fires for every player the
-	//! moment they connect - querying the physics engine that early crashed
-	//! the server outright, before the entity's physics was up. GodMode and
-	//! Freeze already follow this cached pattern for the same reason.
+	//! Cached, not read live off PhysicsIsRagdoll(): this runs from COT_UpdatePlayerVars at connect,
+	//! and querying physics before the entity's physics is up crashed the server.
+	//! GodMode and Freeze follow the same pattern.
 	void COTSetRagdoll( bool mode )
 	{
 #ifndef DAYZ_1_29
@@ -1017,11 +994,9 @@ modded class PlayerBase
 		return 0;
 	}
 
-	// Activate a bleeding source on the named body-part selection
-	// (e.g. "Head", "LeftArm"). Vanilla only exposes AddBleedingSource(int bit)
-	// and only DebugActivateBleedingSource(int idx) maps to a part - but those
-	// index maps are internal. We round-trip via the COT mod of the base class
-	// which exposes zone enumeration, then call AddBleedingSource(bit).
+	// Activate a bleeding source on the named body-part selection (e.g. "Head", "LeftArm").
+	// Vanilla index maps are internal, so we round-trip via the base class's zone
+	// enumeration, then call AddBleedingSource(bit).
 	bool COTAddBleedingByName( string selectionName )
 	{
 		if ( !g_Game.IsServer() )

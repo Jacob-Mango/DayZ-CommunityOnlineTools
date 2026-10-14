@@ -1,18 +1,7 @@
 //! Archetype B: a fixed toolbar over a tabbed pane.
-//!
-//! Filters/Objects/Settings tabs each live in their own file
-//! (JMESPFormTabFilters.c / JMESPFormTabObjects.c / JMESPFormTabSettings.c).
-//! What stays here:
-//!   - The shared toolbar (ESP on/off + classname filter), above the tab strip.
-//!   - `IconForViewType` - a deprecated static forwarder to JMESPViewTypeWidget, for sub-mods
-//!     that still call it on this class.
-//!   - DeleteSelected / MoveToCursor / CreateLoadout_Confirm /
-//!     OnSendMessage_Confirm / PromptSendMessage - JMConfirmation dispatches
-//!     its named callbacks against whatever object its window was Init()'d
-//!     with, not against whichever tab raised the popup, so these have to
-//!     stay on the form. PromptSendMessage is also called externally
-//!     (JMESPActionMenu.c, via espModule.GetForm()), which is a second,
-//!     independent reason it cannot move.
+//! Tabs live in JMESPFormTab*.c. Stays here: the shared toolbar, the deprecated IconForViewType
+//! forwarder, and DeleteSelected/MoveToCursor/*_Confirm/PromptSendMessage (JMConfirmation calls
+//! back on the object its window was Init()'d with; PromptSendMessage is also called by JMESPActionMenu).
 class JMESPForm: JMFormBase
 {
 	//! Tab indices - what the strip's AddTab() returned for each tab, never written as numbers.
@@ -99,9 +88,7 @@ class JMESPForm: JMFormBase
 
 		//! UIActionSearchBox carries its own inline clear, so there is no
 		//! separate 'x' button beside it any more.
-		//! Placeholder names what it does, not what it is. "Filter:" said
-		//! nothing about WHAT was being filtered, in a form that has two other
-		//! search boxes filtering two other things.
+		//! Placeholder names what it filters; the form has two other search boxes.
 		m_SearchBox = UIActionManager.CreateSearchBox( row, this, "OnChange_Filter", "#STR_COT_ESP_MODULE_CLASS_FILTER", m_Module.Filter );
 		m_SearchBox.SetFlex( 1.0, 120 );
 		m_SearchBox.SetTooltip( "#STR_COT_ESP_MODULE_TT_CLASS_FILTER" );

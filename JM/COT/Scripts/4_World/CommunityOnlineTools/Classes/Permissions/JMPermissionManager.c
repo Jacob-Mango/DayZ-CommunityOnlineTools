@@ -241,11 +241,9 @@ class JMPermissionManager
 			if ( IsMissionHost() )
 				return true;
 
-			//! Own client player is not registered yet during the connect race -
-			//! permission checks can run this early (sidebar Init, an incoming
-			//! RPC_UpdateRole) before it is. Expected and recoverable, same as
-			//! the other HasPermission() overload above - not a programming
-			//! mistake, so no Assert_Null spam for it.
+			//! Own client player is not registered yet during the connect race (sidebar Init,
+			//! incoming RPC_UpdateRole). Expected and recoverable, same as the other
+			//! HasPermission() overload - not a programming mistake, so no Assert_Null spam.
 			if ( !instance )
 				return false;
 
@@ -265,14 +263,8 @@ class JMPermissionManager
 	}
 
 	/**
-	 * @brief check permission when it's related to an RPC received on server
-	 *
-	 * This overload is the single choke point every incoming COT RPC goes
-	 * through on the server, and a refusal here means a client asked for
-	 * something its own UI never offers it. That is close to the strongest
-	 * signal available from inside a mod: a legitimate client cannot
-	 * produce it by accident. Reported, not acted on - the anti-cheat
-	 * module decides whether a burst of these is worth a flag.
+	 * @brief check permission for an RPC received on server. Single choke point for
+	 * incoming COT RPCs; a refusal is reported to anti-cheat, which decides on a flag.
 	 */
 	bool HasPermissionRPC( string permission, PlayerIdentity ihp )
 	{
@@ -374,14 +366,10 @@ class JMPermissionManager
 		m_RosterBatchCount = 0;
 	}
 
-	//! Test roster. SERVER ONLY: the client gets these the same way it gets real
-	//! players, through the permission sync. Run on both ends it built two
-	//! independent sets - the client's own thirty plus the thirty the server
-	//! pushed - and because both draw from the same name pools the roster came
-	//! out looking like every player was listed two or three times.
-	//!
-	//! Also guards against being called twice on the same manager, which would
-	//! reuse the same `i` values for a second batch.
+	//! Test roster. SERVER ONLY: the client gets these through the permission sync.
+	//! Run on both ends it built two sets from the same name pools, so players looked
+	//! listed two or three times. Also guards against a second call on the same manager
+	//! (it would reuse the same `i` values).
 	void CreateFakePlayers()
 	{
 		if ( !g_Game.IsServer() )
@@ -662,13 +650,9 @@ class JMPermissionManager
 	}
 
 	//! Overload taking an explicit permission type.
-	//!
-	//! Mod-compat: DayZ-Expansion carries its own `Expansion_RegisterPermission`
-	//! in a `modded class JMPermissionManager` that is a verbatim copy of this
-	//! body, duplicated only so it could pass a permType. Exposing the overload
-	//! here means Expansion (and any other mod) can call
-	//! `RegisterPermission(name, type)` directly instead of reimplementing it
-	//! against COT internals. Expansion's own copy keeps working either way.
+	//! Mod-compat: Expansion carries a verbatim copy of this body in its own
+	//! Expansion_RegisterPermission only to pass a permType; other mods can now call
+	//! RegisterPermission(name, type) directly. Expansion's copy keeps working.
 	void RegisterPermission( string permission, JMPermissionType permType )
 	{
 		#ifdef JM_COT_DIAG_LOGGING

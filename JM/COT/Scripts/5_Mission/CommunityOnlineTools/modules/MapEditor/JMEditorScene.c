@@ -1,16 +1,6 @@
-// =============================================================================
-//  JMEditorScene.c
-//
-//  3D scene queries for the Map Editor. The user's cursor raycasts into the
-//  world to determine:
-//    - where to place a new spawned object (the surface hit point)
-//    - which existing object is under the cursor (selection pick)
-//
-//  Uses g_Game.GetCurrentCameraPosition() / GetCurrentCameraDirection() -
-//  the same pattern that COT's existing JMCameraModule uses (JMCameraModule.c:162).
-//  DayZ 1.29 has no static GetCurrentCamera() on DayZGame; camera is fetched
-//  via g_Game as a singleton Game instance.
-// =============================================================================
+// JMEditorScene.c - 3D scene queries for the Map Editor: raycast from the cursor to find
+// the spawn surface hit point and the object under the cursor. Uses g_Game.GetCurrentCameraPosition()
+// / GetCurrentCameraDirection() like JMCameraModule; 1.29 has no static GetCurrentCamera().
 
 class JMEditorScene
 {
@@ -20,14 +10,10 @@ class JMEditorScene
 		return g_Game.SurfaceY( x, z );
 	}
 
-	// Cast a ray from the active camera through the screen-pixel (x, y).
-	// Returns the world-space hit point and the hit Object (or NULL on miss).
-	//
-	// We approximate the screen-pixel ray via the active camera's forward
-	// direction (g_Game.GetCurrentCameraDirection) plus a small horizontal/vertical
-	// offset derived from the camera's current yaw/pitch. DayZ 1.29's Camera
-	// class doesn't expose per-pixel raycast; this approximation is good
-	// enough for the editor's spawn-point heuristic.
+	// Cast a ray from the active camera through the screen-pixel (x, y). Returns the
+	// world-space hit point and the hit Object (or NULL on miss). DayZ 1.29's Camera has
+	// no per-pixel raycast, so this approximates with the camera's forward direction plus a
+	// small offset from its yaw/pitch - enough for the editor's spawn-point heuristic.
 	static void CastFromScreen( int sx, int sy, out vector hitPos, out Object hitObj )
 	{
 		hitPos = vector.Zero;

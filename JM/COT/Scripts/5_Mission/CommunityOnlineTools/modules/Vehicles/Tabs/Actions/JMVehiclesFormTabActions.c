@@ -1,10 +1,7 @@
-//! "Actions" tab of JMVehiclesForm - the per-vehicle command buttons (repair,
-//! refuel, teleport, delete ...) for whichever vehicle is currently selected.
-//! Back-reference to the owning form, same shape as JMPlayerRowWidget.Menu.
-//!
-//! The selection (m_CurrentVehicle) and the JMConfirmation callbacks stay on
-//! the form: a confirmation calls its callback on the form, and the roster's
-//! bulk deletes and the map's marker menu share the same delete flow.
+//! "Actions" tab of JMVehiclesForm - per-vehicle command buttons (repair, refuel, teleport,
+//! delete ...). Back-reference to the owning form, same shape as JMPlayerRowWidget.Menu. The selection
+//! (m_CurrentVehicle) and JMConfirmation callbacks stay on the form: confirmations call back on
+//! the form, and the roster's bulk deletes and the map's marker menu share the delete flow.
 class JMVehiclesFormTabActions: JMFormTab
 {
 	protected JMVehiclesForm m_Form;

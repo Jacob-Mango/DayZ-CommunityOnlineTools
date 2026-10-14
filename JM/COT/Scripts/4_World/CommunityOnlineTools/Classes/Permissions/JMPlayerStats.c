@@ -1,24 +1,7 @@
-// =============================================================================
-//  JMPlayerStats
-//
-//  Per-player session history: how long they have played, how many times they
-//  have connected, when they were first and last seen, how often they have
-//  died, and how long their lives last.
-//
-//  None of this existed before. JMPlayerInstance syncs live state (health,
-//  position, flags) and nothing historical; m_LifeSpanState is the beard/blood
-//  cosmetic stage, not a duration.
-//
-//  Stored inside the existing per-GUID player JSON rather than in a file of its
-//  own - that file is already loaded and saved on exactly this lifecycle, and a
-//  second one would double the per-player disk I/O on a full server.
-//  JsonFileLoader leaves a missing member at its default, so an older file
-//  without a Stats block loads cleanly.
-//
-//  Wall-clock time comes from JMAntiCheatClock.UtcNow(): g_Game.GetTime() is
-//  milliseconds since THIS mission started, so it restarts at zero and is
-//  useless for anything written to disk.
-// =============================================================================
+//  JMPlayerStats - per-player session history (playtime, connects, first/last
+//  seen, deaths, life durations), stored in the per-GUID player JSON to avoid a
+//  second file's I/O; older files load at defaults. Wall-clock time is
+//  JMAntiCheatClock.UtcNow(): g_Game.GetTime() restarts at zero each mission.
 
 class JMPlayerStats : Managed
 {

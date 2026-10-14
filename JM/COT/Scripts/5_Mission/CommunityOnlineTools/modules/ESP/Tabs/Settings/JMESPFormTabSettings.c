@@ -75,12 +75,8 @@ class JMESPFormTabSettings: JMFormTab
 			idx += m_Form.m_Module.DrawPlayerSkeletonsIncludingMyself;
 		m_PlayerSkeletons.SetSelection( idx, false );
 
-		//! A slider, not a dropdown: four steps on a continuum read better as a
-		//! continuum, and the fill grows with the thickness it sets.
-		//!
-		//! The track spans 0..4 so a thickness of 1 reads as a quarter of it
-		//! rather than as empty, but 0 is not a thickness anything can be drawn
-		//! at, so the handler floors the value at MIN_LINE_THICKNESS.
+		//! A slider, not a dropdown: four steps on a continuum. Track spans 0..4 so 1 reads as a
+		//! quarter, but 0 cannot be drawn, so the handler floors it at MIN_LINE_THICKNESS.
 		m_SkeletonLineThickness = UIActionManager.CreateSlider( displayContent, "#STR_COT_GENERIC_LINE_THICKNESS", 0.0, 4.0, this, "OnChange_Skeleton_LineThickness" );
 		m_SkeletonLineThickness.SetCurrent( m_Form.m_Module.SkeletonLineThickness );
 		m_SkeletonLineThickness.SetFormat( "#STR_COT_FORMAT_PIXEL" );

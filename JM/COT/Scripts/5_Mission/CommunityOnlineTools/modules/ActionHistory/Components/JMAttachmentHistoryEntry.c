@@ -1,14 +1,6 @@
-// =============================================================================
-//  JMAttachmentHistoryEntry
-//
-//  Undo/redo for ESP's attachment add / swap / remove on one slot. It records
-//  the classname before and after ("" = empty slot), so all three are the same
-//  entry: undo puts `before` in the slot, redo puts `after` back.
-//
-//  What is restored is a fresh attachment of that classname, not the exact
-//  item that was there - its health, quantity and anything attached to IT are
-//  not carried across.
-// =============================================================================
+//  JMAttachmentHistoryEntry - undo/redo for ESP attachment add/swap/remove on one
+//  slot: records classname before/after ("" = empty). Restores a FRESH attachment
+//  of that classname, not the original (health, quantity, sub-attachments lost).
 class JMAttachmentHistoryEntry: JMActionHistoryEntry
 {
 	protected EntityAI m_Target;

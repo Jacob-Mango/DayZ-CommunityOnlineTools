@@ -1,27 +1,7 @@
-// =============================================================================
-//  JMWeatherMachine - the dynamic weather state machine, server side
-//
-//  Owns "where are we" and "when do we move": which state and phase the
-//  weather is in, the single timer that ends the current phase, and the
-//  persisted runtime record (WeatherState.json) that lets a restart carry on
-//  from the same place. The authored configuration it walks (states, phases,
-//  presets) belongs to JMWeatherSerialize and is only read here.
-//
-//  Movement is the same three rolls at every level, all over percentage lists:
-//
-//    phase --edge--> another phase of the same state       (or "leave")
-//    leave --state.NextStates--> another state
-//    state --Entry--> the phase that state opens on
-//
-//  Timing belongs to the phase being ENTERED. Its hold is drawn ONCE, when it
-//  is entered, and that one figure is both the timer and the MinDuration
-//  handed to the engine - the two used to be drawn separately and merely
-//  agreed in scale.
-//
-//  Time is tracked as seconds LEFT, never as a wall-clock deadline, so time the
-//  server spends down does not count against a phase: a restart resumes with
-//  what was remaining when the last snapshot was written.
-// =============================================================================
+//  JMWeatherMachine - server-side dynamic weather state machine (state/phase, timer, persisted
+//  WeatherState.json; config is JMWeatherSerialize's). Percentage-list rolls: phase --edge-->
+//  phase or "leave"; leave --NextStates--> state; state --Entry--> phase. A hold is drawn ONCE
+//  on entry. Time is seconds LEFT, not a deadline, so downtime does not count.
 class JMWeatherMachine
 {
 	//! How often the remaining hold is snapshotted to disk while running. A crash
@@ -359,11 +339,9 @@ class JMWeatherMachine
 		return true;
 	}
 
-	//! A state's weather was applied by hand: move the machine to that phase
-	//! WITHOUT applying anything - the caller has already put the weather on as the
-	//! admin asked, with its own timing, and the machine simply carries on from
-	//! there. An empty phase means the state's entry roll. False when the machine is
-	//! not running, in which case there is nothing to move.
+	//! A state's weather was applied by hand: move to that phase WITHOUT applying anything
+	//! (the caller already did, with its own timing). An empty phase means the state's
+	//! entry roll. False when the machine is not running.
 	bool Adopt( string stateName, string phaseName )
 	{
 		if ( !m_Running || !m_Settings.DynamicEnabled )
@@ -572,11 +550,8 @@ class JMWeatherMachine
 	}
 
 	//! A random state from the rotation.
-	//!
-	//! States can opt out, which is how one meant only to be reached from other
-	//! states stays off the start-of-session dice. If NOTHING is in rotation the
-	//! flag is treated as unset rather than as "no weather at all". A state with
-	//! no phases cannot be entered and is never picked.
+	//! States can opt out of the start-of-session dice; if NOTHING is in rotation the flag
+	//! is treated as unset. A state with no phases is never picked.
 	protected JMWeatherState RandomState()
 	{
 		array<JMWeatherState> pool = new array<JMWeatherState>;

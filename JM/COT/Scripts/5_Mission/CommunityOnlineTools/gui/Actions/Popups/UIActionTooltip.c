@@ -1,16 +1,6 @@
-// =============================================================================
-//  UIActionTooltip
-//
-//  Global hover tooltip supporting text, optional icon, and optional color swatch.
-//  Text wraps automatically via RichTextWidget sized to content vertically.
-//
-//  Usage:
-//      UIActionManager.CreateTooltip( layoutRoot );   // once per form
-//
-//      btn.SetTooltip( "Delete vehicle" );
-//      btn.SetTooltip( "Warning", JMConstants.ICON_ALERT, 0xFFFF4444 );  // icon
-//      btn.SetTooltip( "Health",  "",                    0xFF44FF44 );   // swatch
-// =============================================================================
+//  UIActionTooltip: global hover tooltip with text, optional icon / color swatch.
+//  Create once per form: UIActionManager.CreateTooltip( layoutRoot );
+//  then btn.SetTooltip( "Warning", JMConstants.ICON_ALERT, 0xFFFF4444 );
 
 class UIActionTooltip: COT_ScriptedWidgetEventHandler
 {

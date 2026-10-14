@@ -187,18 +187,9 @@ class JMCameraForm: JMFormBase
 
 	override void OnCreate()
 	{
-		// ----------------------------------------------------------------------
-		// Full pane, tabbed: a tab strip over one content frame per tab, each
-		// with its own scroller and its sections as cards.
-		//
-		//   Effects    Controls, Depth of Field, Post-Process, Shake, Reset
-		//   Traveling  JMCameraTravelPanel
-		//   Bookmarks  saved camera positions
-		//   Settings   options
-		//
-		// Every tab is built here rather than on first activation: Update()
-		// drives the Effects sliders every frame, whichever tab is showing.
-		// ----------------------------------------------------------------------
+		// Full pane, tabbed (Effects, Traveling, Bookmarks, Settings): one content
+		// frame per tab with its own scroller and cards. Every tab is built here, not
+		// on first activation: Update() drives the Effects sliders on every frame.
 
 		m_RightTabStrip = layoutRoot.FindAnyWidget( "panel_right_tabs" );
 		m_RightContent  = layoutRoot.FindAnyWidget( "panel_right_content" );

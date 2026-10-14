@@ -1,11 +1,7 @@
-//! "Wind" tab of JMWeatherForm - magnitude/direction and the wind function
-//! curve. Back-reference to the owning form, same shape as
-//! JMPlayerRowWidget.Menu. See JMWeatherFormTabSky.c's header for why
-//! Apply/dirty-tracking/preview mechanics stay on the form.
-//!
-//! Every value is a JMWeatherRangeControl: one value, or a span the server rolls
-//! between on each apply. Direction is stored as radians in <-PI,+PI> and shown as
-//! a compass heading in degrees, which is just a scale and an offset.
+//! "Wind" tab of JMWeatherForm - magnitude/direction and wind function curve. See
+//! JMWeatherFormTabSky.c for why Apply/dirty/preview stay on the form. Values are
+//! JMWeatherRangeControls (one value or a span rolled per apply); direction is radians in
+//! <-PI,+PI> shown as a compass heading in degrees.
 class JMWeatherFormTabWind: JMFormTab
 {
 	protected JMWeatherForm m_Form;

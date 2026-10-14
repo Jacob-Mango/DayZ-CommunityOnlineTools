@@ -1,10 +1,6 @@
-// =============================================================================
-//  JMMapEditorObject.c
-//
-//  Per-object record used by the Map Editor module. Holds the spawn-time
-//  parameters needed to re-create the object on server load and to drive
-//  live transform RPCs. Plain serialisable class (no refs).
-// =============================================================================
+//  JMMapEditorObject - per-object Map Editor record: spawn-time params to
+//  re-create the object on server load and drive transform RPCs. Plain
+//  serialisable class (no refs).
 
 class JMMapEditorObject
 {

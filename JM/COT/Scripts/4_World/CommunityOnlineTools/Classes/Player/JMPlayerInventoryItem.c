@@ -1,22 +1,7 @@
-// =============================================================================
-//  JMPlayerInventoryItem
-//
-//  One entry of a player's inventory, as sent to an admin client on demand.
-//
-//  The server walks the target's inventory with a PREORDER traversal and emits
-//  one of these per entity. PREORDER is parent-before-child, so ParentIndex can
-//  be resolved against the entries already emitted and the whole tree arrives as
-//  a flat array with no recursion on either side.
-//
-//  Only the classname crosses the wire. Display name, icon and category all come
-//  from CfgVehicles, which the client already has - sending them would roughly
-//  double the payload for information the receiver can look up for free.
-//
-//  The network ID is what the delete / repair / take operations refer back to.
-//  The server never trusts it as a world lookup: it is resolved ONLY against the
-//  named target player's own inventory, so a client cannot reach an arbitrary
-//  object by guessing an ID.
-// =============================================================================
+//  One inventory entry sent to an admin client; PREORDER traversal (parent first)
+//  lets ParentIndex resolve against earlier entries. Only the classname is sent.
+//  The network ID is resolved ONLY against the target player's own inventory,
+//  so a client cannot reach arbitrary objects by guessing an ID.
 
 class JMPlayerInventoryItem
 {
@@ -28,11 +13,9 @@ class JMPlayerInventoryItem
 	static const int FLAG_WEAPON     = 8;
 	static const int FLAG_MAGAZINE   = 16;
 
-	//! Per-item capabilities, so the context menu can offer only the entries
-	//! that mean something for the row that was hit. All three are answered by
-	//! the SERVER against the live entity rather than guessed from the config:
-	//! a jam is runtime state, and both of the others depend on what the item
-	//! is actually carrying, not only on what its class allows.
+	//! Per-item capabilities for the context menu. Answered by the SERVER against the
+	//! live entity, not the config: a jam is runtime state and the others depend on
+	//! what the item actually carries.
 	static const int FLAG_JAMMED     = 32;
 	static const int FLAG_LIQUID     = 64;   //!< liquid container
 	static const int FLAG_FOOD       = 128;  //!< has cookable food stages

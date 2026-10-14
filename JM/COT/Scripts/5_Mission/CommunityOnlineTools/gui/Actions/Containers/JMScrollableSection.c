@@ -1,28 +1,7 @@
-// =============================================================================
-//  JMScrollableSection
-//
-//  Convenience wrapper around a UIActionScroller + an inner content grid.
-//  Avoids the three-step boilerplate (CreateScroller -> GetContentWidget ->
-//  CreateGridSpacer) that every form repeats, and provides a single
-//  UpdateScroller() call to wire into OnResize().
-//
-//  Usage
-//  -----
-//  In your form class:
-//
-//      private ref JMScrollableSection m_Scroller;
-//
-//  In OnInit():
-//
-//      m_Scroller = UIActionManager.CreateScrollableSection( layoutRoot.FindAnyWidget("panel") );
-//      Widget content = m_Scroller.GetContent();
-//      // add widgets to content ...
-//
-//  In OnResize():
-//
-//      override void OnResize( float w, float h ) { m_Scroller.UpdateScroller(); }
-//
-// =============================================================================
+// JMScrollableSection: wraps a UIActionScroller + inner content grid, replacing the
+// CreateScroller -> GetContentWidget -> CreateGridSpacer boilerplate. Create with
+// UIActionManager.CreateScrollableSection( root ), add widgets to GetContent(), and call
+// UpdateScroller() from OnResize().
 class JMScrollableSection
 {
 	protected UIActionScroller m_Scroller;

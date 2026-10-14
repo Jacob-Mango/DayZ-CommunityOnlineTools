@@ -1,14 +1,6 @@
-// =============================================================================
 //  JMPlayerBan.c
-//
-//  Persistent ban record. All public fields are reflected automatically by
-//  JsonFileLoader<JMPlayerBanStore> - no manual serialisation needed.
-//
-//  NOTE: BanDuration stores an absolute Unix expiry timestamp (not a relative
-//  duration). This matches how JMPlayerModule.SendBanMessage() works:
-//      duration = nowUTC.GetTimestamp() + duration;
-//  -1 means permanent.
-// =============================================================================
+//  Persistent ban record, public fields reflected by JsonFileLoader.
+//  BanDuration is an absolute Unix expiry timestamp (not relative); -1 = permanent.
 
 class JMPlayerBan
 {
@@ -117,15 +109,9 @@ class JMPlayerBan
     }
 
     //! DEPRECATED - use CF_Modules<JMBanModule>.Get().Ban( steamID, name, message, seconds, issuedBy, issuedByName ).
-    //!
-    //! Bans used to be one JSON file per player, written with this. They are one Bans.json owned by
-    //! JMBanModule now, so the record is handed to the module instead of written behind its back (the
-    //! module would overwrite the file on its next save). ban.BanDuration is still the old absolute expiry:
-    //! -1 stays permanent, an expiry already in the past lifts the ban. The key is ban.SteamID, or guid when
-    //! the record carries none. Server only; a no-op when the module is not loaded.
-    //!
-    //! The module is looked up by name and called by name because JMBanModule lives in 5_Mission, above
-    //! this file, and a `modded class` cannot add this from a higher layer.
+    //! Bans.json is owned by JMBanModule, so the record is handed to it (it would overwrite direct writes).
+    //! ban.BanDuration is an absolute expiry: -1 permanent, past lifts the ban. Key is ban.SteamID or guid.
+    //! Server only. Module is called by name as it lives in 5_Mission, above this layer.
     static void Save( JMPlayerBan ban, string guid )
     {
         JMDeprecated.WarnOnce( null, "JMPlayerBan.Save() is deprecated. Please use CF_Modules<JMBanModule>.Get().Ban() / Unban()." );

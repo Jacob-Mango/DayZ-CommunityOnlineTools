@@ -573,13 +573,9 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	// PanelWidget (btn_bkg) fires this. Deliberately does NOT call
-	// ToggleShow() - InitButton() requires the inner ButtonWidget "btn" to
-	// exist for a tile to be added at all (see AddModule), so OnClick below
-	// always fires for the exact same press too. Toggling from both handlers
-	// flipped the module open then immediately closed (or the reverse)
-	// within one click - visible as an instant open/close flicker on every
-	// sidebar tile press.
+	// PanelWidget (btn_bkg) fires this. Deliberately does NOT call ToggleShow():
+	// the inner ButtonWidget "btn" always exists (see AddModule), so OnClick fires
+	// for the same press too, and toggling from both flickered open/closed.
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{
 		return false;

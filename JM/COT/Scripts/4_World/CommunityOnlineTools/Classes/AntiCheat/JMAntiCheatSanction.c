@@ -1,31 +1,7 @@
-// =============================================================================
-//  JMAntiCheatSanction.c
-//
-//  Short-lived "this was us" windows.
-//
-//  Every rule in the anti-cheat asks the same question: did the server do this,
-//  or did the client? A 400m jump is a teleport cheat when a client causes it
-//  and an admin tool when the server causes it, and the two look identical by
-//  the time the position poll sees them - one sample here, the next one there.
-//
-//  The module used to answer that question by skipping anyone holding COT
-//  access. That made every admin invisible to every rule, so a stolen admin
-//  account was invisible too. This answers it the other way round: the code
-//  performing a sanctioned action says so, and only the rule that action would
-//  trip is muted, only for the player it happened to, only for a few seconds.
-//  Nobody is exempt as a person.
-//
-//  Public API, safe for other mods:
-//
-//      JMAntiCheatSanction.Grant( guid, JMAntiCheatSanction.MOVEMENT, 5.0 );
-//      player.SetWorldPosition( somewhere );
-//
-//  SetWorldPosition on PlayerBase already grants MOVEMENT for you, so a mod
-//  that teleports through it needs no changes at all. Grant() is for the paths
-//  that do not - a direct SetPosition, a sync juncture, an inventory fill.
-//
-//  Server-only in effect. Granting on a client is harmless and does nothing.
-// =============================================================================
+//  Short-lived "this was us" windows: sanctioned code mutes only the rule it would trip, for that
+//  player, for a few seconds (nobody is exempt as a person). Server-only in effect.
+//  API: JMAntiCheatSanction.Grant( guid, JMAntiCheatSanction.MOVEMENT, 5.0 );
+//  SetWorldPosition already grants MOVEMENT; Grant() is for direct SetPosition, inventory fill etc.
 
 class JMAntiCheatSanction
 {

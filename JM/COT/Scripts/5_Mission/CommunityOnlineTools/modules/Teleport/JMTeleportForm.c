@@ -1,31 +1,7 @@
-// =============================================================================
-//  JMTeleportForm
-//
-//  Saved locations on the left; the map and the coordinates that go with it on
-//  the right.
-//
-//  ---------------------------------------------------------------------------
-//  WHAT REPLACED WHAT
-//
-//  The old form was a 400x510 column: a raw TextListboxWidget, a bare "X: / Z:"
-//  row, one Teleport button, and an add/remove strip. It showed the module's
-//  saved-location half and nothing else - teleporting to a typed coordinate had
-//  no control anywhere in the UI, and picking a spot meant opening the separate
-//  Map window and double-clicking it.
-//
-//  The map is now IN here, as UIActionMap - the shared component, not a private
-//  MapWidget - so the list, the coordinate fields and the map are three views
-//  of one position instead of three features in two windows.
-//
-//  There is no "selected location" panel any more. A location is acted on from
-//  the list itself, by right-clicking it; a panel that existed to hold four
-//  buttons for the row already highlighted was a second place to look at the
-//  thing you were already looking at.
-//
-//  Selection is held by NAME, not by object. The module drops and rebuilds its
-//  whole location array on every Reload, so a held JMTeleportLocation is a
-//  pointer into the previous copy the moment anything is added or removed.
-// =============================================================================
+// JMTeleportForm - saved locations on the left; the map and coordinates on the right. The map
+// is the shared UIActionMap, so list, coordinate fields and map are three views of one position.
+// Locations are acted on by right-clicking the list row. Selection is held by NAME, not object:
+// the module rebuilds its location array on every Reload, so a held pointer goes stale.
 
 class JMTeleportForm: JMFormBase
 {
@@ -56,11 +32,9 @@ class JMTeleportForm: JMFormBase
 	static const string MAP_LAYER_HELICRASH  = "tp_helicrash";
 	static const string MAP_LAYER_TOXICZONES = "tp_toxiczones";
 
-	//! What a row IN THE LIST is, not what layer it draws to. The list used to
-	//! be locations only; it now mirrors every overlay the filter menu can turn
-	//! on, so every row needs to say which kind it is before anything can act
-	//! on it correctly (a vehicle has no Edit/Delete, teleporting to it uses a
-	//! bare position rather than a saved JMTeleportLocation, ...).
+	//! What a row IN THE LIST is, not what layer it draws to. The list mirrors every overlay
+	//! the filter menu can turn on, so each row says which kind it is before anything acts
+	//! on it (a vehicle has no Edit/Delete; teleporting to it uses a bare position).
 	static const string ROWKIND_LOCATION  = "location";
 	static const string ROWKIND_PLAYER    = "player";
 	static const string ROWKIND_VEHICLE   = "vehicle";
@@ -122,11 +96,9 @@ class JMTeleportForm: JMFormBase
 	static const float DISABLE_X      = 0.345;
 	static const float DISABLE_W      = 0.655;
 
-	// ---- Panels ------------------------------------------------------------
-	//! m_LeftPanel, m_RightPanel, m_RightContent and m_RightPanelDisable are
-	//! JMFormBase's - the base declares the structural panels every archetype
-	//! shares. Redeclaring them here shadows the fields the base's own walks
-	//! read.
+	// ---- Panels ----
+	//! m_LeftPanel, m_RightPanel, m_RightContent and m_RightPanelDisable are JMFormBase's;
+	//! redeclaring them here would shadow the fields the base's own walks read.
 	protected Widget m_SearchWrapper;
 	protected Widget m_ListWrapper;
 
@@ -308,12 +280,9 @@ class JMTeleportForm: JMFormBase
 		MeasureCoordsCard();
 		LayoutRightPane();
 
-		//! The coordinates card isn't rendered yet on the OnResize that opens
-		//! the form, so MeasureCoordsCard bails on a zero GetScreenSize and
-		//! LayoutRightPane sizes the map off the COORDS_H_SEED guess instead
-		//! of the card's real height - which is why the map used to stay
-		//! wrong-sized until something else forced a second OnResize. Queue
-		//! one remeasure a frame later, once the card has actually rendered.
+		//! The coordinates card is not rendered on the OnResize that opens the form, so
+		//! MeasureCoordsCard bails on a zero GetScreenSize and the map is sized off the
+		//! COORDS_H_SEED guess. Queue one remeasure a frame later, once the card has rendered.
 		DeferCall( "DeferredRemeasureCoords", 50 );
 	}
 
@@ -382,11 +351,9 @@ class JMTeleportForm: JMFormBase
 	//  Right pane layout
 	// =========================================================================
 
-	//! Coordinates on the floor, map above them.
-	//!
-	//! Both bands are placed by hand rather than stacked in a spacer, because
-	//! the map has to be told a height - it has no content height of its own -
-	//! and that height is whatever the coordinates card does not need.
+	//! Coordinates on the floor, map above them. Both bands are placed by hand because the
+	//! map has no content height of its own and must be told one: whatever the coordinates
+	//! card does not need.
 	protected void LayoutRightPane()
 	{
 		if ( m_FormH <= 0 )
@@ -417,12 +384,9 @@ class JMTeleportForm: JMFormBase
 			m_Map.SetHeight( mapH - JMUILayout.Px( CARD_CHROME ) );
 	}
 
-	//! Read the height the coordinates card settled on.
-	//!
-	//! The card sizes itself to its rows, and no widget can measure itself on
-	//! the frame it is built, so the band opens at a seed height and is
-	//! corrected from the real one. Measured rather than hard-coded because a
-	//! row added to that card would otherwise silently overlap the map.
+	//! Read the height the coordinates card settled on. No widget can measure itself on the
+	//! frame it is built, so the band opens at a seed height and is corrected from the real
+	//! one. Measured, not hard-coded, so a row added to the card cannot overlap the map.
 	protected void MeasureCoordsCard()
 	{
 		if ( !m_CoordsCard )
@@ -748,11 +712,9 @@ class JMTeleportForm: JMFormBase
 			if ( markerName == "" )
 				markerName = "#STR_COT_TELEPORT_MODULE_MARKER_DEFAULT_NAME";
 
-			//! The marker's own glyph, so a trader reads as a trader here the
-			//! same as it does on Expansion's map. GetIcon() resolves the
-			//! stored icon NAME through ExpansionIcons to a texture path or
-			//! an imageset reference, both of which LoadImageFile takes; a
-			//! marker that named no icon falls back to the plain dot.
+			//! The marker's own glyph, so a trader reads as a trader as on Expansion's map.
+			//! GetIcon() resolves the stored icon NAME via ExpansionIcons to a texture path or
+			//! imageset reference, both fine for LoadImageFile; no icon falls back to the dot.
 			string markerIcon = marker.GetIcon();
 			if ( markerIcon == "" )
 				markerIcon = UIActionMap.ICON_DOT;
@@ -956,14 +918,10 @@ class JMTeleportForm: JMFormBase
 		return MAP_LAYER + "_" + locationName;
 	}
 
-	//! A glyph per kind of place, so the map is readable without reading every
-	//! label. The category names are the ones DayZ puts in CfgWorlds Names, and
-	//! anything a map pack invents beyond them falls through to a pin.
-	//! Not the lucide set the rest of this form uses: a map mark is drawn by
-	//! the map, not by an ImageWidget, and that renderer reads .paa only - see
-	//! the note on UIActionMap.ICON_DOT. These are DayZ's own navigation
-	//! glyphs, which are the only marker-shaped .paa textures that are
-	//! guaranteed to be present.
+	//! A glyph per kind of place. Category names are DayZ's CfgWorlds Names; anything a map
+	//! pack adds falls through to a pin. Not the lucide set: a map mark is drawn by the map's
+	//! renderer, which reads .paa only (see UIActionMap.ICON_DOT), and DayZ's own navigation
+	//! glyphs are the only marker-shaped .paa guaranteed to be present.
 	protected string MarkerIconFor( string category )
 	{
 		if ( category == "City" || category == "CityCapital" || category == "Capital" )
@@ -1211,13 +1169,9 @@ class JMTeleportForm: JMFormBase
 			OnClick_DeleteLocation( UIEvent.CLICK, NULL );
 	}
 
-	// =========================================================================
-	//  Live overlays - players and vehicles
-	//
-	//  Neither belongs to this module. They are drawn here because the map is
-	//  here, each in its own layer, so switching one off cannot disturb the
-	//  locations or the other one.
-	// =========================================================================
+	// ---- Live overlays - players and vehicles ----
+	//  Neither belongs to this module; they are drawn here because the map is, each in its
+	//  own layer so switching one off cannot disturb the locations or the other overlay.
 
 	//! Start or stop the poll, and take down whatever was just switched off.
 	void ApplyOverlays()
@@ -1540,11 +1494,9 @@ class JMTeleportForm: JMFormBase
 
 		RefreshCategories();
 
-		//! A location can be deleted from under the selection, by this admin or
-		//! by another one. Only meaningful for a location row - GetCurrentLocation()
-		//! looks locations up by name, and would wrongly clear the selection on
-		//! every call for a player or vehicle row, whose key is never a location
-		//! name to begin with.
+		//! A location can be deleted from under the selection, by this admin or another. Only
+		//! meaningful for a location row: GetCurrentLocation() looks up by name and would wrongly
+		//! clear the selection for a player or vehicle row, whose key is never a location name.
 		if ( m_SelectedKind == ROWKIND_LOCATION && m_SelectedName != "" && !GetCurrentLocation() )
 		{
 			m_SelectedName = "";
@@ -1629,11 +1581,9 @@ class JMTeleportForm: JMFormBase
 		TeleportToCurrentRow( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
-	//! A saved location goes through Location(), which the module resolves to
-	//! the location's CURRENT position by name server-side - the one thing that
-	//! still matters once the click that started this confirm is long past.
-	//! Every other row kind has no such object to resolve through, so it goes
-	//! through Position() with the position captured when the row was built.
+	//! A saved location goes through Location(), which the module resolves to its CURRENT
+	//! position by name server-side. Other row kinds have no such object, so they go through
+	//! Position() with the position captured when the row was built.
 	protected void TeleportToCurrentRow( array< string > guids )
 	{
 		int row = CurrentRow();
@@ -1688,11 +1638,9 @@ class JMTeleportForm: JMFormBase
 
 		vector pos = clipboard.BeautifiedToVector();
 
-		//! The copy answers a click with a check mark, so the paste has to
-		//! answer one too - otherwise the only button in the strip that can
-		//! fail is also the only one that says nothing when it works. A
-		//! clipboard holding anything that is not a vector flashes a red cross
-		//! instead and the fields are left alone.
+		//! The copy answers a click with a check mark, so the paste must too, or the only
+		//! button that can fail is the only one silent on success. A clipboard that is not a
+		//! vector flashes a red cross and leaves the fields alone.
 		if ( pos == vector.Zero )
 		{
 			m_BtnPasteCoords.SetFeedbackIcon( JMConstants.Lucide( "x" ) );
@@ -1731,12 +1679,9 @@ class JMTeleportForm: JMFormBase
 		return "<" + FormatCoord( pos[0] ) + ", " + FormatCoord( pos[1] ) + ", " + FormatCoord( pos[2] ) + ">";
 	}
 
-	//! Whole metres, through an int.
-	//!
-	//! The old form printed the raw float, which spills a coordinate like
-	//! 3712.440185546875 across the column. Rounding to a float and printing
-	//! that just moves the noise, so the round lands in an int and the string
-	//! is built from that.
+	//! Whole metres, through an int. Printing the raw float spills 3712.440185546875 across
+	//! the column, and rounding to a float just moves the noise, so round into an int and
+	//! build the string from that.
 	protected string FormatCoord( float value )
 	{
 		int rounded = Math.Round( value );
@@ -1785,12 +1730,9 @@ class JMTeleportForm: JMFormBase
 		m_Module.Reload();
 	}
 
-	// =========================================================================
-	//  Permission gating
-	//
-	//  Bound rather than evaluated once: a permission granted while the form is
-	//  open has to reach the controls without a close and reopen.
-	// =========================================================================
+	// ---- Permission gating ----
+	//  Bound rather than evaluated once: a permission granted while the form is open has to
+	//  reach the controls without a close and reopen.
 
 	protected void BindRightPermissions()
 	{

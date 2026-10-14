@@ -1,24 +1,7 @@
-//! One vital an admin can set on a player: health, blood, shock, energy, water,
-//! stamina, heat buffer.
-//!
-//! The stat owns what differs between them - the permission that gates it, its
-//! range, how it is written to the entity, how the client reads it back and how
-//! its slider is coloured. Sending, clamping, applying and receiving one is the
-//! same code for all of them (JMPlayerModule.SetStat / Exec_SetStat / RPC_SetStat),
-//! and the General tab builds one JMPlayerStatRow per stat that owns its slider's
-//! dirty flag, repaint and Apply.
-//!
-//! The id is what travels on the wire. The built-ins use JMStatType; a mod adds a stat
-//! with an id above JMStatType.COUNT:
-//!
-//!   modded class JMPlayerModule
-//!   {
-//!       override void RegisterStats( array< ref JMPlayerStat > stats )
-//!       {
-//!           super.RegisterStats( stats );
-//!           DefineStat( stats, new MyStat(), MY_STAT_ID, "MyStat", MY_PERM, 0, 100 );
-//!       }
-//!   }
+//! One vital an admin can set on a player (health, blood, shock, ...). A stat owns
+//! what differs (permission, range, entity write/read, slider colour); send/clamp/
+//! apply is shared (JMPlayerModule.SetStat). The id goes on the wire: a mod adds
+//! one above JMStatType.COUNT via modded RegisterStats() calling DefineStat().
 class JMPlayerStat
 {
 	protected int m_Type;

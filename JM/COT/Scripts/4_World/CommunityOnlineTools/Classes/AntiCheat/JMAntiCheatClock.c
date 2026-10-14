@@ -1,18 +1,7 @@
-// =============================================================================
-//  JMAntiCheatClock.c
-//
-//  Real-world UTC seconds, for the two things g_Game.GetTime() cannot do:
-//  decay a score across a server restart, and tell an admin how old a flag is.
-//
-//  g_Game.GetTime() is milliseconds since THIS mission started. It is the right
-//  clock for everything inside a session - cooldowns, rolling windows - and the
-//  wrong one for anything written to disk, because it restarts at zero.
-//
-//  Note the 2038 ceiling: Enforce ints are 32-bit signed, so UtcNow() overflows
-//  in January 2038 like every other epoch second stored in an int. Nothing here
-//  is worth widening for that; a flag file from 2038 is not a flag file anyone
-//  is still reading.
-// =============================================================================
+//  JMAntiCheatClock.c - real-world UTC seconds, for score decay across restarts
+//  and flag age. g_Game.GetTime() is ms since THIS mission started: fine within
+//  a session, wrong for anything written to disk. UtcNow() overflows in 2038
+//  (32-bit int); not worth widening.
 
 class JMAntiCheatClock
 {

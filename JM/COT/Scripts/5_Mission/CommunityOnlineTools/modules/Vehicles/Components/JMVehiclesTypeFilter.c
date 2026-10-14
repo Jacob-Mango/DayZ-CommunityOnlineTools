@@ -30,11 +30,9 @@ class JMVehiclesTypeFilter
 		return ( m_ShownTypes & typeBit ) != 0;
 	}
 
-	//! Every filter starts open, so the form shows the whole server the moment it
-	//! is opened. Assigned here rather than at the declaration: JMVT_ALL is a
-	//! global const folded from other global consts, and a member initialiser that
-	//! resolved it to 0 would open the form with every vehicle type hidden and no
-	//! visible reason why.
+	//! Every filter starts open. Assigned here, not at the declaration: JMVT_ALL is a global const
+	//! folded from other consts, and a member initialiser resolving it to 0 would hide every
+	//! vehicle type with no visible reason.
 	void Reset()
 	{
 		m_ShownTypes      = JMVT_ALL;

@@ -1,24 +1,12 @@
-// =============================================================================
-//  JMWeatherPhase - one sub-state of a JMWeatherState
-//
-//  A phase is what the weather IS for a while: it names the stored preset that
-//  supplies the weather values (nothing is duplicated - the preset stays the one
-//  place those live), how long it holds and how long it takes to fade in, and
-//  where it can go from here.
-//
-//  Edges name another phase of the SAME state, or "" for "leave the state" -
-//  so "how likely is this state to end after this phase" is an ordinary
-//  percentage in the same list as every other choice, not a separate dial.
-// =============================================================================
+//  JMWeatherPhase - one sub-state of a JMWeatherState: the weather values, how long it holds,
+//  its fade-in, and where it can go next. Edges name another phase of the SAME state, or ""
+//  for "leave the state", so ending the state is an ordinary percentage in the same list.
 class JMWeatherPhase
 {
 	string Name;
 
-	//! The weather this phase puts on when it is entered. It is the phase's OWN
-	//! copy - a phase used to name a stored preset, and two phases that named the
-	//! same one shared it, so editing one moved the other. Every field a phase does
-	//! not drive is -1 (see JMWeatherPreset.Neutral): it holds whatever the world
-	//! already is.
+	//! The weather put on when entered: the phase's OWN copy (shared presets made editing one move
+	//! another). Fields a phase does not drive are -1 (see JMWeatherPreset.Neutral): the world's value holds.
 	autoptr JMWeatherPreset Conditions;
 
 	//! Legacy: the name of the stored preset this phase used to apply. Read once by

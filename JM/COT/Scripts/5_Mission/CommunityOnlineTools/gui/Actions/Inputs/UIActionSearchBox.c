@@ -1,17 +1,7 @@
-// =============================================================================
-//  UIActionSearchBox
-//
-//  General-purpose search / filter / autocomplete text input.
-//    - Optional left-hand label (SetLabel)
-//    - Greyed placeholder inside the field when empty (SetPlaceholder)
-//    - Autocomplete suggestion via SetTextPreview() - committed on TAB / ENTER
-//    - Inline x clear button (visible while the field has text)
-//    - Debounced UIEvent.CHANGE (~100ms) on every real text change
-//    - UIEvent.CLICK when the x is pressed (text already cleared)
-//
-//  Exposes the inner widgets (label, edit box, preview box) so callers can
-//  still tweak per-widget sizing via UIActionBase.SetWidgetWidth().
-// =============================================================================
+//  UIActionSearchBox - search / filter / autocomplete text input: label (SetLabel), placeholder,
+//  autocomplete via SetTextPreview() (TAB / ENTER commits), x clear button, debounced
+//  UIEvent.CHANGE (~100ms), UIEvent.CLICK on x (text already cleared). Inner widgets are
+//  exposed for UIActionBase.SetWidgetWidth().
 class UIActionSearchBox: UIActionBase
 {
 	protected TextWidget     m_Label;
@@ -241,12 +231,9 @@ class UIActionSearchBox: UIActionBase
 		UpdatePlaceholder();
 	}
 
-	// -------------------------------------------------------------------------
-	//  Suggestion list - call InitSuggestionList(anchor) once to enable the
-	//  dropdown-style popup.  Provide the full item set with SetSuggestions().
-	//  By default the list is filtered live against the field text (prefix
-	//  match); disable with SetAutoFilter(false) to show everything.
-	// -------------------------------------------------------------------------
+	//  Suggestion list - call InitSuggestionList(anchor) once to enable the popup, give the
+	//  full set with SetSuggestions(). Filtered live by prefix match unless
+	//  SetAutoFilter(false).
 
 	void InitSuggestionList( notnull Widget listAnchor )
 	{

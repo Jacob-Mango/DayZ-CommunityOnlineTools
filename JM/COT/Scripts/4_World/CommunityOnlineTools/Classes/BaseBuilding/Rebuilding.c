@@ -1,12 +1,8 @@
 #ifndef DAYZ_1_29
 //! 1.30+
-//! Build, dismantle and repair for the rebuildable map buildings - the irrigation
-//! tunnel entrance, the well, the rebuildable houses - which are plain Buildings
-//! with a Rebuilding construction rather than BaseBuildingBase with a Construction.
-//!
-//! These go through BuildPartServerEx / DismantlePartServerEx, the same calls the
-//! vanilla debug spawn of a pre-built variant uses, which already run the part's
-//! built/dismantled processing and take no materials that are not there.
+//! Build, dismantle and repair for rebuildable map buildings (irrigation tunnel, well,
+//! rebuildable houses): plain Buildings with a Rebuilding construction. Uses
+//! BuildPartServerEx / DismantlePartServerEx, as the vanilla debug spawn does.
 modded class Rebuilding
 {
 	override void COT_BuildParts(TStringArray parts_name, PlayerBase player, bool checkMaterials = true)

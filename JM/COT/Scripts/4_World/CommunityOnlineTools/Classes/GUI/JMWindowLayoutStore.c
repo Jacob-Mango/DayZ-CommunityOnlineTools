@@ -1,15 +1,7 @@
-// =============================================================================
-//  JMWindowLayoutStore.c
-//
-//  Per-client persisted window position/size, keyed by module name so a
-//  module's window reopens at its last rect regardless of which instance
-//  opened it. Lives at $profile:CommunityOnlineTools/GUI/window_layout.json
-//
-//  A flat array rather than a map keyed by module name - the module name is
-//  already a field on the entry, and an array survives a hand-edit far
-//  better than a JSON object whose keys have to match a field inside each
-//  value (same reasoning as JMAntiCheatFlagStore).
-// =============================================================================
+//  JMWindowLayoutStore.c - per-client window rect keyed by module name, stored in
+//  $profile:CommunityOnlineTools/GUI/window_layout.json. A flat array, not a map:
+//  the name is already a field on the entry and an array survives hand-edits
+//  better (same reasoning as JMAntiCheatFlagStore).
 
 class JMWindowLayoutEntry
 {

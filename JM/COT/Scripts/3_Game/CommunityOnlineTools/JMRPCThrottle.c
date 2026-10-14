@@ -1,15 +1,7 @@
-//! Per-sender rate limit for RPCs that cost more than a switch case.
-//!
-//! A permission check answers "may this player do it at all". It does not
-//! answer "may they do it four hundred times a second", and the handlers that
-//! write a log line, append to a file or post a webhook are exactly the ones
-//! where the second question matters: a client that repeats the message is
-//! spending the server's disk and the server's outbound HTTP budget, not its
-//! own.
-//!
-//! Keyed by GUID and bucket so one noisy action cannot starve another, and
-//! bounded so a server that has seen thousands of players over a wipe does not
-//! carry a row for every one of them.
+//! Per-sender rate limit for RPCs that cost more than a switch case (log lines, file
+//! appends, webhooks). A permission check does not stop a client repeating one hundreds
+//! of times a second. Keyed by GUID and bucket so one action cannot starve another,
+//! and bounded so a long-running server does not keep a row for every past player.
 class JMRPCThrottle
 {
 	//! Past this the map is pruned of everything already expired. Sized for a
@@ -19,12 +11,9 @@ class JMRPCThrottle
 	//! Next g_Game.GetTime() at which a given guid+bucket may run again.
 	protected static ref map<string, int> s_NextAllowed = new map<string, int>;
 
-	//! May this sender run this action now?
-	//!
-	//! Answers true and arms the next window, or false and changes nothing -
-	//! so a caller that is refused does not push its own cooldown further out
-	//! by asking. An empty guid is the server or an offline host acting on its
-	//! own behalf, which is never rate limited.
+	//! May this sender run this action now? True arms the next window; false changes
+	//! nothing, so a refused caller does not extend its own cooldown. An empty guid is
+	//! the server or an offline host and is never rate limited.
 	static bool Allow( string guid, string bucket, int intervalMs )
 	{
 		if ( guid == "" || intervalMs <= 0 )

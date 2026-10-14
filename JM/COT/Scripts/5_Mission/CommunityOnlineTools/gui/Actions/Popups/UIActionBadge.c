@@ -1,21 +1,7 @@
-// =============================================================================
-//  UIActionBadge
-//
-//  Status chip: a label on the left and a colored pill on the right.
-//  Use SetStatus/SetBadgeColor to update the display.
-//
-//  Read-only by default. SetClickable( true ) plus a callback turns the chip
-//  into its own control - the whole badge becomes a hit area, the pill lights
-//  on hover, and a click fires UIEvent.CLICK - so a flag an admin can change is
-//  toggled where it is READ instead of only from a checkbox on another tab.
-//  The badge holds no state of its own: the callback decides what the new value
-//  is and repaints it with SetStatus.
-//
-//  Usage:
-//      m_StatusBadge = UIActionManager.CreateBadge( parent, "Connection" );
-//      m_StatusBadge.SetStatus( "ONLINE", ARGB(255,  40, 180, 80) );
-//      m_StatusBadge.SetStatus( "BANNED", ARGB(255, 200,  40, 40) );
-// =============================================================================
+//  UIActionBadge: status chip, label left and colored pill right; update with SetStatus/SetBadgeColor.
+//  Read-only by default; SetClickable( true ) + callback makes it a control that fires UIEvent.CLICK.
+//  It holds no state: the callback decides the new value and repaints with SetStatus.
+//  Usage: m_Badge = UIActionManager.CreateBadge( parent, "Connection" ); m_Badge.SetStatus( "ONLINE", ARGB(255, 40, 180, 80) );
 class UIActionBadge: UIActionBase
 {
 	protected TextWidget   m_Label;

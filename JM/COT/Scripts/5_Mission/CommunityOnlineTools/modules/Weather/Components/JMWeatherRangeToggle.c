@@ -1,15 +1,7 @@
-//! The button in a weather card's title bar that switches its sliders between one
-//! value and a min/max span - the same control, same icon and same reasoning as
-//! the object spawner's, one per card.
-//!
-//! It lives in the title bar rather than in a row of its own: it is a mode for
-//! the whole card, not one more property of the weather, and a row would have
-//! put it in the same list as the values it governs.
-//!
-//! Off by default when editing the live world - rolling between two bounds is the
-//! advanced case, and a pair of handles reads as a range whether or not the admin
-//! meant one. The form turns every toggle on while a preset is being edited,
-//! where a span is the normal thing to want.
+//! Title-bar button switching a weather card's sliders between one value and a min/max span (same
+//! as the object spawner's). In the title bar as it is a mode for the whole card, not a property.
+//! Off by default on the live world (a range is the advanced case); the form turns all on while
+//! a preset is edited.
 class JMWeatherRangeToggle
 {
 	protected JMWeatherForm m_Form;

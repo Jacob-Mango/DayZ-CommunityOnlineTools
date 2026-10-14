@@ -1,11 +1,6 @@
-// =============================================================================
-//  JMFuelHistoryEntry
-//
-//  Undo/redo for a vehicle's fuel level - both ESP's Set Fuel and Refuel.
-//  Values are the tank fraction (0..1) CommunityOnlineToolsBase.GetFuel01 /
-//  SetFuel01 already speak. A vehicle with no readable tank (GetFuel01 gives
-//  -1) does not get an entry.
-// =============================================================================
+//  JMFuelHistoryEntry - undo/redo for vehicle fuel (ESP Set Fuel and Refuel).
+//  Values are the tank fraction 0..1 of GetFuel01/SetFuel01; no entry if
+//  GetFuel01 gives -1.
 class JMFuelHistoryEntry: JMPropertyHistoryEntry
 {
 	void JMFuelHistoryEntry( Object target, float before, float after )

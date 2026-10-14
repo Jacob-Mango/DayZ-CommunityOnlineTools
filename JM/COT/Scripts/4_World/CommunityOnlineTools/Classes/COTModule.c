@@ -7,12 +7,8 @@ class COTModule : JMModuleBase
 	protected bool m_LeftMouseDown;
 
 	//! How often open sessions are written through, in milliseconds.
-	//!
-	//! Playtime is only folded into the total on disconnect, so without this a
-	//! server crash loses every connected player's session outright - and a
-	//! crash is exactly when a server has been up longest. Five minutes bounds
-	//! that loss without writing a file per player any more often than a role
-	//! change already does.
+	//! Playtime is only folded in on disconnect, so without this a server crash
+	//! loses every connected player's session. Five minutes bounds that loss.
 	static const int STATS_FLUSH_INTERVAL_MS = 300000;
 
 	void COTModule()
@@ -42,14 +38,9 @@ class COTModule : JMModuleBase
 			cotMenuShown = m_COTMenu.IsShown();
 
 		#ifdef COT_DEBUGLOGS
-		//! Bug history: "(m_COTMenu != NULL).ToString()" is fine on its own,
-		//! but ".ToString()" on the PARENTHESIZED "&&" expression itself -
-		//! "(m_COTMenu && m_COTMenu.IsShown()).ToString()" - crashed the real
-		//! engine natively at boot every time (SetMenuState is a COT_ON_OPEN
-		//! listener, invoked unconditionally from OnStart()), despite passing
-		//! the custom lint tool and despite the plain-bool fields above being
-		//! fine. Precomputing into plain bool locals first avoids the pattern
-		//! entirely instead of relying on '.ToString()' placement.
+		//! ".ToString()" on a parenthesized "&&" expression, e.g.
+		//! "(m_COTMenu && m_COTMenu.IsShown()).ToString()", natively crashes the
+		//! engine at boot (lint does not catch it). Precompute plain bool locals.
 		Print("[COT_DBG] SetMenuState(" + show.ToString() + ") - COT_ON_OPEN listener, m_COTMenu=" + hasCotMenu.ToString() + " IsShown=" + cotMenuShown.ToString());
 		#endif
 
@@ -85,20 +76,10 @@ class COTModule : JMModuleBase
 			{
 				JMStatics.WINDOWS_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
 
-				//! The container deliberately keeps its default sort.
-				//!
-				//! MapWidget and ItemPreviewWidget render nothing when an
-				//! ancestor carries a high sort, and this container used to be
-				//! set to JMUILayout.SORT_WINDOW (920) - which is why every COT
-				//! item preview and every COT map was blank everywhere, no
-				//! matter what its own layout or style said. The base game has
-				//! no counter-example: its one workspace-hosted preview,
-				//! PluginItemDiagnostic, sits at priority 5.
-				//!
-				//! The sort was originally raised so the in-game HUD would not
-				//! draw over module windows. If that returns, the fix is a sort
-				//! high enough to beat the HUD and low enough to keep these
-				//! widgets rendering - not SORT_WINDOW.
+				//! Keeps its default sort on purpose: MapWidget/ItemPreviewWidget
+				//! render nothing under a high-sort ancestor (SORT_WINDOW blanked
+				//! every COT map/preview). If the HUD draws over windows again, pick
+				//! a sort just above the HUD, not SORT_WINDOW.
 			}
 
 			if ( m_COTMenu == NULL )
@@ -118,12 +99,8 @@ class COTModule : JMModuleBase
 	}
 
 	//! Creates the "everyone"/"admin" default roles if they don't exist yet.
-	//!
-	//! Split out of OnMissionLoaded() so callers that cannot rely on module
-	//! lifecycle ordering (e.g. JM_COT_AUTOTEST, which runs from
-	//! CommunityOnlineTools.OnStart() and previously found "everyone" missing
-	//! when it ran ahead of this module's own OnMissionLoaded) can force
-	//! creation deterministically. Idempotent - safe to call more than once.
+	//! Public so callers that can't rely on module lifecycle order (e.g.
+	//! JM_COT_AUTOTEST from OnStart()) can force it. Idempotent.
 	static void EnsureDefaultRoles()
 	{
 		GetPermissionsManager().CreateRole( "everyone" );
@@ -211,15 +188,9 @@ class COTModule : JMModuleBase
 
 			m_COTMenu.OnUpdate( timeslice );
 
-			//! Not just "does a click close COT" - this is also what hands
-			//! mouse/camera control back to the game (ResetGameFocus +
-			//! ShowUICursor(false)) so right-click-drag can look around while
-			//! the sidebar stays open. Removing it broke free-look entirely,
-			//! not just the false-positive closes. NEVER calls SetOpen() -
-			//! it only ever touches game/UI focus, so it cannot be the cause
-			//! of the sidebar's m_IsOpen actually flipping to false; that is
-			//! tracked separately (see CommunityOnlineToolsBase.SetOpen's
-			//! DumpStackString instrumentation).
+			//! Hands mouse/camera control back to the game on outside clicks, so
+			//! free-look works with the sidebar open - removing it breaks free-look.
+			//! Only touches game/UI focus, never SetOpen()/m_IsOpen.
 			if ( m_LeftMouseDown )
 			{
 				if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) == 0 )
@@ -352,12 +323,9 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	//! Decides whether a click should hand mouse/camera control back to the
-	//! game (m_GameActive=true) or leave it with COT's UI. NEVER closes the
-	//! sidebar itself (never touches SetOpen/m_IsOpen) - it only changes
-	//! game focus/cursor visibility. A click misclassified as "outside COT"
-	//! here looks like the sidebar closing because the UI becomes unusable,
-	//! but m_IsOpen stays true the whole time.
+	//! Decides whether a click hands mouse/camera control back to the game
+	//! (m_GameActive=true) or stays with COT's UI. Never touches m_IsOpen: a
+	//! click misclassified as "outside COT" only looks like the sidebar closed.
 	void OnMouseDown()
 	{
 		if ( g_Game.GetUIManager().GetMenu() )

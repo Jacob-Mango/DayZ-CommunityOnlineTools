@@ -1,17 +1,7 @@
-// =============================================================================
-//  JMMapEditorCatalog.c
-//
-//  Static asset catalog for the Map Editor's left sidebar. Modelled after the
-//  DayZ Editor's object browser. Every entry is a vanilla classname plus an
-//  icon path; categories are collapsible. Custom modded classnames can be
-//  added by editing this file (no DB / JSON loader - keep it simple).
-//
-//  The JMMapEditorAsset data class lives in its own file (one class per file).
-//
-//  Spawn convention: pick a row -> form enters Spawn mode -> next map click
-//  places the object. Cancel spawn by clicking an empty spot or pressing Esc
-//  (future hook).
-// =============================================================================
+//  JMMapEditorCatalog.c: static asset catalog (classname + icon, collapsible categories)
+//  for the Map Editor sidebar; edit this file to add modded classnames (no JSON loader).
+//  Pick a row -> Spawn mode -> next map click places the object. JMMapEditorAsset is
+//  in its own file.
 
 class JMMapEditorCatalog
 {

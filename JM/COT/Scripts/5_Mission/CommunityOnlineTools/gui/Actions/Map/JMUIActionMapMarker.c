@@ -1,17 +1,6 @@
-// =============================================================================
-//  JMUIActionMapMarker
-//
-//  One marker's on-screen widget for UIActionMap - icon, persistent label,
-//  hover glow and a selection ring. This is Vehicle Manager's marker
-//  (JMVehiclesMapMarker) made generic: same layout, same "transparent button
-//  sibling of the MapWidget, repositioned every tick via MapToScreen" trick,
-//  but reporting back to a generic UIActionMap owner by marker id instead of
-//  a JMVehicleMetaData-typed callback.
-//
-//  Native AddUserMark marks (what UIActionMap drew before) track pan/zoom for
-//  free and can't be hovered or given a ring - a real widget can be both, at
-//  the cost of needing this per-tick reprojection.
-// =============================================================================
+//  JMUIActionMapMarker: a marker widget for UIActionMap (icon, label, hover glow, selection ring);
+//  JMVehiclesMapMarker made generic. A transparent button sibling of the MapWidget, repositioned
+//  every tick via MapToScreen (native AddUserMark tracks pan/zoom free but cannot hover or ring).
 class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 {
 	protected Widget      m_Root;

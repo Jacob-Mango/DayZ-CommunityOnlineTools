@@ -1,25 +1,6 @@
-// =============================================================================
-//  UIActionKeyValueList
-//
-//  A compact read-only two-column info panel built from a string map.
-//  Rows are created lazily on the first call and updated in-place on
-//  subsequent SetValue() calls - no widget churn on data refreshes.
-//
-//  Usage:
-//      m_Info = UIActionManager.CreateKeyValueList( parent );
-//      m_Info.SetValue( "Health",  "100%" );
-//      m_Info.SetValue( "Status",  "OK"   );
-//      m_Info.SetValue( "Ping",    "42ms" );
-//
-//      // Later, refresh just one value:
-//      m_Info.SetValue( "Ping", "88ms" );
-//
-//      // Remove a row:
-//      m_Info.RemoveKey( "Ping" );
-//
-//      // Clear everything:
-//      m_Info.Clear();
-// =============================================================================
+//  UIActionKeyValueList - compact read-only two-column info panel. Rows are
+//  created lazily and updated in place by SetValue(key, value), so refreshes
+//  cause no widget churn. RemoveKey(key) drops a row; Clear() drops all.
 class UIActionKeyValueList: UIActionBase
 {
 	protected Widget m_Rows;
@@ -44,11 +25,9 @@ class UIActionKeyValueList: UIActionBase
 		return "";
 	}
 
-	//! Set or update a key/value pair.  Creates a new row if key is new.
-	//!
-	//! `icon` is only read when the row is created - it is part of the row's
-	//! identity, not part of its value, and re-setting it on every refresh
-	//! would reload the image ten times a second for nothing.
+	//! Set or update a key/value pair; creates a row if the key is new. `icon` is
+	//! only read on creation (row identity, not value) - re-setting it on every
+	//! refresh would reload the image needlessly.
 	void SetValue( string key, string value, string icon = "" )
 	{
 		if ( m_ValueWidgets.Contains( key ) )
@@ -101,13 +80,9 @@ class UIActionKeyValueList: UIActionBase
 		m_ValueStrings = new map<string, string>;
 	}
 
-	//! Grow the root to fit the rows.
-	//!
-	//! UIActionKeyValueList.layout declares the root as `size 1 1` with
-	//! `vexactsize 1` - one pixel tall, exactly. The inner action_rows grid does
-	//! size to its content, but the root never does, so every row was being
-	//! drawn inside a 1px box and the whole control rendered as nothing. Nothing
-	//! else sizes it, so it has to size itself as rows come and go.
+	//! Grow the root to fit the rows. The layout's root is `size 1 1` with
+	//! `vexactsize 1` (1px tall) and never sizes to content, so without this the
+	//! rows draw inside a 1px box and the control renders as nothing.
 	protected void UpdateHeight()
 	{
 		if ( !layoutRoot )

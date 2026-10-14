@@ -1,16 +1,7 @@
-// =============================================================================
-//  JMPlayerStatsHook
-//
-//  Forwards the engine death event to the per-player session stats.
-//
-//  A static forwarder rather than another override inside PlayerBase, matching
-//  JMAntiCheatKillHook next door: PlayerBase.EEKilled already calls out to one
-//  of these, and keeping the pattern means the Mission-layer module never has to
-//  be referenced from the World-layer entity.
-//
-//  Server-side only. A client running this would count deaths into a player
-//  file it does not have.
-// =============================================================================
+//  JMPlayerStatsHook - forwards the engine death event to per-player session stats.
+//  Static forwarder like JMAntiCheatKillHook, so the World-layer PlayerBase never references
+//  the Mission-layer module.
+//  Server-side only: a client would count deaths into a player file it does not have.
 
 class JMPlayerStatsHook
 {

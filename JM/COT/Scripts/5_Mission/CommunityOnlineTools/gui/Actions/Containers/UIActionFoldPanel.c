@@ -1,36 +1,7 @@
-// =============================================================================
-//  UIActionFoldPanel
-//
-//  A container that opens and closes with a slide. Put rows into GetContent()
-//  and call SetExpanded / Toggle; the panel measures its own content every
-//  frame and animates its clipped height toward it, so the host never has to
-//  know how tall the rows came out.
-//
-//  This is the piece that a "fold" made out of raw widgets keeps getting wrong.
-//  A clipping panel CANNOT size itself to its content - it holds a spacer whose
-//  own height is a fraction of the panel, so "panel fits child, child fills
-//  panel" resolves circularly and the panel grows down the form. The fix is not
-//  to guess the height from a row count, and not to poll and pin it from the
-//  host: it is to let the control own the measurement, which it can do because
-//  UIActionBase already runs it every frame.
-//
-//  Folds nest. A fold inside another fold's content changes that content's
-//  height as it animates, and the outer one is re-measuring every frame, so it
-//  follows along on its own.
-//
-//  Fires UIEvent.CHANGE on every frame the height moves - a host inside a
-//  scroller wants that to re-run UpdateScroller().
-//
-//  Usage:
-//      UIActionFoldPanel fold = UIActionManager.CreateFoldPanel( body, this, "OnChange_Fold" );
-//      fold.SetColor( JMTheme.SURFACE_SUNKEN );
-//      fold.SetExpanded( false, false );          // start closed, no animation
-//
-//      UIActionManager.CreateText( fold.GetContent(), "a row" );
-//
-//      // later, from a button:
-//      fold.Toggle();
-// =============================================================================
+//  UIActionFoldPanel - slide-open container; rows go in GetContent(), then SetExpanded / Toggle.
+//  It measures its own content every frame (a clipping panel cannot size to a spacer child: the
+//  sizing resolves circularly), so hosts never guess heights. Folds nest and follow along.
+//  Fires UIEvent.CHANGE every frame the height moves, so a scroller host can UpdateScroller().
 
 class UIActionFoldPanel: UIActionBase
 {

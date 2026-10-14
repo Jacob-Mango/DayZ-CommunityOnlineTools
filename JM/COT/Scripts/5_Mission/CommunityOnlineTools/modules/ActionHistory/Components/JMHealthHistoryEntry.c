@@ -1,10 +1,5 @@
-// =============================================================================
-//  JMHealthHistoryEntry
-//
-//  Undo/redo for ESP's Set Health (the global health value - the GUI has no
-//  per-zone control). Not the Heal action: that is JMHealHistoryEntry, which
-//  also handles players' stamina/water.
-// =============================================================================
+//  JMHealthHistoryEntry - undo/redo for ESP Set Health (global value, no per-zone
+//  control). Not Heal: that is JMHealHistoryEntry.
 class JMHealthHistoryEntry: JMPropertyHistoryEntry
 {
 	void JMHealthHistoryEntry( Object target, float before, float after )

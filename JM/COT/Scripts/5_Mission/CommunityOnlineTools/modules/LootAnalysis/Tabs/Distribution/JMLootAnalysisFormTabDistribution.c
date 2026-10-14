@@ -19,11 +19,9 @@ class JMLootAnalysisFormTabDistribution: JMFormTab
 	protected UIActionKeyValueList m_DistStatsList;
 	protected float m_DistStatsH = JMLootAnalysisForm.STATS_H;
 
-	//! Distinct matched-usage strings in the current Distribution result set,
-	//! in first-seen order - what RebuildLegend() renders. Parallel to
-	//! m_LegendBadges, the same way JMLootAnalysisForm's m_RecentIds is
-	//! parallel to m_RecentButtons: one build pass, so the two can never
-	//! drift apart.
+	//! Distinct matched-usage strings in the current Distribution result set, in first-seen
+	//! order - what RebuildLegend() renders. Parallel to m_LegendBadges (one build pass, so
+	//! the two cannot drift apart), like JMLootAnalysisForm's m_RecentIds / m_RecentButtons.
 	protected ref TStringArray m_DistTypesSeen = new TStringArray;
 	protected ref array<ref UIActionBadge> m_LegendBadges = new array<ref UIActionBadge>;
 
@@ -213,13 +211,9 @@ class JMLootAnalysisFormTabDistribution: JMFormTab
 	}
 
 	//! Called by the module (through the form) once the server answers a
-	//! RPC_RequestLootDistribution. `types` is the usage tag that matched
-	//! each position - what markers are coloured by and what the legend (in
-	//! Item Info) groups on.
-	//!
-	//! A fresh result set replaces the last one outright, including which
-	//! usages are hidden - a new search has nothing to do with what the last
-	//! one's legend had toggled off.
+	//! RPC_RequestLootDistribution. `types` is the matched usage tag per position (marker
+	//! colour and legend grouping). A fresh result set replaces the last outright, including
+	//! the hidden usages: a new search has nothing to do with the old legend toggles.
 	void AddMarkers(array<string> names, array<vector> positions, array<string> types)
 	{
 		if (!m_DistributionMap)
@@ -261,11 +255,9 @@ class JMLootAnalysisFormTabDistribution: JMFormTab
 		RebuildLegend();
 	}
 
-	//! Redraws every Distribution marker from m_DistMarker*All, skipping
-	//! whichever usages are currently in m_HiddenUsages - the legend badges'
-	//! only effect. Re-derives from the stored result set rather than hiding
-	//! individual marker widgets, so toggling a usage back on needs nothing
-	//! more than re-adding it from data already in hand.
+	//! Redraws every Distribution marker from m_DistMarker*All, skipping usages in
+	//! m_HiddenUsages (the legend badges' only effect). Re-derives from the stored result set
+	//! rather than hiding marker widgets, so toggling a usage back on needs only the data.
 	protected void RepaintMarkers()
 	{
 		if (!m_DistributionMap)
@@ -280,11 +272,9 @@ class JMLootAnalysisFormTabDistribution: JMFormTab
 			if (usage != "" && m_HiddenUsages.Find(usage) >= 0)
 				continue;
 
-			//! Icon "" and label "" - AddMarker falls back to a small dot, and
-			//! at a few hundred spawn points a full icon plus an always-on name
-			//! label per marker is unreadable clutter. Colour alone (matched to
-			//! the legend) carries the type; the name is kept in
-			//! m_DistMarkerNames for the right-click menu's Copy Name.
+			//! Icon "" and label "": AddMarker falls back to a small dot, since a full icon plus
+			//! name label per marker is clutter at a few hundred spawn points. Colour (matched to the
+			//! legend) carries the type; the name is kept in m_DistMarkerNames for Copy Name.
 			m_DistributionMap.AddMarker(m_DistMarkerIdsAll[i], m_DistMarkerPositionsAll[i], "", UsageColor(usage), "", MAP_LAYER_DIST);
 		}
 

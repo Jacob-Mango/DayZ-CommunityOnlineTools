@@ -1,32 +1,7 @@
-//! The preset editor: pick, add, edit, apply and delete presets, and shape the
-//! phases and odds that move the dynamic weather between them.
-//!
-//! A PRESET here is what used to be a separate preset AND a state: one named thing
-//! made of phases, where each phase carries the weather it puts on. Picking one in
-//! the selector shows its structure; the Edit button additionally puts the
-//! Sky / Precipitation / Wind tabs into preset edit mode, where they show - and
-//! edit - the weather of the phase selected here, every value a min/max span.
-//!
-//! What is edited is a WORKING COPY (m_Working). Nothing reaches the server until
-//! Save, which sends the whole preset as one payload - the server validates it and
-//! keeps its own copy, so a half-finished edit can never leave the machine with a
-//! half-applied one. The controls read from and write to the working copy through
-//! CommitState() / CommitPhase() / the Load* methods, which are the only places
-//! the two are synchronised, so the rule for every handler is "commit before you
-//! switch what the controls are showing".
-//!
-//! Every action is an icon in a card's title bar, and a name is changed through a
-//! small popup behind the pencil beside its selector - a name is set once and read
-//! many times, so it does not get a permanent text box.
-//!
-//! Cards, top to bottom - each below the first appears once a preset is picked:
-//!   Presets       selector + rename; title bar: Add / Edit / Apply Now / Delete / Save
-//!                 (Save glows while there is something to save)
-//!   Next Presets  where the machine goes when this preset ends
-//!   Phase         selector + rename, hold, fade; title bar: Add / Enter Now / Remove
-//!   Opens On      which phase the preset starts with (only with more than one)
-//!   After Phase   where the machine goes when this phase ends (incl. "leave")
-//! A list card with nothing to show and nothing left to add is hidden.
+//! The preset editor: pick, add, edit, apply, delete presets and shape their phases and odds.
+//! A PRESET is a named set of phases, each carrying the weather it puts on. Edit puts the
+//! Sky / Precipitation / Wind tabs into preset edit mode. Edits go to a WORKING COPY
+//! (m_Working); nothing reaches the server until Save. Commit before switching the controls.
 class JMWeatherDynamicEditor
 {
 	//! Fixed row at the head of the preset selector; stored presets follow it.
@@ -318,11 +293,10 @@ class JMWeatherDynamicEditor
 	//  Refresh - the stored configuration changed
 	// -------------------------------------------------------------------------
 
-	//! Called whenever the settings are (re)loaded. Keeps the selection by NAME and
-	//! reloads the working copy from the stored preset - unless the person has an
-	//! unsaved edit on screen, which a refresh (another admin's save, a preset
-	//! created elsewhere) must not throw away. Edit mode counts as one: the weather
-	//! controls hold values the working copy does not have yet.
+	//! Called whenever the settings are (re)loaded. Keeps the selection by NAME and reloads the
+	//! working copy from the stored preset - unless an unsaved edit is on screen (edit mode
+	//! counts: the weather controls hold values the working copy lacks), which a refresh
+	//! from another admin's save must not throw away.
 	void RefreshFromSettings()
 	{
 		JMWeatherSerialize settings = Settings();
@@ -760,11 +734,10 @@ class JMWeatherDynamicEditor
 		CommitWeather( phase );
 	}
 
-	//! The weather tabs into the phase's weather - but only the sections that were
-	//! actually touched. A tab that was never opened has no controls to read, and a
-	//! card that was not touched still shows the WORLD's value where the phase says
-	//! "leave this alone"; writing those back would turn every untouched field of
-	//! the preset into a setting.
+	//! The weather tabs into the phase's weather - only the sections actually touched. An
+	//! unopened tab has no controls to read, and an untouched card still shows the WORLD's
+	//! value where the phase says "leave alone"; writing those back would make every
+	//! untouched field a setting.
 	protected void CommitWeather( JMWeatherPhase phase )
 	{
 		if ( !m_EditMode )
@@ -814,11 +787,9 @@ class JMWeatherDynamicEditor
 		weather.ClearDate();
 	}
 
-	//! Both halves. Order matters: state first, so its lists are read while they
-	//! still hold the names they were loaded with, then the phase.
-	//!
-	//! Loading a list or the weather tabs afterwards forgets what was changed, so
-	//! whatever was pending is remembered here, before it goes: an edit is only
+	//! Both halves. Order matters: state first, so its lists are read while they still hold
+	//! their loaded names, then the phase. Loading a list or the weather tabs afterwards
+	//! forgets what changed, so pending edits are remembered here first: an edit is only
 	//! ever cleared by a save.
 	protected void CommitAll()
 	{
@@ -868,14 +839,10 @@ class JMWeatherDynamicEditor
 		m_Form.UpdateStates();
 	}
 
-	//! Show the working phase's weather on THIS CLIENT, immediately.
-	//!
-	//! Picking a preset to edit is asking what it looks like, and answering that
-	//! with a panel of numbers when the sky is right there is the long way round. It
-	//! goes on locally, so nobody else's weather moves, with the fades stripped so
-	//! it is the END state rather than a slow drift toward it. Weather only: a
-	//! preset carries no date. The server owns the weather and syncs it, so this
-	//! lasts until the next sync - the right lifetime for a preview.
+	//! Show the working phase's weather on THIS CLIENT, immediately, so picking a preset shows
+	//! the sky rather than numbers. Local only (nobody else's weather moves), fades stripped so
+	//! it is the END state, weather only (no date). The server syncs weather, so it lasts until
+	//! the next sync - the right lifetime for a preview.
 	protected void PreviewWeather()
 	{
 		JMWeatherFormTabSky           sky           = m_Form.m_TabSkyCtrl;
@@ -982,12 +949,10 @@ class JMWeatherDynamicEditor
 		config.TargetName = m_TargetName;
 		config.State      = m_Working.Copy();
 
-		//! From here the preset is known to the server as its new name. Until that
-		//! shows up in the settings, RefreshFromSettings leaves the screen alone.
-		//!
-		//! Set BEFORE sending: on a listen server the send runs the whole save and
-		//! refreshes this editor before it returns, and a rename would look like the
-		//! old name having been deleted out from under it.
+		//! From here the preset is known to the server under its new name; until that shows up in
+		//! the settings, RefreshFromSettings leaves the screen alone. Set BEFORE sending: on a
+		//! listen server the send saves and refreshes this editor before returning, and a rename
+		//! would look like the old name deleted.
 		m_TargetName  = m_Working.Name;
 		m_PendingName = m_Working.Name;
 		m_Dirty       = false;

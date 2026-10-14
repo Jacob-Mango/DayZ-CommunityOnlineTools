@@ -182,16 +182,10 @@ class JMVehiclesForm: JMFormBase
 		//! each toolbar row is a cell inside it.
 		Widget toolbar = UIActionManager.CreateGridSpacer( m_LeftToolbar, TOOLBAR_ROWS, 1 );
 
-		// Row 1 - search bar with icon-only refresh button.
-		//
-		// A flex row, not a plain wrap spacer: the search box has to end on the
-		// same right edge as the delete buttons under it. A fraction width
-		// cannot do that - it is a fraction of the whole block, so the 30px
-		// refresh button in front of it always pushed the field short of the
-		// edge. Here the button is reserved at its fixed width and the field
-		// takes whatever is left.
-		//! Every control on this toolbar is drawn at the same height, which
-		//! is the height the search box layout is authored at.
+		// Row 1 - search bar with icon-only refresh button. A flex row, not a wrap spacer: a
+		// fraction width is of the whole block, so the fixed 30px refresh button pushed the field
+		// short of the delete buttons' right edge. The button keeps its width, the field takes the rest.
+		//! Every control on this toolbar is drawn at the search box layout's authored height.
 		JMSearchRow searchToolbar = UIActionManager.CreateSearchFlexRow( toolbar, "Search", this, "OnChange_Search", "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH", TOOLBAR_CONTROL_PX );
 
 		m_SearchRow = searchToolbar.Row;
@@ -310,13 +304,9 @@ class JMVehiclesForm: JMFormBase
 		ResizeTabs( w, h );
 	}
 
-	//! PinStripGeometry pins both left-hand blocks to x=0 / width=1 every time
-	//! it runs, so a gutter written into the layout file survives only until the
-	//! first resize. It has to be re-applied here or the toolbar's buttons are
-	//! drawn edge to edge and the surface's rounded corners clip them.
-	//!
-	//! Only the horizontal values are touched: the vertical split is what
-	//! PinStripGeometry was just called for.
+	//! PinStripGeometry pins both left-hand blocks to x=0 / width=1 on every run, so a
+	//! gutter authored in the layout survives only until the first resize; re-apply it here
+	//! or the buttons clip against the rounded corners. Only horizontal values are touched.
 	protected void ApplyLeftGutter( float contentHeight )
 	{
 		float x;
@@ -450,11 +440,9 @@ class JMVehiclesForm: JMFormBase
 		if ( m_IsInVehicleInfo && m_CurrentVehicle && m_CurrentVehicle.m_NetworkIDLow == fresh.m_NetworkIDLow && m_CurrentVehicle.m_NetworkIDHigh == fresh.m_NetworkIDHigh )
 			SetVehicleInfo( fresh, false );
 
-		// A vehicle that is already on screen and still passes the filters can
-		// be patched where it stands. Rebuilding would destroy the marker under
-		// the cursor - which, while the hover panel is polling, is the one this
-		// delta is about - and the engine answers a vanished hover target by
-		// recentring the cursor.
+		// A vehicle already on screen that still passes the filters is patched in place.
+		// Rebuilding would destroy the marker under the cursor (the one the polling hover panel
+		// is about) and the engine answers a vanished hover target by recentring the cursor.
 		if ( PatchVehicleInPlace( fresh ) )
 			return;
 
@@ -726,13 +714,10 @@ class JMVehiclesForm: JMFormBase
 		UpdateUI();
 	}
 
-	//! Marker sync runs off the window's per-frame Update() rather than a
-	//! Timer, same reasoning UIActionMap.TickMarkers() itself documents: a
-	//! 20 Hz Timer meant a marker only caught up with the map three frames
-	//! out of four, which reads as the markers lagging behind the terrain
-	//! while the map is being dragged. Per-frame is the only rate that
-	//! tracks a drag, and it stays cheap because TickMarkers() skips the
-	//! work whenever the view has not actually moved.
+	//! Marker sync runs off the window's per-frame Update(), not a Timer (see
+	//! UIActionMap.TickMarkers()): a 20 Hz Timer lagged markers behind the terrain while the
+	//! map was dragged. Per-frame is the only rate that tracks a drag and stays cheap, as
+	//! TickMarkers() skips work when the view has not moved.
 	override void Update()
 	{
 		super.Update();

@@ -1,19 +1,7 @@
-//! Client-side drawing of construction parts in the world, for the ESP action menu.
-//!
-//! Two things, both read-only on the construction:
-//!  - a preview of what a construction row acts on, set while the pointer rests
-//!    on that row (see JMESPActionMenu.OnMenuHover) and cleared when it leaves;
-//!  - the nodes of a rebuildable building, toggled per building from its
-//!    construction page: one box per right-click target, so an admin can see
-//!    where to click to get the menu narrowed to that part.
-//!
-//! Shapes, not the parts themselves: showing a part is an animation source the
-//! server sets and syncs, and hiding a rubble part spawns rubble - neither is
-//! something the client may fake.
-//!
-//! Boxes are kept in model space, worked out once when a preview or a node set
-//! is made, and drawn with the object's current transform every frame as ONCE
-//! shapes, so nothing has to be torn down when the object goes away.
+//! Client-side, read-only drawing of construction parts for the ESP action menu: a preview of
+//! the hovered construction row, and per-building nodes (one box per right-click target).
+//! Shapes only: showing a part is a server-synced animation source and hiding rubble spawns
+//! rubble, which the client may not fake. Boxes are model-space, drawn as ONCE shapes.
 class JMConstructionPreview: Managed
 {
 	static const int COLOR_BUILD     = JMTheme.SUCCESS;

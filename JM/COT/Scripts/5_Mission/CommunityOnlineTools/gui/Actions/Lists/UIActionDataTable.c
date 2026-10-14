@@ -1,33 +1,7 @@
-// =============================================================================
-//  UIActionDataTable
-//
-//  A multi-column read-only table with a header row and scrollable data rows.
-//  Columns are defined by calling SetColumns(); rows are added with AddRow().
-//  Clicking a row fires UIEvent.CLICK and GetSelectedRow() returns its index.
-//  Call ClearRows() + AddRow() to rebuild the table on data changes.
-//
-//  Usage:
-//      m_Table = UIActionManager.CreateDataTable( parent, this, "OnClick_Row" );
-//      m_Table.SetColumns( { "Name", "Status", "Ping" }, { 0.5, 0.3, 0.2 } );
-//      foreach ( PlayerInfo p : players )
-//          m_Table.AddRow( { p.Name, p.Status, "" + p.Ping } );
-//
-//      void OnClick_Row( UIEvent eid, UIActionBase action )
-//      {
-//          int row = m_Table.GetSelectedRow();
-//      }
-//
-//  Right-clicking a row selects it and fires UIEvent.CLICK_RIGHT instead, with
-//  the cursor position available from GetLastRightClickX/Y() - enough to open a
-//  context menu over the row that was hit:
-//
-//      void OnClick_Row( UIEvent eid, UIActionBase action )
-//      {
-//          if ( eid != UIEvent.CLICK_RIGHT )
-//              return;
-//          m_Menu.OpenAt( m_Table.GetLastRightClickX(), m_Table.GetLastRightClickY() );
-//      }
-// =============================================================================
+//  UIActionDataTable - multi-column read-only table: SetColumns( names, fractions ), AddRow( cells ),
+//  ClearRows() + AddRow() to rebuild. A row click fires UIEvent.CLICK (GetSelectedRow() = index);
+//  right-click selects and fires UIEvent.CLICK_RIGHT instead, with the cursor position in
+//  GetLastRightClickX/Y() for opening a context menu.
 class UIActionDataTable: UIActionBase
 {
 	protected Widget  m_HeaderContainer;

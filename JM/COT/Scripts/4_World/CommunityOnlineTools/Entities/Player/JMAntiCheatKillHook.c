@@ -1,15 +1,6 @@
-// =============================================================================
-//  JMAntiCheatKillHook.c
-//
-//  Static forwarder for the kill-tracking hooks wired in PlayerBase.c.
-//  Lives at 4_World so it's compiled in the same module that owns
-//  PlayerBase.  The 4_World module compiles BEFORE 5_Mission so we
-//  can't reference the 5_Mission `JMAntiCheatModule` class directly.
-//
-//  Pattern: store the events in a static 4_World-side cache.  The
-//  anti-cheat module polls the cache in its `OnUpdate` tick (which
-//  already runs in 5_Mission, where it can resolve its own type).
-// =============================================================================
+//  JMAntiCheatKillHook - static forwarder for the kill hooks wired in PlayerBase.c.
+//  4_World compiles before 5_Mission, so events go in a static cache that
+//  JMAntiCheatModule polls in its OnUpdate tick.
 
 class JMAntiCheatKillEvent
 {
@@ -22,13 +13,9 @@ class JMAntiCheatKillEvent
 	//! Ammo classname from EEHitBy, "" for melee and fists.
 	string      HitAmmo;
 
-	//! How the hit was delivered. Only one of these can be true, and all three
-	//! can be false - a zombie or a fall is neither.
-	//!
-	//! The distinction matters because the distance rules differ per class:
-	//! a melee hit at 40m is impossible, a rifle hit at 40m is a Tuesday, and
-	//! a grenade "hit" at 40m is just blast radius and must not be judged at
-	//! all.
+	//! How the hit was delivered; at most one is true (zombie/fall: none). Distance
+	//! rules differ per class: melee at 40m is impossible, rifle is fine, and
+	//! explosive blast radius must not be judged at all.
 	bool        IsRanged;
 	bool        IsMelee;
 	bool        IsExplosive;
@@ -59,17 +46,10 @@ class JMAntiCheatKillHook
 	//! Covers bleed-out/shock deaths that resolve well after the final hit.
 	static const int SNAPSHOT_WINDOW_MS = 120000;
 
-	//! Resolve the player responsible for damage dealt by `source`.
-	//!
-	//! `source` is rarely the killer:
-	//!   - shot      -> source is the *weapon*, owned by the shooter
-	//!   - explosion -> source is the grenade/mine, whose owner we tagged in
-	//!                  ItemBase.OnInventoryExit / OnPlacementComplete
-	//!   - trap      -> source is the trap, tagged in TrapBase.StartActivate
-	//!   - roadkill  -> source is the vehicle; blame the driver
-	//!
-	//! A bare PlayerBase.Cast(source) catches only melee/fists, which is why
-	//! every explosive, trap and vehicle kill used to be dropped outright.
+	//! Resolve the player responsible for damage from `source`, rarely the killer:
+	//! shot = weapon (owner), explosive/trap = item (owner tagged in OnInventoryExit /
+	//! OnPlacementComplete / TrapBase.StartActivate), roadkill = vehicle (driver).
+	//! A bare PlayerBase.Cast(source) only catches melee.
 	static PlayerBase ResolveKiller( Object source )
 	{
 		if ( !source )

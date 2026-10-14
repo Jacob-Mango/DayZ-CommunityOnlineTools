@@ -1,22 +1,7 @@
-// =============================================================================
-//  UIActionSliderRange
-//
-//  A progress-bar-style range control with two draggable handles (low / high).
-//  Click or drag on the track to move the nearest handle.
-//  Fires UIEvent.CHANGE whenever either handle moves.
-//
-//  Usage:
-//      m_Range = UIActionManager.CreateSliderRange( parent, "Health", 0, 100,
-//          this, "OnChange_Range" );
-//      m_Range.SetStep( 1 );
-//      m_Range.SetRange( 20, 80 );
-//
-//      void OnChange_Range( UIEvent eid, UIActionBase action )
-//      {
-//          float lo = m_Range.GetRangeLow();
-//          float hi = m_Range.GetRangeHigh();
-//      }
-// =============================================================================
+//  UIActionSliderRange - progress-bar-style range control with two draggable handles (low / high).
+//  Click or drag on the track to move the nearest handle; fires UIEvent.CHANGE when either moves.
+//  Use: m_Range = UIActionManager.CreateSliderRange( parent, "Health", 0, 100, this, "OnChange_Range" );
+//  then SetStep / SetRange and read GetRangeLow() / GetRangeHigh() in the handler.
 class UIActionSliderRange: UIActionBase
 {
 	protected TextWidget  m_Label;
@@ -57,14 +42,9 @@ class UIActionSliderRange: UIActionBase
 	// 0 = none, 1 = dragging low handle, 2 = dragging high handle
 	protected int m_Dragging;
 
-	//! Single-value mode: one handle, and the bar filled from the minimum the
-	//! way a plain slider fills.
-	//!
-	//! The low bound is pinned onto the high one rather than the control
-	//! growing a second value store, so a caller reading GetRangeLow() and
-	//! GetRangeHigh() gets one exact value out of a control it never has to ask
-	//! the mode of - which is the whole reason this is a mode rather than a
-	//! second widget class.
+	//! Single-value mode: one handle, bar filled from the minimum like a plain slider.
+	//! The low bound is pinned onto the high one, so GetRangeLow() and GetRangeHigh() give one
+	//! exact value without the caller asking the mode; hence a mode, not a second widget class.
 	protected bool m_Single;
 
 	//! How many arrows the layout declares. Must match the number of flow_N
@@ -147,16 +127,9 @@ class UIActionSliderRange: UIActionBase
 		UpdateVisuals();
 	}
 
-	//! Shade the filled bar across its own span.
-	//!
-	//! `stops` are evenly spaced over the slider's min..max, and every point in
-	//! between is mixed from the two it falls between - so a health slider can
-	//! run ruined-red through to pristine-green and each part of the bar shows
-	//! the condition of the values under it. Pass an empty array to go back to
-	//! one flat colour.
-	//!
-	//! The bar is not one widget shaded but a row of small ones each painted
-	//! its own colour: nothing in the engine gradients a panel.
+	//! Shade the filled bar across its span: `stops` are evenly spaced over min..max and points
+	//! between are mixed from their neighbours. Empty array = one flat colour. The bar is a row
+	//! of small widgets each painted its own colour: the engine cannot gradient a panel.
 	void SetGradient( notnull TIntArray stops )
 	{
 		m_Gradient.Clear();
@@ -183,12 +156,8 @@ class UIActionSliderRange: UIActionBase
 		UpdateVisuals();
 	}
 
-	//! Colour the two ends independently.
-	//!
-	//! A range whose meaning changes across it - health running ruined to
-	//! pristine - says more when each handle carries the colour of the value it
-	//! is sitting on, and the bar between them the blend. One flat colour for
-	//! the whole control can only describe one end of it.
+	//! Colour the two ends independently: each handle carries the colour of its value and the
+	//! bar between them the blend, for ranges whose meaning changes across them (health).
 	void SetRangeColors( int lowColor, int highColor )
 	{
 		m_FillColor = JMTheme.Mix( lowColor, highColor, 0.5 );
@@ -215,16 +184,9 @@ class UIActionSliderRange: UIActionBase
 		UpdateVisuals();
 	}
 
-	//! Collapse the control to one handle, or open it back up to two.
-	//!
-	//! The low handle is HIDDEN rather than the row being rebuilt as a
-	//! UIActionSlider: the two read identically apart from that second handle,
-	//! and swapping the widget out would cost the caller its reference, its
-	//! gradient and its colours every time the mode changed.
-	//!
-	//! Collapsing loses where the low handle was. A caller that wants the span
-	//! back as it left it keeps that value itself and re-applies it with
-	//! SetRange after switching back - see JMObjectSpawnerForm.ApplyRangeMode.
+	//! Collapse to one handle, or open back up to two. The low handle is HIDDEN, not the row
+	//! rebuilt, so the caller keeps its reference, gradient and colours. Collapsing loses the
+	//! low value; callers re-apply it with SetRange (see JMObjectSpawnerForm.ApplyRangeMode).
 	void SetSingle( bool single )
 	{
 		if ( m_Single == single )
@@ -238,11 +200,9 @@ class UIActionSliderRange: UIActionBase
 		UpdateVisuals();
 	}
 
-	//! Move the value while single, clamped to the control's own bounds.
-	//!
-	//! NOT through the high handle's usual clamp: that floors at m_Low, which is
-	//! sitting exactly on the value here, so the number could be dragged up and
-	//! never back down again.
+	//! Move the value while single, clamped to the control's own bounds. NOT through the high
+	//! handle's clamp: it floors at m_Low, which sits on the value here, so it could never
+	//! be dragged back down.
 	protected void SetSingleValue( float value )
 	{
 		m_High = SnapToStep( Math.Clamp( value, m_Min, m_Max ) );
@@ -272,12 +232,9 @@ class UIActionSliderRange: UIActionBase
 		Class.CastTo( m_Fill,       layoutRoot.FindAnyWidget( "action_fill"        ) );
 		Class.CastTo( m_GradientHost, layoutRoot.FindAnyWidget( "action_gradient"   ) );
 
-		//! The strip's slices are declared in the layout, not built here, and
-		//! each one carries a style. A PanelWidget draws its Color by TINTING
-		//! the nine-slice art its style names, so a panel with no style has
-		//! nothing to tint and paints nothing at all - which is why every
-		//! earlier version of this strip was invisible no matter what parent it
-		//! was given or what colour it was set to.
+		//! The strip's slices are declared in the layout, each with a style. A PanelWidget tints
+		//! the nine-slice art its style names, so a panel with no style paints nothing at all,
+		//! whatever its parent or colour.
 		for ( int seg = 0; seg < GRADIENT_SEGMENTS; seg++ )
 		{
 			Widget slice = layoutRoot.FindAnyWidget( "grad_" + seg );
@@ -377,11 +334,8 @@ class UIActionSliderRange: UIActionBase
 		return capW / trackW;
 	}
 
-	//! Hide the caps by making them transparent rather than by hiding them.
-	//!
-	//! A hidden widget measures zero wide, and CapWidth has to be able to
-	//! measure one to know how far to inset the strip - so they stay visible
-	//! for their whole life and the colour carries whether they show.
+	//! Hide the caps by making them transparent, not hiding them: a hidden widget measures
+	//! zero wide and CapWidth needs to measure one to inset the strip.
 	protected void ClearCaps()
 	{
 		if ( m_CapLow )
@@ -391,23 +345,10 @@ class UIActionSliderRange: UIActionBase
 			m_CapHigh.SetColor( 0x00000000 );
 	}
 
-	//! Paint the segment strip across the filled span, in slider space.
-	//! The strip lives in action_gradient - a plain panel declared in the
-	//! layout, holding a fixed row of slices declared alongside it.
-	//!
-	//! Nothing here is created at runtime, and every slice carries a style -
-	//! rover_sim_colorable, the vanilla all-WhitePixel one, so the colour set
-	//! below has flat art to tint and no corner rounding to seam between
-	//! neighbours. All script does is size the host to the filled span and
-	//! colour what the layout already declared.
-	//!
-	//! Flat art leaves the strip SQUARE, though, and the track behind it is a
-	//! 6px pill - so at full range the strip's corners overhang it. The two ends
-	//! are therefore drawn by rounded caps instead, with the strip inset by half
-	//! a cap at each end so only the caps' outer halves are left showing.
-	//!
-	//! The caps and the host are declared BEFORE the handles, so the handles
-	//! draw over them without anyone having to sort anything.
+	//! Paint the segment strip across the filled span. Everything lives in the layout
+	//! (action_gradient host + slices styled rover_sim_colorable); script only sizes and colours.
+	//! The flat strip is square vs the 6px pill track, so rounded caps draw the ends and the
+	//! strip is inset half a cap. Caps/host are declared BEFORE the handles.
 	protected void PaintGradient( float fillLeft, float fillRight )
 	{
 		if ( !m_GradientHost )
@@ -504,14 +445,9 @@ class UIActionSliderRange: UIActionBase
 		while ( m_FlowPhase >= 1.0 )
 			m_FlowPhase -= 1.0;
 
-		//! Use every arrow the layout has, and divide the span between them,
-		//! so the line of arrows reaches the far end of the fill.
-		//!
-		//! This used to fix the gap at FLOW_SPACING_PX and then cap the count
-		//! at the number of arrows that exist, which meant a wide bar got the
-		//! same 6 arrows crowded into its first ~180px with the rest of the
-		//! fill empty - the motion read as a detail in the corner rather than
-		//! as the bar flowing.
+		//! Use every arrow the layout has and divide the span between them, so the line reaches
+		//! the far end of the fill (a fixed FLOW_SPACING_PX gap crowded arrows into the start
+		//! of wide bars).
 		int count = m_Arrows.Count();
 
 		//! On a short span that many arrows would sit on top of each other, so
@@ -662,12 +598,9 @@ class UIActionSliderRange: UIActionBase
 		GetMousePos( mx, my );
 		float val = XToValue( mx );
 
-		//! A drag that has run the handles together hands over to the other one
-		//! rather than pushing against it. Clamping alone would leave the pair
-		//! stuck wherever they met - grabbing the low handle and dragging right
-		//! past the high one could never open the range again.
-		//! Single mode is exempt: the pair is pinned together there on purpose,
-		//! and there is only ever the one handle to drag.
+		//! A drag that runs the handles together hands over to the other one; clamping alone would
+		//! leave the pair stuck where they met. Single mode is exempt: the pair is pinned on
+		//! purpose and there is one handle.
 		if ( m_Low == m_High && !m_Single )
 		{
 			if ( m_Dragging == 1 && val > m_High )
@@ -687,13 +620,9 @@ class UIActionSliderRange: UIActionBase
 		CallEvent( UIEvent.CHANGE );
 	}
 
-	//! Which handle a click at `value` is asking for: 1 = low, 2 = high.
-	//!
-	//! Nearest wins, but the two handles can sit on the SAME value, and then
-	//! every click is equidistant. Resolving that tie the same way every time
-	//! picks the low handle, which is clamped by the high one and so cannot
-	//! move up - a collapsed range would be frozen. The tie is broken by which
-	//! side of the pair was clicked instead, so it can always be opened.
+	//! Which handle a click at `value` is asking for: 1 = low, 2 = high. Nearest wins; when both
+	//! sit on the SAME value the tie is broken by which side was clicked, so a collapsed range
+	//! can always be opened (always picking low would freeze it, clamped by high).
 	protected int PickHandle( float value )
 	{
 		//! Only one handle to pick from.
@@ -753,12 +682,8 @@ class UIActionSliderRange: UIActionBase
 		UpdateVisuals();
 	}
 
-	//! Half a handle's width, as a fraction of the track width.
-	//! Measured off the HIGH handle, the one that is always visible.
-	//!
-	//! A hidden widget measures zero wide, so taking this from the low handle
-	//! returned 0 the moment single mode hid it - and the remaining handle was
-	//! then drawn with its LEFT edge on the value instead of its centre.
+	//! Half a handle's width, as a fraction of the track width. Measured off the HIGH handle,
+	//! the always-visible one: a hidden widget (low, in single mode) measures zero wide.
 	protected float HandleHalfWidth()
 	{
 		if ( !m_Track || !m_HandleHigh )
@@ -818,11 +743,9 @@ class UIActionSliderRange: UIActionBase
 		m_FlowLeft  = fillLeft;
 		m_FlowWidth = fillWidth;
 
-		// Handle positions are relative to the track but their size is in pixels,
-		// so SetPos( t, 0 ) puts the LEFT edge at the value and the handle ends
-		// up sitting past the fill - visible as a gap on the high end. Shift each
-		// one back by half its own width so it is centred on its value, and keep
-		// it inside the track at the extremes.
+		// Handle positions are track-relative but sizes are pixels, so SetPos( t, 0 ) puts the
+		// LEFT edge on the value (gap at the high end). Shift back by half the handle width to
+		// centre it, and keep it inside the track at the extremes.
 		float half = HandleHalfWidth();
 
 		if ( m_HandleLow )
@@ -837,15 +760,9 @@ class UIActionSliderRange: UIActionBase
 			m_RangeText.SetText( FormatRange() );
 	}
 
-	//! Formats both ends through the value format.
-	//!
-	//! The format has to be TRANSLATED first. Callers pass a stringtable key
-	//! ("#STR_COT_FORMAT_PERCENTAGE"), the same as UIActionSlider takes, and
-	//! this used to hand that key straight to string.Format - so a percentage
-	//! range rendered as the literal "%1% - %1%" instead of "20% - 80%".
-	//!
-	//! Whole-number steps round, matching UIActionSlider, so a 1-step range
-	//! does not read as "19.999999%".
+	//! Formats both ends through the value format, which must be TRANSLATED first (callers pass
+	//! a stringtable key like "#STR_COT_FORMAT_PERCENTAGE", as for UIActionSlider).
+	//! Whole-number steps round, so a 1-step range does not read as "19.999999%".
 	protected string FormatRange()
 	{
 		//! One number in single mode. "30 - 30" is not a range, and reading it

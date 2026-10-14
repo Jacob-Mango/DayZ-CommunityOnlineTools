@@ -1,69 +1,7 @@
-// =============================================================================
-//  UIActionMap
-//
-//  A world map any form can drop into a card, with markers it OWNS rather than
-//  redraws by hand.
-//
-//  ---------------------------------------------------------------------------
-//  WHY THIS EXISTS
-//
-//  Every form that wanted a map was re-implementing the same three things:
-//  create the MapWidget from a layout, keep a private list of what to draw, and
-//  call ClearUserMarks + AddUserMark over the whole list whenever anything
-//  moved. MapWidget offers no way to move or remove ONE mark - the only API is
-//  "erase everything and draw it again" - so each host also had to own every
-//  mark on its map, which is exactly why two features could never share one.
-//
-//  This holds the marks instead. A marker has an id and a LAYER, so the player
-//  module can own "players", loot analysis can own "loot", and the teleport
-//  form can own "locations", each adding, moving and clearing its own without
-//  touching anyone else's.
-//
-//  ---------------------------------------------------------------------------
-//  MARKERS ARE REAL WIDGETS, NOT NATIVE MARKS
-//
-//  This used to draw with MapWidget's own AddUserMark/ClearUserMarks - cheap,
-//  but a native mark cannot be hovered, cannot show a selection ring, and
-//  resolves .paa icons only. Vehicle Manager had already solved all three with
-//  JMUIActionMapMarker's ancestor (JMVehiclesMapMarker): a small transparent
-//  ButtonWidget sibling of the MapWidget, positioned every tick with
-//  MapToScreen. That is what a marker is now, mod-wide, via JMUIActionMapMarker
-//  - the price is TickMarkers(), which the host must call once a frame (see
-//  below), where a native mark tracked pan/zoom for free.
-//
-//  ClearLayer/refresh-heavy hosts (the teleport form's player/vehicle overlays,
-//  refreshed every few seconds) would otherwise destroy and recreate every
-//  widget in a layer on every refresh even when nothing moved. Cleared markers'
-//  widgets are PARKED instead of destroyed immediately, and only actually
-//  unlinked a frame later - so an AddMarker for the same id within that window
-//  (the normal "clear then re-add the current list" pattern) reclaims the same
-//  widget instead of thrashing it.
-//
-//  ---------------------------------------------------------------------------
-//  INTERACTION
-//
-//  Fires UIEvent.CLICK on a press and UIEvent.DOUBLE_CLICK on a double press,
-//  whether it lands on open ground or directly on a marker widget. The host
-//  reads what was hit off the action the same way either way:
-//
-//      GetLastClickWorldPos()   - where on the ground, always set
-//      GetLastClickedMarkerId() - "" unless the press landed on a marker
-//      GetLastClickButton()     - MouseState.LEFT or MouseState.RIGHT
-//
-//  Also fires UIEvent.MOUSE_ENTER / MOUSE_LEAVE as the cursor crosses a marker
-//  - GetHoveredMarkerId() reads back which one, same shape as
-//  UIActionDataTable's GetHoveredRow().
-//
-//  Usage:
-//      m_Map = UIActionManager.CreateMap( card.GetContent(), this, "OnClick_Map" );
-//      m_Map.CenterOn( g_Game.GetPlayer().GetPosition() );
-//      m_Map.AddMarker( "loc_nwaf", pos, "NWAF", JMTheme.ACCENT, "", "locations" );
-//      ...
-//      m_Map.ClearLayer( "locations" );
-//
-//  And, once a frame, from the host's own Update():
-//      m_Map.TickMarkers();
-// =============================================================================
+// UIActionMap - a world map any form can drop into a card, with markers it OWNS. MapWidget
+// cannot move/remove ONE mark, so markers are real widgets (transparent ButtonWidgets placed
+// via MapToScreen) with an id and LAYER; the host MUST call TickMarkers() once a frame.
+// Fires CLICK / DOUBLE_CLICK / MOUSE_ENTER / MOUSE_LEAVE (see GetLastClick*, GetHoveredMarkerId).
 
 //! One mark on the map. Held rather than drawn straight through, because
 //! MapWidget cannot edit or erase an individual mark once it has it.
@@ -141,16 +79,9 @@ class UIActionMap: UIActionBase
 	//! whatever list is beside it.
 	static const int COLOR_SELECTED = 0xFFFFFF00;
 
-	//! Marker glyphs - all JMConstants.Lucide() .edds icons, loaded the same
-	//! way Vehicle Manager's markers always have.
-	//!
-	//! These used to be DayZ's own native navigation .paa set (map_camp_ca and
-	//! the like) plus a couple of hand-authored COT .paa files, back when
-	//! AddUserMark drew them - AddUserMark's mark renderer is the only thing
-	//! that ever knew how to read that particular packing. Loaded through a
-	//! plain ImageWidget the way every marker is now, they come out as a flat
-	//! colour square instead of a glyph, so they are mapped to the nearest
-	//! Lucide equivalent here instead.
+	//! Marker glyphs - all JMConstants.Lucide() .edds icons. The old native navigation
+	//! .paa set only decoded inside AddUserMark's renderer; through a plain ImageWidget
+	//! they come out as a flat colour square, so each maps to the nearest Lucide icon.
 	static const string ICON_DOT          = "JM/COT/GUI/textures/icons/lucide/dot.edds";
 	static const string ICON_DOT_SELECTED = "JM/COT/GUI/textures/icons/lucide/circle-dot.edds";
 	static const string ICON_CAR          = "JM/COT/GUI/textures/icons/lucide/car.edds";
@@ -298,11 +229,9 @@ class UIActionMap: UIActionBase
 	//  View
 	// -------------------------------------------------------------------------
 
-	//! Height comes from UIActionBase.SetHeight, and the root is already
-	//! VEXACTSIZE - CreateMap sets that when it applies the height it was
-	//! asked for - so a host that wants the map to fill a band just calls it
-	//! with the band's height in layout pixels. A MapWidget has no content
-	//! height of its own, so somebody always has to.
+	//! Height comes from UIActionBase.SetHeight and the root is already VEXACTSIZE
+	//! (CreateMap sets it), so a host filling a band calls it with the band height in
+	//! layout pixels. A MapWidget has no content height of its own.
 
 	void SetScale( float scale )
 	{
@@ -390,12 +319,9 @@ class UIActionMap: UIActionBase
 		m_Map.SetMapPos( worldPos );
 	}
 
-	//! Centre on something that may not have been laid out yet.
-	//!
-	//! SetMapPos on a map the engine has not sized is discarded, so a form that
-	//! centres in the same pass that builds the map comes up on the world
-	//! origin. Re-issuing it a frame later is the only reliable fix, and it is
-	//! wanted often enough that every host should not have to rediscover it.
+	//! Centre on something that may not have been laid out yet. SetMapPos on a map the
+	//! engine has not sized is discarded (the form comes up on the world origin), so
+	//! re-issue it a frame later.
 	void CenterOnDeferred( vector worldPos )
 	{
 		CenterOn( worldPos );
@@ -514,13 +440,9 @@ class UIActionMap: UIActionBase
 		return true;
 	}
 
-	//! Erase one feature's marks. The point of layers: loot analysis dropping
-	//! its results must not take the player dots with it.
-	//!
-	//! Widgets are parked rather than destroyed here - the normal caller shape
-	//! is ClearLayer followed immediately by re-adding the current list, and
-	//! parking lets AddMarker reclaim the same widget for an id that survives
-	//! the refresh instead of destroying and recreating it.
+	//! Erase one feature's marks (loot analysis must not take the player dots with it).
+	//! Widgets are parked, not destroyed: callers usually re-add the current list right
+	//! away and AddMarker reclaims the parked widget for any id that survives.
 	void ClearLayer( string layer )
 	{
 		for ( int i = m_Markers.Count() - 1; i >= 0; i-- )
@@ -535,13 +457,9 @@ class UIActionMap: UIActionBase
 			if ( m_SelectedId == id )
 				m_SelectedId = "";
 
-			//! m_HoveredMarkerId is deliberately left alone here: the widget
-			//! usually survives via ParkWidget's reclaim pool (nothing re-added
-			//! it under the same id yet), and the cursor never actually left it,
-			//! so a reset now would fire a leave for a marker about to reappear
-			//! under the mouse unchanged. FlushParkedWidgets reconciles this a
-			//! frame later, once it is known whether the id was actually
-			//! reclaimed.
+			//! m_HoveredMarkerId is left alone here: the widget usually survives via the
+			//! reclaim pool and the cursor never left it, so a reset would fire a leave for
+			//! a marker about to reappear. FlushParkedWidgets reconciles a frame later.
 
 			m_Markers.Remove( i );
 
@@ -619,22 +537,18 @@ class UIActionMap: UIActionBase
 	{
 		m_FlushScheduled = false;
 
-		//! Only now is it known whether the hovered marker survived the
-		//! ClearLayer/AddMarker cycle under the same id. If it did not, its
-		//! widget was never going to fire a real MOUSE_LEAVE (the cursor never
-		//! left it, it just stopped existing), so the host has to be told here
-		//! or its hover card would stay open forever.
+		//! Only now is it known whether the hovered marker survived the ClearLayer/AddMarker
+		//! cycle. If not, its widget never fires a real MOUSE_LEAVE (it just stopped
+		//! existing), so the host is told here or its hover card would stay open forever.
 		if ( m_HoveredMarkerId != "" && !m_ById.Contains( m_HoveredMarkerId ) )
 			NotifyMarkerHoverLeave( m_HoveredMarkerId );
 
 		m_ParkedWidgets.Clear();
 	}
 
-	//! Reposition every marker widget to match the map's current pan/zoom, and
-	//! spin whichever ring is selected. The host calls this once a frame -
-	//! skipped whenever the view has not moved, so it stays cheap at any
-	//! marker count. See JMVehiclesForm.Update() for the pattern this is
-	//! lifted from.
+	//! Reposition every marker widget to match the map's pan/zoom and spin the selected
+	//! ring. The host calls this once a frame; skipped when the view has not moved, so
+	//! it stays cheap. Pattern lifted from JMVehiclesForm.Update().
 	void TickMarkers()
 	{
 		if ( !m_Map )
@@ -721,11 +635,8 @@ class UIActionMap: UIActionBase
 		CallEvent( UIEvent.MOUSE_LEAVE );
 	}
 
-	//! Screen point -> world point, snapped to the ground.
-	//!
-	//! ScreenToMap answers a position at map height, which is not a place a
-	//! player can stand; every caller wanted the ground under it, so the snap
-	//! is done here rather than in four places.
+	//! Screen point -> world point, snapped to the ground. ScreenToMap answers at map
+	//! height, which is not a place a player can stand, so the snap is done here.
 	vector ScreenToWorld( int x, int y )
 	{
 		if ( !m_Map )
@@ -765,11 +676,8 @@ class UIActionMap: UIActionBase
 		return best;
 	}
 
-	//! Presses, not clicks.
-	//!
-	//! MapWidget is not a ButtonWidget and never raises OnClick, so the press is
-	//! the only event there is. It is also what lets a right press be reported
-	//! at all, which OnClick has no way to express.
+	//! Presses, not clicks. MapWidget is not a ButtonWidget and never raises OnClick;
+	//! the press is the only event, and the only way to report a right press.
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{
 		if ( w != m_Map )

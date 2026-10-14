@@ -1,12 +1,7 @@
-//! "Players" mode of JMRoleManagerForm - the online-player roster and the
-//! per-player role/name-restriction editor. Back-reference to the owning
-//! form, same shape as JMPlayerRowWidget.Menu. See
-//! JMRoleManagerFormTabRoles.c's header for why RoleManager splits by mode
-//! rather than by lazy tab container.
-//!
-//! ConfirmRoleNameRestriction stays on the FORM, not here - JMConfirmation
-//! dispatches its named callbacks against whatever object its window was
-//! Init()'d with, not against whichever object raised the popup.
+//! "Players" mode of JMRoleManagerForm - online-player roster and per-player
+//! role/name-restriction editor (see JMRoleManagerFormTabRoles.c for the mode
+//! split). ConfirmRoleNameRestriction stays on the FORM: JMConfirmation
+//! dispatches callbacks to the object its window was Init()'d with.
 class JMRoleManagerFormTabPlayers: JMFormTab
 {
 	protected JMRoleManagerForm m_Form;

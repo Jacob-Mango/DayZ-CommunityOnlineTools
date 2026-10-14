@@ -206,12 +206,9 @@ modded class JMModuleBase
 		return false;
 	}
 
-	//! Opt-in flood gate: it only runs for a module whose OnRPC() calls
-	//! super.OnRPC(). That is deliberately NOT the norm - one click routinely
-	//! sends a burst of RPCs to a module (the Player tab's Apply sends up to
-	//! seven back to back), and a blanket limit would silently drop all but the
-	//! first. For a handler that costs disk or HTTP use JMRPCThrottle, which is
-	//! keyed per action instead of per module.
+	//! Opt-in flood gate: runs only if OnRPC() calls super.OnRPC(). Deliberately not the norm: one
+	//! click can send a burst (Player Apply sends up to seven) and a blanket limit would drop all
+	//! but the first. For handlers costing disk or HTTP use JMRPCThrottle (per action).
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
 		if ( IsMissionHost() && IsRateLimited( sender ) )
@@ -324,15 +321,10 @@ modded class JMModuleBase
 		m_Webhook.Post( GetModuleName() + type, msg );
 	}
 
-	//! Declare this module's permissions. Called on BOTH client and server as the
-	//! module is registered, before the mission loads, so a permission declared
-	//! here exists on both sides - which is what the permission sync needs.
-	//! Override and call JMPermissions.Register( JMConstants.PERM_X ) for each;
-	//! there is no need to do it from the constructor any more.
-	//!
-	//! The base declares the view permission and every permission the module's JMModuleInfo and
-	//! its actions name, so a module that describes itself declares nothing here. A module that
-	//! overrides this must call super to keep them.
+	//! Declare this module's permissions. Called on BOTH client and server at registration, before
+	//! the mission loads (the permission sync needs that). Override and call JMPermissions.Register().
+	//! The base declares the view permission and all those named by JMModuleInfo and its actions;
+	//! an override must call super to keep them.
 	void DeclarePermissions()
 	{
 		JMModuleInfo info = GetModuleInfo();

@@ -1,24 +1,7 @@
-// =============================================================================
-//  UIActionConfirmInline
-//
-//  A button that, when clicked, morphs into Confirm + Cancel split buttons
-//  for a configurable timeout (default 4 s).  If the user does not confirm,
-//  it reverts automatically.  Fires UIEvent.CLICK on the initial press,
-//  UIEvent.CHANGE on confirmed, and nothing on cancel/timeout.
-//
-//  The confirm/cancel labels default to "Confirm" / "Cancel" but can be
-//  overridden with SetConfirmLabel() / SetCancelLabel().
-//
-//  Usage:
-//      m_DeleteBtn = UIActionManager.CreateConfirmInline( parent, "Delete Vehicle",
-//          this, "OnConfirm_Delete" );
-//
-//      void OnConfirm_Delete( UIEvent eid, UIActionBase action )
-//      {
-//          if ( eid == UIEvent.CHANGE )
-//              Exec_DeleteVehicle();
-//      }
-// =============================================================================
+//  UIActionConfirmInline - a button that morphs into Confirm + Cancel for a timeout (default
+//  4 s) and reverts if not confirmed. Fires UIEvent.CLICK on the initial press, UIEvent.CHANGE
+//  on confirm, nothing on cancel/timeout: run the action only when eid == UIEvent.CHANGE.
+//  Labels default to "Confirm" / "Cancel"; override with SetConfirmLabel() / SetCancelLabel().
 class UIActionConfirmInline: UIActionBase
 {
 	protected ButtonWidget m_BtnAction;
@@ -41,12 +24,9 @@ class UIActionConfirmInline: UIActionBase
 	protected float m_Timer;
 	protected float m_TimeoutSeconds;
 
-	//! Set by CenterIcon(); re-applied every frame from ApplyIconCenter()
-	//! rather than computed once, because action_button's real pixel size
-	//! is not known on the frame CenterIcon() is called - a caller sizing
-	//! the button with SetFixedSize() right before CenterIcon() gets that
-	//! size back from GetScreenSize() only after the engine has laid it
-	//! out at least once.
+	//! Set by CenterIcon(); re-applied every frame from ApplyIconCenter() because
+	//! action_button's real pixel size is only known after the engine has laid it out
+	//! at least once, not on the frame CenterIcon() is called.
 	protected bool m_CenterIconRequested;
 	protected int  m_CenterIconPx;
 
@@ -157,13 +137,9 @@ class UIActionConfirmInline: UIActionBase
 			m_ActionText.SetTextOffset( LABEL_OFFSET_ICON, 0 );
 	}
 
-	// Position the icon at the geometric center of the button. Use after
-	// SetFixedSize when the action text is empty (icon-only mode); the
-	// default layout positions the icon at the left to flank the text.
-	// iconSize is the square the icon itself is drawn at; the button's own
-	// size is read back live every frame (see ApplyIconCenter) rather than
-	// taken as a parameter, since a caller's own SetFixedSize() call right
-	// before this one has not necessarily been laid out yet.
+	// Center the icon in the button; use after SetFixedSize when the action text is empty
+	// (icon-only mode). iconSize is the icon's square; the button size is read back live
+	// every frame (see ApplyIconCenter) since a just-called SetFixedSize() is not yet laid out.
 	void CenterIcon( int buttonSizeUnused = 32, int iconSize = 16 )
 	{
 		if ( !m_Icon )
@@ -171,12 +147,9 @@ class UIActionConfirmInline: UIActionBase
 
 		m_Icon.SetSize( iconSize, iconSize );
 
-		//! action_icon is declared halign left_ref in the layout - clearing
-		//! the exact-position flags (as this used to do) turns its position
-		//! into a FRACTION of the button instead of centering it, since
-		//! nothing here ever switches the anchor to center_ref. left_ref
-		//! plus an exact pixel offset centers it just as well and does not
-		//! depend on an anchor this widget was never given.
+		//! action_icon is halign left_ref in the layout: clearing the exact-position flags would
+		//! turn its position into a FRACTION of the button, not center it. left_ref plus an
+		//! exact pixel offset centers it without needing a center_ref anchor.
 		m_Icon.SetFlags( WidgetFlags.HEXACTPOS | WidgetFlags.VEXACTPOS, true );
 
 		m_CenterIconPx = iconSize;
@@ -184,11 +157,9 @@ class UIActionConfirmInline: UIActionBase
 		ApplyIconCenter();
 	}
 
-	//! Re-centers the icon against action_button's actual current pixel
-	//! size. Called once from CenterIcon() and again every frame from
-	//! Update() until it has something real to measure - GetScreenSize()
-	//! reads 0 on the frame a widget is first sized, the same reason
-	//! UIActionCard seeds tall and shrinks once it can measure itself.
+	//! Re-centers the icon against action_button's current pixel size. Called from CenterIcon()
+	//! and every frame from Update() until it can measure: GetScreenSize() reads 0 on the frame
+	//! a widget is first sized (same reason UIActionCard seeds tall).
 	protected void ApplyIconCenter()
 	{
 		if ( !m_CenterIconRequested || !m_Icon || !m_BtnAction )

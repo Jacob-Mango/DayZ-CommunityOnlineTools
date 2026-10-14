@@ -1,20 +1,7 @@
-// =============================================================================
-//  JMPropertyHistoryEntry
-//
-//  Base for "one number on one object was changed": health, quantity, liquid
-//  type, fuel. A subclass says how to write one value (Apply) and what to
-//  call it; this class supplies the before/after bookkeeping, the Undo/Redo
-//  pair, and the merge that folds a burst of edits to the same property (a
-//  slider dragged through ten values) into one step.
-//
-//  Construct it AFTER the change with both values - `after` should be read
-//  back from the object, not taken from the request, so any clamping the
-//  action applied is what redo replays:
-//
-//      float before = target.GetHealth( "", "" );
-//      ... apply the change ...
-//      JMActionHistory.Push( new JMHealthHistoryEntry( target, before, target.GetHealth( "", "" ) ), owner );
-// =============================================================================
+// JMPropertyHistoryEntry - base for "one number on one object was changed" (health,
+// quantity, fuel). A subclass writes one value (Apply) and names it; this supplies
+// before/after bookkeeping, Undo/Redo and the merge of bursts of edits (a dragged slider).
+// Construct AFTER the change, reading `after` back from the object so clamping is replayed.
 class JMPropertyHistoryEntry: JMActionHistoryEntry
 {
 	//! Edits to the same property of the same object closer together than this
