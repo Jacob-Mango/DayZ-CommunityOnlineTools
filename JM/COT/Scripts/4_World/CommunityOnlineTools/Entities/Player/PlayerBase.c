@@ -138,7 +138,7 @@ modded class PlayerBase
 		//! an admin teleport, a spectate exit, a vehicle unstuck. Tell the
 		//! anti-cheat so the next position sample is discarded instead of
 		//! being read as a several-kilometre jump.
-		COT_ReportEngineMove();
+		COT_GrantMove();
 	}
 
 	override void Init()
@@ -626,10 +626,10 @@ modded class PlayerBase
 	//! Because this sits on PlayerBase.SetWorldPosition, ANY mod that teleports
 	//! a player through that method is covered without knowing COT exists. Mods
 	//! that move a player some other way - a raw SetPosition, a sync juncture -
-	//! should call COT_SanctionAction themselves.
-	void COT_ReportEngineMove()
+	//! should call COT_GrantAction themselves.
+	void COT_GrantMove()
 	{
-		COT_SanctionAction(JMAntiCheatSanction.MOVEMENT, JMAntiCheatSanction.MoveGraceSeconds);
+		COT_GrantAction(JMAntiCheatSanction.MOVEMENT, JMAntiCheatSanction.MoveGraceSeconds);
 	}
 
 	//! Declare that the server is about to do something to this player that an
@@ -638,7 +638,7 @@ modded class PlayerBase
 	//! This is how a scripted action is told apart from a cheat: not by who the
 	//! player is, but by whether our own code announced the action. See
 	//! JMAntiCheatSanction for the buckets.
-	void COT_SanctionAction(string bucket, float seconds)
+	void COT_GrantAction(string bucket, float seconds)
 	{
 		if (!g_Game || !g_Game.IsServer())
 			return;
@@ -1413,7 +1413,7 @@ modded class PlayerBase
 		//! The position history is keyed by guid, not by character, so without
 		//! this the first sample after respawning reads as a teleport from
 		//! wherever this character died.
-		COT_ReportEngineMove();
+		COT_GrantMove();
 	}
 
 	override void EEHitBy(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)
