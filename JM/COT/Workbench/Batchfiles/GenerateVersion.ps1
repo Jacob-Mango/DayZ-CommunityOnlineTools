@@ -8,7 +8,10 @@
     mod can know its own version is for that version to be a compiled-in
     constant. This script generates that constant.
 
-    It writes two files, both generated - never hand-edit either:
+    It writes two files, both generated - never hand-edit either, and also
+    updates the COT_<year>_<month><day> entry in the CfgMods defines[] of
+    Scripts/config.cpp in place (that file is hand-maintained otherwise, only
+    the version define is touched):
 
       Scripts/Data/Version.hpp                      the plain version string,
                                                     which CfgMods.versionPath
@@ -54,6 +57,7 @@ $repoRoot    = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $versionFile = Join-Path $repoRoot 'Workbench\version'
 $hppFile     = Join-Path $repoRoot 'Scripts\Data\Version.hpp'
 $buildInfoC  = Join-Path $repoRoot 'Scripts\3_Game\CommunityOnlineTools\JMBuildInfo.c'
+$configCpp   = Join-Path $repoRoot 'Scripts\config.cpp'
 
 # --- version number -----------------------------------------------------------
 
@@ -193,6 +197,27 @@ class JMBuildInfo
 New-Item -ItemType Directory -Force -Path (Split-Path $buildInfoC) | Out-Null
 Set-Content -Path $buildInfoC -Value $enforce -Encoding ascii
 
+# --- config.cpp version define ------------------------------------------------
+
+# "COT_<year>_<month><day>" in CfgMods defines[], e.g. COT_2026_1014. Edited in
+# place with a Latin-1 round trip so the file's line endings and bytes are
+# preserved, and only written back when the value actually changed.
+$versionDefine = "COT_$($now.Year)_$($now.ToString('MMdd'))"
+$configBytes   = [System.IO.File]::ReadAllBytes($configCpp)
+$latin1        = [System.Text.Encoding]::GetEncoding(28591)
+$configText    = $latin1.GetString($configBytes)
+$defineRegex   = '"COT_\d{4}_\d{4}"'
+
+if ($configText -notmatch $defineRegex) {
+    throw "config.cpp has no `"COT_<year>_<month><day>`" entry in CfgMods defines[] to update: $configCpp"
+}
+
+$newConfigText = [regex]::Replace($configText, $defineRegex, "`"$versionDefine`"")
+if ($newConfigText -ne $configText) {
+    [System.IO.File]::WriteAllBytes($configCpp, $latin1.GetBytes($newConfigText))
+}
+
 Write-Host "[version] $displayVersion  channel=$Channel  commit=$commit  branch=$branch  dirty=$dirty"
 Write-Host "[version] wrote $hppFile"
 Write-Host "[version] wrote $buildInfoC"
+Write-Host "[version] define $versionDefine in $configCpp"
