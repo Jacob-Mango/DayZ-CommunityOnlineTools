@@ -544,13 +544,8 @@ class JMObjectSpawnerForm: JMFormBase
 				dBodyDynamic(m_PreviewItem, false);
 				m_PreviewItem.DisableSimulation(true);
 
-				// Give the preview entity the same attachment pass the spawn
-				// itself would run, so a weapon shows its optic and magazine and
-				// a vehicle its parts instead of a stripped model that never
-				// matches what actually lands in the world.
-				PlayerBase previewOwner = PlayerBase.Cast( g_Game.GetPlayer() );
-				if ( previewOwner )
-					m_Module.SetupEntityForMode( m_PreviewItem, previewOwner, m_Module.m_ObjSetupMode );
+				//! XXX: Do NOT try to use OnDebugSpawn, SetupEntityForMode, SpawnCompatibleAttachments etc here,
+				//! it's unsafe to run on client and also slows down scrolling through the list of items
 
 				m_ItemPreview.SetItem( m_PreviewItem );
 
