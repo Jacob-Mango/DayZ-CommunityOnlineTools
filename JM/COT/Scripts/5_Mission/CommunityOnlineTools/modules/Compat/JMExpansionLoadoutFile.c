@@ -28,7 +28,12 @@ class JMExpansionLoadoutFile
 
 		ExpansionPrefab parsed = new ExpansionPrefab();
 		string errorMsg;
-		if ( !JsonFileLoader<ExpansionPrefab>.MakeData( parsed, content, errorMsg ) )
+		if ( !JsonFileLoader<ExpansionPrefab>.LoadData( content, parsed, errorMsg ) )
+			return false;
+
+		//! Since LoadData will happily read any JSON file, we need a way to check if this is a valid loadout
+		//! If all the member arrays are empty, we consider the loadout invalid
+		if ( parsed.InventoryAttachments.Count() == 0 && parsed.InventoryCargo.Count() == 0 && parsed.ConstructionPartsBuilt.Count() == 0 && parsed.Sets.Count() == 0 )
 			return false;
 
 		prefab = parsed;

@@ -158,7 +158,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	void SpawnCursor( string Loadout, vector position )
 	{
-		if ( IsMissionClient() )
+		if ( g_Game.IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( Loadout );
@@ -226,7 +226,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	void SpawnPlayers( string Loadout, array< string > guids )
 	{
-		if ( IsMissionClient() )
+		if ( g_Game.IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( Loadout );
@@ -329,7 +329,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	void SpawnTarget( string Loadout, EntityAI ent )
 	{
-		if ( IsMissionClient() )
+		if ( g_Game.IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( Loadout );
@@ -584,6 +584,21 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	void Create(string name)
 	{
+		if ( !g_Game.IsMultiplayer() )
+		{
+			set< Object > objects = new set< Object >;
+			set< ref JMSelectedObject > selectedObjs = JM_GetSelected().GetObjects();
+
+			foreach ( JMSelectedObject selectedObj: selectedObjs )
+			{
+				if ( selectedObj.obj )
+					objects.Insert( selectedObj.obj );
+			}
+			
+			Exec_Create( name, objects, GetPermissionsManager().GetClientPlayer() );
+			return;
+		}
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( name );
 		JM_GetSelected().SerializeObjects( rpc );
@@ -620,14 +635,11 @@ class JMLoadoutModule: JMRenderableModuleBase
 		int count = objects.Count();
 		for(int i=0; i < count; i++)
 		{
-			if (count != 0)
-			{
-				avgPos[0] = avgPos[0] + objects[i].GetPosition()[0];
-				avgPos[2] = avgPos[2] + objects[i].GetPosition()[2];
+			avgPos[0] = avgPos[0] + objects[i].GetPosition()[0];
+			avgPos[2] = avgPos[2] + objects[i].GetPosition()[2];
 
-				if (objects[i].GetPosition()[1] < avgPos[1] || avgPos[1] == 0)
-					avgPos[1] = objects[i].GetPosition()[1];
-			}
+			if (objects[i].GetPosition()[1] < avgPos[1] || avgPos[1] == 0)
+				avgPos[1] = objects[i].GetPosition()[1];
 
 			EntityAI parent;
 			if (Class.CastTo(parent, objects[i]))
@@ -638,11 +650,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 		if (count > 0)
 		{
-			if (count != 0)
-			{
-				avgPos[0] = avgPos[0] / count;
-				avgPos[2] = avgPos[2] / count;
-			}
+			avgPos[0] = avgPos[0] / count;
+			avgPos[2] = avgPos[2] / count;
 
 			foreach(EntityAI prnt: parents)
 				loadouts.Insert(LoadoutProcessItem(prnt, avgPos - prnt.GetPosition(), prnt.GetOrientation()));
@@ -651,7 +660,6 @@ class JMLoadoutModule: JMRenderableModuleBase
 				loadouts.Insert(LoadoutProcessObject(obj, avgPos - obj.GetPosition(), obj.GetOrientation()));
 
 			JMLoadout loadout = new JMLoadout;
-			loadout.m_Items = new array< ref JMLoadoutItem >;
 			loadout.m_Items = loadouts;
 			loadout.m_IsLocalPosition = true;			
 			
