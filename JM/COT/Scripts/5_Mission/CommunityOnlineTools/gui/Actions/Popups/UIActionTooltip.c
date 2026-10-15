@@ -42,6 +42,9 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 			m_Root.Show( false );
 		}
 
+		if ( s_InstanceRef && s_InstanceRef != this )
+			s_InstanceRef.m_Root = null;
+
 		s_Instance    = this;
 		s_InstanceRef = this;
 
