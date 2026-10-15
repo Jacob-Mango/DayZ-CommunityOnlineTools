@@ -1249,7 +1249,7 @@ class JMESPActionMenu
 			Add( PREFIX_ACTION + "copyclassnameatts", "#STR_COT_ESP_MODULE_MENU_COPY_CLASSNAMES", JMConstants.Lucide( "list-tree" ) );
 			Add( PREFIX_ACTION + "copyxml",       "#STR_COT_ESP_MODULE_MENU_COPY_XML",       JMConstants.Lucide( "code-xml" ) );
 			Add( PREFIX_ACTION + "copyspawnable", "#STR_COT_ESP_MODULE_MENU_COPY_SPAWNABLE", JMConstants.Lucide( "file-code" ) );
-			Add( PREFIX_ACTION + "copyexpansion", "#STR_COT_ESP_MODULE_MENU_COPY_EXPANSION", JMConstants.Lucide( "map-pin" ) );
+			Add( PREFIX_ACTION + "copyexpansion", "#STR_COT_ESP_MODULE_EXPORT_MAP", JMConstants.Lucide( "map-pin" ) );
 #ifdef DZ_Expansion_Core
 			Add( PREFIX_ACTION + "copyloadout",   "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_EXPLOADOUT",   JMConstants.Lucide( "box" ) );
 #endif
