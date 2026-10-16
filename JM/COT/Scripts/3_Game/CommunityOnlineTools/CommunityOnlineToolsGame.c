@@ -122,3 +122,5 @@ static CommunityOnlineToolsGame GetCOTGame()
 {
 	return g_cotGame;
 }
+
+typedef CommunityOnlineToolsGame COTGame;
