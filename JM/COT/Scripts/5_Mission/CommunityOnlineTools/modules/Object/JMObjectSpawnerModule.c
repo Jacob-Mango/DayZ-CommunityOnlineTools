@@ -1250,8 +1250,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					if (g_Game.ConfigIsExisting(path + " Nutrition"))
 						continue;
 
-					TStringArray inv_slots = {};
-					g_Game.ConfigGetTextArray(path + " inventorySlot", inv_slots);
+					TStringArray inv_slots = g_Game.COT_GetInventorySlots(path);
 
 					foreach (string inv_slot: inv_slots)
 					{
@@ -1445,8 +1444,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					if (g_Game.ConfigIsExisting(path + " Nutrition"))
 						continue;
 
-					array<string> inv_slots = new array<string>;
-					g_Game.ConfigGetTextArray(path + " inventorySlot", inv_slots);
+					array<string> inv_slots = g_Game.COT_GetInventorySlots(path);
 
 					foreach (string inv_slot: inv_slots)
 					{

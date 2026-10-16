@@ -117,8 +117,7 @@ modded class MissionGameplay
 
 					if (!knife)
 					{
-						TStringArray inventorySlot = {};
-						child.ConfigGetTextArray("inventorySlot", inventorySlot);
+						TStringArray inventorySlot = g_Game.COT_GetInventorySlots(child);
 						foreach (string slotName: inventorySlot)
 						{
 							slotName.ToLower();

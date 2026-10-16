@@ -138,8 +138,7 @@ class JMESPActionMenu
 				if ( !g_Game.ConfigGetText( path + " displayName", displayName ) || displayName == "" || displayName.IndexOf("$UNT$") > -1 )
 					continue;
 
-				array<string> invSlots = new array<string>();
-				g_Game.ConfigGetTextArray( path + " inventorySlot", invSlots );
+				array<string> invSlots = g_Game.COT_GetInventorySlots( path );
 
 				foreach ( string invSlot : invSlots )
 				{
@@ -1107,6 +1106,9 @@ class JMESPActionMenu
 
 			string slotName = InventorySlots.GetSlotDisplayName( slotId );
 			EntityAI attached = target.GetInventory().FindAttachment( slotId );
+
+			if ( attached && ( attached.GetFlags() & EntityFlags.VISIBLE ) == 0 )
+				continue;  //! Ignore slot if attached entity is invisible
 
 			string label = slotName + ": ";
 			if ( attached )
