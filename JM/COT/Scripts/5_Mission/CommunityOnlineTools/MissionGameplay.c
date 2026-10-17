@@ -37,6 +37,9 @@ modded class MissionGameplay
 
 	void OfflineMissionStart()
 	{
+		if (g_Game.GetPlayer())
+			return;  //! Looks like mission init.c already created a character
+
 		vector position = GetSpawnPoints().GetRandomElement();
 
 		JsonDataContaminatedAreas effectAreaData = EffectAreaLoader.GetData();
