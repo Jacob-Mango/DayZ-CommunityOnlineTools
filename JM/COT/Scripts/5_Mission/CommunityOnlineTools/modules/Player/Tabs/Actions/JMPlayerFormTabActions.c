@@ -29,7 +29,7 @@ class JMPlayerFormTabActions: JMFormTab
 	UIActionButton m_DiseaseAdd;
 	UIActionButton m_DiseaseRemove;
 	UIActionImageButton m_DiseaseClear;
-	ref array< int > m_DiseaseAgentIds;
+	ref array< int > m_DiseaseAgentIds = {};
 
 	// Bleed-from-body-part controls
 	UIActionDropdown m_BleedingPart;
@@ -169,18 +169,6 @@ class JMPlayerFormTabActions: JMFormTab
 
 		UIActionCard section0Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_DISEASES_HEADER" );
 		Widget section0 = section0Card.GetContent();
-		// Static agent id list mirrors PluginTransmissionAgents eAgents bitmask
-		m_DiseaseAgentIds = {
-			eAgents.CHOLERA,
-			eAgents.INFLUENZA,
-			eAgents.SALMONELLA,
-			eAgents.BRAIN,
-			eAgents.FOOD_POISON,
-			eAgents.CHEMICAL_POISON,
-			eAgents.WOUND_AGENT,
-			eAgents.NERVE_AGENT,
-			eAgents.HEAVYMETAL
-		};
 
 		// Dropdown shows each disease with a green or red icon depending on whether the
 		// currently selected player is infected. Click "Add" to inject, "Remove" to clear.
@@ -713,16 +701,19 @@ class JMPlayerFormTabActions: JMFormTab
 		int prevSel = m_DiseaseAgent.GetSelection();
 
 		m_DiseaseAgent.ClearEntries();
+		m_DiseaseAgentIds.Clear();
 
 		TStringArray names = {};
 		map<string, int> agentsNamed = new map<string, int>;
+		map<string, int> agentIds = new map<string, int>;
 		int agentCount;
+		int agentId;
 
 		typename e = eAgents;
 		int count = e.GetVariableCount();
 		for (int i = 0, j = 0; i < count; ++i)
 		{
-			if (e.GetVariableType(i) == int)
+			if (e.GetVariableType(i) == int && e.GetVariableValue(null, i, agentId))
 			{
 				string name = e.GetVariableName(i);
 
@@ -733,6 +724,7 @@ class JMPlayerFormTabActions: JMFormTab
 
 				names.Insert(name);
 				agentsNamed[name] = agentCount;
+				agentIds[name] = agentId;
 			}
 		}
 
@@ -758,6 +750,7 @@ class JMPlayerFormTabActions: JMFormTab
 			}
 
 			m_DiseaseAgent.AddEntry( string.Format("#STR_COT_PLAYER_MODULE_DISEASE_NAME_%1 (%2)", agentName, agentCount), icon, colour );
+			m_DiseaseAgentIds.Insert(agentIds[agentName]);
 		}
 
 		// Restore prior selection without firing CHANGE (which would also close the popup).
