@@ -958,10 +958,10 @@ class JMPlayerForm: JMFormBase
 			m_TabActionsCtrl.BanPlayerSingle( confirmation );
 	}
 
-	void OnDiseaseMaskUpdated( string guid, int cholera, int influenza, int salmonella, int brain, int foodPoison, int chemPoison, int wound, int nerve, int heavyMetal )
+	void OnDiseaseMaskUpdated( string guid, TIntArray agentCounts )
 	{
 		if ( m_TabActionsCtrl )
-			m_TabActionsCtrl.OnDiseaseMaskUpdated( guid, cholera, influenza, salmonella, brain, foodPoison, chemPoison, wound, nerve, heavyMetal );
+			m_TabActionsCtrl.OnDiseaseMaskUpdated( guid, agentCounts );
 	}
 
 	void OnBleedingStateUpdated( string guid, array< string > names, array< int > bits, int bleedingBits, array< int > activePartIndices )

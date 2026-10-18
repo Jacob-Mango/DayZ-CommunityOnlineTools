@@ -189,7 +189,7 @@ class JMPlayerFormTabActions: JMFormTab
 		m_DiseaseAgent.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_DISEASE_AGENT" );
 
 		// Default-state rows: all green (no data until selection pushes mask)
-		RebuildDiseaseDropdown( 0, 0, 0, 0, 0, 0, 0, 0, 0 );
+		RebuildDiseaseDropdown();
 
 		// Add/Remove act on the dropdown's agent, so they stay under it. Clear-all
 		// wipes the card, so it is a title-bar icon button (caption is its tooltip).
@@ -690,7 +690,7 @@ class JMPlayerFormTabActions: JMFormTab
 
 	// ---------------- Disease dropdown rebuild ----------------
 
-	void RebuildDiseaseDropdown( int cholera, int influenza, int salmonella, int brain, int foodPoison, int chemPoison, int wound, int nerve, int heavyMetal )
+	void RebuildDiseaseDropdown( TIntArray agentCounts = null )
 	{
 		// Arrives from a server response, which does not wait for the Actions
 		// tab to have been opened.
@@ -714,37 +714,39 @@ class JMPlayerFormTabActions: JMFormTab
 
 		m_DiseaseAgent.ClearEntries();
 
-		// (count, label, agentId)
-		int counts[9];
-		counts[0] = cholera;
-		counts[1] = influenza;
-		counts[2] = salmonella;
-		counts[3] = brain;
-		counts[4] = foodPoison;
-		counts[5] = chemPoison;
-		counts[6] = wound;
-		counts[7] = nerve;
-		counts[8] = heavyMetal;
+		TStringArray names = {};
+		map<string, int> agentsNamed = new map<string, int>;
+		int agentCount;
 
-		string labels[9];
-		labels[0] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_CHOLERA";
-		labels[1] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_INFLUENZA";
-		labels[2] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_SALMONELLA";
-		labels[3] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_BRAIN_KURU";
-		labels[4] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_FOOD_POISONING";
-		labels[5] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_CHEMICAL_POISONING";
-		labels[6] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_WOUND_INFECTION";
-		labels[7] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_NERVE_AGENT";
-		labels[8] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_HEAVY_METAL_POISONING";
+		typename e = eAgents;
+		int count = e.GetVariableCount();
+		for (int i = 0, j = 0; i < count; ++i)
+		{
+			if (e.GetVariableType(i) == int)
+			{
+				string name = e.GetVariableName(i);
+
+				if (agentCounts && j < agentCounts.Count())
+					agentCount = agentCounts[j++];
+				else
+					agentCount = 0;
+
+				names.Insert(name);
+				agentsNamed[name] = agentCount;
+			}
+		}
+
+		names.Sort();
 
 		int COLOR_OK = ARGB(255, 73, 184, 117);   // green = not infected
 		int COLOR_BAD = ARGB(255, 217, 90, 90);  // red = infected
 
-		for ( int i = 0; i < 9; i++ )
+		foreach (string agentName: names)
 		{
+			agentCount = agentsNamed[agentName];
 			string icon;
 			int colour;
-			if ( counts[i] > 0 )
+			if ( agentCount > 0 )
 			{
 				icon = JMConstants.ICON_HEALTH_DECREASE;
 				colour = COLOR_BAD;
@@ -755,13 +757,13 @@ class JMPlayerFormTabActions: JMFormTab
 				colour = COLOR_OK;
 			}
 
-			m_DiseaseAgent.AddEntry( labels[i] + " (" + counts[i].ToString() + ")", icon, colour );
+			m_DiseaseAgent.AddEntry( string.Format("#STR_COT_PLAYER_MODULE_DISEASE_NAME_%1 (%2)", agentName, agentCount), icon, colour );
 		}
 
 		// Restore prior selection without firing CHANGE (which would also close the popup).
 		// If prior selection was -1 or out of range, fall back to 0.
 		int restore = prevSel;
-		if ( restore < 0 || restore >= 9 )
+		if ( restore < 0 || restore >= agentsNamed.Count() )
 			restore = 0;
 		m_DiseaseAgent.SetSelection( restore, false );
 
@@ -773,10 +775,10 @@ class JMPlayerFormTabActions: JMFormTab
 	}
 
 	// Called from the module when the server pushes the selected player's mask.
-	void OnDiseaseMaskUpdated( string guid, int cholera, int influenza, int salmonella, int brain, int foodPoison, int chemPoison, int wound, int nerve, int heavyMetal )
+	void OnDiseaseMaskUpdated( string guid, TIntArray agentCounts )
 	{
 		if ( guid == m_Form.m_LastSelectedGuid )
-			RebuildDiseaseDropdown( cholera, influenza, salmonella, brain, foodPoison, chemPoison, wound, nerve, heavyMetal );
+			RebuildDiseaseDropdown( agentCounts );
 	}
 
 	// Called from the module when the server pushes the selected player's

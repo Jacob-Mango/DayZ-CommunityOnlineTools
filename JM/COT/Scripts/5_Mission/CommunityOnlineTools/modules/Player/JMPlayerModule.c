@@ -3029,19 +3029,20 @@ class JMPlayerModule: JMRenderableModuleBase
 		int cholera, influenza, salmonella, brain, foodPoison, chemPoison, wound, nerve, heavyMetal;
 
 		if ( !ctx.Read( maskGuid ) )    return;
-		if ( !ctx.Read( cholera ) )     return;
-		if ( !ctx.Read( influenza ) )   return;
-		if ( !ctx.Read( salmonella ) )  return;
-		if ( !ctx.Read( brain ) )       return;
-		if ( !ctx.Read( foodPoison ) )  return;
-		if ( !ctx.Read( chemPoison ) )  return;
-		if ( !ctx.Read( wound ) )       return;
-		if ( !ctx.Read( nerve ) )       return;
-		if ( !ctx.Read( heavyMetal ) )  return;
-
+		
+		typename e = eAgents;
+		int count;
+		if ( !ctx.Read( count ) || count < 0 || count > e.GetVariableCount() )    return;
+		TIntArray agentCounts = {};
+		while (count--)
+		{
+			int agentCount;
+			if ( !ctx.Read( agentCount ) )    return;
+			agentCounts.Insert(agentCount);
+		}
 		JMPlayerForm form;
 		if ( Class.CastTo( form, GetForm() ) )
-			form.OnDiseaseMaskUpdated( maskGuid, cholera, influenza, salmonella, brain, foodPoison, chemPoison, wound, nerve, heavyMetal );
+			form.OnDiseaseMaskUpdated( maskGuid, agentCounts );
 	}
 
 	protected void SendDiseaseMaskTo( PlayerIdentity to, string guid )
@@ -3049,6 +3050,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		int mask = 0;
 		int cholera = 0, influenza = 0, salmonella = 0, brain = 0;
 		int foodPoison = 0, chemPoison = 0, wound = 0, nerve = 0, heavyMetal = 0;
+
+		TIntArray agentCounts = {};
 
 		if ( guid != "" )
 		{
@@ -3058,30 +3061,25 @@ class JMPlayerModule: JMRenderableModuleBase
 				PlayerBase player = PlayerBase.Cast( players[0].PlayerObject );
 				if ( player )
 				{
-					cholera    = player.COTGetAgentCount( eAgents.CHOLERA );
-					influenza  = player.COTGetAgentCount( eAgents.INFLUENZA );
-					salmonella = player.COTGetAgentCount( eAgents.SALMONELLA );
-					brain      = player.COTGetAgentCount( eAgents.BRAIN );
-					foodPoison = player.COTGetAgentCount( eAgents.FOOD_POISON );
-					chemPoison = player.COTGetAgentCount( eAgents.CHEMICAL_POISON );
-					wound      = player.COTGetAgentCount( eAgents.WOUND_AGENT );
-					nerve      = player.COTGetAgentCount( eAgents.NERVE_AGENT );
-					heavyMetal = player.COTGetAgentCount( eAgents.HEAVYMETAL );
+					typename e = eAgents;
+					int count = e.GetVariableCount();
+					int val;
+					for (int i = 0; i < count; ++i)
+					{
+						if (e.GetVariableType(i) == int && e.GetVariableValue(null, i, val))
+							agentCounts.Insert(player.COTGetAgentCount( val ));
+					}
 				}
 			}
 		}
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( guid );
-		rpc.Write( cholera );
-		rpc.Write( influenza );
-		rpc.Write( salmonella );
-		rpc.Write( brain );
-		rpc.Write( foodPoison );
-		rpc.Write( chemPoison );
-		rpc.Write( wound );
-		rpc.Write( nerve );
-		rpc.Write( heavyMetal );
+		rpc.Write( agentCounts.Count() );
+		foreach (int agentCount: agentCounts)
+		{
+			rpc.Write( agentCount );
+		}
 		rpc.Send( NULL, JMPlayerModuleRPC.SendDiseaseMask, true, to );
 	}
 
