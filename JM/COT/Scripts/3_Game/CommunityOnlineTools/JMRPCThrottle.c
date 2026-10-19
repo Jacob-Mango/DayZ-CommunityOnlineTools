@@ -43,16 +43,14 @@ class JMRPCThrottle
 
 		array<string> stale = new array<string>;
 
-		for ( int i = 0; i < s_NextAllowed.Count(); ++i )
+		foreach ( string key, int time: s_NextAllowed )
 		{
-			string key = s_NextAllowed.GetKey( i );
-
 			if ( key.IndexOf( guid + "|" ) == 0 )
 				stale.Insert( key );
 		}
 
-		for ( int j = 0; j < stale.Count(); ++j )
-			s_NextAllowed.Remove( stale[j] );
+		foreach ( string staleKey: stale )
+			s_NextAllowed.Remove( staleKey );
 	}
 
 	//! Drop every window that has already passed.
@@ -60,14 +58,14 @@ class JMRPCThrottle
 	{
 		array<string> expired = new array<string>;
 
-		for ( int i = 0; i < s_NextAllowed.Count(); ++i )
+		foreach ( string key, int time: s_NextAllowed )
 		{
-			if ( s_NextAllowed.GetElement( i ) <= now )
-				expired.Insert( s_NextAllowed.GetKey( i ) );
+			if ( time <= now )
+				expired.Insert( key );
 		}
 
-		for ( int j = 0; j < expired.Count(); ++j )
-			s_NextAllowed.Remove( expired[j] );
+		foreach ( string expirdedKey: expired )
+			s_NextAllowed.Remove( expirdedKey );
 
 		//! Everything is still live - the map is genuinely that busy. Emptying
 		//! it is better than growing without bound: the worst a cleared window

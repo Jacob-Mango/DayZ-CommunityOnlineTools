@@ -2982,10 +2982,10 @@ class JMESPModule: JMRenderableModuleBase
 
 		TStringArray names = new TStringArray;
 
-		for ( int i = 0; i < parts.Count(); ++i )
+		foreach (string partName, JMConstructionPartData part: parts )
 		{
-			if ( parts.GetElement( i ).m_State == JMConstructionPartState.CAN_BUILD )
-				names.Insert( parts.GetKey( i ) );
+			if ( part.m_State == JMConstructionPartState.CAN_BUILD )
+				names.Insert( partName );
 		}
 
 		if ( names.Count() == 0 )
@@ -3016,10 +3016,10 @@ class JMESPModule: JMRenderableModuleBase
 
 		TStringArray names = new TStringArray;
 
-		for ( int i = 0; i < parts.Count(); ++i )
+		foreach (string partName, JMConstructionPartData part: parts )
 		{
-			if ( parts.GetElement( i ).m_State == JMConstructionPartState.BUILT )
-				names.Insert( parts.GetKey( i ) );
+			if ( part.m_State == JMConstructionPartState.BUILT )
+				names.Insert( partName );
 		}
 
 		if ( names.Count() == 0 )
@@ -3048,10 +3048,10 @@ class JMESPModule: JMRenderableModuleBase
 
 		TStringArray names = new TStringArray;
 
-		for ( int i = 0; i < parts.Count(); ++i )
+		foreach (string partName, JMConstructionPartData part: parts )
 		{
-			if ( parts.GetElement( i ).m_State == JMConstructionPartState.BUILT )
-				names.Insert( parts.GetKey( i ) );
+			if ( part.m_State == JMConstructionPartState.BUILT )
+				names.Insert( partName );
 		}
 
 		if ( names.Count() == 0 )

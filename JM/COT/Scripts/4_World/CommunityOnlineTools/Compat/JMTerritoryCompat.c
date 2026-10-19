@@ -42,9 +42,8 @@ modded class ExpansionTerritoryModule
 		if ( !flags )
 			return;
 
-		for ( int i = 0; i < flags.Count(); i++ )
+		foreach ( int territoryID, TerritoryFlag flag: flags )
 		{
-			TerritoryFlag flag = flags.GetElement( i );
 			if ( !flag )
 				continue;
 

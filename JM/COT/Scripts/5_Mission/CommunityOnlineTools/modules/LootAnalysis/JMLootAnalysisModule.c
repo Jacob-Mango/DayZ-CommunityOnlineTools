@@ -912,10 +912,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		// Collect matching group names, each with the usage tag that matched it -
 		// that tag is what the client colours/legends the marker by.
 		map<string, string> matchingGroups = new map<string, string>;
-		for (int pi = 0; pi < m_CEProtos.Count(); pi++)
+		foreach (string protoKey, JMCEGroupProto gprProto: m_CEProtos)
 		{
-			string protoKey = m_CEProtos.GetKey(pi);
-			JMCEGroupProto gprProto = m_CEProtos.GetElement(pi);
 			if (!gprProto)
 				continue;
 
@@ -943,11 +941,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		array<vector> markerPositions = new array<vector>;
 		array<string> markerTypes = new array<string>;
 
-		for (int gi = 0; gi < matchingGroups.Count(); gi++)
+		foreach (string groupKey, string matchedUsage: matchingGroups)
 		{
-			string groupKey = matchingGroups.GetKey(gi);
-			string matchedUsage = matchingGroups.GetElement(gi);
-
 			array<vector> groupPositions;
 			if (!m_CEPositions.Find(groupKey, groupPositions) || !groupPositions)
 				continue;

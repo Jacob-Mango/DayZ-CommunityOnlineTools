@@ -858,8 +858,8 @@ class JMPlayerInstance : Managed
 			m_PlayerFile.Roles.Copy( m_Roles );
 
 			m_PlayerFile.NameRestrictions.Clear();
-			for ( int nr = 0; nr < m_RoleNameRestrictions.Count(); nr++ )
-				m_PlayerFile.NameRestrictions.Insert( m_RoleNameRestrictions.GetKey( nr ), m_RoleNameRestrictions.GetElement( nr ) );
+			foreach ( string role, string restriction: m_RoleNameRestrictions )
+				m_PlayerFile.NameRestrictions.Insert( role, restriction );
 
 			m_PlayerFile.Save();
 		}

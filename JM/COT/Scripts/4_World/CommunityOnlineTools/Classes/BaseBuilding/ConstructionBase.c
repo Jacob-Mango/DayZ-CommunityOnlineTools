@@ -45,13 +45,10 @@ modded class ConstructionBase
 
 	void COT_GetParts( out map< string, ref JMConstructionPartData > parts, bool checkMaterials = true )
 	{
-		for ( int i = 0; i < m_ConstructionParts.Count(); ++i )
+		foreach ( string part_name, ConstructionPart part: m_ConstructionParts )
 		{
-			string part_name = m_ConstructionParts.GetKey( i );
-			ConstructionPart part = m_ConstructionParts.Get( part_name );
-
-			JMConstructionPartData data = parts.Get( part_name );
-			if ( data == NULL )
+			JMConstructionPartData data;
+			if ( !parts.Find( part_name, data ) )
 			{
 				data = new JMConstructionPartData;
 				parts.Insert( part_name, data );

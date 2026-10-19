@@ -567,14 +567,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		if ( !m_PermissionControls )
 			return;
 
-		COT_ScriptedWidgetEventHandler control;
-
-		for ( int i = 0; i < m_PermissionControls.Count(); i++ )
+		foreach ( COT_ScriptedWidgetEventHandler control, string permission: m_PermissionControls )
 		{
-			control = m_PermissionControls.GetKey( i );
-
 			if ( control )
-				control.COT_ApplyPermission( m_PermissionControls.GetElement( i ) );
+				control.COT_ApplyPermission( permission );
 		}
 	}
 

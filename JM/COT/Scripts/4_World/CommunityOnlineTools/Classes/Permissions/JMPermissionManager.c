@@ -797,9 +797,9 @@ class JMPermissionManager
 		{
 			// Print( "Printing all authenticated players!" );
 
-			for ( int i = 0; i < Players.Count(); i++ )
+			foreach ( string guid, JMPlayerInstance player: Players )
 			{
-				Players.GetElement( i ).DebugPrint();
+				player.DebugPrint();
 			}
 		}
 	}

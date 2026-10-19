@@ -12,9 +12,9 @@ class JMEntityTracker
 		else
 			outClassnames.Clear();
 
-		for (int i = 0; i < m_EntitiesByType.Count(); i++)
+		foreach (string className, set<EntityAI> entities: m_EntitiesByType)
 		{
-			outClassnames.Insert(m_EntitiesByType.GetKey(i));
+			outClassnames.Insert(className);
 		}
 	}
 

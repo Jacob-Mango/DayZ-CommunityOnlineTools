@@ -20,9 +20,7 @@ class UIActionKeyValueList: UIActionBase
 	//! Get the current displayed value for a key ("" if not present).
 	string GetValue( string key )
 	{
-		if ( m_ValueStrings.Contains( key ) )
-			return m_ValueStrings.Get( key );
-		return "";
+		return m_ValueStrings[key];
 	}
 
 	//! Set or update a key/value pair; creates a row if the key is new. `icon` is

@@ -862,26 +862,9 @@ class JMESPActionMenu
 		string filter = m_PartFilter;
 		filter.ToLower();
 
-		bool filtered = false;
-
-		if ( filter != "" )
+		foreach ( string partName, JMConstructionPartData part: parts )
 		{
-			for ( int f = 0; f < parts.Count(); ++f )
-			{
-				if ( PartMatchesFilter( parts.GetElement( f ), filter ) )
-				{
-					filtered = true;
-					break;
-				}
-			}
-		}
-
-		for ( int i = 0; i < parts.Count(); ++i )
-		{
-			string partName = parts.GetKey( i );
-			JMConstructionPartData part = parts.Get( partName );
-
-			if ( filtered && !PartMatchesFilter( part, filter ) )
+			if ( filter != "" && !PartMatchesFilter( part, filter ) )
 				continue;
 
 			//! A part that conflicts with something already built cannot be

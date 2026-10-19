@@ -610,7 +610,9 @@ class JMLootAnalysisForm: JMFormBase
 	{
 		string text = "";
 
-		foreach (string key : list.GetKeys())
+		TStringArray keys = list.GetKeys();
+
+		foreach (string key : keys)
 		{
 			if (text != "")
 				text += "\n";

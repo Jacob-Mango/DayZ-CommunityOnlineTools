@@ -134,10 +134,8 @@ class JMTeleportHistory
 		//! every player on the server and fills PlayerObject for the ones this
 		//! client has loaded, so a tracked player without a local identity is
 		//! still named the same here as in the player manager.
-		for ( int i = 0; i < permissions.Players.Count(); i++ )
+		foreach ( string guid, JMPlayerInstance instance: permissions.Players )
 		{
-			JMPlayerInstance instance = permissions.Players.GetElement( i );
-
 			if ( !instance )
 				continue;
 

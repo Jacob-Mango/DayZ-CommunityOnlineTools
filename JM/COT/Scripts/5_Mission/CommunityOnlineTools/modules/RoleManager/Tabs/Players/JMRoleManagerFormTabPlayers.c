@@ -415,11 +415,10 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 		{
 			m_PlayerSelectedRole = data.Value;
 
-			for ( int i = 0; i < m_PlayerRoleChecks.Count(); i++ )
+			foreach ( string roleName, UIActionToggleSwitch toggle: m_PlayerRoleChecks )
 			{
-				string roleName = m_PlayerRoleChecks.GetKey( i );
 				if ( roleName != data.Value )
-					m_PlayerRoleChecks.GetElement( i ).SetChecked( false );
+					toggle.SetChecked( false );
 			}
 		}
 		else
@@ -445,11 +444,8 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 			roles.Insert( m_PlayerSelectedRole );
 
 		map<string, string> nameRestrictions = new map<string, string>();
-		int nameRestCount = m_PlayerNameRestrictions.Count();
-		for ( int i = 0; i < nameRestCount; i++ )
+		foreach ( string rName, string rVal: m_PlayerNameRestrictions )
 		{
-			string rName = m_PlayerNameRestrictions.GetKey( i );
-			string rVal  = m_PlayerNameRestrictions.GetElement( i );
 			if ( rVal != "" )
 				nameRestrictions.Insert( rName, rVal );
 		}

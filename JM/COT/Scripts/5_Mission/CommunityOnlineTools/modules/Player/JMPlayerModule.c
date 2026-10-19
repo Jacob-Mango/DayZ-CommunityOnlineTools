@@ -45,47 +45,6 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
 	}
 
-	// Helpers exposed to the form for the body-part dropdown labels. Reads
-	// from any connected player's BleedingSourcesManagerServer (which carries
-	// the modded COT_GetZoneSelectionName / COT_GetZoneCount). Falls back to
-	// the local player if no other is available.
-	int GetBleedingZoneCount()
-	{
-		return GetBleedingZoneCountFor( NULL );
-	}
-
-	// Variants that take an explicit target player - used by the form to populate
-	// the dropdown from the selected player (whose BleedingSourcesManagerServer
-	// is always constructed on the server).
-	int GetBleedingZoneCountFor( PlayerBase player )
-	{
-		if ( !player )
-			player = PlayerBase.Cast( g_Game.GetPlayer() );
-		if ( !player )
-			return 0;
-		BleedingSourcesManagerServer bms = player.GetBleedingManagerServer();
-		if ( !bms )
-			return 0;
-		return bms.COT_GetZoneCount();
-	}
-
-	string GetBleedingZoneSelectionName( int idx )
-	{
-		return GetBleedingZoneSelectionNameFor( NULL, idx );
-	}
-
-	string GetBleedingZoneSelectionNameFor( PlayerBase player, int idx )
-	{
-		if ( !player )
-			player = PlayerBase.Cast( g_Game.GetPlayer() );
-		if ( !player )
-			return "";
-		BleedingSourcesManagerServer bms = player.GetBleedingManagerServer();
-		if ( !bms )
-			return "";
-		return bms.COT_GetZoneSelectionName( idx );
-	}
-
 	//! The stat for a wire id, or NULL when it is not one of ours.
 	JMPlayerStat GetStat( int type )
 	{
@@ -303,10 +262,10 @@ class JMPlayerModule: JMRenderableModuleBase
 			array< string > nrValues = new array< string >;
 			if ( nameRestrictions )
 			{
-				for ( int ni = 0; ni < nameRestrictions.Count(); ni++ )
+				foreach ( string role, string restriction: nameRestrictions )
 				{
-					nrKeys.Insert( nameRestrictions.GetKey( ni ) );
-					nrValues.Insert( nameRestrictions.GetElement( ni ) );
+					nrKeys.Insert( role );
+					nrValues.Insert( restriction );
 				}
 			}
 
@@ -4280,15 +4239,15 @@ class JMPlayerModule: JMRenderableModuleBase
 
 					if ( bms )
 					{
-						int count = bms.COT_GetZoneCount();
-						for ( int i = 0; i < count; i++ )
+						int i;
+						foreach ( string nm, BleedingSourceZone zone: bms.m_BleedingSourceZone )
 						{
-							string nm = bms.COT_GetZoneSelectionName( i );
-							int bit = bms.COT_GetZoneBit( i );
+							int bit = zone.GetBit();
 							names.Insert( nm );
 							bits.Insert( bit );
 							if ( ( bit & bleedingBits ) != 0 )
 								activePartIndices.Insert( i );
+							++i;
 						}
 					}
 				}
