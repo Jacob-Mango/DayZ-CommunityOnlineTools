@@ -20,13 +20,22 @@ modded class ConstructionBase
 #endif
 	bool COT_CanBuildPart(string partName, bool checkMaterials = true)
 	{
+		if ( IsPartConstructed( partName ) )
+			return false;
+
 		if ( !HasRequiredPart( partName ) )
+			return false;
+
+		if ( !PartHasAnySupportFulfilled( partName ) )
 			return false;
 
 		if ( HasConflictPart( partName ) )
 			return false;
 
 		if ( checkMaterials && !HasMaterials( partName ) )
+			return false;
+
+		if ( checkMaterials && MaterialIsRuined( partName ) )
 			return false;
 
 		return true;
