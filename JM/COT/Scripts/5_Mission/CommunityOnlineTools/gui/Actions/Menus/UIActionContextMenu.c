@@ -422,6 +422,11 @@ class UIActionContextMenu: UIActionBase
 		}
 
 		m_FullHeight = 0;
+
+		//! Important to reset scroll pos so if we navigate a menu with many entries
+		//! where we have to scroll down to select a sub-page which is shorter,
+		//! its contents don't disappear because the menu is still scrolled
+		m_Scroller.VScrollToPos( 0 );
 	}
 
 	//! textColor 0 means "use the default", so callers can pass JMTheme.DANGER
