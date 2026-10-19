@@ -99,6 +99,8 @@ class JMESPActionMenu
 		if ( !m_Meta.target.IsWeapon() )
 			configPaths.Insert( CFG_WEAPONSPATH );
 
+		TStringArray displayNames = {};
+
 		string displayName;
 
 		Weapon_Base weapon;
@@ -110,11 +112,9 @@ class JMESPActionMenu
 			{
 				//! @note ConfigGetText returns already translated values
 				g_Game.ConfigGetText( CFG_MAGAZINESPATH + " "  + mag + " displayName", displayName );
-				labels.Insert( displayName );
+				InsertUnique( labels, mag, displayName, result, displayNames );
 			}
 		}
-
-		TStringArray slotNames = {};
 
 		foreach ( string configPath : configPaths )
 		{
@@ -147,17 +147,8 @@ class JMESPActionMenu
 					if ( InventorySlots.GetSlotIdFromString( invSlot ) == slotId )
 					{
 						result.Insert( childName );
-						slotNames.Insert( invSlot );
 
-						int idx = labels.Find( displayName );
-						if ( idx == -1 )
-							labels.Insert( displayName );
-						else
-						{
-							//! If displayname is already in list, replace with slotname
-							labels[idx] = slotNames[idx];
-							labels.Insert( invSlot );
-						}
+						InsertUnique( labels, childName, displayName, result, displayNames );
 
 						break;
 					}
@@ -166,6 +157,21 @@ class JMESPActionMenu
 		}
 
 		return result;
+	}
+
+	void InsertUnique( TStringArray labels, string className, string displayName, TStringArray classNames, TStringArray displayNames )
+	{
+		int idx = displayNames.Find( displayName );
+		if ( idx == -1 )
+			labels.Insert( displayName );
+		else
+		{
+			//! If displayname is already in list, replace with classname
+			labels[idx] = classNames[idx];
+			labels.Insert( className );
+		}
+
+		displayNames.Insert( displayName );
 	}
 
 	JMESPMeta GetTarget()
@@ -1104,6 +1110,7 @@ class JMESPActionMenu
 
 		TIntArray slotIds = {};
 		TStringArray slotNames = {};
+		TStringArray displayNames = {};
 		TStringArray labels = {};
 
 		for ( int i = 0; i < count; i++ )
@@ -1112,21 +1119,17 @@ class JMESPActionMenu
 			if ( slotId == InventorySlots.INVALID || !InventorySlots.GetShowForSlotId( slotId ) )
 				continue;
 
+			if ( !target.CanDisplayAttachmentSlot( slotId ) )
+				continue;
+
 			slotIds.Insert( slotId );
 
-			string displayName = InventorySlots.GetSlotDisplayName( slotId );
 			string slotName = InventorySlots.GetSlotName( slotId );
+			string displayName = InventorySlots.GetSlotDisplayName( slotId );
 
 			slotNames.Insert( slotName );
 
-			int idx = labels.Find( displayName );
-			if ( idx == -1 )
-				labels.Insert( displayName );
-			else
-			{
-				labels[idx] = slotNames[idx];
-				labels.Insert( slotName );
-			}
+			InsertUnique( labels, slotName, displayName, slotNames, displayNames );
 		}
 
 		foreach ( int j, string label: labels )
@@ -1169,30 +1172,10 @@ class JMESPActionMenu
 		array< string > candidateLabels = {};
 		m_AttachCandidates = GetSlotCandidates( slotId, candidateLabels );
 
-		for ( int j = 0; j < m_AttachCandidates.Count(); j++ )
+		foreach ( int j, string label: candidateLabels )
 		{
-			string label = candidateLabels[j];
-
-			// Two different classnames can share one displayName (e.g. skin
-			// variants) - fall back to the classname so the rows read as two
-			// distinct choices instead of a duplicate that can't be told apart.
-			if ( CountOf( candidateLabels, label ) > 1 )
-				label = m_AttachCandidates[j];
-
 			Add( PREFIX_ACTION + "setattach:" + j, label, JMConstants.Lucide( "puzzle" ), canSet );
 		}
-	}
-
-	protected int CountOf( array< string > values, string needle )
-	{
-		int count = 0;
-		for ( int i = 0; i < values.Count(); i++ )
-		{
-			if ( values[i] == needle )
-				count++;
-		}
-
-		return count;
 	}
 
 	//! A fireplace's whole lifecycle. Refuel is listed above ignite on purpose: a fire with
