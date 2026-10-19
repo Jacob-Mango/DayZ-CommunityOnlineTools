@@ -16,8 +16,12 @@ class JMLoadoutItem: JMLoadoutItem_Base
 		BaseBuildingBase bb;
 		if (Class.CastTo(bb, obj))
 		{
+			Construction construction = bb.GetConstruction();
+			if (!construction)
+				return;
+
 			m_ConstructionParts = {};
-			map<string, ref ConstructionPart> parts = bb.GetConstruction().GetConstructionParts();
+			map<string, ref ConstructionPart> parts = construction.GetConstructionParts();
 			foreach (string partName, ConstructionPart part: parts)
 			{
 				if (part.m_IsBuilt)
