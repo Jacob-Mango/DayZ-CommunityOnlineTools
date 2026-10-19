@@ -373,14 +373,14 @@ class JMLootAnalysisForm: JMFormBase
 				if (scope == 0)
 					continue;
 
-				strNameLower = strName;
-				strNameLower.ToLower();
-
 				typename type = strName.ToType();
 
 				// Apply category filter
-				if (m_CurrentType != "" && !g_Game.IsKindOf(strNameLower, m_CurrentType) && (!type || !m_CurrentScriptType || !type.IsInherited( m_CurrentScriptType ) ))
+				if (m_CurrentType != "" && !g_Game.IsKindOf(strName, m_CurrentType) && (!type || !m_CurrentScriptType || !type.IsInherited( m_CurrentScriptType ) ))
 					continue;
+
+				strNameLower = strName;
+				strNameLower.ToLower();
 
 				// Apply keyword search filter
 				if (!matcher.Matches(strNameLower))

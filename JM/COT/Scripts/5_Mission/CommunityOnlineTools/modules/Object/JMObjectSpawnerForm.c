@@ -1009,9 +1009,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 				g_Game.ConfigGetChildName( strConfigPath, nClass, strName );
 
-				string strNameLower = strName;
-				strNameLower.ToLower();
-
 				int scope = g_Game.ConfigGetInt( strConfigPath + " " + strName + " scope" );
 
 				if ( scope == 0 || (scope == 1 && !m_Module.m_AllowRestrictedClassNames) )
@@ -1023,8 +1020,11 @@ class JMObjectSpawnerForm: JMFormBase
 
 				typename type = strName.ToType();
 
-				if (m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) || ( type && m_Module.m_CurrentScriptType && type.IsInherited( m_Module.m_CurrentScriptType ) ) )
+				if (m_Module.m_CurrentType == "" || g_Game.IsKindOf( strName, m_Module.m_CurrentType ) || ( type && m_Module.m_CurrentScriptType && type.IsInherited( m_Module.m_CurrentScriptType ) ) )
 				{
+					string strNameLower = strName;
+					strNameLower.ToLower();
+
 					if ( m_Module.IsExcludedClassName( strNameLower ) )
 						continue;
 
