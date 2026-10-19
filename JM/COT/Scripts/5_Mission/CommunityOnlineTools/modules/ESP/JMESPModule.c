@@ -393,42 +393,6 @@ class JMESPModule: JMRenderableModuleBase
 		return NULL;
 	}
 
-	//! Names `target` to the server: its network id, then the object itself. An object
-	//! native to the map (a rebuildable building, a house door) reports a static network
-	//! id that GetObjectByNetworkId does not resolve on the server, so the object is also
-	//! written as is and the engine resolves it on the other side - the same way vanilla's
-	//! ActionBase.WriteToContext sends its action target.
-	static void WriteTarget( ParamsWriteContext ctx, Object target )
-	{
-		int netLow, netHigh;
-		target.GetNetworkID( netLow, netHigh );
-
-		ctx.Write( netLow );
-		ctx.Write( netHigh );
-		ctx.Write( target );
-	}
-
-	//! The other half of WriteTarget. `target` comes back null when the object no
-	//! longer exists (or never existed on the server); only a short read is false.
-	static bool ReadTarget( ParamsReadContext ctx, out Object target )
-	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return false;
-
-		Object written;
-		if ( !ctx.Read( written ) )
-			return false;
-
-		if ( netLow || netHigh )
-			target = g_Game.GetObjectByNetworkId( netLow, netHigh );
-
-		if ( !target )
-			target = written;
-
-		return true;
-	}
-
 	//! The construction an object builds and dismantles through, if it has one.
 	//! Base building objects have one, and so do the rebuildable map buildings
 	//! (the irrigation tunnel entrance, the well, the rebuildable houses) which
@@ -646,7 +610,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( slotId );
 			rpc.Write( className );
 			rpc.Send( NULL, JMESPModuleRPC.SetAttachment, true, NULL );
@@ -680,7 +645,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( health );
 			rpc.Send( NULL, JMESPModuleRPC.SetHealth, true, NULL );
 		}
@@ -2353,8 +2319,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		float health;
@@ -2369,6 +2335,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -2390,7 +2357,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( slotId );
 			rpc.Send( NULL, JMESPModuleRPC.RemoveAttachment, true, NULL );
 		}
@@ -2398,15 +2366,15 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		int slotId;
+		int netLow, netHigh, slotId;
 		string className;
-		if ( !ReadTarget( ctx, obj ) || !ctx.Read( slotId ) || !ctx.Read( className ) )
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) || !ctx.Read( slotId ) || !ctx.Read( className ) )
 			return;
 
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -2419,14 +2387,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_RemoveAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		int slotId;
-		if ( !ReadTarget( ctx, obj ) || !ctx.Read( slotId ) )
+		int netLow, netHigh, slotId;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) || !ctx.Read( slotId ) )
 			return;
 
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -2503,7 +2471,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( action );
 			rpc.Write( ivalue );
 			rpc.Write( fvalue );
@@ -3689,8 +3658,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_ObjectAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		int action;
@@ -3713,6 +3682,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -3838,7 +3808,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( part );
 			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Build, true, NULL );
 		}
@@ -3866,8 +3837,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Build( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		string part_name;
@@ -3877,6 +3848,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -3900,7 +3872,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( part );
 			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Dismantle, true, NULL );
 		}
@@ -3924,8 +3897,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Dismantle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		string part_name;
@@ -3935,6 +3908,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -3958,7 +3932,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( part );
 			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Repair, true, NULL );
 		}
@@ -3979,8 +3954,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		string part_name;
@@ -3990,6 +3965,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -4017,7 +3993,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( part );
 			rpc.Write( health01 );
 			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_SetPartHealth, true, NULL );
@@ -4050,8 +4027,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_SetPartHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		string part_name;
@@ -4065,6 +4042,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -4088,7 +4066,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Send( NULL, JMESPModuleRPC.Vehicle_Unstuck, true, NULL );
 		}
 	}
@@ -4107,13 +4086,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_Vehicle_Unstuck( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -4135,7 +4115,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Send( NULL, JMESPModuleRPC.Vehicle_Refuel, true, NULL );
 		}
 	}
@@ -4168,13 +4149,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_Vehicle_Refuel( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -4196,7 +4178,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			WriteTarget( rpc, target );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Send( NULL, JMESPModuleRPC.Heal, true, NULL );
 		}
 	}
@@ -4244,13 +4227,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Object obj;
-		if ( !ReadTarget( ctx, obj ) )
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
 		if ( !senderRPC )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
