@@ -2975,9 +2975,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !construction )
 			return 0;
 
-		bool requireMaterials = true;
-		if ( !IsMissionOffline() )
-			requireMaterials = !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED, ident, instance );
+		bool requireMaterials = !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED, ident, instance );
 
 		map< string, ref JMConstructionPartData > parts = new map< string, ref JMConstructionPartData >;
 		construction.COT_GetParts( parts, requireMaterials );
@@ -3767,11 +3765,12 @@ class JMESPModule: JMRenderableModuleBase
 		ConstructionBase construction = GetConstructionOf( target );
 
 		if ( !construction )
+		{
+			CF.FormatErrorEx("%1 has no construction!", ErrorExSeverity.WARNING, target.ToString());
 			return;
+		}
 
-		bool requireMaterials = true;
-		if ( !IsMissionOffline() )
-			requireMaterials = !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED, ident, instance );
+		bool requireMaterials = !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED, ident, instance );
 		
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );

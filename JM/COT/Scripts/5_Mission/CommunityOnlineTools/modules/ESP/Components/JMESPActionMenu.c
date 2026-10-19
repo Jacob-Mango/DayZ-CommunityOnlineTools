@@ -928,7 +928,12 @@ class JMESPActionMenu
 		}
 		else
 		{
-			Add( PREFIX_ACTION + "build", "#STR_COT_ESP_MODULE_MENU_BUILD", JMConstants.Lucide( "hammer" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD ) );
+			EntityAI entity = EntityAI.Cast( m_Meta.target );
+			ConstructionBase construction = ConstructionBase.Cast( entity.GetConstructionBasic() );
+			if ( JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED ) || construction.COT_CanBuildPart( m_PageArg, true ) )
+				Add( PREFIX_ACTION + "build", "#STR_COT_ESP_MODULE_MENU_BUILD", JMConstants.Lucide( "hammer" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD ) );
+			else
+				Add( PREFIX_ACTION + "build", "#STR_COT_ESP_MODULE_MENU_BUILD #STR_COT_ESP_MODULE_MENU_BUILD_MATERIALS_MISSING", JMConstants.Lucide( "hammer" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD ), JMTheme.DANGER );
 		}
 	}
 
