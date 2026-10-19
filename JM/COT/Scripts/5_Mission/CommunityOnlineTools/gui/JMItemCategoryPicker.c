@@ -86,7 +86,7 @@ class JMItemCategoryPicker
 	// -------------------------------------------------------------------------
 
 	//! Id / icon / label for every category, in menu order. The id is the config base
-	//! class the list filters on; "" is everything. One table read by both the menu and
+	//! class or script type (case sensitive!) the list filters on; "" is everything. One table read by both the menu and
 	//! the recent chips, so the two cannot drift apart.
 	static void CategoryTable( out TStringArray ids, out TStringArray icons, out TStringArray labels )
 	{
@@ -95,32 +95,33 @@ class JMItemCategoryPicker
 		labels = new TStringArray;
 
 		AddCategory( ids, icons, labels, "",               JMConstants.Lucide( "layers" ),    "#STR_COT_OBJECT_CATEGORY_ALL" );
-		AddCategory( ids, icons, labels, "edible_base",    JMConstants.ICON_MEAT,             "#STR_COT_OBJECT_CATEGORY_FOOD" );
-		AddCategory( ids, icons, labels, "bottle_base",    JMConstants.ICON_BEER_BOTTLE,      "#STR_COT_OBJECT_CATEGORY_DRINKS" );
-		AddCategory( ids, icons, labels, "transport",      JMConstants.ICON_JEEP,             "#STR_COT_OBJECT_CATEGORY_VEHICLES" );
-		AddCategory( ids, icons, labels, "weapon_base",    JMConstants.ICON_FAMAS,            "#STR_COT_OBJECT_CATEGORY_FIREARMS" );
-		AddCategory( ids, icons, labels, "meleeweapon",    JMConstants.ICON_GLADIUS,          "#STR_COT_OBJECT_CATEGORY_MELEE" );
-		AddCategory( ids, icons, labels, "magazine_base",  JMConstants.ICON_MACHINE_GUN_MAG,  "#STR_COT_OBJECT_CATEGORY_AMMO" );
-		AddCategory( ids, icons, labels, "clothing_base",  JMConstants.ICON_CLOTHES,          "#STR_COT_OBJECT_CATEGORY_CLOTHING" );
-		AddCategory( ids, icons, labels, "headgear_base",  JMConstants.ICON_STAHLHELM,        "#STR_COT_OBJECT_CATEGORY_HEADGEAR" );
-		AddCategory( ids, icons, labels, "mask_base",      JMConstants.ICON_BALACLAVA,        "#STR_COT_OBJECT_CATEGORY_MASKS" );
-		AddCategory( ids, icons, labels, "glasses_base",   JMConstants.ICON_SUNGLASSES,       "#STR_COT_OBJECT_CATEGORY_GLASSES" );
-		AddCategory( ids, icons, labels, "top_base",       JMConstants.ICON_T_SHIRT,          "#STR_COT_OBJECT_CATEGORY_TOPS" );
-		AddCategory( ids, icons, labels, "pants_base",     JMConstants.ICON_TROUSERS,         "#STR_COT_OBJECT_CATEGORY_PANTS" );
-		AddCategory( ids, icons, labels, "vest_base",      JMConstants.ICON_BELT,             "#STR_COT_OBJECT_CATEGORY_VESTS" );
-		AddCategory( ids, icons, labels, "gloves_base",    JMConstants.ICON_GLOVES,           "#STR_COT_OBJECT_CATEGORY_GLOVES" );
-		AddCategory( ids, icons, labels, "shoes_base",     JMConstants.ICON_TROUSERS,         "#STR_COT_OBJECT_CATEGORY_SHOES" );
-		AddCategory( ids, icons, labels, "backpack_base",  JMConstants.ICON_LIGHT_BACKPACK,   "#STR_COT_OBJECT_CATEGORY_BACKPACKS" );
-		AddCategory( ids, icons, labels, "container_base", JMConstants.ICON_KNAPSACK,         "#STR_COT_OBJECT_CATEGORY_CONTAINERS" );
-		AddCategory( ids, icons, labels, "inventory_base", JMConstants.ICON_FULL_FOLDER,      "#STR_COT_OBJECT_CATEGORY_ITEMS" );
-		AddCategory( ids, icons, labels, "itemmedical",    JMConstants.ICON_MEDICINES,        "#STR_COT_OBJECT_CATEGORY_MEDICAL" );
-		AddCategory( ids, icons, labels, "tool_base",      JMConstants.ICON_SHARP_AXE,        "#STR_COT_OBJECT_CATEGORY_TOOLS" );
-		AddCategory( ids, icons, labels, "trapbase",       JMConstants.ICON_TINKER,           "#STR_COT_OBJECT_CATEGORY_TRAPS" );
-		AddCategory( ids, icons, labels, "electricdevice", JMConstants.ICON_ELECTRIC,         "#STR_COT_OBJECT_CATEGORY_ELECTRONICS" );
-		AddCategory( ids, icons, labels, "tentbase",       JMConstants.ICON_CAMPING_TENT,     "#STR_COT_OBJECT_CATEGORY_TENTS" );
-		AddCategory( ids, icons, labels, "grenade_base",   JMConstants.ICON_UNLIT_BOMB,       "#STR_COT_OBJECT_CATEGORY_EXPLOSIVES" );
-		AddCategory( ids, icons, labels, "house",          JMConstants.ICON_HOME_GARAGE,      "#STR_COT_OBJECT_CATEGORY_BUILDINGS" );
-		AddCategory( ids, icons, labels, "dz_lightai",     JMConstants.ICON_SHAMBLING_ZOMBIE, "#STR_COT_OBJECT_CATEGORY_AI" );
+		AddCategory( ids, icons, labels, "Edible_Base",    JMConstants.ICON_MEAT,             "#STR_COT_OBJECT_CATEGORY_FOOD" );
+		AddCategory( ids, icons, labels, "Bottle_Base",    JMConstants.ICON_BEER_BOTTLE,      "#STR_COT_OBJECT_CATEGORY_DRINKS" );
+		AddCategory( ids, icons, labels, "Transport",      JMConstants.ICON_JEEP,             "#STR_COT_OBJECT_CATEGORY_VEHICLES" );
+		AddCategory( ids, icons, labels, "Weapon_Base",    JMConstants.ICON_FAMAS,            "#STR_COT_OBJECT_CATEGORY_FIREARMS" );
+		//AddCategory( ids, icons, labels, "meleeweapon",    JMConstants.ICON_GLADIUS,          "#STR_COT_OBJECT_CATEGORY_MELEE" );  //! what's this supposed to be? doesn't exist!
+		AddCategory( ids, icons, labels, "Magazine_Base",  JMConstants.ICON_MACHINE_GUN_MAG,  "#STR_COT_OBJECT_CATEGORY_AMMO" );
+		AddCategory( ids, icons, labels, "Clothing_Base",  JMConstants.ICON_CLOTHES,          "#STR_COT_OBJECT_CATEGORY_CLOTHING" );
+		AddCategory( ids, icons, labels, "HeadGear_Base",  JMConstants.ICON_STAHLHELM,        "#STR_COT_OBJECT_CATEGORY_HEADGEAR" );
+		AddCategory( ids, icons, labels, "Mask_Base",      JMConstants.ICON_BALACLAVA,        "#STR_COT_OBJECT_CATEGORY_MASKS" );
+		AddCategory( ids, icons, labels, "Glasses_Base",   JMConstants.ICON_SUNGLASSES,       "#STR_COT_OBJECT_CATEGORY_GLASSES" );
+		AddCategory( ids, icons, labels, "Top_Base",       JMConstants.ICON_T_SHIRT,          "#STR_COT_OBJECT_CATEGORY_TOPS" );
+		AddCategory( ids, icons, labels, "Pants_Base",     JMConstants.ICON_TROUSERS,         "#STR_COT_OBJECT_CATEGORY_PANTS" );
+		AddCategory( ids, icons, labels, "Vest_Base",      JMConstants.ICON_BELT,             "#STR_COT_OBJECT_CATEGORY_VESTS" );
+		AddCategory( ids, icons, labels, "Gloves_Base",    JMConstants.ICON_GLOVES,           "#STR_COT_OBJECT_CATEGORY_GLOVES" );
+		AddCategory( ids, icons, labels, "Shoes_Base",     JMConstants.ICON_TROUSERS,         "#STR_COT_OBJECT_CATEGORY_SHOES" );
+		AddCategory( ids, icons, labels, "Backpack_Base",  JMConstants.ICON_LIGHT_BACKPACK,   "#STR_COT_OBJECT_CATEGORY_BACKPACKS" );
+		AddCategory( ids, icons, labels, "Container_Base", JMConstants.ICON_KNAPSACK,         "#STR_COT_OBJECT_CATEGORY_CONTAINERS" );
+		AddCategory( ids, icons, labels, "Inventory_Base", JMConstants.ICON_FULL_FOLDER,      "#STR_COT_OBJECT_CATEGORY_ITEMS" );
+		//AddCategory( ids, icons, labels, "itemmedical",    JMConstants.ICON_MEDICINES,        "#STR_COT_OBJECT_CATEGORY_MEDICAL" );  //! what's this supposed to be? doesn't exist!
+		AddCategory( ids, icons, labels, "ToolBase",       JMConstants.ICON_SHARP_AXE,        "#STR_COT_OBJECT_CATEGORY_TOOLS" );
+		AddCategory( ids, icons, labels, "TrapBase",       JMConstants.ICON_TINKER,           "#STR_COT_OBJECT_CATEGORY_TRAPS" );
+		//AddCategory( ids, icons, labels, "electricdevice", JMConstants.ICON_ELECTRIC,         "#STR_COT_OBJECT_CATEGORY_ELECTRONICS" );  //! what's this supposed to be? doesn't exist!
+		AddCategory( ids, icons, labels, "BaseBuildingBase", JMConstants.Lucide( "hammer" ),  "#STR_COT_ESP_MODULE_VIEW_TYPE_BASE_BUILDING" );
+		AddCategory( ids, icons, labels, "TentBase",       JMConstants.ICON_CAMPING_TENT,     "#STR_COT_OBJECT_CATEGORY_TENTS" );
+		AddCategory( ids, icons, labels, "Grenade_Base",   JMConstants.ICON_UNLIT_BOMB,       "#STR_COT_OBJECT_CATEGORY_EXPLOSIVES" );
+		AddCategory( ids, icons, labels, "House",          JMConstants.ICON_HOME_GARAGE,      "#STR_COT_OBJECT_CATEGORY_BUILDINGS" );
+		AddCategory( ids, icons, labels, "DZ_LightAI",     JMConstants.ICON_SHAMBLING_ZOMBIE, "#STR_COT_OBJECT_CATEGORY_AI" );
 	}
 
 	static void CategoryGroupTable( out TStringArray ids, out TStringArray icons, out TStringArray labels )
@@ -144,47 +145,48 @@ class JMItemCategoryPicker
 
 		if ( groupId == GROUP_GEAR )
 		{
-			members.Insert( "clothing_base" );
-			members.Insert( "headgear_base" );
-			members.Insert( "mask_base" );
-			members.Insert( "glasses_base" );
-			members.Insert( "top_base" );
-			members.Insert( "pants_base" );
-			members.Insert( "vest_base" );
-			members.Insert( "gloves_base" );
-			members.Insert( "shoes_base" );
-			members.Insert( "backpack_base" );
+			members.Insert( "Clothing_Base" );
+			members.Insert( "HeadGear_Base" );
+			members.Insert( "Mask_Base" );
+			members.Insert( "Glasses_Base" );
+			members.Insert( "Top_Base" );
+			members.Insert( "Pants_Base" );
+			members.Insert( "Vest_Base" );
+			members.Insert( "Gloves_Base" );
+			members.Insert( "Shoes_Base" );
+			members.Insert( "Backpack_Base" );
 			return members;
 		}
 
 		if ( groupId == GROUP_WEAPONS )
 		{
-			members.Insert( "weapon_base" );
-			members.Insert( "meleeweapon" );
-			members.Insert( "magazine_base" );
-			members.Insert( "grenade_base" );
-			members.Insert( "trapbase" );
+			members.Insert( "Weapon_Base" );
+			//members.Insert( "meleeweapon" );
+			members.Insert( "Magazine_Base" );
+			members.Insert( "Grenade_Base" );
+			members.Insert( "TrapBase" );
 			return members;
 		}
 
 		if ( groupId == GROUP_SURVIVAL )
 		{
-			members.Insert( "edible_base" );
-			members.Insert( "bottle_base" );
-			members.Insert( "itemmedical" );
-			members.Insert( "tool_base" );
-			members.Insert( "tentbase" );
-			members.Insert( "container_base" );
+			members.Insert( "Edible_Base" );
+			members.Insert( "Bottle_Base" );
+			//members.Insert( "itemmedical" );
+			members.Insert( "ToolBase" );
+			members.Insert( "BaseBuildingBase" );
+			members.Insert( "TentBase" );
+			members.Insert( "Container_Base" );
 			return members;
 		}
 
 		if ( groupId == GROUP_WORLD )
 		{
-			members.Insert( "transport" );
-			members.Insert( "house" );
-			members.Insert( "dz_lightai" );
-			members.Insert( "electricdevice" );
-			members.Insert( "inventory_base" );
+			members.Insert( "Transport" );
+			members.Insert( "House" );
+			members.Insert( "DZ_LightAI" );
+			//members.Insert( "electricdevice" );
+			members.Insert( "Inventory_Base" );
 			return members;
 		}
 

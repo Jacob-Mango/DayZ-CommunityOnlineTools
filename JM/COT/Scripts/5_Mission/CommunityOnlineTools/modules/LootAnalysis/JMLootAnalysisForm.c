@@ -41,7 +41,8 @@ class JMLootAnalysisForm: JMFormBase
 	protected UIActionImageButton m_FilterButton;
 	protected ref JMItemCategoryPicker m_Categories;
 	protected string m_SearchFilter = "";
-	protected string m_CurrentCategory = "";
+	protected string m_CurrentType = "";
+	protected typename m_CurrentScriptType;
 	protected UIActionItemList m_ItemList;
 
 	// ---- Right column --------------------------------------------------------
@@ -317,9 +318,10 @@ class JMLootAnalysisForm: JMFormBase
 	}
 
 	//! The picker's change callback: "" is everything, otherwise the config base class to filter on.
-	void OnCategoryChanged(string categoryId)
+	void OnCategoryChanged(string type)
 	{
-		m_CurrentCategory = categoryId;
+		m_CurrentType = type;
+		m_CurrentScriptType = type.ToType();
 
 		UpdateItemList();
 	}
@@ -374,8 +376,10 @@ class JMLootAnalysisForm: JMFormBase
 				strNameLower = strName;
 				strNameLower.ToLower();
 
+				typename type = strName.ToType();
+
 				// Apply category filter
-				if (m_CurrentCategory != "" && !g_Game.IsKindOf(strNameLower, m_CurrentCategory))
+				if (m_CurrentType != "" && !g_Game.IsKindOf(strNameLower, m_CurrentType) && (!type || !m_CurrentScriptType || !type.IsInherited( m_CurrentScriptType ) ))
 					continue;
 
 				// Apply keyword search filter

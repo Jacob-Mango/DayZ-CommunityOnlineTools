@@ -12,6 +12,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	float m_SpawnHealthMax   = -1;
 	bool m_AutoShow;
 	string m_CurrentType;
+	typename m_CurrentScriptType;
 	string m_SearchText;
 	int m_OverrideDebugSpawnDepth;
 

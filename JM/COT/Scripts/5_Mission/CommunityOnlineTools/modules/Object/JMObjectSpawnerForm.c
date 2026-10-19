@@ -438,9 +438,10 @@ class JMObjectSpawnerForm: JMFormBase
 	}
 
 	//! The picker's change callback: "" is everything, otherwise the config base class to filter on.
-	void OnCategoryChanged( string categoryId )
+	void OnCategoryChanged( string type )
 	{
-		m_Module.m_CurrentType = categoryId;
+		m_Module.m_CurrentType = type;
+		m_Module.m_CurrentScriptType = type.ToType();
 
 		UpdateList();
 	}
@@ -1020,7 +1021,9 @@ class JMObjectSpawnerForm: JMFormBase
 				if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty || model == "bmp")
 					continue;
 
-				if (m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) )
+				typename type = strName.ToType();
+
+				if (m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) || ( type && m_Module.m_CurrentScriptType && type.IsInherited( m_Module.m_CurrentScriptType ) ) )
 				{
 					if ( m_Module.IsExcludedClassName( strNameLower ) )
 						continue;
