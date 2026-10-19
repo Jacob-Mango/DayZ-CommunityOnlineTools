@@ -56,6 +56,29 @@ modded class ConstructionBase
 	{
 		foreach ( string part_name, ConstructionPart part: m_ConstructionParts )
 		{
+			// 1.30: the part's own m_Name field is stale and no longer
+			// populated - the localized label now only comes through
+			// GetName() -> m_PartTypeData.GetNameLocalized().
+			string displayName = part.GetName();
+			if ( !displayName || part.GetMainPartName() == "utility_nonparts" )
+			{
+				//! Only include parts that have a localized name and are actual parts
+			#ifdef DIAG_DEVELOPER
+				Print(part_name);
+				PrintFormat("part.GetPartName: %1", part.GetPartName());
+				PrintFormat("part.GetMainPartName: %1", part.GetMainPartName());
+				PrintFormat("part.GetRequiredParts: %1", part.GetRequiredParts());
+				array<ref TStringArray> reqPartsVariants = part.GetRequiredPartsVariants();
+				if (reqPartsVariants)
+				{
+					Print("part.GetRequiredPartsVariants:");
+					foreach (TStringArray variants: reqPartsVariants)
+						PrintFormat(" %1", variants);
+				}
+			#endif
+				continue;  
+			}
+
 			JMConstructionPartData data;
 			if ( !parts.Find( part_name, data ) )
 			{
@@ -66,10 +89,10 @@ modded class ConstructionBase
 			data.m_Name = part_name;
 			data.m_MainPartName = part.GetMainPartName();
 
-			// 1.30: the part's own m_Name field is stale and no longer
-			// populated - the localized label now only comes through
-			// GetName() -> m_PartTypeData.GetNameLocalized().
-			data.m_DisplayName = part.GetName();
+			data.m_DisplayName = displayName;
+
+			if ( !data.m_DisplayName )
+				data.m_DisplayName = part_name;
 
 			if ( part.IsBuilt() )
 			{
