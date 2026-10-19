@@ -1840,10 +1840,7 @@ class JMESPActionMenu
 		if ( !Perm( JMConstants.PERM_ESP_OBJECT_DELETE ) )
 			return;
 
-		if ( IsMissionOffline() || ( !m_Meta.networkLow && !m_Meta.networkHigh ) )
-			m_Meta.module.DeleteObject( m_Meta.target );
-		else
-			m_Meta.module.DeleteObject( m_Meta.networkLow, m_Meta.networkHigh );
+		m_Meta.module.DeleteObject( m_Meta.target );
 
 		m_Meta.m_TargetDeleted = true;
 	}

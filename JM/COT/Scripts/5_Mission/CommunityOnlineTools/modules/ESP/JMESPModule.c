@@ -610,11 +610,9 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( slotId );
 			rpc.Write( className );
-			rpc.Send( NULL, JMESPModuleRPC.SetAttachment, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetAttachment, true, NULL );
 		}
 	}
 
@@ -645,10 +643,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( health );
-			rpc.Send( NULL, JMESPModuleRPC.SetHealth, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetHealth, true, NULL );
 		}
 	}
 
@@ -666,10 +662,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( orientation );
-			rpc.Send( NULL, JMESPModuleRPC.SetOrientation, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetOrientation, true, NULL );
 		}
 	}
 
@@ -687,10 +681,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( position );
-			rpc.Send( NULL, JMESPModuleRPC.SetPosition, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetPosition, true, NULL );
 		}
 	}
 
@@ -2035,11 +2027,9 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( previousPosition );
 			rpc.Write( previousOrientation );
-			rpc.Send( NULL, JMESPModuleRPC.RecordTransformHistory, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.RecordTransformHistory, true, NULL );
 		}
 	}
 
@@ -2053,12 +2043,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_RecordTransformHistory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-
-		int netLow;
-		int netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		vector previousPosition;
 		vector previousOrientation;
 		if ( !ctx.Read( previousPosition ) )
@@ -2067,8 +2051,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 	#ifdef SERVER
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		if ( !COT.IsValidWorldPosition( previousPosition ) )
@@ -2084,7 +2067,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
 			return;
 
-		Exec_RecordTransformHistory( previousPosition, previousOrientation, obj, senderRPC );
+		Exec_RecordTransformHistory( previousPosition, previousOrientation, target, senderRPC );
 	#endif
 	}
 
@@ -2175,18 +2158,11 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-
-		int netLow;
-		int netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		vector position;
 		if ( !ctx.Read( position ) )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 	#ifdef SERVER
@@ -2200,9 +2176,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
 			return;
 
-		Exec_SetPosition( position, obj, senderRPC, instance );
+		Exec_SetPosition( position, target, senderRPC, instance );
 	#else
-		obj.SetPosition( position );
+		target.SetPosition( position );
 	#endif
 	}
 
@@ -2237,18 +2213,11 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetOrientation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-
-		int netLow;
-		int netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		vector orientation;
 		if ( !ctx.Read( orientation ) )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 	#ifdef SERVER
@@ -2262,9 +2231,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETORIENTATION, senderRPC ) )
 			return;
 
-		Exec_SetOrientation( orientation, obj, senderRPC, instance );
+		Exec_SetOrientation( orientation, target, senderRPC, instance );
 	#else
-		obj.SetOrientation( orientation );
+		target.SetOrientation( orientation );
 	#endif
 	}
 
@@ -2319,10 +2288,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		float health;
 		if ( !ctx.Read( health ) )
 			return;
@@ -2335,15 +2300,14 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETHEALTH, senderRPC, instance ) )
 			return;
 
-		Exec_SetHealth( health, zone, obj, senderRPC, instance );
+		Exec_SetHealth( health, zone, target, senderRPC, instance );
 	}
 
 	void RemoveAttachment( Object target, int slotId )
@@ -2357,52 +2321,48 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( slotId );
-			rpc.Send( NULL, JMESPModuleRPC.RemoveAttachment, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.RemoveAttachment, true, NULL );
 		}
 	}
 
 	protected void RPC_SetAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh, slotId;
+		int slotId;
 		string className;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) || !ctx.Read( slotId ) || !ctx.Read( className ) )
+		if ( !ctx.Read( slotId ) || !ctx.Read( className ) )
 			return;
 
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
 			return;
 
-		Exec_SetAttachment( slotId, className, obj, senderRPC, instance );
+		Exec_SetAttachment( slotId, className, target, senderRPC, instance );
 	}
 
 	protected void RPC_RemoveAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh, slotId;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) || !ctx.Read( slotId ) )
+		int slotId;
+		if ( !ctx.Read( slotId ) )
 			return;
 
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
 			return;
 
-		Exec_RemoveAttachment( slotId, obj, senderRPC, instance );
+		Exec_RemoveAttachment( slotId, target, senderRPC, instance );
 	}
 
 	protected void Exec_SetAttachment( int slotId, string className, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
@@ -2471,12 +2431,10 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( action );
 			rpc.Write( ivalue );
 			rpc.Write( fvalue );
-			rpc.Send( NULL, JMESPModuleRPC.ObjectAction, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.ObjectAction, true, NULL );
 		}
 	}
 
@@ -3658,10 +3616,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_ObjectAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		int action;
 		if ( !ctx.Read( action ) )
 			return;
@@ -3682,15 +3636,14 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( permission, senderRPC, instance ) )
 			return;
 
-		Exec_ObjectAction( action, ivalue, fvalue, obj, senderRPC, instance );
+		Exec_ObjectAction( action, ivalue, fvalue, target, senderRPC, instance );
 	}
 
 	protected void RPC_ObjectActionResult( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -3735,14 +3688,11 @@ class JMESPModule: JMRenderableModuleBase
 		COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_ESP_MODULE_NOTIFY_CODE_COPIED", ivalue.ToString() ) );
 	}
 
+	[Obsolete("Use DeleteObject( Object target )")]
 	void DeleteObject( int networkLow, int networkHigh )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( networkLow );
-		rpc.Write( networkHigh );
-		rpc.Send( NULL, JMESPModuleRPC.DeleteObject, true, NULL );
-
-		m_RemoveDeleted = true;
+		Object target = g_Game.GetObjectByNetworkId( networkLow, networkHigh );
+		DeleteObject( target );
 	}
 
 	void DeleteObject( Object target )
@@ -3753,7 +3703,10 @@ class JMESPModule: JMRenderableModuleBase
 		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 			Exec_DeleteObject( target, NULL );
 		else
-			DeleteObject( netLow, netHigh );
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( target, JMESPModuleRPC.DeleteObject, true, NULL );
+		}
 
 		m_RemoveDeleted = true;
 	}
@@ -3780,12 +3733,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_DeleteObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow;
-		int netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+		if ( !target )
 			return;
-
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 
 		if ( !senderRPC )
 			return;
@@ -3794,7 +3743,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_DELETE, senderRPC, instance ) )
 			return;
 
-		Exec_DeleteObject( obj, senderRPC, instance );
+		Exec_DeleteObject( target, senderRPC, instance );
 	}
 
 	void BaseBuilding_Build( EntityAI target, string part )
@@ -3808,10 +3757,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( part );
-			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Build, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Build, true, NULL );
 		}
 	}
 
@@ -3837,10 +3784,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Build( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		string part_name;
 		if ( !ctx.Read( part_name ) )
 			return;
@@ -3848,8 +3791,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
@@ -3857,7 +3799,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		EntityAI bb;
-		if ( Class.CastTo( bb, obj ) )
+		if ( Class.CastTo( bb, target ) )
 			Exec_BaseBuilding_Build( bb, part_name, senderRPC, instance );
 	}
 
@@ -3872,10 +3814,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( part );
-			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Dismantle, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Dismantle, true, NULL );
 		}
 	}
 
@@ -3897,10 +3837,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Dismantle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		string part_name;
 		if ( !ctx.Read( part_name ) )
 			return;
@@ -3908,8 +3844,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
@@ -3917,7 +3852,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		EntityAI bb;
-		if ( Class.CastTo( bb, obj ) )
+		if ( Class.CastTo( bb, target ) )
 			Exec_BaseBuilding_Dismantle( bb, part_name, senderRPC, instance );
 	}
 
@@ -3932,10 +3867,8 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( part );
-			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Repair, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Repair, true, NULL );
 		}
 	}
 
@@ -3954,10 +3887,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		string part_name;
 		if ( !ctx.Read( part_name ) )
 			return;
@@ -3965,8 +3894,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
@@ -3974,7 +3902,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		EntityAI bb;
-		if ( Class.CastTo( bb, obj ) )
+		if ( Class.CastTo( bb, target ) )
 			Exec_BaseBuilding_Repair( bb, part_name, senderRPC, instance );
 	}
 
@@ -3993,11 +3921,9 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
 			rpc.Write( part );
 			rpc.Write( health01 );
-			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_SetPartHealth, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_SetPartHealth, true, NULL );
 		}
 	}
 
@@ -4027,10 +3953,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_SetPartHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		string part_name;
 		if ( !ctx.Read( part_name ) )
 			return;
@@ -4042,8 +3964,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
@@ -4051,7 +3972,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		EntityAI bb;
-		if ( Class.CastTo( bb, obj ) )
+		if ( Class.CastTo( bb, target ) )
 			Exec_BaseBuilding_SetPartHealth( bb, part_name, health01, senderRPC, instance );
 	}
 
@@ -4066,9 +3987,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
-			rpc.Send( NULL, JMESPModuleRPC.Vehicle_Unstuck, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.Vehicle_Unstuck, true, NULL );
 		}
 	}
 
@@ -4086,22 +4005,17 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_Vehicle_Unstuck( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_CAR_UNSTUCK, senderRPC, instance ) )
 			return;
 
-		Exec_Vehicle_Unstuck( obj, senderRPC, instance );
+		Exec_Vehicle_Unstuck( target, senderRPC, instance );
 	}
 
 	void Vehicle_Refuel( Object target)
@@ -4115,9 +4029,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
-			rpc.Send( NULL, JMESPModuleRPC.Vehicle_Refuel, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.Vehicle_Refuel, true, NULL );
 		}
 	}
 
@@ -4149,22 +4061,17 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_Vehicle_Refuel( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_CAR_REFUEL, senderRPC, instance ) )
 			return;
 
-		Exec_Vehicle_Refuel( obj, senderRPC, instance );
+		Exec_Vehicle_Refuel( target, senderRPC, instance );
 	}
 
 	void Heal( Object target )
@@ -4178,9 +4085,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
-			rpc.Send( NULL, JMESPModuleRPC.Heal, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.Heal, true, NULL );
 		}
 	}
 
@@ -4227,22 +4132,17 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int netLow, netHigh;
-		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
-			return;
-
 		if ( !senderRPC )
 			return;
 
-		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
-		if ( !obj )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_HEAL, senderRPC, instance ) )
 			return;
 
-		Exec_Heal( obj, senderRPC, instance );
+		Exec_Heal( target, senderRPC, instance );
 	}
 
 	protected void OnAddObject( Object obj )
