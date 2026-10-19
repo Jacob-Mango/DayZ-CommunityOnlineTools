@@ -41,8 +41,20 @@ class JMPermissionManager
 			MakeDirectory( JMConstants.DIR_PERMISSIONS );
 		#endif
 
+			//! First run: no Players folder yet, so drop an example file
+			//! showing admins how to pin roles to a Steam64 ID.
+			bool createPlayersExample = !FileExist( JMConstants.DIR_PLAYERS );
+
 			MakeDirectory( JMConstants.DIR_PLAYERS );
 			MakeDirectory( JMConstants.DIR_ROLES );
+
+			if ( createPlayersExample )
+			{
+				JMPlayerSerialize example = new JMPlayerSerialize();
+				example.m_FileName = JMConstants.DIR_PLAYERS + "Your_Steam64_ID" + JMConstants.EXT_PLAYER;
+				example.Roles.Insert( "admin" );
+				example.Save();
+			}
 		}
 		
 	#ifdef DIAG_DEVELOPER
