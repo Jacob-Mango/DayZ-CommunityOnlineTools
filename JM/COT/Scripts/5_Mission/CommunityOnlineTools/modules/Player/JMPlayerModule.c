@@ -3026,7 +3026,6 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		// Client-side: server pushed a mask - populate the form
 		string maskGuid;
-		int cholera, influenza, salmonella, brain, foodPoison, chemPoison, wound, nerve, heavyMetal;
 
 		if ( !ctx.Read( maskGuid ) )    return;
 		
@@ -3047,10 +3046,6 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void SendDiseaseMaskTo( PlayerIdentity to, string guid )
 	{
-		int mask = 0;
-		int cholera = 0, influenza = 0, salmonella = 0, brain = 0;
-		int foodPoison = 0, chemPoison = 0, wound = 0, nerve = 0, heavyMetal = 0;
-
 		TIntArray agentCounts = {};
 
 		if ( guid != "" )
