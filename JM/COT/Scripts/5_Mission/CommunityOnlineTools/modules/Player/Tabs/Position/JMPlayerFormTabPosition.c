@@ -75,7 +75,7 @@ class JMPlayerFormTabPosition: JMFormTab
 	//! the default: the point of focusing a step is to see WHERE it is, and at
 	//! the overview scale three positions in the same town are one dot.
 	static const float MAP_FOCUS_SCALE = 0.06;
-	static const int MAP_MARK_TARGET = 0xFFFFFF00;
+	static const int MAP_MARK_TARGET = 0xFFE8590C;
 	static const int MAP_MARK_SELF   = 0xFF00FF00;
 
 	//! Drawn height of the embedded map, in layout pixels.
@@ -298,6 +298,8 @@ class JMPlayerFormTabPosition: JMFormTab
 			m_TeleportHistoryGrid  = UIActionManager.CreateGridSpacer( m_TeleportHistoryHost, 1, 1 );
 			m_TeleportHistoryEmpty = UIActionManager.CreateText( m_TeleportHistoryGrid, "#STR_COT_TELEPORT_HISTORY_EMPTY", "" );
 
+			UpdateFormScroller();
+
 			return;
 		}
 
@@ -332,6 +334,14 @@ class JMPlayerFormTabPosition: JMFormTab
 			m_TeleportHistoryCopy.Insert( copy );
 			m_TeleportHistoryFocus.Insert( focus );
 		}
+
+		UpdateFormScroller();
+	}
+
+	protected void UpdateFormScroller()
+	{
+		if ( m_Form.m_ActionListScroller )
+			m_Form.m_ActionListScroller.UpdateScroller();
 	}
 
 	//! The entry a row's controls act on, or NULL if the panel has moved on
