@@ -11,16 +11,16 @@ class JMBuildInfo
 	static const string CHANNEL_INTERNAL     = "internal";
 
 	//! <year>.<month>.<day>-<hour><minute> UTC build timestamp, no channel suffix.
-	static const string VERSION = "2026.10.091910";
+	static const string VERSION = "2026.10.191017";
 
 	//! VERSION plus the channel suffix - what the UI shows.
-	static const string DISPLAY_VERSION = "2026.10.091910-internal";
+	static const string DISPLAY_VERSION = "2026.10.191017-internal";
 
 	//! One of the CHANNEL_* ids above.
 	static const string CHANNEL = "internal";
 
 	//! Short commit the build came from, or "unknown" outside a git checkout.
-	static const string COMMIT = "01dbf8c0";
+	static const string COMMIT = "be66f611";
 
 	//! Branch the build came from.
 	static const string BRANCH = "dev/1.30";
@@ -29,7 +29,7 @@ class JMBuildInfo
 	static const bool DIRTY = true;
 
 	//! UTC build timestamp, "YYYY-MM-DD HH:MM".
-	static const string BUILT_AT = "2026-10-11 18:12";
+	static const string BUILT_AT = "2026-10-19 10:17";
 
 	//! "COT 1.4.2" / "COT 1.4.2-exp". What the sidebar footer renders.
 	static string GetFooterText()
