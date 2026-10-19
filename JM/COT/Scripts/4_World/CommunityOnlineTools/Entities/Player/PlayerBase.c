@@ -1008,18 +1008,7 @@ modded class PlayerBase
 		if ( !bms )
 			return false;
 
-		int count = bms.COT_GetZoneCount();
-		for ( int i = 0; i < count; i++ )
-		{
-			if ( bms.COT_GetZoneSelectionName( i ) == selectionName )
-			{
-				int bit = bms.COT_GetZoneBit( i );
-				if ( bit != 0 )
-					bms.COT_ActivateBleedingSource( bit );
-				return true;
-			}
-		}
-		return false;
+		return bms.AttemptAddBleedingSourceBySelection( selectionName );
 	}
 
 	void COTResetItemWetness()
