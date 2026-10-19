@@ -114,6 +114,8 @@ class JMESPActionMenu
 			}
 		}
 
+		TStringArray slotNames = {};
+
 		foreach ( string configPath : configPaths )
 		{
 			int childCount = g_Game.ConfigGetChildrenCount( configPath );
@@ -145,7 +147,17 @@ class JMESPActionMenu
 					if ( InventorySlots.GetSlotIdFromString( invSlot ) == slotId )
 					{
 						result.Insert( childName );
-						labels.Insert( displayName );
+						slotNames.Insert( invSlot );
+
+						int idx = labels.Find( displayName );
+						if ( idx == -1 )
+							labels.Insert( displayName );
+						else
+						{
+							//! If displayname is already in list, replace with slotname
+							labels[idx] = slotNames[idx];
+							labels.Insert( invSlot );
+						}
 
 						break;
 					}
@@ -1085,20 +1097,48 @@ class JMESPActionMenu
 		if ( !Class.CastTo( target, m_Meta.target ) || !target.GetInventory() )
 			return;
 
-		int count = target.GetInventory().GetAttachmentSlotsCount();
+		GameInventory inventory = target.GetInventory();
+
+		int count = inventory.GetAttachmentSlotsCount();
+		int slotId;
+
+		TIntArray slotIds = {};
+		TStringArray slotNames = {};
+		TStringArray labels = {};
+
 		for ( int i = 0; i < count; i++ )
 		{
-			int slotId = target.GetInventory().GetAttachmentSlotId( i );
+			slotId = inventory.GetAttachmentSlotId( i );
 			if ( slotId == InventorySlots.INVALID || !InventorySlots.GetShowForSlotId( slotId ) )
 				continue;
 
-			string slotName = InventorySlots.GetSlotDisplayName( slotId );
-			EntityAI attached = target.GetInventory().FindAttachment( slotId );
+			slotIds.Insert( slotId );
+
+			string displayName = InventorySlots.GetSlotDisplayName( slotId );
+			string slotName = InventorySlots.GetSlotName( slotId );
+
+			slotNames.Insert( slotName );
+
+			int idx = labels.Find( displayName );
+			if ( idx == -1 )
+				labels.Insert( displayName );
+			else
+			{
+				labels[idx] = slotNames[idx];
+				labels.Insert( slotName );
+			}
+		}
+
+		foreach ( int j, string label: labels )
+		{
+			slotId = slotIds[j];
+
+			EntityAI attached = inventory.FindAttachment( slotId );
 
 			if ( attached && ( attached.GetFlags() & EntityFlags.VISIBLE ) == 0 )
 				continue;  //! Ignore slot if attached entity is invisible
 
-			string label = slotName + ": ";
+			label += ": ";
 			if ( attached )
 				label += attached.GetDisplayName();
 			else
