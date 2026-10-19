@@ -2128,7 +2128,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		bool cantBanAdmin;
 		foreach (JMPlayerInstance player: players)
 		{
-			if (!player.PlayerObject)
+			if (!player.PlayerObject || !player.PlayerObject.GetIdentity())
 				continue;
 			
 			if (player.PlayerObject.GetIdentity() == ident)
@@ -2143,7 +2143,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			SendBanMessage(player.PlayerObject.GetIdentity(), messageText, duration);
 
-			//! Kick and Ban player after delay so client can still receive kickmessage RPC
+			//! Kick and Ban player after delay so client can still receive banmessage RPC
 			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance, messageText, duration);
 		}
 
@@ -2155,7 +2155,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void Exec_Ban_Single(JMPlayerInstance player, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = "", int duration = -1)
 	{
-		if (!g_Game || !player.PlayerObject)
+		if (!g_Game || !player.PlayerObject || !player.PlayerObject.GetIdentity())
 			return;
 
 		auto missionServer = MissionServer.Cast(g_Game.GetMission());
@@ -2227,7 +2227,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		foreach (JMPlayerInstance player: players)
 		{
-			if (!player.PlayerObject)
+			if (!player.PlayerObject || !player.PlayerObject.GetIdentity())
 				continue;
 
 			SendKickMessage(player.PlayerObject.GetIdentity(), messageText);
@@ -2241,7 +2241,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void Exec_Kick_Single(JMPlayerInstance player, PlayerIdentity ident, JMPlayerInstance instance = NULL)
 	{
-		if (!g_Game || !player.PlayerObject)
+		if (!g_Game || !player.PlayerObject || !player.PlayerObject.GetIdentity())
 			return;
 
 		auto missionServer = MissionServer.Cast(g_Game.GetMission());
