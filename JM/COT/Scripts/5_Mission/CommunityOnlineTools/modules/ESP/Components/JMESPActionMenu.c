@@ -192,7 +192,7 @@ class JMESPActionMenu
 		return label;
 	}
 
-	bool IsAttachmentSlotAccessible( EntityAI target, string slotName )
+	bool IsAttachmentSlotAccessible( EntityAI target, string slotName, out string partName )
 	{
 		Building building;
 		if ( Class.CastTo( building, target ) )
@@ -219,7 +219,9 @@ class JMESPActionMenu
 							{
 								ConstructionBase construction = ConstructionBase.Cast( building.GetConstructionBasic() );
 
-								if ( !doorInfo.m_DoorConstructionPartName || construction.IsPartConstructed( doorInfo.m_DoorConstructionPartName ) )
+								partName = doorInfo.m_DoorConstructionPartName;
+
+								if ( !partName || construction.IsPartConstructed( partName ) )
 									return true;
 
 								return false;
@@ -936,23 +938,8 @@ class JMESPActionMenu
 		//! Narrowed to the part the right-click landed on when it landed on one;
 		//! a rebuildable building has dozens. A click on nothing that names a part
 		//! (or a name no part answers to) lists everything rather than nothing.
-		string filter = m_PartFilter;
-		filter.ToLower();
-
-		bool filtered = false;
-
-		if ( filter != "" )
-		{
-			//! Only filter parts if at least one part DOES match the filter
-			foreach ( string partNameTmp, JMConstructionPartData partTmp: parts )
-			{
-				if ( PartMatchesFilter( partTmp, filter ) )
-				{
-					filtered = true;
-					break;
-				}
-			}
-		}
+		string filter;
+		bool filtered = CheckConstructionPartsFilter( filter );
 
 		foreach ( string partName, JMConstructionPartData part: parts )
 		{
@@ -965,6 +952,29 @@ class JMESPActionMenu
 
 			AddPage( PAGE_PART + ":" + partName, part.m_DisplayName, JMConstants.Lucide( "hammer" ), enabled );
 		}
+	}
+
+	protected bool CheckConstructionPartsFilter( out string filter )
+	{
+		if ( m_PartFilter != "" )
+		{
+			map< string, ref JMConstructionPartData > parts = m_Meta.GetConstructionParts();
+
+			if ( parts )
+			{
+				filter = m_PartFilter;
+				filter.ToLower();
+
+				//! Only filter parts if at least one part DOES match the filter
+				foreach ( string partName, JMConstructionPartData part: parts )
+				{
+					if ( PartMatchesFilter( part, filter ) )
+						return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	protected bool PartMatchesFilter( JMConstructionPartData part, string lowerFilter )
@@ -1181,6 +1191,12 @@ class JMESPActionMenu
 
 		int count = inventory.GetAttachmentSlotsCount();
 		int slotId;
+		string partName;
+		string filter;
+		bool filtered = CheckConstructionPartsFilter( filter );
+
+		map< string, ref JMConstructionPartData > parts = m_Meta.GetConstructionParts();
+		JMConstructionPartData part;
 
 		TStringIntMap slotIdByLabel = new TStringIntMap;
 		TStringArray slotNames = {};
@@ -1198,7 +1214,10 @@ class JMESPActionMenu
 
 			string slotName = InventorySlots.GetSlotName( slotId );
 
-			if ( !IsAttachmentSlotAccessible( target, slotName ) )
+			if ( !IsAttachmentSlotAccessible( target, slotName, partName ) )
+				continue;
+
+			if ( filtered && partName && parts.Find( partName, part ) && !PartMatchesFilter( part, filter ) )
 				continue;
 
 			string displayName = InventorySlots.GetSlotDisplayName( slotId );
