@@ -329,7 +329,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 
 		UIActionImageButton btn;
 		if ( Class.CastTo( btn, action ) )
-			btn.StopPulse();
+			btn.SetGlow( false );
 
 		action.AnimateSpin( 1.0 );
 
@@ -339,7 +339,7 @@ class JMRoleManagerFormTabRoles: JMFormTab
 	protected void MarkRolePermChanged()
 	{
 		if ( m_SavePermBtn )
-			m_SavePermBtn.AnimatePulse( 5.0 );
+			m_SavePermBtn.SetGlow( true );
 	}
 
 	// =========================================================================

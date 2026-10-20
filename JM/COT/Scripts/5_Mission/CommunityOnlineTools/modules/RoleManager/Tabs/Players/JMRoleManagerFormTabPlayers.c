@@ -340,7 +340,7 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 	protected void MarkPlayerRoleChanged()
 	{
 		if ( m_SaveRolesBtn )
-			m_SaveRolesBtn.AnimatePulse( 5.0 );
+			m_SaveRolesBtn.SetGlow( true );
 	}
 
 	void OnClick_CopyGUID( UIEvent eid, UIActionBase action )
@@ -454,7 +454,7 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 
 		UIActionImageButton btn;
 		if ( Class.CastTo( btn, action ) )
-			btn.StopPulse();
+			btn.SetGlow( false );
 
 		action.AnimateSpin( 1.0 );
 

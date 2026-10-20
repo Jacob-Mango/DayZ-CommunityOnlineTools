@@ -9,6 +9,8 @@ class UIActionButton: UIActionBase
 	static const float ICON_SLOT_PAD = 4.0;
 	static const float ICON_SLOT_W   = 30.0;
 
+	static const float PILL_TEXT_X   = 40.0;
+
 	//! How fast the icon swings to a new resting angle. Matches the fold
 	//! panel's slide so a chevron and the rows it opens move together.
 	static const float ICON_ROTATE_SPEED = 14.0;
@@ -198,8 +200,7 @@ class UIActionButton: UIActionBase
 				return;
 			}
 
-			if ( m_Text )
-				m_Text.SetTextOffset( 0, 0 );
+			ApplyPillTextLayout( false );
 			return;
 		}
 
@@ -212,9 +213,24 @@ class UIActionButton: UIActionBase
 			return;
 		}
 
-		// Shift text right so it stays visually centered in the remaining space
-		if ( m_Text )
-			m_Text.SetTextOffset( 16, 0 );
+		ApplyPillTextLayout( true );
+	}
+
+	protected void ApplyPillTextLayout( bool hasIcon )
+	{
+		if ( !m_Text )
+			return;
+
+		if ( hasIcon )
+		{
+			m_Text.ClearFlags( WidgetFlags.CENTER );
+			m_Text.SetTextOffset( PILL_TEXT_X, 0 );
+		}
+		else
+		{
+			m_Text.SetFlags( WidgetFlags.CENTER );
+			m_Text.SetTextOffset( 0, 0 );
+		}
 	}
 
 	//! The icon slot is reserved whether or not an icon is loaded, so a leaf

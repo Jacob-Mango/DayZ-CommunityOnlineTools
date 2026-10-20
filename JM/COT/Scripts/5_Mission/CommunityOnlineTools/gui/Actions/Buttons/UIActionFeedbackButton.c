@@ -337,8 +337,7 @@ class UIActionFeedbackButton: UIActionButton
 		{
 			m_Icon.Show( false );
 
-			if ( m_Text )
-				m_Text.SetTextOffset( 0, 0 );
+			ApplyPillTextLayout( false );
 
 			return;
 		}
@@ -347,7 +346,6 @@ class UIActionFeedbackButton: UIActionButton
 		m_Icon.SetImage( 0 );
 		m_Icon.Show( true );
 
-		if ( m_Text )
-			m_Text.SetTextOffset( 16, 0 );
+		ApplyPillTextLayout( true );
 	}
 }

@@ -16,6 +16,8 @@ class UIActionImageButton: UIActionButton
 	protected float  m_PulseTimer;
 	protected float  m_PulseDuration;
 
+	protected bool   m_Glow;
+
 	//! Double click to leave the button firing its own callback once a
 	//! second, double click again to stop. Opt-in per button (see
 	//! UIActionManager.CreateRefreshButton) rather than on by default: a
@@ -161,6 +163,37 @@ class UIActionImageButton: UIActionButton
 	override void AnimatePulse( float duration = 2.0 )
 	{
 		TriggerPulse( duration );
+	}
+
+	bool IsGlowing()
+	{
+		return m_Glow;
+	}
+
+	//! Green and pulsing while `glow`, plain again once it is cleared. Safe to call every frame
+	//! with the pending state. Mid-feedback the check mark keeps the widget: the colour it
+	//! falls back to is changed instead, so a click that clears the glow does not bring it back.
+	void SetGlow( bool glow )
+	{
+		if ( glow == m_Glow )
+			return;
+
+		m_Glow = glow;
+
+		int fill = JMTheme.BUTTON_FILL;
+		if ( m_Glow )
+			fill = JMTheme.SUCCESS_FILL;
+
+		if ( !m_Glow )
+		{
+			m_PulseActive = false;
+			m_PulseTimer  = 0;
+		}
+
+		m_SavedFillColor = fill;
+
+		if ( !m_FeedbackActive )
+			SetColor( fill );
 	}
 
 	void StopPulse()
@@ -329,6 +362,9 @@ class UIActionImageButton: UIActionButton
 				SetColor( ARGB( 255, r, g, b ) );
 			}
 		}
+
+		if ( m_Glow && !m_PulseActive && !m_FeedbackActive )
+			TriggerPulse( 2.0 );
 
 		if ( !m_FeedbackActive )
 			return;
