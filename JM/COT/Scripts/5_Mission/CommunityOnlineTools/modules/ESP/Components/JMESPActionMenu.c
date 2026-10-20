@@ -1186,7 +1186,7 @@ class JMESPActionMenu
 			if ( !IsAttachmentSlotAccessible( target, slotName ) )
 				continue;
 
-			string displayName = InventorySlots.GetSlotDisplayName( slotId );
+			string displayName = Widget.TranslateString( InventorySlots.GetSlotDisplayName( slotId ) );
 
 			slotNames.Insert( slotName );
 
