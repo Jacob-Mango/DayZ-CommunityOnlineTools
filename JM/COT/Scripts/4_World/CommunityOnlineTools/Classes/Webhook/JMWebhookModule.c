@@ -7,7 +7,19 @@ class JMWebhookQueueItem : Managed
 	// Optional target context for per-player/per-role filtering.
 	// Empty strings mean "no specific target" (send to all groups).
 	string m_TargetGUID;
+
+	//! Comma separated role names the target held when the event was posted - kept on the item
+	//! because the player may be gone from the permissions manager by the time it is sent.
 	string m_TargetRole;
+
+	//! A second player involved in the event (the killer in a death or hit), matched by the
+	//! group filters exactly like the target.
+	string m_OtherGUID;
+	string m_OtherRole;
+
+	//! Steam64 of each, so a group can be filtered by either the GUID or the Steam64 ID.
+	string m_TargetSteam;
+	string m_OtherSteam;
 
 	void JMWebhookQueueItem( string type, JMWebhookMessage message, string targetGUID = "", string targetRole = "" )
 	{
@@ -31,6 +43,38 @@ class JMWebhookQueueItem : Managed
 	string GetTargetRole()
 	{
 		return m_TargetRole;
+	}
+
+	void SetOther( string guid, string roles, string steam = "" )
+	{
+		m_OtherGUID = guid;
+		m_OtherRole = roles;
+		m_OtherSteam = steam;
+	}
+
+	void SetTargetSteam( string steam )
+	{
+		m_TargetSteam = steam;
+	}
+
+	string GetTargetSteam()
+	{
+		return m_TargetSteam;
+	}
+
+	string GetOtherSteam()
+	{
+		return m_OtherSteam;
+	}
+
+	string GetOtherGUID()
+	{
+		return m_OtherGUID;
+	}
+
+	string GetOtherRole()
+	{
+		return m_OtherRole;
 	}
 
 	int GetTime()
@@ -387,6 +431,99 @@ class JMWebhookModule: JMModuleBase
 		m_Queue.Insert( new JMWebhookQueueItem( connectionType, message, targetGUID, targetRole ) );
 	}
 
+	//! Post an event done by (or to) a player: a group filtered to that player's GUID or to one of
+	//! their roles receives it. `other` is a second player in the same event, e.g. the killer.
+	//! Either may be NULL; with neither it is a plain Post().
+	void PostAs( string connectionType, JMWebhookMessage message, JMPlayerInstance player, JMPlayerInstance other = NULL )
+	{
+		if ( IsMissionClient() )
+			return;
+
+		if ( Assert_Null( message ) )
+			return;
+
+		string guid = "";
+		string roles = "";
+
+		if ( player )
+		{
+			guid = player.GetGUID();
+			roles = JoinRoles( player );
+		}
+
+		JMWebhookQueueItem item = new JMWebhookQueueItem( connectionType, message, guid, roles );
+
+		if ( player )
+			item.SetTargetSteam( player.GetSteam64ID() );
+
+		if ( other )
+			item.SetOther( other.GetGUID(), JoinRoles( other ), other.GetSteam64ID() );
+
+		m_Queue.Insert( item );
+	}
+
+	//! The permissions instance behind a player entity, or NULL (AI, a body with no identity).
+	JMPlayerInstance InstanceOf( PlayerBase player )
+	{
+		if ( !player )
+			return NULL;
+
+		PlayerIdentity identity = player.GetIdentity();
+		if ( !identity )
+			return NULL;
+
+		return GetPermissionsManager().GetPlayer( identity.GetId() );
+	}
+
+	protected string JoinRoles( JMPlayerInstance player )
+	{
+		string joined = "";
+
+		array< string > roles = player.GetRoles();
+		for ( int i = 0; i < roles.Count(); i++ )
+			joined += "," + roles[i];
+
+		return joined;
+	}
+
+	//! A group with a GUID and/or role filter only receives events whose target or other player
+	//! matches it (both filters, when both are set). Unfiltered groups receive everything.
+	protected bool MatchesGroupFilter( JMWebhookConnectionGroup grp, JMWebhookQueueItem item )
+	{
+		if ( grp.FilterGUID != "" )
+		{
+			bool isTarget = grp.FilterGUID == item.GetTargetGUID() || grp.FilterGUID == item.GetTargetSteam();
+			bool isOther  = grp.FilterGUID == item.GetOtherGUID() || grp.FilterGUID == item.GetOtherSteam();
+
+			if ( !isTarget && !isOther )
+				return false;
+		}
+
+		if ( grp.FilterRole != "" )
+		{
+			if ( !HasRoleFor( grp.FilterRole, item.GetTargetGUID(), item.GetTargetRole() ) && !HasRoleFor( grp.FilterRole, item.GetOtherGUID(), item.GetOtherRole() ) )
+				return false;
+		}
+
+		return true;
+	}
+
+	//! `roles` is what the player held when the event was posted; the permissions manager is the
+	//! fallback for a Post() that only knew the GUID.
+	protected bool HasRoleFor( string role, string guid, string roles )
+	{
+		if ( guid == "" )
+			return false;
+
+		string padded = roles + ",";
+		if ( padded.IndexOf( "," + role + "," ) != -1 )
+			return true;
+
+		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( guid );
+
+		return pi && pi.HasRole( role );
+	}
+
 	protected void Thread_ProcessQueue()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -420,25 +557,8 @@ class JMWebhookModule: JMModuleBase
 							// Check group-level filter: if the group has a GUID or role filter,
 							// only fire if the queue item's target matches.
 							JMWebhookConnectionGroup grp = connections[i].m_Group;
-							if ( grp )
-							{
-								if ( grp.FilterGUID != "" && grp.FilterGUID != item.GetTargetGUID() )
-									continue;
-
-								if ( grp.FilterRole != "" )
-								{
-									// Check if the target player has the required role
-									bool roleMatch = false;
-									if ( item.GetTargetGUID() != "" )
-									{
-										JMPlayerInstance pi = GetPermissionsManager().GetPlayer( item.GetTargetGUID() );
-										if ( pi && pi.HasRole( grp.FilterRole ) )
-											roleMatch = true;
-									}
-									if ( !roleMatch )
-										continue;
-								}
-							}
+							if ( grp && !MatchesGroupFilter( grp, item ) )
+								continue;
 
 							connections[i].Post( m_Core, s_Serializer, item.GetMessage() );
 						}
@@ -484,9 +604,6 @@ class JMWebhookModule: JMModuleBase
 
 		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
 
-		if ( m_ServerHostName != "" )
-			embed.AddField( "Server:", m_ServerHostName, false );
-
 		return message;
 	}
 
@@ -498,9 +615,6 @@ class JMWebhookModule: JMModuleBase
 		embed.SetColor( color );
 
 		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
-
-		if ( m_ServerHostName != "" )
-			embed.AddField( "Server:", m_ServerHostName, false );
 
 		return message;
 	}
@@ -517,10 +631,7 @@ class JMWebhookModule: JMModuleBase
 
 		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
 
-		if ( m_ServerHostName != "" )
-			embed.AddField( "Server:", m_ServerHostName, true );
-
-		embed.AddField( title, player.FormatSteamWebhook(), m_ServerHostName != "" );
+		AddPlayerFields( embed, player, title );
 
 		return message;
 	}
@@ -534,11 +645,51 @@ class JMWebhookModule: JMModuleBase
 
 		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
 
-		if ( m_ServerHostName != "" )
-			embed.AddField( "Server:", m_ServerHostName, true );
-
-		embed.AddField( title, admin.FormatSteamWebhook(), m_ServerHostName != "" );
+		AddPlayerFields( embed, admin, title );
 
 		return message;
+	}
+
+	//! The acting player, up front on every event: who (linked to their Steam profile), their
+	//! roles and where they stood. The caller adds what was done after these.
+	protected void AddPlayerFields( JMWebhookDiscordEmbed embed, JMPlayerInstance player, string title )
+	{
+		embed.AddField( title, player.FormatSteamWebhook(), true );
+
+		string roles = JoinRoleNames( player );
+		if ( roles != "" )
+			embed.AddField( "Role:", roles, true );
+
+		if ( player.PlayerObject )
+			embed.AddField( "Position:", FormatPosition( player.PlayerObject.GetPosition() ), true );
+	}
+
+	//! One decimal at most, so 29.999998 reads as 30.
+	static string FormatNumber( float value )
+	{
+		return ( Math.Round( value * 10 ) / 10 ).ToString();
+	}
+
+	string JoinRoleNames( JMPlayerInstance player )
+	{
+		string names = "";
+
+		array< string > roles = player.GetRoles();
+		for ( int i = 0; i < roles.Count(); i++ )
+		{
+			if ( i > 0 )
+				names += ", ";
+
+			names += roles[i];
+		}
+
+		return names;
+	}
+
+	//! "x, y, z" in whole metres - what a webhook reader can paste into the map, without the
+	//! float noise of vector.ToString().
+	static string FormatPosition( vector position )
+	{
+		return Math.Round( position[0] ).ToString() + ", " + Math.Round( position[1] ).ToString() + ", " + Math.Round( position[2] ).ToString();
 	}
 }

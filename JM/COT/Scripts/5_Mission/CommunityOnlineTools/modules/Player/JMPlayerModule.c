@@ -792,10 +792,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
+			//! The synced copy is refreshed first so "from" is what the player has right now.
+			players[i].Update();
+			float statBefore = stat.Read( players[i] );
+
 			stat.Apply( player, value );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set " + statName + " To " + value + " [guid=" + players[i].GetGUID() + "]" );
-			SendWebhookColored( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " " + statName + " to " + value, JMConstants.WEBHOOK_COLOR_WARNING );
+			SendWebhookColored( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " " + statName + " from **" + JMWebhookModule.FormatNumber( statBefore ) + "** to **" + JMWebhookModule.FormatNumber( value ) + "**/" + JMWebhookModule.FormatNumber( stat.GetMax() ), JMConstants.WEBHOOK_COLOR_WARNING );
 
 			players[i].Update();
 		}
@@ -1047,13 +1051,15 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
+			vector tpFrom = player.GetPosition();
+
 			player.SetLastPosition();
 
 			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position );
 
-			SendWebhookColored( "Teleport", instance, "Teleported " + players[i].FormatSteamWebhook() + " to " + position.ToString(), JMConstants.WEBHOOK_COLOR_TELEPORT );
+			SendWebhookColored( "Teleport", instance, "Teleported " + players[i].FormatSteamWebhook() + " from **" + JMWebhookModule.FormatPosition( tpFrom ) + "** to **" + JMWebhookModule.FormatPosition( position ) + "**", JMConstants.WEBHOOK_COLOR_TELEPORT );
 
 			players[i].Update();
 		}

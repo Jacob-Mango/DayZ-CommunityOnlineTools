@@ -267,7 +267,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		GetPermissionsManager().CreateRole( name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Created role: " + name );
-		SendWebhook( "CreateRole", NULL, "Created role: " + name );
+		SendWebhook( "CreateRole", instance, "Created role: " + name );
 
 		if ( ident )
 			SendRoleListToClient( ident );
@@ -303,7 +303,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		GetPermissionsManager().RemoveRole( name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Deleted role: " + name );
-		SendWebhook( "DeleteRole", NULL, "Deleted role: " + name );
+		SendWebhook( "DeleteRole", instance, "Deleted role: " + name );
 
 		if ( ident )
 			SendRoleListToClient( ident );
@@ -323,7 +323,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		role.Save();
 
 		GetCommunityOnlineToolsBase().Log( ident, "Updated permissions for role: " + roleName );
-		SendWebhook( "SetRolePermissions", NULL, "Updated permissions for role: " + roleName );
+		SendWebhook( "SetRolePermissions", instance, "Updated permissions for role: " + roleName );
 
 		if ( ident )
 			SendRoleListToClient( ident );

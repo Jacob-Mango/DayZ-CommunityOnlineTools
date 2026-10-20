@@ -327,12 +327,14 @@ class JMTeleportModule: JMRenderableModuleBase
 			//! rows still walk unchanged.
 			JMActionHistory.Push( new JMTeleportSnapshotEntry( player, player.GetPosition() ), JMActionHistory.OwnerOf( ident ) );
 
+			vector vecFrom = player.GetPosition();
+
 			SetPlayerPosition( player, position );
 
 			if ( shouldLog )
 			{
 				GetCommunityOnlineToolsBase().Log( ident, "Teleported "+ players[i].GetSteam64ID() +" to position " + position.ToString() );
-				SendWebhookColored( "Vector", instance, "Teleported "+players[i].GetSteam64ID()+" to position " + position.ToString(), JMConstants.WEBHOOK_COLOR_TELEPORT );
+				SendWebhookColored( "Vector", instance, "Teleported " + players[i].FormatSteamWebhook() + " from **" + JMWebhookModule.FormatPosition( vecFrom ) + "** to **" + JMWebhookModule.FormatPosition( position ) + "**", JMConstants.WEBHOOK_COLOR_TELEPORT );
 			}
 		}
 
@@ -411,13 +413,15 @@ class JMTeleportModule: JMRenderableModuleBase
 			return;
 		}
 
+		vector cursorFrom = player.GetPosition();
+
 		SetPlayerPosition( player, position );
 
 		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_POSITION_CURSOR_NOLOG, player.GetIdentity() ) )
 		{
 			GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
 		
-			SendWebhookColored( "Vector", instance, "Teleported to position " + position.ToString(), JMConstants.WEBHOOK_COLOR_TELEPORT );
+			SendWebhookColored( "Vector", instance, "Teleported to cursor from **" + JMWebhookModule.FormatPosition( cursorFrom ) + "** to **" + JMWebhookModule.FormatPosition( position ) + "**", JMConstants.WEBHOOK_COLOR_TELEPORT );
 		}
 	}
 
@@ -507,10 +511,12 @@ class JMTeleportModule: JMRenderableModuleBase
 
 			tempPos = SnapToGround(tempPos);
 
+			vector locFrom = player.GetPosition();
+
 			SetPlayerPosition( player, tempPos );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
-			SendWebhookColored( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name, JMConstants.WEBHOOK_COLOR_TELEPORT );
+			SendWebhookColored( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " from **" + JMWebhookModule.FormatPosition( locFrom ) + "** to **" + location.Name + "** (" + JMWebhookModule.FormatPosition( tempPos ) + ")", JMConstants.WEBHOOK_COLOR_TELEPORT );
 
 			players[j].Update();
 		}
@@ -805,10 +811,12 @@ class JMTeleportModule: JMRenderableModuleBase
 		else
 			return;
 
+		vector cmdFrom = player.GetPosition();
+
 		SetPlayerPosition( player, position );
 
 		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
-		SendWebhookColored( "Vector", instance, "Teleported to position " + position.ToString(), JMConstants.WEBHOOK_COLOR_TELEPORT );
+		SendWebhookColored( "Vector", instance, "Teleported from **" + JMWebhookModule.FormatPosition( cmdFrom ) + "** to **" + JMWebhookModule.FormatPosition( position ) + "**", JMConstants.WEBHOOK_COLOR_TELEPORT );
 	}
 
 	void Command_Get(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)

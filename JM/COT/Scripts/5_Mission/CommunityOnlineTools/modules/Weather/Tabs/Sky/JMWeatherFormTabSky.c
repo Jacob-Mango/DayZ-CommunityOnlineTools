@@ -114,13 +114,13 @@ class JMWeatherFormTabSky: JMFormTab
 		Widget content = m_ScrollerSky.GetContentWidget();
 
 		UIActionCard overcastCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_OVERCAST" );
-		overcastCard.AddApplyButton( this, "OnClick_ApplyOvercast" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_OVERCAST, overcastCard.AddApplyButton( this, "OnClick_ApplyOvercast" ) );
 		m_ToggleOvercast = new JMWeatherRangeToggle( m_Form, overcastCard, JMWeatherForm.SECTION_OVERCAST );
 		m_SliderOvercastForecast = m_Form.CreatePercentRange( overcastCard.GetContent(), "#STR_COT_GENERIC_AMOUNT", "OnChange_Overcast", this );
 		m_ToggleOvercast.Add( m_SliderOvercastForecast );
 
 		UIActionCard fogCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_FOG" );
-		fogCard.AddApplyButton( this, "OnClick_ApplyFog" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_FOG, fogCard.AddApplyButton( this, "OnClick_ApplyFog" ) );
 		m_ToggleFog = new JMWeatherRangeToggle( m_Form, fogCard, JMWeatherForm.SECTION_FOG );
 		Widget fogBody = UIActionManager.CreateGridSpacer( fogCard.GetContent(), 4, 1 );
 
@@ -142,7 +142,7 @@ class JMWeatherFormTabSky: JMFormTab
 		m_ToggleFog.Add( m_SliderDynamicFogBias );
 
 		UIActionCard stormCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_STORM" );
-		stormCard.AddApplyButton( this, "OnClick_ApplyStorm" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_STORM, stormCard.AddApplyButton( this, "OnClick_ApplyStorm" ) );
 		m_ToggleStorm = new JMWeatherRangeToggle( m_Form, stormCard, JMWeatherForm.SECTION_STORM );
 		Widget stormBody = UIActionManager.CreateGridSpacer( stormCard.GetContent(), 3, 1 );
 
@@ -162,7 +162,7 @@ class JMWeatherFormTabSky: JMFormTab
 	#ifndef DAYZ_1_29
 		//! 1.30+
 		UIActionCard sandstormCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_SANDSTORM" );
-		sandstormCard.AddApplyButton( this, "OnClick_ApplySandstorm" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_SANDSTORM, sandstormCard.AddApplyButton( this, "OnClick_ApplySandstorm" ) );
 		m_ToggleSandstorm = new JMWeatherRangeToggle( m_Form, sandstormCard, JMWeatherForm.SECTION_SANDSTORM );
 		Widget sandstormBody = UIActionManager.CreateGridSpacer( sandstormCard.GetContent(), 5, 1 );
 

@@ -290,16 +290,17 @@ modded class JMModuleBase
 
 		CheckWebhookType( type );
 
-		auto msg = m_Webhook.CreateDiscordMessage( player, "Admin Account: " );
+		auto msg = m_Webhook.CreateDiscordMessageAdmin( player, "Player:", JMConstants.WEBHOOK_COLOR_INFO );
 
-		msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
+		AddWebhookBody( msg, type, message );
 
 		#ifdef JM_COT_WEBHOOK_DEBUG
 		Print( "name=" + GetModuleName() + type );
 		Print( "message=" + message );
 		#endif
 
-		m_Webhook.Post( GetModuleName() + type, msg );
+		//! The acting admin is the target of the group GUID / role filters.
+		m_Webhook.PostAs( GetModuleName() + type, msg, player );
 
 		#ifdef JM_COT_WEBHOOK_DEBUG
 		Print( "-JMModuleBase::SendWebhook() - Admin" );
@@ -307,18 +308,34 @@ modded class JMModuleBase
 	}
 
 	// SendWebhook with admin context and a specific embed color.
-	void SendWebhookColored( string type, JMPlayerInstance player, string message, int color )
+	//! `details` is extra markdown lines for the event (before / after values, the target, ...),
+	//! shown under the one-line `message`.
+	void SendWebhookColored( string type, JMPlayerInstance player, string message, int color, string details = "" )
 	{
 		if ( !m_Webhook || !player || IsMissionOffline() )
 			return;
 
 		CheckWebhookType( type );
 
-		auto msg = m_Webhook.CreateDiscordMessageAdmin( player, "Admin Account: ", color );
+		auto msg = m_Webhook.CreateDiscordMessageAdmin( player, "Player:", color );
 
-		msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
+		AddWebhookBody( msg, type, message, details );
 
-		m_Webhook.Post( GetModuleName() + type, msg );
+		m_Webhook.PostAs( GetModuleName() + type, msg, player );
+	}
+
+	//! What was done: the module's title field with the message, the optional details, and the
+	//! module / action as the footer.
+	protected void AddWebhookBody( JMWebhookDiscordMessage msg, string type, string message, string details = "" )
+	{
+		auto embed = msg.GetEmbed();
+
+		embed.AddField( GetWebhookTitle(), message, false );
+
+		if ( details != "" )
+			embed.AddField( "Details", details, false );
+
+		embed.SetFooter( GetWebhookTitle() + " - " + type );
 	}
 
 	//! Declare this module's permissions. Called on BOTH client and server at registration, before

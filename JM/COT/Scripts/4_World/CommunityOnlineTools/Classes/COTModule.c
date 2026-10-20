@@ -437,8 +437,9 @@ class COTModule : JMModuleBase
 
 				msg.GetEmbed().SetTitle( "Player Joined" );
 				msg.GetEmbed().SetDescription( instance.FormatSteamWebhook() + " has joined the server." );
+				AddIdentityFields( msg.GetEmbed(), instance );
 
-				m_Webhook.Post( "PlayerJoin", msg );
+				m_Webhook.PostAs( "PlayerJoin", msg, instance );
 			}
 		}
 
@@ -492,6 +493,18 @@ class COTModule : JMModuleBase
 	/**
 	 * See: MissionServer::PlayerDisconnected - Fires when the player has disconnected from the server (OnClientReconnect won't fire)
 	 */
+	//! Who connected / disconnected, in the terms an admin needs to find them again.
+	protected void AddIdentityFields( JMWebhookDiscordEmbed embed, JMPlayerInstance instance )
+	{
+		embed.AddField( "Player:", instance.FormatSteamWebhook(), true );
+		embed.AddField( "Steam ID:", instance.GetSteam64ID(), true );
+		embed.AddField( "GUID:", instance.GetGUID(), false );
+
+		string roles = m_Webhook.JoinRoleNames( instance );
+		if ( roles != "" )
+			embed.AddField( "Role:", roles, true );
+	}
+
 	override void OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
 	{
 		#ifdef COT_DEBUGLOGS
@@ -520,8 +533,9 @@ class COTModule : JMModuleBase
 
 				msg.GetEmbed().SetTitle( "Player Left" );
 				msg.GetEmbed().SetDescription( instance.FormatSteamWebhook() + " has left the server." );
+				AddIdentityFields( msg.GetEmbed(), instance );
 
-				m_Webhook.Post( "PlayerLeave", msg );
+				m_Webhook.PostAs( "PlayerLeave", msg, instance );
 			}
 
 			GetCommunityOnlineToolsBase().RemoveClient( uid );

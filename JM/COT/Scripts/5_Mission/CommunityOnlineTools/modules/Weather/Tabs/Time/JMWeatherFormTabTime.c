@@ -49,7 +49,7 @@ class JMWeatherFormTabTime: JMFormTab
 		Widget content = m_ScrollerTime.GetContentWidget();
 
 		UIActionCard dateCard = UIActionManager.CreateCard( content, "#STR_COT_GENERIC_DATE" );
-		dateCard.AddApplyButton( this, "OnClick_ApplyTime" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_TIME, dateCard.AddApplyButton( this, "OnClick_ApplyTime" ) );
 		Widget dateBody = UIActionManager.CreateGridSpacer( dateCard.GetContent(), 2, 1 );
 
 		//! Year, month and day are one date, so they read as one row.

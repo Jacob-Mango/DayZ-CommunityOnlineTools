@@ -50,7 +50,7 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 		Widget content = m_ScrollerPrecipitation.GetContentWidget();
 
 		UIActionCard rainCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_RAIN" );
-		rainCard.AddApplyButton( this, "OnClick_ApplyRain" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_RAIN, rainCard.AddApplyButton( this, "OnClick_ApplyRain" ) );
 		m_ToggleRain = new JMWeatherRangeToggle( m_Form, rainCard, JMWeatherForm.SECTION_RAIN );
 		Widget rainBody = UIActionManager.CreateGridSpacer( rainCard.GetContent(), 2, 1 );
 
@@ -66,7 +66,7 @@ class JMWeatherFormTabPrecipitation: JMFormTab
 		m_RangeRainThreshold.SetTooltip( "#STR_COT_WEATHER_THRESHOLDS_DESC" );
 
 		UIActionCard snowCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_SNOW" );
-		snowCard.AddApplyButton( this, "OnClick_ApplySnow" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_SNOW, snowCard.AddApplyButton( this, "OnClick_ApplySnow" ) );
 		m_ToggleSnow = new JMWeatherRangeToggle( m_Form, snowCard, JMWeatherForm.SECTION_SNOW );
 		Widget snowBody = UIActionManager.CreateGridSpacer( snowCard.GetContent(), 2, 1 );
 

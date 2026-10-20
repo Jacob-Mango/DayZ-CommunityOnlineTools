@@ -185,6 +185,15 @@ class JMBanModule : JMRenderableModuleBase
     //  Server: execute a ban
     // -------------------------------------------------------------------------
 
+    //! The permissions instance of the admin behind an identity, NULL for the mission host.
+    protected JMPlayerInstance GetAdminInstance( PlayerIdentity adminIdent )
+    {
+        if ( !adminIdent )
+            return NULL;
+
+        return GetPermissionsManager().GetPlayer( adminIdent.GetId() );
+    }
+
     protected void Exec_Ban( string steamID, string playerName, string message, int durationSeconds, string issuedBy, string issuedByName, PlayerIdentity adminIdent )
     {
         JMPlayerBan ban = new JMPlayerBan();
@@ -208,7 +217,7 @@ class JMBanModule : JMRenderableModuleBase
         Save();
 
         GetCommunityOnlineToolsBase().Log( adminIdent, "Banned [steamID=" + steamID + "] | " + message );
-        SendWebhook( "Ban", NULL, "Banned " + playerName + " (" + steamID + ") | " + message );
+        SendWebhook( "Ban", GetAdminInstance( adminIdent ), "Banned " + playerName + " (" + steamID + ") | " + message );
     }
 
     // -------------------------------------------------------------------------
@@ -336,7 +345,7 @@ class JMBanModule : JMRenderableModuleBase
             issuedByName = adminIdent.GetName();
 
         GetCommunityOnlineToolsBase().Log( adminIdent, "Unbanned [steamID=" + steamID + "]" );
-        SendWebhook( "Unban", NULL, issuedByName + " unbanned SteamID: " + steamID );
+        SendWebhook( "Unban", GetAdminInstance( adminIdent ), issuedByName + " unbanned SteamID: " + steamID );
 
         if ( adminIdent )
             COTCreateNotification( adminIdent, new StringLocaliser( "Unbanned SteamID: " + steamID ) );
@@ -374,6 +383,16 @@ class JMBanModule : JMRenderableModuleBase
             return;
         }
 
+        //! BanDuration is the expiry timestamp (-1 permanent), so "from" is what was left of it.
+        string durationFrom = "permanent";
+        if ( ban.BanDuration != -1 )
+        {
+            CF_Date nowBefore = CF_Date.Now( true );
+            durationFrom = Math.Max( 0, ban.BanDuration - nowBefore.GetTimestamp() ).ToString() + "s remaining";
+        }
+
+        string durationTo = "permanent";
+
         if ( durationSeconds == -1 )
         {
             ban.BanDuration = -1;
@@ -382,12 +401,13 @@ class JMBanModule : JMRenderableModuleBase
         {
             CF_Date now = CF_Date.Now( true );
             ban.BanDuration = now.GetTimestamp() + durationSeconds;
+            durationTo = durationSeconds.ToString() + "s";
         }
 
         Save();
 
         GetCommunityOnlineToolsBase().Log( adminIdent, "Edited ban duration [steamID=" + steamID + "] -> " + durationSeconds );
-        SendWebhook( "EditBan", NULL, "Edited ban duration for SteamID: " + steamID + " -> " + durationSeconds + "s" );
+        SendWebhook( "EditBan", GetAdminInstance( adminIdent ), "Edited ban duration for SteamID: " + steamID + " from **" + durationFrom + "** to **" + durationTo + "**" );
     }
 
     protected void RPC_EditBanDuration( ParamsReadContext ctx, PlayerIdentity sender, Object target )

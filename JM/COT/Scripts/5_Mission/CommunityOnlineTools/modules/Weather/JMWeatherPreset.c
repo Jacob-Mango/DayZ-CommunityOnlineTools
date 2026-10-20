@@ -318,6 +318,10 @@ class JMWeatherPhenomenon: JMWeatherBase
 	[NonSerialized()]
 	float Actual;
 
+	//! What the world had when Apply last ran - the "from" of the webhook line.
+	[NonSerialized()]
+	float Previous = -1000;
+
 	//! Noun the webhook line is built around ("fog", "wind direction").
 	string GetLabel()
 	{
@@ -345,9 +349,37 @@ class JMWeatherPhenomenon: JMWeatherBase
 		return null;
 	}
 
+	//! "Set rain from 0% to 60 - 80% (fade 30s, hold 240s)". Wind is m/s and degrees, the rest a
+	//! percentage; the engine's own 0-1 / radian values mean nothing to a reader.
 	override string Describe()
 	{
-		return "Set " + GetLabel() + "=" + Forecast;
+		string text = "Set " + GetLabel();
+
+		if ( Previous != -1000 )
+			text += " from **" + FormatValue( Previous ) + "**";
+
+		text += " to **" + FormatValue( Forecast );
+
+		if ( ForecastHi > Forecast )
+			text += " - " + FormatValue( ForecastHi );
+
+		text += "**";
+
+		if ( Time > 0 || MinDuration > 0 )
+			text += " (fade " + Math.Round( Time ).ToString() + "s, hold " + Math.Round( MinDuration ).ToString() + "s)";
+
+		return text;
+	}
+
+	protected string FormatValue( float value )
+	{
+		if ( Type() == JMWeatherWindMagnitude )
+			return JMWebhookModule.FormatNumber( value ) + " m/s";
+
+		if ( Type() == JMWeatherWindDirection )
+			return Math.Round( ( value * Math.RAD2DEG ) + 180.0 ).ToString() + " deg";
+
+		return Math.Round( value * 100 ).ToString() + "%";
 	}
 
 	//! Every phenomenon has the same three fields, so one write covers all of them.
@@ -408,6 +440,8 @@ class JMWeatherPhenomenon: JMWeatherBase
 						break;
 					}
 				}
+
+				Previous = phenom.GetActual();
 
 				phenom.Set( clampedForecast, Time, MinDuration );
 			}

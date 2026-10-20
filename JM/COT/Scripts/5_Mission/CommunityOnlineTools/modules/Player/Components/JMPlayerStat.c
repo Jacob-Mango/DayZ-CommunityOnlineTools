@@ -76,6 +76,11 @@ class JMPlayerStat
 		return this;
 	}
 
+	float GetMax()
+	{
+		return m_Max;
+	}
+
 	float Clamp( float value )
 	{
 		return Math.Clamp( value, m_Min, m_Max );

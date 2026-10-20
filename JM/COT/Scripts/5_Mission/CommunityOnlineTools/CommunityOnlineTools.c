@@ -171,7 +171,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		m_ActiveGUIDs[senderRPC.GetId()] = active;
 
-		m_Webhook.Post( "AdminActive", message );
+		m_Webhook.PostAs( "AdminActive", message, instance );
 	}
 
 	override void RefreshClients()

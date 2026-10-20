@@ -60,7 +60,7 @@ class JMWeatherFormTabWind: JMFormTab
 		Widget content = m_ScrollerWind.GetContentWidget();
 
 		UIActionCard windCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_WIND" );
-		windCard.AddApplyButton( this, "OnClick_ApplyWind" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_WIND, windCard.AddApplyButton( this, "OnClick_ApplyWind" ) );
 		m_ToggleWind = new JMWeatherRangeToggle( m_Form, windCard, JMWeatherForm.SECTION_WIND );
 		Widget windBody = UIActionManager.CreateGridSpacer( windCard.GetContent(), 2, 1 );
 
@@ -79,7 +79,7 @@ class JMWeatherFormTabWind: JMFormTab
 		m_ToggleWind.Add( m_SliderWindDirection );
 
 		UIActionCard funcCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_FUNCTION" );
-		funcCard.AddApplyButton( this, "OnClick_ApplyWindFunction" );
+		m_Form.RegisterApplyButton( JMWeatherForm.SECTION_WIND_FUNCTION, funcCard.AddApplyButton( this, "OnClick_ApplyWindFunction" ) );
 		m_ToggleWindFunction = new JMWeatherRangeToggle( m_Form, funcCard, JMWeatherForm.SECTION_WIND_FUNCTION );
 		Widget funcBody = UIActionManager.CreateGridSpacer( funcCard.GetContent(), 3, 1 );
 

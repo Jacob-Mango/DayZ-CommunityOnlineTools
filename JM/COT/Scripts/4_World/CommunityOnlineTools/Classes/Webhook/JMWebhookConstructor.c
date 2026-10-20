@@ -51,6 +51,7 @@ class JMWebhookConstructor : Managed
 		AddConnection( "PlayerDeath" );
 		AddConnection( "PlayerDeathNoPos" );
 		AddConnection( "PlayerDamage" );
+		AddConnection( "PlayerKillfeed" );
 
 		AddConnection( "AdminActive" );
 
