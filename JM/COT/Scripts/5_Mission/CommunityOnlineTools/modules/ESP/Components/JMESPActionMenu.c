@@ -159,19 +159,37 @@ class JMESPActionMenu
 		return result;
 	}
 
-	void InsertUnique( TStringArray labels, string className, string displayName, TStringArray classNames, TStringArray displayNames )
+	string InsertUnique( TStringArray labels, string className, string displayName, TStringArray classNames, TStringArray displayNames, TStringIntMap idByLabel = null )
 	{
+		string label;
+
 		int idx = displayNames.Find( displayName );
 		if ( idx == -1 )
-			labels.Insert( displayName );
+			label = displayName;
 		else
 		{
 			//! If displayname is already in list, replace with classname
-			labels[idx] = classNames[idx];
-			labels.Insert( className );
+			string oldLabel = labels[idx];
+			string newLabel = classNames[idx];
+
+			if ( newLabel != oldLabel )
+			{
+				labels[idx] = newLabel;
+
+				if ( idByLabel )
+				{
+					idByLabel[newLabel] = idByLabel[oldLabel];
+					idByLabel.Remove( oldLabel );
+				}
+			}
+
+			label = className;
 		}
 
 		displayNames.Insert( displayName );
+		labels.Insert( label );
+
+		return label;
 	}
 
 	bool IsAttachmentSlotAccessible( EntityAI target, string slotName )
@@ -1149,7 +1167,7 @@ class JMESPActionMenu
 		int count = inventory.GetAttachmentSlotsCount();
 		int slotId;
 
-		TIntArray slotIds = {};
+		TStringIntMap slotIdByLabel = new TStringIntMap;
 		TStringArray slotNames = {};
 		TStringArray displayNames = {};
 		TStringArray labels = {};
@@ -1168,18 +1186,20 @@ class JMESPActionMenu
 			if ( !IsAttachmentSlotAccessible( target, slotName ) )
 				continue;
 
-			slotIds.Insert( slotId );
-
 			string displayName = InventorySlots.GetSlotDisplayName( slotId );
 
 			slotNames.Insert( slotName );
 
-			InsertUnique( labels, slotName, displayName, slotNames, displayNames );
+			string uniqueLabel = InsertUnique( labels, slotName, displayName, slotNames, displayNames, slotIdByLabel );
+
+			slotIdByLabel[uniqueLabel] = slotId;
 		}
 
-		foreach ( int j, string label: labels )
+		labels.Sort();
+
+		foreach ( string label: labels )
 		{
-			slotId = slotIds[j];
+			slotId = slotIdByLabel[label];
 
 			EntityAI attached = inventory.FindAttachment( slotId );
 
@@ -1216,6 +1236,8 @@ class JMESPActionMenu
 
 		array< string > candidateLabels = {};
 		m_AttachCandidates = GetSlotCandidates( slotId, candidateLabels );
+
+		candidateLabels.Sort();
 
 		foreach ( int j, string label: candidateLabels )
 		{
