@@ -174,6 +174,47 @@ class JMESPActionMenu
 		displayNames.Insert( displayName );
 	}
 
+	bool IsAttachmentSlotAccessible( EntityAI target, string slotName )
+	{
+		Building building;
+		if ( Class.CastTo( building, target ) )
+		{
+			AdditionalDoorInfosHolder doorInfoHolder = building.GetDoorInfoHolder();
+
+			if ( doorInfoHolder )
+			{
+				map<int, ref AdditionalDoorInfo> doorInfoMap = doorInfoHolder.GetDoorInfoMap();
+
+				string slotNameLower = slotName;
+				slotNameLower.ToLower();
+
+				foreach ( int doorIndex, AdditionalDoorInfo doorInfo: doorInfoMap )
+				{
+					if ( doorInfo.m_RelatedInventorySlotNames )
+					{
+						foreach ( string slotNameCandidate: doorInfo.m_RelatedInventorySlotNames )
+						{
+							string slotNameCandidateLower = slotNameCandidate;
+							slotNameCandidateLower.ToLower();
+
+							if ( slotNameCandidateLower == slotNameLower )
+							{
+								ConstructionBase construction = ConstructionBase.Cast( building.GetConstructionBasic() );
+
+								if ( !doorInfo.m_DoorConstructionPartName || construction.IsPartConstructed( doorInfo.m_DoorConstructionPartName ) )
+									return true;
+
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
 	JMESPMeta GetTarget()
 	{
 		return m_Meta;
@@ -1122,9 +1163,13 @@ class JMESPActionMenu
 			if ( !target.CanDisplayAttachmentSlot( slotId ) )
 				continue;
 
+			string slotName = InventorySlots.GetSlotName( slotId );
+
+			if ( !IsAttachmentSlotAccessible( target, slotName ) )
+				continue;
+
 			slotIds.Insert( slotId );
 
-			string slotName = InventorySlots.GetSlotName( slotId );
 			string displayName = InventorySlots.GetSlotDisplayName( slotId );
 
 			slotNames.Insert( slotName );
