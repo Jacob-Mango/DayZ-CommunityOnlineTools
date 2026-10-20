@@ -19,12 +19,6 @@ class JMWeatherDynamicEditor
 	static const float PICK_WIDTH = 0.9;
 	static const int   ICON_PX    = 28;
 
-	//! The Save icon repeats its glow this often while there is something to save.
-	//! The glow itself lasts SAVE_PULSE_SECONDS, so the gap keeps it continuous
-	//! without ever restarting one that has not finished.
-	static const float SAVE_PULSE_SECONDS  = 2.0;
-	static const float SAVE_PULSE_INTERVAL = 2.1;
-
 	protected JMWeatherForm m_Form;
 	protected UIActionScroller m_Scroller;
 
@@ -81,10 +75,6 @@ class JMWeatherDynamicEditor
 	//! Which cards are on screen, as a bit per card, so the scroller is only
 	//! re-measured when one actually appears or goes. -1 before the first pass.
 	protected int m_ShownMask = -1;
-
-	//! Save-icon glow bookkeeping.
-	protected bool  m_SaveGlow;
-	protected float m_SavePulseAt;
 
 	void JMWeatherDynamicEditor( JMWeatherForm form, UIActionScroller scroller, Widget content )
 	{
@@ -881,40 +871,7 @@ class JMWeatherDynamicEditor
 		if ( !m_ButtonSave )
 			return;
 
-		bool pending = IsPending();
-
-		if ( pending != m_SaveGlow )
-		{
-			m_SaveGlow    = pending;
-			m_SavePulseAt = 0;
-
-			PaintSave();
-		}
-
-		if ( !m_SaveGlow )
-			return;
-
-		float now = g_Game.GetTickTime();
-
-		if ( now - m_SavePulseAt < SAVE_PULSE_INTERVAL )
-			return;
-
-		m_SavePulseAt = now;
-
-		m_ButtonSave.TriggerPulse( SAVE_PULSE_SECONDS );
-	}
-
-	protected void PaintSave()
-	{
-		if ( m_SaveGlow )
-		{
-			m_ButtonSave.SetColor( JMTheme.SUCCESS_FILL );
-		}
-		else
-		{
-			m_ButtonSave.StopPulse();
-			m_ButtonSave.SetColor( JMTheme.BUTTON_FILL );
-		}
+		m_ButtonSave.SetGlow( IsPending() );
 	}
 
 	// -------------------------------------------------------------------------

@@ -40,6 +40,7 @@ class JMWeatherForm: JMFormBase
 	static const int SECTION_WIND_FUNCTION = 6;
 	static const int SECTION_TIME          = 7;
 	static const int SECTION_SANDSTORM     = 8;
+	static const int SECTION_COUNT         = 9;
 
 	//! Public enough (no modifier), not protected: JMWeatherFormTabSky/
 	//! Precipitation/Wind/Time reach this through their back-reference.
@@ -64,6 +65,10 @@ class JMWeatherForm: JMFormBase
 
 	//! Bitmask tracking which sections the admin has touched since last refresh.
 	protected int m_DirtySectionsMask;
+
+	//! Each card's Apply icon by section, registered by the tab that creates it. An icon glows
+	//! while its section is dirty (see PollApplyGlow); a tab never built has no entry.
+	protected ref array< UIActionImageButton > m_SectionApply;
 
 	//! The mode banner across the top: which mode the tabs are in, plus Save / Close.
 	protected ref JMWeatherModeBanner m_Banner;
@@ -181,6 +186,38 @@ class JMWeatherForm: JMFormBase
 
 		if ( !IsSectionDirty( SECTION_WIND_FUNCTION ) && m_TabWindCtrl )
 			m_TabWindCtrl.SetWindFunctionValues( preset );
+	}
+
+	//! Public: each tab hands over the Apply icon of every card it builds. Returns the icon so the
+	//! call wraps the AddApplyButton() it replaces.
+	UIActionImageButton RegisterApplyButton( int section, UIActionImageButton button )
+	{
+		if ( !m_SectionApply )
+		{
+			m_SectionApply = new array< UIActionImageButton >;
+
+			for ( int i = 0; i < SECTION_COUNT; i++ )
+				m_SectionApply.Insert( NULL );
+		}
+
+		m_SectionApply[section] = button;
+
+		return button;
+	}
+
+	//! Per frame: an Apply icon glows for as long as its section has edits nobody applied.
+	protected void PollApplyGlow()
+	{
+		if ( !m_SectionApply )
+			return;
+
+		for ( int section = 0; section < SECTION_COUNT; section++ )
+		{
+			UIActionImageButton button = m_SectionApply[section];
+
+			if ( button )
+				button.SetGlow( IsSectionDirty( section ) );
+		}
 	}
 
 	protected void ClearDirtySections()
@@ -400,6 +437,7 @@ class JMWeatherForm: JMFormBase
 			m_TabOverviewCtrl.Poll();
 
 		PollDynamicStatus();
+		PollApplyGlow();
 
 		//! Auto-refresh pulls the LIVE WORLD into the editing controls several
 		//! times a second. In preset mode those controls hold the preset, so

@@ -47,6 +47,14 @@ class UIActionSliderRange: UIActionBase
 	//! exact value without the caller asking the mode; hence a mode, not a second widget class.
 	protected bool m_Single;
 
+	//! Anchored mode: a FROM value the caller keeps moving (where the weather is now) and a TARGET
+	//! the user drags (where it is going). The span, its two ends and the flow arrows are derived
+	//! from the pair, so the target can sit on either side of the anchor and the anchor itself
+	//! can never be dragged. Wins over single mode.
+	protected bool  m_Anchored;
+	protected float m_Anchor;
+	protected float m_Target;
+
 	//! How many arrows the layout declares. Must match the number of flow_N
 	//! images in UIActionSliderRange.layout.
 	static const int   FLOW_ARROWS      = 12;
@@ -86,6 +94,42 @@ class UIActionSliderRange: UIActionBase
 	bool IsSingle()
 	{
 		return m_Single;
+	}
+
+	bool IsAnchored()
+	{
+		return m_Anchored;
+	}
+
+	float GetTarget()
+	{
+		return m_Target;
+	}
+
+	//! Anchored on: the target starts where the anchor is, so nothing looks edited.
+	void SetAnchored( bool anchored )
+	{
+		if ( m_Anchored == anchored )
+			return;
+
+		m_Anchored = anchored;
+		m_Anchor   = m_High;
+		m_Target   = m_High;
+
+		UpdateVisuals();
+	}
+
+	//! The unmovable end. Called every frame with the live value, so it is not snapped to a step.
+	void SetAnchor( float value )
+	{
+		m_Anchor = Math.Clamp( value, m_Min, m_Max );
+		UpdateVisuals();
+	}
+
+	void SetTarget( float value )
+	{
+		m_Target = SnapToStep( Math.Clamp( value, m_Min, m_Max ) );
+		UpdateVisuals();
 	}
 
 	void SetAlpha( float alpha )
@@ -507,7 +551,12 @@ class UIActionSliderRange: UIActionBase
 
 		float val = XToValue( x );
 
-		if ( m_Single )
+		if ( m_Anchored )
+		{
+			m_Dragging = 2;
+			m_Target = SnapToStep( Math.Clamp( val, m_Min, m_Max ) );
+		}
+		else if ( m_Single )
 		{
 			m_Dragging = 2;
 			SetSingleValue( val );
@@ -545,6 +594,14 @@ class UIActionSliderRange: UIActionBase
 
 		// Pick the handle closest to the mouse X position
 		float val = XToValue( x );
+
+		if ( m_Anchored )
+		{
+			m_Target = SnapToStep( Math.Clamp( m_Target + wheel * m_Step, m_Min, m_Max ) );
+			UpdateVisuals();
+			CallEvent( UIEvent.CHANGE );
+			return true;
+		}
 
 		if ( m_Single )
 		{
@@ -609,7 +666,9 @@ class UIActionSliderRange: UIActionBase
 				m_Dragging = 1;
 		}
 
-		if ( m_Single )
+		if ( m_Anchored )
+			m_Target = SnapToStep( Math.Clamp( val, m_Min, m_Max ) );
+		else if ( m_Single )
 			SetSingleValue( val );
 		else if ( m_Dragging == 1 )
 			m_Low  = SnapToStep( Math.Clamp( val, m_Min, m_High ) );
@@ -720,13 +779,31 @@ class UIActionSliderRange: UIActionBase
 		if ( m_Single )
 			m_Low = m_High;
 
+		//! Anchored: the ends are whichever of from / target is lower, and the arrows point from
+		//! the anchor to the target. Both handles show, so the low one is put back.
+		if ( m_Anchored )
+		{
+			m_Low  = Math.Min( m_Anchor, m_Target );
+			m_High = Math.Max( m_Anchor, m_Target );
+
+			if ( m_HandleLow )
+				m_HandleLow.Show( true );
+
+			if ( m_Target > m_Anchor )
+				SetFlowDirection( 1 );
+			else if ( m_Target < m_Anchor )
+				SetFlowDirection( -1 );
+			else
+				SetFlowDirection( 0 );
+		}
+
 		float fillLeft  = ( m_Low  - m_Min ) / range;
 		float fillRight = ( m_High - m_Min ) / range;
 
 		//! A plain slider fills from its own minimum. With both bounds
 		//! collapsed onto the value there is no span between them to draw, so
 		//! the bar would read empty at every setting.
-		if ( m_Single )
+		if ( m_Single && !m_Anchored )
 			fillLeft = 0;
 
 		float fillWidth = fillRight - fillLeft;
@@ -765,6 +842,14 @@ class UIActionSliderRange: UIActionBase
 	//! Whole-number steps round, so a 1-step range does not read as "19.999999%".
 	protected string FormatRange()
 	{
+		//! "from -> to", in that order whichever way the weather is heading - the sorted ends
+		//! would hide which one is the target.
+		if ( m_Anchored && m_Step >= 1.0 )
+			return TranslateStringEx( m_Format, Math.Round( m_Anchor ).ToString() ) + " > " + TranslateStringEx( m_Format, Math.Round( m_Target ).ToString() );
+
+		if ( m_Anchored )
+			return TranslateStringEx( m_Format, m_Anchor.ToString() ) + " > " + TranslateStringEx( m_Format, m_Target.ToString() );
+
 		//! One number in single mode. "30 - 30" is not a range, and reading it
 		//! as one is exactly the confusion the mode exists to remove.
 		if ( m_Single && m_Step >= 1.0 )

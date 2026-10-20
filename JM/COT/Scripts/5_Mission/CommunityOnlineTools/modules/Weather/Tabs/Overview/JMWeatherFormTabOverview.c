@@ -34,14 +34,29 @@ class JMWeatherFormTabOverview: JMFormTab
 	static const float SPECIAL_WEATHER_POLL_INTERVAL = 1.0;
 	protected UIActionText m_StateTextClock;
 
-	//! Range bars (now vs heading towards), mirroring the "now -> next" row. No
-	//! callback and rewritten every frame, so a drag snaps back: live output, not
-	//! controls.
+	//! Range bars (now vs heading towards), mirroring the "now -> next" row. Rewritten
+	//! every frame, so a drag snaps back: live output, not controls - until Easy mode
+	//! is switched on, when OnChange_Easy keeps what the admin moved.
 	protected UIActionSliderRange m_StateOvercast;
 	protected UIActionSliderRange m_StateRain;
 	protected UIActionSliderRange m_StateSnow;
 	protected UIActionSliderRange m_StateFog;
 	protected UIActionSliderRange m_StateWind;
+
+	//! Easy mode: the five bars above stop being a readout and become single-value sliders
+	//! that write the live world on the card's Apply. A bar left alone keeps following the
+	//! forecast; one the admin moved is held (its bit in m_EasyDirtyMask) until Apply or Refresh.
+	protected UIActionImageButton m_ButtonEasy;
+	protected UIActionImageButton m_ButtonEasyApply;
+	protected bool m_EasyMode;
+	protected int  m_EasyDirtyMask;
+
+	static const int EASY_OVERCAST = 0;
+	static const int EASY_RAIN     = 1;
+	static const int EASY_SNOW     = 2;
+	static const int EASY_FOG      = 3;
+	static const int EASY_WIND     = 4;
+
 	protected UIActionIconGrid m_QuickWeather;
 	protected UIActionIconGrid m_QuickTime;
 	protected UIActionImageButton  m_ButtonRefresh;
@@ -146,6 +161,9 @@ class JMWeatherFormTabOverview: JMFormTab
 
 		// --- Live state -------------------------------------------------------
 		UIActionCard stateCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_STATE" );
+		m_ButtonEasy = stateCard.AddCardHeaderAction( JMConstants.Lucide( "wand-sparkles" ), this, "OnClick_EasyMode", "#STR_COT_WEATHER_MODULE_EASYMODE" );
+		m_ButtonEasyApply = stateCard.AddApplyButton( this, "OnClick_EasyApply" );
+		m_ButtonEasyApply.Hide();
 		m_ButtonRefresh = stateCard.AddRefreshButton( this, "OnClick_Refresh" );
 
 		Widget stateBody = UIActionManager.CreateGridSpacer( stateCard.GetContent(), 3, 1 );
@@ -191,7 +209,7 @@ class JMWeatherFormTabOverview: JMFormTab
 
 		//! Wind is the one readout not measured in <0,1> - it is m/s, on the
 		//! same 0-20 scale the Wind tab's slider uses.
-		m_StateWind = UIActionManager.CreateSliderRange( bars, "#STR_COT_WEATHER_MODULE_WIND", 0, JMWeatherForm.WIND_SCALE_MAX );
+		m_StateWind = UIActionManager.CreateSliderRange( bars, "#STR_COT_WEATHER_MODULE_WIND", 0, JMWeatherForm.WIND_SCALE_MAX, this, "OnChange_Easy" );
 		m_StateWind.SetFormat( "#STR_COT_FORMAT_MPS" );
 		m_StateWind.SetStep( 0.1 );
 
@@ -288,6 +306,7 @@ class JMWeatherFormTabOverview: JMFormTab
 		RefreshLiveState();
 		RefreshTimingWarnings();
 		PollSpecialWeatherStatus();
+		PollEasyGlow();
 	}
 
 	//! Flag the two legal-but-surprising timing values (not blocked): a zero
@@ -363,11 +382,22 @@ class JMWeatherFormTabOverview: JMFormTab
 		if ( !weather )
 			return;
 
-		SetStateRange( m_StateOvercast, weather.GetOvercast(), 100.0, 100.0 );
-		SetStateRange( m_StateRain, weather.GetRain(), 100.0, 100.0 );
-		SetStateRange( m_StateSnow, weather.GetSnowfall(), 100.0, 100.0 );
-		SetStateRange( m_StateFog, weather.GetFog(), 100.0, 100.0 );
-		SetStateRange( m_StateWind, weather.GetWindMagnitude(), 1.0, JMWeatherForm.WIND_SCALE_MAX );
+		if ( m_EasyMode )
+		{
+			SetEasyValue( EASY_OVERCAST, m_StateOvercast, weather.GetOvercast(), 100.0, 100.0 );
+			SetEasyValue( EASY_RAIN, m_StateRain, weather.GetRain(), 100.0, 100.0 );
+			SetEasyValue( EASY_SNOW, m_StateSnow, weather.GetSnowfall(), 100.0, 100.0 );
+			SetEasyValue( EASY_FOG, m_StateFog, weather.GetFog(), 100.0, 100.0 );
+			SetEasyValue( EASY_WIND, m_StateWind, weather.GetWindMagnitude(), 1.0, JMWeatherForm.WIND_SCALE_MAX );
+		}
+		else
+		{
+			SetStateRange( m_StateOvercast, weather.GetOvercast(), 100.0, 100.0 );
+			SetStateRange( m_StateRain, weather.GetRain(), 100.0, 100.0 );
+			SetStateRange( m_StateSnow, weather.GetSnowfall(), 100.0, 100.0 );
+			SetStateRange( m_StateFog, weather.GetFog(), 100.0, 100.0 );
+			SetStateRange( m_StateWind, weather.GetWindMagnitude(), 1.0, JMWeatherForm.WIND_SCALE_MAX );
+		}
 
 		RefreshSpecialWeatherBadge();
 	}
@@ -429,7 +459,7 @@ class JMWeatherFormTabOverview: JMFormTab
 	//! A 0-100 percentage range bar for one phenomenon.
 	protected UIActionSliderRange CreateStateRange( Widget parent, string label )
 	{
-		UIActionSliderRange range = UIActionManager.CreateSliderRange( parent, label, 0, 100 );
+		UIActionSliderRange range = UIActionManager.CreateSliderRange( parent, label, 0, 100, this, "OnChange_Easy" );
 		range.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		range.SetStep( 1 );
 		return range;
@@ -442,6 +472,144 @@ class JMWeatherFormTabOverview: JMFormTab
 
 		widget.LoadImageFile( 0, path );
 		widget.SetImage( 0 );
+	}
+
+	// -------------------------------------------------------------------------
+	//  Easy mode - edit the Current Conditions bars directly
+	// -------------------------------------------------------------------------
+
+	protected bool IsEasyDirty( int bar )
+	{
+		return ( m_EasyDirtyMask & ( 1 << bar ) ) != 0;
+	}
+
+	//! The FROM end always follows the live value and cannot be dragged, so it creeps toward
+	//! the target as the weather fades. The TARGET end follows the forecast until the admin
+	//! moves it, and is then held.
+	protected void SetEasyValue( int bar, UIActionSliderRange range, WeatherPhenomenon phenomenon, float scale, float ceiling )
+	{
+		if ( !range || !phenomenon )
+			return;
+
+		range.SetAnchor( Math.Clamp( phenomenon.GetActual() * scale, 0, ceiling ) );
+
+		if ( !IsEasyDirty( bar ) )
+			range.SetTarget( Math.Clamp( phenomenon.GetForecast() * scale, 0, ceiling ) );
+	}
+
+	protected void SetEasyAnchored( bool anchored )
+	{
+		if ( m_StateOvercast ) m_StateOvercast.SetAnchored( anchored );
+		if ( m_StateRain )     m_StateRain.SetAnchored( anchored );
+		if ( m_StateSnow )     m_StateSnow.SetAnchored( anchored );
+		if ( m_StateFog )      m_StateFog.SetAnchored( anchored );
+		if ( m_StateWind )     m_StateWind.SetAnchored( anchored );
+	}
+
+	//! Per frame, from Poll(): the Apply icon glows while a bar is held and unapplied.
+	protected void PollEasyGlow()
+	{
+		if ( m_ButtonEasyApply )
+			m_ButtonEasyApply.SetGlow( m_EasyMode && m_EasyDirtyMask != 0 );
+	}
+
+	void OnChange_Easy( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE || !m_EasyMode )
+			return;
+
+		if ( action == m_StateOvercast )
+			m_EasyDirtyMask = m_EasyDirtyMask | ( 1 << EASY_OVERCAST );
+		else if ( action == m_StateRain )
+			m_EasyDirtyMask = m_EasyDirtyMask | ( 1 << EASY_RAIN );
+		else if ( action == m_StateSnow )
+			m_EasyDirtyMask = m_EasyDirtyMask | ( 1 << EASY_SNOW );
+		else if ( action == m_StateFog )
+			m_EasyDirtyMask = m_EasyDirtyMask | ( 1 << EASY_FOG );
+		else if ( action == m_StateWind )
+			m_EasyDirtyMask = m_EasyDirtyMask | ( 1 << EASY_WIND );
+	}
+
+	//! Switching either way drops whatever was held: the readout takes the bars back.
+	void OnClick_EasyMode( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_EasyMode      = !m_EasyMode;
+		m_EasyDirtyMask = 0;
+
+		SetEasyAnchored( m_EasyMode );
+
+		if ( m_EasyMode )
+		{
+			m_ButtonEasy.SetColor( JMTheme.ACCENT );
+			m_ButtonEasyApply.Show();
+		}
+		else
+		{
+			m_ButtonEasy.SetColor( JMTheme.BUTTON_FILL );
+			m_ButtonEasyApply.Hide();
+		}
+
+		PollEasyGlow();
+	}
+
+	//! Writes the bars the admin moved to the live world, each under its own permission,
+	//! with the Transition / Duration from the Timing card.
+	void OnClick_EasyApply( UIEvent eid, UIActionBase action )
+	{
+		JMWeatherModule module = m_Form.m_Module;
+
+		if ( eid != UIEvent.CLICK || !module || !m_EasyMode )
+			return;
+
+		action.AnimateFeedback();
+
+		float transition = m_Form.GlobalTransition();
+		float duration   = m_Form.GlobalDuration();
+
+		if ( IsEasyDirty( EASY_OVERCAST ) && JMPermissions.Has( JMConstants.PERM_WEATHER_OVERCAST ) )
+			module.SetOvercast( m_StateOvercast.GetTarget() * 0.01, transition, duration );
+
+		//! Rain and snow only fall while the overcast sits inside their thresholds (vanilla
+		//! 0.6 - 1.0), so a bare amount does nothing under a lighter sky. Opened fully so the
+		//! amount the admin asked for is what shows, as the Rainy / Snowy quick actions do.
+		//! Rain and snow are one or the other, as the Rainy / Snowy quick actions treat them: rain
+		//! left falling hides the snow (and the reverse). So switching one on sends the other to
+		//! zero, unless the admin moved that bar too.
+		bool rainDirty = IsEasyDirty( EASY_RAIN );
+		bool snowDirty = IsEasyDirty( EASY_SNOW );
+
+		if ( rainDirty && JMPermissions.Has( JMConstants.PERM_WEATHER_RAIN ) )
+		{
+			module.SetRain( m_StateRain.GetTarget() * 0.01, transition, duration );
+
+			if ( m_StateRain.GetTarget() > 0 && JMPermissions.Has( JMConstants.PERM_WEATHER_RAIN_THRESHOLDS ) )
+				module.SetRainThresholds( 0.0, 1.0, transition );
+
+			if ( m_StateRain.GetTarget() > 0 && !snowDirty && JMPermissions.Has( JMConstants.PERM_WEATHER_SNOW ) )
+				module.SetSnow( 0, transition, duration );
+		}
+
+		if ( snowDirty && JMPermissions.Has( JMConstants.PERM_WEATHER_SNOW ) )
+		{
+			module.SetSnow( m_StateSnow.GetTarget() * 0.01, transition, duration );
+
+			if ( m_StateSnow.GetTarget() > 0 && JMPermissions.Has( JMConstants.PERM_WEATHER_SNOW_THRESHOLDS ) )
+				module.SetSnowThresholds( 0.0, 1.0, transition );
+
+			if ( m_StateSnow.GetTarget() > 0 && !rainDirty && JMPermissions.Has( JMConstants.PERM_WEATHER_RAIN ) )
+				module.SetRain( 0, transition, duration );
+		}
+
+		if ( IsEasyDirty( EASY_FOG ) && JMPermissions.Has( JMConstants.PERM_WEATHER_FOG ) )
+			module.SetFog( m_StateFog.GetTarget() * 0.01, transition, duration );
+
+		if ( IsEasyDirty( EASY_WIND ) && JMPermissions.Has( JMConstants.PERM_WEATHER_WIND ) )
+			module.SetWindMagnitude( m_StateWind.GetTarget(), transition, duration );
+
+		m_EasyDirtyMask = 0;
 	}
 
 	// -------------------------------------------------------------------------
@@ -672,6 +840,7 @@ class JMWeatherFormTabOverview: JMFormTab
 		//! them - and reloads whatever the tabs are meant to be showing, which
 		//! in preset mode is the stored preset, not the server.
 		m_Form.ClearDirty();
+		m_EasyDirtyMask = 0;
 
 		m_Form.LoadEditorValues();
 	}
@@ -680,6 +849,8 @@ class JMWeatherFormTabOverview: JMFormTab
 	{
 		m_Form.UpdateActionState( m_ButtonRefresh, JMConstants.PERM_WEATHER_VIEW );
 		m_Form.UpdateActionState( m_ButtonApplyAll, JMConstants.PERM_WEATHER_VIEW );
+		m_Form.UpdateActionState( m_ButtonEasy, JMConstants.PERM_WEATHER_VIEW );
+		m_Form.UpdateActionState( m_ButtonEasyApply, JMConstants.PERM_WEATHER_VIEW );
 		m_Form.UpdateActionState( m_ToggleFreezeTime, JMConstants.PERM_WEATHER_FREEZETIME );
 		m_Form.UpdateActionState( m_ToggleAutoRefresh, JMConstants.PERM_WEATHER_VIEW );
 
