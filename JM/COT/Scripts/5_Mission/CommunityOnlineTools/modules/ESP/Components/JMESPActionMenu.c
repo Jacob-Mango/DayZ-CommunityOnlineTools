@@ -1186,7 +1186,12 @@ class JMESPActionMenu
 			if ( !IsAttachmentSlotAccessible( target, slotName ) )
 				continue;
 
-			string displayName = Widget.TranslateString( InventorySlots.GetSlotDisplayName( slotId ) );
+			string displayName = InventorySlots.GetSlotDisplayName( slotId );
+
+			if ( displayName == "#STR_CodeLock0" )  //! I have no idea where it pulls that from but it's not vanilla nor Expansion
+				displayName = "#STR_CfgVehicles_codelock0";
+
+			displayName = Widget.TranslateString( displayName );
 
 			slotNames.Insert( slotName );
 
