@@ -44,7 +44,7 @@ class CfgMods
 		defines[] =
 		{
 			"JM_COT",
-			"COT_2026_1019",
+			"COT_2026_1020",
 			//"JM_COT_LOGGING",
 			//"JM_COT_ESP_DEBUG",
 			//"JM_COT_WEBHOOK_DEBUG",
