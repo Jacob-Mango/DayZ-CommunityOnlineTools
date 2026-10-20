@@ -939,9 +939,24 @@ class JMESPActionMenu
 		string filter = m_PartFilter;
 		filter.ToLower();
 
+		bool filtered = false;
+
+		if ( filter != "" )
+		{
+			//! Only filter parts if at least one part DOES match the filter
+			foreach ( string partNameTmp, JMConstructionPartData partTmp: parts )
+			{
+				if ( PartMatchesFilter( partTmp, filter ) )
+				{
+					filtered = true;
+					break;
+				}
+			}
+		}
+
 		foreach ( string partName, JMConstructionPartData part: parts )
 		{
-			if ( filter != "" && !PartMatchesFilter( part, filter ) )
+			if ( filtered && !PartMatchesFilter( part, filter ) )
 				continue;
 
 			//! A part that conflicts with something already built cannot be
