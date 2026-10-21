@@ -350,7 +350,7 @@ modded class PluginAdminLog
 				Class.CastTo( pbKiller, source );
 				weaponName = "Fists";
 			}
-			else if ( source.IsMeleeWeapon() )
+			else
 			{
 				Class.CastTo( pbKiller, source.GetHierarchyParent() );
 			}
