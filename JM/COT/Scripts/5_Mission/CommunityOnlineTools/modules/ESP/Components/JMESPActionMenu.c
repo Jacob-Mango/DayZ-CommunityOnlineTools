@@ -108,7 +108,7 @@ class JMESPActionMenu
 			{
 				//! @note ConfigGetText returns already translated values
 				g_Game.ConfigGetText( CFG_MAGAZINESPATH + " "  + mag + " displayName", displayName );
-				uniqueLabel = InsertUnique( labels, mag, displayName, mags, displayNames );
+				uniqueLabel = InsertUnique( labels, mag, displayName, mags, displayNames, null, candidatesByLabel );
 				candidatesByLabel[uniqueLabel] = mag;
 			}
 		}
@@ -153,7 +153,7 @@ class JMESPActionMenu
 							classNames.Insert( childName );
 							seen.Insert( childName );
 
-							uniqueLabel = InsertUnique( labels, childName, displayName, classNames, displayNames );
+							uniqueLabel = InsertUnique( labels, childName, displayName, classNames, displayNames, null, candidatesByLabel );
 							candidatesByLabel[uniqueLabel] = childName;
 
 							break;
@@ -168,7 +168,7 @@ class JMESPActionMenu
 		return candidatesByLabel;
 	}
 
-	string InsertUnique( TStringArray labels, string className, string displayName, TStringArray classNames, TStringArray displayNames, TStringIntMap idByLabel = null )
+	string InsertUnique( TStringArray labels, string className, string displayName, TStringArray classNames, TStringArray displayNames, TStringIntMap idByLabel = null, TStringStringMap classNameByLabel = null )
 	{
 	#ifdef DIAG_DEVELOPER
 	#ifdef DZ_Expansion_Core
@@ -198,6 +198,12 @@ class JMESPActionMenu
 				{
 					idByLabel[newLabel] = idByLabel[oldLabel];
 					idByLabel.Remove( oldLabel );
+				}
+
+				if ( classNameByLabel )
+				{
+					classNameByLabel[newLabel] = classNameByLabel[oldLabel];
+					classNameByLabel.Remove( oldLabel );
 				}
 			}
 
