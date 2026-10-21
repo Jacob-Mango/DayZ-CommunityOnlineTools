@@ -2371,9 +2371,14 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !entity || !entity.GetInventory() )
 			return;
 
-		GameInventory inventory = entity.GetInventory();
+		Man player = Man.Cast( target );
 
-		EntityAI existing = inventory.FindAttachment( slotId );
+		EntityAI existing;
+
+		if ( slotId == InventorySlots.HANDS && player )
+			existing = player.GetEntityInHands();
+		else
+			existing = entity.GetInventory().FindAttachment( slotId );
 
 		string classBefore;
 		if ( existing )
@@ -2391,7 +2396,12 @@ class JMESPModule: JMRenderableModuleBase
 		}
 		else
 		{
-			EntityAI created = inventory.CreateAttachmentEx( className, slotId );
+			EntityAI created;
+
+			if ( slotId == InventorySlots.HANDS && player )
+				created = player.GetHumanInventory().CreateInHands( className );
+			else
+				created = entity.GetInventory().CreateAttachmentEx( className, slotId );
 
 			if ( created )
 				classAfter = className;
@@ -2409,7 +2419,15 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !entity || !entity.GetInventory() )
 			return;
 
-		EntityAI existing = entity.GetInventory().FindAttachment( slotId );
+		Man player = Man.Cast( target );
+
+		EntityAI existing;
+
+		if ( slotId == InventorySlots.HANDS && player )
+			existing = player.GetEntityInHands();
+		else
+			existing = entity.GetInventory().FindAttachment( slotId );
+
 		if ( !existing )
 			return;
 

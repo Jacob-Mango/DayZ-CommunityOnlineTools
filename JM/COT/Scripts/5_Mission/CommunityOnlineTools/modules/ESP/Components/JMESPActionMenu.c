@@ -91,6 +91,9 @@ class JMESPActionMenu
 	#endif
 	#endif
 
+		if ( slotId == InventorySlots.HANDS && m_Meta.target.IsMan() )
+			slotId = InventorySlots.SHOULDER;
+
 		TStringArray classNames = {};
 		TStringArray displayNames = {};
 		TStringSet seen = new TStringSet();
@@ -1211,6 +1214,8 @@ class JMESPActionMenu
 		if ( !Class.CastTo( target, m_Meta.target ) || !target.GetInventory() )
 			return;
 
+		Man player = Man.Cast( target );
+
 		GameInventory inventory = target.GetInventory();
 
 		int count = inventory.GetAttachmentSlotsCount();
@@ -1264,13 +1269,18 @@ class JMESPActionMenu
 		{
 			slotId = slotIdsByLabel[label];
 
-			EntityAI attached = inventory.FindAttachment( slotId );
+			EntityAI attached;
 
-			if ( attached && ( attached.GetFlags() & EntityFlags.VISIBLE ) == 0 )
-				continue;  //! Ignore slot if attached entity is invisible
+			if ( slotId == InventorySlots.HANDS && player )
+				attached = player.GetEntityInHands();
+			else
+				attached = inventory.FindAttachment( slotId );
 
 			if ( attached )
 			{
+				if ( ( attached.GetFlags() & EntityFlags.VISIBLE ) == 0 )
+					continue;  //! Ignore slot if attached entity is invisible
+
 				if ( attached.GetDisplayName() != label )
 					label += ": " + attached.GetDisplayName();
 			}
@@ -1296,7 +1306,16 @@ class JMESPActionMenu
 
 		bool canSet = Perm( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT );
 
-		if ( target.GetInventory().FindAttachment( slotId ) )
+		Man player = Man.Cast( m_Meta.target );
+
+		EntityAI existing;
+
+		if ( slotId == InventorySlots.HANDS && player )
+			existing = player.GetEntityInHands();
+		else
+			existing = target.GetInventory().FindAttachment( slotId );
+
+		if ( existing )
 			Add( PREFIX_ACTION + "removeattach", "#STR_COT_ESP_MODULE_MENU_REMOVE", JMConstants.Lucide( "trash-2" ), canSet, JMTheme.DANGER );
 
 		array< string > candidateLabels = {};
