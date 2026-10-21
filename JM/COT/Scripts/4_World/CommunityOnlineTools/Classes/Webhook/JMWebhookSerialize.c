@@ -27,7 +27,7 @@ class JMWebhookSerialize : Managed
 
 	void Load()
 	{
-		JsonFileLoader< JMWebhookSerialize >.JsonLoadFile( JMConstants.FILE_WEBHOOK, this );
+		JMJsonFile< JMWebhookSerialize >.Load( JMConstants.FILE_WEBHOOK, this );
 		
 		for ( int i = 0; i < Connections.Count(); ++i )
 		{
@@ -37,7 +37,7 @@ class JMWebhookSerialize : Managed
 
 	void Save()
 	{
-		JsonFileLoader< JMWebhookSerialize >.JsonSaveFile( JMConstants.FILE_WEBHOOK, this );
+		JMJsonFile< JMWebhookSerialize >.Save( JMConstants.FILE_WEBHOOK, this );
 	}
 
 	void OnSend( ParamsWriteContext ctx )

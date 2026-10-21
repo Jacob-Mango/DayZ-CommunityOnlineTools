@@ -481,7 +481,7 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // -------------------------------------------------------------------------
-    //  Persistence - JsonFileLoader<JMPlayerBanStore>
+    //  Persistence - JMJsonFile<JMPlayerBanStore>
     // -------------------------------------------------------------------------
 
     protected void Load()

@@ -4241,6 +4241,10 @@ class JMESPModule: JMRenderableModuleBase
 						m_LoadoutModule.Load();
 				}
 			}
+			else
+			{
+				CF_Log.Error( errorMsg );
+			}
 		}
 	#else
 		// Fallback to legacy format

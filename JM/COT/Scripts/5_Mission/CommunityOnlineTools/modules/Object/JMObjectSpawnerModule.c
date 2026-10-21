@@ -1676,8 +1676,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		RecolorLoadoutItem(snapshot, newColor, depth + 1);
 
 	#ifdef DIAG_DEVELOPER
-		string errMsg;
-		JsonFileLoader<JMLoadoutItem>.SaveFile("$profile:COT_Recolor_Snapshot.json", snapshot, errMsg);
+		JMJsonFile<JMLoadoutItem>.Save("$profile:COT_Recolor_Snapshot.json", snapshot);
 	#endif
 
 		//! Move old entity out of the way since we will recreate in same spot

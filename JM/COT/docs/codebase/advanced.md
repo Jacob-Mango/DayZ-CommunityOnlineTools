@@ -80,8 +80,7 @@ JMJsonFile<JMMyStore>.Load( "path/file.json", store );     // false (and logged)
 JMJsonFile<JMMyStore>.Save( "path/file.json", store );     // creates every missing folder first
 ```
 
-Use `JMJsonFile<T>`, not `JsonFileLoader<T>` directly (see [module-creation.md](module-creation.md#optional-settings-persistence)).
-A few older files still call `JsonFileLoader<T>.JsonLoadFile/JsonSaveFile` (`JMSpawnerConfig`, `JMLoadoutSettings`).
+Use `JMJsonFile<T>`, not `JsonFileLoader<T>` directly for saving/loading to/from file (see [module-creation.md](module-creation.md#optional-settings-persistence)).
 
 ## Chat Command System
 

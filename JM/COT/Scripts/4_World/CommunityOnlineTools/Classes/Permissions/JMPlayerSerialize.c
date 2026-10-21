@@ -43,14 +43,18 @@ class JMPlayerSerialize : Managed
 		playerFile.m_FileName = JMConstants.DIR_PLAYERS + inst.GetSteam64ID() + JMConstants.EXT_PLAYER;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
-			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
+			if ( !JMJsonFile<JMPlayerSerialize>.Load( playerFile.m_FileName, playerFile ) )
+				return false;
+
 			return true;
 		}
 
 		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
-			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
+			if ( !JMJsonFile<JMPlayerSerialize>.Load( playerFile.m_FileName, playerFile ) )
+				return false;
+	
 			// File already exists in the correct location - no re-save needed.
 			return true;
 		}
@@ -62,7 +66,8 @@ class JMPlayerSerialize : Managed
 		playerFile.m_FileName = JMConstants.DIR_PLAYERS + inst.GetSteam64ID() + JMConstants.EXT_PLAYER + JMConstants.EXT_WINDOWS_DEFAULT;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
-			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
+			if ( !JMJsonFile<JMPlayerSerialize>.Load( playerFile.m_FileName, playerFile ) )
+				return false;
 
 			DeleteFile( playerFile.m_FileName );
 			playerFile.m_FileName = JMConstants.DIR_PLAYERS + inst.GetSteam64ID() + JMConstants.EXT_PLAYER;
@@ -74,7 +79,8 @@ class JMPlayerSerialize : Managed
 		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER + JMConstants.EXT_WINDOWS_DEFAULT;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
-			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
+			if ( !JMJsonFile<JMPlayerSerialize>.Load( playerFile.m_FileName, playerFile ) )
+				return false;
 
 			DeleteFile( playerFile.m_FileName );
 			playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
@@ -92,6 +98,6 @@ class JMPlayerSerialize : Managed
 
 	void Save()
 	{
-		JsonFileLoader<JMPlayerSerialize>.JsonSaveFile( m_FileName, this );
+		JMJsonFile<JMPlayerSerialize>.Save( m_FileName, this );
 	}
 }

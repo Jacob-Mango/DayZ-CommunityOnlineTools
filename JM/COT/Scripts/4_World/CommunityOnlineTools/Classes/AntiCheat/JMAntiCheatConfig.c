@@ -168,11 +168,8 @@ class JMAntiCheatConfig
 	{
 		JMAntiCheatConfig cfg = new JMAntiCheatConfig();
 
-		if ( !FileExist( FILE ) )
-			return cfg;
+		JMJsonFile<JMAntiCheatConfig>.Load( FILE, cfg );
 
-		JMAntiCheatConfig onDisk = new JMAntiCheatConfig();
-		JsonFileLoader<JMAntiCheatConfig>.JsonLoadFile( FILE, onDisk );
-		return onDisk;
+		return cfg;
 	}
 }

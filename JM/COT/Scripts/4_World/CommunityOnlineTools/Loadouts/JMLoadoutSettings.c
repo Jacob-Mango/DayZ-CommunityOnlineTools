@@ -47,7 +47,7 @@ class JMLoadoutSettings
 		if (FileExist(filepath))
         {
 			JMLoadout userFile = new JMLoadout();
-			JsonFileLoader<JMLoadout>.JsonLoadFile(filepath, userFile);
+			JMJsonFile<JMLoadout>.Load(filepath, userFile);
 		    return userFile;
         }
 
@@ -118,7 +118,7 @@ class JMLoadoutSettings
 	{
 		string tmpPath = filepath + ".tmp";
 
-		JsonFileLoader<JMLoadout>.JsonSaveFile(tmpPath, data);
+		JMJsonFile<JMLoadout>.Save(tmpPath, data);
 
 		// Only promote the temp file if it was successfully written
 		if (FileExist(tmpPath))

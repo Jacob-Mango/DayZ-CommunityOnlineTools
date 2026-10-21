@@ -10,16 +10,14 @@ class JMCustomExampleSettings: Managed
 	{
 		JMCustomExampleSettings settings = new JMCustomExampleSettings();
 
-		if ( FileExist( FILE ) )
-			JsonFileLoader<JMCustomExampleSettings>.JsonLoadFile( FILE, settings );
+		JMJsonFile<JMCustomExampleSettings>.Load( FILE, settings );
 
 		return settings;
 	}
 
 	void Save()
 	{
-		MakeDirectory( JMConstants.DIR_COT );
-		JsonFileLoader<JMCustomExampleSettings>.JsonSaveFile( FILE, this );
+		JMJsonFile<JMCustomExampleSettings>.Save( FILE, this );
 	}
 }
 #endif

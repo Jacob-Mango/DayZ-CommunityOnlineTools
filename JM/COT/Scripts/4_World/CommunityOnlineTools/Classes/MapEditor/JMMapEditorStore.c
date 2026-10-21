@@ -13,15 +13,12 @@ class JMMapEditorStore
 			return new JMMapEditorStore();
 
 		JMMapEditorStore store = new JMMapEditorStore();
-		JsonFileLoader<JMMapEditorStore>.JsonLoadFile( FILE, store );
+		JMJsonFile<JMMapEditorStore>.Load( FILE, store );
 		return store;
 	}
 
 	static void Save( JMMapEditorStore store )
 	{
-		if ( !FileExist( DIR ) )
-			MakeDirectory( DIR );
-
-		JsonFileLoader<JMMapEditorStore>.JsonSaveFile( FILE, store );
+		JMJsonFile<JMMapEditorStore>.Save( FILE, store );
 	}
 }

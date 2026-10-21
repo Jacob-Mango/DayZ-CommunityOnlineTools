@@ -77,7 +77,10 @@ class JMCompensationHelper
 		string errorMsg;
 
 		if ( !JsonFileLoader<ExpansionPrefab>.MakeData( prefab, loadoutJSON, errorMsg ) )
+		{
+			CF_Log.Error( errorMsg );
 			return;
+		}
 
 		if ( !FileExist( JMConstants.DIR_COMPENSATIONS ) )
 			MakeDirectory( JMConstants.DIR_COMPENSATIONS );

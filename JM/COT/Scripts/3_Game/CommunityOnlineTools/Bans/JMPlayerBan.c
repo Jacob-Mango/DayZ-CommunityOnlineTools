@@ -1,5 +1,5 @@
 //  JMPlayerBan.c
-//  Persistent ban record, public fields reflected by JsonFileLoader.
+//  Persistent ban record, public fields reflected by JMJsonFile.
 //  BanDuration is an absolute Unix expiry timestamp (not relative); -1 = permanent.
 
 class JMPlayerBan
@@ -92,10 +92,8 @@ class JMPlayerBan
             return NULL;
 
         JMPlayerBanStore store = new JMPlayerBanStore();
-        string err;
-        if ( !JsonFileLoader<JMPlayerBanStore>.LoadFile( BAN_FILE, store, err ) )
+        if ( !JMJsonFile<JMPlayerBanStore>.Load( BAN_FILE, store ) )
         {
-            Print( "[COT/Ban] Load error: " + err );
             return NULL;
         }
 
@@ -153,8 +151,7 @@ class JMPlayerBan
             return false;
 
         JMPlayerBanStore store = new JMPlayerBanStore();
-        string err;
-        if ( !JsonFileLoader<JMPlayerBanStore>.LoadFile( BAN_FILE, store, err ) )
+        if ( !JMJsonFile<JMPlayerBanStore>.Load( BAN_FILE, store ) )
             return false;
 
         bool changed = false;
@@ -168,7 +165,7 @@ class JMPlayerBan
         }
 
         if ( changed )
-            JsonFileLoader<JMPlayerBanStore>.SaveFile( BAN_FILE, store, err );
+            JMJsonFile<JMPlayerBanStore>.Save( BAN_FILE, store );
 
         return changed;
     }

@@ -70,7 +70,7 @@ class JMSpawnerConfig
 		}
 
 		JMSpawnerConfig cfg = new JMSpawnerConfig();
-		JsonFileLoader< JMSpawnerConfig >.JsonLoadFile( JMConstants.FILE_SPAWNER_CONFIG, cfg );
+		JMJsonFile< JMSpawnerConfig >.Load( JMConstants.FILE_SPAWNER_CONFIG, cfg );
 		return cfg;
 	}
 
@@ -80,6 +80,6 @@ class JMSpawnerConfig
 		if ( !FileExist( dir ) )
 			MakeDirectory( dir );
 
-		JsonFileLoader< JMSpawnerConfig >.JsonSaveFile( JMConstants.FILE_SPAWNER_CONFIG, this );
+		JMJsonFile< JMSpawnerConfig >.Save( JMConstants.FILE_SPAWNER_CONFIG, this );
 	}
 }
