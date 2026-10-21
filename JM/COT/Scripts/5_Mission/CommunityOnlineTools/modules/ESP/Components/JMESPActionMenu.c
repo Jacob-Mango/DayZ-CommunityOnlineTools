@@ -74,12 +74,6 @@ class JMESPActionMenu
 	// names the slot, so the list can be broader than the target accepts; the server's
 	// CreateAttachmentEx() enforces compatibility, so a bad pick just fails there.
 
-	//! Candidate classnames for whatever slot PAGE_ATTACH_SLOT is currently
-	//! showing - built by BuildAttachSlot(), read by index when "setattach:N"
-	//! is clicked. Rebuilt every time the page is (re)entered, so an index is
-	//! only ever resolved against the list that produced it.
-	protected ref array<string> m_AttachCandidates;
-
 	UIActionContextMenu GetMenu()
 	{
 		return m_Menu;
@@ -89,79 +83,103 @@ class JMESPActionMenu
 	//! this slot in its own inventorySlot[] - see the class-level note above
 	//! for why this is deliberately a wide net rather than a weapon-specific
 	//! compatibility table.
-	protected ref array<string> GetSlotCandidates( int slotId, array<string> labels )
+	TStringStringMap GetSlotCandidates( int slotId, array<string> labels )
 	{
-		array<string> result = new array<string>();
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		auto trace = EXTrace.Profile(true, null, "JMESPActionMenu::GetSlotCandidates");
+	#endif
+	#endif
 
-		TStringArray configPaths = new TStringArray();
-		configPaths.Insert( CFG_VEHICLESPATH );
-
-		if ( !m_Meta.target.IsWeapon() )
-			configPaths.Insert( CFG_WEAPONSPATH );
-
+		TStringArray classNames = {};
 		TStringArray displayNames = {};
+		TStringSet seen = new TStringSet();
+		TStringStringMap candidatesByLabel = new TStringStringMap();
 
 		string displayName;
+		string uniqueLabel;
 
 		Weapon_Base weapon;
 		if ( slotId == InventorySlots.MAGAZINE && Class.CastTo( weapon, m_Meta.target ) )
 		{
-			result = weapon.COTGetMagazineTypesValidated( "magazines", weapon.GetCurrentMuzzle() );
+			TStringArray mags = weapon.COTGetMagazineTypesValidated( "magazines", weapon.GetCurrentMuzzle() );
 
-			foreach ( string mag: result )
+			foreach ( string mag: mags )
 			{
 				//! @note ConfigGetText returns already translated values
 				g_Game.ConfigGetText( CFG_MAGAZINESPATH + " "  + mag + " displayName", displayName );
-				InsertUnique( labels, mag, displayName, result, displayNames );
+				uniqueLabel = InsertUnique( labels, mag, displayName, mags, displayNames );
+				candidatesByLabel[uniqueLabel] = mag;
 			}
 		}
-
-		foreach ( string configPath : configPaths )
+		else
 		{
-			int childCount = g_Game.ConfigGetChildrenCount( configPath );
+			TStringArray configPaths = new TStringArray();
+			configPaths.Insert( CFG_VEHICLESPATH );
 
-			for ( int i = 0; i < childCount; i++ )
+			if ( !m_Meta.target.IsWeapon() )
+				configPaths.Insert( CFG_WEAPONSPATH );
+
+			foreach ( string configPath : configPaths )
 			{
-				string childName;
-				g_Game.ConfigGetChildName( configPath, i, childName );
+				int childCount = g_Game.ConfigGetChildrenCount( configPath );
 
-				if ( result.Find( childName ) > -1 )
-					continue;
-
-				string path = configPath + " " + childName;
-				if ( g_Game.ConfigGetInt( path + " scope" ) != 2 )
-					continue;
-
-				string model;
-				if ( !g_Game.ConfigGetText( path + " model", model ) || model == "" || model == "bmp" )
-					continue;
-
-				//! @note ConfigGetText returns already translated values
-				if ( !g_Game.ConfigGetText( path + " displayName", displayName ) || displayName == "" || displayName.IndexOf("$UNT$") > -1 )
-					continue;
-
-				array<string> invSlots = g_Game.COT_GetInventorySlots( path );
-
-				foreach ( string invSlot : invSlots )
+				for ( int i = 0; i < childCount; i++ )
 				{
-					if ( InventorySlots.GetSlotIdFromString( invSlot ) == slotId )
+					string childName;
+					g_Game.ConfigGetChildName( configPath, i, childName );
+
+					if ( seen.Find( childName ) > -1 )
+						continue;
+
+					string path = configPath + " " + childName;
+					if ( g_Game.ConfigGetInt( path + " scope" ) != 2 )
+						continue;
+
+					string model;
+					if ( !g_Game.ConfigGetText( path + " model", model ) || model == "" || model == "bmp" )
+						continue;
+
+					//! @note ConfigGetText returns already translated values
+					if ( !g_Game.ConfigGetText( path + " displayName", displayName ) || displayName == "" || displayName.IndexOf("$UNT$") > -1 )
+						continue;
+
+					array<string> invSlots = g_Game.COT_GetInventorySlots( path );
+
+					foreach ( string invSlot : invSlots )
 					{
-						result.Insert( childName );
+						if ( InventorySlots.GetSlotIdFromString( invSlot ) == slotId )
+						{
+							classNames.Insert( childName );
+							seen.Insert( childName );
 
-						InsertUnique( labels, childName, displayName, result, displayNames );
+							uniqueLabel = InsertUnique( labels, childName, displayName, classNames, displayNames );
+							candidatesByLabel[uniqueLabel] = childName;
 
-						break;
+							break;
+						}
 					}
 				}
 			}
 		}
 
-		return result;
+		labels.Sort();
+
+		return candidatesByLabel;
 	}
 
 	string InsertUnique( TStringArray labels, string className, string displayName, TStringArray classNames, TStringArray displayNames, TStringIntMap idByLabel = null )
 	{
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		auto trace = EXTrace.Profile(true, null, "JMESPActionMenu::InsertUnique");
+	#endif
+	#endif
+
 		string label;
+
+		if ( !displayName )
+			displayName = className;
 
 		int idx = displayNames.Find( displayName );
 		if ( idx == -1 )
@@ -703,7 +721,7 @@ class JMESPActionMenu
 		if ( attachEntity )
 			attachInv = attachEntity.GetInventory();
 
-		if ( attachInv && attachInv.GetAttachmentSlotsCount() > 0 && !PlayerBase.Cast( target ) )
+		if ( attachInv && attachInv.GetAttachmentSlotsCount() > 0 )
 			AddPage( PAGE_ATTACHMENTS, "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS", JMConstants.Lucide( "puzzle" ), Perm( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT ) );
 
 		AddPage( PAGE_COPY, "#STR_COT_GENERIC_COPY", JMConstants.Lucide( "copy" ) );
@@ -1198,7 +1216,7 @@ class JMESPActionMenu
 		map< string, ref JMConstructionPartData > parts = m_Meta.GetConstructionParts();
 		JMConstructionPartData part;
 
-		TStringIntMap slotIdByLabel = new TStringIntMap;
+		TStringIntMap slotIdsByLabel = new TStringIntMap;
 		TStringArray slotNames = {};
 		TStringArray displayNames = {};
 		TStringArray labels = {};
@@ -1229,16 +1247,16 @@ class JMESPActionMenu
 
 			slotNames.Insert( slotName );
 
-			string uniqueLabel = InsertUnique( labels, slotName, displayName, slotNames, displayNames, slotIdByLabel );
+			string uniqueLabel = InsertUnique( labels, slotName, displayName, slotNames, displayNames, slotIdsByLabel );
 
-			slotIdByLabel[uniqueLabel] = slotId;
+			slotIdsByLabel[uniqueLabel] = slotId;
 		}
 
 		labels.Sort();
 
 		foreach ( string label: labels )
 		{
-			slotId = slotIdByLabel[label];
+			slotId = slotIdsByLabel[label];
 
 			EntityAI attached = inventory.FindAttachment( slotId );
 
@@ -1274,14 +1292,25 @@ class JMESPActionMenu
 			Add( PREFIX_ACTION + "removeattach", "#STR_COT_ESP_MODULE_MENU_REMOVE", JMConstants.Lucide( "trash-2" ), canSet, JMTheme.DANGER );
 
 		array< string > candidateLabels = {};
-		m_AttachCandidates = GetSlotCandidates( slotId, candidateLabels );
+		TStringStringMap candidates = GetSlotCandidates( slotId, candidateLabels );
 
-		candidateLabels.Sort();
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		EXTrace.Profile(true, this, "JMESPActionMenu::BuildAttachSlot -> foreach");
+	#endif
+	#endif
 
-		foreach ( int j, string label: candidateLabels )
+		foreach ( string label: candidateLabels )
 		{
-			Add( PREFIX_ACTION + "setattach:" + j, label, JMConstants.Lucide( "puzzle" ), canSet );
+			string className = candidates[label];
+			Add( PREFIX_ACTION + "setattach:" + className, label, JMConstants.Lucide( "puzzle" ), canSet );
 		}
+
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		EXTrace.DumpProfilingData();
+	#endif
+	#endif
 	}
 
 	//! A fireplace's whole lifecycle. Refuel is listed above ignite on purpose: a fire with
@@ -1616,7 +1645,7 @@ class JMESPActionMenu
 		else if ( name == "removeattach" )
 			DoRemoveAttachment();
 		else if ( name == "setattach" )
-			DoSetAttachment( arg.ToInt() );
+			DoSetAttachment( arg );
 		else if ( name == "ignite" )
 			DoFireAction( JMESPObjectAction.SetBurning, 1 );
 		else if ( name == "extinguish" )
@@ -2139,17 +2168,15 @@ class JMESPActionMenu
 		m_Meta.module.RemoveAttachment( m_Meta.target, m_PageArg.ToInt() );
 	}
 
-	//! `index` resolves against m_AttachCandidates as it stood when this page
-	//! was last built - see BuildAttachSlot().
-	protected void DoSetAttachment( int index )
+	protected void DoSetAttachment( string className )
 	{
 		if ( !Perm( JMConstants.PERM_ESP_OBJECT_WEAPON ) || m_PageArg == "" )
 			return;
 
-		if ( !m_AttachCandidates || index < 0 || index >= m_AttachCandidates.Count() )
+		if ( !className )
 			return;
 
-		m_Meta.module.SetAttachment( m_Meta.target, m_PageArg.ToInt(), m_AttachCandidates[index] );
+		m_Meta.module.SetAttachment( m_Meta.target, m_PageArg.ToInt(), className );
 	}
 
 	protected void DoFireAction( int action, int value )
