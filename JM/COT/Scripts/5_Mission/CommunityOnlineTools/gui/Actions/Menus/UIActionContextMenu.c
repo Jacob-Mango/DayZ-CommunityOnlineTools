@@ -42,6 +42,7 @@ class UIActionContextMenu: UIActionBase
 	protected string m_LastClickedId;
 	protected int    m_HoveredRow;      // -1 when nothing highlighted
 	protected bool   m_Open;
+	protected bool   m_RebuildItems;
 
 	//! Seconds to ignore outside clicks after opening. The button press that
 	//! opened the menu is usually still held when the first Update() runs, and
@@ -434,7 +435,7 @@ class UIActionContextMenu: UIActionBase
 	void AddItem( string id, string label, string icon = "", int textColor = 0, bool submenu = false, Class target = null, string callback = "" )
 	{
 		m_Entries.Insert( new JMContextMenuEntry( id, label, icon, textColor, submenu, target, callback ) );
-		RebuildItems();
+		RebuildItemsInNextFrame();
 	}
 
 	//! Remove one item and redraw the menu. Like AddItem / ClearItems this rebuilds every row, so
@@ -446,9 +447,18 @@ class UIActionContextMenu: UIActionBase
 			if ( m_Entries[i].Id == id )
 			{
 				m_Entries.Remove( i );
-				RebuildItems();
+				RebuildItemsInNextFrame();
 				return;
 			}
+		}
+	}
+
+	protected void RebuildItemsInNextFrame()
+	{
+		if ( !m_RebuildItems )
+		{
+			m_RebuildItems = true;
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Call( RebuildItems );
 		}
 	}
 
@@ -532,6 +542,8 @@ class UIActionContextMenu: UIActionBase
 
 	protected void RebuildItems()
 	{
+		m_RebuildItems = false;
+
 		if ( !m_Grid )
 		{
 			Error("[UIActionContextMenu] RebuildItems failed: m_Grid is null!");
