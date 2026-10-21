@@ -1263,11 +1263,13 @@ class JMESPActionMenu
 			if ( attached && ( attached.GetFlags() & EntityFlags.VISIBLE ) == 0 )
 				continue;  //! Ignore slot if attached entity is invisible
 
-			label += ": ";
 			if ( attached )
-				label += attached.GetDisplayName();
+			{
+				if ( attached.GetDisplayName() != label )
+					label += ": " + attached.GetDisplayName();
+			}
 			else
-				label += "#STR_COT_ESP_MODULE_ATTACH_EMPTY";
+				label += ": #STR_COT_ESP_MODULE_ATTACH_EMPTY";
 
 			Add( PREFIX_PAGE + PAGE_ATTACH_SLOT + ":" + slotId, label, JMConstants.Lucide( "puzzle" ), true );
 		}
