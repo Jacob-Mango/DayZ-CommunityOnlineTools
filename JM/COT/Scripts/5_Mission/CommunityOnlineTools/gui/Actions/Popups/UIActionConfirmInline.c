@@ -30,6 +30,8 @@ class UIActionConfirmInline: UIActionBase
 	protected bool m_CenterIconRequested;
 	protected int  m_CenterIconPx;
 
+	protected JMFormBase m_Form;
+
 	//! Icon strip reserved on the left: 10 (position) + 16 (size) + 8 (gap).
 	//! Half of it is how far the centred label moves right to clear the icon.
 	static const int ICON_RIGHT_EDGE   = 26;
@@ -53,6 +55,11 @@ class UIActionConfirmInline: UIActionBase
 			m_ConfirmText.SetText( text );
 	}
 
+	void SetForm( JMFormBase form )
+	{
+		m_Form = form;
+	}
+
 	protected void SetState( bool pending )
 	{
 		m_Pending = pending;
@@ -60,6 +67,9 @@ class UIActionConfirmInline: UIActionBase
 		if ( m_BtnAction  ) m_BtnAction.Show(  !pending );
 		if ( m_BtnConfirm ) m_BtnConfirm.Show(  pending );
 		if ( m_BtnCancel  ) m_BtnCancel.Show(   pending );
+
+		if ( m_Form )
+			m_Form.SetConfirmInlinePendingState( pending );
 	}
 
 	//! Seconds the confirm/cancel pair stays visible before auto-reverting.

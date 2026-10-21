@@ -384,6 +384,7 @@ class JMObjectSpawnerForm: JMFormBase
 		UIActionIconGrid.ApplyDeletePreset( m_DeleteCursorBtn );
 		m_DeleteCursorBtn.SetWidth( MODE_ROW_W2 );
 		m_DeleteCursorBtn.SetTooltip( "#STR_COT_OBJECT_MODULE_DELETE_DESC" );
+		m_DeleteCursorBtn.SetForm( this );
 
 		BindPermission( m_DeleteCursorBtn, JMConstants.PERM_ENTITY_DELETE );
 
@@ -921,6 +922,14 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_PendingDeleteCursorObj = obj;
 		m_DeleteCursorBtn.Arm();
+	}
+
+	override void SetConfirmInlinePendingState( bool pending )
+	{
+		if ( pending && m_PendingDeleteCursorObj )
+			GetWindow().SetTitle( string.Format( "#STR_COT_OBJECT_MODULE_DELETE %1?", m_PendingDeleteCursorObj.GetDisplayName() ) );
+		else
+			GetWindow().SetTitle( m_Module.GetTitle() );
 	}
 
 	void SearchInput_OnChange( UIEvent eid, UIActionBase action )

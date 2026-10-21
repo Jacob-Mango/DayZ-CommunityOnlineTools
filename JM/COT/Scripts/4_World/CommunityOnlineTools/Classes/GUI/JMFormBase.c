@@ -287,6 +287,8 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 			strip.COT_SetTabVisible( tab, visible );
 	}
 
+	void SetConfirmInlinePendingState( bool pending );
+
 	void OnWidgetScriptInit( Widget w )
 	{
 		layoutRoot = w;
