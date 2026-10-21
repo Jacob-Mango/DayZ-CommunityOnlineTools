@@ -97,7 +97,7 @@ class UIActionManager
 	//  CreateFlexRow - WrapSpacer wrapped in a UIActionFlexRow; children use
 	//  SetFlex(grow, minPx, maxPx) for flexbox-style sizing. Add via row.Add(action),
 	//  call row.Layout() from OnResize. See UIActionFlexRow.c.
-	static ref UIActionFlexRow CreateFlexRow( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_CENTER )
+	static UIActionFlexRow CreateFlexRow( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_CENTER )
 	{
 		WrapSpacerWidget row = CreateWrapSpacer( parent, halign, valign );
 		if ( !row )
