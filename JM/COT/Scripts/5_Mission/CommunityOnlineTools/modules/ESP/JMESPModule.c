@@ -3003,11 +3003,15 @@ class JMESPModule: JMRenderableModuleBase
 		map< string, ref JMConstructionPartData > parts = new map< string, ref JMConstructionPartData >;
 		construction.COT_GetParts( parts, requireMaterials );
 
+		array< ConstructionPart > partsOrdered = construction.GetConstructionPartArray();
+
 		TStringArray names = new TStringArray;
 
-		foreach (string partName, JMConstructionPartData part: parts )
+		foreach ( ConstructionPart part: partsOrdered )
 		{
-			if ( part.m_State == JMConstructionPartState.CAN_BUILD )
+			string partName = part.GetPartName();
+			JMConstructionPartData partData = parts[partName];
+			if ( partData.m_State == JMConstructionPartState.CAN_BUILD )
 				names.Insert( partName );
 		}
 
