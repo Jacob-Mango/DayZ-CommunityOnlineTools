@@ -836,7 +836,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if (!parent)
 			JMActionHistory.Push( new JMSpawnHistoryEntry( ent ), JMActionHistory.OwnerOfInstance( callerInstance ) );
 
-		if ((flags & ECE_LOCAL) == ECE_LOCAL)
+		if (g_Game.IsDedicatedServer() && (flags & ECE_LOCAL) == ECE_LOCAL)
 		{
 			g_Game.RemoteObjectTreeDelete(obj);  //! Needed since SetupEntity might have spawned atts, and those wouldn't be created by RemoteObjectTreeCreate if they weren't spawned only locally...
 			g_Game.RemoteObjectTreeCreate(obj);
@@ -872,6 +872,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! in SetupEntity: the preview drives those from its own sliders.
 	void SetupEntityForMode( EntityAI entity, PlayerBase player, COT_ObjectSetupMode mode )
 	{
+		if (!g_Game.IsServer())
+		{
+			Error("SetupEntityForMode is unsafe to be called on MP client!");
+			return;
+		}
+
 		switch (mode)
 		{
 			case COT_ObjectSetupMode.DEBUGSPAWN:
@@ -882,8 +888,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				break;
 
 			case COT_ObjectSetupMode.CE:
-				if (g_Game.IsServer())
-					entity.EEOnCECreate();  //! Can only be called on server since SetZoneDamageCEInit calls GetHealth which is an error on client
+				entity.EEOnCECreate();  //! Can only be called on server since SetZoneDamageCEInit calls GetHealth which is an error on client
 				Weapon_Base weapon;
 				if (Class.CastTo(weapon, entity))
 				{
@@ -910,10 +915,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				}
 				break;
 		}
-
-		//! A freshly spawned vehicle with wheels should not start to roll. It doesn't. Set brake anyway to make sure.
-		if (g_Game.IsServer())
-			COT.SetBrake(entity, 1.0);
 	}
 
 	//! Pick a value out of a spawn range.
@@ -930,6 +931,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	protected void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player, COT_ObjectSetupMode mode = COT_ObjectSetupMode.NONE )
 	{
+		if (!g_Game.IsServer())
+		{
+			Error("SetupEntity is unsafe to be called on MP client!");
+			return;
+		}
+
 		//! Rolled here rather than at the call site: this runs once per spawned
 		//! entity, so every one of them gets its own value.
 		quantity = RollSpawnValue( quantity, m_SpawnQuantityMax );
@@ -992,6 +999,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 
 		SetupEntityHealth( entity, health, temp );
+
+		//! A freshly spawned vehicle with wheels should not start to roll. It doesn't. Set brake anyway to make sure.
+		if (entity.IsTransport())
+			COT.SetBrake(entity, 1.0);
 	}
 
 	//! Refill a magazine with one kind of cartridge. ammoItems lists AMMO PILE classes; cartridges

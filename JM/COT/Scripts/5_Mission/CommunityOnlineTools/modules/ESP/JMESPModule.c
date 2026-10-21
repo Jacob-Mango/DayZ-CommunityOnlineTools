@@ -2404,7 +2404,12 @@ class JMESPModule: JMRenderableModuleBase
 				created = entity.GetInventory().CreateAttachmentEx( className, slotId );
 
 			if ( created )
+			{
 				classAfter = className;
+
+				JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
+				objSpawnerModule.SetupEntityForMode( created, PlayerBase.Cast( player ), objSpawnerModule.m_ObjSetupMode );
+			}
 		}
 
 		if ( classBefore != classAfter )
