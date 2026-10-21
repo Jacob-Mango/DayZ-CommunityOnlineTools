@@ -86,7 +86,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! The color tokens recognized in a classname (the "blue" in "CivilianSedan_Blue"), shared by
 	//! DetectColorToken and "Change Colors" so both agree what index N means. "darkblue" must
 	//! precede "blue": Contains() takes the first hit and darkblue names contain "blue".
-	static ref array<string> GetColorTokens()
+	static array<string> GetColorTokens()
 	{
 		return s_ColorTokens;
 	}

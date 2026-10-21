@@ -119,7 +119,7 @@ class UIActionStepList: UIActionBase
 		return false;
 	}
 
-	protected ref JMStepListRow BuildRow( string label )
+	protected JMStepListRow BuildRow( string label )
 	{
 		// Row layout: [index 30px] [label fill] [^ 24px] [v 24px] [x 24px]
 		Widget rowRoot = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/Wrappers/1/GridSpacer5.layout", m_Rows );

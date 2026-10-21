@@ -31,7 +31,7 @@ class JMMapEditorCatalog
 		return cats;
 	}
 
-	static ref array< ref JMMapEditorAsset > Build()
+	static array< ref JMMapEditorAsset > Build()
 	{
 		array< ref JMMapEditorAsset > items = new array< ref JMMapEditorAsset >;
 		JMMapEditorAsset e;
