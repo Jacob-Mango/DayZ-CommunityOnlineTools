@@ -97,13 +97,13 @@ modded class ConstructionBase
 			if ( part.IsBuilt() )
 			{
 				data.m_State = JMConstructionPartState.BUILT;
-			} else if ( !HasRequiredPart( part_name ) )
+			} else if ( !HasRequiredPart( part_name ) || !PartHasAnySupportFulfilled( part_name ) )
 			{
 				data.m_State = JMConstructionPartState.REQUIRED_PART_NOT_BUILT;
 			} else if ( HasConflictPart( part_name ) )
 			{
 				data.m_State = JMConstructionPartState.CONFLICTING_PART;
-			} else if ( checkMaterials && !HasMaterials( part_name ) )
+			} else if ( checkMaterials && ( !HasMaterials( part_name ) || MaterialIsRuined( part_name ) ) )
 			{
 				data.m_State = JMConstructionPartState.NOT_ENOUGH_MATERIALS;
 			} else

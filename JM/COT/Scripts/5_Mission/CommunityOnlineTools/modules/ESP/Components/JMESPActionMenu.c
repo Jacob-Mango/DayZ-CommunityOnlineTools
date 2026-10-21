@@ -365,6 +365,7 @@ class JMESPActionMenu
 
 		m_Menu = UIActionManager.CreateContextMenu( parent, anchor, this, "OnMenuClick" );
 		m_Menu.SetHoverCallback( this, "OnMenuHover" );
+		m_Menu.SetCloseOnClick( false );
 
 		return m_Menu;
 	}
@@ -954,31 +955,83 @@ class JMESPActionMenu
 		Add( PREFIX_ACTION + "dismantleall", "#STR_COT_ESP_MODULE_MENU_DISMANTLE_ALL", JMConstants.Lucide( "pickaxe" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE ), JMTheme.DANGER );
 		Add( PREFIX_ACTION + "repairall", "#STR_COT_ESP_MODULE_MENU_REPAIR_ALL", JMConstants.Lucide( "wrench" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_REPAIR ) );
 
+		ConstructionBase construction = JMESPModule.GetConstructionOf( m_Meta.target );
+
 	#ifndef DAYZ_1_29
 		//! A rebuildable building narrows this page to the part under the click,
 		//! so where to click is worth seeing. Client-side drawing only - nothing
 		//! is sent, so there is no permission to check.
-		if ( Rebuilding.Cast( JMESPModule.GetConstructionOf( m_Meta.target ) ) )
+		if ( Rebuilding.Cast( construction ) )
 			AddToggle( PREFIX_ACTION + "shownodes", "#STR_COT_ESP_MODULE_MENU_SHOW_NODES", m_Meta.module.GetConstructionPreview().IsShowingNodes( EntityAI.Cast( m_Meta.target ) ) );
 	#endif
 
-		//! Narrowed to the part the right-click landed on when it landed on one;
-		//! a rebuildable building has dozens. A click on nothing that names a part
-		//! (or a name no part answers to) lists everything rather than nothing.
-		string filter;
-		bool filtered = CheckConstructionPartsFilter( filter );
+		TStringStringMap labelsByPartName = new TStringStringMap;
+		TStringArray displayNames = {};
+		TStringArray partNames = {};
+		TStringArray labels = {};
 
-		foreach ( string partName, JMConstructionPartData part: parts )
+		foreach ( JMConstructionPartData partData: parts )
 		{
-			if ( filtered && !PartMatchesFilter( part, filter ) )
+			partNames.Insert( partData.m_Name );
+			InsertUnique( labels, partData.m_Name, partData.m_DisplayName, partNames, displayNames );
+		}
+
+		//! Need to do 2md iteration since old labels may get swapped for partName by InsertUnique in 1st iteration
+		//! which would lead to stale labels in labelsByPartName
+		for ( int i = 0; i < partNames.Count(); ++i )
+		{
+			labelsByPartName[partNames[i]] = labels[i];
+		}
+
+		//! We sort by classname since that will make rebuildable buildings show entries in a sensible order.
+		//! Another option could be using ConstructionBase::GetConstructionPartArray() which is the order from config.cpp
+		//! Will need to see which one works best.
+		partNames.Sort();
+
+		map< string, ref JMConstructionPartData > filteredParts = GetConstructionPartsFiltered();
+
+		foreach ( string partName: partNames )
+		{
+			JMConstructionPartData part;
+
+			if ( !filteredParts.Find( partName, part ) )
 				continue;
 
-			//! A part that conflicts with something already built cannot be
-			//! acted on at all, so it is not offered a page.
-			bool enabled = part.m_State != JMConstructionPartState.CONFLICTING_PART;
+			string label = labelsByPartName[partName];
 
-			AddPage( PAGE_PART + ":" + partName, part.m_DisplayName, JMConstants.Lucide( "hammer" ), enabled );
+			if ( part.m_State == JMConstructionPartState.CAN_BUILD )
+				AddBuildPart( partName, label );
+			else
+				AddPage( PAGE_PART + ":" + partName, label, JMConstants.Lucide( "hammer" ) );
 		}
+	}
+
+	map< string, ref JMConstructionPartData > GetConstructionPartsFiltered()
+	{
+		map< string, ref JMConstructionPartData > parts = m_Meta.GetConstructionParts();
+		map< string, ref JMConstructionPartData > filteredParts = new map< string, ref JMConstructionPartData >;
+
+		if ( parts )
+		{
+			//! Narrowed to the part the right-click landed on when it landed on one;
+			//! a rebuildable building has dozens. A click on nothing that names a part
+			//! (or a name no part answers to) lists everything rather than nothing.
+			string filter;
+			bool filtered = CheckConstructionPartsFilter( filter );
+
+			foreach ( string partName, JMConstructionPartData part: parts )
+			{
+				if ( filtered && !PartMatchesFilter( part, filter ) )
+					continue;
+
+				//! A part that conflicts with something already built cannot be
+				//! acted on at all, so it is not offered a page.
+				if ( part.m_State != JMConstructionPartState.CONFLICTING_PART )
+					filteredParts[partName] = part;
+			}
+		}
+
+		return filteredParts;
 	}
 
 	protected bool CheckConstructionPartsFilter( out string filter )
@@ -1040,13 +1093,28 @@ class JMESPActionMenu
 		}
 		else
 		{
-			EntityAI entity = EntityAI.Cast( m_Meta.target );
-			ConstructionBase construction = ConstructionBase.Cast( entity.GetConstructionBasic() );
-			if ( JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED ) || construction.COT_CanBuildPart( m_PageArg, true ) )
-				Add( PREFIX_ACTION + "build", "#STR_COT_ESP_MODULE_MENU_BUILD", JMConstants.Lucide( "hammer" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD ) );
-			else
-				Add( PREFIX_ACTION + "build", "#STR_COT_ESP_MODULE_MENU_BUILD #STR_COT_ESP_MODULE_MENU_BUILD_MATERIALS_MISSING", JMConstants.Lucide( "hammer" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD ), JMTheme.DANGER );
+			AddBuildPart( m_PageArg, part.m_DisplayName );
 		}
+	}
+
+	protected void AddBuildPart( string partName, string partDisplayName )
+	{
+		string label;
+		int color;
+
+		EntityAI entity = EntityAI.Cast( m_Meta.target );
+		ConstructionBase construction = ConstructionBase.Cast( entity.GetConstructionBasic() );
+		if ( JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD_MATERIALSNOTREQUIRED ) || construction.COT_CanBuildPart( partName, true ) )
+		{
+			label = string.Format( "#STR_COT_ESP_MODULE_MENU_BUILD %1", partDisplayName );
+		}
+		else
+		{
+			label = string.Format( "#STR_COT_ESP_MODULE_MENU_BUILD %1 #STR_COT_ESP_MODULE_MENU_BUILD_MATERIALS_MISSING", partDisplayName );
+			color = JMTheme.DANGER;
+		}
+
+		Add( PREFIX_ACTION + "build:" + partName, label, JMConstants.Lucide( "hammer" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD ), color );
 	}
 
 	protected void BuildVehicle()
@@ -1541,10 +1609,16 @@ class JMESPActionMenu
 		if ( m_Page == PAGE_BUILD )
 		{
 			string partPage = PREFIX_PAGE + PAGE_PART + ":";
+			string buildAction = PREFIX_ACTION + "build:";
+			string partName;
 
 			if ( id.IndexOf( partPage ) == 0 )
+				partName = id.Substring( partPage.Length(), id.Length() - partPage.Length() );
+			else if ( id.IndexOf( buildAction ) == 0 )
+				partName = id.Substring( buildAction.Length(), id.Length() - buildAction.Length() );
+
+			if ( partName )
 			{
-				string partName = id.Substring( partPage.Length(), id.Length() - partPage.Length() );
 				part = parts.Get( partName );
 
 				if ( !part )
@@ -1630,216 +1704,352 @@ class JMESPActionMenu
 			arg = id.Substring( split + 1, id.Length() - split - 1 );
 		}
 
-		if ( name == "select" )
+		//! 1) Determine which action to run
+		switch ( name )
+		{
+		case "select":
 			DoSelect( true );
-		else if ( name == "deselect" )
+			break;
+		case "deselect":
 			DoSelect( false );
-		else if ( name == "copyclassnameatts" )
+			break;
+		case "copyclassnameatts":
 			DoCopyTypeWithAttachments();
-		else if ( name == "copyxml" )
+			break;
+		case "copyxml":
 			DoCopyTypesXml();
-		else if ( name == "copyspawnable" )
+			break;
+		case "copyspawnable":
 			DoCopySpawnableTypes();
-		else if ( name == "copyexpansion" )
+			break;
+		case "copyexpansion":
 			DoCopyExpansionObject();
+			break;
 #ifdef DZ_Expansion_Core
-		else if ( name == "copyloadout" )
+		case "copyloadout":
 			DoCopyExpLoadout();
+			break;
 #endif
-		else if ( name == "delete" )
+		case "delete":
 			DoDelete();
-		else if ( name == "copypos" )
+			break;
+		case "copypos":
 			COTFeedback.Copy( m_Meta.target.GetPosition().ToString() );
-		else if ( name == "copyori" )
+			break;
+		case "copyori":
 			COTFeedback.Copy( m_Meta.target.GetOrientation().ToString() );
-		else if ( name == "tpme" )
+			break;
+		case "tpme":
 			DoTeleportSelfTo();
-		else if ( name == "tphere" )
+			break;
+		case "tphere":
 			DoTeleportHere();
-		else if ( name == "tpundo" )
+			break;
+		case "tpundo":
 			DoTeleportUndo();
-		else if ( name == "tpredo" )
+			break;
+		case "tpredo":
 			DoTeleportRedo();
-		else if ( name == "jam" )
+			break;
+		case "jam":
 			DoWeaponAction( JMESPObjectAction.SetJammed, Flip( WeaponIsJammed() ) );
-		else if ( name == "chamber" )
+			break;
+		case "chamber":
 			DoWeaponAction( JMESPObjectAction.SetChambered, 1 );
-		else if ( name == "unchamber" )
+			break;
+		case "unchamber":
 			DoWeaponAction( JMESPObjectAction.SetChambered, 0 );
-		else if ( name == "loadmag" )
+			break;
+		case "loadmag":
 			DoWeaponAction( JMESPObjectAction.LoadMagazine, 0 );
-		else if ( name == "fillinternal" )
+			break;
+		case "fillinternal":
 			DoWeaponAction( JMESPObjectAction.FillInternalMagazine, 0 );
-		else if ( name == "removeattach" )
+			break;
+		case "removeattach":
 			DoRemoveAttachment();
-		else if ( name == "setattach" )
+			break;
+		case "setattach":
 			DoSetAttachment( arg );
-		else if ( name == "ignite" )
+			break;
+		case "ignite":
 			DoFireAction( JMESPObjectAction.SetBurning, 1 );
-		else if ( name == "extinguish" )
+			break;
+		case "extinguish":
 			DoFireAction( JMESPObjectAction.SetBurning, 0 );
-		else if ( name == "firefuel" )
+			break;
+		case "firefuel":
 			DoFireAction( JMESPObjectAction.FireplaceRefuel, 0 );
-		else if ( name == "cookall" )
+			break;
+		case "cookall":
 			DoFireAction( JMESPObjectAction.CookAll, 0 );
-		else if ( name == "stones" )
+			break;
+		case "stones":
 			DoFireAction( JMESPObjectAction.SetStoneCircle, Flip( FireHasStones() ) );
-		else if ( name == "oven" )
+			break;
+		case "oven":
 			DoFireAction( JMESPObjectAction.SetOven, Flip( FireIsOven() ) );
-		else if ( name == "lockall" )
+			break;
+		case "lockall":
 			DoLockAll( 1 );
-		else if ( name == "unlockall" )
+			break;
+		case "unlockall":
 			DoLockAll( 0 );
-		else if ( name == "parthp" )
+			break;
+		case "parthp":
 			DoPartHealth( arg.ToFloat() * 0.01 );
-		else if ( name == "scale" )
+			break;
+		case "scale":
 			DoScale( arg.ToFloat() );
-		else if ( name == "msg" )
+			break;
+		case "msg":
 			DoMessage();
-		else if ( name == "copyname" )
+			break;
+		case "copyname":
 			DoCopyName();
-		else if ( name == "copyguid" )
+			break;
+		case "copyguid":
 			DoCopyGUID();
-		else if ( name == "copysteam" )
+			break;
+		case "copysteam":
 			DoCopySteam();
-		else if ( name == "copynetid" )
+			break;
+		case "copynetid":
 			DoCopyNetworkID();
-		else if ( name == "copyclassname" )
+			break;
+		case "copyclassname":
 			DoCopyClassname();
-		else if ( name == "copycategory" )
+			break;
+		case "copycategory":
 			DoCopyCategory();
-		else if ( name == "strip" )
+			break;
+		case "strip":
 			DoPlayerVerb( "strip" );
-		else if ( name == "clearcargo" )
+			break;
+		case "clearcargo":
 			DoPlayerVerb( "clearcargo" );
-		else if ( name == "kick" )
+			break;
+		case "kick":
 			DoPlayerVerb( "kick" );
-		else if ( name == "ban" )
+			break;
+		case "ban":
 			DoPlayerVerb( "ban" );
-		else if ( name == "pastepos" )
+			break;
+		case "pastepos":
 			DoPastePosition();
-		else if ( name == "pasteori" )
+			break;
+		case "pasteori":
 			DoPasteOrientation();
-		else if ( name == "ground" )
+			break;
+		case "ground":
 			DoSnapToGround();
-		else if ( name == "facecam" )
+			break;
+		case "facecam":
 			DoFaceCamera();
-		else if ( name == "edittransform" )
+			break;
+		case "edittransform":
 			DoEditTransform();
-		else if ( name == "health" )
+			break;
+		case "health":
 			DoHealth( arg.ToFloat() );
-		else if ( name == "heal" )
+			break;
+		case "heal":
 			DoHeal();
-		else if ( name == "quantity" )
+			break;
+		case "quantity":
 			DoQuantity( arg.ToFloat() );
-		else if ( name == "liquid" )
+			break;
+		case "liquid":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetLiquid, arg.ToInt(), 0, m_Meta.target );
-		else if ( name == "food" )
+			break;
+		case "food":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetFoodStage, arg.ToInt(), 0, m_Meta.target );
-		else if ( name == "disinfect" )
+			break;
+		case "disinfect":
 			DoDisinfect();
-		else if ( name == "openclose" )
+			break;
+		case "openclose":
 			DoOpenClose();
-		else if ( name == "lock" )
+			break;
+		case "lock":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetLock, 1, 0, m_Meta.target );
-		else if ( name == "unlock" )
+			break;
+		case "unlock":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetLock, 0, 0, m_Meta.target );
-		else if ( name == "getcode" )
+			break;
+		case "getcode":
 			m_Meta.module.ObjectAction( JMESPObjectAction.GetCode, 0, 0, m_Meta.target );
-		else if ( name == "pastecode" )
+			break;
+		case "pastecode":
 			DoPasteCode();
-		else if ( name == "digilock" )
+			break;
+		case "digilock":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetDigitalLock, 1, m_Meta.m_DoorIndex, m_Meta.target );
-		else if ( name == "digiunlock" )
+			break;
+		case "digiunlock":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetDigitalLock, 0, m_Meta.m_DoorIndex, m_Meta.target );
-		else if ( name == "digigetcode" )
+			break;
+		case "digigetcode":
 			m_Meta.module.ObjectAction( JMESPObjectAction.GetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
-		else if ( name == "digiresetcode" )
+			break;
+		case "digiresetcode":
 			m_Meta.module.ObjectAction( JMESPObjectAction.ResetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
-		else if ( name == "digisetcode" )
+			break;
+		case "digisetcode":
 			DoSetDigitalCode();
-		else if ( name == "shownodes" )
+			break;
+		case "shownodes":
 			DoShowNodes();
-		else if ( name == "build" )
-			DoConstruction( 0 );
-		else if ( name == "dismantle" )
+			break;
+		case "build":
+			DoConstruction( 0, arg );
+			break;
+		case "dismantle":
 			DoConstruction( 1 );
-		else if ( name == "repairpart" )
+			break;
+		case "repairpart":
 			DoConstruction( 2 );
-		else if ( name == "refuel" )
+			break;
+		case "refuel":
 			DoRefuel();
-		else if ( name == "fuel" )
+			break;
+		case "fuel":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetFuel, 0, arg.ToFloat() * 0.01, m_Meta.target );
-		else if ( name == "coolant" )
+			break;
+		case "coolant":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetCoolant, 0, arg.ToFloat() * 0.01, m_Meta.target );
-		else if ( name == "flag" )
+			break;
+		case "flag":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetFlagRaised, 0, arg.ToFloat() * 0.01, m_Meta.target );
-		else if ( name == "lockwheels" )
+			break;
+		case "lockwheels":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetLockWheels, 1, 0, m_Meta.target );
-		else if ( name == "unlockwheels" )
+			break;
+		case "unlockwheels":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetLockWheels, 0, 0, m_Meta.target );
-		else if ( name == "repairfill" )
+			break;
+		case "repairfill":
 			m_Meta.module.ObjectAction( JMESPObjectAction.RepairAndFillSlots, 0, 0, m_Meta.target );
-		else if ( name == "changecolor" )
+			break;
+		case "changecolor":
 			m_Meta.module.ObjectAction( JMESPObjectAction.ChangeColor, arg.ToInt(), 0, m_Meta.target );
-		else if ( name == "pingrenade" )
+			break;
+		case "pingrenade":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetGrenadePin, 1, 0, m_Meta.target );
-		else if ( name == "unpingrenade" )
+			break;
+		case "unpingrenade":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetGrenadePin, 0, 0, m_Meta.target );
-		else if ( name == "triggertrap" )
+			break;
+		case "triggertrap":
 			m_Meta.module.ObjectAction( JMESPObjectAction.TriggerTrap, 0, 0, m_Meta.target );
-		else if ( name == "armtrap" )
+			break;
+		case "armtrap":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetTrapArmed, 1, 0, m_Meta.target );
-		else if ( name == "disarmtrap" )
+			break;
+		case "disarmtrap":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetTrapArmed, 0, 0, m_Meta.target );
-		else if ( name == "immobilize" )
+			break;
+		case "immobilize":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetImmobilized, Flip( CreatureIsImmobilized() ), 0, m_Meta.target );
-		else if ( name == "objclearcargo" )
+			break;
+		case "objclearcargo":
 			m_Meta.module.ObjectAction( JMESPObjectAction.ClearCargo, 0, 0, m_Meta.target );
-		else if ( name == "buildall" )
+			break;
+		case "buildall":
 			m_Meta.module.ObjectAction( JMESPObjectAction.BuildAll, 0, 0, m_Meta.target );
-		else if ( name == "dismantleall" )
+			break;
+		case "dismantleall":
 			m_Meta.module.ObjectAction( JMESPObjectAction.DismantleAll, 0, 0, m_Meta.target );
-		else if ( name == "repairall" )
+			break;
+		case "repairall":
 			m_Meta.module.ObjectAction( JMESPObjectAction.RepairAll, 0, 0, m_Meta.target );
-		else if ( name == "openfence" )
+			break;
+		case "openfence":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetFenceOpen, 1, 0, m_Meta.target );
-		else if ( name == "closefence" )
+			break;
+		case "closefence":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetFenceOpen, 0, 0, m_Meta.target );
-		else if ( name == "opentent" )
+			break;
+		case "opentent":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetTentOpen, 1, 0, m_Meta.target );
-		else if ( name == "closetent" )
+			break;
+		case "closetent":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetTentOpen, 0, 0, m_Meta.target );
-		else if ( name == "opendoor" )
+			break;
+		case "opendoor":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetHouseDoorOpen, 1, m_Meta.m_DoorIndex, m_Meta.target );
-		else if ( name == "closedoor" )
+			break;
+		case "closedoor":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetHouseDoorOpen, 0, m_Meta.m_DoorIndex, m_Meta.target );
-		else if ( name == "lockdoor" )
+			break;
+		case "lockdoor":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetHouseDoorLocked, 1, m_Meta.m_DoorIndex, m_Meta.target );
-		else if ( name == "unlockdoor" )
+			break;
+		case "unlockdoor":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetHouseDoorLocked, 0, m_Meta.m_DoorIndex, m_Meta.target );
-		else if ( name == "opencardoors" )
+			break;
+		case "opencardoors":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetCarDoors, 1, 0, m_Meta.target );
-		else if ( name == "closecardoors" )
+			break;
+		case "closecardoors":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetCarDoors, 0, 0, m_Meta.target );
-		else if ( name == "unstuck" )
+			break;
+		case "unstuck":
 			DoUnstuck();
-		else if ( name == "vehunlock" )
+			break;
+		case "vehunlock":
 			DoVehicleLock();
-		else if ( name == "vehunpair" )
+			break;
+		case "vehunpair":
 			DoVehicleUnPair();
-		else if ( name == "spectate" )
+			break;
+		case "spectate":
 			DoSpectate( action );
-		else if ( name == "uncon" )
+			break;
+		case "uncon":
 			DoUnconscious();
-		else if ( name == "freeze" )
+			break;
+		case "freeze":
 			DoFreeze();
-		else if ( name == "legs" )
+			break;
+		case "legs":
 			DoBrokenLegs();
+			break;
 #ifndef DAYZ_1_29
-		else if ( name == "ragdoll" )
+		case "ragdoll":
 			DoRagdoll();
+			break;
 #endif
+		}
+
+		//! 2) Determine what to do with the menu after running the action
+		switch ( name )
+		{
+		case "build":
+		case "dismantle":
+		case "repairpart":
+			if ( GetConstructionPartsFiltered().Count() > 1 )
+				GoToPage( PAGE_BUILD );
+			else
+				m_Menu.Close();
+			break;
+
+		case "parthp":
+			if ( GetConstructionPartsFiltered().Count() > 1 )
+				GoToPage( PAGE_PART + ":" + m_PageArg );
+			else
+				m_Menu.Close();
+			break;
+
+		case "removeattach":
+		case "setattach":
+			GoToPage( PAGE_ATTACHMENTS );
+			break;
+
+		default:
+			m_Menu.Close();
+			break;
+		}
 	}
 
 	//! <type name="..."/> block - the types.xml per-object entry.
@@ -2577,19 +2787,22 @@ class JMESPActionMenu
 		preview.SetShowNodes( building, !preview.IsShowingNodes( building ) );
 	}
 
-	protected void DoConstruction( int what )
+	protected void DoConstruction( int what, string partName = "" )
 	{
 		EntityAI building = EntityAI.Cast( m_Meta.target );
 
-		if ( !building || m_PageArg == "" )
+		if ( !partName )
+			partName = m_PageArg;
+
+		if ( !building || partName == "" )
 			return;
 
 		if ( what == 0 )
-			m_Meta.module.BaseBuilding_Build( building, m_PageArg );
+			m_Meta.module.BaseBuilding_Build( building, partName );
 		else if ( what == 1 )
-			m_Meta.module.BaseBuilding_Dismantle( building, m_PageArg );
+			m_Meta.module.BaseBuilding_Dismantle( building, partName );
 		else
-			m_Meta.module.BaseBuilding_Repair( building, m_PageArg );
+			m_Meta.module.BaseBuilding_Repair( building, partName );
 	}
 
 	protected void DoRefuel()
