@@ -20,7 +20,7 @@ PanelWidgetClass UIActionContextMenu_Panel {
    "Scrollbar V" 1
    "Scrollbar H" 0
    {
-   GridSpacerWidgetClass menu_grid {
+   WrapSpacerWidgetClass menu_grid {
     position 0 0
     size 1 1
     hexactpos 0
@@ -28,8 +28,6 @@ PanelWidgetClass UIActionContextMenu_Panel {
     hexactsize 0
     vexactsize 0
     "Size To Content V" 1
-    Columns 1
-    Rows 1
    }
    }
   }

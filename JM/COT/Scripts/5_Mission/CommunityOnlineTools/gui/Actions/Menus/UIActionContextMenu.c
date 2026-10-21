@@ -33,7 +33,7 @@ class UIActionContextMenu: UIActionBase
 {
 	protected Widget           m_Anchor;
 	protected Widget           m_Panel;
-	protected GridSpacerWidget m_Grid;
+	protected SpacerWidget m_Grid;
 
 	//! Only engages when the menu is taller than the screen has room for - see
 	//! UpdatePlacement. A short menu never touches the scroller at all.
