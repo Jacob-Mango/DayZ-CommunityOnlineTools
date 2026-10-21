@@ -23,12 +23,32 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	bool m_AllowRestrictedClassNames;
 	bool m_FilterWithDisplayName;
 
-	static ref TStringArray s_ColorTokens = { "darkblue", "white", "black", "blue", "red", "green", "tan", "camo", "orange", "grey", "gray", "yellow", "wine", "beige", "rust", "gold", "plum" };
+	static ref TStringArray s_ColorTokens = {};
+	static ref TStringStringMap s_ColorNamesByToken = new TStringStringMap;
 
 	//! classname (lowercased, color token stripped) -> { token -> real classname }. Built once
 	//! from CfgVehicles + CfgWeapons for the module's lifetime (static game data); rescanning
 	//! tens of thousands of entries per "Change Colors" click caused the menu-open lag.
 	protected static ref map<string, ref map<string, string>> s_ColorVariantsByBase;
+
+	void JMObjectSpawnerModule()
+	{
+		InitDefaultColorTokens();
+	}
+
+	static void InitDefaultColorTokens()
+	{
+		TStringArray colors = { "DarkBlue", "White", "Black", "Blue", "Red", "Green", "Tan", "Camo", "Orange", "Gey", "Gray", "Yellow", "Wine", "Beige", "Rust", "Gold", "Plum" };
+
+		foreach ( string color: colors )
+		{
+			string token = color;
+			token.ToLower();
+
+			s_ColorTokens.Insert( token );
+			s_ColorNamesByToken[token] = color;
+		}
+	}
 
 	//! Which colors "Change Colors" can offer for `entity`: only tokens with a real sibling
 	//! classname on the entity or its attached children. Most vanilla bodies (a car chassis)
@@ -1518,6 +1538,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		s_ColorVariantsByBase = new map<string, ref map<string, string>>;
 
 		array<string> tokens = GetColorTokens();
+		string token;
 
 		//! TODO/FIXME: Too much individual iteration of the whole Cfg* tree in various places scattered all across
 		//! COT - if we are going to build various lookup tables, we should do that in ONE place
@@ -1545,18 +1566,26 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				string color;
 				if (g_Game.ConfigGetText(child_path + " color", color))
 				{
-					color.ToLower();
-					if (tokens.Find(color) == -1)
-						tokens.Insert(color);
+					token = color;
+					token.ToLower();
+					if (!s_ColorNamesByToken.Contains(token))
+					{
+						tokens.Insert(token);
+						s_ColorNamesByToken[token] = color;
+					}
 				}
 
 			#ifdef DZ_Expansion_Core
 				string skinName;
 				if (g_Game.ConfigGetText(child_path + " skinName", skinName))
 				{
-					skinName.ToLower();
-					if (tokens.Find(skinName) == -1)
-						tokens.Insert(skinName);
+					token = skinName;
+					token.ToLower();
+					if (!s_ColorNamesByToken.Contains(token))
+					{
+						tokens.Insert(token);
+						s_ColorNamesByToken[token] = skinName;
+					}
 				}
 			#endif
 

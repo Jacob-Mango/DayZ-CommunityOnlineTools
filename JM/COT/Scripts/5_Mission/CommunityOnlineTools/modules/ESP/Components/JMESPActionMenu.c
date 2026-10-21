@@ -1379,10 +1379,11 @@ class JMESPActionMenu
 			return;
 		}
 
-		for ( int i = 0; i < tokens.Count(); i++ )
+		foreach ( string token: tokens )
 		{
-			int wireIndex = JMObjectSpawnerModule.GetColorTokenIndex( tokens[i] );
-			Add( PREFIX_ACTION + "changecolor:" + wireIndex, tokens[i], JMConstants.Lucide( "palette" ) );
+			int wireIndex = JMObjectSpawnerModule.GetColorTokenIndex( token );
+			string colorName = JMObjectSpawnerModule.s_ColorNamesByToken[token];
+			Add( PREFIX_ACTION + "changecolor:" + wireIndex, colorName, JMConstants.Lucide( "palette" ) );
 		}
 	}
 
