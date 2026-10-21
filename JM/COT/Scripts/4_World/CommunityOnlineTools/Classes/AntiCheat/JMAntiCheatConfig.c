@@ -164,12 +164,35 @@ class JMAntiCheatConfig
 	static const string DIR  = "$profile:CommunityOnlineTools\\AntiCheat\\";
 	static const string FILE = "$profile:CommunityOnlineTools\\AntiCheat\\config.json";
 
+	static ref JMAntiCheatConfig s_Instance;
+
+	static JMAntiCheatConfig Get()
+	{
+		if ( s_Instance )
+			return s_Instance;
+
+		s_Instance = new JMAntiCheatConfig();
+
+		if ( FileExist( FILE ) )
+		{
+			JMJsonFile<JMAntiCheatConfig>.Load( FILE, s_Instance );
+		}
+		else
+		{
+		#ifndef DIAG_DEVELOPER
+			//! Anti-cheat needs work to make it usable. Disable unless running under diag/devel.
+			s_Instance.Enabled = false;
+		#endif
+
+			JMJsonFile<JMAntiCheatConfig>.Save( FILE, s_Instance );
+		}
+
+		return s_Instance;
+	}
+
+	[Obsolete("Use JMAntiCheatConfig::Get")]
 	static JMAntiCheatConfig Load()
 	{
-		JMAntiCheatConfig cfg = new JMAntiCheatConfig();
-
-		JMJsonFile<JMAntiCheatConfig>.Load( FILE, cfg );
-
-		return cfg;
+		return Get();
 	}
 }

@@ -129,6 +129,9 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		// Collect all unique categories not in preferred order
 		foreach ( JMRenderableModuleBase mod: modules )
 		{
+			if ( !mod.IsEnabled() )
+				continue;
+
 			if ( !mod.HasButton() )
 				continue;
 
@@ -153,7 +156,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 			bool hasAny = false;
 			foreach ( JMRenderableModuleBase checkMod: modules )
 			{
-				if ( checkMod.HasButton() && checkMod.GetCategory() == catName )
+				if ( checkMod.IsEnabled() && checkMod.HasButton() && checkMod.GetCategory() == catName )
 				{
 					hasAny = true;
 					break;
@@ -187,7 +190,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 			// Add all modules in this category
 			foreach ( JMRenderableModuleBase mod2: modules )
 			{
-				if ( mod2.HasButton() && mod2.GetCategory() == catName )
+				if ( mod2.IsEnabled() && mod2.HasButton() && mod2.GetCategory() == catName )
 				{
 					category.AddModule( mod2 );
 				}

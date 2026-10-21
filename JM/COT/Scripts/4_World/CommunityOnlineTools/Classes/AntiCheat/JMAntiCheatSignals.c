@@ -34,6 +34,9 @@ class JMAntiCheatSignals
 
 	static void ReportDeniedRpc( string guid, string permission )
 	{
+		if ( !JMAntiCheatConfig.Get().Enabled )
+			return;
+
 		if ( guid == "" )
 			return;
 
@@ -58,6 +61,9 @@ class JMAntiCheatSignals
 
 	static void ReportShot( string guid, int ammoCountAfter, bool jammed, float jamChance )
 	{
+		if ( !JMAntiCheatConfig.Get().Enabled )
+			return;
+
 		if ( guid == "" )
 			return;
 

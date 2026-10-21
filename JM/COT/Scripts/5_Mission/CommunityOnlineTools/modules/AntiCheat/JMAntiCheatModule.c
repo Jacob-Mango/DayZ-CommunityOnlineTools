@@ -5,7 +5,7 @@
 
 class JMAntiCheatModule : JMRenderableModuleBase
 {
-	protected ref JMAntiCheatConfig m_Config;
+	protected ref JMAntiCheatConfig m_Config = JMAntiCheatConfig.Get();
 
 	// Server-side state
 	protected ref map< string, ref JMAntiCheatFlag > m_Flags;
@@ -193,6 +193,11 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		return instance.HasPermission( "COT" );
 	}
 
+	override bool IsEnabled()
+	{
+		return m_Config.Enabled;
+	}
+
 	protected bool IsInVehicle( PlayerBase pb )
 	{
 		if ( !pb )
@@ -270,8 +275,6 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 		if ( IsMissionHost() )
 		{
-			m_Config = JMAntiCheatConfig.Load();
-
 			//! The 4_World callers that grant movement sanctions cannot reach
 			//! a 5_Mission config, so the number is pushed down to them here.
 			JMAntiCheatSanction.MoveGraceSeconds = m_Config.PositionGraceS;
@@ -293,7 +296,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 	override void OnUpdate( float timeslice )
 	{
-		if ( !IsMissionHost() || !m_Config || !m_Config.Enabled )
+		if ( !g_Game.IsServer() || !m_Config || !m_Config.Enabled )
 			return;
 
 		// Drain the static 4_World-side kill-event queue written by
