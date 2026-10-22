@@ -3017,7 +3017,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			string partName = part.GetPartName();
 			JMConstructionPartData partData = parts[partName];
-			if ( partData.m_State == JMConstructionPartState.CAN_BUILD )
+			if ( partData && partData.m_State == JMConstructionPartState.CAN_BUILD )
 				names.Insert( partName );
 		}
 
