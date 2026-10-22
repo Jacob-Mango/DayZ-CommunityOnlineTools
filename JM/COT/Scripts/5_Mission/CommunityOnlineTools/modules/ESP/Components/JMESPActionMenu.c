@@ -64,6 +64,8 @@ class JMESPActionMenu
 	//! The construction selection the menu was opened on, see Open.
 	protected string m_PartFilter;
 
+	ref map< string, ref JMConstructionPartData > m_FilteredParts;
+
 	//! Where the menu was first opened. Every page after the first reopens at
 	//! the same spot, so drilling in does not walk the menu across the screen.
 	protected float m_X;
@@ -262,7 +264,13 @@ class JMESPActionMenu
 		return true;
 	}
 
+	[Obsolete("Use GetMeta")]
 	JMESPMeta GetTarget()
+	{
+		return m_Meta;
+	}
+
+	JMESPMeta GetMeta()
 	{
 		return m_Meta;
 	}
@@ -373,12 +381,12 @@ class JMESPActionMenu
 	//! The world menu, built on first use. Parented to the ESP container (created once per
 	//! client at mission load) rather than the raiser, so it cannot be torn out from under
 	//! itself when the opening thing stops being tracked.
-	static JMESPActionMenu Shared()
+	static JMESPActionMenu Shared( bool create = true )
 	{
 		if ( !JMStatics.ESP_CONTAINER )
 			return NULL;
 
-		if ( s_Shared )
+		if ( s_Shared || !create )
 			return s_Shared;
 
 		JMESPActionMenu menu = new JMESPActionMenu();
@@ -988,13 +996,13 @@ class JMESPActionMenu
 		//! Will need to see which one works best.
 		JMStatics.SortStringArrayIgnoreCase( partNames );
 
-		map< string, ref JMConstructionPartData > filteredParts = GetConstructionPartsFiltered();
+		m_FilteredParts = GetConstructionPartsFiltered();
 
 		foreach ( string partName: partNames )
 		{
 			JMConstructionPartData part;
 
-			if ( !filteredParts.Find( partName, part ) )
+			if ( !m_FilteredParts.Find( partName, part ) )
 				continue;
 
 			string label = labelsByPartName[partName];
@@ -1066,6 +1074,26 @@ class JMESPActionMenu
 		name.ToLower();
 
 		return mainName == lowerFilter || name == lowerFilter;
+	}
+
+	bool ConstructionPartsChanged()
+	{
+		if ( m_FilteredParts )
+		{
+			map< string, ref JMConstructionPartData > filteredParts = GetConstructionPartsFiltered();
+
+			if ( filteredParts.Count() != m_FilteredParts.Count() )
+				return true;
+
+			foreach ( string partName, JMConstructionPartData partData: filteredParts )
+			{
+				JMConstructionPartData prevPartData;
+				if ( !m_FilteredParts.Find( partName, prevPartData ) || prevPartData.m_State != partData.m_State )
+					return true;
+			}
+		}
+
+		return false;
 	}
 
 	protected void BuildPart()
@@ -1278,9 +1306,39 @@ class JMESPActionMenu
 	{
 		AddBack();
 
+		TStringIntMap slotIdsByLabel = new TStringIntMap;
+		map<int, EntityAI> attachmentsById = new map<int, EntityAI>;
+		TStringArray labels = GetSlotLabels( slotIdsByLabel, attachmentsById );
+
+		JMStatics.SortStringArrayIgnoreCase( labels );
+
+		foreach ( string label: labels )
+		{
+			int slotId = slotIdsByLabel[label];
+
+			EntityAI attached = attachmentsById[slotId];
+
+			if ( attached )
+			{
+				if ( attached.GetDisplayName() != label )
+					label += ": " + attached.GetDisplayName();
+			}
+			else
+			{
+				label += ": #STR_COT_ESP_MODULE_ATTACH_EMPTY";
+			}
+
+			Add( PREFIX_PAGE + PAGE_ATTACH_SLOT + ":" + slotId, label, JMConstants.Lucide( "puzzle" ), true );
+		}
+	}
+
+	TStringArray GetSlotLabels( TStringIntMap slotIdsByLabel = null, map<int, EntityAI> attachmentsById = null )
+	{
+		TStringArray labels = {};
+
 		EntityAI target;
 		if ( !Class.CastTo( target, m_Meta.target ) || !target.GetInventory() )
-			return;
+			return labels;
 
 		Man player = Man.Cast( target );
 
@@ -1295,10 +1353,8 @@ class JMESPActionMenu
 		map< string, ref JMConstructionPartData > parts = m_Meta.GetConstructionParts();
 		JMConstructionPartData part;
 
-		TStringIntMap slotIdsByLabel = new TStringIntMap;
 		TStringArray slotNames = {};
 		TStringArray displayNames = {};
-		TStringArray labels = {};
 
 		for ( int i = 0; i < count; i++ )
 		{
@@ -1317,26 +1373,6 @@ class JMESPActionMenu
 			if ( filtered && partName && parts.Find( partName, part ) && !PartMatchesFilter( part, filter ) )
 				continue;
 
-			string displayName = InventorySlots.GetSlotDisplayName( slotId );
-
-			if ( displayName == "#STR_CodeLock0" )  //! I have no idea where it pulls that from but it's not vanilla nor Expansion
-				displayName = "#STR_CfgVehicles_codelock0";
-
-			displayName = Widget.TranslateString( displayName );
-
-			slotNames.Insert( slotName );
-
-			string uniqueLabel = InsertUnique( labels, slotName, displayName, slotNames, displayNames, slotIdsByLabel );
-
-			slotIdsByLabel[uniqueLabel] = slotId;
-		}
-
-		JMStatics.SortStringArrayIgnoreCase( labels );
-
-		foreach ( string label: labels )
-		{
-			slotId = slotIdsByLabel[label];
-
 			EntityAI attached;
 
 			if ( slotId == InventorySlots.HANDS && player )
@@ -1349,14 +1385,26 @@ class JMESPActionMenu
 				if ( ( attached.GetFlags() & EntityFlags.VISIBLE ) == 0 )
 					continue;  //! Ignore slot if attached entity is invisible
 
-				if ( attached.GetDisplayName() != label )
-					label += ": " + attached.GetDisplayName();
+				if ( attachmentsById )
+					attachmentsById[slotId] = attached;
 			}
-			else
-				label += ": #STR_COT_ESP_MODULE_ATTACH_EMPTY";
 
-			Add( PREFIX_PAGE + PAGE_ATTACH_SLOT + ":" + slotId, label, JMConstants.Lucide( "puzzle" ), true );
+			string displayName = InventorySlots.GetSlotDisplayName( slotId );
+
+			if ( displayName == "#STR_CodeLock0" )  //! I have no idea where it pulls that from but it's not vanilla nor Expansion
+				displayName = "#STR_CfgVehicles_codelock0";
+
+			displayName = Widget.TranslateString( displayName );
+
+			slotNames.Insert( slotName );
+
+			string uniqueLabel = InsertUnique( labels, slotName, displayName, slotNames, displayNames, slotIdsByLabel );
+
+			if ( slotIdsByLabel )
+				slotIdsByLabel[uniqueLabel] = slotId;
 		}
+
+		return labels;
 	}
 
 	//! m_PageArg is the slot id (see BuildAttachments) - "Remove" only shows
@@ -2027,28 +2075,51 @@ class JMESPActionMenu
 		{
 		case "build":
 		case "dismantle":
+			break;
+
 		case "repairpart":
-			if ( GetConstructionPartsFiltered().Count() > 1 )
-				GoToPage( PAGE_BUILD );
-			else
-				m_Menu.Close();
+			OnConstructionAction( PAGE_BUILD, m_PageArg );
 			break;
 
 		case "parthp":
-			if ( GetConstructionPartsFiltered().Count() > 1 )
-				GoToPage( PAGE_PART + ":" + m_PageArg );
-			else
-				m_Menu.Close();
+			OnConstructionAction( PAGE_PART + ":" + m_PageArg, m_PageArg );
 			break;
 
 		case "removeattach":
 		case "setattach":
-			GoToPage( PAGE_ATTACHMENTS );
 			break;
 
 		default:
 			m_Menu.Close();
 			break;
+		}
+	}
+
+	void OnConstructionAction( string page, string partName )
+	{
+		if ( !IsOpen() )
+			return;
+
+		if ( m_Page == PAGE_BUILD || m_Page == PAGE_PART )
+		{
+			if ( GetConstructionPartsFiltered().Count() > 1 )
+				GoToPage( page );
+			else
+				m_Menu.Close();
+		}
+	}
+
+	void OnItemAttachmentChanged( string page, string slotName, EntityAI item )
+	{
+		if ( !IsOpen() )
+			return;
+
+		if ( m_Page == PAGE_ATTACH_SLOT )
+		{
+			if ( GetSlotLabels().Count() > 1 )
+				GoToPage( page );
+			else
+				m_Menu.Close();
 		}
 	}
 

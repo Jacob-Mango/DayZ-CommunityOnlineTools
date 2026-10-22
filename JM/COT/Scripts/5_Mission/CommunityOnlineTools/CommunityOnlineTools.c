@@ -16,7 +16,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void CloseSharedMenu()
 	{
-		JMESPActionMenu menu = JMESPActionMenu.Shared();
+		JMESPActionMenu menu = JMESPActionMenu.Shared( false );
 
 		if ( menu )
 			menu.Close();
@@ -47,6 +47,46 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		super.OnLoaded();
 	}
+
+#ifndef SERVER
+	override void OnItemAttached( EntityAI parent, string slotName, EntityAI item )
+	{
+		UpdateActionMenu( "itemattached", parent, slotName, item );
+	}
+
+	override void OnItemDetached( EntityAI parent, string slotName, EntityAI item )
+	{
+		UpdateActionMenu( "itemdetached", parent, slotName, item );
+	}
+
+	override void OnVariablesSynchronized( EntityAI entity )
+	{
+		//! TODO: Find a better way to determine when construction changed
+		if ( entity.CanUseConstruction() )
+			UpdateActionMenu( "constructionsync", entity, "" );
+	}
+
+	void UpdateActionMenu( string action, EntityAI entity, string arg, EntityAI item = null )
+	{
+		JMESPActionMenu menu = JMESPActionMenu.Shared( false );
+
+		if ( !menu || !menu.IsOpen() || !menu.GetMeta() || menu.GetMeta().target != entity )
+			return;
+
+		switch ( action )
+		{
+			case "itemattached":
+			case "itemdetached":
+				menu.OnItemAttachmentChanged( JMESPActionMenu.PAGE_ATTACHMENTS, arg, item );
+				break;
+
+			case "constructionsync":
+				if ( menu.ConstructionPartsChanged() )
+					menu.OnConstructionAction( JMESPActionMenu.PAGE_BUILD, arg );
+				break;
+		}
+	}
+#endif
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{

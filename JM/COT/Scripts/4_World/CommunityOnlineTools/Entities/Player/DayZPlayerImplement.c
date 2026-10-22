@@ -122,6 +122,15 @@ modded class DayZPlayerImplement
 					COT_SetEntityInvisibleRecursive(item, true);
 				break;
 		}
+
+		GetCOTBase().OnItemAttached(this, slot_name, item);
+	}
+
+	override void EEItemDetached(EntityAI item, string slot_name)
+	{
+		super.EEItemDetached(item, slot_name);
+
+		GetCOTBase().OnItemDetached(this, slot_name, item);
 	}
 
 	void COT_SetEntityInvisibleRecursive(EntityAI ent, bool invisible)

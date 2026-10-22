@@ -37,6 +37,27 @@ modded class ItemBase
 			JMEntityTracker.Register(this);
 	}
 
+	override void EEItemAttached(EntityAI item, string slot_name)
+	{
+		super.EEItemAttached(item, slot_name);
+
+		GetCOTBase().OnItemAttached(this, slot_name, item);
+	}
+
+	override void EEItemDetached(EntityAI item, string slot_name)
+	{
+		super.EEItemDetached(item, slot_name);
+
+		GetCOTBase().OnItemDetached(this, slot_name, item);
+	}
+
+	override void OnVariablesSynchronized()
+	{
+		super.OnVariablesSynchronized();
+
+		GetCOTBase().OnVariablesSynchronized(this);
+	}
+
 	//! Thrown grenade: tag the player whose hands it just left.
 	override void OnInventoryExit( Man player )
 	{

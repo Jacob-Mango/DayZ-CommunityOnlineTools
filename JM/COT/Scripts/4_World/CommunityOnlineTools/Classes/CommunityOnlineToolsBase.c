@@ -398,6 +398,12 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		}
 	}
 
+	void OnItemAttached( EntityAI parent, string slotName, EntityAI item );
+
+	void OnItemDetached( EntityAI parent, string slotName, EntityAI item );
+
+	void OnVariablesSynchronized( EntityAI entity );
+
 	void ToggleActive()
 	{
 		#ifdef COT_DEBUGLOGS
