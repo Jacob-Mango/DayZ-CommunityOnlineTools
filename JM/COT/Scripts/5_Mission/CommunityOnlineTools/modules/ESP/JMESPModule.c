@@ -3578,7 +3578,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( WatchDigitalCodeLockMenu );
 
-		if ( IsCOTInterfaceOpen() )
+		if ( g_cotBase.IsOpen() )
 			g_Game.GetUIManager().ShowUICursor( true );
 	}
 #endif
