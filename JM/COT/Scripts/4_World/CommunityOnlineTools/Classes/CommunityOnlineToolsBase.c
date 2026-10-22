@@ -339,6 +339,8 @@ class CommunityOnlineToolsBase: CommunityOnlineToolsGame
 		{
 			JMScriptInvokers.COT_ON_CLOSE.Invoke();
 			ForceDisableInputs( false );
+
+			CloseSharedMenu();
 		}
 	}
 
