@@ -1,3 +1,4 @@
+//! TODO: Remove this and use vanilla EConstructionInfoCategories instead
 enum JMConstructionPartState
 {
 	UNKNOWN = 0,
@@ -8,6 +9,7 @@ enum JMConstructionPartState
 	NOT_ENOUGH_MATERIALS //TODO: link this to a permission
 }
 
+//! TODO: Remove this and use vanilla ConstructionPart instead
 class JMConstructionPartData : UIActionData
 {
 	string m_Name;
