@@ -478,8 +478,6 @@ class JMESPModule: JMRenderableModuleBase
 		rayInput.radius = 0.15;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
 		if ( !DayZPhysics.RaycastRVProxy( rayInput, results ) ) return NULL;
-		PlayerBase selfPlayer = PlayerBase.Cast( g_Game.GetPlayer() );
-		bool allowSelf = selfPlayer && selfPlayer.IsInThirdPerson();
 
 		foreach ( RaycastRVResult res: results )
 		{
@@ -489,7 +487,7 @@ class JMESPModule: JMRenderableModuleBase
 			if ( !res.obj )
 				continue;
 
-			if ( res.obj == g_Game.GetPlayer() && !allowSelf )
+			if ( !AllowSelf( res.obj ) )
 				continue;
 
 			return res.obj;
@@ -1238,11 +1236,7 @@ class JMESPModule: JMRenderableModuleBase
 				if ( Class.CastTo( entity, obj ) && entity.GetHierarchyRoot() )
 					obj = entity.GetHierarchyRoot();
 
-				//! In first person the camera is inside the admin's own collision mesh, so the
-				//! ray hits self first - skip it. In third person a self-hit is deliberate
-				//! and a legitimate right-click target.
-				PlayerBase selfPlayer = PlayerBase.Cast( g_Game.GetPlayer() );
-				if ( obj == g_Game.GetPlayer() && ( !selfPlayer || !selfPlayer.IsInThirdPerson() ) )
+				if ( !AllowSelf( obj ) )
 					continue;
 
 				COT_String objType = JMESPMeta.GetObjectType( obj );
@@ -1257,6 +1251,18 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		return NULL;
+	}
+
+	bool AllowSelf( notnull Object obj )
+	{
+		//! In first person the camera is inside the admin's own collision mesh, so the
+		//! ray hits self first - skip it. In third person or freecam a self-hit is deliberate
+		//! and a legitimate right-click target.
+		DayZPlayer selfPlayer = g_Game.GetPlayer();
+		if ( obj == selfPlayer && !selfPlayer.IsInThirdPerson() && !CurrentActiveCamera )
+			return false;
+
+		return true;
 	}
 
 	//! A meta for an object nobody is tracking.
