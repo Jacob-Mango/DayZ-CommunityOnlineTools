@@ -74,7 +74,7 @@ class JMLoadoutForm: JMFormBase
 			return;
 		}
 		
-		JMStatics.SortStringArray( names );
+		JMStatics.SortStringArrayIgnoreCase( names );
 
 		foreach(string name: names)
 		{

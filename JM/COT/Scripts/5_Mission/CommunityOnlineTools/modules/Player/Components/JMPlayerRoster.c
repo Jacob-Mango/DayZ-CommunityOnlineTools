@@ -465,39 +465,29 @@ class JMPlayerRoster
 	//! index for two players sharing a name and silently dropped one from the list.
 	protected void SortPlayersArray( out array< JMPlayerInstance > players, bool isReversed )
 	{
-		int count = players.Count();
-
 		TStringArray pNames = new TStringArray;
-		for ( int i = 0; i < count; i++ )
-			pNames.Insert( players[i].GetName() );
+		foreach ( JMPlayerInstance player: players )
+			pNames.Insert( player.GetName() );
 
-		pNames.Sort( isReversed );
+		JMStatics.SortStringArrayIgnoreCase( pNames, isReversed );
 
 		array< JMPlayerInstance > remaining = new array< JMPlayerInstance >;
 		remaining.Copy( players );
 
-		array< JMPlayerInstance > sorted = new array< JMPlayerInstance >;
+		players.Clear();
 
-		for ( i = 0; i < count; i++ )
+		foreach ( string wantName: pNames )
 		{
-			string wantName = pNames[i];
-
-			for ( int j = 0; j < remaining.Count(); j++ )
+			foreach ( int j, JMPlayerInstance remainingPlayer: remaining )
 			{
-				if ( !remaining[j] )
+				if ( remainingPlayer.GetName() != wantName )
 					continue;
 
-				if ( remaining[j].GetName() != wantName )
-					continue;
-
-				sorted.Insert( remaining[j] );
-				remaining[j] = NULL;
+				players.Insert( remainingPlayer );
+				remaining.Remove( j );
 				break;
 			}
 		}
-
-		players.Clear();
-		players.Copy( sorted );
 	}
 
 	void UpdatePlayerCount()

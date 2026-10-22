@@ -56,71 +56,56 @@ class JMStatics
 		RemoveOverlay( w );
 	}
 
-	static void SortStringArray( out array< string > arr )
+	[Obsolete("Use array::Sort")]
+	static void SortStringArray( TStringArray values )
 	{
-		int count = arr.Count();
-		string strs[ 1000 ];
-
-		for ( int i = 0; i < count; i++ )
-		{
-			strs[ i ] = arr[ i ];
-		}
-
-		Sort( strs, count );
-
-		arr.Clear();
-
-		for ( i = 0; i < count; i++ )
-		{
-			arr.Insert( strs[i] );
-		}
+		values.Sort();
 	}
 
-	static void SortStringArrayKVPair( out array< string > arrKey, out array< string > arrValue )
+	//! @note optimized for speed, works best if each value is unique when ignoring case.
+	//! If values are not unique when ignoring case, the last occurence of each repeating value will be chosen.
+	//! E.g. if values is {"ONE", "Two", "One", "TWO", "Three"}, then the resulting array will be {"One", "One", "Three", "TWO", "TWO"}
+	static void SortStringArrayIgnoreCase( TStringArray values, bool reverse = false )
 	{
-		if ( arrKey.Count() != arrValue.Count() )
+		TStringArray keys = {};
+		TStringStringMap keyToValue = new TStringStringMap;
+
+		foreach ( string value: values )
+		{
+			string valueLower = value;
+			valueLower.ToLower();
+			keys.Insert( valueLower );
+			keyToValue[valueLower] = value;
+		}
+
+		SortStringArrayHelper( keys, keyToValue, values, reverse );
+	}
+
+	static void SortStringArrayKVPair( TStringArray keys, TStringArray values, bool reverse = false )
+	{
+		if ( keys.Count() != values.Count() )
 			return;
 
-		int count = arrKey.Count();
+		TStringStringMap keyToValue = new TStringStringMap;
 
-		string strs[ 1000 ];
-		int pIndices[ 1000 ];
-
-		for ( int i = 0; i < count; i++ )
+		foreach ( int i, string key: keys )
 		{
-			strs[ i ] = arrKey[ i ];
+			keyToValue[key] = values[i];
 		}
 
-		Sort( strs, count );
+		SortStringArrayHelper( keys, keyToValue, values, reverse );
+	}
 
-		for ( i = 0; i < arrKey.Count(); i++ )
+	static void SortStringArrayHelper( TStringArray keys, TStringStringMap keyToValue, TStringArray values, bool reverse = false )
+	{
+		keys.Sort( reverse );
+
+		values.Clear();
+
+		foreach ( string key: keys )
 		{
-			for ( int j = 0; j < arrKey.Count(); j++ )
-			{
-				if ( strs[j] == arrKey[i] )
-				{
-					pIndices[i] = j;
-				}
-			}
+			values.Insert( keyToValue[key] );
 		}
-
-		array< string > narrKey = new array< string >;
-		array< string > narrValue = new array< string >;
-
-		narrKey.Resize( count );
-		narrValue.Resize( count );
-
-		for ( i = 0; i < count; i++ )
-		{
-			narrKey.Set( pIndices[i], arrKey[i] );
-			narrValue.Set( pIndices[i], arrValue[i] );
-		}
-
-		arrKey.Clear();
-		arrValue.Clear();
-
-		arrKey.Copy( narrKey );
-		arrValue.Copy( narrValue );
 	}
 
 	//! @note joinked from ExpansionString

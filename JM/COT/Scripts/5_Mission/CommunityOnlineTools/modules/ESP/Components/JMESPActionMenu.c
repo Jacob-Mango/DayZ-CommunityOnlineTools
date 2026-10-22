@@ -166,7 +166,7 @@ class JMESPActionMenu
 			}
 		}
 
-		labels.Sort();
+		JMStatics.SortStringArrayIgnoreCase( labels );
 
 		return candidatesByLabel;
 	}
@@ -986,7 +986,7 @@ class JMESPActionMenu
 		//! We sort by classname since that will make rebuildable buildings show entries in a sensible order.
 		//! Another option could be using ConstructionBase::GetConstructionPartArray() which is the order from config.cpp
 		//! Will need to see which one works best.
-		partNames.Sort();
+		JMStatics.SortStringArrayIgnoreCase( partNames );
 
 		map< string, ref JMConstructionPartData > filteredParts = GetConstructionPartsFiltered();
 
@@ -1331,7 +1331,7 @@ class JMESPActionMenu
 			slotIdsByLabel[uniqueLabel] = slotId;
 		}
 
-		labels.Sort();
+		JMStatics.SortStringArrayIgnoreCase( labels );
 
 		foreach ( string label: labels )
 		{
