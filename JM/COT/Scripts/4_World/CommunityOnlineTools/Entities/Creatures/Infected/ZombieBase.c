@@ -56,14 +56,16 @@ modded class ZombieBase
 	{
 		super.EEItemAttached(item, slot_name);
 
-		GetCOTBase().OnItemAttached(this, slot_name, item);
+		if (g_cotBase)
+			g_cotBase.OnItemAttached(this, slot_name, item);
 	}
 
 	override void EEItemDetached(EntityAI item, string slot_name)
 	{
 		super.EEItemDetached(item, slot_name);
 
-		GetCOTBase().OnItemDetached(this, slot_name, item);
+		if (g_cotBase)
+			g_cotBase.OnItemDetached(this, slot_name, item);
 	}
 
 	override void EEDelete(EntityAI parent)
