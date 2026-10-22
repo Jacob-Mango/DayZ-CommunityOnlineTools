@@ -2114,7 +2114,7 @@ class JMESPActionMenu
 		if ( !IsOpen() )
 			return;
 
-		if ( m_Page == PAGE_ATTACH_SLOT )
+		if ( m_Page == PAGE_ATTACHMENTS || m_Page == PAGE_ATTACH_SLOT )
 		{
 			if ( GetSlotLabels().Count() > 1 )
 				GoToPage( page );
