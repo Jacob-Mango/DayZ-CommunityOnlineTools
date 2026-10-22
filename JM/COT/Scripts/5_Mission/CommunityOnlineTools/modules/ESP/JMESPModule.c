@@ -3017,8 +3017,18 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			string partName = part.GetPartName();
 			JMConstructionPartData partData = parts[partName];
-			if ( partData && partData.m_State == JMConstructionPartState.CAN_BUILD )
-				names.Insert( partName );
+			if ( partData )
+			{
+				if ( partName.Contains( "door" ) && partName.Contains( "barricade" ) )
+					continue;  //! Don't build door barricades, prefer actual doors
+
+				if ( partData.m_State == JMConstructionPartState.CAN_BUILD || partData.m_State == JMConstructionPartState.REQUIRED_PART_NOT_BUILT )
+					names.InsertAt( partName, 0 );  //! Reverse order because construction parts are usually ordered with highest tier last
+
+			#ifdef DIAG_DEVELOPER
+				PrintFormat("%1 %2", partName, typename.EnumToString(JMConstructionPartState, partData.m_State));
+			#endif
+			}
 		}
 
 		if ( names.Count() == 0 )
@@ -3029,9 +3039,11 @@ class JMESPModule: JMRenderableModuleBase
 
 		construction.COT_BuildParts( names, player, requireMaterials );
 
-		SendWebhookColored( "BB_Build", instance, "Built every buildable part (" + names.Count() + ") of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_ESP );
+		int partsBuiltCount = construction.COT_GetBuiltParts().Count();
 
-		return names.Count();
+		SendWebhookColored( "BB_Build", instance, "Built every buildable part (" + partsBuiltCount + ") of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_ESP );
+
+		return partsBuiltCount;
 	}
 
 	//! Take the whole construction apart, base part included - which is what

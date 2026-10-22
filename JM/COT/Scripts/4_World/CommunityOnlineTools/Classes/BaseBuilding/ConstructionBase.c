@@ -103,7 +103,7 @@ modded class ConstructionBase
 		TConstructionPartVariantArray variantsGroups = GetConstructionPart( partName ).GetRequiredPartsVariants();
 		if ( variantsGroups )
 		{
-			foreach ( array<string> variantsGroup: variantsGroups )
+			foreach ( TStringArray variantsGroup: variantsGroups )
 			{
 				foreach ( string variant: variantsGroup )
 				{
@@ -117,6 +117,35 @@ modded class ConstructionBase
 		}
 
 		return hasConflictPart;
+	}
+
+	bool COT_PickRequiredPartVariant( string partName, out string requiredVariant )
+	{
+		TConstructionPartVariantArray variantsGroups = GetConstructionPart( partName ).GetRequiredPartsVariants();
+		if ( variantsGroups )
+		{
+			//! Reverse order because construction parts are usually ordered with highest tier last
+			for ( int i = variantsGroups.Count() - 1; i >= 0; --i )
+			{
+				TStringArray variantsGroup = variantsGroups[i];
+
+				for ( int j = variantsGroup.Count() - 1; j >= 0; --j )
+				{
+					string variant = variantsGroup[j];
+
+					if ( variant.Contains( "door" ) && variant.Contains( "barricade" ) )
+						continue;  //! Don't build door barricades, prefer actual doors
+
+					if ( IsPartConstructed( variant ) || !HasConflictPart( variant ) )
+					{
+						requiredVariant = variant;
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	//! The not yet built parts that building `partName` through COT_BuildRequiredParts
@@ -153,6 +182,11 @@ modded class ConstructionBase
 
 		foreach ( string dependentPart : dependentParts )
 			COT_GetPartsToDismantle( dependentPart, result );
+	}
+
+	array<ConstructionPart> COT_GetBuiltParts()
+	{
+		return m_BuiltConstructionPartArray;
 	}
 
 	//! A model-space box around one part, for drawing it on the client.
@@ -253,9 +287,10 @@ modded class ConstructionBase
 	{
 		ConstructionPart part = GetConstructionPart( part_name );
 		array<string> requiredParts = part.GetRequiredParts();
-		TConstructionPartVariantArray variantsGroups = part.GetRequiredPartsVariants();
-		if ( variantsGroups )
-			requiredParts.Insert( variantsGroups[0][0] );
+		
+		string requiredVariant;
+		if ( COT_PickRequiredPartVariant( part_name, requiredVariant ) )
+			requiredParts.Insert( requiredVariant );
 		
 		foreach ( string requiredPartName: requiredParts )
 		{
