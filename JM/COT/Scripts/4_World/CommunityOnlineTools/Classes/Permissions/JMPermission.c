@@ -310,8 +310,9 @@ class JMPermission : Managed
 
 	void Serialize( array< string > output, string prepend = "" )
 	{
+		CF_Trace trace;
 		if (!Parent)
-			auto trace = CF_Trace_2(this, "Serialize").Add(m_SerializedFullName).Add(Children.Count());
+			trace = CF_Trace_2(this, "Serialize").Add(m_SerializedFullName).Add(Children.Count());
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
@@ -328,8 +329,9 @@ class JMPermission : Managed
 
 	void Deserialize( array< string > input )
 	{
+		CF_Trace trace;
 		if (!Parent)
-			auto trace = CF_Trace_1(this, "Deserialize").Add(input.Count());
+			trace = CF_Trace_1(this, "Deserialize").Add(input.Count());
 
 		for ( int i = 0; i < input.Count(); i++ )
 			AddPermission( input[i], JMPermissionType.INHERIT );
