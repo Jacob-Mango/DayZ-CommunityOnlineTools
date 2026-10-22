@@ -999,7 +999,7 @@ class JMESPActionMenu
 
 			string label = labelsByPartName[partName];
 
-			if ( part.m_State == JMConstructionPartState.CAN_BUILD )
+			if ( part.m_State != JMConstructionPartState.BUILT )
 				AddBuildPart( partName, label );
 			else
 				AddPage( PAGE_PART + ":" + partName, label, JMConstants.Lucide( "hammer" ) );

@@ -29,7 +29,7 @@ modded class ConstructionBase
 		if ( !PartHasAnySupportFulfilled( partName ) )
 			return false;
 
-		if ( HasConflictPart( partName ) )
+		if ( COT_HasConflictPart( partName ) )
 			return false;
 
 		if ( checkMaterials && !HasMaterials( partName ) )
@@ -56,28 +56,8 @@ modded class ConstructionBase
 	{
 		foreach ( string part_name, ConstructionPart part: m_ConstructionParts )
 		{
-			// 1.30: the part's own m_Name field is stale and no longer
-			// populated - the localized label now only comes through
-			// GetName() -> m_PartTypeData.GetNameLocalized().
-			string displayName = part.GetName();
-			if ( !displayName || part.GetMainPartName() == "utility_nonparts" )
-			{
-				//! Only include parts that have a localized name and are actual parts
-			#ifdef DIAG_DEVELOPER
-				Print(part_name);
-				PrintFormat("part.GetPartName: %1", part.GetPartName());
-				PrintFormat("part.GetMainPartName: %1", part.GetMainPartName());
-				PrintFormat("part.GetRequiredParts: %1", part.GetRequiredParts());
-				array<ref TStringArray> reqPartsVariants = part.GetRequiredPartsVariants();
-				if (reqPartsVariants)
-				{
-					Print("part.GetRequiredPartsVariants:");
-					foreach (TStringArray variants: reqPartsVariants)
-						PrintFormat(" %1", variants);
-				}
-			#endif
-				continue;  
-			}
+			if ( part.IsUtilityPart() )
+				continue;
 
 			JMConstructionPartData data;
 			if ( !parts.Find( part_name, data ) )
@@ -89,7 +69,7 @@ modded class ConstructionBase
 			data.m_Name = part_name;
 			data.m_MainPartName = part.GetMainPartName();
 
-			data.m_DisplayName = displayName;
+			data.m_DisplayName = part.GetName();
 
 			if ( !data.m_DisplayName )
 				data.m_DisplayName = part_name;
@@ -97,12 +77,12 @@ modded class ConstructionBase
 			if ( part.IsBuilt() )
 			{
 				data.m_State = JMConstructionPartState.BUILT;
+			} else if ( COT_HasConflictPart( part_name ) )
+			{
+				data.m_State = JMConstructionPartState.CONFLICTING_PART;
 			} else if ( !HasRequiredPart( part_name ) || !PartHasAnySupportFulfilled( part_name ) )
 			{
 				data.m_State = JMConstructionPartState.REQUIRED_PART_NOT_BUILT;
-			} else if ( HasConflictPart( part_name ) )
-			{
-				data.m_State = JMConstructionPartState.CONFLICTING_PART;
 			} else if ( checkMaterials && ( !HasMaterials( part_name ) || MaterialIsRuined( part_name ) ) )
 			{
 				data.m_State = JMConstructionPartState.NOT_ENOUGH_MATERIALS;
@@ -111,6 +91,32 @@ modded class ConstructionBase
 				data.m_State = JMConstructionPartState.CAN_BUILD;
 			}
 		}
+	}
+
+	bool COT_HasConflictPart( string partName )
+	{
+		if ( HasConflictPart( partName ) )
+			return true;
+
+		bool hasConflictPart;
+
+		TConstructionPartVariantArray variantsGroups = GetConstructionPart( partName ).GetRequiredPartsVariants();
+		if ( variantsGroups )
+		{
+			foreach ( array<string> variantsGroup: variantsGroups )
+			{
+				foreach ( string variant: variantsGroup )
+				{
+					if ( IsPartConstructed( variant ) )
+						return false;  //! Obviously cannot have a conflict if one of the required variants is built
+
+					if ( !hasConflictPart && HasConflictPart( variant ) )
+						hasConflictPart = true;
+				}
+			}
+		}
+
+		return hasConflictPart;
 	}
 
 	//! The not yet built parts that building `partName` through COT_BuildRequiredParts
@@ -245,16 +251,16 @@ modded class ConstructionBase
 	
 	void COT_BuildRequiredParts(string part_name, PlayerBase player, bool checkMaterials = true)
 	{
-		string main_part_name = GetConstructionPart( part_name ).GetMainPartName();
-		string cfg_path = "cfgVehicles" + " " + COT_GetParent().GetType() + " "+ "Construction" + " " + main_part_name + " " + part_name + " " + "required_parts";
+		ConstructionPart part = GetConstructionPart( part_name );
+		array<string> requiredParts = part.GetRequiredParts();
+		TConstructionPartVariantArray variantsGroups = part.GetRequiredPartsVariants();
+		if ( variantsGroups )
+			requiredParts.Insert( variantsGroups[0][0] );
 		
-		array<string> required_parts = new array<string>;
-		g_Game.ConfigGetTextArray( cfg_path, required_parts );
-		
-		for ( int i = 0; i < required_parts.Count(); ++i )
+		foreach ( string requiredPartName: requiredParts )
 		{
-			if ( !IsPartConstructed( required_parts.Get( i ) ) )
-				COT_BuildRequiredParts(required_parts.Get( i ), player, checkMaterials);
+			if ( !IsPartConstructed( requiredPartName ) )
+				COT_BuildRequiredParts(requiredPartName, player, checkMaterials);
 		}
 
 		if ( !IsPartConstructed( part_name ) )
@@ -271,16 +277,16 @@ modded class ConstructionBase
 	
 	void COT_DismantleRequiredParts(string part_name, PlayerBase player)
 	{
-		array<string> required_parts = GetValidDepenentPartsArray(part_name);
+		array<string> requiredParts = GetValidDepenentPartsArray(part_name);
 
-		if ( required_parts )
+		if ( requiredParts )
 		{
-			for ( int i = 0; i < required_parts.Count(); ++i )
+			foreach ( string requiredPartName: requiredParts )
 			{
-				if ( HasDependentPart( required_parts.Get( i ) ) )
-					COT_DismantleRequiredParts(required_parts.Get( i ), player);
+				if ( HasDependentPart( requiredPartName ) )
+					COT_DismantleRequiredParts(requiredPartName, player);
 				else
-					COT_DismantlePart(required_parts.Get( i ), player);
+					COT_DismantlePart(requiredPartName, player);
 			}
 		}
 
@@ -294,11 +300,11 @@ modded class ConstructionBase
 			return;
 
 		string damage_zone;
-		if ( DamageSystem.GetDamageZoneFromComponentName( COT_GetParent(), part_name, damage_zone ) )
+		if ( DamageSystem.GetDamageZoneFromComponentName( m_EntityParent, part_name, damage_zone ) )
 		{
-			COT_GetParent().SetAllowDamage(true);
-			COT_GetParent().SetHealthMax( damage_zone, "Health" );
-			COT_GetParent().ProcessInvulnerabilityCheck(COT_GetParent().GetInvulnerabilityTypeString());
+			m_EntityParent.SetAllowDamage(true);
+			m_EntityParent.SetHealthMax( damage_zone, "Health" );
+			m_EntityParent.ProcessInvulnerabilityCheck(m_EntityParent.GetInvulnerabilityTypeString());
 		}
 
 	#ifdef DAYZ_1_29
@@ -306,7 +312,8 @@ modded class ConstructionBase
 			DestroyCollisionTrigger();
 	#endif
 
-		COT_GetParent().OnPartBuiltServer( player, part_name, AT_BUILD_PART );
+		if ( COT_GetParent() )
+			COT_GetParent().OnPartBuiltServer( player, part_name, AT_BUILD_PART );
 	}
 
 	void COT_DismantlePart( string part_name, PlayerBase player )
@@ -314,14 +321,15 @@ modded class ConstructionBase
 		if ( !COT_CanDismantlePart( part_name ) )
 			return;
 
-		COT_GetParent().OnPartDismantledServer( player, part_name, AT_DISMANTLE_PART );
+		if ( COT_GetParent() )
+			COT_GetParent().OnPartDismantledServer( player, part_name, AT_DISMANTLE_PART );
 
 		string damage_zone;
-		if ( DamageSystem.GetDamageZoneFromComponentName( COT_GetParent(), part_name, damage_zone ) )
+		if ( DamageSystem.GetDamageZoneFromComponentName( m_EntityParent, part_name, damage_zone ) )
 		{
-			if ( COT_GetParent().GetHealth( damage_zone, "Health" ) > 0 )
+			if ( m_EntityParent.GetHealth( damage_zone, "Health" ) > 0 )
 			{
-				COT_Base.SetHealth( COT_GetParent(), damage_zone, "Health", 0 );
+				COT_Base.SetHealth( m_EntityParent, damage_zone, "Health", 0 );
 			}
 		}
 	}
@@ -329,9 +337,9 @@ modded class ConstructionBase
 	void COT_RepairPart( string part_name )
 	{
 		string damage_zone;
-		if ( DamageSystem.GetDamageZoneFromComponentName( COT_GetParent(), part_name, damage_zone ) )
+		if ( DamageSystem.GetDamageZoneFromComponentName( m_EntityParent, part_name, damage_zone ) )
 		{
-			COT_Base.SetHealthMax( COT_GetParent(), damage_zone, "Health" );
+			COT_Base.SetHealthMax( m_EntityParent, damage_zone, "Health" );
 		}
 	}
 
