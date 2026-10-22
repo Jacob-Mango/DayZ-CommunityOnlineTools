@@ -917,7 +917,7 @@ class JMESPActionMenu
 		//! 1.30+
 		DigitalCodeLock codeLock = JMESPModule.GetDigitalCodeLock( m_Meta.target, m_Meta.m_DoorIndex );
 
-		if ( codeLock )
+		if ( codeLock && codeLock.HasEnergy() )
 			BuildDigitalCodeLock( codeLock );
 	#endif
 	}
