@@ -544,7 +544,7 @@ class JMWebhookModule: JMModuleBase
 				if ( !Assert_Null( item ) )
 				{
 					set< JMWebhookConnection > connections = m_ConnectionMap.Get( item.GetType() );
-					if ( !Assert_Null( connections ) )
+					if ( connections )
 					{
 						#ifdef JM_COT_DIAG_LOGGING
 						CF_Log.Debug("Thread_ProcessQueue - item type \"%1\"", item.GetType());
@@ -565,7 +565,7 @@ class JMWebhookModule: JMModuleBase
 					}
 					else
 					{
-						CF_Log.Error("Thread_ProcessQueue - webhook type \"%1\" not registered, please override JMModuleBase::GetWebhookTypes to insert it", item.GetType());
+						CF.FormatError("Thread_ProcessQueue - webhook type \"%1\" not registered, please override JMModuleBase::GetWebhookTypes to insert it", item.GetType());
 					}
 				}
 

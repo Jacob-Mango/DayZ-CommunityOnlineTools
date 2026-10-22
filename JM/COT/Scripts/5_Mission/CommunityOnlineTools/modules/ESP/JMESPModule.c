@@ -785,6 +785,7 @@ class JMESPModule: JMRenderableModuleBase
 		info.AddWebhookType( "DuplicateAll" );
 		info.AddWebhookType( "DeleteAll" );
 		info.AddWebhookType( "MoveToCursor" );
+		info.AddWebhookType( "Object" );
 	}
 
 	override void RegisterKeyMouseBindings()
