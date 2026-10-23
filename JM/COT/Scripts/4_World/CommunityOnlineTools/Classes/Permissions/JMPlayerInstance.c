@@ -834,6 +834,15 @@ class JMPlayerInstance : Managed
 			return;
 
 		string playerFilePath    = m_PlayerFile.m_FileName;
+
+		if ( !playerFilePath )
+		{
+			if ( m_GUID.IndexOf( "GFake_" ) != 0 )
+				CF.FormatError( "Cannot save roles and stats for player %1 (id=%2) - file name is empty", m_Name, m_GUID );
+
+			return;
+		}
+
 		string permissionsPath   = JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION;
 
 		// If the player is back to default, remove any files we previously wrote.
