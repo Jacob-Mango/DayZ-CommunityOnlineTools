@@ -610,6 +610,10 @@ class JMESPModule: JMRenderableModuleBase
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( slotId );
 			rpc.Write( className );
+			
+			JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
+			rpc.Write( objSpawnerModule.m_ObjSetupMode );
+
 			rpc.Send( target, JMESPModuleRPC.SetAttachment, true, NULL );
 		}
 	}
@@ -2338,6 +2342,10 @@ class JMESPModule: JMRenderableModuleBase
 		int slotId;
 		string className;
 		if ( !ctx.Read( slotId ) || !ctx.Read( className ) )
+			return;
+			
+		JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
+		if ( !ctx.Read( objSpawnerModule.m_ObjSetupMode ) )
 			return;
 
 		if ( !senderRPC )
