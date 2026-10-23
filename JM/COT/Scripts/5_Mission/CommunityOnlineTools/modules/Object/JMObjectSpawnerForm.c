@@ -882,6 +882,21 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 	}
 
+	override bool OnBeforeConfirmInline( COT_ScriptedWidgetEventHandler action )
+	{
+		if ( action == m_DeleteCursorBtn )
+		{
+			Object obj = m_Module.GetObjectAtCursor();
+
+			if ( !obj )
+				return false;
+
+			m_PendingDeleteCursorObj = obj;
+		}
+
+		return true;
+	}
+
 	//! Fired by m_DeleteCursorBtn on CHANGE, i.e. once the confirm/cancel pair
 	//! has actually been confirmed - by a mouse click on Confirm, or by a
 	//! second keybind press via DeleteCursor(Object) below.
@@ -892,9 +907,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 		Object obj = m_PendingDeleteCursorObj;
 		m_PendingDeleteCursorObj = null;
-
-		if ( !obj )
-			obj = m_Module.GetObjectAtCursor();
 
 		if ( !obj )
 			return;

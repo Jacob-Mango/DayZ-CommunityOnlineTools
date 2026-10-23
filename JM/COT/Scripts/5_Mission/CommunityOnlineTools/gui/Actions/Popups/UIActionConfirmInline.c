@@ -261,9 +261,9 @@ class UIActionConfirmInline: UIActionBase
 	{
 		if ( w == m_BtnAction && !m_Pending )
 		{
-			SetState( true );
-			m_Timer = 0;
-			CallEvent( UIEvent.CLICK );
+			if ( !m_Form || m_Form.OnBeforeConfirmInline( this ) )
+				Arm();
+
 			return true;
 		}
 

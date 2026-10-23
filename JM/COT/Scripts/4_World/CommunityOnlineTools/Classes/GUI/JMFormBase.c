@@ -416,6 +416,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		ApplyRegisteredPermissions();
 	}
 
+	//! Fired on click before arming any confirm inline button if it has a form set
+	bool OnBeforeConfirmInline( COT_ScriptedWidgetEventHandler action );
+
 	void Update()
 	{
 
