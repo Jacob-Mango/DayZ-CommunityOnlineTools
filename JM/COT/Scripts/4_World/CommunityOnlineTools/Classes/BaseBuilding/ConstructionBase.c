@@ -132,8 +132,10 @@ modded class ConstructionBase
 				for ( int j = variantsGroup.Count() - 1; j >= 0; --j )
 				{
 					string variant = variantsGroup[j];
+					string partNameLower = variant;
+					partNameLower.ToLower();
 
-					if ( variant.Contains( "door" ) && variant.Contains( "barricade" ) )
+					if ( partNameLower.Contains( "door" ) && partNameLower.Contains( "barricade" ) )
 						continue;  //! Don't build door barricades, prefer actual doors
 
 					if ( IsPartConstructed( variant ) || !HasConflictPart( variant ) )

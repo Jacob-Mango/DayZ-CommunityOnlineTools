@@ -3012,7 +3012,8 @@ class JMESPModule: JMRenderableModuleBase
 
 		array< ConstructionPart > partsOrdered = construction.GetConstructionPartArray();
 
-		TStringArray names = new TStringArray;
+		TStringArray names = {};
+		TStringArray other = {};
 
 		foreach ( ConstructionPart part: partsOrdered )
 		{
@@ -3020,17 +3021,30 @@ class JMESPModule: JMRenderableModuleBase
 			JMConstructionPartData partData = parts[partName];
 			if ( partData )
 			{
-				if ( partName.Contains( "door" ) && partName.Contains( "barricade" ) )
+				string partNameLower = partName;
+				partNameLower.ToLower();
+
+				bool isDoor = partNameLower.Contains( "door" );
+
+				if ( isDoor && partNameLower.Contains( "barricade" ) )
 					continue;  //! Don't build door barricades, prefer actual doors
 
 				if ( partData.m_State == JMConstructionPartState.CAN_BUILD || partData.m_State == JMConstructionPartState.REQUIRED_PART_NOT_BUILT )
-					names.InsertAt( partName, 0 );  //! Reverse order because construction parts are usually ordered with highest tier last
+				{
+					//! Reverse order because construction parts are usually ordered with highest tier last
+					if ( isDoor )
+						names.InsertAt( partName, 0 );
+					else
+						other.InsertAt( partName, 0 );
+				}
 
 			#ifdef DIAG_DEVELOPER
 				PrintFormat("%1 %2", partName, typename.EnumToString(JMConstructionPartState, partData.m_State));
 			#endif
 			}
 		}
+
+		names.InsertAll( other );  //! Prefer doors by inserting everything else after
 
 		if ( names.Count() == 0 )
 			return 0;
