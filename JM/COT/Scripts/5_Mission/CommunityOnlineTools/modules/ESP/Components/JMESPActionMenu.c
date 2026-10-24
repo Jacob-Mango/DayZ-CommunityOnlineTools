@@ -54,6 +54,10 @@ class JMESPActionMenu
 	protected UIActionContextMenu m_Menu;
 	protected ref JMESPMeta m_Meta;
 
+	protected CombinationLock m_CombinationLock;
+	protected DigitalCodeLock m_CodeLock;
+	protected ItemBase m_LockItem;
+
 	//! Kept from Init() so the transform-edit popup can be built lazily, in
 	//! the same parent/anchor the menu itself uses - see GetTransformPopup().
 	protected Widget m_Parent;
@@ -616,7 +620,11 @@ class JMESPActionMenu
 			}
 		}
 
-		if ( JMESPModule.GetCombinationLock( target ) || JMESPModule.GetDigitalCodeLock( target, m_Meta.m_DoorIndex ) )
+		m_LockItem = JMLockItem.Get( target, m_Meta.m_DoorIndex );
+		Class.CastTo( m_CombinationLock, m_LockItem );
+		Class.CastTo( m_CodeLock, m_LockItem );
+
+		if ( m_LockItem && m_LockItem.COT_CanInteract() )
 			AddPage( PAGE_LOCK, "#STR_COT_ESP_MODULE_PAGE_LOCK", JMConstants.Lucide( "lock" ) );
 
 		if ( m_Meta.GetConstructionParts() )
@@ -894,58 +902,31 @@ class JMESPActionMenu
 	{
 		AddBack();
 
-		CombinationLock combo = JMESPModule.GetCombinationLock( m_Meta.target );
+		if ( m_LockItem.COT_IsLocked() )
+			Add( PREFIX_ACTION + "unlock", "#STR_COT_ESP_MODULE_MENU_UNLOCK", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+		else if ( m_LockItem.COT_CanBeLocked() )
+			Add( PREFIX_ACTION + "lock", "#STR_COT_ESP_MODULE_MENU_LOCK", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
 
-		if ( combo )
-		{
-			if ( combo.IsLocked() )
-				Add( PREFIX_ACTION + "unlock", "#STR_COT_ESP_MODULE_MENU_UNLOCK", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
-			else
-				Add( PREFIX_ACTION + "lock", "#STR_COT_ESP_MODULE_MENU_LOCK", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+		//! The same two verbs over every lock standing near this one. A base is
+		//! a dozen separate entities, so "lock the base" cannot be addressed to
+		//! the gate the menu was opened on.
+		Add( PREFIX_ACTION + "lockall", "#STR_COT_ESP_MODULE_MENU_LOCK_ALL", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
+		Add( PREFIX_ACTION + "unlockall", "#STR_COT_ESP_MODULE_MENU_UNLOCK_ALL", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
 
-			//! The same two verbs over every lock standing near this one. A base is
-			//! a dozen separate entities, so "lock the base" cannot be addressed to
-			//! the gate the menu was opened on.
-			Add( PREFIX_ACTION + "lockall", "#STR_COT_ESP_MODULE_MENU_LOCK_ALL", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
-			Add( PREFIX_ACTION + "unlockall", "#STR_COT_ESP_MODULE_MENU_UNLOCK_ALL", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
-
+		if ( m_LockItem.COT_HasCode() )
 			Add( PREFIX_ACTION + "getcode", "#STR_COT_ESP_MODULE_ACTION_GET_CODE", JMConstants.ICON_STACK, Perm( JMConstants.PERM_ESP_OBJECT_GETCODE ) );
-			Add( PREFIX_ACTION + "pastecode", "#STR_COT_ESP_MODULE_MENU_PASTE_CODE", JMConstants.Lucide( "clipboard-paste" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
+
+		if ( m_LockItem.COT_CanSetCode() )
+		{
+			if ( m_LockItem.COT_CanResetCode() )
+				Add( PREFIX_ACTION + "resetcode", "#STR_COT_ESP_MODULE_MENU_RESET_CODE", JMConstants.Lucide( "rotate-ccw" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
+
+			if ( m_CombinationLock )
+				Add( PREFIX_ACTION + "pastecode", "#STR_COT_ESP_MODULE_MENU_PASTE_CODE", JMConstants.Lucide( "clipboard-paste" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
+			else if ( m_CodeLock )
+				Add( PREFIX_ACTION + "digisetcode", "#STR_COT_ESP_MODULE_MENU_SET_CODE", JMConstants.Lucide( "keyboard" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
 		}
-
-	#ifndef DAYZ_1_29
-		//! 1.30+
-		DigitalCodeLock codeLock = JMESPModule.GetDigitalCodeLock( m_Meta.target, m_Meta.m_DoorIndex );
-
-		if ( codeLock && codeLock.HasEnergy() )
-			BuildDigitalCodeLock( codeLock );
-	#endif
 	}
-
-#ifndef DAYZ_1_29
-	//! 1.30+
-	//! The digital code lock's own verbs. Locking is only offered once a code is set; setting
-	//! one hands over to the lock's own keypad (see DoSetDigitalCode), as a menu cannot ask
-	//! for free-form digits.
-	protected void BuildDigitalCodeLock( DigitalCodeLock codeLock )
-	{
-		if ( codeLock.IsLocked() )
-			Add( PREFIX_ACTION + "digiunlock", "#STR_COT_ESP_MODULE_MENU_UNLOCK", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
-		else if ( codeLock.CanBeLocked() && codeLock.HasPIN() )
-			Add( PREFIX_ACTION + "digilock", "#STR_COT_ESP_MODULE_MENU_LOCK", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
-
-		if ( codeLock.HasPIN() )
-			Add( PREFIX_ACTION + "digigetcode", "#STR_COT_ESP_MODULE_ACTION_GET_CODE", JMConstants.ICON_STACK, Perm( JMConstants.PERM_ESP_OBJECT_GETCODE ) );
-
-		if ( !codeLock.CanSetCode() )
-			return;
-
-		if ( codeLock.HasPIN() )
-			Add( PREFIX_ACTION + "digiresetcode", "#STR_COT_ESP_MODULE_MENU_RESET_CODE", JMConstants.Lucide( "rotate-ccw" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
-
-		Add( PREFIX_ACTION + "digisetcode", "#STR_COT_ESP_MODULE_MENU_SET_CODE", JMConstants.Lucide( "keyboard" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
-	}
-#endif
 
 	protected void BuildConstruction()
 	{
@@ -1920,28 +1901,19 @@ class JMESPActionMenu
 			DoOpenClose();
 			break;
 		case "lock":
-			m_Meta.module.ObjectAction( JMESPObjectAction.SetLock, 1, 0, m_Meta.target );
+			m_Meta.module.ObjectAction( JMESPObjectAction.SetLock, 1, 0, m_LockItem );
 			break;
 		case "unlock":
-			m_Meta.module.ObjectAction( JMESPObjectAction.SetLock, 0, 0, m_Meta.target );
+			m_Meta.module.ObjectAction( JMESPObjectAction.SetLock, 0, 0, m_LockItem );
 			break;
 		case "getcode":
-			m_Meta.module.ObjectAction( JMESPObjectAction.GetCode, 0, 0, m_Meta.target );
+			m_Meta.module.ObjectAction( JMESPObjectAction.GetCode, 0, 0, m_LockItem );
 			break;
 		case "pastecode":
 			DoPasteCode();
 			break;
-		case "digilock":
-			m_Meta.module.ObjectAction( JMESPObjectAction.SetDigitalLock, 1, m_Meta.m_DoorIndex, m_Meta.target );
-			break;
-		case "digiunlock":
-			m_Meta.module.ObjectAction( JMESPObjectAction.SetDigitalLock, 0, m_Meta.m_DoorIndex, m_Meta.target );
-			break;
-		case "digigetcode":
-			m_Meta.module.ObjectAction( JMESPObjectAction.GetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
-			break;
-		case "digiresetcode":
-			m_Meta.module.ObjectAction( JMESPObjectAction.ResetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
+		case "resetcode":
+			m_Meta.module.ObjectAction( JMESPObjectAction.ResetCode, 0, 0, m_LockItem );
 			break;
 		case "digisetcode":
 			DoSetDigitalCode();
@@ -2822,7 +2794,7 @@ class JMESPActionMenu
 		if ( clipboard == "" )
 			return;
 
-		m_Meta.module.ObjectAction( JMESPObjectAction.SetCode, clipboard.ToInt(), 0, m_Meta.target );
+		m_Meta.module.ObjectAction( JMESPObjectAction.SetCode, clipboard.ToInt(), 0, m_LockItem );
 	}
 
 	//! Opens the lock's own keypad to dial the new code in. A lock that already has
@@ -2831,23 +2803,18 @@ class JMESPActionMenu
 	//! reached the client through the lock's synced state.
 	protected void DoSetDigitalCode()
 	{
-	#ifndef DAYZ_1_29
-		//! 1.30+
-		DigitalCodeLock codeLock = JMESPModule.GetDigitalCodeLock( m_Meta.target, m_Meta.m_DoorIndex );
-
-		if ( !codeLock )
+		if ( !m_CodeLock )
 			return;
 
-		if ( !codeLock.HasPIN() )
+		if ( !m_CodeLock.HasPIN() )
 		{
-			m_Meta.module.OpenDigitalCodeLockMenu( codeLock );
+			m_Meta.module.OpenDigitalCodeLockMenu( m_CodeLock );
 			return;
 		}
 
-		m_Meta.module.ObjectAction( JMESPObjectAction.ResetDigitalCode, 0, m_Meta.m_DoorIndex, m_Meta.target );
+		m_Meta.module.ObjectAction( JMESPObjectAction.ResetCode, 0, 0, m_CodeLock );
 
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( m_Meta.module.OpenDigitalCodeLockMenu, DIGITAL_CODE_LOCK_MENU_DELAY, false, codeLock );
-	#endif
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( m_Meta.module.OpenDigitalCodeLockMenu, DIGITAL_CODE_LOCK_MENU_DELAY, false, m_CodeLock );
 	}
 
 	protected void DoShowNodes()

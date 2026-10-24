@@ -370,28 +370,8 @@ class JMESPModule: JMRenderableModuleBase
 		return center + Vector( x, 0, z );
 	}
 
-	//! The lock that governs this object: the object itself if it is one, or
-	//! the one attached to it if it is a gate.
-	static CombinationLock GetCombinationLock( Object target )
-	{
-		CombinationLock combo;
-
-		if ( Class.CastTo( combo, target ) )
-			return combo;
-
-		EntityAI entity = EntityAI.Cast( target );
-
-		if ( !entity || !entity.GetInventory() )
-			return NULL;
-
-		for ( int i = 0; i < entity.GetInventory().AttachmentCount(); ++i )
-		{
-			if ( Class.CastTo( combo, entity.GetInventory().GetAttachmentFromIndex( i ) ) )
-				return combo;
-		}
-
-		return NULL;
-	}
+	[Obsolete("Use JMLockItemT<CombinationLock>::Get")]
+	static CombinationLock GetCombinationLock( Object target, int doorIndex = -1 );
 
 	//! The construction an object builds and dismantles through, if it has one.
 	//! Base building objects have one, and so do the rebuildable map buildings
@@ -417,52 +397,8 @@ class JMESPModule: JMRenderableModuleBase
 	#endif
 	}
 
-#ifdef DAYZ_1_29
-	static ItemBase GetDigitalCodeLock( Object target, int doorIndex = -1 );
-#else
-	//! 1.30+
-	//! The digital code lock that governs this object: the target itself when the
-	//! menu was opened on the lock, the one on a gate, or - for a building - the one
-	//! on the door under the cursor (doorIndex, -1 when there was none).
-	static DigitalCodeLock GetDigitalCodeLock( Object target, int doorIndex = -1 )
-	{
-		DigitalCodeLock codeLock;
-
-		if ( Class.CastTo( codeLock, target ) )
-			return codeLock;
-
-		Fence fence;
-		if ( Class.CastTo( fence, target ) )
-			return fence.GetCodeLock();
-
-		//! A bunker has the one lock, on its entrance, not one per door
-		Bunker bunker;
-		if ( Class.CastTo( bunker, target ) )
-			return bunker.GetCodeLock();
-
-		BuildingBase building;
-		if ( Class.CastTo( building, target ) )
-		{
-			if ( doorIndex < 0 )
-				return NULL;
-
-			AdditionalDoorInfo doorInfo = building.GetDoorInfo( doorIndex );
-
-			if ( !doorInfo || !doorInfo.m_RelatedInventorySlotNames )
-				return NULL;
-
-			foreach ( string slotName : doorInfo.m_RelatedInventorySlotNames )
-			{
-				codeLock = building.GetCodeLock( slotName );
-
-				if ( codeLock )
-					return codeLock;
-			}
-		}
-
-		return NULL;
-	}
-#endif
+	[Obsolete("Use JMLockItemT<DigitalCodeLock>::Get")]
+	static DigitalCodeLock GetDigitalCodeLock( Object target, int doorIndex = -1 );
 
 	bool GetDrawPlayerSkeletonsEnabled()
 	{
@@ -2498,11 +2434,7 @@ class JMESPModule: JMRenderableModuleBase
 			case JMESPObjectAction.SetCode:
 				return JMConstants.PERM_ESP_OBJECT_SETCODE;
 			case JMESPObjectAction.GetCode:
-			case JMESPObjectAction.GetDigitalCode:
 				return JMConstants.PERM_ESP_OBJECT_GETCODE;
-
-			case JMESPObjectAction.SetDigitalLock:
-				return JMConstants.PERM_ESP_OBJECT_LOCK;
 
 			case JMESPObjectAction.ResetDigitalCode:
 				return JMConstants.PERM_ESP_OBJECT_SETCODE;
@@ -2590,6 +2522,8 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !target )
 			return;
 
+		bool bvalue = ivalue;
+
 		ItemBase item = ItemBase.Cast( target );
 
 		string logValue = ivalue.ToString();
@@ -2653,28 +2587,21 @@ class JMESPModule: JMRenderableModuleBase
 				break;
 
 			case JMESPObjectAction.SetLock:
-				Exec_SetLock( target, ivalue );
+				if ( !item || !item.COT_SetLockState( bvalue ) )
+					return;
 				break;
 
 			case JMESPObjectAction.SetCode:
-				Exec_SetCode( target, ivalue );
+				if ( !item || item.COT_SetCode( ivalue ) )
+					return;
 				break;
 
 			case JMESPObjectAction.GetCode:
 				Exec_GetCode( target, ident );
 				return;
 
-			case JMESPObjectAction.SetDigitalLock:
-				if ( !Exec_SetDigitalLock( target, ivalue, fvalue ) )
-					return;
-				break;
-
-			case JMESPObjectAction.GetDigitalCode:
-				Exec_GetDigitalCode( target, fvalue, ident );
-				return;
-
-			case JMESPObjectAction.ResetDigitalCode:
-				if ( !Exec_ResetDigitalCode( target, fvalue ) )
+			case JMESPObjectAction.ResetCode:
+				if ( !item || !item.COT_ResetCode() )
 					return;
 				break;
 
@@ -2818,8 +2745,9 @@ class JMESPModule: JMRenderableModuleBase
 				return;
 		}
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=" + action + " value=" + logValue );
-		SendWebhookColored( "Object", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") action " + action + " to " + logValue, JMConstants.WEBHOOK_COLOR_ESP );
+		string actionStr = typename.EnumToString(JMESPObjectAction, action);
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=" + actionStr + " value=" + logValue );
+		SendWebhookColored( "Object", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") action " + actionStr + " to " + logValue, JMConstants.WEBHOOK_COLOR_ESP );
 	}
 
 	protected void Exec_SetLockWheels( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
@@ -3460,116 +3388,67 @@ class JMESPModule: JMRenderableModuleBase
 		float radiusSq = LOCK_ALL_RADIUS * LOCK_ALL_RADIUS;
 		int touched = 0;
 
-		for ( int i = 0; i < nearby.Count(); i++ )
+		foreach ( EntityAI entity: nearby )
 		{
 			//! The box reaches past the radius in its corners - keep it a sphere.
-			if ( vector.DistanceSq( centre, nearby[i].GetPosition() ) > radiusSq )
+			if ( vector.DistanceSq( centre, entity.GetPosition() ) > radiusSq )
 				continue;
 
-			CombinationLock combo = GetCombinationLock( nearby[i] );
+			GameInventory inventory = entity.GetInventory();
 
-			if ( !combo )
+			if ( !inventory )
 				continue;
 
-			//! An object and the lock hanging off it both answer with the same
-			//! lock, so the same one arrives twice.
-			if ( combo.IsLocked() == ( locked != 0 ) )
-				continue;
+			for ( int i = 0; i < inventory.AttachmentCount(); ++i )
+			{
+				EntityAI att = inventory.GetAttachmentFromIndex( i );
 
-			Exec_SetLock( nearby[i], locked );
-			touched++;
+				ItemBase item;
+				if ( Class.CastTo( item, att ) && item.COT_IsLock() )
+				{
+					if ( item.COT_SetLockState( locked ) )
+						touched++;
+				}
+			}
 		}
 
 		return touched;
 	}
 
-	//! Locking runs the vanilla server path (slot lock and shuffle). Unlocking does NOT:
-	//! UnlockServer drops the lock on the ground, and an admin wants the gate open, so
-	//! the dial is just turned back to the locked combination (what the lock calls unlocked).
-	protected void Exec_SetLock( Object target, int locked )
-	{
-		CombinationLock combo = GetCombinationLock( target );
+	[Obsolete("Use ItemBase::COT_SetLockState")]
+	protected void Exec_SetLock( Object target, int locked );
 
-		if ( !combo )
-			return;
+	[Obsolete("Use ItemBase::COT_SetCode")]
+	protected void Exec_SetCode( Object target, int code );
 
-		if ( locked )
-		{
-			combo.LockServer( EntityAI.Cast( combo.GetHierarchyParent() ) );
-			return;
-		}
-
-		combo.SetCombination( combo.m_CombinationLocked );
-		combo.CheckLockedStateServer();
-		combo.Synchronize();
-	}
-
-	//! Changing the code keeps the lock in the state it was already in: a
-	//! locked gate stays locked on the new code rather than falling open.
-	protected void Exec_SetCode( Object target, int code )
-	{
-		CombinationLock combo = GetCombinationLock( target );
-
-		if ( !combo )
-			return;
-
-		//! The lock net-syncs its combination as an int registered over exactly
-		//! the range its dials can show. A code from outside that range - which
-		//! is anything a hand-written packet cares to send - is a value the
-		//! sync cannot carry, and leaves a lock nobody can ever open.
-		int maxCode = Math.Pow( 10, combo.GetLockDigits() ) - 1;
-
-		if ( code < 0 || code > maxCode )
-			return;
-
-		bool wasLocked = combo.IsLocked();
-
-		combo.m_CombinationLocked = code;
-		combo.SetCombination( code );
-
-#ifdef DAYZ_1_29
-		if ( wasLocked )
-			combo.ShuffleLock(); //! protected as of 1.30, dials just won't reshuffle visually there
-#endif
-
-		combo.CheckLockedStateServer();
-		combo.Synchronize();
-	}
-
-	//! The locked combination is not among the lock's net-synced variables -
-	//! only the dialled one is - so the client cannot read it and has to ask.
+	//! The locked combination is not among the lock's net-synced variables,
+	//! so the client cannot read it and has to ask.
 	protected void Exec_GetCode( Object target, PlayerIdentity ident )
 	{
-		CombinationLock combo = GetCombinationLock( target );
+		string code;
 
-		if ( !combo )
+		ItemBase lockItem;
+
+		if ( Class.CastTo( lockItem, target ) )
+			code = lockItem.COT_GetCode();
+		else
 			return;
 
 		if ( !ident )
 		{
-			OnObjectActionResult( JMESPObjectAction.GetCode, combo.m_CombinationLocked );
+			OnObjectActionResult( JMESPObjectAction.GetCode, 0, code );
 			return;
 		}
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( JMESPObjectAction.GetCode );
-		rpc.Write( combo.m_CombinationLocked );
-		rpc.Write( "" );
+		rpc.Write( 0 );
+		rpc.Write( code );
 		rpc.Send( NULL, JMESPModuleRPC.ObjectActionResult, true, ident );
 	}
 
-#ifdef DAYZ_1_29
-	static ItemBase GetDigitalCodeLockForAction( Object target, float doorValue );
-#else
-	//! 1.30+
-	//! GetDigitalCodeLock for an object action: the door index rides in the action's float value.
-	static DigitalCodeLock GetDigitalCodeLockForAction( Object target, float doorValue )
-	{
-		int doorIndex = doorValue;
-
-		return GetDigitalCodeLock( target, doorIndex );
-	}
-#endif
+	[Obsolete("Use JMLockItemT<DigitalCodeLock>::Get")]
+	static DigitalCodeLock GetDigitalCodeLockForAction( Object target, float doorValue );
 
 #ifdef DAYZ_1_29
 	void OpenDigitalCodeLockMenu( ItemBase codeLock );
@@ -3606,79 +3485,14 @@ class JMESPModule: JMRenderableModuleBase
 	}
 #endif
 
-	//! A lock with no code has nothing to lock against, and locking it anyway
-	//! leaves a lock nobody can open without resetting it first.
-	protected bool Exec_SetDigitalLock( Object target, int locked, float fvalue )
-	{
-	#ifdef DAYZ_1_29
-		return false;
-	#else
-		//! 1.30+
-		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
+	[Obsolete("Use ItemBase::COT_SetLockState")]
+	protected bool Exec_SetDigitalLock( Object target, int locked, float fvalue );
 
-		if ( !codeLock )
-			return false;
-
-		if ( locked )
-		{
-			if ( !codeLock.CanBeLocked() || !codeLock.HasPIN() )
-				return false;
-
-			codeLock.SetLockState( true );
-			return true;
-		}
-
-		codeLock.SetLockState( false );
-
-		return true;
-	#endif
-	}
-
-	//! The code is text, not a number - "0042" is a different code from "42" - so
-	//! it goes back as a string through the same result channel the combination
-	//! lock's number uses.
-	protected void Exec_GetDigitalCode( Object target, float fvalue, PlayerIdentity ident )
-	{
-	#ifndef DAYZ_1_29
-		//! 1.30+
-		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
-
-		if ( !codeLock )
-			return;
-
-		if ( !ident )
-		{
-			OnObjectActionResult( JMESPObjectAction.GetDigitalCode, 0, codeLock.GetLockPIN() );
-			return;
-		}
-
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( JMESPObjectAction.GetDigitalCode );
-		rpc.Write( 0 );
-		rpc.Write( codeLock.GetLockPIN() );
-		rpc.Send( NULL, JMESPModuleRPC.ObjectActionResult, true, ident );
-	#endif
-	}
-
-	//! Unlocked first: a lock that is still locked when its code is cleared would
-	//! keep its door shut with nothing left to open it by.
-	protected bool Exec_ResetDigitalCode( Object target, float fvalue )
-	{
-	#ifdef DAYZ_1_29
-		return false;
-	#else
-		//! 1.30+
-		DigitalCodeLock codeLock = GetDigitalCodeLockForAction( target, fvalue );
-
-		if ( !codeLock || !codeLock.CanSetCode() )
-			return false;
-
-		codeLock.SetLockState( false );
-		codeLock.ResetPIN();
-
-		return true;
-	#endif
-	}
+	[Obsolete("Use Exec_GetCode")]
+	protected void Exec_GetDigitalCode( Object target, float fvalue, PlayerIdentity ident );
+	
+	[Obsolete("Use ItemBase::COT_ResetCode")]
+	protected bool Exec_ResetDigitalCode( Object target, float fvalue );
 
 	protected void RPC_ObjectAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
@@ -3734,7 +3548,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void OnObjectActionResult( int action, int ivalue, string text = "" )
 	{
-		if ( action == JMESPObjectAction.GetDigitalCode )
+		if ( action == JMESPObjectAction.GetCode )
 		{
 			if ( text == "" )
 				return;
@@ -3745,13 +3559,6 @@ class JMESPModule: JMRenderableModuleBase
 
 			return;
 		}
-
-		if ( action != JMESPObjectAction.GetCode )
-			return;
-
-		g_Game.CopyToClipboard( ivalue.ToString() );
-
-		COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_ESP_MODULE_NOTIFY_CODE_COPIED", ivalue.ToString() ) );
 	}
 
 	[Obsolete("Use DeleteObject( Object target )")]

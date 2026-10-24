@@ -25,6 +25,92 @@ modded class ItemBase
 		return m_COT_KillOwner;
 	}
 
+	bool COT_IsLock();
+
+	bool COT_CanInteract();
+
+	bool COT_SetCode( int code );
+
+	bool COT_HasCode();
+
+	string COT_GetCode();
+
+	bool COT_SetLockState( bool locked )
+	{
+		if ( !COT_IsLock() || !COT_CanInteract() )
+			return false;
+
+		if ( locked )
+		{
+			if ( !COT_CanBeLocked() )
+				return false;
+
+			COT_CloseHierarchyRoot();
+		}
+
+		return true;
+	}
+
+	bool COT_CanBeLocked();
+
+	bool COT_IsLocked();
+
+	bool COT_CanSetCode();
+
+	bool COT_CanResetCode();
+
+	bool COT_ResetCode();
+
+	void COT_CloseHierarchyRoot()
+	{
+		EntityAI root = GetHierarchyRoot();
+
+		if ( root == this )
+			return;
+
+		ItemBase itemRoot;
+		if ( Class.CastTo( itemRoot, root ) && itemRoot.IsOpen() )
+			itemRoot.Close();
+
+		Fence fence;
+		if ( Class.CastTo( fence, root ) && fence.CanCloseFence() )
+			fence.CloseFence();
+
+		BuildingBase building;
+		if ( Class.CastTo( building, root ) )
+		{
+			InventoryLocation invLoc = new InventoryLocation;
+			GetInventory().GetCurrentInventoryLocation( invLoc );
+
+			//! Find the door this lock is attached to
+			int doorCount = building.GetDoorCount();
+			bool found;
+			for ( int doorIndex = 0; doorIndex < doorCount; ++doorIndex )
+			{
+				AdditionalDoorInfo doorInfo = building.GetDoorInfo( doorIndex );
+
+				if ( doorInfo && doorInfo.m_RelatedInventorySlotNames )
+				{
+					foreach ( string slotName : doorInfo.m_RelatedInventorySlotNames )
+					{
+						if ( InventorySlots.GetSlotIdFromString( slotName ) == invLoc.GetSlot() )
+						{
+							found = true;
+
+							if ( building.IsDoorOpen( doorIndex ) )
+								building.CloseDoor( doorIndex );
+
+							break;
+						}
+					}
+
+					if ( found )
+						break;
+				}
+			}
+		}
+	}
+
 	//! Tracker hooks live on EEInit/EEDelete, not the ctor/dtor. Enforce
 	//! destructors run on GC, not on deletion, so a dtor-based unregister lags
 	//! and GetByClassname hands out entities that are already gone. EEDelete is
