@@ -2576,17 +2576,24 @@ class JMESPModule: JMRenderableModuleBase
 				if ( !item )
 					return;
 				if ( ivalue )
+				{
+					item.COT_SetLockState( false );
 				#ifdef DZ_Expansion_BaseBuilding
 					item.Expansion_Open( "*" );
 				#else
 					item.Open();
 				#endif
+				}
 				else
+				{
 				#ifdef DZ_Expansion_BaseBuilding
 					item.Expansion_Close( "*" );
 				#else
 					item.Close();
 				#endif
+					if ( item.COT_CanBeLocked() )
+						item.COT_SetLockState( true );
+				}
 				break;
 
 			case JMESPObjectAction.SetLock:
