@@ -20,7 +20,7 @@ class JMCETypeData
 	int m_Cost      = -1;
 
 	//! Which types.xml this entry was parsed from - a mission can register
-	//! several (see Exec_FindRegisteredTypesFiles). Save_ItemTypeInfo needs
+	//! several (see FindRegisteredTypesFiles). Save_ItemTypeInfo needs
 	//! this to know which file to patch; nothing else reads it.
 	string m_SourceFile;
 
@@ -159,18 +159,20 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 
 		if (IsMissionHost())
-			Exec_LoadCEData();
+			LoadCEData();
 	}
 
-	protected void Exec_LoadCEData()
+	protected void LoadCEData()
 	{
+		auto trace = CF_Trace_0(this);
+
 		m_CETypes     = new map<string, ref JMCETypeData>;
 		m_CEProtos    = new map<string, ref JMCEGroupProto>;
 		m_CEPositions = new map<string, ref array<vector>>;
 
-		Exec_ParseAllTypesXml();
-		Exec_ParseMapGroupProtoXml();
-		Exec_ParseMapGroupPosXml();
+		ParseAllTypesXml();
+		ParseMapGroupProtoXml();
+		ParseMapGroupPosXml();
 
 		m_CEDataLoaded = true;
 	}
@@ -178,17 +180,17 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// Discover every types.xml the mission registers; mods/maps add theirs via cfgeconomycore.xml
 	// (<ce folder="mymod"><file name="mymod_types.xml" type="types"/></ce>). Parsing only
 	// $mission:db/types.xml silently drops modded items. See docs/audits/2026-07-15-todo-mods-audit.md.
-	protected void Exec_ParseAllTypesXml()
+	protected void ParseAllTypesXml()
 	{
 		array<string> files = new array<string>;
 		files.Insert("$mission:db/types.xml");
 
-		Exec_FindRegisteredTypesFiles(files);
+		FindRegisteredTypesFiles(files);
 
 		int parsed = 0;
 		foreach (string path : files)
 		{
-			if (Exec_ParseTypesXml(path))
+			if (ParseTypesXml(path))
 				parsed++;
 		}
 
@@ -198,7 +200,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// Walk cfgeconomycore.xml for <ce folder="X"><file name="Y" type="types"/>
 	// and append $mission:X/Y for each. A missing or ce-less cfgeconomycore is
 	// normal (vanilla missions have none) -- not an error.
-	protected void Exec_FindRegisteredTypesFiles(inout array<string> files)
+	protected void FindRegisteredTypesFiles(inout array<string> files)
 	{
 		CF_XML_Document coreDoc;
 		if (!CF_XML.ReadDocument("$mission:cfgeconomycore.xml", coreDoc))
@@ -255,7 +257,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	// Parse one types.xml using CF_XML. Later files override earlier entries (CE last-registered-wins).
 	// <types><type name="AK101"><category name="weapons"/><usage name="Military"/></type></types>
-	protected bool Exec_ParseTypesXml(string path)
+	protected bool ParseTypesXml(string path)
 	{
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument(path, doc))
@@ -382,7 +384,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	// Parse $mission:mapgroupproto.xml using CF_XML
 	// <prototype><group name="Land_Shed_M1" lootmax="2"><usage name="Industrial"/>...</group></prototype>
-	protected void Exec_ParseMapGroupProtoXml()
+	protected void ParseMapGroupProtoXml()
 	{
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument("$mission:mapgroupproto.xml", doc))
@@ -448,7 +450,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// <map>
 	//   <group name="Land_Shed_M1" pos="80.26 113.79 4422.18" .../>
 	// </map>
-	protected void Exec_ParseMapGroupPosXml()
+	protected void ParseMapGroupPosXml()
 	{
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument("$mission:mapgrouppos.xml", doc))
@@ -1027,7 +1029,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		string path = typeData.m_SourceFile;
 
 		string content;
-		if (!Exec_ReadFileText(path, content))
+		if (!ReadFileText(path, content))
 		{
 			Print("[LootAnalysis] Save failed: could not read " + path);
 			return false;
@@ -1064,11 +1066,11 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 		//! Backed up before the live file is touched - the one file operation
 		//! here that must never be skipped.
-		Exec_WriteFileText(path + ".bak", content);
+		WriteFileText(path + ".bak", content);
 
 		string newContent = content.Substring(0, typeStart) + newBlock + content.Substring(blockEnd, content.Length() - blockEnd);
 
-		if (!Exec_WriteFileText(path, newContent))
+		if (!WriteFileText(path, newContent))
 		{
 			Print("[LootAnalysis] Save failed: could not write " + path);
 			return false;
@@ -1111,7 +1113,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//! Whole-file read via the engine's line-based FGets, rejoined with "\n" -
 	//! the only text file I/O this engine exposes from script (see
 	//! JMLoadoutModule's own loadout loader for the same pattern).
-	protected bool Exec_ReadFileText(string path, out string content)
+	protected bool ReadFileText(string path, out string content)
 	{
 		if (!FileExist(path))
 			return false;
@@ -1137,7 +1139,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		return true;
 	}
 
-	protected bool Exec_WriteFileText(string path, string content)
+	protected bool WriteFileText(string path, string content)
 	{
 		FileHandle handle = OpenFile(path, FileMode.WRITE);
 		if (!handle)
