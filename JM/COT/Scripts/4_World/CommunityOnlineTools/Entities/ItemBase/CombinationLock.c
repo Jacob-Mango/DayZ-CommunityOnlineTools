@@ -21,7 +21,7 @@ modded class CombinationLock
 		return true;
 	}
 
-	override bool COT_SetCode( string code )
+	override bool COT_SetCode( string code, PlayerBase player = null )
 	{
 		int combination = code.ToInt();
 

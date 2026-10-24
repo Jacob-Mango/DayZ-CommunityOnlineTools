@@ -11,12 +11,12 @@ modded class ExpansionCodeLock
 		return true;
 	}
 
-	override bool COT_SetCode( string code )
+	override bool COT_SetCode( string code, PlayerBase player = null )
 	{
 		if ( code )
 			COT_CloseHierarchyRoot();
 
-		SetCode( code );
+		SetCode( code, player );
 
 		return true;
 	}

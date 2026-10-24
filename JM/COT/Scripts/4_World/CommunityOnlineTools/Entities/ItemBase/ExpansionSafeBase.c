@@ -11,12 +11,12 @@ modded class ExpansionSafeBase
 		return true;
 	}
 
-	override bool COT_SetCode( string code )
+	override bool COT_SetCode( string code, PlayerBase player = null )
 	{
 		if ( code )
 			Expansion_Close( "*" );
 
-		SetCode( code );
+		SetCode( code, player );
 
 		return true;
 	}

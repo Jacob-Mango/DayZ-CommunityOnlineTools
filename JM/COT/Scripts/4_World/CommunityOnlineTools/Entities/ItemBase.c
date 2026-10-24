@@ -29,7 +29,7 @@ modded class ItemBase
 
 	bool COT_CanInteract();
 
-	bool COT_SetCode( string code );
+	bool COT_SetCode( string code, PlayerBase player = null );
 
 	bool COT_HasCode();
 
@@ -183,7 +183,8 @@ modded class ItemBase
 
 				if ( pinLength >= COT_GetMinCodeLength() && pinLength <= COT_GetMaxCodeLength() )
 				{
-					COT_SetCode( pin );
+					PlayerBase player = GetPlayerObjectByIdentity( identity );
+					COT_SetCode( pin, player );
 					success = true;
 				}
 			}

@@ -2595,7 +2595,7 @@ class JMESPModule: JMRenderableModuleBase
 				break;
 
 			case JMESPObjectAction.SetCode:
-				if ( !item || !item.COT_SetCode( ivalue.ToString() ) )
+				if ( !item || !item.COT_SetCode( ivalue.ToString(), GetPlayerObjectByIdentity( ident ) ) )
 					return;
 				break;
 
