@@ -735,10 +735,17 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 	bool CallEvent( UIEvent eid )
 	{
+		Param1< UIActionBase > param;
 		if ( eid == UIEvent.CLICK && m_OnClickInstance && m_OnClickFunc != "" )
-			g_Game.GameScript.CallFunctionParams( m_OnClickInstance, m_OnClickFunc, NULL, new Param1< UIActionBase >( this ) );
+		{
+			param = new Param1< UIActionBase >( this );
+			g_Game.GameScript.CallFunctionParams( m_OnClickInstance, m_OnClickFunc, NULL, param );
+		}
 		else if ( eid == UIEvent.CHANGE && m_OnChangeInstance && m_OnChangeFunc != "" )
-			g_Game.GameScript.CallFunctionParams( m_OnChangeInstance, m_OnChangeFunc, NULL, new Param1< UIActionBase >( this ) );
+		{
+			param = new Param1< UIActionBase >( this );
+			g_Game.GameScript.CallFunctionParams( m_OnChangeInstance, m_OnChangeFunc, NULL, param );
+		}
 
 		if ( !m_HasCallback )
 			return false;
