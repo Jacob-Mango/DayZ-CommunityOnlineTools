@@ -600,29 +600,9 @@ class JMESPActionMenu
 
 			if ( item.CanBeDisinfected() )
 				AddToggle( PREFIX_ACTION + "disinfect", "#STR_COT_ESP_MODULE_ACTION_DISINFECTED", item.GetCleanness() > 0, Perm( JMConstants.PERM_ESP_OBJECT_SETCLEANNESS ) );
-
-			//! Open and Close are no-op virtuals on a plain ItemBase, so this is limited to
-			//! containers that override them. The row names the action, not the current state:
-			//! a menu entry is a verb, and "Open" on an open container reads as a statement.
-			if ( item.IsInherited( Container_Base ) )
-			{
-				if ( item.IsOpen() )
-					Add( PREFIX_ACTION + "openclose", "#STR_COT_ESP_MODULE_ACTION_CLOSE", JMConstants.Lucide( "package" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
-				else
-					Add( PREFIX_ACTION + "openclose", "#STR_COT_ESP_MODULE_ACTION_OPEN", JMConstants.Lucide( "package-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
-			}
 		}
 
 		m_LockItem = JMLockItem.Get( target, m_Meta.m_DoorIndex );
-
-		if ( m_LockItem && m_LockItem.COT_CanInteract() )
-		{
-			string lockPageTitle = m_LockItem.GetDisplayName();
-			if ( m_Meta.name == lockPageTitle )
-				lockPageTitle = "#STR_COT_VEHICLE_LOCK";
-
-			AddPage( PAGE_LOCK, lockPageTitle, JMConstants.Lucide( "lock" ) );
-		}
 
 		if ( m_Meta.GetConstructionParts() )
 			AddPage( PAGE_BUILD, "#STR_COT_ESP_MODULE_PAGE_BUILD", JMConstants.Lucide( "hammer" ) );
@@ -690,25 +670,27 @@ class JMESPActionMenu
 		if ( target.IsInherited( ZombieBase ) || target.IsInherited( AnimalBase ) )
 			AddToggle( PREFIX_ACTION + "immobilize", "#STR_COT_ESP_MODULE_ACTION_IMMOBILIZED", CreatureIsImmobilized(), Perm( JMConstants.PERM_ESP_OBJECT_IMMOBILIZE ) );
 
+		//! START open/close actions per entity
+
 		Fence fence = Fence.Cast( target );
 		if ( fence )
 		{
 			// Same eligibility vanilla's own gate action uses - a gate with
-			// no hinges built yet, or one that's locked, has nothing here to
-			// open or close.
+			// no hinges built yet has nothing here to open or close.
+			// Since we're admin, can always open a locked gate.
 			if ( fence.CanCloseFence() )
-				Add( PREFIX_ACTION + "closefence", "#STR_COT_ESP_MODULE_MENU_CLOSE_FENCE", JMConstants.Lucide( "door-closed" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD ) );
-			else if ( fence.CanOpenFence() )
-				Add( PREFIX_ACTION + "openfence", "#STR_COT_ESP_MODULE_MENU_OPEN_FENCE", JMConstants.Lucide( "door-open" ), Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD ) );
+				Add( PREFIX_ACTION + "closefence", "#STR_COT_ESP_MODULE_MENU_CLOSE_FENCE", JMConstants.Lucide( "door-closed" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+			else if ( fence.HasHinges() && !fence.IsOpened() )
+				Add( PREFIX_ACTION + "openfence", "#STR_COT_ESP_MODULE_MENU_OPEN_FENCE", JMConstants.Lucide( "door-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 		}
 
 		TentBase tent = TentBase.Cast( target );
-		if ( tent )
+		if ( tent && tent.GetState() == TentBase.PITCHED )
 		{
-			if ( tent.IsOpen() )
-				Add( PREFIX_ACTION + "closetent", "#STR_COT_ESP_MODULE_MENU_CLOSE_TENT", JMConstants.Lucide( "package" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+			if ( tent.COT_IsOpen() )
+				Add( PREFIX_ACTION + "closetent", "#STR_COT_ESP_MODULE_MENU_CLOSE_TENT", JMConstants.Lucide( "tent" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 			else
-				Add( PREFIX_ACTION + "opentent", "#STR_COT_ESP_MODULE_MENU_OPEN_TENT", JMConstants.Lucide( "package-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+				Add( PREFIX_ACTION + "opentent", "#STR_COT_ESP_MODULE_MENU_OPEN_TENT", JMConstants.Lucide( "tent" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 		}
 
 		//! A static map building only offers door actions when the right-click
@@ -720,20 +702,63 @@ class JMESPActionMenu
 		{
 			int doorIndex = m_Meta.m_DoorIndex;
 
-			if ( house.IsDoorLocked( doorIndex ) )
-				Add( PREFIX_ACTION + "unlockdoor", "#STR_COT_ESP_MODULE_MENU_UNLOCK_DOOR", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
-			else if ( house.CanDoorBeLocked( doorIndex ) )
-				Add( PREFIX_ACTION + "lockdoor", "#STR_COT_ESP_MODULE_MENU_LOCK_DOOR", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
-
 			if ( house.IsDoorOpen( doorIndex ) )
 			{
 				if ( house.CanDoorBeClosed( doorIndex ) )
 					Add( PREFIX_ACTION + "closedoor", "#STR_COT_ESP_MODULE_MENU_CLOSE_DOOR", JMConstants.Lucide( "door-closed" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 			}
-			else if ( house.CanDoorBeOpened( doorIndex, true ) )
+			else if ( house.CanDoorBeOpened( doorIndex, true ) || house.IsDoorLocked( doorIndex ) || ( m_LockItem && m_LockItem.COT_IsLocked() ) )
 			{
 				Add( PREFIX_ACTION + "opendoor", "#STR_COT_ESP_MODULE_MENU_OPEN_DOOR", JMConstants.Lucide( "door-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 			}
+
+			//! Locking after opening/closing - so it stays grouped with attached lock submenu below
+
+			if ( house.IsDoorLocked( doorIndex ) || ( m_LockItem && m_LockItem.COT_IsLocked() ) )
+				Add( PREFIX_ACTION + "unlockdoor", "#STR_COT_ESP_MODULE_MENU_UNLOCK_DOOR", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+			else if ( ( house.CanDoorBeLocked( doorIndex ) && ( !m_LockItem || m_LockItem.COT_CanBeLocked() ) ) || ( m_LockItem && m_LockItem.COT_CanBeLocked() ) )
+				Add( PREFIX_ACTION + "lockdoor", "#STR_COT_ESP_MODULE_MENU_LOCK_DOOR", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+		}
+
+		//! General openable item open/close actions if nothing else matches
+		if ( item && !fence && !tent && !house )
+		{
+			//! Open and Close are no-op virtuals on a plain ItemBase, so this is limited to
+			//! containers that override them. The row names the action, not the current state:
+			//! a menu entry is a verb, and "Open" on an open container reads as a statement.
+			if ( item.COT_IsOpenable() )
+			{
+				string iconClose;
+				string iconOpen;
+
+				if ( item.IsInherited( BaseBuildingBase ) )
+				{
+					iconClose = JMConstants.Lucide( "door-closed" );
+					iconOpen = JMConstants.Lucide( "door-open" );
+				}
+				else
+				{
+					iconClose = JMConstants.Lucide( "package" );
+					iconOpen = JMConstants.Lucide( "package-open" );
+				}
+
+				if ( item.IsOpen() )
+					Add( PREFIX_ACTION + "closeitem", "#STR_COT_ESP_MODULE_ACTION_CLOSE", iconClose, Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+				else
+					Add( PREFIX_ACTION + "openitem", "#STR_COT_ESP_MODULE_ACTION_OPEN", iconOpen, Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+			}
+		}
+
+		//! END open/close actions per entity
+
+		//! Attached lock submenu
+		if ( m_LockItem && m_LockItem.COT_CanInteract() )
+		{
+			string lockPageTitle = m_LockItem.GetDisplayName();
+			if ( m_Meta.name == lockPageTitle )
+				lockPageTitle = "#STR_COT_VEHICLE_LOCK";
+
+			AddPage( PAGE_LOCK, lockPageTitle, JMConstants.Lucide( "lock" ) );
 		}
 
 		//! Weapons, vehicles and clothing expose attachment slots through the same GameInventory
@@ -1913,8 +1938,11 @@ class JMESPActionMenu
 		case "disinfect":
 			DoDisinfect();
 			break;
-		case "openclose":
-			DoOpenClose();
+		case "openitem":
+			m_Meta.module.ObjectAction( JMESPObjectAction.SetOpen, 1, 0, m_Meta.target );
+			break;
+		case "closeitem":
+			m_Meta.module.ObjectAction( JMESPObjectAction.SetOpen, 0, 0, m_Meta.target );
 			break;
 		case "lock":
 			m_Meta.module.ObjectAction( JMESPObjectAction.SetLock, 1, 0, m_LockItem );
@@ -2781,21 +2809,6 @@ class JMESPActionMenu
 			cleanness = 0;
 
 		m_Meta.module.ObjectAction( JMESPObjectAction.SetCleanness, cleanness, 0, m_Meta.target );
-	}
-
-	protected void DoOpenClose()
-	{
-		ItemBase item = ItemBase.Cast( m_Meta.target );
-
-		if ( !item )
-			return;
-
-		int open = 1;
-
-		if ( item.IsOpen() )
-			open = 0;
-
-		m_Meta.module.ObjectAction( JMESPObjectAction.SetOpen, open, 0, m_Meta.target );
 	}
 
 	//! A code is four free-form digits, which a menu has no way to ask for -

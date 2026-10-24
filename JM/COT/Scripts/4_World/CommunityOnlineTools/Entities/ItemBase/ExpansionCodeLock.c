@@ -47,20 +47,10 @@ modded class ExpansionCodeLock
 			return false;
 
 		if ( locked )
-		{
-			if ( !ExpansionIsLocked() )
-				ExpansionLock();
-		}
-		else if ( ExpansionIsLocked() )
-		{
+			ExpansionLock();
+		else
 			ExpansionUnlock();
-		}
 
-		return true;
-	}
-
-	override bool COT_CanBeLocked()
-	{
 		return true;
 	}
 

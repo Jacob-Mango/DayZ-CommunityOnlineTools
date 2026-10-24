@@ -25,6 +25,8 @@ class JMESPMeta: COT_WidgetHolder
 	JMESPTransformPopup m_TransformPopup;
 	string m_Key;  //! set if not actively tracked by ESP but created for (e.g.) world actions menu
 
+	int m_Component = -1;
+
 	//! Which Building door the right-click landed on, from the raycast
 	//! component the menu was opened with. -1 when the target isn't a
 	//! Building or the click wasn't on any of its doors.

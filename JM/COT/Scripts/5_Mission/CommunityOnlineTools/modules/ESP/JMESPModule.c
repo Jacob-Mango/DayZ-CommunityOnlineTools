@@ -305,7 +305,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		int component = GetViewComponentAtCursor( building );
 
-		if ( component < 0 )
+		if ( component < 0 || component >= building.GetDoorCount() )
 			return -1;
 
 		return building.GetDoorIndex( component );
@@ -327,7 +327,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		vector to = from + ( dir * WORLD_MENU_RANGE );
 
-		RaycastRVParams rayInput = new RaycastRVParams( from, to );
+		RaycastRVParams rayInput = new RaycastRVParams( from, to, g_Game.GetPlayer() );
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
 		rayInput.radius = 0.1;
 		rayInput.type = ObjIntersectView;
@@ -341,7 +341,13 @@ class JMESPModule: JMRenderableModuleBase
 
 		foreach ( RaycastRVResult result: results )
 		{
-			Object obj = result.obj;
+			Object obj;
+
+			if (result.hierLevel > 0)
+				obj = result.parent;
+			else
+				obj = result.obj;
+
 			if ( !obj )
 				continue;
 
@@ -726,6 +732,7 @@ class JMESPModule: JMRenderableModuleBase
 		info.AddWebhookType( "DeleteAll" );
 		info.AddWebhookType( "MoveToCursor" );
 		info.AddWebhookType( "Object" );
+		info.AddWebhookType( "SetTentOpen" );
 	}
 
 	override void RegisterKeyMouseBindings()
@@ -1077,13 +1084,15 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !CreateMetaForObject( obj, meta ) )
 			return;
 
+		meta.m_Component = GetViewComponentAtCursor( obj );
+
 		//! Static map buildings only get door actions when the click landed on a door.
 		//! GetDoorIndex needs a VIEW geometry component; PickWorldObject's is whichever
 		//! answered first (usually fire), the wrong index space, so re-pick with a
 		//! view-only ray.
 		Building building = Building.Cast( obj );
-		if ( building )
-			meta.m_DoorIndex = GetBuildingDoorIndexAtCursor( building );
+		if ( building && meta.m_Component > -1 && meta.m_Component < building.GetDoorCount() )
+			meta.m_DoorIndex = building.GetDoorIndex( meta.m_Component );
 		else
 			meta.m_DoorIndex = -1;
 
@@ -2427,11 +2436,10 @@ class JMESPModule: JMRenderableModuleBase
 				return JMConstants.PERM_ESP_OBJECT_SETCLEANNESS;
 			case JMESPObjectAction.SetFoodStage:
 				return JMConstants.PERM_ESP_OBJECT_SETFOODSTAGE;
-			case JMESPObjectAction.SetOpen:
-				return JMConstants.PERM_ESP_OBJECT_OPENCLOSE;
 
 			case JMESPObjectAction.SetLock:
 			case JMESPObjectAction.SetLockAll:
+			case JMESPObjectAction.SetHouseDoorLocked:
 				return JMConstants.PERM_ESP_OBJECT_LOCK;
 			case JMESPObjectAction.SetCode:
 			case JMESPObjectAction.ResetCode:
@@ -2473,13 +2481,11 @@ class JMESPModule: JMRenderableModuleBase
 			case JMESPObjectAction.SetTrapArmed:
 				return JMConstants.PERM_ESP_OBJECT_TRAP;
 
+			case JMESPObjectAction.SetOpen:
 			case JMESPObjectAction.SetFenceOpen:
-				return JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD;
-
 			case JMESPObjectAction.SetTentOpen:
 			case JMESPObjectAction.SetCarDoors:
 			case JMESPObjectAction.SetHouseDoorOpen:
-			case JMESPObjectAction.SetHouseDoorLocked:
 				return JMConstants.PERM_ESP_OBJECT_OPENCLOSE;
 
 			//! Setting a fluid to a fraction is the same power as filling it.
@@ -2573,27 +2579,7 @@ class JMESPModule: JMRenderableModuleBase
 				break;
 
 			case JMESPObjectAction.SetOpen:
-				if ( !item )
-					return;
-				if ( ivalue )
-				{
-					item.COT_SetLockState( false );
-				#ifdef DZ_Expansion_BaseBuilding
-					item.Expansion_Open( "*" );
-				#else
-					item.Open();
-				#endif
-				}
-				else
-				{
-				#ifdef DZ_Expansion_BaseBuilding
-					item.Expansion_Close( "*" );
-				#else
-					item.Close();
-				#endif
-					if ( item.COT_CanBeLocked() )
-						item.COT_SetLockState( true );
-				}
+				Exec_SetOpen( target, ivalue, ident, instance );
 				break;
 
 			case JMESPObjectAction.SetLock:
@@ -2851,12 +2837,17 @@ class JMESPModule: JMRenderableModuleBase
 	protected void Exec_SetFenceOpen( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
 	{
 		Fence fence = Fence.Cast( target );
-		if ( !fence )
+		if ( !fence || !fence.HasHinges() )
 			return;
 
-		if ( ivalue != 0 )
+		ItemBase lockItem = JMLockItem.Get( target );
+
+		if ( lockItem )
+			lockItem.COT_SetLockState( !ivalue );  //! Unlocks the gate on open, closes & locks the gate automatically on close
+
+		if ( ivalue != 0 && fence.CanOpenFence() )
 			fence.OpenFence();
-		else
+		else if ( !lockItem && fence.CanCloseFence() )
 			fence.CloseFence();
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=fenceopen state=" + ivalue );
@@ -2871,10 +2862,25 @@ class JMESPModule: JMRenderableModuleBase
 
 		int doorIndex = fvalue;
 
+		if ( doorIndex < 0 || doorIndex >= house.GetDoorCount() )
+			return;
+
+		ItemBase lockItem = JMLockItem.Get( target, doorIndex );
+
+		if ( lockItem )
+			lockItem.COT_SetLockState( !ivalue );  //! Unlocks the door on open, closes & locks the door automatically on close
+
 		if ( ivalue != 0 )
+		{
+			if ( house.IsDoorLocked( doorIndex ) )
+				house.UnlockDoor( doorIndex );
+
 			house.OpenDoor( doorIndex );
-		else
+		}
+		else if ( !lockItem )
+		{
 			house.CloseDoor( doorIndex );
+		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=housedooropen door=" + doorIndex + " state=" + ivalue );
 		SendWebhookColored( "SetHouseDoorOpen", instance, "Door " + doorIndex + " open state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
@@ -2888,7 +2894,14 @@ class JMESPModule: JMRenderableModuleBase
 
 		int doorIndex = fvalue;
 
-		if ( ivalue != 0 )
+		if ( doorIndex < 0 || doorIndex >= house.GetDoorCount() )
+			return;
+
+		ItemBase lockItem = JMLockItem.Get( target, doorIndex );
+
+		if ( lockItem )
+			lockItem.COT_SetLockState( ivalue );
+		else if ( ivalue != 0 )
 			house.LockDoor( doorIndex );
 		else
 			house.UnlockDoor( doorIndex );
@@ -2903,13 +2916,35 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !tent )
 			return;
 
-		if ( ivalue != 0 )
-			tent.Open();
-		else
-			tent.Close();
+		int count = tent.COT_ToggleAnimations( ivalue );
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=tentopen state=" + ivalue );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=tentopen state=" + ivalue + " count=" + count );
 		SendWebhookColored( "SetTentOpen", instance, "Tent open state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	protected void Exec_SetOpen( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		ItemBase item = ItemBase.Cast( target );
+		if ( !item )
+			return;
+
+		ItemBase lockItem = JMLockItem.Get( target );
+
+		if ( lockItem )
+			lockItem.COT_SetLockState( !ivalue );  //! Unlocks the item on open, closes & locks the item automatically on close
+
+		if ( ivalue != 0 )
+		#ifdef DZ_Expansion_BaseBuilding
+			item.Expansion_Open( "*" );
+		#else
+			item.Open();
+		#endif
+		else if ( !lockItem )
+		#ifdef DZ_Expansion_BaseBuilding
+			item.Expansion_Close( "*" );
+		#else
+			item.Close();
+		#endif
 	}
 
 	protected void Exec_SetCarDoors( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )

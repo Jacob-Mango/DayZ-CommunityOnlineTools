@@ -90,10 +90,9 @@ modded class CombinationLock
 
 		if ( locked )
 		{
-			if ( !IsLocked() )
-				LockServer( parent );
+			LockServer( parent );
 		}
-		else if ( IsLocked() )
+		else
 		{
 			//! Locking runs the vanilla server path (slot lock and shuffle). Unlocking does NOT:
 			//! UnlockServer drops the lock on the ground, and an admin wants the gate openable, so

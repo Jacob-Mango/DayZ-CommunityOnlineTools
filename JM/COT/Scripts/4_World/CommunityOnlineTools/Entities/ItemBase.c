@@ -25,6 +25,8 @@ modded class ItemBase
 		return m_COT_KillOwner;
 	}
 
+	bool COT_IsOpenable();
+
 	bool COT_IsLock();
 
 	bool COT_CanInteract();
@@ -51,13 +53,20 @@ modded class ItemBase
 
 			COT_CloseHierarchyRoot();
 		}
+		else if ( !COT_IsLocked() )
+		{
+			return false;
+		}
 
 		return true;
 	}
 
 	bool COT_CanBeLocked()
 	{
-		return COT_HasCode();
+		if ( COT_HasCode() && !COT_IsLocked() )
+			return true;
+
+		return false;
 	}
 
 	bool COT_IsLocked();
