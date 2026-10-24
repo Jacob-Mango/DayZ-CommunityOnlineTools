@@ -616,7 +616,13 @@ class JMESPActionMenu
 		m_LockItem = JMLockItem.Get( target, m_Meta.m_DoorIndex );
 
 		if ( m_LockItem && m_LockItem.COT_CanInteract() )
-			AddPage( PAGE_LOCK, m_LockItem.GetDisplayName(), JMConstants.Lucide( "lock" ) );
+		{
+			string lockPageTitle = m_LockItem.GetDisplayName();
+			if ( m_Meta.name == lockPageTitle )
+				lockPageTitle = "#STR_COT_VEHICLE_LOCK";
+
+			AddPage( PAGE_LOCK, lockPageTitle, JMConstants.Lucide( "lock" ) );
+		}
 
 		if ( m_Meta.GetConstructionParts() )
 			AddPage( PAGE_BUILD, "#STR_COT_ESP_MODULE_PAGE_BUILD", JMConstants.Lucide( "hammer" ) );
