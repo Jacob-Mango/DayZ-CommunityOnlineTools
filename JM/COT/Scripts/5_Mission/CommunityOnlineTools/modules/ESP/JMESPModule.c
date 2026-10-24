@@ -2592,7 +2592,7 @@ class JMESPModule: JMRenderableModuleBase
 				break;
 
 			case JMESPObjectAction.SetCode:
-				if ( !item || item.COT_SetCode( ivalue ) )
+				if ( !item || !item.COT_SetCode( ivalue ) )
 					return;
 				break;
 
