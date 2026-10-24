@@ -13,6 +13,7 @@ class JMContextMenuEntry
 	bool   Submenu;
 	Class  Target;
 	string Callback;
+	bool   IsDivider;
 
 	void JMContextMenuEntry( string id, string text, string iconPath = "", int textColor = 0, bool submenu = false, Class target = null, string callback = "" )
 	{
@@ -438,6 +439,14 @@ class UIActionContextMenu: UIActionBase
 		RebuildItemsInNextFrame();
 	}
 
+	void AddDivider()
+	{
+		auto entry = new JMContextMenuEntry( "", "" );
+		entry.IsDivider = true;
+		m_Entries.Insert( entry );
+		RebuildItemsInNextFrame();
+	}
+
 	//! Remove one item and redraw the menu. Like AddItem / ClearItems this rebuilds every row, so
 	//! never call it from the click handler of the menu's own row - defer it a tick.
 	void RemoveItemById( string id )
@@ -562,12 +571,18 @@ class UIActionContextMenu: UIActionBase
 		{
 			JMContextMenuEntry entry = m_Entries[i];
 
-			Widget row = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContextMenuItem.layout", m_Grid );
+			Widget row;
+
+			if ( entry.IsDivider )
+				row = UIActionManager.CreateDivider( m_Grid, JMTheme.DIVIDER_MEDIUM, 1 );
+			else
+				row = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContextMenuItem.layout", m_Grid );
 
 			if ( !row )
 				continue;
 
-			row.SetHandler( this );
+			if ( !entry.IsDivider )
+				row.SetHandler( this );
 
 			ImageWidget rowIcon;
 			Class.CastTo( rowIcon, row.FindAnyWidget( "item_icon" ) );
@@ -633,16 +648,24 @@ class UIActionContextMenu: UIActionBase
 		while ( child )
 		{
 			bool enabled = true;
+			bool isDivider = false;
 			if ( i < m_Entries.Count() )
-				enabled = m_Entries[i].Enabled;
+			{
+				JMContextMenuEntry entry = m_Entries[i];
+				enabled = entry.Enabled;
+				isDivider = entry.IsDivider;
+			}
 
-			int color = COLOR_ROW_NORMAL;
-			if ( !enabled )
-				color = COLOR_ROW_DISABLED;
-			else if ( i == m_HoveredRow )
-				color = COLOR_ROW_HOVER;
+			if ( !isDivider )
+			{
+				int color = COLOR_ROW_NORMAL;
+				if ( !enabled )
+					color = COLOR_ROW_DISABLED;
+				else if ( i == m_HoveredRow )
+					color = COLOR_ROW_HOVER;
 
-			child.SetColor( color );
+				child.SetColor( color );
+			}
 
 			TextWidget rowText;
 			Class.CastTo( rowText, child.FindAnyWidget( "item_text" ) );
@@ -742,7 +765,7 @@ class UIActionContextMenu: UIActionBase
 			m_HoveredRow = idx;
 			RefreshRowColors();
 
-			if ( idx < m_Entries.Count() )
+			if ( idx < m_Entries.Count() && m_Entries[idx].Id )
 				SetHoveredId( m_Entries[idx].Id );
 		}
 		return false;
