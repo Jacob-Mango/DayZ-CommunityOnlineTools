@@ -2429,15 +2429,15 @@ class JMESPModule: JMRenderableModuleBase
 				return JMConstants.PERM_ESP_OBJECT_SETFOODSTAGE;
 			case JMESPObjectAction.SetOpen:
 				return JMConstants.PERM_ESP_OBJECT_OPENCLOSE;
+
 			case JMESPObjectAction.SetLock:
+			case JMESPObjectAction.SetLockAll:
 				return JMConstants.PERM_ESP_OBJECT_LOCK;
 			case JMESPObjectAction.SetCode:
+			case JMESPObjectAction.ResetCode:
 				return JMConstants.PERM_ESP_OBJECT_SETCODE;
 			case JMESPObjectAction.GetCode:
 				return JMConstants.PERM_ESP_OBJECT_GETCODE;
-
-			case JMESPObjectAction.ResetDigitalCode:
-				return JMConstants.PERM_ESP_OBJECT_SETCODE;
 
 			case JMESPObjectAction.SetJammed:
 			case JMESPObjectAction.SetChambered:
@@ -2450,11 +2450,6 @@ class JMESPModule: JMRenderableModuleBase
 			case JMESPObjectAction.SetOven:
 			case JMESPObjectAction.CookAll:
 				return JMConstants.PERM_ESP_OBJECT_FIREPLACE;
-
-			//! The same permission as locking one, because that is what it is -
-			//! the radius only changes how many at a time.
-			case JMESPObjectAction.SetLockAll:
-				return JMConstants.PERM_ESP_OBJECT_LOCK;
 
 			case JMESPObjectAction.SetLockWheels:
 				return JMConstants.PERM_ESP_OBJECT_CAR_LOCKWHEELS;
@@ -2581,9 +2576,17 @@ class JMESPModule: JMRenderableModuleBase
 				if ( !item )
 					return;
 				if ( ivalue )
+				#ifdef DZ_Expansion_BaseBuilding
+					item.Expansion_Open( "*" );
+				#else
 					item.Open();
+				#endif
 				else
+				#ifdef DZ_Expansion_BaseBuilding
+					item.Expansion_Close( "*" );
+				#else
 					item.Close();
+				#endif
 				break;
 
 			case JMESPObjectAction.SetLock:
@@ -2592,7 +2595,7 @@ class JMESPModule: JMRenderableModuleBase
 				break;
 
 			case JMESPObjectAction.SetCode:
-				if ( !item || !item.COT_SetCode( ivalue ) )
+				if ( !item || !item.COT_SetCode( ivalue.ToString() ) )
 					return;
 				break;
 
@@ -3388,11 +3391,16 @@ class JMESPModule: JMRenderableModuleBase
 		float radiusSq = LOCK_ALL_RADIUS * LOCK_ALL_RADIUS;
 		int touched = 0;
 
+		ItemBase item;
+
 		foreach ( EntityAI entity: nearby )
 		{
 			//! The box reaches past the radius in its corners - keep it a sphere.
 			if ( vector.DistanceSq( centre, entity.GetPosition() ) > radiusSq )
 				continue;
+
+			if ( Class.CastTo( item, entity ) && item.COT_IsLock() && item.COT_SetLockState( locked ) )
+				++touched;
 
 			GameInventory inventory = entity.GetInventory();
 
@@ -3403,12 +3411,8 @@ class JMESPModule: JMRenderableModuleBase
 			{
 				EntityAI att = inventory.GetAttachmentFromIndex( i );
 
-				ItemBase item;
-				if ( Class.CastTo( item, att ) && item.COT_IsLock() )
-				{
-					if ( item.COT_SetLockState( locked ) )
-						touched++;
-				}
+				if ( Class.CastTo( item, att ) && item.COT_IsLock() && item.COT_SetLockState( locked ) )
+					++touched;
 			}
 		}
 
@@ -3450,15 +3454,16 @@ class JMESPModule: JMRenderableModuleBase
 	[Obsolete("Use JMLockItemT<DigitalCodeLock>::Get")]
 	static DigitalCodeLock GetDigitalCodeLockForAction( Object target, float doorValue );
 
-#ifdef DAYZ_1_29
-	void OpenDigitalCodeLockMenu( ItemBase codeLock );
-#else
-	//! 1.30+
-	//! Raise the vanilla keypad over a digital code lock, to dial a new code into
+	//! Raise the vanilla keypad over a code lock, to dial a new code into
 	//! it. Client only - the keypad sends the code to the server itself.
 	void OpenDigitalCodeLockMenu( DigitalCodeLock codeLock )
 	{
-		if ( !codeLock || !IsMissionClient() )
+		OpenLockMenu( codeLock );
+	}
+
+	void OpenLockMenu( ItemBase lockItem )
+	{
+		if ( !lockItem || !IsMissionClient() )
 			return;
 
 		DigitalCodeLockUIBase keypad = DigitalCodeLockUIBase.Cast( g_Game.GetUIManager().EnterScriptedMenu( MENU_DIGITAL_CODELOCK, NULL ) );
@@ -3466,24 +3471,23 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !keypad )
 			return;
 
-		keypad.SetTargetLock( codeLock.GetCodeLockComponent() );
+		keypad.COT_SetTargetLock( lockItem );
 
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( WatchDigitalCodeLockMenu, 250, true );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( WatchCodeLockMenu, 250, true );
 	}
 
 	//! The keypad is entered without a parent menu, so closing it hides the cursor
 	//! COT's own windows still need - poll for it going away and give the cursor back.
-	protected void WatchDigitalCodeLockMenu()
+	protected void WatchCodeLockMenu()
 	{
 		if ( g_Game.GetUIManager().FindMenu( MENU_DIGITAL_CODELOCK ) )
 			return;
 
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( WatchDigitalCodeLockMenu );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( WatchCodeLockMenu );
 
 		if ( g_cotBase.IsOpen() )
 			g_Game.GetUIManager().ShowUICursor( true );
 	}
-#endif
 
 	[Obsolete("Use ItemBase::COT_SetLockState")]
 	protected bool Exec_SetDigitalLock( Object target, int locked, float fvalue );

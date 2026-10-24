@@ -42,11 +42,6 @@ class JMESPActionMenu
 	//! others, so it is listed first.
 	static const string SCALE_VALUES = "1|0.5|0.75|1.5|2";
 
-	//! How long after resetting a digital code lock its keypad is raised, in ms -
-	//! long enough for the cleared code to reach the client through the lock's
-	//! synced state, short enough to read as one action.
-	static const int DIGITAL_CODE_LOCK_MENU_DELAY = 500;
-
 	//! The one menu that floats over the world: both world entry points raise this same
 	//! instance, as only one menu can be open at a time. The ESP form keeps its own,
 	//! anchored inside its window so the list does not clip it.
@@ -54,8 +49,6 @@ class JMESPActionMenu
 	protected UIActionContextMenu m_Menu;
 	protected ref JMESPMeta m_Meta;
 
-	protected CombinationLock m_CombinationLock;
-	protected DigitalCodeLock m_CodeLock;
 	protected ItemBase m_LockItem;
 
 	//! Kept from Init() so the transform-edit popup can be built lazily, in
@@ -553,9 +546,9 @@ class JMESPActionMenu
 	//! `page` lets a sub-page of a sub-page (Transform > Copy) go back one
 	//! level instead of all the way to Main - every other page is one level
 	//! deep, so the default keeps their call sites unchanged.
-	protected void AddBack( string page = PAGE_MAIN )
+	protected void AddBack( string page = PAGE_MAIN, string label = "#STR_COT_ESP_MODULE_MENU_BACK" )
 	{
-		Add( PREFIX_PAGE + page, "#STR_COT_ESP_MODULE_MENU_BACK", JMConstants.Lucide( "chevron-left" ) );
+		Add( PREFIX_PAGE + page, label, JMConstants.Lucide( "chevron-left" ) );
 	}
 
 	protected bool Perm( string permission )
@@ -621,11 +614,9 @@ class JMESPActionMenu
 		}
 
 		m_LockItem = JMLockItem.Get( target, m_Meta.m_DoorIndex );
-		Class.CastTo( m_CombinationLock, m_LockItem );
-		Class.CastTo( m_CodeLock, m_LockItem );
 
 		if ( m_LockItem && m_LockItem.COT_CanInteract() )
-			AddPage( PAGE_LOCK, "#STR_COT_ESP_MODULE_PAGE_LOCK", JMConstants.Lucide( "lock" ) );
+			AddPage( PAGE_LOCK, m_LockItem.GetDisplayName(), JMConstants.Lucide( "lock" ) );
 
 		if ( m_Meta.GetConstructionParts() )
 			AddPage( PAGE_BUILD, "#STR_COT_ESP_MODULE_PAGE_BUILD", JMConstants.Lucide( "hammer" ) );
@@ -898,9 +889,9 @@ class JMESPActionMenu
 			Add( PREFIX_ACTION + "food:" + values[i].ToString(), names[i], "", canSet );
 	}
 
-	protected void BuildLock()
+	protected void BuildLock( string page = "" )
 	{
-		AddBack();
+		AddBack( page, m_LockItem.GetDisplayName() );
 
 		if ( m_LockItem.COT_IsLocked() )
 			Add( PREFIX_ACTION + "unlock", "#STR_COT_ESP_MODULE_MENU_UNLOCK", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
@@ -921,10 +912,8 @@ class JMESPActionMenu
 			if ( m_LockItem.COT_CanResetCode() )
 				Add( PREFIX_ACTION + "resetcode", "#STR_COT_ESP_MODULE_MENU_RESET_CODE", JMConstants.Lucide( "rotate-ccw" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
 
-			if ( m_CombinationLock )
-				Add( PREFIX_ACTION + "pastecode", "#STR_COT_ESP_MODULE_MENU_PASTE_CODE", JMConstants.Lucide( "clipboard-paste" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
-			else if ( m_CodeLock )
-				Add( PREFIX_ACTION + "digisetcode", "#STR_COT_ESP_MODULE_MENU_SET_CODE", JMConstants.Lucide( "keyboard" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
+			Add( PREFIX_ACTION + "pastecode", "#STR_COT_ESP_MODULE_MENU_PASTE_CODE", JMConstants.Lucide( "clipboard-paste" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
+			Add( PREFIX_ACTION + "setcode", "#STR_COT_ESP_MODULE_MENU_SET_CODE", JMConstants.Lucide( "keyboard" ), Perm( JMConstants.PERM_ESP_OBJECT_SETCODE ) );
 		}
 	}
 
@@ -1393,24 +1382,45 @@ class JMESPActionMenu
 	//! other conditional row in this menu.
 	protected void BuildAttachSlot()
 	{
-		Add( PREFIX_PAGE + PAGE_ATTACHMENTS, "#STR_COT_ESP_MODULE_MENU_BACK", JMConstants.Lucide( "chevron-left" ) );
-
 		EntityAI target;
-		if ( !Class.CastTo( target, m_Meta.target ) || !target.GetInventory() || m_PageArg == "" )
-			return;
-
-		int slotId = m_PageArg.ToInt();
-
-		bool canSet = Perm( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT );
-
-		Man player = Man.Cast( m_Meta.target );
 
 		EntityAI existing;
 
-		if ( slotId == InventorySlots.HANDS && player )
-			existing = player.GetEntityInHands();
+		if ( Class.CastTo( target, m_Meta.target ) && target.GetInventory() && m_PageArg != "" )
+		{
+			int slotId = m_PageArg.ToInt();
+
+			bool canSet = Perm( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT );
+
+			Man player = Man.Cast( m_Meta.target );
+
+			if ( slotId == InventorySlots.HANDS && player )
+				existing = player.GetEntityInHands();
+			else
+				existing = target.GetInventory().FindAttachment( slotId );
+
+			m_LockItem = JMLockItem.Get( existing, m_Meta.m_DoorIndex );
+
+			if ( existing )
+			{
+				if ( m_LockItem && m_LockItem.COT_CanInteract() )
+				{
+					BuildLock( PAGE_ATTACHMENTS );
+					m_Menu.AddDivider();
+				}
+				else
+					AddBack( PAGE_ATTACHMENTS, existing.GetDisplayName() );
+			}
+			else
+			{
+				AddBack( PAGE_ATTACHMENTS );
+			}
+		}
 		else
-			existing = target.GetInventory().FindAttachment( slotId );
+		{
+			AddBack( PAGE_ATTACHMENTS );
+			return;
+		}
 
 		if ( existing )
 			Add( PREFIX_ACTION + "removeattach", "#STR_COT_ESP_MODULE_MENU_REMOVE", JMConstants.Lucide( "trash-2" ), canSet, JMTheme.DANGER );
@@ -1915,8 +1925,8 @@ class JMESPActionMenu
 		case "resetcode":
 			m_Meta.module.ObjectAction( JMESPObjectAction.ResetCode, 0, 0, m_LockItem );
 			break;
-		case "digisetcode":
-			DoSetDigitalCode();
+		case "setcode":
+			DoSetCode();
 			break;
 		case "shownodes":
 			DoShowNodes();
@@ -2797,24 +2807,13 @@ class JMESPActionMenu
 		m_Meta.module.ObjectAction( JMESPObjectAction.SetCode, clipboard.ToInt(), 0, m_LockItem );
 	}
 
-	//! Opens the lock's own keypad to dial the new code in. A lock that already has
-	//! a code is reset first - the keypad only accepts a new code on a lock that
-	//! has none - and the keypad is raised a moment later, once the reset has
-	//! reached the client through the lock's synced state.
-	protected void DoSetDigitalCode()
+	//! Opens the lock's own keypad to dial the new code in
+	protected void DoSetCode()
 	{
-		if ( !m_CodeLock )
+		if ( !m_LockItem )
 			return;
 
-		if ( !m_CodeLock.HasPIN() )
-		{
-			m_Meta.module.OpenDigitalCodeLockMenu( m_CodeLock );
-			return;
-		}
-
-		m_Meta.module.ObjectAction( JMESPObjectAction.ResetCode, 0, 0, m_CodeLock );
-
-		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( m_Meta.module.OpenDigitalCodeLockMenu, DIGITAL_CODE_LOCK_MENU_DELAY, false, m_CodeLock );
+		m_Meta.module.OpenLockMenu( m_LockItem );
 	}
 
 	protected void DoShowNodes()

@@ -6,17 +6,9 @@ modded class CombinationLock
 
 	void CombinationLock()
 	{
-		Print("CombinationLock()");
-
 		m_COT_CombinationLocked_Default = m_CombinationLocked;
 		m_COT_Combination_Default = m_Combination;
 		m_COT_CombinationInside_Default = m_CombinationInside;
-		Print(m_CombinationLocked);
-		Print(m_Combination);
-		Print(m_CombinationInside);
-		Print(m_COT_CombinationLocked_Default);
-		Print(m_COT_Combination_Default);
-		Print(m_COT_CombinationInside_Default);
 	}
 
 	override bool COT_IsLock()
@@ -29,17 +21,21 @@ modded class CombinationLock
 		return true;
 	}
 
-	override bool COT_SetCode( int code )
+	override bool COT_SetCode( string code )
 	{
-		if ( code < 0 || code.ToString().Length() > m_LockDigits )
+		int combination = code.ToInt();
+
+		if ( combination < 0 || code.Length() > m_LockDigits )
 			return false;
 
-		SetCombinationLocked( code );
-		m_Combination = code;
-		m_CombinationInside = code;
+		SetCombinationLocked( combination );
+		m_Combination = combination;
+		m_CombinationInside = combination;
 
 		if ( IsLocked() )
 		{
+			ResetActionVar();
+
 			ShuffleLock();
 			CheckLockedStateServer();
 			Synchronize();
@@ -52,6 +48,9 @@ modded class CombinationLock
 
 	override bool COT_HasCode()
 	{
+		if ( m_CombinationLocked == m_COT_CombinationLocked_Default && m_Combination == m_COT_Combination_Default && m_CombinationInside == m_COT_CombinationInside_Default )
+			return false;
+
 		return true;
 	}
 
@@ -67,6 +66,16 @@ modded class CombinationLock
 		}
 
 		return combinationText;
+	}
+
+	override int COT_GetMinCodeLength()
+	{
+		return m_LockDigits;
+	}
+
+	override int COT_GetMaxCodeLength()
+	{
+		return m_LockDigits;
 	}
 
 	override bool COT_SetLockState( bool locked )
@@ -108,11 +117,6 @@ modded class CombinationLock
 		return true;
 	}
 
-	override bool COT_CanBeLocked()
-	{
-		return true;
-	}
-
 	override bool COT_IsLocked()
 	{
 		return IsLocked();
@@ -123,30 +127,15 @@ modded class CombinationLock
 		return true;
 	}
 
-	override bool COT_CanResetCode()
-	{
-		if ( m_CombinationLocked == m_COT_CombinationLocked_Default && m_Combination == m_COT_Combination_Default && m_CombinationInside == m_COT_CombinationInside_Default )
-			return false;
-
-		return true;
-	}
-
 	override bool COT_ResetCode()
 	{
 		COT_SetLockState( false );
 
-		Print(m_CombinationLocked);
-		Print(m_Combination);
-		Print(m_CombinationInside);
-		Print(m_COT_CombinationLocked_Default);
-		Print(m_COT_Combination_Default);
-		Print(m_COT_CombinationInside_Default);
 		SetCombinationLocked( m_COT_CombinationLocked_Default );
 		m_Combination = m_COT_Combination_Default;
 		m_CombinationInside = m_COT_CombinationInside_Default;
-		Print(m_CombinationLocked);
-		Print(m_Combination);
-		Print(m_CombinationInside);
+
+		ResetActionVar();
 
 		UpdateLockDigits();
 

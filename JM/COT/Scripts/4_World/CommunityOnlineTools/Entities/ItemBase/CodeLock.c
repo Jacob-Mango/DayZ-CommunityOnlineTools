@@ -20,6 +20,16 @@ modded class DigitalCodeLock
 		return GetLockPIN();
 	}
 
+	override int COT_GetMinCodeLength()
+	{
+		return GetMinLockPINLength();
+	}
+
+	override int COT_GetMaxCodeLength()
+	{
+		return CodeLockComponent.MAX_LOCK_PIN_LENGTH;
+	}
+
 	override bool COT_SetLockState( bool locked )
 	{
 		if ( !super.COT_SetLockState( locked ) )
@@ -32,7 +42,7 @@ modded class DigitalCodeLock
 
 	override bool COT_CanBeLocked()
 	{
-		if ( CanBeLocked() && HasPIN() )
+		if ( super.COT_CanBeLocked() && CanBeLocked() )
 			return true;
 
 		return false;
@@ -46,14 +56,6 @@ modded class DigitalCodeLock
 	override bool COT_CanSetCode()
 	{
 		return CanSetCode();
-	}
-
-	override bool COT_CanResetCode()
-	{
-		if ( HasPIN() && CanSetCode() )
-			return true;
-
-		return false;
 	}
 
 	override bool COT_ResetCode()
