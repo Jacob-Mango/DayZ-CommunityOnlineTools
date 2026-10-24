@@ -5,23 +5,6 @@ modded class DigitalCodeLockUI
 
 	protected bool m_COT_ForceSetCode;
 
-	override protected void ClearInput()
-	{
-		super.ClearInput();
-
-		for (int i = 0; i < MAX_LOCK_PIN_LENGTH; ++i)
-		{
-			TextWidget digitTextW = TextWidget.Cast(layoutRoot.FindAnyWidget("PasswordDigitNumber_Text" + i));
-			if (digitTextW)
-			{
-				bool show = false;
-				if (i < m_COT_MaxCodeLength)
-					show = true;
-				digitTextW.GetParent().Show(show);
-			}
-		}
-	}
-
 	override void COT_SetTargetLock( ItemBase targetLock )
 	{
 		if ( m_TargetLock || !targetLock )
@@ -36,23 +19,15 @@ modded class DigitalCodeLockUI
 
 		m_COT_ForceSetCode = true;
 
-		ClearInput();
-	}
-
-	override protected void Select()
-	{
-		super.Select();
-
-		int pinLength = m_EnteredPIN.Length();
-		if (pinLength > m_COT_MaxCodeLength)
+		for (int i = 0; i < MAX_LOCK_PIN_LENGTH; ++i)
 		{
-			m_EnteredPIN = m_EnteredPIN.Substring(0, m_COT_MaxCodeLength);
-
-			for (int i = m_COT_MaxCodeLength; i < pinLength; ++i)
+			TextWidget digitTextW = TextWidget.Cast(layoutRoot.FindAnyWidget("PasswordDigitNumber_Text" + i));
+			if (digitTextW)
 			{
-				TextWidget digitTextW = TextWidget.Cast(layoutRoot.FindAnyWidget("PasswordDigitNumber_Text" + i));
-				if (digitTextW)
-					digitTextW.SetText("");
+				bool show = false;
+				if (i < m_COT_MaxCodeLength)
+					show = true;
+				digitTextW.GetParent().Show(show);
 			}
 		}
 	}
