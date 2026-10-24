@@ -7,15 +7,13 @@ modded class DigitalCodeLockUI
 
 	override protected void ClearInput()
 	{
-		m_EnteredPIN = "";
+		super.ClearInput();
 
 		for (int i = 0; i < MAX_LOCK_PIN_LENGTH; ++i)
 		{
 			TextWidget digitTextW = TextWidget.Cast(layoutRoot.FindAnyWidget("PasswordDigitNumber_Text" + i));
 			if (digitTextW)
 			{
-				digitTextW.SetText("");
-
 				bool show = false;
 				if (i < m_COT_MaxCodeLength)
 					show = true;
@@ -61,6 +59,12 @@ modded class DigitalCodeLockUI
 
 	override protected void ConfirmCode()
 	{
+		if (!m_COT_ForceSetCode)
+		{
+			super.ConfirmCode();
+			return;
+		}
+
 		if (m_EnteredPIN == "" || !m_TargetLock)
 			return;
 		
@@ -70,7 +74,7 @@ modded class DigitalCodeLockUI
 			return;
 
 		//! Need to reset code first before we can force set new code
-		if (m_COT_ForceSetCode)
+		if (m_HasPIN)
 			CF_Modules<JMESPModule>.Get().ObjectAction(JMESPObjectAction.ResetCode, 0, 0, m_TargetLock);
 
 		Param1<string> pin = new Param1<string>(m_EnteredPIN);
