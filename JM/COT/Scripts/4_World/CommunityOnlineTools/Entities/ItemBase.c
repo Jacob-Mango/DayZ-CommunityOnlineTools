@@ -25,7 +25,13 @@ modded class ItemBase
 		return m_COT_KillOwner;
 	}
 
-	bool COT_IsOpenable();
+	bool COT_IsOpenable()
+	{
+		if ( IsAnyInherited( { Barrel_ColorBase, BarrelHoles_ColorBase, Compass, TelescopicBaton } ) )
+			return true;
+
+		return false;
+	}
 
 	bool COT_IsLock();
 
