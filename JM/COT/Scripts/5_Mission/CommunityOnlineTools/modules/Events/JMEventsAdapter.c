@@ -113,20 +113,6 @@ class JMEventsAdapter: JMEntityManagerAdapter
 
 	protected void CollectContaminatedAreas( out array<ref JMEntityMetaData> outEntities )
 	{
-#ifdef EXPANSIONMODMISSIONS
-		// Use our server-side mirror (modded ExpansionContaminatedArea_COT.c).
-		// Vanilla s_ContaminatedAreas is client-only and would always be empty here.
-		for ( int i = 0; i < ExpansionContaminatedArea.s_JM_COT_AllAreas.Count(); i++ )
-		{
-			ExpansionContaminatedArea area = ExpansionContaminatedArea.s_JM_COT_AllAreas[i];
-			if ( !area )
-				continue;
-
-			JMEntityMetaData m = BuildEntityMeta( area, JMEventsCategory.CONTAMINATED, "Contaminated Zone", JMConstants.ICON_CANCEL, ARGB( 255, 80, 180, 40 ) );
-			m.SetExtra( "Radius", area.m_Radius.ToString() + "m" );
-			outEntities.Insert( m );
-		}
-#else
 		// Vanilla EffectArea tracking (modded EffectArea_COT.c).
 		for ( int vi = 0; vi < EffectArea.s_JM_COT_AllAreas.Count(); vi++ )
 		{
@@ -153,7 +139,6 @@ class JMEventsAdapter: JMEntityManagerAdapter
 			m.SetExtra( "Type", zoneType );
 			outEntities.Insert( m );
 		}
-#endif
 	}
 
 	protected void CollectAirdrops( out array<ref JMEntityMetaData> outEntities )
@@ -327,16 +312,6 @@ class JMEventsAdapter: JMEntityManagerAdapter
 		}
 		else if ( category == JMEventsCategory.CONTAMINATED )
 		{
-#ifdef EXPANSIONMODMISSIONS
-			array<Object> toDelete2 = new array<Object>;
-			for ( int i = 0; i < ExpansionContaminatedArea.s_JM_COT_AllAreas.Count(); i++ )
-			{
-				if ( ExpansionContaminatedArea.s_JM_COT_AllAreas[i] )
-					toDelete2.Insert( ExpansionContaminatedArea.s_JM_COT_AllAreas[i] );
-			}
-			foreach ( Object o2: toDelete2 )
-				GetGame().ObjectDelete( o2 );
-#else
 			array<Object> toDeleteV = new array<Object>;
 			for ( int vi = 0; vi < EffectArea.s_JM_COT_AllAreas.Count(); vi++ )
 			{
@@ -345,7 +320,6 @@ class JMEventsAdapter: JMEntityManagerAdapter
 			}
 			foreach ( Object ov: toDeleteV )
 				GetGame().ObjectDelete( ov );
-#endif
 		}
 	}
 

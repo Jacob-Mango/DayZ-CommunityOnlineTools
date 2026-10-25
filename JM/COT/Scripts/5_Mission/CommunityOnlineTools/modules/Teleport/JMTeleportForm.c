@@ -817,20 +817,6 @@ class JMTeleportForm: JMFormBase
 		string zoneName = "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER";
 		int zoneIndex = 0;
 
-#ifdef EXPANSIONMODMISSIONS
-		if ( ExpansionContaminatedArea.s_JM_COT_AllAreas )
-		{
-			for ( int ei = 0; ei < ExpansionContaminatedArea.s_JM_COT_AllAreas.Count(); ei++ )
-			{
-				ExpansionContaminatedArea expArea = ExpansionContaminatedArea.s_JM_COT_AllAreas[ei];
-				if ( !expArea )
-					continue;
-
-				entries.Insert( new JMTeleportMapEntry( "toxic_" + zoneIndex, expArea.GetPosition(), zoneName, "#" + ( zoneIndex + 1 ), JMConstants.Lucide( "biohazard" ), ARGB( 255, 80, 180, 40 ) ) );
-				zoneIndex++;
-			}
-		}
-#else
 		if ( EffectArea.s_JM_COT_AllAreas )
 		{
 			for ( int vi = 0; vi < EffectArea.s_JM_COT_AllAreas.Count(); vi++ )
@@ -843,7 +829,6 @@ class JMTeleportForm: JMFormBase
 				zoneIndex++;
 			}
 		}
-#endif
 	}
 
 	protected void AppendToxicZoneRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
