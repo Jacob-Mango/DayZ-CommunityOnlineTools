@@ -2842,12 +2842,13 @@ class JMESPModule: JMRenderableModuleBase
 
 		ItemBase lockItem = JMLockItem.Get( target );
 
+		bool locked;
 		if ( lockItem )
-			lockItem.COT_SetLockState( !ivalue );  //! Unlocks the gate on open, closes & locks the gate automatically on close
+			locked = lockItem.COT_SetLockState( !ivalue );  //! Unlocks the gate on open, closes & locks the gate automatically on close
 
 		if ( ivalue != 0 && fence.CanOpenFence() )
 			fence.OpenFence();
-		else if ( !lockItem && fence.CanCloseFence() )
+		else if ( !locked && fence.CanCloseFence() )
 			fence.CloseFence();
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=fenceopen state=" + ivalue );
@@ -2867,8 +2868,9 @@ class JMESPModule: JMRenderableModuleBase
 
 		ItemBase lockItem = JMLockItem.Get( target, doorIndex );
 
+		bool locked;
 		if ( lockItem )
-			lockItem.COT_SetLockState( !ivalue );  //! Unlocks the door on open, closes & locks the door automatically on close
+			locked = lockItem.COT_SetLockState( !ivalue );  //! Unlocks the door on open, closes & locks the door automatically on close
 
 		if ( ivalue != 0 )
 		{
@@ -2877,7 +2879,7 @@ class JMESPModule: JMRenderableModuleBase
 
 			house.OpenDoor( doorIndex );
 		}
-		else if ( !lockItem )
+		else if ( !locked )
 		{
 			house.CloseDoor( doorIndex );
 		}
@@ -2930,8 +2932,9 @@ class JMESPModule: JMRenderableModuleBase
 
 		ItemBase lockItem = JMLockItem.Get( target );
 
+		bool locked;
 		if ( lockItem )
-			lockItem.COT_SetLockState( !ivalue );  //! Unlocks the item on open, closes & locks the item automatically on close
+			locked = lockItem.COT_SetLockState( !ivalue );  //! Unlocks the item on open, closes & locks the item automatically on close
 
 		if ( ivalue != 0 )
 		#ifdef DZ_Expansion_BaseBuilding
@@ -2939,7 +2942,7 @@ class JMESPModule: JMRenderableModuleBase
 		#else
 			item.Open();
 		#endif
-		else if ( !lockItem )
+		else if ( !locked )
 		#ifdef DZ_Expansion_BaseBuilding
 			item.Expansion_Close( "*" );
 		#else
