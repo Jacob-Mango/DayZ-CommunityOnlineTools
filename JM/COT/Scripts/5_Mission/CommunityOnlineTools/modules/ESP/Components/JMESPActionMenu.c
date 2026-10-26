@@ -424,6 +424,11 @@ class JMESPActionMenu
 		m_X       = x;
 		m_Y       = y;
 
+		m_PageLabels.Clear();
+		m_BreadCrumbs.Clear();
+		m_BreadCrumbs_Labels.Clear();
+		m_PageTitle = "";
+
 		Show();
 	}
 
@@ -431,11 +436,6 @@ class JMESPActionMenu
 	{
 		if ( m_Menu )
 			m_Menu.Close();
-
-		m_PageLabels.Clear();
-		m_BreadCrumbs.Clear();
-		m_BreadCrumbs_Labels.Clear();
-		m_PageTitle = "";
 	}
 
 	// =========================================================================
