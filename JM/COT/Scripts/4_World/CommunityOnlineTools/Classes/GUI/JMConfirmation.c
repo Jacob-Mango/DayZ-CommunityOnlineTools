@@ -156,7 +156,8 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 		if ( callback != "" )
 		{
-			g_Game.GameScript.CallFunctionParams( m_Base, callback, NULL, new Param1<JMConfirmation>( this ) );
+			auto param = new Param1<JMConfirmation>( this );
+			g_Game.GameScript.CallFunctionParams( m_Base, callback, NULL, param );
 		}
 	}
 

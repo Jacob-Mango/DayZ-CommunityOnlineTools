@@ -496,7 +496,8 @@ class JMEntityManagerForm: JMFormBase
 
 		SyncAndRefresh();
 
-		DeferCall( "UpdateMapPosition", 34, false, new Param2< bool, vector >( true, vector.Zero ) );
+		auto param = new Param2< bool, vector >( true, vector.Zero );
+		DeferCall( "UpdateMapPosition", 34, false, param );
 
 		StartMarkerTick();
 	}

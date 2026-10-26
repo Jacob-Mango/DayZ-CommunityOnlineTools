@@ -693,7 +693,8 @@ class JMVehiclesForm: JMFormBase
 
 		SyncAndRefreshVehicles();
 
-		DeferCall( "UpdateMapPosition", 34, false, new Param2< bool, vector >( true, vector.Zero ) );
+		auto param = new Param2< bool, vector >( true, vector.Zero );
+		DeferCall( "UpdateMapPosition", 34, false, param );
 
 		// OnResize fires before the form is rendered, where GetScreenSize
 		// returns 0 and Layout() no-ops. Re-flow one tick after it is up.

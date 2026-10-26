@@ -134,12 +134,14 @@ class JMPlayerBan
             seconds = ban.BanDuration - CF_Date.Now( true ).GetTimestamp();
             if ( seconds <= 0 )
             {
-                g_Game.GameScript.CallFunctionParams( module, "Unban", NULL, new Param1< string >( key ) );
+                auto param1 = new Param1< string >( key );
+                g_Game.GameScript.CallFunctionParams( module, "Unban", NULL, param1 );
                 return;
             }
         }
 
-        g_Game.GameScript.CallFunctionParams( module, "Ban", NULL, new Param6< string, string, string, int, string, string >( key, ban.PlayerName, ban.Message, seconds, ban.IssuedBy, ban.IssuedByName ) );
+        auto param6 = new Param6< string, string, string, int, string, string >( key, ban.PlayerName, ban.Message, seconds, ban.IssuedBy, ban.IssuedByName );
+        g_Game.GameScript.CallFunctionParams( module, "Ban", NULL, param6 );
     }
 
     // Mark a timed ban as expired in the store (called when expiry is detected at connect).

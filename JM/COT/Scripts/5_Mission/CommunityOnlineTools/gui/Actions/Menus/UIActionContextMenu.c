@@ -188,7 +188,10 @@ class UIActionContextMenu: UIActionBase
 		m_HoveredId = id;
 
 		if ( m_HoverTarget && m_HoverCallback != "" )
-			GetGame().GameScript.CallFunctionParams( m_HoverTarget, m_HoverCallback, null, new Param1<string>( id ) );
+		{
+			auto param = new Param1<string>( id );
+			GetGame().GameScript.CallFunctionParams( m_HoverTarget, m_HoverCallback, null, param );
+		}
 	}
 
 	//! Lay the entries out in `columns` columns (1 or 2). Call before the first AddItem.
@@ -752,7 +755,8 @@ class UIActionContextMenu: UIActionBase
 
 		if ( entry.Target && entry.Callback != "" )
 		{
-			GetGame().GameScript.CallFunctionParams( entry.Target, entry.Callback, null, new Param1<string>( entry.Id ) );
+			auto param = new Param1<string>( entry.Id );
+			GetGame().GameScript.CallFunctionParams( entry.Target, entry.Callback, null, param );
 		}
 
 		CallEvent( UIEvent.CLICK );

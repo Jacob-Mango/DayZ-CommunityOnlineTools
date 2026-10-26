@@ -264,7 +264,10 @@ class JMItemCategoryPicker
 			m_Menu.Refresh();
 
 		if ( m_Target && m_ChangeFn != "" )
-			GetGame().GameScript.CallFunctionParams( m_Target, m_ChangeFn, null, new Param1<string>( id ) );
+		{
+			auto param = new Param1<string>( id );
+			GetGame().GameScript.CallFunctionParams( m_Target, m_ChangeFn, null, param );
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -344,7 +347,10 @@ class JMItemCategoryPicker
 			m_FooterOn = !m_FooterOn;
 
 			if ( m_FooterTarget && m_FooterFn != "" )
-				GetGame().GameScript.CallFunctionParams( m_FooterTarget, m_FooterFn, null, new Param1<bool>( m_FooterOn ) );
+			{
+				auto param = new Param1<bool>( m_FooterOn );
+				GetGame().GameScript.CallFunctionParams( m_FooterTarget, m_FooterFn, null, param );
+			}
 		}
 	}
 

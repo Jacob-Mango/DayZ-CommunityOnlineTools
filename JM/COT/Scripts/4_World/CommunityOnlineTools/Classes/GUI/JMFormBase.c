@@ -917,7 +917,8 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 			return;
 
 		JMCustomTabCallback entry = m_CustomTabCallbacks.Get( tabIdx );
-		g_Game.GameScript.CallFunctionParams( entry.m_Instance, entry.m_FuncName, null, new Param1<Widget>( strip.COT_TabContent( tabIdx ) ) );
+		auto param = new Param1<Widget>( strip.COT_TabContent( tabIdx ) );
+		g_Game.GameScript.CallFunctionParams( entry.m_Instance, entry.m_FuncName, null, param );
 	}
 
 	//! Everything a tab-strip change handler has to do: dismiss popups, then OnTabUnfocus( previous ),
@@ -1224,7 +1225,8 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		if ( !m_PlayerTargetHandler || m_PlayerTargetCallback == "" )
 			return;
 
-		g_Game.GameScript.CallFunctionParams( m_PlayerTargetHandler, m_PlayerTargetCallback, NULL, new Param2< array<string>, JMConfirmation >( targets, confirmation ) );
+		auto param = new Param2< array<string>, JMConfirmation >( targets, confirmation );
+		g_Game.GameScript.CallFunctionParams( m_PlayerTargetHandler, m_PlayerTargetCallback, NULL, param );
 	}
 
 	/**
@@ -1273,7 +1275,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 				if (confirmSelf)
 					return CreateConfirmation_Two( JMConfirmationType.INFO, title, "#STR_COT_WARNING_SELECTEDSELF_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_SELF", callbackSelf );
 				else if (executeCallbackOnNoConfirmation)
-					g_Game.GameScript.CallFunctionParams( this, callbackSelf, NULL, new Param1<JMConfirmation>( NULL ) );
+				{
+					auto param = new Param1<JMConfirmation>( NULL );
+					g_Game.GameScript.CallFunctionParams( this, callbackSelf, NULL, param );
+				}
 			}
 		}
 
@@ -1305,7 +1310,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		}
 
 		if ( executeCallbackOnNoConfirmation && callbackSelectedObjectSingle != string.Empty )
-			g_Game.GameScript.CallFunctionParams( this, callbackSelectedObjectSingle, NULL, new Param1<JMConfirmation>( NULL ) );
+		{
+			auto param = new Param1<JMConfirmation>( NULL );
+			g_Game.GameScript.CallFunctionParams( this, callbackSelectedObjectSingle, NULL, param );
+		}
 
 		return null;
 	}

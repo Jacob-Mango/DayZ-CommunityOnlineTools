@@ -314,7 +314,10 @@ class UIActionFilterMenu
 			m_Menu.AddItem( ID_TOGGLE_ALL, page.ToggleAllLabel, JMConstants.ICON_SELECT_ALL );
 
 		if ( page.BuildTarget && page.BuildFn != "" )
-			GetGame().GameScript.CallFunctionParams( page.BuildTarget, page.BuildFn, null, new Param1<UIActionFilterMenu>( this ) );
+		{
+			auto param = new Param1<UIActionFilterMenu>( this );
+			GetGame().GameScript.CallFunctionParams( page.BuildTarget, page.BuildFn, null, param );
+		}
 
 		if ( IsRegistryPage( page ) )
 			AddRegisteredRows();
@@ -372,10 +375,11 @@ class UIActionFilterMenu
 		if ( IsRegistryPage( page ) )
 			registered = JMFilterRegistry.Find( m_RegistryScope, id );
 
+		auto param = new Param1<string>( id );
 		if ( registered && registered.m_Target && registered.m_Callback != "" )
-			GetGame().GameScript.CallFunctionParams( registered.m_Target, registered.m_Callback, null, new Param1<string>( id ) );
+			GetGame().GameScript.CallFunctionParams( registered.m_Target, registered.m_Callback, null, param );
 		else if ( page.ChangeTarget && page.ChangeFn != "" )
-			GetGame().GameScript.CallFunctionParams( page.ChangeTarget, page.ChangeFn, null, new Param1<string>( id ) );
+			GetGame().GameScript.CallFunctionParams( page.ChangeTarget, page.ChangeFn, null, param );
 
 		JMFilterMenuRow picked = FindRow( id );
 		bool keepOpen = picked && picked.KeepOpen;

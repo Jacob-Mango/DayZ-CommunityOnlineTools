@@ -41,7 +41,8 @@ class JMMapForm: JMFormBase
 		if ( !JMPermissions.Has( JMConstants.PERM_MAP_VIEW ) )
 			return;
 
-		DeferCall( "UpdateMapPosition", 34, false, new Param2< bool, vector >( true, vector.Zero ) );
+		auto param = new Param2< bool, vector >( true, vector.Zero );
+		DeferCall( "UpdateMapPosition", 34, false, param );
 
 		DeferCall( "UpdateMapMarkers", 1000, true );
 	}

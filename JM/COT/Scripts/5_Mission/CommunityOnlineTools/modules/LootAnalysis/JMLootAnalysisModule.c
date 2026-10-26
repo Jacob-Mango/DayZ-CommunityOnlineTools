@@ -742,7 +742,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 			COTCreateNotification(senderRPC, new StringLocaliser("No spawned items found: " + className));
 
 			//! The client is waiting on a reply to release its lock, so it gets an empty one
-			GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", new Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>>(new array<string>, new array<vector>, new array<float>, new array<float>, new array<int>, new array<string>, new array<int>, new array<string>), true, senderRPC);
+			auto empty = new Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>>(new array<string>, new array<vector>, new array<float>, new array<float>, new array<int>, new array<string>, new array<int>, new array<string>);
+			GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", empty, true, senderRPC);
 			return;
 		}
 
@@ -872,7 +873,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 			positions.Insert(entity.GetPosition());
 		}
 
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", new Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>>(names, positions, healthPct, quantityPct, lifetimeSeconds, attachmentsJoined, ammoCount, previewStates), true, senderRPC);
+		auto param = new Param8<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>, ref array<string>>(names, positions, healthPct, quantityPct, lifetimeSeconds, attachmentsJoined, ammoCount, previewStates);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemScanResults", param, true, senderRPC);
 	}
 
 	// Server: Find CE potential spawn locations for a classname using XML data
@@ -970,7 +972,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 			return;
 		}
 
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendLootSpawnLocations", new Param3<ref array<string>, ref array<vector>, ref array<string>>(markerNames, markerPositions, markerTypes), true, senderRPC);
+		auto param = new Param3<ref array<string>, ref array<vector>, ref array<string>>(markerNames, markerPositions, markerTypes);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendLootSpawnLocations", param, true, senderRPC);
 	}
 
 	// Server: look up the CE tuning values for a classname and send them to the
@@ -1001,7 +1004,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 			info.m_Tiers    = typeData.m_Tiers;
 		}
 
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemTypeInfo", new Param1<ref JMLootItemTypeInfo>(info), true, senderRPC);
+		auto param = new Param1<ref JMLootItemTypeInfo>(info);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SendItemTypeInfo", param, true, senderRPC);
 	}
 
 	//  Server: save edited CE values back to their source types.xml. CF_XML is read-only, so the
@@ -1236,24 +1240,28 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	void RequestItemScan(string className)
 	{
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_RequestItemScan", new Param2<string, bool>(className, m_AllowNonLoot), true);
+		auto param = new Param2<string, bool>(className, m_AllowNonLoot);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_RequestItemScan", param, true);
 	}
 
 	void RequestLootDistribution(string className)
 	{
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_RequestLootDistribution", new Param1<string>(className), true);
+		auto param = new Param1<string>(className);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_RequestLootDistribution", param, true);
 	}
 
 	void DeleteAllItems(string className)
 	{
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_DeleteAllItems", new Param1<string>(className), true);
+		auto param = new Param1<string>(className);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_DeleteAllItems", param, true);
 	}
 
 	//! Edited Nominal/Min/Lifetime/Restock, patched into className's source
 	//! types.xml server-side - see Exec_SaveTypeXmlValues.
 	void SaveItemTypeInfo(string className, int nominal, int min, int lifetime, int restock)
 	{
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SaveItemTypeInfo", new Param5<string, int, int, int, int>(className, nominal, min, lifetime, restock), true);
+		auto param = new Param5<string, int, int, int, int>(className, nominal, min, lifetime, restock);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_SaveItemTypeInfo", param, true);
 	}
 
 	//! Item Info's header Reload button - re-fetches CE data for whichever
@@ -1262,7 +1270,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//! not disturb).
 	void RequestItemTypeInfo(string className)
 	{
-		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_RequestItemTypeInfo", new Param1<string>(className), true);
+		auto param = new Param1<string>(className);
+		GetRPCManager().SendRPC("JM_COT_RPC", "RPC_RequestItemTypeInfo", param, true);
 	}
 
 	void ShowItemsOnMap(string className)

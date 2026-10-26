@@ -18,7 +18,8 @@ modded class DayZPlayerCameraBase
 			break;
 			case JMNVTypes.NV_COT_ON:
 				m_JMHasAdminNVG = true;
-				PPERequesterBank.GetRequester(PPERequesterBank.COTREQ_CAMERANV).Start( new Param1<int>(COTPPERequester_CameraNV.COT_ON) );
+				auto param = new Param1<int>(COTPPERequester_CameraNV.COT_ON);
+				PPERequesterBank.GetRequester(PPERequesterBank.COTREQ_CAMERANV).Start( param );
 		
 				if (PlayerBaseClient.Cast(m_pPlayer))
 					PlayerBaseClient.Cast(m_pPlayer).SwitchPersonalLight(NVtype < 1);

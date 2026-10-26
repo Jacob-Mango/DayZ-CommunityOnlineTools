@@ -13,7 +13,8 @@ class JMConfirmationForm: JMConfirmation
 	{
 		if ( callback != "" )
 		{
-			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), callback, new Param1<JMConfirmation>( this ) );
+			auto param = new Param1<JMConfirmation>( this );
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), callback, param );
 		}
 	}
 }
