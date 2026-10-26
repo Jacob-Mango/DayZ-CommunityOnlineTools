@@ -57,6 +57,10 @@ class JMESPActionMenu
 	protected Widget m_Anchor;
 	protected string m_Page;
 	protected string m_PageArg;
+	protected string m_PageTitle;
+	protected ref TStringStringMap m_PageLabels = new TStringStringMap;
+	protected ref TStringArray m_BreadCrumbs = {};
+	protected ref TStringArray m_BreadCrumbs_Labels = {};
 
 	//! The construction selection the menu was opened on, see Open.
 	protected string m_PartFilter;
@@ -427,6 +431,11 @@ class JMESPActionMenu
 	{
 		if ( m_Menu )
 			m_Menu.Close();
+
+		m_PageLabels.Clear();
+		m_BreadCrumbs.Clear();
+		m_BreadCrumbs_Labels.Clear();
+		m_PageTitle = "";
 	}
 
 	// =========================================================================
@@ -517,6 +526,16 @@ class JMESPActionMenu
 			return;
 
 		m_Menu.AddItem( PREFIX_PAGE + page, label, icon, 0, true );
+
+		if ( !m_PageLabels.Contains( page ) )
+		{
+			int split = label.IndexOf( ":" );
+
+			if ( split > -1 )
+				label = label.Substring( 0, split );
+
+			m_PageLabels[page] = label;
+		}
 	}
 
 	//! A row that reports a state as well as offering to change it: the glyph
@@ -546,8 +565,16 @@ class JMESPActionMenu
 	//! `page` lets a sub-page of a sub-page (Transform > Copy) go back one
 	//! level instead of all the way to Main - every other page is one level
 	//! deep, so the default keeps their call sites unchanged.
-	protected void AddBack( string page = PAGE_MAIN, string label = "#STR_COT_ESP_MODULE_MENU_BACK" )
+	protected void AddBack( string page = PAGE_MAIN, string label = "" )
 	{
+		if ( !label )
+		{
+			label = m_PageTitle;
+
+			if ( !label )
+				label = "#STR_COT_ESP_MODULE_MENU_BACK";
+		}
+		
 		Add( PREFIX_PAGE + page, label, JMConstants.Lucide( "chevron-left" ) );
 	}
 
@@ -1099,7 +1126,7 @@ class JMESPActionMenu
 
 	protected void BuildPart()
 	{
-		Add( PREFIX_PAGE + PAGE_BUILD, "#STR_COT_ESP_MODULE_MENU_BACK", JMConstants.Lucide( "chevron-left" ) );
+		AddBack( PAGE_BUILD );
 
 		map< string, ref JMConstructionPartData > parts = m_Meta.GetConstructionParts();
 
@@ -1207,7 +1234,7 @@ class JMESPActionMenu
 
 	protected void BuildFuel()
 	{
-		Add( PREFIX_PAGE + PAGE_VEHICLE, "#STR_COT_ESP_MODULE_MENU_BACK", JMConstants.Lucide( "chevron-left" ) );
+		AddBack( PAGE_VEHICLE );
 
 		bool canSet = Perm( JMConstants.PERM_ESP_OBJECT_CAR_REFUEL );
 
@@ -1220,7 +1247,7 @@ class JMESPActionMenu
 
 	protected void BuildCoolant()
 	{
-		Add( PREFIX_PAGE + PAGE_VEHICLE, "#STR_COT_ESP_MODULE_MENU_BACK", JMConstants.Lucide( "chevron-left" ) );
+		AddBack( PAGE_VEHICLE );
 
 		AddPercentRows( "coolant", "#STR_COT_ESP_MODULE_MENU_FULL", "#STR_COT_ESP_MODULE_MENU_EMPTY", JMConstants.Lucide( "thermometer" ), Perm( JMConstants.PERM_ESP_OBJECT_CAR_REFUEL ) );
 	}
@@ -1248,7 +1275,7 @@ class JMESPActionMenu
 	//! every part and material tier has a different maximum.
 	protected void BuildPartHealth()
 	{
-		Add( PREFIX_PAGE + PAGE_PART + ":" + m_PageArg, "#STR_COT_ESP_MODULE_MENU_BACK", JMConstants.Lucide( "chevron-left" ) );
+		AddBack( PAGE_PART + ":" + m_PageArg );
 
 		bool canSet = Perm( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_SETHEALTH );
 
@@ -1329,7 +1356,7 @@ class JMESPActionMenu
 				label += ": #STR_COT_ESP_MODULE_ATTACH_EMPTY";
 			}
 
-			Add( PREFIX_PAGE + PAGE_ATTACH_SLOT + ":" + slotId, label, JMConstants.Lucide( "puzzle" ), true );
+			AddPage( PAGE_ATTACH_SLOT + ":" + slotId, label, JMConstants.Lucide( "puzzle" ), true );
 		}
 	}
 
@@ -1440,7 +1467,7 @@ class JMESPActionMenu
 					m_Menu.AddDivider();
 				}
 				else
-					AddBack( PAGE_ATTACHMENTS, existing.GetDisplayName() );
+					AddBack( PAGE_ATTACHMENTS, string.Format( "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS   ‹   %1", existing.GetDisplayName() ) );
 			}
 			else
 			{
@@ -1507,7 +1534,7 @@ class JMESPActionMenu
 
 	protected void BuildScale()
 	{
-		Add( PREFIX_PAGE + PAGE_PLAYER, "#STR_COT_ESP_MODULE_MENU_BACK", JMConstants.Lucide( "chevron-left" ) );
+		AddBack( PAGE_PLAYER );
 
 		bool canSet = Perm( JMConstants.PERM_PLAYER_SCALE );
 
@@ -1756,6 +1783,50 @@ class JMESPActionMenu
 			m_PageArg = "";
 			m_Page = page;
 		}
+
+	#ifdef DIAG_DEVELOPER
+		Print(page);
+	#endif
+
+		if ( page == PAGE_MAIN )
+		{
+			m_BreadCrumbs.Clear();
+			m_BreadCrumbs_Labels.Clear();
+			m_PageTitle = "";
+		}
+		else
+		{
+			int idx = m_BreadCrumbs.Find( page );
+
+		#ifdef DIAG_DEVELOPER
+			Print(idx);
+		#endif
+
+			if ( idx > -1 )
+			{
+				for ( int i = m_BreadCrumbs.Count() - 1; i >= idx; --i )
+				{
+					m_BreadCrumbs.Remove( i );
+					m_BreadCrumbs_Labels.Remove( i );
+				}
+			}
+
+			string label = m_PageLabels[page];
+
+			if ( label )
+			{
+				m_BreadCrumbs.Insert( page );
+				m_BreadCrumbs_Labels.Insert( m_PageLabels[page] );
+			}
+
+			m_PageTitle = string.Join( "   ‹   ", m_BreadCrumbs_Labels );
+		}
+
+	#ifdef DIAG_DEVELOPER
+		foreach (string id, string l: m_PageLabels) PrintFormat("m_PageLabels[%1] = %2", id, l);
+		Print(m_BreadCrumbs);
+		Print(m_BreadCrumbs_Labels);
+	#endif
 
 		Show();
 	}
@@ -2106,7 +2177,7 @@ class JMESPActionMenu
 			break;
 
 		default:
-			m_Menu.Close();
+			Close();
 			break;
 		}
 	}
@@ -2121,7 +2192,7 @@ class JMESPActionMenu
 			if ( GetConstructionPartsFiltered().Count() > 1 )
 				GoToPage( page );
 			else
-				m_Menu.Close();
+				Close();
 		}
 	}
 
@@ -2135,7 +2206,7 @@ class JMESPActionMenu
 			if ( GetSlotLabels().Count() > 1 )
 				GoToPage( page );
 			else
-				m_Menu.Close();
+				Close();
 		}
 	}
 

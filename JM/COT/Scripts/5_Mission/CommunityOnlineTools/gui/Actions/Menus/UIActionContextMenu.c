@@ -40,7 +40,7 @@ class UIActionContextMenu: UIActionBase
 	//! UpdatePlacement. A short menu never touches the scroller at all.
 	protected ScrollWidget     m_Scroller;
 	protected ref array<ref JMContextMenuEntry> m_Entries;
-	protected string m_LastClickedId;
+	protected ref JMContextMenuEntry m_LastClickedEntry;
 	protected int    m_HoveredRow;      // -1 when nothing highlighted
 	protected bool   m_Open;
 	protected bool   m_RebuildItems;
@@ -122,7 +122,12 @@ class UIActionContextMenu: UIActionBase
 
 	string GetLastClickedId()
 	{
-		return m_LastClickedId;
+		return m_LastClickedEntry.Id;
+	}
+
+	JMContextMenuEntry GetLastClickedEntry()
+	{
+		return m_LastClickedEntry;
 	}
 
 	override bool IsOpen()
@@ -359,7 +364,6 @@ class UIActionContextMenu: UIActionBase
 		super.OnInit();
 
 		m_Entries       = new array<ref JMContextMenuEntry>;
-		m_LastClickedId = "";
 		m_HoveredRow    = -1;
 		m_Open          = false;
 		m_FullHeight    = 0;
@@ -737,10 +741,10 @@ class UIActionContextMenu: UIActionBase
 			return true;
 
 		JMContextMenuEntry entry = m_Entries[idx];
-		m_LastClickedId = entry.Id;
+		m_LastClickedEntry = entry;
 
 		#ifdef COT_DEBUGLOGS
-		Print("[COT_DBG] UIActionContextMenu.OnClick: row id=" + m_LastClickedId + " m_CloseOnClick=" + m_CloseOnClick.ToString());
+		Print("[COT_DBG] UIActionContextMenu.OnClick: row id=" + m_LastClickedEntry.Id + " m_CloseOnClick=" + m_CloseOnClick.ToString());
 		#endif
 
 		if ( m_CloseOnClick )
