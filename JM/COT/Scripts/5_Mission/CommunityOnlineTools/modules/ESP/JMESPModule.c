@@ -305,7 +305,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		int component = GetViewComponentAtCursor( building );
 
-		if ( component < 0 || component >= building.GetDoorCount() )
+		if ( component < 0 )
 			return -1;
 
 		return building.GetDoorIndex( component );
@@ -1091,7 +1091,7 @@ class JMESPModule: JMRenderableModuleBase
 		//! answered first (usually fire), the wrong index space, so re-pick with a
 		//! view-only ray.
 		Building building = Building.Cast( obj );
-		if ( building && meta.m_Component > -1 && meta.m_Component < building.GetDoorCount() )
+		if ( building && meta.m_Component > -1 )
 			meta.m_DoorIndex = building.GetDoorIndex( meta.m_Component );
 		else
 			meta.m_DoorIndex = -1;
