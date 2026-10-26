@@ -7,13 +7,6 @@ class JMLockItem
 		if ( Class.CastTo( item, target ) && item.COT_IsLock() )
 			return item;
 
-		Fence fence;
-		if ( Class.CastTo( fence, target ) )
-		{
-			if ( Class.CastTo( item, fence.GetCombinationLock() ) || Class.CastTo( item, fence.GetCodeLock() ) )
-				return item;
-		}
-
 		//! A bunker has the one lock, on its entrance, not one per door
 		Bunker bunker;
 		if ( Class.CastTo( bunker, target ) )
@@ -31,7 +24,7 @@ class JMLockItem
 			{
 				foreach ( string slotName : doorInfo.m_RelatedInventorySlotNames )
 				{
-					if ( Class.CastTo( item, building.GetCombinationLock( slotName ) ) || Class.CastTo( item, building.GetCodeLock( slotName ) ) )
+					if ( Class.CastTo( item, building.FindAttachmentBySlotName( slotName ) ) && item.COT_IsLock() )
 						return item;
 				}
 
