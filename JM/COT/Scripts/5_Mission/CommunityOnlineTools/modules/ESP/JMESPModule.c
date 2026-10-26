@@ -2365,6 +2365,8 @@ class JMESPModule: JMRenderableModuleBase
 
 			if ( created )
 			{
+				created.SetQuantity( created.GetQuantityMax() );  //! Depending on which slot this item is attached to, will set to max allowed quantity for that slot
+
 				classAfter = className;
 
 				JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
