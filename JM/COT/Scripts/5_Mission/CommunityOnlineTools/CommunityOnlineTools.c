@@ -51,7 +51,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 #ifndef SERVER
 	override void OnItemAttached( EntityAI parent, string slotName, EntityAI item )
 	{
-		UpdateActionMenu( "itemattached", parent, slotName, item );
+		//! Deferred so that quantity etc set after creation have been applied by that point
+		if ( JMESPActionMenu.GetMenuForEntityIfOpen( parent ) )
+			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( UpdateActionMenu, "itemattached", parent, slotName, item );
 	}
 
 	override void OnItemDetached( EntityAI parent, string slotName, EntityAI item )
@@ -68,9 +70,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	void UpdateActionMenu( string action, EntityAI entity, string arg, EntityAI item = null )
 	{
-		JMESPActionMenu menu = JMESPActionMenu.Shared( false );
+		JMESPActionMenu menu = JMESPActionMenu.GetMenuForEntityIfOpen( entity );
 
-		if ( !menu || !menu.IsOpen() || !menu.GetMeta() || menu.GetMeta().target != entity )
+		if ( !menu )
 			return;
 
 		switch ( action )

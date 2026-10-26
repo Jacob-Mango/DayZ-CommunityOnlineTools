@@ -400,6 +400,16 @@ class JMESPActionMenu
 		return s_Shared;
 	}
 
+	static JMESPActionMenu GetMenuForEntityIfOpen( Object target )
+	{
+		JMESPActionMenu menu = Shared( false );
+
+		if ( menu && menu.IsOpen() && menu.GetMeta() && menu.GetMeta().target == target )
+			return menu;
+
+		return null;
+	}
+
 	//! `partFilter` is the construction selection the right-click landed on ("" for none): the
 	//! construction page lists only the parts built from it. It belongs to this open, not to the
 	//! meta, which is cached and reused by every other way of opening the menu.
@@ -732,19 +742,19 @@ class JMESPActionMenu
 			if ( house.IsDoorOpen( doorIndex ) )
 			{
 				if ( house.CanDoorBeClosed( doorIndex ) )
-					Add( PREFIX_ACTION + "closedoor", "#STR_COT_ESP_MODULE_MENU_CLOSE_DOOR", JMConstants.Lucide( "door-closed" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+					Add( PREFIX_ACTION + "closedoor", GetDoorLabel( "#STR_COT_ESP_MODULE_MENU_CLOSE_DOOR" ), JMConstants.Lucide( "door-closed" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 			}
 			else if ( house.CanDoorBeOpened( doorIndex, true ) || house.IsDoorLocked( doorIndex ) || ( m_LockItem && m_LockItem.COT_IsLocked() ) )
 			{
-				Add( PREFIX_ACTION + "opendoor", "#STR_COT_ESP_MODULE_MENU_OPEN_DOOR", JMConstants.Lucide( "door-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+				Add( PREFIX_ACTION + "opendoor", GetDoorLabel( "#STR_COT_ESP_MODULE_MENU_OPEN_DOOR" ), JMConstants.Lucide( "door-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 			}
 
 			//! Locking after opening/closing - so it stays grouped with attached lock submenu below
 
 			if ( house.IsDoorLocked( doorIndex ) || ( m_LockItem && m_LockItem.COT_IsLocked() ) )
-				Add( PREFIX_ACTION + "unlockdoor", "#STR_COT_ESP_MODULE_MENU_UNLOCK_DOOR", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+				Add( PREFIX_ACTION + "unlockdoor", GetDoorLabel( "#STR_COT_ESP_MODULE_MENU_UNLOCK_DOOR" ), JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 			else if ( ( house.CanDoorBeLocked( doorIndex ) && ( !m_LockItem || m_LockItem.COT_CanBeLocked() ) ) || ( m_LockItem && m_LockItem.COT_CanBeLocked() ) )
-				Add( PREFIX_ACTION + "lockdoor", "#STR_COT_ESP_MODULE_MENU_LOCK_DOOR", JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
+				Add( PREFIX_ACTION + "lockdoor", GetDoorLabel( "#STR_COT_ESP_MODULE_MENU_LOCK_DOOR" ), JMConstants.Lucide( "lock" ), Perm( JMConstants.PERM_ESP_OBJECT_OPENCLOSE ) );
 		}
 
 		//! General openable item open/close actions if nothing else matches
@@ -781,11 +791,7 @@ class JMESPActionMenu
 		//! Attached lock submenu
 		if ( m_LockItem && m_LockItem.COT_CanInteract() )
 		{
-			string lockPageTitle = m_LockItem.GetDisplayName();
-			if ( m_Meta.name == lockPageTitle )
-				lockPageTitle = "#STR_COT_VEHICLE_LOCK";
-
-			AddPage( PAGE_LOCK, lockPageTitle, JMConstants.Lucide( "lock" ) );
+			AddPage( PAGE_LOCK, GetUniqueAttachmentLabel( m_LockItem ), JMConstants.Lucide( "lock" ) );
 		}
 
 		//! Weapons, vehicles and clothing expose attachment slots through the same GameInventory
@@ -829,6 +835,57 @@ class JMESPActionMenu
 			Add( PREFIX_ACTION + "delete", "#STR_COT_GENERIC_DELETE", JMConstants.ICON_TRASH_CAN, Perm( JMConstants.PERM_ESP_OBJECT_DELETE ) && m_Meta.CanDelete(), JMTheme.DANGER );
 
 		JMContextMenuRegistry.Populate( "3DWorld", m_Menu );
+	}
+
+	string GetDoorLabel( string label, bool simple = true )
+	{
+		BuildingBase building;
+		if ( m_Meta.m_DoorIndex > -1 && Class.CastTo( building, m_Meta.target ) && building.GetDoorCount() > 1 )
+		{
+			if ( simple )
+				return string.Format( "%1 %2", label, GetDoorPartNumber( building, m_Meta.m_DoorIndex ) );
+			else
+				return string.Format( "%1 (#STR_COT_DOOR %2)", label, GetDoorPartNumber( building, m_Meta.m_DoorIndex ) );
+		}
+
+		return label;
+	}
+
+	//! Reason for this: Construction part number does not necessarily match door index + 1. E.g.
+	//! part name     door index + 1
+	//! door1_wood    1
+	//! door1_metal   2
+	//! door2_wood    3
+	//! door2_metal   4
+	//! etc.
+	int GetDoorPartNumber( BuildingBase building, int doorIndex )
+	{
+		AdditionalDoorInfo doorInfo = building.GetDoorInfo( doorIndex );
+
+		if ( doorInfo && doorInfo.m_RelatedInventorySlotNames )
+			return GetDoorPartNumber( doorIndex, doorInfo.m_RelatedInventorySlotNames[0] );
+
+		return doorIndex + 1;  //! fallback
+	}
+
+	int GetDoorPartNumber( int doorIndex, string slotName )
+	{
+		string numberPart;
+
+		string numbers = "0123456789";
+		for ( int i = 0; i < slotName.Length(); ++i )
+		{
+			string c = slotName[i];
+			if ( numbers.Contains( c ) )
+				numberPart += c;
+			else if ( numberPart.Length() > 0 )
+				break;  //! Only consecutive numbers, break on 1st non-number char when numberPart is no longer empty string
+		}
+
+		if ( numberPart.Length() > 0 )
+			return numberPart.ToInt();
+
+		return doorIndex + 1;  //! fallback
 	}
 
 	protected void BuildTransform()
@@ -947,9 +1004,11 @@ class JMESPActionMenu
 			Add( PREFIX_ACTION + "food:" + values[i].ToString(), names[i], "", canSet );
 	}
 
-	protected void BuildLock( string page = "" )
+	protected void BuildLock( string page = PAGE_MAIN )
 	{
-		AddBack( page, m_LockItem.GetDisplayName() );
+		string label = GetUniqueAttachmentLabel( m_LockItem );
+
+		AddBack( page, label );
 
 		if ( m_LockItem.COT_IsLocked() )
 			Add( PREFIX_ACTION + "unlock", "#STR_COT_ESP_MODULE_MENU_UNLOCK", JMConstants.Lucide( "lock-open" ), Perm( JMConstants.PERM_ESP_OBJECT_LOCK ) );
@@ -1348,16 +1407,118 @@ class JMESPActionMenu
 
 			if ( attached )
 			{
-				if ( attached.GetDisplayName() != label )
-					label += ": " + attached.GetDisplayName();
+				label = GetUniqueAttachmentLabel( attached );
 			}
 			else
 			{
+				string slotDisplayName = InventorySlots.GetSlotDisplayName( slotId );
+				string doorLabel = GetRelatedDoorLabel( slotDisplayName, slotId );
+
+				if ( doorLabel != slotDisplayName )
+					label = doorLabel;
+
 				label += ": #STR_COT_ESP_MODULE_ATTACH_EMPTY";
 			}
 
 			AddPage( PAGE_ATTACH_SLOT + ":" + slotId, label, JMConstants.Lucide( "puzzle" ), true );
 		}
+	}
+
+	//! Label including slot, attachment displayname, and stacked quantity (if applicable)
+	string GetUniqueAttachmentLabel( EntityAI attachment )
+	{
+		string label;
+		int slotCandidatesCount;
+
+		if ( m_Meta.m_DoorIndex == -1 )
+		{
+			TStringArray invSlots = g_Game.COT_GetInventorySlots( attachment );
+
+			EntityAI target;
+			if ( invSlots.Count() > 0 && Class.CastTo( target, m_Meta.target ) )
+			{
+				TStringArray attSlots = {};
+				target.ConfigGetTextArray( "attachments", attSlots );
+
+				foreach ( string attSlotName: attSlots )
+				{
+					attSlotName.ToLower();
+
+					foreach ( string invSlotName: invSlots )
+					{
+						invSlotName.ToLower();
+
+						if ( attSlotName == invSlotName )
+						{
+							++slotCandidatesCount;
+
+							if ( slotCandidatesCount > 1 )
+								break;
+						}
+					}
+
+					if ( slotCandidatesCount > 1 )
+						break;
+				}
+			}
+		}
+
+		auto il = new InventoryLocation();
+		attachment.GetInventory().GetCurrentInventoryLocation( il );
+
+		int slotId = il.GetSlot();
+		string attDisplayName = attachment.GetDisplayName();
+		string doorLabel = GetRelatedDoorLabel( attDisplayName, slotId );
+
+		if ( slotCandidatesCount > 1 )
+		{
+			if ( doorLabel == attDisplayName )
+			{
+				string slotName = InventorySlots.GetSlotName( slotId );
+				label = string.Format( "%1: %2", slotName, attDisplayName );
+			}
+			else
+				label = doorLabel;
+		}
+		else
+		{
+			label = doorLabel;
+		}
+
+		if ( attachment.HasQuantity() && attachment.ConfigGetString( "stackedUnit" ) == "pc." )
+			label += string.Format(" %1/%2", attachment.GetQuantity(), attachment.GetQuantityMax());
+
+		return label;
+	}
+
+	string GetRelatedDoorLabel( string label, int slotId )
+	{
+		BuildingBase building;
+		if ( Class.CastTo( building, m_Meta.target ) )
+		{
+			string slotName = InventorySlots.GetSlotName( slotId );
+			string slotNameLower = slotName;
+			slotNameLower.ToLower();
+
+			for ( int doorIndex = 0; doorIndex < building.GetDoorCount(); ++doorIndex )
+			{
+				AdditionalDoorInfo doorInfo = building.GetDoorInfo( doorIndex );
+
+				if ( doorInfo && doorInfo.m_RelatedInventorySlotNames )
+				{
+					foreach ( string relatedSlotName : doorInfo.m_RelatedInventorySlotNames )
+					{
+						string relatedSlotNameLower = relatedSlotName;
+						relatedSlotNameLower.ToLower();
+
+						if ( relatedSlotNameLower == slotNameLower )
+							return string.Format( "%1 (#STR_COT_DOOR %2)", label, GetDoorPartNumber( doorIndex, relatedSlotName ) );
+					}
+				}
+			}
+		}
+
+		return label;
 	}
 
 	TStringArray GetSlotLabels( TStringIntMap slotIdsByLabel = null, map<int, EntityAI> attachmentsById = null )
@@ -1467,7 +1628,10 @@ class JMESPActionMenu
 					m_Menu.AddDivider();
 				}
 				else
-					AddBack( PAGE_ATTACHMENTS, string.Format( "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS   ‹   %1", existing.GetDisplayName() ) );
+				{
+					string attLabel = GetUniqueAttachmentLabel( existing );
+					AddBack( PAGE_ATTACHMENTS, string.Format( "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS   ‹   %1", attLabel ) );
+				}
 			}
 			else
 			{
@@ -1788,7 +1952,7 @@ class JMESPActionMenu
 		Print(page);
 	#endif
 
-		if ( page == PAGE_MAIN )
+		if ( !page || page == PAGE_MAIN )
 		{
 			m_BreadCrumbs.Clear();
 			m_BreadCrumbs_Labels.Clear();
@@ -1816,7 +1980,7 @@ class JMESPActionMenu
 			if ( label )
 			{
 				m_BreadCrumbs.Insert( page );
-				m_BreadCrumbs_Labels.Insert( m_PageLabels[page] );
+				m_BreadCrumbs_Labels.Insert( label );
 			}
 
 			m_PageTitle = string.Join( "   ‹   ", m_BreadCrumbs_Labels );

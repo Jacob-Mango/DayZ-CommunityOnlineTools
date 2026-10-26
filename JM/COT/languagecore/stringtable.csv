@@ -55,6 +55,7 @@ STR_COT_CAMERA_SECTION_WAYPOINT_EDITOR,Waypoint Editor,Waypoint Editor,Editor bo
 STR_COT_CAMERA_SECTION_PATH_CONTROLS,Path Controls,Path Controls,Ovládání trasy,Pfad-Steuerung,Управление маршрутом,Sterowanie trasą,Útvonal vezérlők,Controlli Percorso,Controles de Ruta,Contrôles du trajet,路徑控制,パスコントロール,Controles do Caminho,路径控制,
 STR_COT_CAMERA_SECTION_SAVED_PATHS,Saved Paths,Saved Paths,Uložené trasy,Gespeicherte Pfade,Сохранённые маршруты,Zapisane Trasy,Mentett útvonalak,Percorsi Salvati,Rutas Guardadas,Trajets sauvegardés,已儲存路徑,保存されたパス,Caminhos Salvos,已保存路径,
 STR_COT_CAMERA_SECTION_BOOKMARKS,Bookmarks,Bookmarks,Záložky,Lesezeichen,Закладки,Zakładki,Könyvjelzők,Segnalibri,Marcadores,Signets,書籤,ブックマーク,Favoritos,书签,
+STR_COT_DOOR,Door,Door,Door,Tür,Door,Door,Door,Door,Door,Door,Door,Door,Door,Door,
 STR_COT_ESP_MODULE_ACTION_CLEAR_ESP,Hide ESP,Hide ESP,Čisté ESP,ESP löschen,Очистить ESP,Wyczyść ESP,ESP Törlése,Pulisci ESP,Borrar ESP,Reset l'ESP,清除 ESP,ESPクリア,Limpar ESP,清除 ESP,
 STR_COT_ESP_MODULE_ACTION_CLEARING_ESP,Clearing ESP,Clearing ESP,Čištění ESP,ESP wird gelöscht,Очистка ESP,Czyszczenie ESP,ESP törlése...,Pulizia ESP,Borrando ESP,Reset de l'ESP,正在清除 ESP,ESPをクリア中,Limpando ESP,正在清除 ESP,
 STR_COT_ESP_MODULE_ACTION_DESELECT_ALL,Deselect All,Deselect All,Odznačit vše,Alle abwählen,Снять выделение,Odznacz Wszystko,Mind törlése,Deseleziona Tutto,Deseleccionar Todo,Aucuns,全部取消選擇,すべて選択解除,Desmarcar Tudo,全部取消选择,
