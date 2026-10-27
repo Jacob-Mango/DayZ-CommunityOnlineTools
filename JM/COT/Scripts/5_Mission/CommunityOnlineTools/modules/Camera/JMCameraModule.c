@@ -366,9 +366,21 @@ class JMCameraModule: JMRenderableModuleBase
 					CurrentActiveCamera.SetDirection(headTransform[1]);
 				}
 
-				player.GetInputController().SetDisabled( true );
+				HumanInputController inputController = player.GetInputController();
+				inputController.OverrideMovementSpeed( HumanInputControllerOverrideType.ENABLED, 0 );
+				inputController.OverrideAimChangeX( HumanInputControllerOverrideType.ENABLED, 0 );
+				inputController.OverrideAimChangeY( HumanInputControllerOverrideType.ENABLED, 0 );
+
+				g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( DisableInputController, 34, false );
 			}
 		}
+	}
+
+	void DisableInputController()
+	{
+		Human player = g_Game.GetPlayer();
+		if ( player )
+			player.GetInputController().SetDisabled( true );
 	}
 
 	[Obsolete("Use Exec_Enter(sender, target, position)")]
@@ -512,7 +524,11 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( g_Game.GetPlayer() )
 		{
-			g_Game.GetPlayer().GetInputController().SetDisabled( false );
+			HumanInputController inputController = player.GetInputController();
+			inputController.SetDisabled( false );
+			inputController.OverrideMovementSpeed( HumanInputControllerOverrideType.DISABLED, 0 );
+			inputController.OverrideAimChangeX( HumanInputControllerOverrideType.DISABLED, 0 );
+			inputController.OverrideAimChangeY( HumanInputControllerOverrideType.DISABLED, 0 );
 		}
 
 		if (waitForPlayerIdleTimeout && player)
