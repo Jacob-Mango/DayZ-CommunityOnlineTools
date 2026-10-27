@@ -2361,7 +2361,12 @@ class JMESPModule: JMRenderableModuleBase
 			if ( slotId == InventorySlots.HANDS && player )
 				created = player.GetHumanInventory().CreateInHands( className );
 			else
+			{
+				if (entity.GetInventory().GetSlotLock(slotId))
+					entity.GetInventory().SetSlotLock(slotId, false);
+
 				created = entity.GetInventory().CreateAttachmentEx( className, slotId );
+			}
 
 			if ( created )
 			{
