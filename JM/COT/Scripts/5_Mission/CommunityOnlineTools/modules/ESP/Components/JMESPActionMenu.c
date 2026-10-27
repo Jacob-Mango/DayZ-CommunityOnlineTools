@@ -1407,7 +1407,12 @@ class JMESPActionMenu
 
 			if ( attached )
 			{
-				label = GetUniqueAttachmentLabel( attached );
+				string attLabel = GetUniqueAttachmentLabel( attached );
+
+				if ( attLabel != attached.GetDisplayName() )
+					label = attLabel;
+				else
+					label += ": " + attLabel;
 			}
 			else
 			{
@@ -1430,7 +1435,7 @@ class JMESPActionMenu
 		string label;
 		int slotCandidatesCount;
 
-		if ( m_Meta.m_DoorIndex == -1 )
+		if ( m_Meta.m_DoorIndex == -1 && m_Meta.target.IsBuilding() )
 		{
 			TStringArray invSlots = g_Game.COT_GetInventorySlots( attachment );
 
