@@ -463,56 +463,89 @@ class JMESPActionMenu
 
 		m_Menu.ClearItems();
 
-		if ( m_Page == PAGE_TRANSFORM )
+		switch ( m_Page )
+		{
+		case PAGE_TRANSFORM:
 			BuildTransform();
-		else if ( m_Page == PAGE_TRANSFORM_COPY )
+			break;
+		case PAGE_TRANSFORM_COPY:
 			BuildTransformCopy();
-		else if ( m_Page == PAGE_TRANSFORM_PASTE )
+			break;
+		case PAGE_TRANSFORM_PASTE:
 			BuildTransformPaste();
-		else if ( m_Page == PAGE_HEALTH )
+			break;
+		case PAGE_HEALTH:
 			BuildHealth();
-		else if ( m_Page == PAGE_QUANTITY )
+			break;
+		case PAGE_QUANTITY:
 			BuildQuantity();
-		else if ( m_Page == PAGE_LIQUID )
+			break;
+		case PAGE_LIQUID:
 			BuildLiquid();
-		else if ( m_Page == PAGE_FOOD )
+			break;
+		case PAGE_FOOD:
 			BuildFood();
-		else if ( m_Page == PAGE_LOCK )
-			BuildLock();
-		else if ( m_Page == PAGE_BUILD )
+			break;
+		case PAGE_LOCK:
+			auto il = new InventoryLocation();
+			if ( m_LockItem && m_LockItem.GetInventory().GetCurrentInventoryLocation( il ) )
+			{
+				m_PageArg = il.GetSlot().ToString();
+				BuildAttachSlot( PAGE_MAIN );
+			}
+			break;
+		case PAGE_BUILD:
 			BuildConstruction();
-		else if ( m_Page == PAGE_PART )
+			break;
+		case PAGE_PART:
 			BuildPart();
-		else if ( m_Page == PAGE_WEAPON )
+			break;
+		case PAGE_WEAPON:
 			BuildWeapon();
-		else if ( m_Page == PAGE_ATTACHMENTS )
+			break;
+		case PAGE_ATTACHMENTS:
 			BuildAttachments();
-		else if ( m_Page == PAGE_ATTACH_SLOT )
-			BuildAttachSlot();
-		else if ( m_Page == PAGE_FIRE )
+			break;
+		case PAGE_ATTACH_SLOT:
+			BuildAttachSlot( PAGE_ATTACHMENTS );
+			break;
+		case PAGE_FIRE:
 			BuildFire();
-		else if ( m_Page == PAGE_SCALE )
+			break;
+		case PAGE_SCALE:
 			BuildScale();
-		else if ( m_Page == PAGE_PARTHP )
+			break;
+		case PAGE_PARTHP:
 			BuildPartHealth();
-		else if ( m_Page == PAGE_FUEL )
+			break;
+		case PAGE_FUEL:
 			BuildFuel();
-		else if ( m_Page == PAGE_COOLANT )
+			break;
+		case PAGE_COOLANT:
 			BuildCoolant();
-		else if ( m_Page == PAGE_FLAG )
+			break;
+		case PAGE_FLAG:
 			BuildFlag();
-		else if ( m_Page == PAGE_COLOR )
+			break;
+		case PAGE_COLOR:
 			BuildColor();
-		else if ( m_Page == PAGE_COPY )
+			break;
+		case PAGE_COPY:
 			BuildCopy();
-		else if ( m_Page == PAGE_COPY_PLAYER )
+			break;
+		case PAGE_COPY_PLAYER:
 			BuildCopyPlayer();
-		else if ( m_Page == PAGE_VEHICLE )
+			break;
+		case PAGE_VEHICLE:
 			BuildVehicle();
-		else if ( m_Page == PAGE_PLAYER )
+			break;
+		case PAGE_PLAYER:
 			BuildPlayer();
-		else
+			break;
+		default:
 			BuildMain();
+			break;
+		}
 
 		m_Menu.OpenAt( m_X, m_Y );
 	}
@@ -1604,7 +1637,7 @@ class JMESPActionMenu
 	//! m_PageArg is the slot id (see BuildAttachments) - "Remove" only shows
 	//! when something is actually there to remove, same reasoning as every
 	//! other conditional row in this menu.
-	protected void BuildAttachSlot()
+	protected void BuildAttachSlot( string page = PAGE_ATTACHMENTS )
 	{
 		EntityAI target;
 
@@ -1629,23 +1662,23 @@ class JMESPActionMenu
 			{
 				if ( m_LockItem && m_LockItem.COT_CanInteract() )
 				{
-					BuildLock( PAGE_ATTACHMENTS );
+					BuildLock( page );
 					m_Menu.AddDivider();
 				}
 				else
 				{
 					string attLabel = GetUniqueAttachmentLabel( existing );
-					AddBack( PAGE_ATTACHMENTS, string.Format( "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS   ‹   %1", attLabel ) );
+					AddBack( page, string.Format( "#STR_COT_ESP_MODULE_PAGE_ATTACHMENTS   ‹   %1", attLabel ) );
 				}
 			}
 			else
 			{
-				AddBack( PAGE_ATTACHMENTS );
+				AddBack( page );
 			}
 		}
 		else
 		{
-			AddBack( PAGE_ATTACHMENTS );
+			AddBack( page );
 			return;
 		}
 
@@ -2370,8 +2403,11 @@ class JMESPActionMenu
 		if ( !IsOpen() )
 			return;
 
-		if ( m_Page == PAGE_ATTACHMENTS || m_Page == PAGE_ATTACH_SLOT )
+		if ( m_Page == PAGE_ATTACHMENTS || m_Page == PAGE_ATTACH_SLOT || m_Page == PAGE_LOCK )
 		{
+			if ( m_Page == PAGE_LOCK )
+				page = PAGE_MAIN;
+
 			if ( GetSlotLabels().Count() > 1 )
 				GoToPage( page );
 			else
