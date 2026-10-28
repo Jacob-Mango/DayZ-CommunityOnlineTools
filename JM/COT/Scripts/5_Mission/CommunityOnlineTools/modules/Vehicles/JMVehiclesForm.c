@@ -380,7 +380,6 @@ class JMVehiclesForm: JMFormBase
 			return;
 
 		auto vehicles = m_Module.GetServerVehicles();
-		TStringArray vehicleEntryLabels = {};
 
 		foreach ( JMVehicleMetaData currentVehicle: vehicles )
 		{
@@ -392,24 +391,9 @@ class JMVehiclesForm: JMFormBase
 
 			JMVehiclesListEntry vehicleListEntry = new JMVehiclesListEntry( m_VehiclesListContent, this, currentVehicle );
 			m_VehicleEntries.Insert( vehicleListEntry );
-
-			int idx = 0;
-			foreach ( string vehicleEntryLabel: vehicleEntryLabels )
-			{
-				if ( JMStatics.StrCaseCmp( vehicleListEntry.GetLabel(), vehicleEntryLabel ) < 0 )
-					break;
-				idx++;
-			}
-			vehicleEntryLabels.InsertAt( vehicleListEntry.GetLabel(), idx );
 		}
 
-		int sort;
-		foreach ( auto listEntry: m_VehicleEntries )
-		{
-			sort = vehicleEntryLabels.Find( listEntry.GetLabel() );
-			if ( sort > -1 )
-				listEntry.SetSort( sort, false );
-		}
+		RankVehicleEntries();
 
 		if ( m_ListScroller )
 			m_ListScroller.UpdateScroller();
@@ -446,9 +430,14 @@ class JMVehiclesForm: JMFormBase
 		if ( PatchVehicleInPlace( fresh ) )
 			return;
 
-		// New vehicle, or one whose refreshed data changes whether it belongs
-		// in the roster at all. Module already patched its cache.
-		LoadVehicles();
+		// Module already patched its cache. A vehicle that belongs on screen is
+		// added as one marker and one row; one that no longer belongs is
+		// dropped if it is there. A full rebuild would churn every other row
+		// for a delta that touched one vehicle.
+		if ( PassesFilters( fresh ) )
+			AddVehicleInPlace( fresh );
+		else
+			RemoveVehicleInPlace( fresh.m_NetworkIDLow, fresh.m_NetworkIDHigh );
 	}
 
 	//! Repoint the existing marker and roster row at `fresh`. False means the
@@ -485,16 +474,15 @@ class JMVehiclesForm: JMFormBase
 			BackToList();
 		}
 
-		if ( RemoveVehicleInPlace( netLow, netHigh ) )
-			return;
-
-		// Not on screen (filtered out, or already gone) - nothing to splice.
-		LoadVehicles();
+		// A vehicle that was not on screen (filtered out, or already gone)
+		// has nothing to splice - the old full rebuild re-rendered the exact
+		// same roster for a delta that changed nothing visible.
+		RemoveVehicleInPlace( netLow, netHigh );
 	}
 
 	//! Drop the one marker and one roster row for a vehicle that left the
-	//! server list. Mirrors PatchVehicleInPlace: false means the caller has
-	//! to fall back, because the vehicle was never on screen to begin with.
+	//! server list. False just means it was never on screen to begin with -
+	//! there is nothing to splice.
 	protected bool RemoveVehicleInPlace( int netLow, int netHigh )
 	{
 		if ( !m_TabMap || !m_TabMap.RemoveVehicleMarker( netLow, netHigh ) )
@@ -517,6 +505,55 @@ class JMVehiclesForm: JMFormBase
 			m_ListScroller.UpdateScroller();
 
 		return true;
+	}
+
+	//! One marker and one roster row for a vehicle that newly belongs on
+	//! screen. Ranks are recomputed for the visible set rather than spliced,
+	//! so a one-vehicle delta never tears rows down - but it also can never
+	//! leave the order inconsistent with the labels.
+	protected void AddVehicleInPlace( JMVehicleMetaData fresh )
+	{
+		if ( !m_TabMap )
+			return;
+
+		m_TabMap.AddVehicleMarker( fresh );
+
+		JMVehiclesListEntry entry = new JMVehiclesListEntry( m_VehiclesListContent, this, fresh );
+		m_VehicleEntries.Insert( entry );
+
+		RankVehicleEntries();
+
+		if ( m_ListScroller )
+			m_ListScroller.UpdateScroller();
+	}
+
+	//! Assign every visible row a dense rank from one case-insensitive label
+	//! sort. Shared by the full rebuild and the single-vehicle in-place add so
+	//! the two can never disagree about ordering, and a roster of thousands
+	//! ranks without per-comparison allocation churn.
+	protected void RankVehicleEntries()
+	{
+		if ( m_VehicleEntries.Count() == 0 )
+			return;
+
+		TStringArray vehicleEntryLabels = {};
+
+		foreach ( JMVehiclesListEntry listEntry: m_VehicleEntries )
+			vehicleEntryLabels.Insert( listEntry.GetLabel() );
+
+		JMStatics.SortStringArrayIgnoreCase( vehicleEntryLabels );
+
+		TStringIntMap rankByLabel = new TStringIntMap;
+
+		for ( int i = 0; i < vehicleEntryLabels.Count(); i++ )
+			rankByLabel[vehicleEntryLabels[i]] = i;
+
+		foreach ( JMVehiclesListEntry listEntry: m_VehicleEntries )
+		{
+			int sort;
+			if ( rankByLabel.Find( listEntry.GetLabel(), sort ) )
+				listEntry.SetSort( sort, false );
+		}
 	}
 
 	void SyncAndRefreshVehicles()
