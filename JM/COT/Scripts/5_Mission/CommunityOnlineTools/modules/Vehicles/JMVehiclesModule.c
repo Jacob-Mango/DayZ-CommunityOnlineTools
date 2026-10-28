@@ -476,12 +476,10 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( m_Vehicles.Count() > 0 )
 			m_Vehicles.Clear();
 
-		//! A node whose value already died is skipped, not dereferenced - a
-		//! stale entry must cost one branch, not a server crash.
 		CF_DoublyLinkedNode_WeakRef<CarScript> node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
-			if ( node.m_Value && !node.m_Value.IsSetForDeletion() )
+			if ( !node.m_Value.IsSetForDeletion() )
 				m_Vehicles.Insert( JMVehicleMetaData.Create( node.m_Value ) );
 			node = node.m_Next;
 		}
@@ -489,7 +487,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		CF_DoublyLinkedNode_WeakRef<BoatScript> boat = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boat )
 		{
-			if ( boat.m_Value && !boat.m_Value.IsSetForDeletion() )
+			if ( !boat.m_Value.IsSetForDeletion() )
 				m_Vehicles.Insert( JMVehicleMetaData.Create( boat.m_Value ) );
 			boat = boat.m_Next;
 		}
@@ -498,7 +496,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bike = MotorbikeScript.s_JM_AllBikes.m_Head;
 		while ( bike )
 		{
-			if ( bike.m_Value && !bike.m_Value.IsSetForDeletion() )
+			if ( !bike.m_Value.IsSetForDeletion() )
 				m_Vehicles.Insert( JMVehicleMetaData.Create( bike.m_Value ) );
 			bike = bike.m_Next;
 		}
@@ -508,7 +506,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
-			if ( cover.m_Value && !cover.m_Value.IsSetForDeletion() )
+			if ( !cover.m_Value.IsSetForDeletion() )
 				m_Vehicles.Insert( JMVehicleMetaData.CreateCover( cover.m_Value ) );
 			cover = cover.m_Next;
 		}
