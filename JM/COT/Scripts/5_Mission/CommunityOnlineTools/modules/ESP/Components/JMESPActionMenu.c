@@ -1441,11 +1441,12 @@ class JMESPActionMenu
 			if ( attached )
 			{
 				string attLabel = GetUniqueAttachmentLabel( attached );
+				string displayName = attached.GetDisplayName();
 
-				if ( attLabel != attached.GetDisplayName() )
+				if ( attLabel != displayName )
 					label = attLabel;
-				else
-					label += ": " + attLabel;
+				else if ( displayName != label )
+					label += ": " + displayName;
 			}
 			else
 			{
