@@ -538,8 +538,8 @@ class JMVehiclesForm: JMFormBase
 
 		TStringArray vehicleEntryLabels = {};
 
-		foreach ( JMVehiclesListEntry listEntry: m_VehicleEntries )
-			vehicleEntryLabels.Insert( listEntry.GetLabel() );
+		foreach ( JMVehiclesListEntry listEntryA: m_VehicleEntries )
+			vehicleEntryLabels.Insert( listEntryA.GetLabel() );
 
 		JMStatics.SortStringArrayIgnoreCase( vehicleEntryLabels );
 
@@ -548,11 +548,11 @@ class JMVehiclesForm: JMFormBase
 		for ( int i = 0; i < vehicleEntryLabels.Count(); i++ )
 			rankByLabel[vehicleEntryLabels[i]] = i;
 
-		foreach ( JMVehiclesListEntry listEntry: m_VehicleEntries )
+		foreach ( JMVehiclesListEntry listEntryB: m_VehicleEntries )
 		{
 			int sort;
-			if ( rankByLabel.Find( listEntry.GetLabel(), sort ) )
-				listEntry.SetSort( sort, false );
+			if ( rankByLabel.Find( listEntryB.GetLabel(), sort ) )
+				listEntryB.SetSort( sort, false );
 		}
 	}
 
