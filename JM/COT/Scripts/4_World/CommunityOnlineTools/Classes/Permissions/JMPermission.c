@@ -419,8 +419,8 @@ class JMPermission : Managed
 				append = " DISALLOW";
 				break;
 			}
-			default:
 			case JMPermissionType.INHERIT:
+			default:
 			{
 				append = " INHERIT";
 				break;

@@ -71,11 +71,6 @@ class JMVehiclesFormTabMap: JMFormTab
 	{
 		switch ( type )
 		{
-			default:
-			case JMVT_CAR:
-				color  = ARGB( 255, 243, 156, 18 );
-				marker = JMConstants.Lucide( "car" );
-			break;
 			case JMVT_BOAT:
 				color  = ARGB( 255, 243, 18, 156 );
 				marker = JMConstants.Lucide( "sailboat" );
@@ -91,6 +86,11 @@ class JMVehiclesFormTabMap: JMFormTab
 			case JMVT_BIKE:
 				color  = ARGB( 255, 243, 156, 100 );
 				marker = JMConstants.Lucide( "bike" );
+			break;
+			case JMVT_CAR:
+			default:
+				color  = ARGB( 255, 243, 156, 18 );
+				marker = JMConstants.Lucide( "car" );
 			break;
 		}
 	}
