@@ -393,7 +393,7 @@ class JMVehiclesForm: JMFormBase
 			m_VehicleEntries.Insert( vehicleListEntry );
 		}
 
-		RankVehicleEntries();
+		SortVehicleEntries();
 
 		if ( m_ListScroller )
 			m_ListScroller.UpdateScroller();
@@ -508,7 +508,7 @@ class JMVehiclesForm: JMFormBase
 	}
 
 	//! One marker and one roster row for a vehicle that newly belongs on
-	//! screen. Ranks are recomputed for the visible set rather than spliced,
+	//! screen. Sort is recomputed for the visible set rather than spliced,
 	//! so a one-vehicle delta never tears rows down - but it also can never
 	//! leave the order inconsistent with the labels.
 	protected void AddVehicleInPlace( JMVehicleMetaData fresh )
@@ -521,38 +521,37 @@ class JMVehiclesForm: JMFormBase
 		JMVehiclesListEntry entry = new JMVehiclesListEntry( m_VehiclesListContent, this, fresh );
 		m_VehicleEntries.Insert( entry );
 
-		RankVehicleEntries();
+		SortVehicleEntries();
 
 		if ( m_ListScroller )
 			m_ListScroller.UpdateScroller();
 	}
 
-	//! Assign every visible row a dense rank from one case-insensitive label
+	//! Sort every visible from one case-insensitive label
 	//! sort. Shared by the full rebuild and the single-vehicle in-place add so
-	//! the two can never disagree about ordering, and a roster of thousands
-	//! ranks without per-comparison allocation churn.
-	protected void RankVehicleEntries()
+	//! the two can never disagree about ordering, and a roster
+	//! sorts without per-comparison allocation churn.
+	protected void SortVehicleEntries()
 	{
 		if ( m_VehicleEntries.Count() == 0 )
 			return;
 
 		TStringArray vehicleEntryLabels = {};
 
-		foreach ( JMVehiclesListEntry listEntry: m_VehicleEntries )
-			vehicleEntryLabels.Insert( listEntry.GetLabel() );
+		foreach ( JMVehiclesListEntry listEntryTmp: m_VehicleEntries )
+			vehicleEntryLabels.Insert( listEntryTmp.GetLabel() );
 
 		JMStatics.SortStringArrayIgnoreCase( vehicleEntryLabels );
 
-		TStringIntMap rankByLabel = new TStringIntMap;
+		TStringIntMap orderByLabel = new TStringIntMap;
 
-		for ( int i = 0; i < vehicleEntryLabels.Count(); i++ )
-			rankByLabel[vehicleEntryLabels[i]] = i;
+		foreach ( int i, string label: vehicleEntryLabels )
+			orderByLabel[label] = i;
 
 		foreach ( JMVehiclesListEntry listEntry: m_VehicleEntries )
 		{
-			int sort;
-			if ( rankByLabel.Find( listEntry.GetLabel(), sort ) )
-				listEntry.SetSort( sort, false );
+			int sort = orderByLabel[listEntry.GetLabel()];
+			listEntry.SetSort( sort, false );
 		}
 	}
 
