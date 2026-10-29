@@ -527,8 +527,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.ClearCargo:
 			RPC_ClearCargo( ctx, sender, target );
 			break;
-		case JMPlayerModuleRPC.Dry:
-			RPC_Dry( ctx, sender, target );
+		case JMPlayerModuleRPC.SetItemWetness:
+			RPC_SetItemWetness( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.StopBleeding:
 			RPC_StopBleeding( ctx, sender, target );
@@ -2399,20 +2399,30 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_ClearCargo( guids, senderRPC, instance );
 	}
 
-	void Dry( array< string > guids )
+	[Obsolete("Use SetItemWetness(0, guids)")]
+	void Dry( array< string > guids );
+
+	[Obsolete("Use Exec_SetItemWetness")]
+	protected void Exec_Dry( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  );
+
+	[Obsolete("Use RPC_SetItemWetness")]
+	protected void RPC_Dry( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target );
+
+	void SetItemWetness( float wetness, array< string > guids )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_Dry( guids, NULL );
+			Exec_SetItemWetness( wetness, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( wetness );
 			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.Dry, true, NULL );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetItemWetness, true, NULL );
 		}
 	}
 
-	protected void Exec_Dry( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	protected void Exec_SetItemWetness( float wetness, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -2422,18 +2432,22 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.COTResetItemWetness();
+			player.COT_SetItemWetness(wetness);
 
-			GetCommunityOnlineToolsBase().Log( ident, "Dried [guid=" + players[i].GetGUID() + "]" );
+			GetCommunityOnlineToolsBase().Log( ident, "Set wetness to " + wetness + " [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhookColored( "Inventory", instance, "Dried " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_INFO );
+			SendWebhookColored( "Inventory", instance, "Set wetness to " + wetness + " " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_INFO );
 
 			players[i].Update();
 		}
 	}
 
-	protected void RPC_Dry( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	protected void RPC_SetItemWetness( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		float wetness;
+		if ( !ctx.Read( wetness ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
@@ -2447,7 +2461,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DRY, senderRPC, instance ) )
 			return;
 
-		Exec_Dry( guids, senderRPC, instance );
+		Exec_SetItemWetness( wetness, guids, senderRPC, instance );
 	}
 
 	void StopBleeding( array< string > guids )

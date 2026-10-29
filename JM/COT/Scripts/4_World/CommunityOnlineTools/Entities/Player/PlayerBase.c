@@ -1013,6 +1013,11 @@ modded class PlayerBase
 
 	void COTResetItemWetness()
 	{
+		COT_SetItemWetness(0);
+	}
+
+	void COT_SetItemWetness(float wetness)
+	{
 		ItemBase item;
 		array< EntityAI > items = new array< EntityAI >;
 		GetInventory().EnumerateInventory( InventoryTraversalType.PREORDER, items );
@@ -1020,7 +1025,7 @@ modded class PlayerBase
 		foreach ( EntityAI entity: items )
 		{
 			if ( Class.CastTo( item, entity ) )
-				item.SetWet( 0 );
+				item.SetWet( wetness );
 		}
 	}
 

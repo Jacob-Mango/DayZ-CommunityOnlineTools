@@ -336,7 +336,8 @@ enum JMPlayerModuleRPC
 	Heal,
 	Strip,
 	ClearCargo,
-	Dry,
+	Dry,  //! Obsolete, use SetItemWetness
+	SetItemWetness,
 	Kick,
 	KickMessage,
 	Ban,

@@ -232,17 +232,20 @@ class JMPlayerFormTabActions: JMFormTab
 
 		UIActionCard section0Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEADER" );
 		Widget section0 = section0Card.GetContent();
-		// Friendly actions at the top - 3 buttons in one row (Stop Bleeding moved to per-part Bleed dropdown)
-		Widget actionsFriendly = UIActionManager.CreateGridSpacer( section0, 1, 3 );
+		// Friendly actions at the top - 4 buttons in one row (Stop Bleeding moved to per-part Bleed dropdown)
+		Widget actionsFriendly = UIActionManager.CreateGridSpacer( section0, 1, 4 );
 		m_HealPlayer = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_ACTION_HEAL",    this, "Click_HealPlayer"    );
-		m_HealPlayer.SetWidth( 0.33 );
+		m_HealPlayer.SetWidth( 0.25 );
 		m_HealPlayer.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_HEAL" );
 		m_RepairTransport = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_ACTION_REPAIR", this, "Click_RepairTransport" );
-		m_RepairTransport.SetWidth( 0.33 );
+		m_RepairTransport.SetWidth( 0.25 );
 		m_RepairTransport.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_REPAIR" );
 		m_DryPlayer = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_ACTION_DRY",     this, "Click_DryPlayer"     );
-		m_DryPlayer.SetWidth( 0.33 );
+		m_DryPlayer.SetWidth( 0.25 );
 		m_DryPlayer.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_DRY" );
+		m_DryPlayer = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_ACTION_SOAK",     this, "Click_SoakPlayer"     );
+		m_DryPlayer.SetWidth( 0.25 );
+		m_DryPlayer.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_SOAK" );
 
 		// Misc actions inbetween - 4 or 5 buttons; #ifdef adds a row if Expansion is loaded
 		UIActionManager.CreateSpacerPx( section0, 10 );
@@ -326,7 +329,20 @@ class JMPlayerFormTabActions: JMFormTab
 
 	void DryTargets( array<string> targets, JMConfirmation confirmation = NULL )
 	{
-		m_Form.m_Module.Dry( targets );
+		m_Form.m_Module.SetItemWetness( 0, targets );
+	}
+
+	void Click_SoakPlayer( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SOAK", this, "SoakTargets", false );
+	}
+
+	void SoakTargets( array<string> targets, JMConfirmation confirmation = NULL )
+	{
+		m_Form.m_Module.SetItemWetness( 1.0, targets );
 	}
 
 	void Click_KillPlayer( UIEvent eid, UIActionBase action )
