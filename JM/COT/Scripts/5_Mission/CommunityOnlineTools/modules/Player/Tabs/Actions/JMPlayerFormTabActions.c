@@ -324,7 +324,7 @@ class JMPlayerFormTabActions: JMFormTab
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", this, "DryTargets", false );
+		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_ACTION_DRY", this, "DryTargets", false );
 	}
 
 	void DryTargets( array<string> targets, JMConfirmation confirmation = NULL )
@@ -337,7 +337,7 @@ class JMPlayerFormTabActions: JMFormTab
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SOAK", this, "SoakTargets", false );
+		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_ACTION_SOAK", this, "SoakTargets", false );
 	}
 
 	void SoakTargets( array<string> targets, JMConfirmation confirmation = NULL )
@@ -350,7 +350,7 @@ class JMPlayerFormTabActions: JMFormTab
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "KillPlayerTargets" );
+		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_ACTION_KILL", this, "KillPlayerTargets" );
 	}
 
 	void KillPlayerTargets( array<string> targets, JMConfirmation confirmation = NULL )
@@ -554,17 +554,17 @@ class JMPlayerFormTabActions: JMFormTab
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Form.CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayerMultiConfirm", "KickPlayerSingleConfirm", "KickPlayerSelfConfirm", false);
+		m_Form.CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_ACTION_KICK", "KickPlayerMultiConfirm", "KickPlayerSingleConfirm", "KickPlayerSelfConfirm", false);
 	}
 
 	void KickPlayerMultiConfirm(JMConfirmation confirmation = NULL)
 	{
-		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "KickPlayerMulti", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK" );
+		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "KickPlayerMulti", "#STR_COT_PLAYER_MODULE_ACTION_KICK" );
 	}
 
 	void KickPlayerSingleConfirm(JMConfirmation confirmation = NULL)
 	{
-		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "KickPlayerSingle", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK" );
+		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "KickPlayerSingle", "#STR_COT_PLAYER_MODULE_ACTION_KICK" );
 	}
 
 	void KickPlayerSelfConfirm(JMConfirmation confirmation = NULL)
@@ -587,17 +587,17 @@ class JMPlayerFormTabActions: JMFormTab
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Form.CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayerMultiConfirm", "BanPlayerSingleConfirm", "BanPlayerSelfConfirm", false);
+		m_Form.CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_ACTION_BAN", "BanPlayerMultiConfirm", "BanPlayerSingleConfirm", "BanPlayerSelfConfirm", false);
 	}
 
 	void BanPlayerMultiConfirm()
 	{
-		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "BanPlayerMulti", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN" );
+		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "BanPlayerMulti", "#STR_COT_PLAYER_MODULE_ACTION_BAN" );
 	}
 
 	void BanPlayerSingleConfirm()
 	{
-		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "BanPlayerSingle", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN" );
+		m_Form.PromptInput( "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "BanPlayerSingle", "#STR_COT_PLAYER_MODULE_ACTION_BAN" );
 	}
 
 	void BanPlayerSelfConfirm(JMConfirmation confirmation)
@@ -897,7 +897,7 @@ class JMPlayerFormTabActions: JMFormTab
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", this, "HealTargets", false );
+		m_Form.ConfirmPlayerAction( "#STR_COT_PLAYER_MODULE_ACTION_HEAL", this, "HealTargets", false );
 	}
 
 	void HealTargets( array<string> targets, JMConfirmation confirmation = NULL )

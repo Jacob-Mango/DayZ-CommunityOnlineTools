@@ -55,7 +55,7 @@
             <input name="UAPlayerModuleUnlimitedAmmo" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO" />
             <input name="UAPlayerModuleAdminNV" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_NVG" />
 
-            <input name="UAPlayerModuleStopSpectating" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_SPECTATE" />
+            <input name="UAPlayerModuleStopSpectating" loc="STR_COT_PLAYER_MODULE_ACTION_SPECTATE_STOP" />
         </actions>
 
         <sorting name="JM_COT" loc="COT">
