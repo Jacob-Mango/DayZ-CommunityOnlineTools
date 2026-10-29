@@ -1340,6 +1340,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		//auto trace = EXTrace.Profile(true, JMObjectSpawnerModule, "FindDelimitedTokenIndex");
 
+		if (token == "")  //! safety, LastIndexOf freezes if passed empty string
+			return -1;
+
 		int idx = lower.LastIndexOf(token);
 		if (idx == -1)
 			return -1;
@@ -1575,7 +1578,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					continue;
 
 				string color;
-				if (g_Game.ConfigGetText(child_path + " color", color))
+				if (g_Game.ConfigGetText(child_path + " color", color) && color != "")
 				{
 					token = color;
 					token.ToLower();
@@ -1588,7 +1591,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			#ifdef DZ_Expansion_Core
 				string skinName;
-				if (g_Game.ConfigGetText(child_path + " skinName", skinName))
+				if (g_Game.ConfigGetText(child_path + " skinName", skinName) && skinName != "")
 				{
 					token = skinName;
 					token.ToLower();
