@@ -61,7 +61,9 @@ class COTModule : JMModuleBase
 
 	override void OnMissionLoaded()
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "OnMissionLoaded");
+	#endif
 
 		super.OnMissionLoaded();
 

@@ -722,7 +722,9 @@ class JMPermissionManager
 
 	array< string > Serialize()
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Serialize").Add(RootPermission.Children.Count());
+	#endif
 
 		array< string > data = new array< string >;
 		RootPermission.Serialize( data );

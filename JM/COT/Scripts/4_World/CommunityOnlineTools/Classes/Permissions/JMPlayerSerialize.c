@@ -34,7 +34,9 @@ class JMPlayerSerialize : Managed
 
 	static bool Load( JMPlayerInstance inst, inout JMPlayerSerialize playerFile )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1("JMPlayerSerialize").Add(inst.GetGUID());
+	#endif
 
 		// steamid files are made by the user, not generated: prioritize them over ours.
 		// Kept under their own name, not migrated to a GUID one: GetGUID() is the BattlEye

@@ -24,7 +24,7 @@ modded class MissionGameplay
 
 	override void ResetGUI()
 	{
-	#ifdef DIAG
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this);
 		PrintFormat("Is GUI reset disabled? %1", m_COT_TempDisableOnSelectPlayer.ToString());
 	#endif

@@ -269,12 +269,12 @@ modded class PlayerBase
 
 	override void OnSelectPlayer()
 	{
-	#ifdef DIAG
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this);
-		PrintFormat("Is player selected? %1", m_PlayerSelected.ToString());
 	#endif
 
 	#ifdef DIAG
+		PrintFormat("Is player selected? %1", m_PlayerSelected.ToString());
 		PrintFormat("Is OnSelectPlayer temporarily disabled? %1", m_COT_TempDisableOnSelectPlayer.ToString());
 	#endif
 
@@ -1205,8 +1205,11 @@ modded class PlayerBase
 
 	void COT_RememberVehicle()
 	{
-	#ifdef DIAG
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this);
+	#endif
+
+	#ifdef DIAG_DEVELOPER
 		PrintFormat("GetCommand_Move? %1", GetCommand_Move().ToString());
 		PrintFormat("GetCommand_Vehicle? %1", GetCommand_Vehicle().ToString());
 		//PrintFormat("m_COT_TransportCache? %1", m_COT_TransportCache.ToString());
@@ -1321,8 +1324,11 @@ modded class PlayerBase
 
 	void COT_ResumeVehicleCommand()
 	{
-	#ifdef DIAG
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this);
+	#endif
+
+	#ifdef DIAG_DEVELOPER
 		PrintFormat("GetCommand_Vehicle? %1", GetCommand_Vehicle().ToString());
 		//PrintFormat("m_COT_TransportCache? %1", m_COT_TransportCache.ToString());
 	#endif

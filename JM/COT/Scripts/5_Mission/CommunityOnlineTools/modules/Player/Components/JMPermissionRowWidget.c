@@ -64,7 +64,9 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 
 	void SetPermission( string inp )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "SetPermission").Add(inp);
+	#endif
 
 		array<string> tokens = new array<string>;
 
@@ -240,7 +242,9 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 
 	void Serialize( out array< string > output, string prepend = "" )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Serialize");
+	#endif
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
@@ -257,7 +261,9 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 
 	protected JMPermissionRowWidget Set( array<string> tokens, int depth, int type )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Set").Add(depth).Add(typename.EnumToString(JMPermissionType, type));
+	#endif
 
 		if ( depth < tokens.Count() )
 		{

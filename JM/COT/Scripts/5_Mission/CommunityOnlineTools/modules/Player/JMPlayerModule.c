@@ -231,7 +231,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void SetPermissions( JMPermission permission, array< string > guids )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "SetPermissions");
+	#endif
 
 		if ( IsMissionHost() )
 		{
@@ -2259,7 +2261,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	//! That way, if the RPC is abused (hacking etc), it won't affect the player during gameplay.
 	protected void RPC_KickMessage(ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "RPC_KickMessage");
+	#endif
 
 		if (g_Game.IsDedicatedServer())
 			return;
@@ -2279,7 +2283,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_BanMessage(ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "RPC_BanMessage");
+	#endif
 
 		if (g_Game.IsDedicatedServer())
 			return;
@@ -2517,7 +2523,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void Exec_SetPermissions( JMPermission permission, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Exec_SetPermissions");
+	#endif
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -2541,7 +2549,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_SetPermissions").Add(senderRPC.GetId());
+	#endif
 
 		JMPermission permission = new JMPermission( JMConstants.PERM_ROOT );
 		permission.CopyPermissions(GetPermissionsManager().RootPermission);

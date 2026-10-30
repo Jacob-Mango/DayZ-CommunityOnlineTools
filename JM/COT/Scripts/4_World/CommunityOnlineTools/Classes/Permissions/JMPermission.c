@@ -310,9 +310,11 @@ class JMPermission : Managed
 
 	void Serialize( array< string > output, string prepend = "" )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		CF_Trace trace;
 		if (!Parent)
 			trace = CF_Trace_2(this, "Serialize").Add(m_SerializedFullName).Add(Children.Count());
+	#endif
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
@@ -329,9 +331,11 @@ class JMPermission : Managed
 
 	void Deserialize( array< string > input )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		CF_Trace trace;
 		if (!Parent)
 			trace = CF_Trace_1(this, "Deserialize").Add(input.Count());
+	#endif
 
 		for ( int i = 0; i < input.Count(); i++ )
 			AddPermission( input[i], JMPermissionType.INHERIT );
@@ -437,7 +441,7 @@ class JMPermission : Managed
 
 	void Sort()
 	{
-	#ifdef DIAG
+	#ifdef JM_COT_DIAG_LOGGING
 		CF_Trace trace;
 		if (!Parent)
 			trace = CF_Trace_2(this).Add(GetFullName()).Add(typename.EnumToString(JMPermissionType, Type));
