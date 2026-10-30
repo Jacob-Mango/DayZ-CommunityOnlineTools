@@ -1532,7 +1532,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		//! to end spectating.
 		if (!m_SpectatorClient || !m_SpectatorClient.m_JM_SpectatedObject)
 		{
-			COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_NOT_SPECTATING"));
+			if (JMPermissions.Has(JMConstants.PERM_PLAYER_SPECTATE))
+				COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_NOT_SPECTATING"));
 			return;
 		}
 
