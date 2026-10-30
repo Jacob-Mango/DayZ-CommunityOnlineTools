@@ -332,9 +332,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		info.AddWebhookType( "Player" );
 	}
 
-	override void OnMissionLoaded()
+	override void OnMissionStart()
 	{
-		super.OnMissionLoaded();
+		super.OnMissionStart();
 
 		if ( IsMissionHost() )
 			LoadSpawnerConfig();

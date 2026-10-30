@@ -80,9 +80,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		m_MapMenu.UpdateMapPosition(playerpos, pos);
 	}
 
-	override void OnMissionLoaded()
+	override void OnMissionStart()
 	{
-		super.OnMissionLoaded();
+		super.OnMissionStart();
 
 		if (g_Game.IsServer())
 			Load();
