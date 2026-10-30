@@ -33,7 +33,7 @@ class JMLocalPreview
 		if ( !Class.CastTo( asItem, ent ) )
 			return;
 
-		if ( quantity >= 0 )
+		if ( g_Game.IsServer() && quantity >= 0 )
 			asItem.SetQuantity( quantity, false );
 
 		Edible_Base asFood;
