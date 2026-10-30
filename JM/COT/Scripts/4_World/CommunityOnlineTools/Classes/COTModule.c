@@ -140,6 +140,14 @@ class COTModule : JMModuleBase
 		return m_COTMenu;
 	}
 
+	override void OnClientPermissionsUpdated()
+	{
+		super.OnClientPermissionsUpdated();
+
+		if ( m_COTMenu )
+			m_COTMenu.UpdatePermissions();
+	}
+
 	override void OnMissionFinish()
 	{
 		if ( m_COTMenu )
