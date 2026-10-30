@@ -909,6 +909,12 @@ class JMPermissionManager
 		m_RoleNamesSorted.RemoveItem( role );
 	}
 
+	void ClearRoles()
+	{
+		Roles.Clear();
+		m_RoleNamesSorted.Clear();
+	}
+
 	void LoadRoles()
 	{
 		string sName = "";
