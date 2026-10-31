@@ -241,7 +241,9 @@ class JMWebhookModule: JMModuleBase
 
 		m_Settings.Save();
 
+#ifndef WORKBENCH // very illegal code ;(
 		g_Game.GameScript.Call( this, "Thread_ProcessQueue", NULL );
+#endif
 	}
 
 	override void OnMissionLoaded()
