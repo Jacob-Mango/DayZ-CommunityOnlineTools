@@ -264,6 +264,9 @@ class JMWebhookModule: JMModuleBase
 		message.GetEmbed().SetDescription( "The server has shut down safely." );
 
 		Post( "ServerShutdown", message );
+
+		g_COT_ThreadWebhooks = false;
+		g_COT_ThreadWebhooks_Running = false;
 	}
 
 	void SaveConnections()
@@ -528,6 +531,8 @@ class JMWebhookModule: JMModuleBase
 
 	protected void Thread_ProcessQueue()
 	{
+		g_COT_ThreadWebhooks_Running = true;
+
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Thread_ProcessQueue");
 		#endif
@@ -537,7 +542,7 @@ class JMWebhookModule: JMModuleBase
 		int lastSendTime = g_Game.GetTickTime();
 		int qps = 1;
 
-		while ( true )
+		while ( g_COT_ThreadWebhooks )
 		{
 			if ( m_Queue.Count() > 0 )
 			{
@@ -578,6 +583,9 @@ class JMWebhookModule: JMModuleBase
 
 				int defer = (int) Math.Clamp( num * 0.1, 1, 2 );
 				Sleep( 250 * Math.Clamp( num, 1, 4 ) * defer );
+
+				if (!g_COT_ThreadWebhooks)
+					break;
 			} else
 			{
 				if ( startTime - lastSendTime > 1000 )
@@ -588,8 +596,13 @@ class JMWebhookModule: JMModuleBase
 				}
 
 				Sleep( 50 );
+
+				if (!g_COT_ThreadWebhooks)
+					break;
 			}
 		}
+
+		g_COT_ThreadWebhooks_Running = false;
 
 		m_Queue.Clear();
 	}
