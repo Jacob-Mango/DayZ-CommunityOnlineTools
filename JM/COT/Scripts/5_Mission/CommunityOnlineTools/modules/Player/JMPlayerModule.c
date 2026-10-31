@@ -1514,10 +1514,16 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( !input.LocalPress() ) return;
 
-		EndSpectating();
+		EndSpectatingEx(false);
 	}
 
 	void EndSpectating()
+	{
+		EndSpectatingEx(true);
+	}
+
+	//! @note only pass notify true if called from an UI element via click
+	void EndSpectatingEx(bool notify)
 	{
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "EndSpectating");
@@ -1532,7 +1538,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		//! to end spectating.
 		if (!m_SpectatorClient || !m_SpectatorClient.m_JM_SpectatedObject)
 		{
-			if (JMPermissions.Has(JMConstants.PERM_PLAYER_SPECTATE))
+			if (notify)
 				COTCreateLocalAdminNotification(new StringLocaliser("STR_COT_PLAYER_MODULE_NOT_SPECTATING"));
 			return;
 		}
