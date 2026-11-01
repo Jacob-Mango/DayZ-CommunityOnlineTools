@@ -590,7 +590,7 @@ class JMWebhookModule: JMModuleBase
 				m_TimeToSleep += 0.25 * Math.Clamp( m_SentCount, 1, 4 ) * defer;
 			} else
 			{
-				if ( m_StartTime - m_LastSendTime > 1.0 )
+				if ( m_LastSendTime - m_StartTime > 1.0 )
 				{
 					m_StartTime = g_Game.GetTickTime();
 					m_LastSendTime = m_StartTime;
