@@ -587,7 +587,7 @@ class JMWebhookModule: JMModuleBase
 
 				int defer = (int) Math.Clamp( m_SentCount * 0.1, 1, 2 );
 				
-				m_TimeToSleep += 0.25 * Math.Clamp( m_SentCount, 1, 4 ) * defer;
+				m_TimeToSleep = 0.25 * Math.Clamp( m_SentCount, 1, 4 ) * defer;
 			} else
 			{
 				if ( m_LastSendTime - m_StartTime > 1.0 )
@@ -597,7 +597,7 @@ class JMWebhookModule: JMModuleBase
 					m_SentCount = 0;
 				}
 
-				m_TimeToSleep += 0.05;
+				m_TimeToSleep = 0.05;
 			}
 		}
 	}
