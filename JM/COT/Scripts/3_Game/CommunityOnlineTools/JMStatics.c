@@ -188,5 +188,3 @@ class JMStatics
 
 static bool g_COT_ThreadESP;
 static bool g_COT_ThreadESP_Running;
-static bool g_COT_ThreadWebhooks;
-static bool g_COT_ThreadWebhooks_Running;
