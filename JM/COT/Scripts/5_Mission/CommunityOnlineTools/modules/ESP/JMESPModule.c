@@ -1561,6 +1561,7 @@ class JMESPModule: JMRenderableModuleBase
 		bool includeImmovable;
 		bool includeBushes;
 		bool includeCreatures;
+		bool includeNoCollision;
 
 		int flags = QueryFlags.DYNAMIC;
 
@@ -1574,6 +1575,12 @@ class JMESPModule: JMRenderableModuleBase
 
 			if (m_ViewTypesByType[JMESPViewTypeAnimal].View || m_ViewTypesByType[JMESPViewTypeInfected].View)
 				includeCreatures = true;
+
+			if (m_ViewTypesByType[JMESPViewTypeBuilding].View && m_IknowWhatIamDoing)
+			{
+				includeNoCollision = true;
+				flags |= QueryFlags.STATIC;
+			}
 		}
 		else if (m_ViewTypesByType[JMESPViewTypeBuilding].View)
 		{
@@ -1625,17 +1632,17 @@ class JMESPModule: JMRenderableModuleBase
 					{
 						DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
 
-						if (includeCreatures)
+						if (includeCreatures || includeNoCollision)
 						{
-							//! PhysicsGetEntitiesInBox doesn't include creatures
+							//! PhysicsGetEntitiesInBox doesn't include creatures or entities w/o physics body
 
-							array<EntityAI> creatures = {};
-							DayZPlayerUtils.SceneGetEntitiesInBox(min, max, creatures);
+							array<EntityAI> entities2 = {};
+							DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities2, flags);
 
-							foreach (auto creature : creatures)
+							foreach (auto entity2 : entities2)
 							{
-								if (creature.IsDayZCreature())
-									objects.Insert(creature);
+								if ((includeCreatures && entity2.IsDayZCreature()) || (includeNoCollision && entity2.IsBuilding() && !dBodyIsSet(entity2)))
+									objects.Insert(entity2);
 							}
 						}
 					}
