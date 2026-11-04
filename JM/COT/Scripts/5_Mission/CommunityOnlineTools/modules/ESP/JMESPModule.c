@@ -732,7 +732,19 @@ class JMESPModule: JMRenderableModuleBase
 		info.AddWebhookType( "DeleteAll" );
 		info.AddWebhookType( "MoveToCursor" );
 		info.AddWebhookType( "Object" );
+		info.AddWebhookType( "SetLockWheels" );
+		info.AddWebhookType( "RefillCoolant" );
+		info.AddWebhookType( "RepairAndFillSlots" );
+		info.AddWebhookType( "ChangeColor" );
+		info.AddWebhookType( "SetGrenadePin" );
+		info.AddWebhookType( "TriggerTrap" );
+		info.AddWebhookType( "SetFenceOpen" );
+		info.AddWebhookType( "SetHouseDoorOpen" );
+		info.AddWebhookType( "SetHouseDoorLocked" );
 		info.AddWebhookType( "SetTentOpen" );
+		info.AddWebhookType( "SetCarDoors" );
+		info.AddWebhookType( "Heal" );
+		info.AddWebhookType( "Create" );
 	}
 
 	override void RegisterKeyMouseBindings()
