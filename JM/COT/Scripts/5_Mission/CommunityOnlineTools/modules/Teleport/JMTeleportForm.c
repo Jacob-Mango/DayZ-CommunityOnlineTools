@@ -891,6 +891,8 @@ class JMTeleportForm: JMFormBase
 		if (!matcher.Matches(Widget.TranslateString(zoneName)))
 			return;
 
+		//! TODO/FIXME: This only includes entries in netbubble on MP client. List of zones should be sent from server as RPC (classname + position)
+
 		if ( EffectArea.s_JM_COT_AllAreas )
 		{
 			for ( int vi = 0; vi < EffectArea.s_JM_COT_AllAreas.Count(); vi++ )
