@@ -186,6 +186,10 @@ class JMTeleportFilter
 				continue;
 
 			string categoryName = m_Form.GetCategories()[i];
+
+			if (!categoryName)
+				categoryName = "<#STR_COT_GENERIC_NONE>";
+
 			bool shown = !IsCategoryHidden( categoryName );
 			string categoryIcon = UIActionFilterMenu.CheckIcon( shown );
 			int categoryColor = UIActionFilterMenu.ToggleTextColor( shown );
