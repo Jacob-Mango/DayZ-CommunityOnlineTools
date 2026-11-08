@@ -38,6 +38,9 @@ class JMTeleportMapOverlays
 		if ( !vehicles )
 			return;
 
+		if ( vehicles.GetServerVehicles().Count() > 0 )
+			return;
+
 		vehicles.RequestServerVehicles();
 	}
 
