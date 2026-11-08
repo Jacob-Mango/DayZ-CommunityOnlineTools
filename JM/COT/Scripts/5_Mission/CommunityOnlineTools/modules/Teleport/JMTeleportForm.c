@@ -1331,7 +1331,10 @@ class JMTeleportForm: JMFormBase
 		}
 
 		if ( !m_Filters.ShowsPlayers() && m_Filters.GetVehicleTypeFilter() == 0 && !m_Filters.ShowsMapMarkers() && !m_Filters.ShowsHeliCrashes() && !m_Filters.ShowsToxicZones() )
+		{
+			RebuildList();
 			return;
+		}
 
 		//! The vehicle list is a server round trip, not a local read, so it is
 		//! asked for once when the overlay is switched on rather than on every
