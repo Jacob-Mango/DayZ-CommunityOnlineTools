@@ -634,16 +634,19 @@ class JMTeleportForm: JMFormBase
 		m_ListItems.Insert( new JMTeleportRowData( key, kind, position, markerId ) );
 	}
 
-	//! True if `label` matches the current search, or there is no search to
-	//! match. Shared by every overlay kind so "type to filter" behaves the same
-	//! whether it is hunting through locations or through the player list.
+	[Obsolete("Use JMSearchMatcher::Matches")]
 	protected bool PassesSearch( string label, JMSearchMatcher matcher )
 	{
 		return matcher.Matches( label );
 	}
 
-	protected void AppendPlayerRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
+	void CollectPlayers(out array<JMPlayerInstance> entries)
 	{
+		entries = new array<JMPlayerInstance>();
+
+		if (!m_Filters.ShowsPlayers())
+			return;
+
 		if ( !JMPermissions.Has( JMConstants.PERM_MAP_PLAYERS ) )
 			return;
 
@@ -651,11 +654,10 @@ class JMTeleportForm: JMFormBase
 		if ( !players )
 			return;
 
-		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_PLAYER";
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
 
-		for ( int i = 0; i < players.Count(); i++ )
+		foreach (JMPlayerInstance player: players)
 		{
-			JMPlayerInstance player = players[i];
 			if ( !player )
 				continue;
 
@@ -664,8 +666,23 @@ class JMTeleportForm: JMFormBase
 
 			string name = player.GetName();
 
-			if ( !PassesSearch( name, matcher ) )
+			if (!matcher.Matches(name))
 				continue;
+
+			entries.Insert( player );
+		}
+	}
+
+	protected void AppendPlayerRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
+	{
+		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_PLAYER";
+
+		array< JMPlayerInstance > players;
+		CollectPlayers( players );
+
+		foreach (JMPlayerInstance player: players)
+		{
+			string name = player.GetName();
 
 			rowLabels.Insert( name );
 			rowSubs.Insert( kindLabel );
@@ -674,12 +691,13 @@ class JMTeleportForm: JMFormBase
 		}
 	}
 
-	//! Mirrors RefreshVehicleMarkers()'s type filter and, critically, its index
-	//! scheme: "tp_veh_" + the FULL-list index i, not a running counter, so the
-	//! marker id built here always matches the one the map already drew for the
-	//! same vehicle.
-	protected void AppendVehicleRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
+	void CollectVehicles(out array<JMVehicleMetaData> entries)
 	{
+		entries = new array<JMVehicleMetaData>();
+
+		if (!m_Filters.GetVehicleTypeFilter())
+			return
+
 		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW ) )
 			return;
 
@@ -691,20 +709,36 @@ class JMTeleportForm: JMFormBase
 		if ( !list )
 			return;
 
-		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_VEHICLE";
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
 
-		for ( int i = 0; i < list.Count(); i++ )
+		foreach (JMVehicleMetaData meta: list)
 		{
-			JMVehicleMetaData meta = list[i];
 			if ( !meta )
 				continue;
 
 			if ( meta.m_VehicleType != 0 && ( meta.m_VehicleType & m_Filters.GetVehicleTypeFilter() ) == 0 )
 				continue;
 
-			if ( !PassesSearch( meta.m_DisplayName, matcher ) )
+			if (!matcher.Matches(meta.m_DisplayName))
 				continue;
 
+			entries.Insert(meta);
+		}
+	}
+
+	//! Mirrors RefreshVehicleMarkers() index
+	//! scheme: "tp_veh_" + the FULL-list index i, not a running counter, so the
+	//! marker id built here always matches the one the map already drew for the
+	//! same vehicle.
+	protected void AppendVehicleRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
+	{
+		array< JMVehicleMetaData > vehicles;
+		CollectVehicles(vehicles);
+
+		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_VEHICLE";
+
+		foreach (int i, JMVehicleMetaData meta: vehicles)
+		{
 			rowLabels.Insert( meta.m_DisplayName );
 			rowSubs.Insert( kindLabel );
 
@@ -719,10 +753,15 @@ class JMTeleportForm: JMFormBase
 	{
 		entries = new array< ref JMTeleportMapEntry >();
 
+		if (!m_Filters.ShowsMapMarkers())
+			return;
+
 #ifdef EXPANSIONMODNAVIGATION
 		ExpansionMapSettings mapSettings = GetExpansionSettings().GetMap();
 		if ( !mapSettings || !mapSettings.ServerMarkers )
 			return;
+
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
 
 		for ( int i = 0; i < mapSettings.ServerMarkers.Count(); i++ )
 		{
@@ -733,6 +772,9 @@ class JMTeleportForm: JMFormBase
 			string markerName = marker.GetName();
 			if ( markerName == "" )
 				markerName = "#STR_COT_TELEPORT_MODULE_MARKER_DEFAULT_NAME";
+
+			if (!matcher.Matches(Widget.TranslateString(markerName)))
+				continue;
 
 			//! The marker's own glyph, so a trader reads as a trader as on Expansion's map.
 			//! GetIcon() resolves the stored icon NAME via ExpansionIcons to a texture path or
@@ -757,9 +799,6 @@ class JMTeleportForm: JMFormBase
 		{
 			JMTeleportMapEntry entry = entries[i];
 
-			if ( !PassesSearch( entry.m_Label, matcher ) )
-				continue;
-
 			rowLabels.Insert( entry.m_Label );
 			rowSubs.Insert( kindLabel );
 
@@ -773,10 +812,18 @@ class JMTeleportForm: JMFormBase
 	{
 		entries = new array< ref JMTeleportMapEntry >();
 
+		if (!m_Filters.ShowsHeliCrashes())
+			return;
+
 		//! Every crash carries the same localized name; the ordinal is the
 		//! only thing that tells two of them apart in a list.
 		string crashName = "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER";
 		int crashIndex = 0;
+
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
+
+		if (!matcher.Matches(Widget.TranslateString(crashName)))
+			return;
 
 		//! TODO/FIXME: This only includes entries in netbubble on MP client. List of crashes should be sent from server as RPC (classname + position)
 
@@ -815,11 +862,6 @@ class JMTeleportForm: JMFormBase
 
 	protected void AppendHeliCrashRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
 	{
-		string crashName = "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER";
-
-		if ( !PassesSearch( crashName, matcher ) )
-			return;
-
 		array< ref JMTeleportMapEntry > entries;
 		CollectHeliCrashEntries( entries );
 
@@ -838,8 +880,16 @@ class JMTeleportForm: JMFormBase
 	{
 		entries = new array< ref JMTeleportMapEntry >();
 
+		if (!m_Filters.ShowsToxicZones())
+			return;
+
 		string zoneName = "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER";
 		int zoneIndex = 0;
+
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
+
+		if (!matcher.Matches(Widget.TranslateString(zoneName)))
+			return;
 
 		if ( EffectArea.s_JM_COT_AllAreas )
 		{
@@ -858,9 +908,6 @@ class JMTeleportForm: JMFormBase
 	protected void AppendToxicZoneRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
 	{
 		string zoneName = "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER";
-
-		if ( !PassesSearch( zoneName, matcher ) )
-			return;
 
 		array< ref JMTeleportMapEntry > entries;
 		CollectToxicZoneEntries( entries );

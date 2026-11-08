@@ -43,28 +43,15 @@ class JMTeleportMapOverlays
 
 	void RefreshPlayerMarkers()
 	{
-		if ( !JMPermissions.Has( JMConstants.PERM_MAP_PLAYERS ) )
-			return;
-
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
-
-		if ( !players )
-			return;
+		array< JMPlayerInstance > players;
+		m_Form.CollectPlayers(players);
 
 		//! One redraw for the whole layer instead of one per player.
 		m_Form.GetMap().BeginBatch();
 		m_Form.GetMap().ClearLayer( JMTeleportForm.MAP_LAYER_PLAYERS );
 
-		for ( int i = 0; i < players.Count(); i++ )
+		foreach (JMPlayerInstance player: players)
 		{
-			JMPlayerInstance player = players[i];
-
-			if ( !player )
-				continue;
-
-			if ( !m_Form.GetFilters().IsPlayerVisibleByRole( player ) )
-				continue;
-
 			int color = JMTeleportForm.COLOR_PLAYER;
 
 			if ( JM_GetSelected().IsSelected( player.GetGUID() ) )
@@ -167,37 +154,15 @@ class JMTeleportMapOverlays
 
 	void RefreshVehicleMarkers()
 	{
-		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW ) )
-			return;
-
-		JMVehiclesModule vehicles = VehiclesModule();
-
-		if ( !vehicles )
-			return;
-
-		array< ref JMVehicleMetaData > list = vehicles.GetServerVehicles();
-
-		if ( !list )
-			return;
+		array< JMVehicleMetaData > vehicles;
+		m_Form.CollectVehicles(vehicles);
 
 		m_Form.GetMap().BeginBatch();
 		m_Form.GetMap().ClearLayer( JMTeleportForm.MAP_LAYER_VEHICLES );
 		m_VehicleByMarkerId.Clear();
 
-		for ( int i = 0; i < list.Count(); i++ )
+		foreach ( int i, JMVehicleMetaData meta: vehicles )
 		{
-			JMVehicleMetaData meta = list[i];
-
-			if ( !meta )
-				continue;
-
-			//! A recognized type answers to its own checkbox; a vehicle
-			//! carrying none of the known bits (modded, unclassified) shows
-			//! whenever the vehicle layer is on at all - same as before this
-			//! had per-type rows.
-			if ( meta.m_VehicleType != 0 && ( meta.m_VehicleType & m_Form.GetFilters().GetVehicleTypeFilter() ) == 0 )
-				continue;
-
 			//! Indexed rather than keyed on the network id: the ids are a pair
 			//! of ints, and the layer is replaced whole on every refresh, so
 			//! nothing outside this loop ever asks for one of these by name.
