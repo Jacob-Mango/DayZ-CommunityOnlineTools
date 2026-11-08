@@ -607,6 +607,9 @@ class JMTeleportForm: JMFormBase
 			if (unchangedCount == m_ListItems.Count())
 			{
 				m_ListItems = existingListItems;
+
+				ApplyMapSelection();
+
 				return;
 			}
 		}
