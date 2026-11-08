@@ -510,13 +510,12 @@ class JMTeleportForm: JMFormBase
 		if ( !m_LocationList )
 			return;
 
-		m_ListItems.Clear();
-
 		TStringArray rowLabels = new TStringArray;
 		TStringArray rowSubs   = new TStringArray;
 
 		if ( !m_Module || !m_Module.IsLoaded() )
 		{
+			m_ListItems.Clear();
 			m_LocationList.SetEmptyText( "#STR_COT_TELEPORT_MODULE_LOADING" );
 			m_LocationList.SetItems( rowLabels, rowSubs );
 			return;
@@ -524,6 +523,7 @@ class JMTeleportForm: JMFormBase
 
 		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION ) )
 		{
+			m_ListItems.Clear();
 			m_LocationList.SetEmptyText( "#STR_COT_TELEPORT_MODULE_NO_VIEW_PERMISSION" );
 			m_LocationList.SetItems( rowLabels, rowSubs );
 			return;
@@ -532,18 +532,21 @@ class JMTeleportForm: JMFormBase
 		array< ref JMTeleportLocation > locations = m_Module.GetLocations();
 		if ( !locations )
 		{
+			m_ListItems.Clear();
 			m_LocationList.SetItems( rowLabels, rowSubs );
 			return;
 		}
+
+		array<ref JMTeleportRowData> existingListItems = m_ListItems;
+		m_ListItems = {};
 
 		JMSearchMatcher matcher = new JMSearchMatcher( m_SearchFilter );
 
 		if ( m_Map )
 			m_Map.ClearLayer( MAP_LAYER );
 
-		for ( int i = 0; i < locations.Count(); i++ )
+		foreach (JMTeleportLocation location: locations)
 		{
-			JMTeleportLocation location = locations[i];
 			if ( !location )
 				continue;
 
@@ -586,6 +589,27 @@ class JMTeleportForm: JMFormBase
 
 		if ( m_Filters.ShowsToxicZones() )
 			AppendToxicZoneRows( rowLabels, rowSubs, matcher );
+
+		//! Don't do anything if the list hasn't changed to prevent the list scroll position jumping needelessly on each update.
+		//! TODO/FIXME: This still has the problem that the list scroll position jumps when an entry is added/removed.
+		if (existingListItems.Count() == m_ListItems.Count())
+		{
+			int unchangedCount;
+
+			foreach (int i, JMTeleportRowData existingEntry: existingListItems)
+			{
+				if (!m_ListItems[i].Equals(existingEntry, false))
+					break;
+
+				++unchangedCount;
+			}
+
+			if (unchangedCount == m_ListItems.Count())
+			{
+				m_ListItems = existingListItems;
+				return;
+			}
+		}
 
 		m_LocationList.SetEmptyText( "#STR_COT_TELEPORT_MODULE_NO_LOCATIONS_MATCH" );
 		m_LocationList.SetItems( rowLabels, rowSubs );
