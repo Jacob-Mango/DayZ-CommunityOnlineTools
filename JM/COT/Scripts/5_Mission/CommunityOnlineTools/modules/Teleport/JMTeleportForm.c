@@ -5,10 +5,8 @@
 
 class JMTeleportForm: JMFormBase
 {
-	//! Menu row shown before any real category, meaning "do not filter". Held
-	//! as an id rather than as a category name so a category could legally be
-	//! called "ALL" without colliding with it.
-	static const string CATEGORY_ALL = "*ALL*";
+	//! Menu row shown before any real category, meaning "do not filter".
+	static const string CATEGORY_ALL = "*";
 
 	//! The map layer this form owns. Anything else drawn on the same map - a
 	//! player dot, a loot result - lives in its own layer and is not ours to
@@ -1526,13 +1524,6 @@ class JMTeleportForm: JMFormBase
 
 		for ( int i = 0; i < types.Count(); i++ )
 		{
-			//! JMTeleportSerialize puts a literal "ALL" at the head of Types -
-			//! it is the old form's filter row, stored with the real
-			//! categories. This menu already has an "everything" row of its
-			//! own, so that one would show up twice.
-			if ( types[i] == "ALL" )
-				continue;
-
 			m_Categories.Insert( types[i] );
 		}
 

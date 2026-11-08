@@ -20,16 +20,68 @@ class JMTeleportSerialize : Managed
 
 		if ( JMJsonFile<JMTeleportSerialize>.Load( m_FileName, settings ) )
 		{
-			//! we dont have versionning so this is a fail safe
-			if ( settings.Types.Count() == 0 )
+			//! we don't have versioning so this is a fail-safe
+			if ( settings.Locations.Count() == 0 )
 			{
 				settings.Defaults();
 				settings.Save();
 			}
-			else if (settings.Types[0] == "")
+			else
 			{
-				settings.Types[0] = "ALL";
-				settings.Save();
+				bool changed;
+				int idx;
+
+				idx =  settings.Types.Find("ALL");
+				if (idx > -1)
+				{
+					settings.Types.Remove(idx);
+					changed = true;
+				}
+
+				//! Remove duplicate entries (based on name) and fix empty type
+
+				TStringArray locationNames = {};
+				map<string, ref JMTeleportLocation> locationsByName = new map<string, ref JMTeleportLocation>;
+
+				foreach (JMTeleportLocation location: settings.Locations)
+				{
+					if (!location.Type)
+					{
+						idx = location.Name.IndexOf(" | ");
+						if (idx > -1)
+						{
+							location.Type = location.Name.Substring(0, idx);
+							location.Name = location.Name.Substring(idx + 3, location.Name.Length() - idx - 3);
+							changed = true;
+						}
+					}
+
+					if (settings.Types.Find(location.Type) == -1)
+					{
+						settings.Types.Insert(location.Type);
+						changed = true;
+					}
+
+					if (!locationsByName[location.Name])
+					{
+						locationNames.Insert(location.Name);
+						locationsByName[location.Name] = location;
+					}
+				}
+
+				settings.Types.Sort();  //! Don't consider just sorting a change
+
+				if (changed)
+				{
+					settings.Locations.Clear();
+
+					foreach (string name: locationNames)
+					{
+						settings.Locations.Insert(locationsByName[name]);
+					}
+
+					settings.Save();
+				}
 			}
 		} else {
 			settings.Defaults();
@@ -56,6 +108,9 @@ class JMTeleportSerialize : Managed
 
 	void Defaults()
 	{
+		Types.Clear();
+		Locations.Clear();
+
 		string location_config_path = "CfgWorlds " + m_WorldName + " Names";
 		int classNamesCount = g_Game.ConfigGetChildrenCount( location_config_path );
 		
@@ -113,7 +168,6 @@ class JMTeleportSerialize : Managed
 		}
 
 		Types.Sort();
-		Types.InsertAt("ALL", 0);
 	
 		array< ref string > afterSorting = new array< ref string >;
 		array< ref string > beforeSorting = new array< ref string >;
