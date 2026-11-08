@@ -1,3 +1,5 @@
+//! Why does this exist? It's essentially a duplicate of JMTeleportLocation.
+//! FIXME: Merge with JMTeleportLocation and remove this
 class JMTeleportRowData
 {
 	string m_Name;
