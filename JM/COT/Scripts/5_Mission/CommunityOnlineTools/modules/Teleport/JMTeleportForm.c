@@ -588,6 +588,8 @@ class JMTeleportForm: JMFormBase
 		if ( m_Filters.ShowsToxicZones() )
 			AppendToxicZoneRows( rowLabels, rowSubs, matcher );
 
+		Sort3(rowLabels, rowSubs, m_ListItems);
+
 		//! Don't do anything if the list hasn't changed to prevent the list scroll position jumping needelessly on each update.
 		//! TODO/FIXME: This still has the problem that the list scroll position jumps when an entry is added/removed.
 		if (existingListItems.Count() == m_ListItems.Count())
@@ -624,6 +626,80 @@ class JMTeleportForm: JMFormBase
 
 		if ( m_Filter )
 			m_Filter.SetTextPreview( matcher.GetClosestMatch() );
+	}
+
+	void Sort3(TStringArray keys, TStringArray values, inout array<ref JMTeleportRowData> listItems)
+	{
+		if ( keys.Count() != values.Count() )
+			return;
+
+		bool ignoreCase = true;
+
+		TStringArray keysLower;
+		map<string, ref TIntArray> keyToIndices = new map<string, ref TIntArray>;
+
+		if ( ignoreCase )
+			keysLower = {};
+
+		TIntArray indices;
+
+		foreach ( int i, string key: keys )
+		{
+			if ( ignoreCase )
+			{
+				key.ToLower();
+				keysLower.Insert( key );
+			}
+
+			if ( !keyToIndices.Find( key, indices ) )
+			{
+				indices = {};
+				keyToIndices[key] = indices;
+			}
+
+			indices.Insert( i );
+		}
+
+		TStringArray sortedKeys;
+		TStringArray outKeys;
+		TStringArray outValues;
+
+		if ( ignoreCase )
+		{
+			keysLower.Sort();
+			sortedKeys = keysLower;
+
+			outKeys = {};
+		}
+		else
+		{
+			keys.Sort();
+			sortedKeys = keys;
+		}
+
+		outValues = {};
+		array<ref JMTeleportRowData> listItemsOrig = listItems;
+		listItems = {};
+
+		foreach ( string sortedKey: sortedKeys )
+		{
+			indices = keyToIndices[sortedKey];
+
+			int index = indices[0];
+			
+			if ( ignoreCase )
+				outKeys.Insert( keys[index] );
+				
+			outValues.Insert( values[index] );
+			listItems.Insert( listItemsOrig[index] );
+
+			indices.RemoveOrdered( 0 );
+		}
+
+		if ( ignoreCase )
+			keys.Copy(outKeys);
+
+		values.Copy(outValues);
 	}
 
 	//! Push one row's data into the four parallel arrays. Call this at the same
