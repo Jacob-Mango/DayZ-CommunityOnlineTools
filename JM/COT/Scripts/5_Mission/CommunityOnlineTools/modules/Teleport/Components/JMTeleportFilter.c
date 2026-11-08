@@ -173,6 +173,7 @@ class JMTeleportFilter
 			return;
 
 		m_Form.ApplyOverlays();
+		m_Form.RebuildList();
 	}
 
 	void BuildFilterLocationsPage( UIActionFilterMenu menu )
@@ -242,6 +243,7 @@ class JMTeleportFilter
 		}
 
 		m_Form.ApplyOverlays();
+		m_Form.RebuildList();
 	}
 
 	void BuildFilterPlayersPage( UIActionFilterMenu menu )
@@ -288,6 +290,7 @@ class JMTeleportFilter
 		}
 
 		m_Form.ApplyOverlays();
+		m_Form.RebuildList();
 	}
 
 	protected void TogglePlayerRole( string roleName )
