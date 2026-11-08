@@ -778,6 +778,8 @@ class JMTeleportForm: JMFormBase
 		string crashName = "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER";
 		int crashIndex = 0;
 
+		//! TODO/FIXME: This only includes entries in netbubble on MP client. List of crashes should be sent from server as RPC (classname + position)
+
 #ifdef EXPANSIONMODAI
 		if ( CrashBase.s_Expansion_HeliCrashes )
 		{
