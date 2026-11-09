@@ -1244,15 +1244,12 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	{
 		auto selected = JM_GetSelected();
 
-		if (!selected)
-			return null;
-
 		auto players = selected.GetPlayers();
 
 		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( players[0] );
 
 		if (!inst)
-			return null;
+			return CreateConfirmation_One(JMConfirmationType.INFO, "#STR_COT_NO_PLAYERS_SELECTED", "", "#STR_COT_GENERIC_CANCEL");
 
 		int count = players.Count();
 		if (count > 1)
@@ -1297,9 +1294,6 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	JMConfirmation CreateAdvancedObjectConfirm(string callbackSelectedObjectsMulti, string callbackSelectedObjectSingle, bool executeCallbackOnNoConfirmation = true)
 	{
 		auto selected = JM_GetSelected();
-
-		if (!selected)
-			return null;
 
 		auto objects = selected.GetObjects();
 
