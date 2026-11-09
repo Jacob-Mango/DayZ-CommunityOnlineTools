@@ -11,6 +11,11 @@ class JMTeleportModule: JMRenderableModuleBase
 			Class.CastTo(m_MapMenu, m_MapModule.GetForm());
 	}
 
+	JMTeleportSerialize GetSettings()
+	{
+		return m_Settings;
+	}
+
 	array< ref JMTeleportLocation > GetLocations()
 	{
 		return m_Settings.Locations;
@@ -587,9 +592,6 @@ class JMTeleportModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_CREATE, ident, instance ) )
 			return;
-		
-		if (m_Settings.Types.Find(catName) == -1)
-			m_Settings.Types.Insert(catName);
 
 		m_Settings.AddLocation(catName, locName, playerpos);
 
@@ -636,36 +638,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_REMOVE, ident, instance ) )
 			return;
 
-		int id = -1;
-		bool hasType = false;
-		for(int i=0; i < m_Settings.Locations.Count(); i++)
-		{
-			if (m_Settings.Locations[i].Type == locName.Type)
-			{
-				if (m_Settings.Locations[i].Name == locName.Name)
-					id = i;
-				else
-					hasType = true;
-
-				if (id > -1)
-					break;
-			}
-		}
-		
-		if (id > -1)
-			m_Settings.Locations.Remove(id);
-
-		if (!hasType)
-		{
-			for(i=0; i < m_Settings.Types.Count(); i++)
-			{
-				if (m_Settings.Types[i] == locName.Type)
-				{
-					m_Settings.Types.Remove(i);
-					break;
-				}
-			}
-		}
+		m_Settings.RemoveLocation(locName.Name);
 
 		m_Settings.Save();
 
@@ -757,7 +730,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		//! The old category may have just lost its last member, in which case it
 		//! is not a category any more. Add does the same bookkeeping in reverse.
 		if ( oldType != newCategory )
-			PruneEmptyType( oldType );
+			m_Settings.RemoveTypeIfUnused( oldType );
 
 		m_Settings.Save();
 
@@ -767,24 +740,8 @@ class JMTeleportModule: JMRenderableModuleBase
 		SendWebhookColored( "Location", instance, "Edited TP " + oldName + " (" + oldType + ") -> " + newName + " (" + newCategory + ")", JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
-	//! Drop a category no location uses any more.
-	protected void PruneEmptyType( string type )
-	{
-		for ( int i = 0; i < m_Settings.Locations.Count(); i++ )
-		{
-			if ( m_Settings.Locations[i].Type == type )
-				return;
-		}
-
-		for ( int t = 0; t < m_Settings.Types.Count(); t++ )
-		{
-			if ( m_Settings.Types[t] != type )
-				continue;
-
-			m_Settings.Types.Remove( t );
-			return;
-		}
-	}
+	[Obsolete("Use JMTeleportSerialize::RemoveTypeIfUnused")]
+	protected void PruneEmptyType( string type );
 
 	void Command_Position(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
 	{
