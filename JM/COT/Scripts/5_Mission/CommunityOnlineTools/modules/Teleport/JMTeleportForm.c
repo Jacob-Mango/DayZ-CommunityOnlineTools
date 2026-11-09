@@ -543,6 +543,8 @@ class JMTeleportForm: JMFormBase
 		if ( m_Map )
 			m_Map.ClearLayer( MAP_LAYER );
 
+		JMTeleportSerialize worldDefaults = JMTeleportSerialize.GetWorldDefaults();
+
 		foreach (JMTeleportLocation location: locations)
 		{
 			if ( !location )
@@ -566,7 +568,17 @@ class JMTeleportForm: JMFormBase
 			//! leaving the map covered in the rest would make the two disagree
 			//! about what "the locations" are.
 			if ( m_Map )
-				m_Map.AddMarker( MarkerIdFor( location.Name ), location.Position, location.Name, MarkerColorFor( location.Type ), MarkerIconFor( location.Type ), MAP_LAYER );
+			{
+				//! @note: We never draw the label of named location markers that match entries from CfgWorlds since the map already
+				//! contains labels for all of them
+				string label = "";
+
+				JMTeleportLocation defaultLocation = worldDefaults.FindLocation(location.Name);
+				if (!defaultLocation || !location.Equals(defaultLocation))
+					label = location.Name;
+
+				m_Map.AddMarker( MarkerIdFor( location.Name ), location.Position, label, MarkerColorFor( location.Type ), MarkerIconFor( location.Type ), MAP_LAYER );
+			}
 		}
 
 		//! Every overlay the filter menu can turn on gets folded into the same
@@ -1882,17 +1894,11 @@ class JMTeleportForm: JMFormBase
 		if ( name == "" || !m_Module || !m_Module.IsLoaded() )
 			return NULL;
 
-		array< ref JMTeleportLocation > locations = m_Module.GetLocations();
-		if ( !locations )
+		JMTeleportSerialize settings = m_Module.GetSettings();
+		if ( !settings )
 			return NULL;
 
-		for ( int i = 0; i < locations.Count(); i++ )
-		{
-			if ( locations[i] && locations[i].Name == name )
-				return locations[i];
-		}
-
-		return NULL;
+		return settings.FindLocation(name);
 	}
 
 	//! The search row resolves its callbacks on the form, so the filter button's click lands here.
