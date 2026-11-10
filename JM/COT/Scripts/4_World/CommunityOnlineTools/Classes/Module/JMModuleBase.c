@@ -14,6 +14,17 @@ modded class JMModuleBase
 	//! RPC id -> the JMModuleAction type that owns it. Built on first use from RegisterActions().
 	protected ref map< int, typename > m_ActionTypes;
 
+	override bool COT_CanProcessInputs()
+	{
+		if (!super.COT_CanProcessInputs())
+			return false;
+
+		if (!g_cotBase)
+			return false;
+
+		return true;
+	}
+
 	array<string> GetCommandNames()
 	{
 		return new array<string>();
