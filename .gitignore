@@ -23,6 +23,7 @@ user.cfg
 
 .vscode/
 .vs/
+*.geany
 
 ServerProfile/CommunityOnlineTools/Logs/
 ServerProfile/BattlEye/
