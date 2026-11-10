@@ -121,6 +121,8 @@ class JMTeleportForm: JMFormBase
 	//! Strongly-typed list items array replacing legacy parallel arrays.
 	protected ref array< ref JMTeleportRowData > m_ListItems = new array< ref JMTeleportRowData >;
 
+	protected ref array<JMTeleportLocation> m_FilteredLocations = {};
+
 	// ---- Right pane --------------------------------------------------------
 	protected UIActionMap            m_Map;
 	protected UIActionCard           m_CoordsCard;
@@ -508,6 +510,8 @@ class JMTeleportForm: JMFormBase
 		if ( !m_LocationList )
 			return;
 
+		m_FilteredLocations.Clear();
+
 		TStringArray rowLabels = new TStringArray;
 		TStringArray rowSubs   = new TStringArray;
 
@@ -540,11 +544,6 @@ class JMTeleportForm: JMFormBase
 
 		JMSearchMatcher matcher = new JMSearchMatcher( m_SearchFilter );
 
-		if ( m_Map )
-			m_Map.ClearLayer( MAP_LAYER );
-
-		JMTeleportSerialize worldDefaults = JMTeleportSerialize.GetWorldDefaults();
-
 		foreach (JMTeleportLocation location: locations)
 		{
 			if ( !location )
@@ -556,6 +555,8 @@ class JMTeleportForm: JMFormBase
 			if ( !matcher.Matches( location.Name ) )
 				continue;
 
+			m_FilteredLocations.Insert(location);
+
 			rowLabels.Insert( location.Name );
 
 			//! The category rides along as the row's subtitle, which is what
@@ -563,22 +564,6 @@ class JMTeleportForm: JMFormBase
 			rowSubs.Insert( location.Type );
 
 			AddRow( location.Name, ROWKIND_LOCATION, location.Position, MarkerIdFor( location.Name ) );
-
-			//! The map shows exactly what the list shows. Filtering the list and
-			//! leaving the map covered in the rest would make the two disagree
-			//! about what "the locations" are.
-			if ( m_Map )
-			{
-				//! @note: We never draw the label of named location markers that match entries from CfgWorlds since the map already
-				//! contains labels for all of them
-				string label = "";
-
-				JMTeleportLocation defaultLocation = worldDefaults.FindLocation(location.Name);
-				if (!defaultLocation || !location.Equals(defaultLocation))
-					label = location.Name;
-
-				m_Map.AddMarker( MarkerIdFor( location.Name ), location.Position, label, MarkerColorFor( location.Type ), MarkerIconFor( location.Type ), MAP_LAYER );
-			}
 		}
 
 		//! Every overlay the filter menu can turn on gets folded into the same
@@ -626,6 +611,8 @@ class JMTeleportForm: JMFormBase
 			}
 		}
 
+		CreateLocationMarkers();
+
 		m_LocationList.SetEmptyText( "#STR_COT_TELEPORT_MODULE_NO_LOCATIONS_MATCH" );
 		m_LocationList.SetItems( rowLabels, rowSubs );
 
@@ -641,6 +628,30 @@ class JMTeleportForm: JMFormBase
 
 		if ( m_Filter )
 			m_Filter.SetTextPreview( matcher.GetClosestMatch() );
+	}
+
+	void CreateLocationMarkers()
+	{
+		if (!m_Map)
+			return;
+
+		m_Map.ClearLayer(MAP_LAYER);
+
+		JMTeleportSerialize worldDefaults = JMTeleportSerialize.GetWorldDefaults();
+
+		foreach (JMTeleportLocation location: m_FilteredLocations)
+		{
+			float alpha = 1.0;
+
+			//! @note We never draw the label (unless highlighted) of named
+			//! location markers that match entries from CfgWorlds since the
+			//! map already contains labels for all of them
+			JMTeleportLocation defaultLocation = worldDefaults.FindLocation(location.Name);
+			if (defaultLocation && location.Equals(defaultLocation))
+				alpha /= 255;  //! Draw with 1% opacity (can't be zero since it'll be interpreted as fully opaque in UIActionMapMarker::SetColor)
+
+			m_Map.AddMarker(MarkerIdFor(location.Name), location.Position, location.Name, MarkerColorFor(location.Type, alpha), MarkerIconFor(location.Type), MAP_LAYER);
+		}
 	}
 
 	void Sort3(TStringArray keys, TStringArray values, inout array<ref JMTeleportRowData> listItems)
@@ -1105,21 +1116,44 @@ class JMTeleportForm: JMFormBase
 
 	//! Colour carries the same split as the glyph, so a category is still
 	//! tellable at a zoom where the glyph is a few pixels across.
-	protected int MarkerColorFor( string category )
+	protected int MarkerColorFor( string category, float alpha = 1.0 )
 	{
-		if ( category == "City" || category == "CityCapital" )
-			return JMTheme.DANGER;
+		int color;
 
-		if ( category == "Village" || category == "VillageCapital" || category == "Settlement" )
-			return JMTheme.WARNING;
+		switch (category)
+		{
+			case "Capital":
+			case "City":
+			case "CityCapital":
+				color = JMTheme.DANGER;
+				break;
 
-		if ( category == "Marine" )
-			return JMTheme.INFO;
+			case "Settlement":
+			case "Village":
+			case "VillageCapital":
+				color = JMTheme.WARNING;
+				break;
 
-		if ( category == "Hill" || category == "Mount" )
-			return JMTheme.SUCCESS;
+			case "Marine":
+				color = JMTheme.INFO;
+				break;
 
-		return JMTheme.ACCENT;
+			case "Hill":
+			case "Mount":
+				color = JMTheme.SUCCESS;
+				break;
+
+			default:
+				color = JMTheme.ACCENT;
+				break;
+		}
+
+		int alphaChannel = ((color & 0xff000000) >> 24) & 255;
+		int alphaMask = (int)(alphaChannel * alpha) << 24;
+		color &= 0x00ffffff;
+		color |= alphaMask;
+
+		return color;
 	}
 
 	protected void ApplyMapSelection()
@@ -1367,6 +1401,11 @@ class JMTeleportForm: JMFormBase
 		if ( !m_Map )
 			return;
 
+		//! The list mirrors these same overlays now, so a join, a leave or a
+		//! vehicle spawning has to reach it on the same tick that moves its dot
+		//! on the map - not only on the next search keystroke or filter toggle.
+		RebuildList();
+
 		if ( m_Filters.ShowsPlayers() )
 			m_Overlays.RefreshPlayerMarkers();
 
@@ -1382,10 +1421,7 @@ class JMTeleportForm: JMFormBase
 		if ( m_Filters.ShowsToxicZones() )
 			m_Overlays.RefreshToxicZoneMarkers();
 
-		//! The list mirrors these same overlays now, so a join, a leave or a
-		//! vehicle spawning has to reach it on the same tick that moves its dot
-		//! on the map - not only on the next search keystroke or filter toggle.
-		RebuildList();
+		ApplyMapSelection();
 	}
 
 	// =========================================================================
