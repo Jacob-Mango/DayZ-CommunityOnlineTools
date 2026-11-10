@@ -1,5 +1,8 @@
 class JMTeleportSerialize : Managed
 {
+	static const string LOCATION_TYPE_AIRFIELD = "Airfield";
+	static const string LOCATION_TYPE_MILITARY_BASE = "Military Base";
+
 	protected static ref JMTeleportSerialize s_WorldDefaults;
 
 	ref TStringArray Types;
@@ -48,7 +51,26 @@ class JMTeleportSerialize : Managed
 					if (idx > -1)
 					{
 						location.Type = location.Name.Substring(0, idx);
+
+						if (location.Type == "Local")
+						{
+							idx = location.Name.IndexOf(" | Military base ");
+							if (idx > -1)
+								location.Type = LOCATION_TYPE_MILITARY_BASE;
+						}
+
 						location.Name = location.Name.Substring(idx + 3, location.Name.Length() - idx - 3);
+						changed = true;
+					}
+				}
+
+				//! This error was in both COT and Expansion Navigation CfGworlds ChernarusPlus Names overrides,
+				//! always fix a mismatch in loaded teleport locations
+				if (location.Name == "Tikhiy zaliv" && settings.m_WorldName == "chernarusplus")
+				{
+					if (Math.Round(location.Position[0]) == 5735 && Math.Round(location.Position[2]) == 1919)
+					{
+						location.Name = "Mutny zaliv";
 						changed = true;
 					}
 				}
@@ -199,21 +221,26 @@ class JMTeleportSerialize : Managed
 
 			if ( location_type.IndexOf("Name") == 0 && location_type.Length() > 4 )
 				location_type = location_type.Substring(4, location_type.Length() - 4);
+
+			//! This error was in both COT and Expansion Navigation CfGworlds ChernarusPlus Names overrides,
+			//! since it probably was copied to countless other mods as well, always fix a mismatch
+			if ( location_class_name == "Marine_Mutnyizaliv" && location_name == "Tikhiy zaliv" )
+				location_name = "Mutny zaliv";
 				
 			if ( location_class_name.IndexOf("AF") == 0 )
-				location_type = "Airfield";
+				location_type = LOCATION_TYPE_AIRFIELD;
 				
 			if ( location_class_name.IndexOf("MB") == 0 )
-				location_type = "Military Base";
+				location_type = LOCATION_TYPE_MILITARY_BASE;
 
 			TStringArray output = new TStringArray;
 			location_class_name.Split("_", output);
 			foreach(string slice: output)
 			{
 				if ( slice == "AF" )
-					location_type = "Airfield";
+					location_type = LOCATION_TYPE_AIRFIELD;
 				else if ( slice == "MB" )
-					location_type = "Military Base";
+					location_type = LOCATION_TYPE_MILITARY_BASE;
 			}
 
 			locationNames.Insert(location_name);
