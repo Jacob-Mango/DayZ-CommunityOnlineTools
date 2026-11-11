@@ -728,16 +728,30 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 	void Undo()
 	{
-		if ( !IsMissionHost() ) return;
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMMapEditorModuleRPC.Undo, true, NULL );
+		if ( g_Game.IsClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMMapEditorModuleRPC.Undo, true, NULL );
+		}
+		else if (!g_Game.IsDedicatedServer())
+		{
+			//! Offline/SP
+			Exec_Undo( null );
+		}
 	}
 
 	void Redo()
 	{
-		if ( !IsMissionHost() ) return;
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMMapEditorModuleRPC.Redo, true, NULL );
+		if ( g_Game.IsClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMMapEditorModuleRPC.Redo, true, NULL );
+		}
+		else if (!g_Game.IsDedicatedServer())
+		{
+			//! Offline/SP
+			Exec_Redo( null );
+		}
 	}
 
 	protected void RPC_Undo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -769,7 +783,13 @@ class JMMapEditorModule : JMRenderableModuleBase
 		if ( !m_RedoStack ) m_RedoStack = new array< ref JMMapEditorUndoEntry >;
 		m_RedoStack.Insert( entry );
 
-		GetCommunityOnlineToolsBase().Log( ident, "MapEditor Undo (" + entry.Type + ")" );
+		JMPlayerInstance instance;
+		if (ident)
+			instance = GetPermissionsManager().GetPlayer( ident.GetId() );
+		else if (!g_Game.IsDedicatedServer())
+			instance = GetPermissionsManager().GetClientPlayer();
+
+		GetCommunityOnlineToolsBase().Log( instance, "MapEditor Undo (" + entry.Type + ")" );
 		BroadcastList();
 	}
 
@@ -784,7 +804,13 @@ class JMMapEditorModule : JMRenderableModuleBase
 		if ( !m_UndoStack ) m_UndoStack = new array< ref JMMapEditorUndoEntry >;
 		m_UndoStack.Insert( entry );
 
-		GetCommunityOnlineToolsBase().Log( ident, "MapEditor Redo (" + entry.Type + ")" );
+		JMPlayerInstance instance;
+		if (ident)
+			instance = GetPermissionsManager().GetPlayer( ident.GetId() );
+		else if (!g_Game.IsDedicatedServer())
+			instance = GetPermissionsManager().GetClientPlayer();
+
+		GetCommunityOnlineToolsBase().Log( instance, "MapEditor Redo (" + entry.Type + ")" );
 		BroadcastList();
 	}
 

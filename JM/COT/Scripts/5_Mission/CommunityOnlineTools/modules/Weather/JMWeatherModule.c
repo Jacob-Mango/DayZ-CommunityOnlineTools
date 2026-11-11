@@ -52,7 +52,12 @@ class JMWeatherModule: JMRenderableModuleBase
 	protected JMPlayerInstance GetCaller( PlayerIdentity ident )
 	{
 		if ( !ident )
-			return NULL;
+		{
+			if (g_Game.IsDedicatedServer())
+				return NULL;
+
+			return GetPermissionsManager().GetClientPlayer();
+		}
 
 		return GetPermissionsManager().GetPlayer( ident.GetId() );
 	}
@@ -429,18 +434,20 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void RequestSpecialWeatherStatus()
 	{
-		if ( !g_Game.IsClient() )
-			return;
-
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, NULL );
+		if ( g_Game.IsClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, NULL );
+		}
+		else if (!g_Game.IsDedicatedServer())
+		{
+			//! Offline/SP
+			Exec_SpecialWeatherStatus(null);
+		}
 	}
 
 	protected void Exec_SpecialWeatherStatus( PlayerIdentity ident )
 	{
-		if ( !ident )
-			return;
-
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEATHER_VIEW, ident ) )
 			return;
 
@@ -453,10 +460,22 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( CF_Modules<JMNamalskEventManagerModule>.Get( namalskModule ) )
 			evrActive = namalskModule.IsEventActive( "EVRStorm" ) || namalskModule.IsEventActive( "EVRStormDeadly" );
 
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( sandstormActive );
-		rpc.Write( evrActive );
-		rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, ident );
+		if (g_Game.IsDedicatedServer())
+		{
+			if (!ident)
+				return;
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( sandstormActive );
+			rpc.Write( evrActive );
+			rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, ident );
+		}
+		else
+		{
+			//! Offline/SP
+			m_LastSandstormActive = sandstormActive;
+			m_LastEVRStormActive = evrActive;
+		}
 	#endif
 	}
 
