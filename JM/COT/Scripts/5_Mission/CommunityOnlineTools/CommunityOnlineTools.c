@@ -222,10 +222,15 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto trace = CF_Trace_0(this, "RefreshClients");
 		#endif
 
-		if ( IsMissionClient() )
+		if ( g_Game.IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMClientRPC.RefreshClients, true, NULL );
+		}
+		else if ( !g_Game.IsDedicatedServer() )
+		{
+			//! Offline/SP
+			GetPermissionsManager().GetClientPlayer().Update();
 		}
 	}
 
@@ -273,10 +278,15 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void RefreshClientPositions()
 	{
-		if ( IsMissionClient() )
+		if ( g_Game.IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMClientRPC.RefreshClientPositions, true, NULL );
+		}
+		else if ( !g_Game.IsDedicatedServer() )
+		{
+			//! Offline/SP, just do the whole update
+			GetPermissionsManager().GetClientPlayer().Update();
 		}
 	}
 
