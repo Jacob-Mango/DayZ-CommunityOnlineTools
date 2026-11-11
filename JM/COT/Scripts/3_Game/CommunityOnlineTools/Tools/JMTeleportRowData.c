@@ -1,5 +1,3 @@
-//! Why does this exist? It's essentially a duplicate of JMTeleportLocation.
-//! FIXME: Merge with JMTeleportLocation and remove this
 class JMTeleportRowData
 {
 	string m_Name;
@@ -15,7 +13,7 @@ class JMTeleportRowData
 		m_MarkerId = markerId;
 	}
 
-	bool Equals(JMTeleportRowData row, bool compareId = false)
+	bool Equals(JMTeleportRowData row, bool compareId = false, float tolerance = 0.1)
 	{
 		if (row.m_Name != m_Name)
 			return false;
@@ -23,7 +21,7 @@ class JMTeleportRowData
 		if (row.m_Kind != m_Kind)
 			return false;
 
-		if (row.m_Position[0] != m_Position[0] || row.m_Position[1] != m_Position[1] || row.m_Position[2] != m_Position[2])
+		if (!Math.IsPointInCircle(row.m_Position, tolerance, m_Position))
 			return false;
 
 		if (compareId && row.m_MarkerId != m_MarkerId)
