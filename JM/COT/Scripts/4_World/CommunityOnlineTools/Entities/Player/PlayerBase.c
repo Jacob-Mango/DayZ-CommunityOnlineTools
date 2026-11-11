@@ -99,21 +99,10 @@ modded class PlayerBase
 
 	void SetWorldPosition(vector position)
 	{
-		Object parent;
+		EntityAI parent;
 		if (Class.CastTo(parent, GetParent()))
 		{
-			Transport transport;
-			if (Class.CastTo(transport, parent))
-			{
-				if (transport.CrewMemberIndex(this) != -1)
-				{
-					COT_Base.PlaceOnSurfaceAtPosition(transport, position);
-					
-					return;
-				}
-			}
-
-			SetPosition(parent.WorldToModel(position));
+			COT_Base.PlaceOnSurfaceAtPosition(parent, position);
 		}
 		else
 		{
