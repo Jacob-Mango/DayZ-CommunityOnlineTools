@@ -373,8 +373,7 @@ class JMPermissionManager
 			return;
 
 		Players.Clear();
-		Roles.Clear();
-		m_RoleNamesSorted.Clear();
+		ClearRoles();
 		m_RosterBatchCount = 0;
 	}
 
