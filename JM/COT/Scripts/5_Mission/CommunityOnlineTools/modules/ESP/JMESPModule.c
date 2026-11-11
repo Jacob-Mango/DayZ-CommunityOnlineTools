@@ -621,7 +621,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
-			Exec_SetPosition( position, target, NULL );
+			Exec_SetPosition( position, target );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -2091,7 +2091,10 @@ class JMESPModule: JMRenderableModuleBase
 		Exec_Log( log, senderRPC, instance );
 	}
 
-	protected void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	[Obsolete("Use Exec_SetPosition( vector position, Object target, JMPlayerInstance instance = NULL )")]
+	protected void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL );
+
+	protected void Exec_SetPosition( vector position, Object target, JMPlayerInstance instance = NULL )
 	{
 		if ( !target )
 			return;
@@ -2112,23 +2115,26 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 		}
 
-		if ( !ShouldRecordMove( ident, "esp_move" ) )
+		if ( !ShouldRecordMove( instance, "esp_move" ) )
 			return;
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
+		GetCommunityOnlineToolsBase().Log( instance, "ESP target=" + target + " action=position value=" + position );
 		SendWebhookColored( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString(), JMConstants.WEBHOOK_COLOR_ESP );
 	}
+
+	[Obsolete("Use ShouldRecordMove( JMPlayerInstance instance, ... )")]
+	protected bool ShouldRecordMove( PlayerIdentity ident, string bucket );
 
 	//! Whether this admin's continuous transform should be written down again.
 	//!
 	//! An offline host has no identity and is never throttled - there is no
 	//! webhook and no remote sender to spend anything.
-	protected bool ShouldRecordMove( PlayerIdentity ident, string bucket )
+	protected bool ShouldRecordMove( JMPlayerInstance instance, string bucket )
 	{
-		if ( !ident )
+		if ( !instance )
 			return true;
 
-		return JMRPCThrottle.Allow( ident.GetId(), bucket, MOVE_RECORD_INTERVAL_MS );
+		return JMRPCThrottle.Allow( instance.GetGUID(), bucket, MOVE_RECORD_INTERVAL_MS );
 	}
 
 	protected void RPC_SetPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -2151,7 +2157,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
 			return;
 
-		Exec_SetPosition( position, target, senderRPC, instance );
+		Exec_SetPosition( position, target, instance );
 	#else
 		target.SetPosition( position );
 	#endif
@@ -2179,7 +2185,7 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 		}
 
-		if ( !ShouldRecordMove( ident, "esp_turn" ) )
+		if ( !ShouldRecordMove( instance, "esp_turn" ) )
 			return;
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
@@ -4374,29 +4380,13 @@ class JMESPModule: JMRenderableModuleBase
 		int moved = 0;
 		int count = objects.Count();
 		
-		int i = objects.Count();
-		while ( i > 0 )
+		foreach (Object obj: objects)
 		{
-			Object obj = objects[i  - 1];
-			objects.Remove( i - 1 );
-
-			if ( obj != NULL )
+			if (obj)
 			{
-				vector transform[4];
-				obj.GetTransform( transform );
-				string obtype = Object.GetDebugName( obj );
-
-				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=MoveToCursor" );
-
-				EntityAI ent = EntityAI.Cast(obj);
-				if (ent)
-					COT.PlaceOnSurfaceAtPosition(ent, cursor);
-				else
-					obj.SetPosition(cursor);
+				Exec_SetPosition(cursor, obj, instance);
 				moved++;
 			}
-
-			i = objects.Count();
 		}
 
 		if ( moved > 0 )
