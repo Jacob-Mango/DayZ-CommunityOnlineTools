@@ -630,6 +630,17 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( IsMissionHost() )
 		{
+			//! The permission belongs to where the entity goes, and that is the
+			//! RPC target, not anything in the stream. The Exec_ it is handed to
+			//! answers it again for the callers that do not come through here.
+			EntityAI targetEnt;
+			string spawnPermission = JMConstants.PERM_ENTITY_SPAWN_POSITION;
+			if ( Class.CastTo( targetEnt, target ) )
+				spawnPermission = JMConstants.PERM_ENTITY_SPAWN_INVENTORY;
+
+			if ( !JMPermissions.HasRPC( spawnPermission, senderRPC ) )
+				return;
+
 			vector position;
 
 			if ( !ctx.Read( position ) )
@@ -653,8 +664,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
-			EntityAI targetEnt;
-			if (Class.CastTo(targetEnt, target))
+			if ( targetEnt )
 				Exec_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, temp, itemState, senderRPC );
 			else
 				Exec_SpawnEntity_Position( className, position, quantity, health, temp, itemState, senderRPC );
@@ -701,6 +711,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! Exec_SpawnEntity_Inventory() answers it again for the callers that
+			//! do not come through here.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_ENTITY_SPAWN_INVENTORY, senderRPC ) )
+				return;
+
 			array< string > players;
 			if ( !ctx.Read( players ) )
 			{

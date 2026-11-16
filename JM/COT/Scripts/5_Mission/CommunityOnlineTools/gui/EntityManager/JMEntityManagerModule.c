@@ -265,21 +265,11 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		if ( !m_Adapter )
 			return;
 
+		//! The permission belongs to the action, so the action id is the one thing
+		//! read ahead of the gate. Nothing else leaves the stream until it passes.
 		string actionId;
 		if ( !ctx.Read( actionId ) )
 			return;
-
-		bool hasEntity;
-		if ( !ctx.Read( hasEntity ) )
-			return;
-
-		JMEntityMetaData entity;
-		if ( hasEntity )
-		{
-			entity = new JMEntityMetaData();
-			if ( !entity.Read( ctx ) )
-				return;
-		}
 
 		// Per-action permission check
 		array<ref JMEntityAction> actions = new array<ref JMEntityAction>;
@@ -291,6 +281,18 @@ class JMEntityManagerModule: JMRenderableModuleBase
 			if ( a.m_Permission != "" && !JMPermissions.HasRPC( a.m_Permission, sender ) )
 				return;
 			break;
+		}
+
+		bool hasEntity;
+		if ( !ctx.Read( hasEntity ) )
+			return;
+
+		JMEntityMetaData entity;
+		if ( hasEntity )
+		{
+			entity = new JMEntityMetaData();
+			if ( !entity.Read( ctx ) )
+				return;
 		}
 
 		m_Adapter.HandleServerAction( actionId, entity, sender );

@@ -268,6 +268,11 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 	protected void RPC_SpawnObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_SPAWN, senderRPC, instance ) )
+			return;
+
 		string className;
 		vector pos;
 		vector ori;
@@ -288,11 +293,6 @@ class JMMapEditorModule : JMRenderableModuleBase
 			return;
 
 		scale = COT.SanitizeScale( scale );
-
-		JMPlayerInstance instance;
-		if ( !senderRPC ) return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_SPAWN, senderRPC, instance ) )
-			return;
 
 		Exec_SpawnObject( className, pos, ori, scale, senderRPC );
 	}
@@ -347,6 +347,11 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 	protected void RPC_TransformObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_TRANSFORM, senderRPC, instance ) )
+			return;
+
 		int id;
 		vector pos;
 		vector ori;
@@ -361,11 +366,6 @@ class JMMapEditorModule : JMRenderableModuleBase
 			return;
 
 		scale = COT.SanitizeScale( scale );
-
-		JMPlayerInstance instance;
-		if ( !senderRPC ) return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_TRANSFORM, senderRPC, instance ) )
-			return;
 
 		Exec_TransformObject( id, pos, ori, scale, senderRPC );
 	}
@@ -423,13 +423,13 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 	protected void RPC_DeleteObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int id;
-		if ( !ctx.Read( id ) ) return;
-
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_MAPEDITOR_DELETE, senderRPC, instance ) )
 			return;
+
+		int id;
+		if ( !ctx.Read( id ) ) return;
 
 		Exec_DeleteObject( id, senderRPC );
 	}

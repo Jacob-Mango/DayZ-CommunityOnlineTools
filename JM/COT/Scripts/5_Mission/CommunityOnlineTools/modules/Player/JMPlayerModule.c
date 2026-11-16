@@ -666,6 +666,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_Message( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_MESSAGE, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
@@ -675,12 +681,6 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		string messageText;
 		if (!ctx.Read(messageText))
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_MESSAGE, senderRPC, instance ) )
 			return;
 
 		Exec_Message( guids, senderRPC, instance, messageText );
@@ -809,12 +809,21 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_SetStat( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !senderRPC )
+			return;
+
+		//! The permission belongs to the stat, so the stat type is the one thing
+		//! read ahead of the gate. Nothing else leaves the stream until it passes.
 		int type;
 		if ( !ctx.Read( type ) )
 			return;
 
 		JMPlayerStat stat = GetStat( type );
 		if ( !stat )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( stat.GetPermission(), senderRPC, instance ) )
 			return;
 
 		float value;
@@ -826,13 +835,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		if ( !senderRPC )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( stat.GetPermission(), senderRPC, instance ) )
 			return;
 
 		Exec_SetStat( type, value, guids, senderRPC, instance );
@@ -892,6 +894,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_Toggle( JMPlayerToggle toggle, ParamsReadContext ctx, PlayerIdentity senderRPC )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( toggle.GetPermission(), senderRPC, instance ) )
+			return;
+
 		int value;
 		if ( !toggle.ReadValue( ctx, value ) )
 			return;
@@ -901,12 +909,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( toggle.GetPermission(), senderRPC, instance ) )
 			return;
 
 		Exec_Toggle( toggle, value, guids, senderRPC, instance );
@@ -1006,17 +1008,17 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_RepairTransport( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target  )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_TRANSPORT_REPAIR, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_TRANSPORT_REPAIR, senderRPC, instance ) )
 			return;
 
 		Exec_RepairTransport( guids, senderRPC, instance );
@@ -1069,6 +1071,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_TeleportTo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_POSITION, senderRPC, instance ) )
+			return;
+
 		vector position;
 		if ( !ctx.Read( position ) )
 			return;
@@ -1081,12 +1089,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_POSITION, senderRPC, instance ) )
 			return;
 
 		Exec_TeleportTo( position, guids, senderRPC, instance );
@@ -1132,14 +1134,14 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_TeleportSenderTo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		string guid;
-		if ( !ctx.Read( guid ) )
-			return;
-
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_SENDERTO, senderRPC, instance ) )
+			return;
+
+		string guid;
+		if ( !ctx.Read( guid ) )
 			return;
 
 		Exec_TeleportSenderTo( guid, senderRPC, instance );
@@ -1193,17 +1195,17 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_TeleportToPrevious( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_PREVIOUS, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_PREVIOUS, senderRPC, instance ) )
 			return;
 
 		Exec_TeleportToPrevious( guids, senderRPC, instance );
@@ -1456,18 +1458,18 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( IsMissionHost() )
 		{
+			JMPlayerInstance instance;
+			if ( !senderRPC )
+				return;
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_SPECTATE, senderRPC ) )
+				return;
+
 			if (!target)
 			{
 				string guid;
 				if (!ctx.Read(guid))
 					return;
 			}
-
-			JMPlayerInstance instance;
-			if ( !senderRPC )
-				return;
-			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_SPECTATE, senderRPC ) )
-				return;
 
 			if (!target)
 				Server_StartSpectating(guid, senderRPC);
@@ -1745,10 +1747,6 @@ class JMPlayerModule: JMRenderableModuleBase
 #endif
 		CF_Log.Debug("JMPlayerModule::RPC_EndSpectating_Finish");
 
-		bool selectPlayer;
-		if (!ctx.Read(selectPlayer))
-			return;
-
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
@@ -1759,6 +1757,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		//! to end spectating.
 		int index = m_SpectatorsWaitingToFinish.Find(senderRPC.GetId());
 		if (index == -1)
+			return;
+
+		bool selectPlayer;
+		if (!ctx.Read(selectPlayer))
 			return;
 
 		m_SpectatorsWaitingToFinish.Remove(index);
@@ -1894,6 +1896,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_Vomit( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_VOMIT, senderRPC, instance ) )
+			return;
+
 		float value;
 		if ( !ctx.Read( value ) )
 			return;
@@ -1903,12 +1911,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_VOMIT, senderRPC, instance ) )
 			return;
 
 		Exec_Vomit(value, guids, senderRPC, instance );
@@ -1934,6 +1936,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_SetScale( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_SCALE, senderRPC, instance ) )
+			return;
+
 		float value;
 		if ( !ctx.Read( value ) )
 			return;
@@ -1945,12 +1953,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_SCALE, senderRPC, instance ) )
 			return;
 
 		Exec_SetScale( value, guids, senderRPC, instance );
@@ -2064,17 +2066,17 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_HEAL, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_HEAL, senderRPC, instance ) )
 			return;
 
 		Exec_Heal( guids, senderRPC, instance );
@@ -2150,6 +2152,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_Ban( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BAN, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
@@ -2163,12 +2171,6 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		int duration;
 		if ( !ctx.Read( duration ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BAN, senderRPC, instance ) )
 			return;
 
 		Exec_Ban( guids, senderRPC, instance, messageText, duration );
@@ -2236,6 +2238,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_Kick( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_KICK, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
@@ -2245,12 +2253,6 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		string messageText;
 		if (!ctx.Read(messageText))
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_KICK, senderRPC, instance ) )
 			return;
 
 		Exec_Kick( guids, senderRPC, instance, messageText );
@@ -2345,17 +2347,17 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_Strip( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_STRIP, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_STRIP, senderRPC, instance ) )
 			return;
 
 		Exec_Strip( guids, senderRPC, instance );
@@ -2396,17 +2398,17 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_ClearCargo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_CLEARCARGO, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_CLEARCARGO, senderRPC, instance ) )
 			return;
 
 		Exec_ClearCargo( guids, senderRPC, instance );
@@ -2457,6 +2459,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_SetItemWetness( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DRY, senderRPC, instance ) )
+			return;
+
 		float wetness;
 		if ( !ctx.Read( wetness ) )
 			return;
@@ -2466,12 +2474,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DRY, senderRPC, instance ) )
 			return;
 
 		Exec_SetItemWetness( wetness, guids, senderRPC, instance );
@@ -2512,17 +2514,17 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_StopBleeding( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_STOPBLEEDING, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_STOPBLEEDING, senderRPC, instance ) )
 			return;
 
 		Exec_StopBleeding( guids, senderRPC, instance );
@@ -2560,6 +2562,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "RPC_SetPermissions").Add(senderRPC.GetId());
 	#endif
 
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_PERMISSIONS, senderRPC, instance ) )
+			return;
+
 		JMPermission permission = new JMPermission( JMConstants.PERM_ROOT );
 		permission.CopyPermissions(GetPermissionsManager().RootPermission);
 		if ( !permission.OnReceive( ctx ) )
@@ -2570,10 +2576,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_PERMISSIONS, senderRPC, instance ) )
 			return;
 
 		Exec_SetPermissions( permission, guids, senderRPC, instance );
@@ -2599,6 +2601,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_SetRoles( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_ROLES, senderRPC, instance ) )
+			return;
+
 		array< string > roles;
 		if ( !ctx.Read( roles ) )
 			return;
@@ -2620,12 +2628,6 @@ class JMPlayerModule: JMRenderableModuleBase
 		int nrCount = Math.Min( nrKeys.Count(), nrValues.Count() );
 		for ( int ni = 0; ni < nrCount; ni++ )
 			nameRestrictions.Insert( nrKeys[ni], nrValues[ni] );
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_ROLES, senderRPC, instance ) )
-			return;
 
 		Exec_SetRoles( roles, guids, senderRPC, instance, nameRestrictions );
 	}
@@ -2684,6 +2686,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_AddDisease( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_ADD, senderRPC, instance ) )
+			return;
+
 		int agent;
 		if ( !ctx.Read( agent ) )
 			return;
@@ -2697,12 +2705,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_ADD, senderRPC, instance ) )
 			return;
 
 		Exec_AddDisease( agent, count, guids, senderRPC, instance );
@@ -2757,6 +2759,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_RemoveDisease( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_REMOVE, senderRPC, instance ) )
+			return;
+
 		int agent;
 		if ( !ctx.Read( agent ) )
 			return;
@@ -2766,12 +2774,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_REMOVE, senderRPC, instance ) )
 			return;
 
 		Exec_RemoveDisease( agent, guids, senderRPC, instance );
@@ -2830,6 +2832,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_ActivateModifier( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_ADD, senderRPC, instance ) )
+			return;
+
 		int modifier_id;
 		if ( !ctx.Read( modifier_id ) )
 			return;
@@ -2839,12 +2847,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_ADD, senderRPC, instance ) )
 			return;
 
 		Exec_ActivateModifier( modifier_id, guids, senderRPC, instance );
@@ -2899,6 +2901,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_DeactivateModifier( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_REMOVE, senderRPC, instance ) )
+			return;
+
 		int modifier_id;
 		if ( !ctx.Read( modifier_id ) )
 			return;
@@ -2908,12 +2916,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_REMOVE, senderRPC, instance ) )
 			return;
 
 		Exec_DeactivateModifier( modifier_id, guids, senderRPC, instance );
@@ -2967,17 +2969,17 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_RemoveAllDiseases( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_REMOVE, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_REMOVE, senderRPC, instance ) )
 			return;
 
 		Exec_RemoveAllDiseases( guids, senderRPC, instance );
@@ -3006,14 +3008,14 @@ class JMPlayerModule: JMRenderableModuleBase
 		// Server-side: client requested a mask - read the guid and send back
 		if ( g_Game.IsDedicatedServer() )
 		{
-			string guid;
-			if ( !ctx.Read( guid ) )
-				return;
-
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
 			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_DISEASE_ADD, senderRPC, instance ) )
+				return;
+
+			string guid;
+			if ( !ctx.Read( guid ) )
 				return;
 
 			SendDiseaseMaskTo( senderRPC, guid );
@@ -3102,14 +3104,14 @@ class JMPlayerModule: JMRenderableModuleBase
 		// Server-side: a client asked for a player history.
 		if ( g_Game.IsDedicatedServer() )
 		{
-			string guid;
-			if ( !ctx.Read( guid ) )
-				return;
-
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
 			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_STATISTICS_VIEW, senderRPC, instance ) )
+				return;
+
+			string guid;
+			if ( !ctx.Read( guid ) )
 				return;
 
 			SendPlayerStatsTo( senderRPC, guid );
@@ -3204,14 +3206,14 @@ class JMPlayerModule: JMRenderableModuleBase
 		// Server-side: a client asked for the Expansion block.
 		if ( g_Game.IsDedicatedServer() )
 		{
-			string guid;
-			if ( !ctx.Read( guid ) )
-				return;
-
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
 			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_STATISTICS_VIEW, senderRPC, instance ) )
+				return;
+
+			string guid;
+			if ( !ctx.Read( guid ) )
 				return;
 
 			SendExpansionInfoTo( senderRPC, guid );
@@ -3347,14 +3349,14 @@ class JMPlayerModule: JMRenderableModuleBase
 		// Server-side: a client asked for a listing.
 		if ( g_Game.IsDedicatedServer() )
 		{
-			string guid;
-			if ( !ctx.Read( guid ) )
-				return;
-
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
 			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_ACCESSINVENTORY, senderRPC, instance ) )
+				return;
+
+			string guid;
+			if ( !ctx.Read( guid ) )
 				return;
 
 			SendInventoryTo( senderRPC, guid );
@@ -3587,18 +3589,18 @@ class JMPlayerModule: JMRenderableModuleBase
 		rpc.Send( NULL, rpcId, true, NULL );
 	}
 
-	//! Shared server half: read the request, check the permission, resolve the
+	//! Shared server half: check the permission, read the request, resolve the
 	//! entity against the target inventory. Returns NULL when any step fails.
 	protected EntityAI ReadInventoryOp( ParamsReadContext ctx, PlayerIdentity senderRPC, string permission, out JMPlayerInstance instance, out JMPlayerInstance targetInstance, out string guid )
 	{
+		if ( !JMPermissions.HasRPC( permission, senderRPC, instance ) )
+			return NULL;
+
 		int netLow, netHigh;
 
 		if ( !ctx.Read( guid ) )     return NULL;
 		if ( !ctx.Read( netLow ) )   return NULL;
 		if ( !ctx.Read( netHigh ) )  return NULL;
-
-		if ( !JMPermissions.HasRPC( permission, senderRPC, instance ) )
-			return NULL;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
 		if ( players.Count() == 0 )
@@ -3651,11 +3653,13 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
+		//! The op goes first: it names the permission, and the server reads
+		//! nothing else until that permission has been checked.
 		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( op );
 		rpc.Write( guid );
 		rpc.Write( netLow );
 		rpc.Write( netHigh );
-		rpc.Write( op );
 		rpc.Send( NULL, JMPlayerModuleRPC.InventoryGroupOp, true, NULL );
 	}
 
@@ -3761,9 +3765,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		string guid;
 		int netLow, netHigh, op;
 
-		if ( !ctx.Read( guid ) )    return;
-		if ( !ctx.Read( netLow ) )  return;
-		if ( !ctx.Read( netHigh ) ) return;
+		//! The permission belongs to the op, so the op is the one thing read
+		//! ahead of the gate. Nothing else leaves the stream until it passes.
 		if ( !ctx.Read( op ) )      return;
 
 		if ( op < 0 || op >= JMInventoryGroupOp.COUNT )
@@ -3772,6 +3775,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( GroupOpPermission( op ), senderRPC, instance ) )
 			return;
+
+		if ( !ctx.Read( guid ) )    return;
+		if ( !ctx.Read( netLow ) )  return;
+		if ( !ctx.Read( netHigh ) ) return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
 		if ( players.Count() == 0 )
@@ -3929,7 +3936,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance targetInstance;
 		string guid;
 
-		// Reads the three shared arguments and answers the permission; the op
+		// Answers the permission and reads the three shared arguments; the op
 		// and its value are still in the stream behind them.
 		EntityAI entity = ReadInventoryOp( ctx, senderRPC, JMConstants.PERM_PLAYER_INVENTORY_MODIFY, instance, targetInstance, guid );
 		if ( !entity )
@@ -4045,6 +4052,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_AddBleedingPart( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BLEED_ADD, senderRPC, instance ) )
+			return;
+
 		string selectionName;
 		array< string > guids;
 
@@ -4052,12 +4065,6 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( guids ) )          return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BLEED_ADD, senderRPC, instance ) )
 			return;
 
 		Exec_AddBleedingPart( selectionName, guids, senderRPC );
@@ -4115,17 +4122,17 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	protected void RPC_StopBleedingPart( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BLEED_STOP, senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC )
-			return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BLEED_STOP, senderRPC, instance ) )
 			return;
 
 		Exec_StopBleedingPart( guids, senderRPC );
@@ -4193,14 +4200,14 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( g_Game.IsDedicatedServer() )
 		{
-			string reqGuid;
-			if ( !ctx.Read( reqGuid ) )
-				return;
-
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
 			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_BLEED_ADD, senderRPC, instance ) )
+				return;
+
+			string reqGuid;
+			if ( !ctx.Read( reqGuid ) )
 				return;
 
 			SendBleedingStateTo( senderRPC, reqGuid );

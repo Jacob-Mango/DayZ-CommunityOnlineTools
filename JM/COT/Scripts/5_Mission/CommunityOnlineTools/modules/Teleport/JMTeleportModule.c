@@ -288,9 +288,11 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !isCursor && !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_POSITION ) )
 				return;
 
+			//! isCursor goes first: it names the permission, and the server
+			//! reads nothing else until that permission has been checked.
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( position );
 			rpc.Write( isCursor );
+			rpc.Write( position );
 			rpc.Write( guids );
 			rpc.Send( NULL, JMTeleportModuleRPC.Position, true, NULL );
 		}
@@ -351,15 +353,25 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! The permission belongs to isCursor, so it is the one thing read
+			//! ahead of the gate. Exec_Position() answers it again for the
+			//! callers that do not come through here.
+			bool isCursor;
+			if ( !ctx.Read( isCursor ) )
+				return;
+
+			string positionPermission = JMConstants.PERM_PLAYER_TELEPORT_POSITION;
+			if ( isCursor )
+				positionPermission = JMConstants.PERM_PLAYER_TELEPORT_POSITION_CURSOR;
+
+			if ( !JMPermissions.HasRPC( positionPermission, senderRPC ) )
+				return;
+
 			vector pos;
 			if ( !ctx.Read( pos ) )
 				return;
 
 			if ( !COT.IsValidWorldPosition( pos ) )
-				return;
-
-			bool isCursor;
-			if ( !ctx.Read( isCursor ) )
 				return;
 
 			array< string > guids;
@@ -434,6 +446,11 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! Exec_PositionRaycast() answers it again for the callers that do
+			//! not come through here.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_POSITION_CURSOR, senderRPC ) )
+				return;
+
 			vector pos;
 			if ( !ctx.Read( pos ) )
 				return;
@@ -531,6 +548,11 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! Exec_Location() answers it again for the callers that do not
+			//! come through here.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION, senderRPC ) )
+				return;
+
 			string loc;
 			if ( !ctx.Read( loc ) )
 				return;
@@ -566,6 +588,11 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! Exec_AddLocation() answers it again for the callers that do not
+			//! come through here.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_CREATE, senderRPC ) )
+				return;
+
 			string locName;
 			if ( !ctx.Read( locName ) )
 				return;
@@ -607,6 +634,11 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! Exec_RemoveLocation() answers it again for the callers that do
+			//! not come through here.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_REMOVE, senderRPC ) )
+				return;
+
 			JMTeleportLocation locName;
 			if ( !ctx.Read( locName ) )
 				return;
@@ -676,6 +708,11 @@ class JMTeleportModule: JMRenderableModuleBase
 	protected void RPC_EditLocation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
+			return;
+
+		//! Exec_EditLocation() answers it again for the callers that do not come
+		//! through here.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_EDIT, senderRPC ) )
 			return;
 
 		JMTeleportLocation location;

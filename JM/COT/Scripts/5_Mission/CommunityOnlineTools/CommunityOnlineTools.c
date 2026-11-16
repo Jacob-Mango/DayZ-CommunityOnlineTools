@@ -171,10 +171,6 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto trace = CF_Trace_1(this, "RPC_Active").Add(senderRPC);
 		#endif
 
-		bool active;
-		if ( !ctx.Read( active ) )
-			return;
-
 		if ( !senderRPC )
 			return;
 
@@ -185,6 +181,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			return;
 
 		if ( !instance )
+			return;
+
+		bool active;
+		if ( !ctx.Read( active ) )
 			return;
 
 		//! Nothing changed, so nothing to announce. A toggle held down, or a

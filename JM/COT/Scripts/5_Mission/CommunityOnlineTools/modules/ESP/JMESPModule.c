@@ -2018,6 +2018,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_RecordTransformHistory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+	#ifdef SERVER
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
+			return;
+
 		vector previousPosition;
 		vector previousOrientation;
 		if ( !ctx.Read( previousPosition ) )
@@ -2025,7 +2033,6 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( previousOrientation ) )
 			return;
 
-	#ifdef SERVER
 		if ( !target )
 			return;
 
@@ -2033,13 +2040,6 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		if ( !COT.IsFiniteVector( previousOrientation ) )
-			return;
-
-		if ( !senderRPC )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
 			return;
 
 		Exec_RecordTransformHistory( previousPosition, previousOrientation, target, senderRPC );
@@ -2071,15 +2071,15 @@ class JMESPModule: JMRenderableModuleBase
 	//! The text is capped, not rejected: the real sender writes only a few fixed phrases.
 	protected void RPC_Log( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		string log;
-		if ( !ctx.Read( log ) )
-			return;
-
 		if ( !senderRPC )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_VIEW, senderRPC, instance ) )
+			return;
+
+		string log;
+		if ( !ctx.Read( log ) )
 			return;
 
 		if ( !JMRPCThrottle.Allow( senderRPC.GetId(), "esp_log", LOG_MIN_INTERVAL_MS ) )
@@ -2139,6 +2139,15 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+	#ifdef SERVER
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
+			return;
+	#endif
+
 		vector position;
 		if ( !ctx.Read( position ) )
 			return;
@@ -2148,13 +2157,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	#ifdef SERVER
 		if ( !COT.IsValidWorldPosition( position ) )
-			return;
-
-		if ( !senderRPC )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
 			return;
 
 		Exec_SetPosition( position, target, instance );
@@ -2194,6 +2196,15 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetOrientation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+	#ifdef SERVER
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETORIENTATION, senderRPC ) )
+			return;
+	#endif
+
 		vector orientation;
 		if ( !ctx.Read( orientation ) )
 			return;
@@ -2203,13 +2214,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	#ifdef SERVER
 		if ( !COT.IsFiniteVector( orientation ) )
-			return;
-
-		if ( !senderRPC )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETORIENTATION, senderRPC ) )
 			return;
 
 		Exec_SetOrientation( orientation, target, senderRPC, instance );
@@ -2269,6 +2273,13 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETHEALTH, senderRPC, instance ) )
+			return;
+
 		float health;
 		if ( !ctx.Read( health ) )
 			return;
@@ -2278,14 +2289,7 @@ class JMESPModule: JMRenderableModuleBase
 		//if ( !ctx.Read( zone ) )
 			//return;
 
-		if ( !senderRPC )
-			return;
-
 		if ( !target )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETHEALTH, senderRPC, instance ) )
 			return;
 
 		Exec_SetHealth( health, zone, target, senderRPC, instance );
@@ -2309,23 +2313,23 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int slotId;
-		string className;
-		if ( !ctx.Read( slotId ) || !ctx.Read( className ) )
-			return;
-			
-		JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
-		if ( !ctx.Read( objSpawnerModule.m_ObjSetupMode ) )
-			return;
-
 		if ( !senderRPC )
-			return;
-
-		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
+			return;
+
+		int slotId;
+		string className;
+		if ( !ctx.Read( slotId ) || !ctx.Read( className ) )
+			return;
+
+		JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
+		if ( !ctx.Read( objSpawnerModule.m_ObjSetupMode ) )
+			return;
+
+		if ( !target )
 			return;
 
 		Exec_SetAttachment( slotId, className, target, senderRPC, instance );
@@ -2333,18 +2337,18 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_RemoveAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int slotId;
-		if ( !ctx.Read( slotId ) )
-			return;
-
 		if ( !senderRPC )
-			return;
-
-		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
+			return;
+
+		int slotId;
+		if ( !ctx.Read( slotId ) )
+			return;
+
+		if ( !target )
 			return;
 
 		Exec_RemoveAttachment( slotId, target, senderRPC, instance );
@@ -3577,8 +3581,22 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_ObjectAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !senderRPC )
+			return;
+
+		//! The permission belongs to the action, so the action is the one thing
+		//! read ahead of the gate. Nothing else leaves the stream until it passes.
 		int action;
 		if ( !ctx.Read( action ) )
+			return;
+
+		string permission = PermissionForAction( action );
+
+		if ( permission == "" )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( permission, senderRPC, instance ) )
 			return;
 
 		int ivalue;
@@ -3589,19 +3607,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( fvalue ) )
 			return;
 
-		string permission = PermissionForAction( action );
-
-		if ( permission == "" )
-			return;
-
-		if ( !senderRPC )
-			return;
-
 		if ( !target )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( permission, senderRPC, instance ) )
 			return;
 
 		Exec_ObjectAction( action, ivalue, fvalue, target, senderRPC, instance );
@@ -3739,18 +3745,18 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Build( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		string part_name;
-		if ( !ctx.Read( part_name ) )
-			return;
-
 		if ( !senderRPC )
-			return;
-
-		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD, senderRPC, instance ) )
+			return;
+
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
+		if ( !target )
 			return;
 
 		EntityAI bb;
@@ -3792,18 +3798,18 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Dismantle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		string part_name;
-		if ( !ctx.Read( part_name ) )
-			return;
-
 		if ( !senderRPC )
-			return;
-
-		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE, senderRPC, instance ) )
+			return;
+
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
+		if ( !target )
 			return;
 
 		EntityAI bb;
@@ -3842,18 +3848,18 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		string part_name;
-		if ( !ctx.Read( part_name ) )
-			return;
-
 		if ( !senderRPC )
-			return;
-
-		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_REPAIR, senderRPC, instance ) )
+			return;
+
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
+		if ( !target )
 			return;
 
 		EntityAI bb;
@@ -3908,6 +3914,13 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_SetPartHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_SETHEALTH, senderRPC, instance ) )
+			return;
+
 		string part_name;
 		if ( !ctx.Read( part_name ) )
 			return;
@@ -3916,14 +3929,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( health01 ) )
 			return;
 
-		if ( !senderRPC )
-			return;
-
 		if ( !target )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_SETHEALTH, senderRPC, instance ) )
 			return;
 
 		EntityAI bb;

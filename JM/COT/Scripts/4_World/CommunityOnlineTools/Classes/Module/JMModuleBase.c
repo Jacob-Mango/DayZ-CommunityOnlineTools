@@ -167,6 +167,16 @@ modded class JMModuleBase
 		if ( !action )
 			return true;
 
+		//! The permission belongs to the action's type, so it is answered before
+		//! anything is read off the stream. ExecAction() answers it again for the
+		//! callers that do not come through here.
+		string permission = action.GetPermission();
+		if ( permission == "" )
+			return true;
+
+		if ( !JMPermissions.HasRPC( permission, sender ) )
+			return true;
+
 		if ( !action.Read( ctx ) )
 			return true;
 
