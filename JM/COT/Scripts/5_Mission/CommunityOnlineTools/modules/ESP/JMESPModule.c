@@ -544,16 +544,17 @@ class JMESPModule: JMRenderableModuleBase
 		int netLow, netHigh;
 		target.GetNetworkID( netLow, netHigh );
 
+		JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
+
 		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
-			Exec_SetAttachment( slotId, className, target, NULL );
+			Exec_SetAttachment( slotId, className, target, NULL, NULL, objSpawnerModule.m_ObjSetupMode );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( slotId );
 			rpc.Write( className );
-			
-			JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
+
 			rpc.Write( objSpawnerModule.m_ObjSetupMode );
 
 			rpc.Send( target, JMESPModuleRPC.SetAttachment, true, NULL );
@@ -2332,11 +2333,13 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( slotId ) || !ctx.Read( className ) )
 			return;
 
-		JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
-		if ( !ctx.Read( objSpawnerModule.m_ObjSetupMode ) )
+		//! Into the request, not into the spawner module: that is one object for
+		//! every admin, and its setup mode is what the chat spawn command runs with.
+		int setupMode;
+		if ( !ctx.Read( setupMode ) )
 			return;
 
-		Exec_SetAttachment( slotId, className, target, senderRPC, instance );
+		Exec_SetAttachment( slotId, className, target, senderRPC, instance, setupMode );
 	}
 
 	protected void RPC_RemoveAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -2358,7 +2361,7 @@ class JMESPModule: JMRenderableModuleBase
 		Exec_RemoveAttachment( slotId, target, senderRPC, instance );
 	}
 
-	protected void Exec_SetAttachment( int slotId, string className, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	protected void Exec_SetAttachment( int slotId, string className, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL, COT_ObjectSetupMode setupMode = COT_ObjectSetupMode.DEBUGSPAWN )
 	{
 		EntityAI entity = EntityAI.Cast( target );
 		if ( !entity || !entity.GetInventory() )
@@ -2408,7 +2411,7 @@ class JMESPModule: JMRenderableModuleBase
 				classAfter = className;
 
 				JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
-				objSpawnerModule.SetupEntityForMode( created, PlayerBase.Cast( player ), objSpawnerModule.m_ObjSetupMode );
+				objSpawnerModule.SetupEntityForMode( created, PlayerBase.Cast( player ), setupMode );
 			}
 		}
 

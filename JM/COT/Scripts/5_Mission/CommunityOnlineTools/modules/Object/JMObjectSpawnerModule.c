@@ -3,7 +3,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	int m_ObjSetupMode = COT_ObjectSetupMode.DEBUGSPAWN;
 
 	//! Ammo classname (from the magazine's ammoItems) a spawned magazine is filled with; ""
-	//! keeps its configured ammo. Rides the spawn RPC as module state, like m_ObjSetupMode.
+	//! keeps its configured ammo. Rides the spawn RPC from this module's state, like
+	//! m_ObjSetupMode: the state of the local form. The server reads all four into the
+	//! request's JMObjectSpawnOptions and never into these.
 	string m_SpawnAmmoType;
 
 	//! Upper bounds for a randomised spawn; -1 means "not a range" (value used exactly).
@@ -556,7 +558,21 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		ctx.Write( m_SpawnHealthMax );
 	}
 
-	protected bool SpawnEntity_ReadFrom(ParamsReadContext ctx, out string className, out float quantity, out float health, out float temp, out int itemState)
+	//! The options the local form is set to, as the object a spawn takes them in.
+	//! For a spawn that does not cross the network (offline / host).
+	protected JMObjectSpawnOptions GetSpawnOptions()
+	{
+		JMObjectSpawnOptions options = new JMObjectSpawnOptions();
+		options.m_SetupMode = m_ObjSetupMode;
+		options.m_AmmoType = m_SpawnAmmoType;
+		options.m_QuantityMax = m_SpawnQuantityMax;
+		options.m_HealthMax = m_SpawnHealthMax;
+		return options;
+	}
+
+	//! @param options receives what SpawnEntity_WriteTo sent of the sender's form
+	//! state. It belongs to this one request.
+	protected bool SpawnEntity_ReadFrom(ParamsReadContext ctx, out string className, out float quantity, out float health, out float temp, out int itemState, JMObjectSpawnOptions options)
 	{
 		if ( !ctx.Read( className ) )
 			return false;
@@ -573,16 +589,16 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !ctx.Read( itemState ) )
 			return false;
 
-		if ( !ctx.Read( m_ObjSetupMode ) )
+		if ( !ctx.Read( options.m_SetupMode ) )
 			return false;
 
-		if ( !ctx.Read( m_SpawnAmmoType ) )
+		if ( !ctx.Read( options.m_AmmoType ) )
 			return false;
 
-		if ( !ctx.Read( m_SpawnQuantityMax ) )
+		if ( !ctx.Read( options.m_QuantityMax ) )
 			return false;
 
-		if ( !ctx.Read( m_SpawnHealthMax ) )
+		if ( !ctx.Read( options.m_HealthMax ) )
 			return false;
 
 		return true;
@@ -609,18 +625,18 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		}
 		else if (!targetEnt)
-			Exec_SpawnEntity_Position( className, position, quantity, health, temp, itemState, NULL );
+			Exec_SpawnEntity_Position( className, position, quantity, health, temp, itemState, NULL, GetSpawnOptions() );
 		else
-			Exec_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, temp, itemState, NULL );
+			Exec_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, temp, itemState, NULL, GetSpawnOptions() );
 	}
 
-	protected void Exec_SpawnEntity_Position( string className, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
+	protected void Exec_SpawnEntity_Position( string className, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident, JMObjectSpawnOptions options = NULL )
 	{
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ENTITY_SPAWN_POSITION, ident, instance ) )
 			return;
 
-		SpawnEntity(className, null, position, quantity, health, temp, itemState, instance);
+		SpawnEntity(className, null, position, quantity, health, temp, itemState, instance, options);
 	}
 
 	protected void RPC_SpawnEntity_Position( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -657,17 +673,18 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			float health;
 			float temp;
 			int itemState;
+			JMObjectSpawnOptions options = new JMObjectSpawnOptions();
 
-			if ( !SpawnEntity_ReadFrom(ctx, className, quantity, health, temp, itemState) )
+			if ( !SpawnEntity_ReadFrom(ctx, className, quantity, health, temp, itemState, options) )
 			{
 				Error("Failed");
 				return;
 			}
 
 			if ( targetEnt )
-				Exec_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, temp, itemState, senderRPC );
+				Exec_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, temp, itemState, senderRPC, options );
 			else
-				Exec_SpawnEntity_Position( className, position, quantity, health, temp, itemState, senderRPC );
+				Exec_SpawnEntity_Position( className, position, quantity, health, temp, itemState, senderRPC, options );
 		}
 	}
 
@@ -681,10 +698,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		}
 		else
-			Exec_SpawnEntity_Inventory( className, players, quantity, health, temp, itemState, NULL );
+			Exec_SpawnEntity_Inventory( className, players, quantity, health, temp, itemState, NULL, GetSpawnOptions() );
 	}
 
-	protected void Exec_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
+	protected void Exec_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, float temp, int itemState, PlayerIdentity ident, JMObjectSpawnOptions options = NULL )
 	{
 		if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
 			return;
@@ -703,7 +720,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			EntityAI parent = instance.PlayerObject;
 			vector position = instance.PlayerObject.GetPosition();
-			SpawnEntity(className, parent, position, quantity, health, temp, itemState, callerInstance);
+			SpawnEntity(className, parent, position, quantity, health, temp, itemState, callerInstance, options);
 		}
 	}
 
@@ -728,14 +745,15 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			float health;
 			float temp;
 			int itemState;
+			JMObjectSpawnOptions options = new JMObjectSpawnOptions();
 
-			if ( !SpawnEntity_ReadFrom(ctx, className, quantity, health, temp, itemState) )
+			if ( !SpawnEntity_ReadFrom(ctx, className, quantity, health, temp, itemState, options) )
 			{
 				Error("Failed");
 				return;
 			}
 
-			Exec_SpawnEntity_Inventory( className, players, quantity, health, temp, itemState, senderRPC );
+			Exec_SpawnEntity_Inventory( className, players, quantity, health, temp, itemState, senderRPC, options );
 		}
 	}
 
@@ -760,24 +778,32 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				}
 				else
 				{
-					Exec_SpawnEntity_TargetInventory(className, targetEnt, position, quantity, health, temp, itemState, null);
+					Exec_SpawnEntity_TargetInventory(className, targetEnt, position, quantity, health, temp, itemState, null, GetSpawnOptions());
 				}
 			}
 		}
 	}
 
-	protected void Exec_SpawnEntity_TargetInventory( string className, EntityAI targetEnt, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
+	protected void Exec_SpawnEntity_TargetInventory( string className, EntityAI targetEnt, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident, JMObjectSpawnOptions options = NULL )
 	{
 		JMPlayerInstance callerInstance;
 		if (!JMPermissions.HasRPC(JMConstants.PERM_ENTITY_SPAWN_INVENTORY, ident, callerInstance))
 			return;
 
-		SpawnEntity(className, targetEnt, position, quantity, health, temp, itemState, callerInstance);
+		SpawnEntity(className, targetEnt, position, quantity, health, temp, itemState, callerInstance, options);
 	}
 
 	//! @note LocationCreateEntity ignores ECE_EQUIP so we always use ObjectCreateEx and move entity to parent (if given) afterwards
-	EntityAI SpawnEntity(string type, EntityAI parent, vector position, float quantity, float health, float temp, int itemState, JMPlayerInstance callerInstance)
+	//! @param options how to set the entity up. NULL is a spawn with no options of its own
+	//! and gets the defaults; it never falls back to what an earlier spawn used.
+	EntityAI SpawnEntity(string type, EntityAI parent, vector position, float quantity, float health, float temp, int itemState, JMPlayerInstance callerInstance, JMObjectSpawnOptions options = NULL)
 	{
+		//! A local, not the parameter: a parameter holds no strong ref, so a new
+		//! object cannot be assigned to it.
+		JMObjectSpawnOptions spawnOptions = options;
+		if (!spawnOptions)
+			spawnOptions = new JMObjectSpawnOptions();
+
 		int flags;
 
 		bool inInventory;
@@ -798,7 +824,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				flags |= ECE_INITAI;
 		}
 
-		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
+		if (spawnOptions.m_SetupMode == COT_ObjectSetupMode.CE)
 			flags |= ECE_EQUIP;
 
 		Object obj = g_Game.CreateObjectEx(type, position, flags);
@@ -844,7 +870,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(g_Game.UpdatePathgraphRegionByObject, 100, false, obj);
 		}
 
-		SetupEntity(ent, quantity, health, temp, itemState, callerInstance.PlayerObject, m_ObjSetupMode);
+		SetupEntity(ent, quantity, health, temp, itemState, callerInstance.PlayerObject, spawnOptions.m_SetupMode, spawnOptions);
 
 		//! Ground spawns only: an item that went into an inventory has no world
 		//! position to restore it to, so undo would put it somewhere it never was.
@@ -944,7 +970,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return Math.RandomFloatInclusive( low, high );
 	}
 
-	protected void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player, COT_ObjectSetupMode mode = COT_ObjectSetupMode.NONE )
+	//! @param options the ranges and ammo type of this spawn. NULL means none: the
+	//! quantity and health are used as given and a magazine keeps its configured ammo.
+	protected void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player, COT_ObjectSetupMode mode = COT_ObjectSetupMode.NONE, JMObjectSpawnOptions options = NULL )
 	{
 		if (!g_Game.IsServer())
 		{
@@ -952,10 +980,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
+		float quantityMax = -1;
+		float healthMax = -1;
+		string ammoType;
+		if (options)
+		{
+			quantityMax = options.m_QuantityMax;
+			healthMax = options.m_HealthMax;
+			ammoType = options.m_AmmoType;
+		}
+
 		//! Rolled here rather than at the call site: this runs once per spawned
 		//! entity, so every one of them gets its own value.
-		quantity = RollSpawnValue( quantity, m_SpawnQuantityMax );
-		health   = RollSpawnValue( health, m_SpawnHealthMax );
+		quantity = RollSpawnValue( quantity, quantityMax );
+		health   = RollSpawnValue( health, healthMax );
 
 		SetupEntityForMode( entity, player, mode );
 
@@ -978,8 +1016,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				}
 			}
 
-			if (mag && m_SpawnAmmoType != "")
-				FillMagazine(mag, m_SpawnAmmoType, quantity);
+			if (mag && ammoType != "")
+				FillMagazine(mag, ammoType, quantity);
 
 			if ( itemState != 0 )
 			{

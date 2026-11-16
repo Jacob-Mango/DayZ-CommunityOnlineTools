@@ -382,6 +382,15 @@ class JMPermission : Managed
 			if (type == -1)  //! No more data
 				break;
 
+			//! Anything else is not a permission type. It would be stored and written
+			//! to the role file as it is, and the file reader takes any number with
+			//! a 2 in it for ALLOW.
+			if (type != JMPermissionType.INHERIT && type != JMPermissionType.DISALLOW && type != JMPermissionType.ALLOW)
+			{
+				CF.FormatError("Invalid type %1 received for permission %2", type.ToString(), child.GetFullName());
+				return false;
+			}
+
 			child.Type = type;
 
 			#ifdef DIAG_DEVELOPER
