@@ -353,6 +353,11 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! General gate first: the specific permission below can only be
+			//! answered once isCursor has been read.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
+				return;
+
 			//! The permission belongs to isCursor, so it is the one thing read
 			//! ahead of the gate. Exec_Position() answers it again for the
 			//! callers that do not come through here.

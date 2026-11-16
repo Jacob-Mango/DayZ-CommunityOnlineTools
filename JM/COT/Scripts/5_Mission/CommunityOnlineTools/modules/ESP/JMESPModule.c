@@ -2022,6 +2022,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
 			return;
@@ -2031,9 +2034,6 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( previousPosition ) )
 			return;
 		if ( !ctx.Read( previousOrientation ) )
-			return;
-
-		if ( !target )
 			return;
 
 		if ( !COT.IsValidWorldPosition( previousPosition ) )
@@ -2142,7 +2142,12 @@ class JMESPModule: JMRenderableModuleBase
 	#ifdef SERVER
 		if ( !senderRPC )
 			return;
+	#endif
 
+		if ( !target )
+			return;
+
+	#ifdef SERVER
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
 			return;
@@ -2150,9 +2155,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		vector position;
 		if ( !ctx.Read( position ) )
-			return;
-
-		if ( !target )
 			return;
 
 	#ifdef SERVER
@@ -2199,7 +2201,12 @@ class JMESPModule: JMRenderableModuleBase
 	#ifdef SERVER
 		if ( !senderRPC )
 			return;
+	#endif
 
+		if ( !target )
+			return;
+
+	#ifdef SERVER
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETORIENTATION, senderRPC ) )
 			return;
@@ -2207,9 +2214,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		vector orientation;
 		if ( !ctx.Read( orientation ) )
-			return;
-
-		if ( !target )
 			return;
 
 	#ifdef SERVER
@@ -2276,6 +2280,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETHEALTH, senderRPC, instance ) )
 			return;
@@ -2288,9 +2295,6 @@ class JMESPModule: JMRenderableModuleBase
 		//! TODO: Setting zone is not implemented in GUI, always sets global health
 		//if ( !ctx.Read( zone ) )
 			//return;
-
-		if ( !target )
-			return;
 
 		Exec_SetHealth( health, zone, target, senderRPC, instance );
 	}
@@ -2316,6 +2320,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
 			return;
@@ -2329,9 +2336,6 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( objSpawnerModule.m_ObjSetupMode ) )
 			return;
 
-		if ( !target )
-			return;
-
 		Exec_SetAttachment( slotId, className, target, senderRPC, instance );
 	}
 
@@ -2340,15 +2344,15 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
 			return;
 
 		int slotId;
 		if ( !ctx.Read( slotId ) )
-			return;
-
-		if ( !target )
 			return;
 
 		Exec_RemoveAttachment( slotId, target, senderRPC, instance );
@@ -3584,6 +3588,14 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
+		//! General gate first: the action's own permission below can only be
+		//! answered once the action has been read.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
+			return;
+
 		//! The permission belongs to the action, so the action is the one thing
 		//! read ahead of the gate. Nothing else leaves the stream until it passes.
 		int action;
@@ -3605,9 +3617,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		float fvalue;
 		if ( !ctx.Read( fvalue ) )
-			return;
-
-		if ( !target )
 			return;
 
 		Exec_ObjectAction( action, ivalue, fvalue, target, senderRPC, instance );
@@ -3693,10 +3702,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_DeleteObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !target )
+		if ( !senderRPC )
 			return;
 
-		if ( !senderRPC )
+		if ( !target )
 			return;
 
 		JMPlayerInstance instance;
@@ -3748,15 +3757,15 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD, senderRPC, instance ) )
 			return;
 
 		string part_name;
 		if ( !ctx.Read( part_name ) )
-			return;
-
-		if ( !target )
 			return;
 
 		EntityAI bb;
@@ -3801,15 +3810,15 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE, senderRPC, instance ) )
 			return;
 
 		string part_name;
 		if ( !ctx.Read( part_name ) )
-			return;
-
-		if ( !target )
 			return;
 
 		EntityAI bb;
@@ -3851,15 +3860,15 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_REPAIR, senderRPC, instance ) )
 			return;
 
 		string part_name;
 		if ( !ctx.Read( part_name ) )
-			return;
-
-		if ( !target )
 			return;
 
 		EntityAI bb;
@@ -3917,6 +3926,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		if ( !target )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_SETHEALTH, senderRPC, instance ) )
 			return;
@@ -3927,9 +3939,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		float health01;
 		if ( !ctx.Read( health01 ) )
-			return;
-
-		if ( !target )
 			return;
 
 		EntityAI bb;

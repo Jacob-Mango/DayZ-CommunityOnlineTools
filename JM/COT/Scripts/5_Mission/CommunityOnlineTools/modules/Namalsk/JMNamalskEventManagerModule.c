@@ -106,6 +106,10 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		{
 			case JMNamalskEventManagerRPC.StartEvent:
 			{
+				//! General gate first: the event's own permission below can only be
+				//! answered once the event name has been read.
+				if (!JMPermissions.HasRPC(JMConstants.PERM_COT_VIEW, sender)) return;
+
 				if (!ctx.Read(evt)) return;
 
 				if (!JMPermissions.HasRPC("Namalsk." + evt + ".Start", sender, instance)) return;
@@ -120,6 +124,10 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 			case JMNamalskEventManagerRPC.CancelEvent:
 			{
+				//! General gate first: the event's own permission below can only be
+				//! answered once the event name has been read.
+				if (!JMPermissions.HasRPC(JMConstants.PERM_COT_VIEW, sender)) return;
+
 				if (!ctx.Read(evt)) return;
 
 				if (!JMPermissions.HasRPC("Namalsk." + evt + ".Cancel", sender, instance)) return;

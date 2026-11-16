@@ -812,6 +812,11 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		//! General gate first: the stat's own permission below can only be answered
+		//! once the stat type has been read.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
+			return;
+
 		//! The permission belongs to the stat, so the stat type is the one thing
 		//! read ahead of the gate. Nothing else leaves the stream until it passes.
 		int type;
@@ -3764,6 +3769,11 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		string guid;
 		int netLow, netHigh, op;
+
+		//! General gate first: the op's own permission below can only be answered
+		//! once the op has been read.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
+			return;
 
 		//! The permission belongs to the op, so the op is the one thing read
 		//! ahead of the gate. Nothing else leaves the stream until it passes.

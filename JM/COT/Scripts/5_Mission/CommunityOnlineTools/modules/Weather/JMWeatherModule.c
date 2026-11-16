@@ -780,6 +780,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
+		//! General gate first: the op's own permissions below can only be answered
+		//! once the op and the target name have been read.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
+			return;
+
 		//! The permission belongs to the op and to whether it names an existing state,
 		//! so those two are read ahead of the gate. The config stays in the stream
 		//! until it passes.
@@ -1094,6 +1099,11 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 
 		if ( !senderRPC )
+			return;
+
+		//! General gate first: the op's own permission below can only be answered
+		//! once the op has been read.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
 			return;
 
 		//! The permission belongs to the op, so the op is the one thing read ahead of

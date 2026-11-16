@@ -265,6 +265,11 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		if ( !m_Adapter )
 			return;
 
+		//! General gate first: the action's own permission below can only be
+		//! answered once the action id has been read.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, sender ) )
+			return;
+
 		//! The permission belongs to the action, so the action id is the one thing
 		//! read ahead of the gate. Nothing else leaves the stream until it passes.
 		string actionId;
