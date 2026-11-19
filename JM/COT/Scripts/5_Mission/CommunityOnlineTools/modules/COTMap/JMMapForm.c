@@ -198,11 +198,8 @@ class JMMapForm: JMFormBase
 			DrawMapCircle( cylinderZone.Center, cylinderZone.Radius, szColor );
 		}
 	}
-#endif
 
-#ifdef EXPANSIONMODCORE
 	// Approximates a circle on the map by placing dot markers around the perimeter.
-	// (Guard matches its only caller, UpdateExpansionSafezones; it needs nothing from Navigation.)
 	protected void DrawMapCircle( vector center, float radius, int color )
 	{
 		int segments = 12;
