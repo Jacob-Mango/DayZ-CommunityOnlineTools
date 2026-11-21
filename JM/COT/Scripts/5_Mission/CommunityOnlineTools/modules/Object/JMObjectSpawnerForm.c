@@ -752,14 +752,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 		switch ( mode )
 		{
-			default:
-			case COT_ObjectSpawnerMode.COPYLISTRAW:
-				for ( int i = 0; i < m_ListClasses.Count(); i++ )
-					clipboardOutput += m_ListClasses[i] + "\n";
-
-				COTFeedback.Copy( clipboardOutput );
-				break;
-
 			case COT_ObjectSpawnerMode.COPYLISTTYPES:
 				clipboardOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 				clipboardOutput += "<types>\n";
@@ -793,6 +785,14 @@ class JMObjectSpawnerForm: JMFormBase
 					COTCreateLocalAdminNotification( new StringLocaliser( errorMsg ) );
 				break;
 		#endif
+
+			case COT_ObjectSpawnerMode.COPYLISTRAW:
+			default:
+				for ( int i = 0; i < m_ListClasses.Count(); i++ )
+					clipboardOutput += m_ListClasses[i] + "\n";
+
+				COTFeedback.Copy( clipboardOutput );
+				break;
 		}
 	}
 
@@ -859,11 +859,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 		switch (mode)
 		{
-			default:
-			case COT_ObjectSpawnerMode.PLAYER_POSITION:
-				m_Module.SpawnEntity_Position(selection, g_Game.GetPlayer().GetPosition(), quantity, health, temp, itemState);
-				break;
-
 			case COT_ObjectSpawnerMode.CURSOR:
 				m_Module.SpawnEntity_Position(selection, GetCursorPos(), quantity, health, temp, itemState);
 				break;
@@ -878,6 +873,11 @@ class JMObjectSpawnerForm: JMFormBase
 
 			case COT_ObjectSpawnerMode.OBJECT_INVENTORY:
 				m_Module.SpawnEntity_Inventory(selection, JM_GetSelected().GetObjects(), quantity, health, temp, itemState);
+				break;
+
+			case COT_ObjectSpawnerMode.PLAYER_POSITION:
+			default:
+				m_Module.SpawnEntity_Position(selection, g_Game.GetPlayer().GetPosition(), quantity, health, temp, itemState);
 				break;
 		}
 	}

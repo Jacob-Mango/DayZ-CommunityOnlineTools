@@ -203,12 +203,17 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! Exec_SpawnCursor() answers it again for the callers that do not
+			//! come through here.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_LOADOUTS_SPAWN_CURSOR, senderRPC ) )
+				return;
+
 			string Loadout;
 			if ( !ctx.Read( Loadout ) )
 			{
 				Error("Failed");
 				return;
-			} 
+			}
 
 			vector position;
 			if ( !ctx.Read( position ) )
@@ -306,12 +311,17 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! Exec_SpawnPlayers() answers it again for the callers that do not
+			//! come through here.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_LOADOUTS_SPAWN_SELECTEDPLAYERS, senderRPC ) )
+				return;
+
 			string Loadout;
 			if ( !ctx.Read( Loadout ) )
 			{
 				Error("Failed");
 				return;
-			} 
+			}
 
 			array< string > guids;
 			if ( !ctx.Read( guids ) )
@@ -375,12 +385,17 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
+			//! Exec_SpawnTarget() answers it again for the callers that do not
+			//! come through here.
+			if ( !JMPermissions.HasRPC( JMConstants.PERM_LOADOUTS_SPAWN_TARGET, senderRPC ) )
+				return;
+
 			string Loadout;
 			if ( !ctx.Read( Loadout ) )
 			{
 				Error("Failed");
 				return;
-			} 
+			}
 
 			EntityAI ent;
 			if ( !ctx.Read( ent ) )

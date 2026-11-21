@@ -12,4 +12,21 @@ class JMTeleportRowData
 		m_Position = pos;
 		m_MarkerId = markerId;
 	}
+
+	bool Equals(JMTeleportRowData row, bool compareId = false, float tolerance = 0.1)
+	{
+		if (row.m_Name != m_Name)
+			return false;
+
+		if (row.m_Kind != m_Kind)
+			return false;
+
+		if (!Math.IsPointInCircle(row.m_Position, tolerance, m_Position))
+			return false;
+
+		if (compareId && row.m_MarkerId != m_MarkerId)
+			return false;
+
+		return true;
+	}
 }

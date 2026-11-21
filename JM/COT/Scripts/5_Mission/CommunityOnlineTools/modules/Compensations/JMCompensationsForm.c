@@ -199,7 +199,7 @@ class JMCompensationsForm: JMFormBase
 			array< string > selectedPlayers = JM_GetSelected().GetPlayersOrSelf();
 			if ( selectedPlayers.Count() == 0 )
 			{
-				ShowNotice( "#STR_COT_COMPENSATIONS_NO_PLAYERS_SELECTED", "#STR_COT_COMPENSATIONS_PLEASE_SELECT_AT_LEAST_ONE_PLAYER" );
+				ShowNotice( "#STR_COT_NO_PLAYERS_SELECTED", "#STR_COT_COMPENSATIONS_PLEASE_SELECT_AT_LEAST_ONE_PLAYER" );
 				return;
 			}
 

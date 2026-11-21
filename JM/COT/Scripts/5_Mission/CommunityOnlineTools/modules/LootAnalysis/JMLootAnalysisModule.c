@@ -9,6 +9,7 @@ class JMCETypeData
 {
 	string m_ClassName;
 	ref array<string> m_Usages;   // e.g. ["Military","Police"]
+	ref array<string> m_Tags;   // e.g. ["floor","shelves"]
 	ref array<string> m_Tiers;    // <value name="Tier1"/> etc
 	string m_Category;            // e.g. "weapons"
 	int m_Nominal   = -1;
@@ -18,6 +19,7 @@ class JMCETypeData
 	int m_Lifetime  = -1;
 	int m_Restock   = -1;
 	int m_Cost      = -1;
+	JMCETypeFlags m_Flags;
 
 	//! Which types.xml this entry was parsed from - a mission can register
 	//! several (see FindRegisteredTypesFiles). Save_ItemTypeInfo needs
@@ -27,8 +29,19 @@ class JMCETypeData
 	void JMCETypeData()
 	{
 		m_Usages = new array<string>;
+		m_Tags   = new array<string>;
 		m_Tiers  = new array<string>;
 	}
+}
+
+enum JMCETypeFlags
+{
+	COUNT_IN_CARGO = 1,
+	COUNT_IN_HOARDER = 2,
+	COUNT_IN_MAP = 4,
+	COUNT_IN_PLAYER = 8,
+	CRAFTED = 16,
+	DELOOT = 32
 }
 
 // mapgroupproto.xml entry: one building type -> its accepted usages
@@ -154,17 +167,22 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//  CE data loading - called on server mission load
 	// -----------------------------------------------------------------------
 
-	override void OnMissionLoaded()
+	//! EXPENSIVE. Do this on mission start
+	override void OnMissionStart()
 	{
-		super.OnMissionLoaded();
+		super.OnMissionStart();
 
-		if (IsMissionHost())
+		if (g_Game.IsDedicatedServer())
 			LoadCEData();
 	}
 
 	protected void LoadCEData()
 	{
-		auto trace = CF_Trace_0(this);
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		auto trace = EXTrace.Start(true, this);
+	#endif
+	#endif
 
 		m_CETypes     = new map<string, ref JMCETypeData>;
 		m_CEProtos    = new map<string, ref JMCEGroupProto>;
@@ -182,6 +200,12 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// $mission:db/types.xml silently drops modded items. See docs/audits/2026-07-15-todo-mods-audit.md.
 	protected void ParseAllTypesXml()
 	{
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		auto trace = EXTrace.Start(true, this);
+	#endif
+	#endif
+
 		array<string> files = new array<string>;
 		files.Insert("$mission:db/types.xml");
 
@@ -259,6 +283,12 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// <types><type name="AK101"><category name="weapons"/><usage name="Military"/></type></types>
 	protected bool ParseTypesXml(string path)
 	{
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		auto trace = EXTrace.Start(true, this);
+	#endif
+	#endif
+
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument(path, doc))
 		{
@@ -279,12 +309,22 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!typesEl)
 			return false;
 
-		array<CF_XML_Tag> typeTags = typesEl.Get("type");
-		if (!typeTags)
+		//! @note CF_XML_Element.Get("tagname") has O(n) runtime with n being equal to number of child tags,
+		//! we want to avoid doing two iterations (one for getting children and another for iterating over children)
+		int typesChildCount = typesEl.Count();
+		if (typesChildCount == 0)
 			return false;
 
-		foreach (CF_XML_Tag typeTag : typeTags)
+		typename flagsEnum = JMCETypeFlags;
+		int flagsCount = flagsEnum.GetVariableCount();
+
+		for (int i = 0; i < typesChildCount; ++i)
 		{
+			CF_XML_Tag typeTag = typesEl.Get(i);
+
+			if (typeTag.GetName() != "type")  //! should not be possible since <type> is the only valid child in <types>
+				continue;
+
 			CF_XML_Attribute nameAttr = typeTag.GetAttribute("name");
 			if (!nameAttr)
 				continue;
@@ -293,69 +333,160 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 			if (typeName == "")
 				continue;
 
-			JMCETypeData data = new JMCETypeData();
+			JMCETypeData data;
+
+			//! An additional type does not overwrite an existing entry completely, but only the defined attributes
+			//! See https://community.bistudio.com/wiki/DayZ:Central_Economy_mission_files_modding
+			string typeNameLower = typeName;
+			typeNameLower.ToLower();
+			if (!m_CETypes.Find(typeNameLower, data))
+			{
+				data = new JMCETypeData();
+				m_CETypes[typeNameLower] = data;
+			}
+			
 			data.m_ClassName = typeName;
 			data.m_SourceFile = path;
 
 			CF_XML_Element typeEl = typeTag.GetContent();
-			if (typeEl)
+			if (!typeEl)
+				continue;
+
+			bool hasFlags = false;
+			bool hasCategory = false;
+			bool hasTags = false;
+			bool hasUsages = false;
+			bool hasValues = false;
+
+			int typeChildCount = typeEl.Count();
+			for (int j = 0; j < typeChildCount; ++j)
 			{
-				// Collect usages
-				array<CF_XML_Tag> usageTags = typeEl.Get("usage");
-				if (usageTags)
+				CF_XML_Tag childTag = typeEl.Get(j);
+
+				switch (childTag.GetName())
 				{
-					foreach (CF_XML_Tag usageTag : usageTags)
+				// Collect flags
+				case "flags":
+					if (hasFlags)
+						CF_Log.Warn("More than one flags tag defined for type '%1' in file '%2'", typeName, path);
+					else
+						hasFlags = true;
+					
+					data.m_Flags = 0;
+
+					for (int k = 0; k < flagsCount; ++k)
 					{
-						CF_XML_Attribute usageAttr = usageTag.GetAttribute("name");
-						if (usageAttr)
+						int flagBit;
+						if (flagsEnum.GetVariableType(k) == int && flagsEnum.GetVariableValue(null, k, flagBit))
 						{
-							string usageName = usageAttr.GetValue();
-							if (usageName != "")
-								data.m_Usages.Insert(usageName);
+							string attrName = flagsEnum.GetVariableName(k);
+							attrName.ToLower();
+							CF_XML_Attribute flagAttr = childTag.GetAttribute(attrName);
+							if (flagAttr)
+							{
+								string flagValue = flagAttr.GetValue();
+								if (flagValue.ToInt() != 0)
+									data.m_Flags |= flagBit;
+							}
 						}
 					}
-				}
+
+					break;
+
+				// Collect usages
+				case "usage":
+					if (!hasUsages && data.m_Usages.Count() > 0)
+					{
+						hasUsages = true;
+						data.m_Usages.Clear();
+					}
+
+					CF_XML_Attribute usageAttr = childTag.GetAttribute("name");
+					if (usageAttr)
+					{
+						string usageName = usageAttr.GetValue();
+						if (usageName != "")
+							data.m_Usages.Insert(usageName);
+					}
+
+					break;
 
 				// Collect category (take the first one)
-				array<CF_XML_Tag> catTags = typeEl.Get("category");
-				if (catTags && catTags.Count() > 0)
-				{
-					CF_XML_Attribute catAttr = catTags[0].GetAttribute("name");
+				case "category":
+					if (hasCategory)
+						CF_Log.Warn("More than one category tag defined for type '%1' in file '%2'", typeName, path);
+					else
+						hasCategory = true;
+
+					CF_XML_Attribute catAttr = childTag.GetAttribute("name");
 					if (catAttr)
 						data.m_Category = catAttr.GetValue();
-				}
+
+					break;
+
+				// Collect tags - <tag name="shelves"/> etc
+				case "tag":
+					if (!hasTags && data.m_Tags.Count() > 0)
+					{
+						hasTags = true;
+						data.m_Tags.Clear();
+					}
+
+					CF_XML_Attribute tagAttr = childTag.GetAttribute("name");
+					if (tagAttr)
+					{
+						string tagName = tagAttr.GetValue();
+						if (tagName != "")
+							data.m_Tags.Insert(tagName);
+					}
+
+					break;
 
 				// Collect tiers - <value name="Tier1"/> etc
-				array<CF_XML_Tag> valueTags = typeEl.Get("value");
-				if (valueTags)
-				{
-					foreach (CF_XML_Tag valueTag : valueTags)
+				case "value":
+					if (!hasValues && data.m_Tiers.Count() > 0)
 					{
-						CF_XML_Attribute valueAttr = valueTag.GetAttribute("name");
-						if (valueAttr)
-						{
-							string tierName = valueAttr.GetValue();
-							if (tierName != "")
-								data.m_Tiers.Insert(tierName);
-						}
+						hasValues = true;
+						data.m_Tiers.Clear();
 					}
-				}
+
+					CF_XML_Attribute valueAttr = childTag.GetAttribute("name");
+					if (valueAttr)
+					{
+						string tierName = valueAttr.GetValue();
+						if (tierName != "")
+							data.m_Tiers.Insert(tierName);
+					}
+
+					break;
 
 				// CE tuning values - simple <tag>123</tag> text-content elements
-				data.m_Nominal  = ParseIntTag(typeEl, "nominal");
-				data.m_Min      = ParseIntTag(typeEl, "min");
-				data.m_QuantMin = ParseIntTag(typeEl, "quantmin");
-				data.m_QuantMax = ParseIntTag(typeEl, "quantmax");
-				data.m_Lifetime = ParseIntTag(typeEl, "lifetime");
-				data.m_Restock  = ParseIntTag(typeEl, "restock");
-				data.m_Cost     = ParseIntTag(typeEl, "cost");
-			}
+				case "nominal":
+					data.m_Nominal  = ParseIntTag(childTag, data.m_Nominal);
+					break;
+				case "min":
+					data.m_Min      = ParseIntTag(childTag, data.m_Min);
+					break;
+				case "quantmin":
+					data.m_QuantMin = ParseIntTag(childTag, data.m_QuantMin);
+					break;
+				case "quantmax":
+					data.m_QuantMax = ParseIntTag(childTag, data.m_QuantMax);
+					break;
+				case "lifetime":
+					data.m_Lifetime = ParseIntTag(childTag, data.m_Lifetime);
+					break;
+				case "restock":
+					data.m_Restock  = ParseIntTag(childTag, data.m_Restock);
+					break;
+				case "cost":
+					data.m_Cost     = ParseIntTag(childTag, data.m_Cost);
+					break;
 
-			string typeNameLower = typeName;
-			typeNameLower.ToLower();
-			//! Set, not Insert: a modded types file may redefine a vanilla
-			//! entry, and Insert would leave both in the map.
-			m_CETypes.Set(typeNameLower, data);
+				default:
+					CF_Log.Warn("Unknown tag '%1' in file '%2'", childTag.GetName(), path);
+				}
+			}
 		}
 
 		return true;
@@ -365,13 +496,22 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	//! CF_XML has no GetText()/GetInnerText(); the inner text is reached by
 	//! calling GetContent() twice - once on the CF_XML_Tag to get its child
 	//! CF_XML_Element, once on that element to get the string it holds.
+	//! WARNING: Inefficient, use ParseIntTag(CF_XML_Tag tag, ...) instead whenever possible
 	protected int ParseIntTag(CF_XML_Element parent, string tagName, int defaultVal = -1)
 	{
 		array<CF_XML_Tag> tags = parent.Get(tagName);
 		if (!tags || tags.Count() == 0)
 			return defaultVal;
 
-		CF_XML_Element content = tags[0].GetContent();
+		return ParseIntTag(tags[0], defaultVal);
+	}
+
+	protected int ParseIntTag(CF_XML_Tag tag, int defaultVal = -1)
+	{
+		if (!tag)
+			return defaultVal;
+
+		CF_XML_Element content = tag.GetContent();
 		if (!content)
 			return defaultVal;
 
@@ -386,6 +526,12 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// <prototype><group name="Land_Shed_M1" lootmax="2"><usage name="Industrial"/>...</group></prototype>
 	protected void ParseMapGroupProtoXml()
 	{
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		auto trace = EXTrace.Start(true, this);
+	#endif
+	#endif
+
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument("$mission:mapgroupproto.xml", doc))
 		{
@@ -404,12 +550,19 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!protoEl)
 			return;
 
-		array<CF_XML_Tag> groupTags = protoEl.Get("group");
-		if (!groupTags)
+		//! @note CF_XML_Element.Get("tagname") has O(n) runtime with n being equal to number of child tags,
+		//! we want to avoid doing two iterations (one for getting children and another for iterating over children)
+		int prototypeChildCount = protoEl.Count();
+		if (prototypeChildCount == 0)
 			return;
 
-		foreach (CF_XML_Tag groupTag : groupTags)
+		for (int i = 0; i < prototypeChildCount; ++i)
 		{
+			CF_XML_Tag groupTag = protoEl.Get(i);
+
+			if (groupTag.GetName() != "group")  //! should not be possible since <group> is the only valid child in <prototype>
+				continue;
+
 			CF_XML_Attribute nameAttr = groupTag.GetAttribute("name");
 			if (!nameAttr)
 				continue;
@@ -424,12 +577,15 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 			CF_XML_Element groupEl = groupTag.GetContent();
 			if (groupEl)
 			{
-				array<CF_XML_Tag> usageTags = groupEl.Get("usage");
-				if (usageTags)
+				int groupChildCount = groupEl.Count();
+
+				for (int j = 0; j < groupChildCount; ++j)
 				{
-					foreach (CF_XML_Tag usageTag : usageTags)
+					CF_XML_Tag childTag = groupEl.Get(j);
+
+					if (childTag.GetName() == "usage")
 					{
-						CF_XML_Attribute usageAttr = usageTag.GetAttribute("name");
+						CF_XML_Attribute usageAttr = childTag.GetAttribute("name");
 						if (usageAttr)
 						{
 							string usageName = usageAttr.GetValue();
@@ -452,6 +608,12 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// </map>
 	protected void ParseMapGroupPosXml()
 	{
+	#ifdef DIAG_DEVELOPER
+	#ifdef DZ_Expansion_Core
+		auto trace = EXTrace.Start(true, this);
+	#endif
+	#endif
+
 		CF_XML_Document doc;
 		if (!CF_XML.ReadDocument("$mission:mapgrouppos.xml", doc))
 		{
@@ -470,12 +632,19 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!mapEl)
 			return;
 
-		array<CF_XML_Tag> groupTags = mapEl.Get("group");
-		if (!groupTags)
+		//! @note CF_XML_Element.Get("tagname") has O(n) runtime with n being equal to number of child tags,
+		//! we want to avoid doing two iterations (one for getting children and another for iterating over children)
+		int mapChildCount = mapEl.Count();
+		if (mapChildCount == 0)
 			return;
 
-		foreach (CF_XML_Tag groupTag : groupTags)
+		for (int i = 0; i < mapChildCount; ++i)
 		{
+			CF_XML_Tag groupTag = mapEl.Get(i);
+
+			if (groupTag.GetName() != "group")  //! should not be possible since <group> is the only valid child in <map>
+				continue;
+
 			CF_XML_Attribute nameAttr = groupTag.GetAttribute("name");
 			if (!nameAttr)
 				continue;

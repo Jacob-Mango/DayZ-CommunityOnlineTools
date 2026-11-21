@@ -1,59 +1,64 @@
-FrameWidgetClass JMVehicleMapMarker {
+FrameWidgetClass {
+ Name "JMVehicleMapMarker"
  clipchildren 0
  ignorepointer 1
- size 1 1
+ size 320 44
  hexactpos 1
  vexactpos 1
  hexactsize 1
  vexactsize 1
  {
-  PanelWidgetClass marker_panel {
-   clipchildren 1
+  GridSpacerWidgetClass "{6AD4D84F330D089C}" {
+   Name "marker_panel"
+   clipchildren 0
    ignorepointer 1
-   position -23 0
-   size 500 50
+   color 0.063 0.063 0.063 1
+   position 0 0
+   size 1 28
+   halign left
    valign center_ref
-   hexactpos 0
-   vexactpos 0
-   hexactsize 1
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
    vexactsize 1
    priority 100
+   style COTPill11Set
+   Padding 11
+   Margin 0
+   "Size To Content H" 1
+   content_valign center
+   Columns 4
+   Rows 1
    {
-    TextWidgetClass marker_name {
-     ignorepointer 1
-     keepsafezone 0
-     position 0.1 0
-     size 447.87997 25
-     valign center_ref
-     hexactpos 0
-     vexactpos 0
+    PanelWidgetClass "{6AD51E878B76041F}" {
+     Name "spacer_left"
+     position 0 0
+     size 0 0
+     halign left
+     valign top
+     hexactpos 1
+     vexactpos 1
      hexactsize 1
      vexactsize 1
-     style Normal
-     text "MARKER NAME"
-     font "gui/fonts/etelkatextpro22"
-     "shadow size" 20
-     "shadow color" 0 0 0 1
-     "shadow offset" 1 1
-     "exact text" 1
-     "size to text h" 0
-     "size to text v" 0
-     "text valign" center
     }
-    PanelWidgetClass marker_icon_panel {
+    PanelWidgetClass "{00000000A30A4A0E}" {
+     Name "marker_icon_panel"
+     clipchildren 0
      ignorepointer 1
      keepsafezone 0
      color 1 1 1 0
-     size 45 45
+     position 0 0
+     size 24 24
      valign center_ref
      hexactpos 0
      vexactpos 0
      hexactsize 1
      vexactsize 1
      draggable 0
-     style blank
+     style COTPill11Set
      {
-      ImageWidgetClass marker_select_ring {
+      ImageWidgetClass "{000000009FD35ED3}" {
+       Name "marker_select_ring"
        visible 0
        ignorepointer 1
        keepsafezone 0
@@ -68,16 +73,19 @@ FrameWidgetClass JMVehicleMapMarker {
        mode blend
        "src alpha" 1
        "no wrap" 1
+       "clamp mode" clamp
        stretch 1
+       "stretch mode" stretch_w_h
        filter 1
        nocache 0
       }
-      ImageWidgetClass marker_icon {
+      ImageWidgetClass "{00000000B54828A5}" {
+       Name "marker_icon"
        clipchildren 1
        ignorepointer 1
        keepsafezone 0
        position 0 0
-       size 32 32
+       size 24 24
        halign center_ref
        valign center_ref
        hexactpos 0
@@ -88,14 +96,17 @@ FrameWidgetClass JMVehicleMapMarker {
        mode blend
        "src alpha" 1
        "no wrap" 1
+       "clamp mode" clamp
        stretch 1
+       "stretch mode" stretch_w_h
        filter 1
        nocache 0
        pivot 0 0
        "Transition width" 0
        Progress 0
       }
-      ButtonWidgetClass marker_button {
+      ButtonWidgetClass "{00000000E5605AB6}" {
+       Name "marker_button"
        ignorepointer 0
        size 1 1
        halign center_ref
@@ -104,12 +115,43 @@ FrameWidgetClass JMVehicleMapMarker {
        vexactpos 0
        hexactsize 0
        vexactsize 0
-       draggable 1
        priority 100
+       draggable 1
        style Empty
        "no focus" 0
       }
      }
+    }
+    TextWidgetClass "{00000000061C2C0B}" {
+     Name "marker_name"
+     ignorepointer 1
+     keepsafezone 0
+     position 0 0
+     size 1 1
+     halign left
+     valign top
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Normal
+     text "MARKER NAME"
+     font "gui/fonts/etelkatextpro22"
+     "exact text" 1
+     "size to text h" 1
+     "size to text v" 1
+     "text valign" center
+    }
+    PanelWidgetClass "{6AD51E83B8F92373}" {
+     Name "spacer_right"
+     position 0 0
+     size 0 0
+     halign left
+     valign top
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
     }
    }
   }

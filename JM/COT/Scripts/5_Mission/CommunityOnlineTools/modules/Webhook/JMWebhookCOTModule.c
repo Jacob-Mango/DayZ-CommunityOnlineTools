@@ -180,17 +180,17 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_URL_ADD, senderRPC, instance ) )
+			return;
+
 		string name;
 		if ( !ctx.Read( name ) )
 			return;
 
 		string url;
 		if ( !ctx.Read( url ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC ) return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_URL_ADD, senderRPC, instance ) )
 			return;
 
 		Exec_AddConnectionGroup( name, url );
@@ -223,13 +223,13 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
-		string name;
-		if ( !ctx.Read( name ) )
-			return;
-
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_URL_REMOVE, senderRPC, instance ) )
+			return;
+
+		string name;
+		if ( !ctx.Read( name ) )
 			return;
 
 		Exec_RemoveConnectionGroup( name );
@@ -275,6 +275,11 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_URL_EDIT, senderRPC, instance ) )
+			return;
+
 		string oldName;
 		if ( !ctx.Read( oldName ) )
 			return;
@@ -293,11 +298,6 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		string filterRole;
 		if ( !ctx.Read( filterRole ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC ) return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_URL_EDIT, senderRPC, instance ) )
 			return;
 
 		Exec_EditConnectionGroup( oldName, newName, newUrl, filterGUID, filterRole );
@@ -335,6 +335,11 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_ADD, senderRPC, instance ) )
+			return;
+
 		string name;
 		if ( !ctx.Read( name ) )
 			return;
@@ -345,11 +350,6 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		bool enabled;
 		if ( !ctx.Read( enabled ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC ) return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_ADD, senderRPC, instance ) )
 			return;
 
 		Exec_AddType( name, group, enabled );
@@ -386,17 +386,17 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_REMOVE, senderRPC, instance ) )
+			return;
+
 		string name;
 		if ( !ctx.Read( name ) )
 			return;
 
 		string group;
 		if ( !ctx.Read( group ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC ) return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_REMOVE, senderRPC, instance ) )
 			return;
 
 		Exec_RemoveType( name, group );
@@ -434,6 +434,11 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_STATE, senderRPC, instance ) )
+			return;
+
 		string name;
 		if ( !ctx.Read( name ) )
 			return;
@@ -444,11 +449,6 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		bool enabled;
 		if ( !ctx.Read( enabled ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !senderRPC ) return;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEBHOOK_MANAGE_TYPE_STATE, senderRPC, instance ) )
 			return;
 
 		Exec_TypeState( name, group, enabled );

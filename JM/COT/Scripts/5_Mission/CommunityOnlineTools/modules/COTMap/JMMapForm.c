@@ -79,6 +79,8 @@ class JMMapForm: JMFormBase
 
 #ifdef EXPANSIONMODNAVIGATION
 		UpdateExpansionMarkers();
+#endif
+#ifdef EXPANSIONMODCORE
 		UpdateExpansionSafezones();
 #endif
 	}
@@ -167,7 +169,9 @@ class JMMapForm: JMFormBase
 			m_MapWidget.AddUserMark( marker.GetPosition(), name, marker.GetColor(), JM_COT_ICON_DOT + ".paa" );
 		}
 	}
+#endif
 
+#ifdef EXPANSIONMODCORE
 	protected void UpdateExpansionSafezones()
 	{
 		ExpansionSafeZoneSettings szSettings = GetExpansionSettings().GetSafeZone();
