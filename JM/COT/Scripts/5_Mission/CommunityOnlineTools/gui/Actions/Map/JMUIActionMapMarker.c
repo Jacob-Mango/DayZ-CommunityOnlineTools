@@ -4,6 +4,7 @@
 class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 {
 	protected Widget      m_Root;
+	protected Widget      m_Panel;
 	protected TextWidget  m_Name;
 	protected ImageWidget m_Icon;
 	protected ButtonWidget m_MarkerButton;
@@ -12,6 +13,7 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 	protected string m_Id;
 	protected vector m_Position;
 	protected int    m_Color;
+	protected bool   m_Selected;
 
 	//! True while the cursor is over this marker - held so a color set while
 	//! hovered doesn't stomp the hover tint, mirroring JMVehiclesMapMarker.
@@ -19,6 +21,8 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 	static const int MARKER_HOVER_COLOR = JMTheme.ACCENT_HOVER;
 	static const string SELECT_RING_ICON  = "circle-dashed";
 	static const int    SELECT_RING_COLOR = JMTheme.ACCENT_HOVER;
+	static const int BACKGROUND_SELECTED = ARGB( 255, 16, 16, 16 );
+	static const int BACKGROUND_DESELECTED = ARGB( 0, 16, 16, 16 );
 
 	void JMUIActionMapMarker( Widget parent, UIActionMap owner, string id, vector position, string label, int color, string icon )
 	{
@@ -30,6 +34,7 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 		if ( m_Root )
 			m_Root.SetSort( JMUILayout.SORT_PREVIEW_OVERLAY );
 
+		m_Panel		   = m_Root.FindAnyWidget( "marker_panel" );
 		m_Name         = TextWidget.Cast( m_Root.FindAnyWidget( "marker_name" ) );
 		m_Icon         = ImageWidget.Cast( m_Root.FindAnyWidget( "marker_icon" ) );
 		m_MarkerButton = ButtonWidget.Cast( m_Root.FindAnyWidget( "marker_button" ) );
@@ -40,11 +45,13 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 		m_Position = position;
 		m_Color    = color;
 
+		m_Panel.SetColor( BACKGROUND_DESELECTED );
+
 		if ( m_Icon && icon != "" )
 			m_Icon.LoadImageFile( 0, icon );
 
 		if ( m_Icon )
-			m_Icon.SetColor( m_Color );
+			m_Icon.SetColor( m_Color | 0xff000000 );
 
 		if ( m_Name )
 		{
@@ -102,10 +109,14 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 			return;
 
 		if ( m_Icon )
-			m_Icon.SetColor( m_Color );
+		{
+			m_Icon.SetColor( m_Color | 0xff000000 );
+		}
 
 		if ( m_Name )
+		{
 			m_Name.SetColor( m_Color );
+		}
 	}
 
 	void SetIcon( string icon )
@@ -138,6 +149,13 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 	//! re-selection does not start mid-spin from a stale angle.
 	void SetSelected( bool selected )
 	{
+		m_Selected = selected;
+
+		if ( selected )
+			m_Panel.SetColor( BACKGROUND_SELECTED );
+		else
+			m_Panel.SetColor( BACKGROUND_DESELECTED );
+
 		if ( !m_SelectRing )
 			return;
 
@@ -159,7 +177,7 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 		float x, y;
 		m_Root.GetParent().GetScreenPos( x, y );
 
-		m_Root.SetPos( screenPos[0] - x, screenPos[1] - y, true );
+		m_Root.SetPos( screenPos[0] - x - 22, screenPos[1] - y - 22, true );
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )
@@ -168,6 +186,9 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 			return false;
 
 		m_Frozen = true;
+
+		if ( m_Id.IndexOf( JMTeleportForm.MAP_LAYER ) == 0 )
+			m_Panel.SetColor( BACKGROUND_SELECTED );
 
 		if ( m_Icon )
 			m_Icon.SetColor( MARKER_HOVER_COLOR );
@@ -187,8 +208,11 @@ class JMUIActionMapMarker: COT_ScriptedWidgetEventHandler
 
 		m_Frozen = false;
 
+		if ( !m_Selected )
+			m_Panel.SetColor( BACKGROUND_DESELECTED );
+
 		if ( m_Icon )
-			m_Icon.SetColor( m_Color );
+			m_Icon.SetColor( m_Color | 0xff000000 );
 		if ( m_Name )
 			m_Name.SetColor( m_Color );
 

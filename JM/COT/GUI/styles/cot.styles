@@ -396,6 +396,30 @@
                 <Item Name="Left" Image="box8_left" />
             </State>
         </Style>
+        <Style Name="COTPill11Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill11_lefttop" />
+                <Item Name="Top" Image="pill11_top" />
+                <Item Name="RightTop" Image="pill11_righttop" />
+                <Item Name="Right" Image="pill11_right" />
+                <Item Name="RightBottom" Image="pill11_rightbottom" />
+                <Item Name="Bottom" Image="pill11_bottom" />
+                <Item Name="LeftBottom" Image="pill11_leftbottom" />
+                <Item Name="Center" Image="pill11_center" />
+                <Item Name="Left" Image="pill11_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill11_lefttop" />
+                <Item Name="Top" Image="pill11_top" />
+                <Item Name="RightTop" Image="pill11_righttop" />
+                <Item Name="Right" Image="pill11_right" />
+                <Item Name="RightBottom" Image="pill11_rightbottom" />
+                <Item Name="Bottom" Image="pill11_bottom" />
+                <Item Name="LeftBottom" Image="pill11_leftbottom" />
+                <Item Name="Center" Image="pill11_center" />
+                <Item Name="Left" Image="pill11_left" />
+            </State>
+        </Style>
     </Widget>
 
     <Widget Name="WrapSpacerWidget">

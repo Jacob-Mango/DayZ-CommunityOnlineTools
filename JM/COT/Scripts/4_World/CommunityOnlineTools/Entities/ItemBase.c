@@ -174,16 +174,16 @@ modded class ItemBase
 		if ( !g_Game.IsServer() )
 			return;
 
-		Param1<string> code = new Param1<string>( "" );
-		if ( !ctx.Read( code ) )
-			return;
-		
-		string pin = code.param1;
-
 		bool success;
 
 		if ( JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETCODE, identity ) )
 		{
+			Param1<string> code = new Param1<string>( "" );
+			if ( !ctx.Read( code ) )
+				return;
+
+			string pin = code.param1;
+
 			if ( COT_HasCode() )
 			{
 				if ( COT_IsLocked() && pin == COT_GetCode() )

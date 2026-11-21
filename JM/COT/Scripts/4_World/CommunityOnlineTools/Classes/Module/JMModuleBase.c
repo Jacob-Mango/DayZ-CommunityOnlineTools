@@ -14,6 +14,17 @@ modded class JMModuleBase
 	//! RPC id -> the JMModuleAction type that owns it. Built on first use from RegisterActions().
 	protected ref map< int, typename > m_ActionTypes;
 
+	override bool COT_CanProcessInputs()
+	{
+		if (!super.COT_CanProcessInputs())
+			return false;
+
+		if (!g_cotBase)
+			return false;
+
+		return true;
+	}
+
 	array<string> GetCommandNames()
 	{
 		return new array<string>();
@@ -154,6 +165,16 @@ modded class JMModuleBase
 
 		JMModuleAction action = JMModuleAction.Cast( type.Spawn() );
 		if ( !action )
+			return true;
+
+		//! The permission belongs to the action's type, so it is answered before
+		//! anything is read off the stream. ExecAction() answers it again for the
+		//! callers that do not come through here.
+		string permission = action.GetPermission();
+		if ( permission == "" )
+			return true;
+
+		if ( !JMPermissions.HasRPC( permission, sender ) )
 			return true;
 
 		if ( !action.Read( ctx ) )

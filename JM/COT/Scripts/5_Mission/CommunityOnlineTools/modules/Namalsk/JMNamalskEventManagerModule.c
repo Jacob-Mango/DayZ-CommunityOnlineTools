@@ -106,6 +106,10 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		{
 			case JMNamalskEventManagerRPC.StartEvent:
 			{
+				//! General gate first: the event's own permission below can only be
+				//! answered once the event name has been read.
+				if (!JMPermissions.HasRPC(JMConstants.PERM_COT_VIEW, sender)) return;
+
 				if (!ctx.Read(evt)) return;
 
 				if (!JMPermissions.HasRPC("Namalsk." + evt + ".Start", sender, instance)) return;
@@ -120,6 +124,10 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 			case JMNamalskEventManagerRPC.CancelEvent:
 			{
+				//! General gate first: the event's own permission below can only be
+				//! answered once the event name has been read.
+				if (!JMPermissions.HasRPC(JMConstants.PERM_COT_VIEW, sender)) return;
+
 				if (!ctx.Read(evt)) return;
 
 				if (!JMPermissions.HasRPC("Namalsk." + evt + ".Cancel", sender, instance)) return;
@@ -134,7 +142,9 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			
 			case JMNamalskEventManagerRPC.LoadEvents:
 			{
+			#ifdef JM_COT_DIAG_LOGGING
 				auto trace1 = CF_Trace_0(this, "OnRPC - LoadEvents");
+			#endif
 
 				if (!g_Game.IsClient()) return;
 
@@ -151,7 +161,9 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			
 			case JMNamalskEventManagerRPC.RequestEvents:
 			{
+			#ifdef JM_COT_DIAG_LOGGING
 				auto trace2 = CF_Trace_0(this, "OnRPC - RequestEvents");
+			#endif
 
 				if (!sender) return;
 
@@ -169,7 +181,9 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 	void RetrievePossibleEvents()
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "RetrievePossibleEvents");
+	#endif
 
 		g_Script.CallFunction(g_Game.GetMission(), "GetNamEventManager", m_EventManager, null);
 		Print("m_EventManager " + m_EventManager);
@@ -231,7 +245,9 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 	protected void StartEvent(string evt)
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "StartEvent");
+	#endif
 
 		if (!m_EventManager)
 		{
@@ -245,7 +261,9 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 	protected void CancelEvent(string evt)
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "CancelEvent");
+	#endif
 
 		if (!m_EventManager)
 		{
@@ -258,7 +276,9 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 	void RequestEvents()
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "RequestEvents");
+	#endif
 
 		if (IsMissionClient() && !IsMissionOffline())
 		{

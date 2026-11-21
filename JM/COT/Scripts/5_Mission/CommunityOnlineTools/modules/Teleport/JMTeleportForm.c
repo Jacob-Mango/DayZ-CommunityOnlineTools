@@ -5,10 +5,8 @@
 
 class JMTeleportForm: JMFormBase
 {
-	//! Menu row shown before any real category, meaning "do not filter". Held
-	//! as an id rather than as a category name so a category could legally be
-	//! called "ALL" without colliding with it.
-	static const string CATEGORY_ALL = "*ALL*";
+	//! Menu row shown before any real category, meaning "do not filter".
+	static const string CATEGORY_ALL = "*";
 
 	//! The map layer this form owns. Anything else drawn on the same map - a
 	//! player dot, a loot result - lives in its own layer and is not ours to
@@ -122,6 +120,8 @@ class JMTeleportForm: JMFormBase
 
 	//! Strongly-typed list items array replacing legacy parallel arrays.
 	protected ref array< ref JMTeleportRowData > m_ListItems = new array< ref JMTeleportRowData >;
+
+	protected ref array<JMTeleportLocation> m_FilteredLocations = {};
 
 	// ---- Right pane --------------------------------------------------------
 	protected UIActionMap            m_Map;
@@ -510,13 +510,14 @@ class JMTeleportForm: JMFormBase
 		if ( !m_LocationList )
 			return;
 
-		m_ListItems.Clear();
+		m_FilteredLocations.Clear();
 
 		TStringArray rowLabels = new TStringArray;
 		TStringArray rowSubs   = new TStringArray;
 
 		if ( !m_Module || !m_Module.IsLoaded() )
 		{
+			m_ListItems.Clear();
 			m_LocationList.SetEmptyText( "#STR_COT_TELEPORT_MODULE_LOADING" );
 			m_LocationList.SetItems( rowLabels, rowSubs );
 			return;
@@ -524,6 +525,7 @@ class JMTeleportForm: JMFormBase
 
 		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION ) )
 		{
+			m_ListItems.Clear();
 			m_LocationList.SetEmptyText( "#STR_COT_TELEPORT_MODULE_NO_VIEW_PERMISSION" );
 			m_LocationList.SetItems( rowLabels, rowSubs );
 			return;
@@ -532,18 +534,18 @@ class JMTeleportForm: JMFormBase
 		array< ref JMTeleportLocation > locations = m_Module.GetLocations();
 		if ( !locations )
 		{
+			m_ListItems.Clear();
 			m_LocationList.SetItems( rowLabels, rowSubs );
 			return;
 		}
 
+		array<ref JMTeleportRowData> existingListItems = m_ListItems;
+		m_ListItems = {};
+
 		JMSearchMatcher matcher = new JMSearchMatcher( m_SearchFilter );
 
-		if ( m_Map )
-			m_Map.ClearLayer( MAP_LAYER );
-
-		for ( int i = 0; i < locations.Count(); i++ )
+		foreach (JMTeleportLocation location: locations)
 		{
-			JMTeleportLocation location = locations[i];
 			if ( !location )
 				continue;
 
@@ -553,6 +555,8 @@ class JMTeleportForm: JMFormBase
 			if ( !matcher.Matches( location.Name ) )
 				continue;
 
+			m_FilteredLocations.Insert(location);
+
 			rowLabels.Insert( location.Name );
 
 			//! The category rides along as the row's subtitle, which is what
@@ -560,12 +564,6 @@ class JMTeleportForm: JMFormBase
 			rowSubs.Insert( location.Type );
 
 			AddRow( location.Name, ROWKIND_LOCATION, location.Position, MarkerIdFor( location.Name ) );
-
-			//! The map shows exactly what the list shows. Filtering the list and
-			//! leaving the map covered in the rest would make the two disagree
-			//! about what "the locations" are.
-			if ( m_Map )
-				m_Map.AddMarker( MarkerIdFor( location.Name ), location.Position, location.Name, MarkerColorFor( location.Type ), MarkerIconFor( location.Type ), MAP_LAYER );
 		}
 
 		//! Every overlay the filter menu can turn on gets folded into the same
@@ -587,6 +585,34 @@ class JMTeleportForm: JMFormBase
 		if ( m_Filters.ShowsToxicZones() )
 			AppendToxicZoneRows( rowLabels, rowSubs, matcher );
 
+		Sort3(rowLabels, rowSubs, m_ListItems);
+
+		//! Don't do anything if the list hasn't changed to prevent the list scroll position jumping needelessly on each update.
+		//! TODO/FIXME: This still has the problem that the list scroll position jumps when an entry is added/removed.
+		if (existingListItems.Count() == m_ListItems.Count())
+		{
+			int unchangedCount;
+
+			foreach (int i, JMTeleportRowData existingEntry: existingListItems)
+			{
+				if (!m_ListItems[i].Equals(existingEntry, false))
+					break;
+
+				++unchangedCount;
+			}
+
+			if (unchangedCount == m_ListItems.Count())
+			{
+				m_ListItems = existingListItems;
+
+				ApplyMapSelection();
+
+				return;
+			}
+		}
+
+		CreateLocationMarkers();
+
 		m_LocationList.SetEmptyText( "#STR_COT_TELEPORT_MODULE_NO_LOCATIONS_MATCH" );
 		m_LocationList.SetItems( rowLabels, rowSubs );
 
@@ -604,6 +630,104 @@ class JMTeleportForm: JMFormBase
 			m_Filter.SetTextPreview( matcher.GetClosestMatch() );
 	}
 
+	void CreateLocationMarkers()
+	{
+		if (!m_Map)
+			return;
+
+		m_Map.ClearLayer(MAP_LAYER);
+
+		JMTeleportSerialize worldDefaults = JMTeleportSerialize.GetWorldDefaults();
+
+		foreach (JMTeleportLocation location: m_FilteredLocations)
+		{
+			float alpha = 1.0;
+
+			//! @note We never draw the label (unless highlighted) of named
+			//! location markers that match entries from CfgWorlds since the
+			//! map already contains labels for all of them
+			JMTeleportLocation defaultLocation = worldDefaults.FindLocation(location.Name);
+			if (defaultLocation && location.Equals(defaultLocation))
+				alpha /= 255;  //! Draw with 1% opacity (can't be zero since it'll be interpreted as fully opaque in UIActionMapMarker::SetColor)
+
+			m_Map.AddMarker(MarkerIdFor(location.Name), location.Position, location.Name, MarkerColorFor(location.Type, alpha), MarkerIconFor(location.Type), MAP_LAYER);
+		}
+	}
+
+	void Sort3(TStringArray keys, TStringArray values, inout array<ref JMTeleportRowData> listItems)
+	{
+		if ( keys.Count() != values.Count() )
+			return;
+
+		bool ignoreCase = true;
+
+		TStringArray keysLower;
+		map<string, ref TIntArray> keyToIndices = new map<string, ref TIntArray>;
+
+		if ( ignoreCase )
+			keysLower = {};
+
+		TIntArray indices;
+
+		foreach ( int i, string key: keys )
+		{
+			if ( ignoreCase )
+			{
+				key.ToLower();
+				keysLower.Insert( key );
+			}
+
+			if ( !keyToIndices.Find( key, indices ) )
+			{
+				indices = {};
+				keyToIndices[key] = indices;
+			}
+
+			indices.Insert( i );
+		}
+
+		TStringArray sortedKeys;
+		TStringArray outKeys;
+		TStringArray outValues;
+
+		if ( ignoreCase )
+		{
+			keysLower.Sort();
+			sortedKeys = keysLower;
+
+			outKeys = {};
+		}
+		else
+		{
+			keys.Sort();
+			sortedKeys = keys;
+		}
+
+		outValues = {};
+		array<ref JMTeleportRowData> listItemsOrig = listItems;
+		listItems = {};
+
+		foreach ( string sortedKey: sortedKeys )
+		{
+			indices = keyToIndices[sortedKey];
+
+			int index = indices[0];
+			
+			if ( ignoreCase )
+				outKeys.Insert( keys[index] );
+				
+			outValues.Insert( values[index] );
+			listItems.Insert( listItemsOrig[index] );
+
+			indices.RemoveOrdered( 0 );
+		}
+
+		if ( ignoreCase )
+			keys.Copy(outKeys);
+
+		values.Copy(outValues);
+	}
+
 	//! Push one row's data into the four parallel arrays. Call this at the same
 	//! point a caller inserts into rowLabels/rowSubs, so index i keeps meaning
 	//! the same row in all of them.
@@ -612,16 +736,19 @@ class JMTeleportForm: JMFormBase
 		m_ListItems.Insert( new JMTeleportRowData( key, kind, position, markerId ) );
 	}
 
-	//! True if `label` matches the current search, or there is no search to
-	//! match. Shared by every overlay kind so "type to filter" behaves the same
-	//! whether it is hunting through locations or through the player list.
+	[Obsolete("Use JMSearchMatcher::Matches")]
 	protected bool PassesSearch( string label, JMSearchMatcher matcher )
 	{
 		return matcher.Matches( label );
 	}
 
-	protected void AppendPlayerRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
+	void CollectPlayers(out array<JMPlayerInstance> entries)
 	{
+		entries = new array<JMPlayerInstance>();
+
+		if (!m_Filters.ShowsPlayers())
+			return;
+
 		if ( !JMPermissions.Has( JMConstants.PERM_MAP_PLAYERS ) )
 			return;
 
@@ -629,11 +756,10 @@ class JMTeleportForm: JMFormBase
 		if ( !players )
 			return;
 
-		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_PLAYER";
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
 
-		for ( int i = 0; i < players.Count(); i++ )
+		foreach (JMPlayerInstance player: players)
 		{
-			JMPlayerInstance player = players[i];
 			if ( !player )
 				continue;
 
@@ -642,8 +768,23 @@ class JMTeleportForm: JMFormBase
 
 			string name = player.GetName();
 
-			if ( !PassesSearch( name, matcher ) )
+			if (!matcher.Matches(name))
 				continue;
+
+			entries.Insert( player );
+		}
+	}
+
+	protected void AppendPlayerRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
+	{
+		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_PLAYER";
+
+		array< JMPlayerInstance > players;
+		CollectPlayers( players );
+
+		foreach (JMPlayerInstance player: players)
+		{
+			string name = player.GetName();
 
 			rowLabels.Insert( name );
 			rowSubs.Insert( kindLabel );
@@ -652,12 +793,13 @@ class JMTeleportForm: JMFormBase
 		}
 	}
 
-	//! Mirrors RefreshVehicleMarkers()'s type filter and, critically, its index
-	//! scheme: "tp_veh_" + the FULL-list index i, not a running counter, so the
-	//! marker id built here always matches the one the map already drew for the
-	//! same vehicle.
-	protected void AppendVehicleRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
+	void CollectVehicles(out array<JMVehicleMetaData> entries)
 	{
+		entries = new array<JMVehicleMetaData>();
+
+		if (!m_Filters.GetVehicleTypeFilter())
+			return
+
 		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW ) )
 			return;
 
@@ -669,20 +811,36 @@ class JMTeleportForm: JMFormBase
 		if ( !list )
 			return;
 
-		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_VEHICLE";
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
 
-		for ( int i = 0; i < list.Count(); i++ )
+		foreach (JMVehicleMetaData meta: list)
 		{
-			JMVehicleMetaData meta = list[i];
 			if ( !meta )
 				continue;
 
 			if ( meta.m_VehicleType != 0 && ( meta.m_VehicleType & m_Filters.GetVehicleTypeFilter() ) == 0 )
 				continue;
 
-			if ( !PassesSearch( meta.m_DisplayName, matcher ) )
+			if (!matcher.Matches(meta.m_DisplayName))
 				continue;
 
+			entries.Insert(meta);
+		}
+	}
+
+	//! Mirrors RefreshVehicleMarkers() index
+	//! scheme: "tp_veh_" + the FULL-list index i, not a running counter, so the
+	//! marker id built here always matches the one the map already drew for the
+	//! same vehicle.
+	protected void AppendVehicleRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
+	{
+		array< JMVehicleMetaData > vehicles;
+		CollectVehicles(vehicles);
+
+		string kindLabel = "#STR_COT_TELEPORT_MODULE_ROW_VEHICLE";
+
+		foreach (int i, JMVehicleMetaData meta: vehicles)
+		{
 			rowLabels.Insert( meta.m_DisplayName );
 			rowSubs.Insert( kindLabel );
 
@@ -697,10 +855,15 @@ class JMTeleportForm: JMFormBase
 	{
 		entries = new array< ref JMTeleportMapEntry >();
 
+		if (!m_Filters.ShowsMapMarkers())
+			return;
+
 #ifdef EXPANSIONMODNAVIGATION
 		ExpansionMapSettings mapSettings = GetExpansionSettings().GetMap();
 		if ( !mapSettings || !mapSettings.ServerMarkers )
 			return;
+
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
 
 		for ( int i = 0; i < mapSettings.ServerMarkers.Count(); i++ )
 		{
@@ -711,6 +874,9 @@ class JMTeleportForm: JMFormBase
 			string markerName = marker.GetName();
 			if ( markerName == "" )
 				markerName = "#STR_COT_TELEPORT_MODULE_MARKER_DEFAULT_NAME";
+
+			if (!matcher.Matches(Widget.TranslateString(markerName)))
+				continue;
 
 			//! The marker's own glyph, so a trader reads as a trader as on Expansion's map.
 			//! GetIcon() resolves the stored icon NAME via ExpansionIcons to a texture path or
@@ -735,9 +901,6 @@ class JMTeleportForm: JMFormBase
 		{
 			JMTeleportMapEntry entry = entries[i];
 
-			if ( !PassesSearch( entry.m_Label, matcher ) )
-				continue;
-
 			rowLabels.Insert( entry.m_Label );
 			rowSubs.Insert( kindLabel );
 
@@ -751,10 +914,20 @@ class JMTeleportForm: JMFormBase
 	{
 		entries = new array< ref JMTeleportMapEntry >();
 
+		if (!m_Filters.ShowsHeliCrashes())
+			return;
+
 		//! Every crash carries the same localized name; the ordinal is the
 		//! only thing that tells two of them apart in a list.
 		string crashName = "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER";
 		int crashIndex = 0;
+
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
+
+		if (!matcher.Matches(Widget.TranslateString(crashName)))
+			return;
+
+		//! TODO/FIXME: This only includes entries in netbubble on MP client. List of crashes should be sent from server as RPC (classname + position)
 
 #ifdef EXPANSIONMODAI
 		if ( CrashBase.s_Expansion_HeliCrashes )
@@ -791,11 +964,6 @@ class JMTeleportForm: JMFormBase
 
 	protected void AppendHeliCrashRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
 	{
-		string crashName = "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER";
-
-		if ( !PassesSearch( crashName, matcher ) )
-			return;
-
 		array< ref JMTeleportMapEntry > entries;
 		CollectHeliCrashEntries( entries );
 
@@ -814,8 +982,18 @@ class JMTeleportForm: JMFormBase
 	{
 		entries = new array< ref JMTeleportMapEntry >();
 
+		if (!m_Filters.ShowsToxicZones())
+			return;
+
 		string zoneName = "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER";
 		int zoneIndex = 0;
+
+		JMSearchMatcher matcher = new JMSearchMatcher(m_SearchFilter);
+
+		if (!matcher.Matches(Widget.TranslateString(zoneName)))
+			return;
+
+		//! TODO/FIXME: This only includes entries in netbubble on MP client. List of zones should be sent from server as RPC (classname + position)
 
 		if ( EffectArea.s_JM_COT_AllAreas )
 		{
@@ -834,9 +1012,6 @@ class JMTeleportForm: JMFormBase
 	protected void AppendToxicZoneRows( TStringArray rowLabels, TStringArray rowSubs, JMSearchMatcher matcher )
 	{
 		string zoneName = "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER";
-
-		if ( !PassesSearch( zoneName, matcher ) )
-			return;
 
 		array< ref JMTeleportMapEntry > entries;
 		CollectToxicZoneEntries( entries );
@@ -941,21 +1116,44 @@ class JMTeleportForm: JMFormBase
 
 	//! Colour carries the same split as the glyph, so a category is still
 	//! tellable at a zoom where the glyph is a few pixels across.
-	protected int MarkerColorFor( string category )
+	protected int MarkerColorFor( string category, float alpha = 1.0 )
 	{
-		if ( category == "City" || category == "CityCapital" )
-			return JMTheme.DANGER;
+		int color;
 
-		if ( category == "Village" || category == "VillageCapital" || category == "Settlement" )
-			return JMTheme.WARNING;
+		switch (category)
+		{
+			case "Capital":
+			case "City":
+			case "CityCapital":
+				color = JMTheme.DANGER;
+				break;
 
-		if ( category == "Marine" )
-			return JMTheme.INFO;
+			case "Settlement":
+			case "Village":
+			case "VillageCapital":
+				color = JMTheme.WARNING;
+				break;
 
-		if ( category == "Hill" || category == "Mount" )
-			return JMTheme.SUCCESS;
+			case "Marine":
+				color = JMTheme.INFO;
+				break;
 
-		return JMTheme.ACCENT;
+			case "Hill":
+			case "Mount":
+				color = JMTheme.SUCCESS;
+				break;
+
+			default:
+				color = JMTheme.ACCENT;
+				break;
+		}
+
+		int alphaChannel = ((color & 0xff000000) >> 24) & 255;
+		int alphaMask = (int)(alphaChannel * alpha) << 24;
+		color &= 0x00ffffff;
+		color |= alphaMask;
+
+		return color;
 	}
 
 	protected void ApplyMapSelection()
@@ -1182,7 +1380,10 @@ class JMTeleportForm: JMFormBase
 		}
 
 		if ( !m_Filters.ShowsPlayers() && m_Filters.GetVehicleTypeFilter() == 0 && !m_Filters.ShowsMapMarkers() && !m_Filters.ShowsHeliCrashes() && !m_Filters.ShowsToxicZones() )
+		{
+			RebuildList();
 			return;
+		}
 
 		//! The vehicle list is a server round trip, not a local read, so it is
 		//! asked for once when the overlay is switched on rather than on every
@@ -1200,6 +1401,11 @@ class JMTeleportForm: JMFormBase
 		if ( !m_Map )
 			return;
 
+		//! The list mirrors these same overlays now, so a join, a leave or a
+		//! vehicle spawning has to reach it on the same tick that moves its dot
+		//! on the map - not only on the next search keystroke or filter toggle.
+		RebuildList();
+
 		if ( m_Filters.ShowsPlayers() )
 			m_Overlays.RefreshPlayerMarkers();
 
@@ -1215,10 +1421,7 @@ class JMTeleportForm: JMFormBase
 		if ( m_Filters.ShowsToxicZones() )
 			m_Overlays.RefreshToxicZoneMarkers();
 
-		//! The list mirrors these same overlays now, so a join, a leave or a
-		//! vehicle spawning has to reach it on the same tick that moves its dot
-		//! on the map - not only on the next search keystroke or filter toggle.
-		RebuildList();
+		ApplyMapSelection();
 	}
 
 	// =========================================================================
@@ -1502,13 +1705,6 @@ class JMTeleportForm: JMFormBase
 
 		for ( int i = 0; i < types.Count(); i++ )
 		{
-			//! JMTeleportSerialize puts a literal "ALL" at the head of Types -
-			//! it is the old form's filter row, stored with the real
-			//! categories. This menu already has an "everything" row of its
-			//! own, so that one would show up twice.
-			if ( types[i] == "ALL" )
-				continue;
-
 			m_Categories.Insert( types[i] );
 		}
 
@@ -1734,17 +1930,11 @@ class JMTeleportForm: JMFormBase
 		if ( name == "" || !m_Module || !m_Module.IsLoaded() )
 			return NULL;
 
-		array< ref JMTeleportLocation > locations = m_Module.GetLocations();
-		if ( !locations )
+		JMTeleportSerialize settings = m_Module.GetSettings();
+		if ( !settings )
 			return NULL;
 
-		for ( int i = 0; i < locations.Count(); i++ )
-		{
-			if ( locations[i] && locations[i].Name == name )
-				return locations[i];
-		}
-
-		return NULL;
+		return settings.FindLocation(name);
 	}
 
 	//! The search row resolves its callbacks on the form, so the filter button's click lands here.

@@ -310,9 +310,11 @@ class JMPermission : Managed
 
 	void Serialize( array< string > output, string prepend = "" )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		CF_Trace trace;
 		if (!Parent)
 			trace = CF_Trace_2(this, "Serialize").Add(m_SerializedFullName).Add(Children.Count());
+	#endif
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
@@ -329,9 +331,11 @@ class JMPermission : Managed
 
 	void Deserialize( array< string > input )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		CF_Trace trace;
 		if (!Parent)
 			trace = CF_Trace_1(this, "Deserialize").Add(input.Count());
+	#endif
 
 		for ( int i = 0; i < input.Count(); i++ )
 			AddPermission( input[i], JMPermissionType.INHERIT );
@@ -378,6 +382,15 @@ class JMPermission : Managed
 			if (type == -1)  //! No more data
 				break;
 
+			//! Anything else is not a permission type. It would be stored and written
+			//! to the role file as it is, and the file reader takes any number with
+			//! a 2 in it for ALLOW.
+			if (type != JMPermissionType.INHERIT && type != JMPermissionType.DISALLOW && type != JMPermissionType.ALLOW)
+			{
+				CF.FormatError("Invalid type %1 received for permission %2", type.ToString(), child.GetFullName());
+				return false;
+			}
+
 			child.Type = type;
 
 			#ifdef DIAG_DEVELOPER
@@ -419,8 +432,8 @@ class JMPermission : Managed
 				append = " DISALLOW";
 				break;
 			}
-			default:
 			case JMPermissionType.INHERIT:
+			default:
 			{
 				append = " INHERIT";
 				break;
@@ -437,7 +450,7 @@ class JMPermission : Managed
 
 	void Sort()
 	{
-	#ifdef DIAG
+	#ifdef JM_COT_DIAG_LOGGING
 		CF_Trace trace;
 		if (!Parent)
 			trace = CF_Trace_2(this).Add(GetFullName()).Add(typename.EnumToString(JMPermissionType, Type));

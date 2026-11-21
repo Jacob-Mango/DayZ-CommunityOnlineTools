@@ -127,10 +127,20 @@ class JMActionHistoryModule: JMModuleBase
 	{
 		GetCommunityOnlineToolsBase().Log( ident, "ActionHistory action=" + type + " entry=" + what );
 
-		if ( !ident )
-			return;
+		JMPlayerInstance instance;
 
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( ident.GetId() );
+		if ( !ident )
+		{
+			if (g_Game.IsDedicatedServer())
+				return;
+
+			instance = GetPermissionsManager().GetClientPlayer();
+		}
+		else
+		{
+			instance = GetPermissionsManager().GetPlayer( ident.GetId() );
+		}
+
 		SendWebhookColored( type, instance, type + " " + what, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 

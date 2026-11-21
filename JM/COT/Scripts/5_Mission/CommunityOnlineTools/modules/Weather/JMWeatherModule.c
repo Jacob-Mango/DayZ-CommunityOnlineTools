@@ -52,7 +52,12 @@ class JMWeatherModule: JMRenderableModuleBase
 	protected JMPlayerInstance GetCaller( PlayerIdentity ident )
 	{
 		if ( !ident )
-			return NULL;
+		{
+			if (g_Game.IsDedicatedServer())
+				return NULL;
+
+			return GetPermissionsManager().GetClientPlayer();
+		}
 
 		return GetPermissionsManager().GetPlayer( ident.GetId() );
 	}
@@ -429,18 +434,20 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void RequestSpecialWeatherStatus()
 	{
-		if ( !g_Game.IsClient() )
-			return;
-
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, NULL );
+		if ( g_Game.IsClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, NULL );
+		}
+		else if (!g_Game.IsDedicatedServer())
+		{
+			//! Offline/SP
+			Exec_SpecialWeatherStatus(null);
+		}
 	}
 
 	protected void Exec_SpecialWeatherStatus( PlayerIdentity ident )
 	{
-		if ( !ident )
-			return;
-
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_WEATHER_VIEW, ident ) )
 			return;
 
@@ -453,10 +460,22 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( CF_Modules<JMNamalskEventManagerModule>.Get( namalskModule ) )
 			evrActive = namalskModule.IsEventActive( "EVRStorm" ) || namalskModule.IsEventActive( "EVRStormDeadly" );
 
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( sandstormActive );
-		rpc.Write( evrActive );
-		rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, ident );
+		if (g_Game.IsDedicatedServer())
+		{
+			if (!ident)
+				return;
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( sandstormActive );
+			rpc.Write( evrActive );
+			rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, ident );
+		}
+		else
+		{
+			//! Offline/SP
+			m_LastSandstormActive = sandstormActive;
+			m_LastEVRStormActive = evrActive;
+		}
 	#endif
 	}
 
@@ -582,7 +601,9 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	protected void RPC_Payload( int rpc_type, ParamsReadContext ctx, PlayerIdentity senderRPC )
 	{
-		JMWeatherBase payload = ReadPayload( rpc_type, ctx );
+		//! Built empty first: the permission belongs to the payload's type, so it is
+		//! answered before anything is read off the stream.
+		JMWeatherBase payload = NewPayload( rpc_type );
 		if ( !payload )
 			return;
 
@@ -592,7 +613,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		//! silent no-op until native calendar replication caught up.
 		if ( !senderRPC )
 		{
-			if ( payload.IsPushedToClients() && !g_Game.IsServer() )
+			if ( payload.IsPushedToClients() && !g_Game.IsServer() && payload.ReadFrom( ctx ) )
 				Exec_Payload( payload, NULL );
 
 			return;
@@ -602,6 +623,10 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 
 		if ( !CanServe( senderRPC, payload.GetPermission() ) )
+			return;
+
+		//! The payload reads itself, field by field, in the order it wrote them.
+		if ( !payload.ReadFrom( ctx ) )
 			return;
 
 		//! Send the payload to the clients so it changes instantly, else the game may take
@@ -645,7 +670,11 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	protected void Send_DynamicWeather( JMWeatherDynamicConfig config )
 	{
+		//! The op and the target name go ahead of the config: together they name the
+		//! permission, and the server reads nothing else until it has been checked.
 		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( config.Op );
+		rpc.Write( config.TargetName );
 		rpc.Write( config );
 		rpc.Send( NULL, JMWeatherModuleRPC.DynamicWeather, true, NULL );
 	}
@@ -745,15 +774,26 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	protected void RPC_DynamicWeather( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		JMWeatherDynamicConfig config = new JMWeatherDynamicConfig;
-
-		if ( !ctx.Read( config ) )
-			return;
-
 		if ( !g_Game.IsServer() )
 			return;
 
 		if ( !senderRPC )
+			return;
+
+		//! General gate first: the op's own permissions below can only be answered
+		//! once the op and the target name have been read.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
+			return;
+
+		//! The permission belongs to the op and to whether it names an existing state,
+		//! so those two are read ahead of the gate. The config stays in the stream
+		//! until it passes.
+		int configOp;
+		if ( !ctx.Read( configOp ) )
+			return;
+
+		string configTarget;
+		if ( !ctx.Read( configTarget ) )
 			return;
 
 		//! The switch is one permission, and what happens to a state is another: making
@@ -761,17 +801,26 @@ class JMWeatherModule: JMRenderableModuleBase
 		bool canSwitch = JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_DYNAMIC, senderRPC );
 		bool canEdit   = canSwitch;
 
-		if ( config.Op == JMWeatherDynamicConfig.OP_SAVE && config.TargetName == "" )
+		if ( configOp == JMWeatherDynamicConfig.OP_SAVE && configTarget == "" )
 			canEdit = JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_CREATE, senderRPC );
-		else if ( config.Op == JMWeatherDynamicConfig.OP_SAVE )
+		else if ( configOp == JMWeatherDynamicConfig.OP_SAVE )
 			canEdit = JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_UPDATE, senderRPC );
-		else if ( config.Op == JMWeatherDynamicConfig.OP_REMOVE )
+		else if ( configOp == JMWeatherDynamicConfig.OP_REMOVE )
 			canEdit = JMPermissions.HasRPC( JMConstants.PERM_WEATHER_PRESET_REMOVE, senderRPC );
 
-		if ( config.Op == JMWeatherDynamicConfig.OP_TOGGLE && !canSwitch )
+		if ( configOp == JMWeatherDynamicConfig.OP_TOGGLE && !canSwitch )
 			return;
 
-		if ( config.Op != JMWeatherDynamicConfig.OP_TOGGLE && !canEdit )
+		if ( configOp != JMWeatherDynamicConfig.OP_TOGGLE && !canEdit )
+			return;
+
+		JMWeatherDynamicConfig config = new JMWeatherDynamicConfig;
+
+		if ( !ctx.Read( config ) )
+			return;
+
+		//! The config must be the one the permission was answered for.
+		if ( config.Op != configOp || config.TargetName != configTarget )
 			return;
 
 		//! Saving a state carries the switch along, but only somebody who may flip it
@@ -864,14 +913,14 @@ class JMWeatherModule: JMRenderableModuleBase
 	
 	protected void RPC_SetWeatherBehavior( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		int mode;
-		if ( !ctx.Read( mode ) )
-			return;
-
 		if (!g_Game.IsServer())
 			return;
 
 		if ( !JMPermissions.HasRPC( "Weather.Behavior", senderRPC ) )
+			return;
+
+		int mode;
+		if ( !ctx.Read( mode ) )
 			return;
 
 		Exec_SetWeatherBehavior( mode, senderRPC );
@@ -1036,32 +1085,50 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 		}
 
+		//! The op goes ahead of the control: it names the permission, and the server
+		//! reads nothing else until that permission has been checked.
 		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( control.Op );
 		rpc.Write( control );
 		rpc.Send( NULL, JMWeatherModuleRPC.DynamicControl, true, NULL );
 	}
 
 	protected void RPC_DynamicControl( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		JMWeatherDynamicControl control = new JMWeatherDynamicControl;
-
-		if ( !ctx.Read( control ) )
-			return;
-
 		if ( !g_Game.IsServer() )
 			return;
 
 		if ( !senderRPC )
 			return;
 
+		//! General gate first: the op's own permission below can only be answered
+		//! once the op has been read.
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
+			return;
+
+		//! The permission belongs to the op, so the op is the one thing read ahead of
+		//! the gate. The control stays in the stream until it passes.
+		int controlOp;
+		if ( !ctx.Read( controlOp ) )
+			return;
+
 		//! Putting a state's weather on is the old "use preset"; moving the machine is
 		//! the dynamic permission.
 		string controlPermission = JMConstants.PERM_WEATHER_PRESET_DYNAMIC;
 
-		if ( control.Op == JMWeatherDynamicControl.OP_APPLY )
+		if ( controlOp == JMWeatherDynamicControl.OP_APPLY )
 			controlPermission = JMConstants.PERM_WEATHER_PRESET_USE;
 
 		if ( !JMPermissions.HasRPC( controlPermission, senderRPC ) )
+			return;
+
+		JMWeatherDynamicControl control = new JMWeatherDynamicControl;
+
+		if ( !ctx.Read( control ) )
+			return;
+
+		//! The control must be the one the permission was answered for.
+		if ( control.Op != controlOp )
 			return;
 
 		Exec_DynamicControl( control, senderRPC );
@@ -1118,14 +1185,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	protected void RPC_FreezeTime( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		bool state;
-		if ( !ctx.Read( state ) )
-			return;
-
 		if (!g_Game.IsServer())
 			return;
 
 		if ( !CanServe( senderRPC, JMConstants.PERM_WEATHER_FREEZETIME ) )
+			return;
+
+		bool state;
+		if ( !ctx.Read( state ) )
 			return;
 
 		Exec_FreezeTime( state, senderRPC );
@@ -1133,7 +1200,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
-	#ifdef DIAG
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this).Add(typename.EnumToString(JMWeatherModuleRPC, rpc_type));
 	#endif
 
