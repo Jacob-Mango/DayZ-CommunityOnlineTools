@@ -99,10 +99,21 @@ modded class PlayerBase
 
 	void SetWorldPosition(vector position)
 	{
-		EntityAI parent;
+		Object parent;
 		if (Class.CastTo(parent, GetParent()))
 		{
-			COT_Base.PlaceOnSurfaceAtPosition(parent, position);
+			Transport transport;
+			if (Class.CastTo(transport, parent))
+			{
+				if (transport.CrewMemberIndex(this) != -1)
+				{
+					COT_Base.PlaceOnSurfaceAtPosition(transport, position);
+					
+					return;
+				}
+			}
+
+			SetPosition(parent.WorldToModel(position));
 		}
 		else
 		{
@@ -258,12 +269,12 @@ modded class PlayerBase
 
 	override void OnSelectPlayer()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
+	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
+		PrintFormat("Is player selected? %1", m_PlayerSelected.ToString());
 	#endif
 
 	#ifdef DIAG
-		PrintFormat("Is player selected? %1", m_PlayerSelected.ToString());
 		PrintFormat("Is OnSelectPlayer temporarily disabled? %1", m_COT_TempDisableOnSelectPlayer.ToString());
 	#endif
 
@@ -1002,11 +1013,6 @@ modded class PlayerBase
 
 	void COTResetItemWetness()
 	{
-		COT_SetItemWetness(0);
-	}
-
-	void COT_SetItemWetness(float wetness)
-	{
 		ItemBase item;
 		array< EntityAI > items = new array< EntityAI >;
 		GetInventory().EnumerateInventory( InventoryTraversalType.PREORDER, items );
@@ -1014,7 +1020,7 @@ modded class PlayerBase
 		foreach ( EntityAI entity: items )
 		{
 			if ( Class.CastTo( item, entity ) )
-				item.SetWet( wetness );
+				item.SetWet( 0 );
 		}
 	}
 
@@ -1194,11 +1200,8 @@ modded class PlayerBase
 
 	void COT_RememberVehicle()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
+	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
-	#endif
-
-	#ifdef DIAG_DEVELOPER
 		PrintFormat("GetCommand_Move? %1", GetCommand_Move().ToString());
 		PrintFormat("GetCommand_Vehicle? %1", GetCommand_Vehicle().ToString());
 		//PrintFormat("m_COT_TransportCache? %1", m_COT_TransportCache.ToString());
@@ -1313,11 +1316,8 @@ modded class PlayerBase
 
 	void COT_ResumeVehicleCommand()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
+	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
-	#endif
-
-	#ifdef DIAG_DEVELOPER
 		PrintFormat("GetCommand_Vehicle? %1", GetCommand_Vehicle().ToString());
 		//PrintFormat("m_COT_TransportCache? %1", m_COT_TransportCache.ToString());
 	#endif

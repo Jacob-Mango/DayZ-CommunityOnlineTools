@@ -109,7 +109,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 		CancelDeferredCalls();
 
-	#ifdef JM_COT_DIAG_LOGGING
+	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
 	#endif
 
@@ -1244,12 +1244,15 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	{
 		auto selected = JM_GetSelected();
 
+		if (!selected)
+			return null;
+
 		auto players = selected.GetPlayers();
 
 		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( players[0] );
 
 		if (!inst)
-			return CreateConfirmation_One(JMConfirmationType.INFO, "#STR_COT_NO_PLAYERS_SELECTED", "", "#STR_COT_GENERIC_CANCEL");
+			return null;
 
 		int count = players.Count();
 		if (count > 1)
@@ -1294,6 +1297,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	JMConfirmation CreateAdvancedObjectConfirm(string callbackSelectedObjectsMulti, string callbackSelectedObjectSingle, bool executeCallbackOnNoConfirmation = true)
 	{
 		auto selected = JM_GetSelected();
+
+		if (!selected)
+			return null;
 
 		auto objects = selected.GetObjects();
 

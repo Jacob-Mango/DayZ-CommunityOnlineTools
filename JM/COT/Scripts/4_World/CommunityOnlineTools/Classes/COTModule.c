@@ -61,9 +61,7 @@ class COTModule : JMModuleBase
 
 	override void OnMissionLoaded()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "OnMissionLoaded");
-	#endif
 
 		super.OnMissionLoaded();
 
@@ -138,14 +136,6 @@ class COTModule : JMModuleBase
 	JMCOTSideBar GetCOTSidebar()
 	{
 		return m_COTMenu;
-	}
-
-	override void OnClientPermissionsUpdated()
-	{
-		super.OnClientPermissionsUpdated();
-
-		if ( m_COTMenu )
-			m_COTMenu.UpdatePermissions();
 	}
 
 	override void OnMissionFinish()

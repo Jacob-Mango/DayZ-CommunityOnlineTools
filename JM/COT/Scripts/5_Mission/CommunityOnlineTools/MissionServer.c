@@ -5,6 +5,8 @@ modded class MissionServer
 
 	void MissionServer()
 	{
+		m_bLoaded = false;
+		
 		if ( !g_cotBase )
 			g_cotBase = new CommunityOnlineTools;
 		if ( !g_cotGame )

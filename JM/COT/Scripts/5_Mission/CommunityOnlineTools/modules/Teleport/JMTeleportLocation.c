@@ -13,36 +13,6 @@ class JMTeleportLocation
 		Radius = radius;
 	}
 
-	bool Equals(JMTeleportLocation location, float tolerance = 0.1, bool ignoreCase = true)
-	{
-		string name = Name;
-		string type = Type;
-		string otherName = location.Name;
-		string otherType = location.Type;
-
-		if (ignoreCase)
-		{
-			name.ToLower();
-			type.ToLower();
-			otherName.ToLower();
-			otherType.ToLower();
-		}
-
-		if (otherName != name)
-			return false;
-
-		if (otherType != type)
-			return false;
-
-		if (!Math.IsPointInCircle(location.Position, tolerance, Position))
-			return false;
-
-		if (Math.AbsFloat(location.Radius - Radius) > tolerance)
-			return false;
-
-		return true;
-	}
-
 	void Write( ParamsWriteContext ctx )
 	{
 		ctx.Write( Type );

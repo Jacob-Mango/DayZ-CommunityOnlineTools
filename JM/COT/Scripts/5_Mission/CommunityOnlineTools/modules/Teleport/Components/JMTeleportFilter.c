@@ -177,27 +177,19 @@ class JMTeleportFilter
 
 	void BuildFilterLocationsPage( UIActionFilterMenu menu )
 	{
-		TStringArray categories = m_Form.GetCategories();
-
-		if ( !categories )
+		if ( !m_Form.GetCategories() )
 			return;
 
-		foreach (string categoryName: categories)
+		for ( int i = 0; i < m_Form.GetCategories().Count(); i++ )
 		{
-			if ( categoryName == JMTeleportForm.CATEGORY_ALL )
+			if ( m_Form.GetCategories()[i] == JMTeleportForm.CATEGORY_ALL )
 				continue;
 
+			string categoryName = m_Form.GetCategories()[i];
 			bool shown = !IsCategoryHidden( categoryName );
 			string categoryIcon = UIActionFilterMenu.CheckIcon( shown );
 			int categoryColor = UIActionFilterMenu.ToggleTextColor( shown );
-
-			string label;
-			if (categoryName)
-				label = categoryName;
-			else
-				label = "#STR_COT_GENERIC_UNKNOWN";
-
-			menu.AddRow( categoryName, label, categoryIcon, categoryColor );
+			menu.AddRow( categoryName, categoryName, categoryIcon, categoryColor );
 		}
 	}
 

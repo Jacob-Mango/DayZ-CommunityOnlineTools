@@ -21,9 +21,7 @@ class JMRole : Managed
 
 	void CopyPermissions( JMPermission copy )
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "CopyPermissions");
-	#endif
 
 		RootPermission.CopyPermissions(copy);
 	}
@@ -49,9 +47,7 @@ class JMRole : Managed
 
 	array< string > Serialize()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Serialize").Add(Name).Add(RootPermission.Children.Count());
-	#endif
 
 		SerializedData.Clear();
 
@@ -62,9 +58,7 @@ class JMRole : Managed
 
 	void Deserialize()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Deserialize").Add(Name).Add(SerializedData.Count());
-	#endif
 
 		for ( int i = 0; i < SerializedData.Count(); i++ )
 		{
@@ -84,9 +78,7 @@ class JMRole : Managed
 
 	bool Save()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Save").Add(Name);
-	#endif
 
 		string filename = FileReadyStripName( Name );
 
@@ -114,9 +106,7 @@ class JMRole : Managed
 
 	bool Load()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this).Add(Name);
-	#endif
 
 		string filename = FileReadyStripName( Name );
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.READ );

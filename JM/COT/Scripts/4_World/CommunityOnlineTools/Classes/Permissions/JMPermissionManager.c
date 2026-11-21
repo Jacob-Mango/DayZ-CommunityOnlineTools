@@ -373,7 +373,8 @@ class JMPermissionManager
 			return;
 
 		Players.Clear();
-		ClearRoles();
+		Roles.Clear();
+		m_RoleNamesSorted.Clear();
 		m_RosterBatchCount = 0;
 	}
 
@@ -721,9 +722,7 @@ class JMPermissionManager
 
 	array< string > Serialize()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Serialize").Add(RootPermission.Children.Count());
-	#endif
 
 		array< string > data = new array< string >;
 		RootPermission.Serialize( data );
@@ -906,12 +905,6 @@ class JMPermissionManager
 	{
 		Roles.Remove( role );
 		m_RoleNamesSorted.RemoveItem( role );
-	}
-
-	void ClearRoles()
-	{
-		Roles.Clear();
-		m_RoleNamesSorted.Clear();
 	}
 
 	void LoadRoles()

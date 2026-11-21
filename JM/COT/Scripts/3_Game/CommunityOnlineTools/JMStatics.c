@@ -81,73 +81,19 @@ class JMStatics
 		SortStringArrayHelper( keys, keyToValue, values, reverse );
 	}
 
-	static void SortStringArrayKVPair( TStringArray keys, TStringArray values, bool reverse = false, bool ignoreCase = false )
+	static void SortStringArrayKVPair( TStringArray keys, TStringArray values, bool reverse = false )
 	{
 		if ( keys.Count() != values.Count() )
 			return;
 
-		TStringArray keysLower;
-		map<string, ref TIntArray> keyToIndices = new map<string, ref TIntArray>;
-
-		if ( ignoreCase )
-			keysLower = {};
-
-		TIntArray indices;
+		TStringStringMap keyToValue = new TStringStringMap;
 
 		foreach ( int i, string key: keys )
 		{
-			if ( ignoreCase )
-			{
-				key.ToLower();
-				keysLower.Insert( key );
-			}
-
-			if ( !keyToIndices.Find( key, indices ) )
-			{
-				indices = {};
-				keyToIndices[key] = indices;
-			}
-
-			indices.Insert( i );
+			keyToValue[key] = values[i];
 		}
 
-		TStringArray sortedKeys;
-		TStringArray outKeys;
-		TStringArray outValues;
-
-		if ( ignoreCase )
-		{
-			keysLower.Sort( reverse );
-			sortedKeys = keysLower;
-
-			outKeys = {};
-		}
-		else
-		{
-			keys.Sort( reverse );
-			sortedKeys = keys;
-		}
-
-		outValues = {};
-
-		foreach ( string sortedKey: sortedKeys )
-		{
-			indices = keyToIndices[sortedKey];
-
-			int index = indices[0];
-			
-			if ( ignoreCase )
-				outKeys.Insert( keys[index] );
-				
-			outValues.Insert( values[index] );
-
-			indices.RemoveOrdered( 0 );
-		}
-
-		if ( ignoreCase )
-			keys.Copy(outKeys);
-
-		values.Copy(outValues);
+		SortStringArrayHelper( keys, keyToValue, values, reverse );
 	}
 
 	static void SortStringArrayHelper( TStringArray keys, TStringStringMap keyToValue, TStringArray values, bool reverse = false )

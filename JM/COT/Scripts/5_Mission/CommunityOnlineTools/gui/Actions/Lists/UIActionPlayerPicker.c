@@ -113,9 +113,23 @@ class UIActionPlayerPicker
 	{
 		m_ListController.ClearSelection();
 
-		JMPlayerInstance clientPlayer = GetPermissionsManager().GetClientPlayer();
-		if ( clientPlayer )
-			m_ListController.SelectItem( clientPlayer, true );
+		if ( !g_Game || !g_Game.GetPlayer() )
+			return;
+
+		PlayerIdentity identity = g_Game.GetPlayer().GetIdentity();
+		if ( !identity )
+			return;
+
+		string localGuid = identity.GetId();
+
+		foreach ( JMPlayerInstance player : m_AllPlayers )
+		{
+			if ( player && player.GetGUID() == localGuid )
+			{
+				m_ListController.SelectItem( player, true );
+				break;
+			}
+		}
 	}
 
 	void SelectOnlineOnly()

@@ -27,7 +27,7 @@ class JMWidgetStore: COT_WidgetHolder
 		if (!g_Game)
 			return;
 
-	#ifdef JM_COT_DIAG_LOGGING
+	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
 	#endif
 	}

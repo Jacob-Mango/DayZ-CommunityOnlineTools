@@ -269,9 +269,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		}
 	}
 
-	override void OnMissionStart()
+	override void OnMissionLoaded()
 	{
-		super.OnMissionStart();
+		super.OnMissionLoaded();
 
 		if ( IsMissionHost() )
 		{

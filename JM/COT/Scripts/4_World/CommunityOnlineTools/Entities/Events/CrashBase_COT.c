@@ -9,33 +9,16 @@ modded class CrashBase
 	static ref CF_DoublyLinkedNodes_WeakRef<CrashBase> s_JM_COT_AllCrashes = new CF_DoublyLinkedNodes_WeakRef<CrashBase>();
 	ref CF_DoublyLinkedNode_WeakRef<CrashBase> s_JM_COT_Node;
 
-	//! We are only interested in crashes spawned by events, not random static objs part of the map
-	//! Server-only
-	override void EEOnCECreate()
+	void CrashBase()
 	{
-		super.EEOnCECreate();
-
-		s_JM_COT_Node = s_JM_COT_AllCrashes.Add(this);
-	}
-
-	//! We are only interested in crashes spawned by events, not random static objs part of the map
-	//! Server-only
-	override void AfterStoreLoad()
-	{
-		super.AfterStoreLoad();
-
-		s_JM_COT_Node = s_JM_COT_AllCrashes.Add(this);
+		if ( GetGame().IsServer() )
+			s_JM_COT_Node = s_JM_COT_AllCrashes.Add( this );
 	}
 
 	void ~CrashBase()
 	{
-	#ifndef DIAG_DEVELOPER
-		if (!g_Game)
-			return;
-	#endif
-
-		if (s_JM_COT_AllCrashes)
-			s_JM_COT_AllCrashes.Remove(s_JM_COT_Node);
+		if ( s_JM_COT_AllCrashes )
+			s_JM_COT_AllCrashes.Remove( s_JM_COT_Node );
 	}
 }
 

@@ -94,10 +94,6 @@ class JMWebhookModule: JMModuleBase
 	protected RestApi m_Core;
 	protected ref map< string, ref set< JMWebhookConnection > > m_ConnectionMap;
 	protected ref array< ref JMWebhookQueueItem > m_Queue;
-	protected float m_StartTime;
-	protected float m_LastSendTime;
-	protected int m_SentCount;
-	protected float m_TimeToSleep;
 	protected JMWebhookSerialize m_Settings;
 	protected string m_ServerHostName;
 
@@ -118,6 +114,10 @@ class JMWebhookModule: JMModuleBase
 
 		group.Set( name, enabled );
 		return true;
+	}
+
+	override void EnableUpdate()
+	{
 	}
 
 	override void OnInit()
@@ -241,8 +241,7 @@ class JMWebhookModule: JMModuleBase
 
 		m_Settings.Save();
 
-		m_StartTime = g_Game.GetTickTime();
-		m_LastSendTime = m_StartTime;
+		g_Game.GameScript.Call( this, "Thread_ProcessQueue", NULL );
 	}
 
 	override void OnMissionLoaded()
@@ -263,9 +262,6 @@ class JMWebhookModule: JMModuleBase
 		message.GetEmbed().SetDescription( "The server has shut down safely." );
 
 		Post( "ServerShutdown", message );
-		ProcessQueue();
-
-		m_Queue.Clear();
 	}
 
 	void SaveConnections()
@@ -528,25 +524,18 @@ class JMWebhookModule: JMModuleBase
 		return pi && pi.HasRole( role );
 	}
 
-	[Obsolete("Use ProcessQueue")]
-	protected void Thread_ProcessQueue();
-
-	override void OnUpdate(float timeslice)
+	protected void Thread_ProcessQueue()
 	{
-		if (m_TimeToSleep > timeslice)
-		{
-			m_TimeToSleep -= timeslice;
-		}
-		else
-		{
-			m_TimeToSleep = 0;
-			ProcessQueue();
-		}
-	}
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "Thread_ProcessQueue");
+		#endif
 
-	protected void ProcessQueue()
-	{
-		if ( m_Queue )
+		int num = 0;
+		int startTime = g_Game.GetTickTime();
+		int lastSendTime = g_Game.GetTickTime();
+		int qps = 1;
+
+		while ( true )
 		{
 			if ( m_Queue.Count() > 0 )
 			{
@@ -582,24 +571,25 @@ class JMWebhookModule: JMModuleBase
 
 				m_Queue.RemoveOrdered( 0 );
 
-				++m_SentCount;
-				m_LastSendTime = g_Game.GetTickTime();
+				num++;
+				lastSendTime = g_Game.GetTickTime();
 
-				int defer = (int) Math.Clamp( m_SentCount * 0.1, 1, 2 );
-				
-				m_TimeToSleep = 0.25 * Math.Clamp( m_SentCount, 1, 4 ) * defer;
+				int defer = (int) Math.Clamp( num * 0.1, 1, 2 );
+				Sleep( 250 * Math.Clamp( num, 1, 4 ) * defer );
 			} else
 			{
-				if ( m_LastSendTime - m_StartTime > 1.0 )
+				if ( startTime - lastSendTime > 1000 )
 				{
-					m_StartTime = g_Game.GetTickTime();
-					m_LastSendTime = m_StartTime;
-					m_SentCount = 0;
+					startTime = g_Game.GetTickTime();
+					lastSendTime = startTime;
+					num = 0;
 				}
 
-				m_TimeToSleep = 0.05;
+				Sleep( 50 );
 			}
 		}
+
+		m_Queue.Clear();
 	}
 
 	JMWebhookDiscordMessage CreateDiscordMessage()

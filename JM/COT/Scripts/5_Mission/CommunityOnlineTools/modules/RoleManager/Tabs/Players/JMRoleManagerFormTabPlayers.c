@@ -259,7 +259,7 @@ class JMRoleManagerFormTabPlayers: JMFormTab
 		UIActionCard roleCard = UIActionManager.CreateCard( m_Form.m_EditorWrapper, "#STR_COT_ROLEMANAGER_MODULE_ASSIGNED_ROLE_TITLE" );
 		m_SaveRolesBtn = roleCard.AddSaveButton( this, "", "#STR_COT_ROLEMANAGER_MODULE_SAVE_ROLE_ASSIGNMENT_TOOLTIP" );
 		if ( m_SaveRolesBtn ) m_SaveRolesBtn.SetOnClick( this, "OnClick_SavePlayerRole" );
-		m_Form.BindPermission( m_SaveRolesBtn, JMConstants.PERM_PLAYER_ROLES );
+		m_Form.BindPermission( m_SaveRolesBtn, JMConstants.PERM_ROLES_PERMISSIONS );
 
 		Widget roleBody = roleCard.GetContent();
 

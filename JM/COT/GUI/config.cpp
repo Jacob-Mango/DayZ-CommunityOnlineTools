@@ -713,7 +713,7 @@ class CfgWorlds
 			};
 			class Marine_Mutnyizaliv: Marine_Mutnyizaliv
 			{
-				name = "Mutny zaliv";
+				name = "Tikhiy zaliv";
 			};
 			class Marine_Chernyzaliv: Marine_Chernyzaliv
 			{

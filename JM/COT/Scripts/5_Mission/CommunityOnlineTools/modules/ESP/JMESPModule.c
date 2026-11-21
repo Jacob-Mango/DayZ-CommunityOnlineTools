@@ -544,17 +544,16 @@ class JMESPModule: JMRenderableModuleBase
 		int netLow, netHigh;
 		target.GetNetworkID( netLow, netHigh );
 
-		JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
-
 		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
-			Exec_SetAttachment( slotId, className, target, NULL, NULL, objSpawnerModule.m_ObjSetupMode );
+			Exec_SetAttachment( slotId, className, target, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( slotId );
 			rpc.Write( className );
-
+			
+			JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
 			rpc.Write( objSpawnerModule.m_ObjSetupMode );
 
 			rpc.Send( target, JMESPModuleRPC.SetAttachment, true, NULL );
@@ -622,7 +621,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		if ( ( !netLow && !netHigh ) || !g_Game.IsMultiplayer() )
 		{
-			Exec_SetPosition( position, target );
+			Exec_SetPosition( position, target, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -733,19 +732,7 @@ class JMESPModule: JMRenderableModuleBase
 		info.AddWebhookType( "DeleteAll" );
 		info.AddWebhookType( "MoveToCursor" );
 		info.AddWebhookType( "Object" );
-		info.AddWebhookType( "SetLockWheels" );
-		info.AddWebhookType( "RefillCoolant" );
-		info.AddWebhookType( "RepairAndFillSlots" );
-		info.AddWebhookType( "ChangeColor" );
-		info.AddWebhookType( "SetGrenadePin" );
-		info.AddWebhookType( "TriggerTrap" );
-		info.AddWebhookType( "SetFenceOpen" );
-		info.AddWebhookType( "SetHouseDoorOpen" );
-		info.AddWebhookType( "SetHouseDoorLocked" );
 		info.AddWebhookType( "SetTentOpen" );
-		info.AddWebhookType( "SetCarDoors" );
-		info.AddWebhookType( "Heal" );
-		info.AddWebhookType( "Create" );
 	}
 
 	override void RegisterKeyMouseBindings()
@@ -1574,7 +1561,6 @@ class JMESPModule: JMRenderableModuleBase
 		bool includeImmovable;
 		bool includeBushes;
 		bool includeCreatures;
-		bool includeNoCollision;
 
 		int flags = QueryFlags.DYNAMIC;
 
@@ -1588,12 +1574,6 @@ class JMESPModule: JMRenderableModuleBase
 
 			if (m_ViewTypesByType[JMESPViewTypeAnimal].View || m_ViewTypesByType[JMESPViewTypeInfected].View)
 				includeCreatures = true;
-
-			if (m_ViewTypesByType[JMESPViewTypeBuilding].View && m_IknowWhatIamDoing)
-			{
-				includeNoCollision = true;
-				flags |= QueryFlags.STATIC;
-			}
 		}
 		else if (m_ViewTypesByType[JMESPViewTypeBuilding].View)
 		{
@@ -1645,17 +1625,17 @@ class JMESPModule: JMRenderableModuleBase
 					{
 						DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
 
-						if (includeCreatures || includeNoCollision)
+						if (includeCreatures)
 						{
-							//! PhysicsGetEntitiesInBox doesn't include creatures or entities w/o physics body
+							//! PhysicsGetEntitiesInBox doesn't include creatures
 
-							array<EntityAI> entities2 = {};
-							DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities2, flags);
+							array<EntityAI> creatures = {};
+							DayZPlayerUtils.SceneGetEntitiesInBox(min, max, creatures);
 
-							foreach (auto entity2 : entities2)
+							foreach (auto creature : creatures)
 							{
-								if ((includeCreatures && entity2.IsDayZCreature()) || (includeNoCollision && entity2.IsBuilding() && !dBodyIsSet(entity2)))
-									objects.Insert(entity2);
+								if (creature.IsDayZCreature())
+									objects.Insert(creature);
 							}
 						}
 					}
@@ -2019,17 +1999,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_RecordTransformHistory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-	#ifdef SERVER
-		if ( !senderRPC )
-			return;
-
-		if ( !target )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
-			return;
-
 		vector previousPosition;
 		vector previousOrientation;
 		if ( !ctx.Read( previousPosition ) )
@@ -2037,10 +2006,21 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( previousOrientation ) )
 			return;
 
+	#ifdef SERVER
+		if ( !target )
+			return;
+
 		if ( !COT.IsValidWorldPosition( previousPosition ) )
 			return;
 
 		if ( !COT.IsFiniteVector( previousOrientation ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
 			return;
 
 		Exec_RecordTransformHistory( previousPosition, previousOrientation, target, senderRPC );
@@ -2072,15 +2052,15 @@ class JMESPModule: JMRenderableModuleBase
 	//! The text is capped, not rejected: the real sender writes only a few fixed phrases.
 	protected void RPC_Log( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		string log;
+		if ( !ctx.Read( log ) )
+			return;
+
 		if ( !senderRPC )
 			return;
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_VIEW, senderRPC, instance ) )
-			return;
-
-		string log;
-		if ( !ctx.Read( log ) )
 			return;
 
 		if ( !JMRPCThrottle.Allow( senderRPC.GetId(), "esp_log", LOG_MIN_INTERVAL_MS ) )
@@ -2092,10 +2072,7 @@ class JMESPModule: JMRenderableModuleBase
 		Exec_Log( log, senderRPC, instance );
 	}
 
-	[Obsolete("Use Exec_SetPosition( vector position, Object target, JMPlayerInstance instance = NULL )")]
-	protected void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL );
-
-	protected void Exec_SetPosition( vector position, Object target, JMPlayerInstance instance = NULL )
+	protected void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		if ( !target )
 			return;
@@ -2116,53 +2093,46 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 		}
 
-		if ( !ShouldRecordMove( instance, "esp_move" ) )
+		if ( !ShouldRecordMove( ident, "esp_move" ) )
 			return;
 
-		GetCommunityOnlineToolsBase().Log( instance, "ESP target=" + target + " action=position value=" + position );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
 		SendWebhookColored( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString(), JMConstants.WEBHOOK_COLOR_ESP );
 	}
-
-	[Obsolete("Use ShouldRecordMove( JMPlayerInstance instance, ... )")]
-	protected bool ShouldRecordMove( PlayerIdentity ident, string bucket );
 
 	//! Whether this admin's continuous transform should be written down again.
 	//!
 	//! An offline host has no identity and is never throttled - there is no
 	//! webhook and no remote sender to spend anything.
-	protected bool ShouldRecordMove( JMPlayerInstance instance, string bucket )
+	protected bool ShouldRecordMove( PlayerIdentity ident, string bucket )
 	{
-		if ( !instance )
+		if ( !ident )
 			return true;
 
-		return JMRPCThrottle.Allow( instance.GetGUID(), bucket, MOVE_RECORD_INTERVAL_MS );
+		return JMRPCThrottle.Allow( ident.GetId(), bucket, MOVE_RECORD_INTERVAL_MS );
 	}
 
 	protected void RPC_SetPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-	#ifdef SERVER
-		if ( !senderRPC )
-			return;
-	#endif
-
-		if ( !target )
-			return;
-
-	#ifdef SERVER
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
-			return;
-	#endif
-
 		vector position;
 		if ( !ctx.Read( position ) )
+			return;
+
+		if ( !target )
 			return;
 
 	#ifdef SERVER
 		if ( !COT.IsValidWorldPosition( position ) )
 			return;
 
-		Exec_SetPosition( position, target, instance );
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETPOSITION, senderRPC, instance ) )
+			return;
+
+		Exec_SetPosition( position, target, senderRPC, instance );
 	#else
 		target.SetPosition( position );
 	#endif
@@ -2190,7 +2160,7 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 		}
 
-		if ( !ShouldRecordMove( instance, "esp_turn" ) )
+		if ( !ShouldRecordMove( ident, "esp_turn" ) )
 			return;
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
@@ -2199,26 +2169,22 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetOrientation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-	#ifdef SERVER
-		if ( !senderRPC )
+		vector orientation;
+		if ( !ctx.Read( orientation ) )
 			return;
-	#endif
 
 		if ( !target )
 			return;
 
 	#ifdef SERVER
+		if ( !COT.IsFiniteVector( orientation ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETORIENTATION, senderRPC ) )
-			return;
-	#endif
-
-		vector orientation;
-		if ( !ctx.Read( orientation ) )
-			return;
-
-	#ifdef SERVER
-		if ( !COT.IsFiniteVector( orientation ) )
 			return;
 
 		Exec_SetOrientation( orientation, target, senderRPC, instance );
@@ -2278,6 +2244,15 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		float health;
+		if ( !ctx.Read( health ) )
+			return;
+
+		string zone;
+		//! TODO: Setting zone is not implemented in GUI, always sets global health
+		//if ( !ctx.Read( zone ) )
+			//return;
+
 		if ( !senderRPC )
 			return;
 
@@ -2287,15 +2262,6 @@ class JMESPModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETHEALTH, senderRPC, instance ) )
 			return;
-
-		float health;
-		if ( !ctx.Read( health ) )
-			return;
-
-		string zone;
-		//! TODO: Setting zone is not implemented in GUI, always sets global health
-		//if ( !ctx.Read( zone ) )
-			//return;
 
 		Exec_SetHealth( health, zone, target, senderRPC, instance );
 	}
@@ -2318,32 +2284,15 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_SetAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !senderRPC )
-			return;
-
-		if ( !target )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
-			return;
-
 		int slotId;
 		string className;
 		if ( !ctx.Read( slotId ) || !ctx.Read( className ) )
 			return;
-
-		//! Into the request, not into the spawner module: that is one object for
-		//! every admin, and its setup mode is what the chat spawn command runs with.
-		int setupMode;
-		if ( !ctx.Read( setupMode ) )
+			
+		JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
+		if ( !ctx.Read( objSpawnerModule.m_ObjSetupMode ) )
 			return;
 
-		Exec_SetAttachment( slotId, className, target, senderRPC, instance, setupMode );
-	}
-
-	protected void RPC_RemoveAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
 		if ( !senderRPC )
 			return;
 
@@ -2354,14 +2303,29 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
 			return;
 
+		Exec_SetAttachment( slotId, className, target, senderRPC, instance );
+	}
+
+	protected void RPC_RemoveAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
 		int slotId;
 		if ( !ctx.Read( slotId ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		if ( !target )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_SETATTACHMENT, senderRPC, instance ) )
 			return;
 
 		Exec_RemoveAttachment( slotId, target, senderRPC, instance );
 	}
 
-	protected void Exec_SetAttachment( int slotId, string className, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL, COT_ObjectSetupMode setupMode = COT_ObjectSetupMode.DEBUGSPAWN )
+	protected void Exec_SetAttachment( int slotId, string className, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		EntityAI entity = EntityAI.Cast( target );
 		if ( !entity || !entity.GetInventory() )
@@ -2411,7 +2375,7 @@ class JMESPModule: JMRenderableModuleBase
 				classAfter = className;
 
 				JMObjectSpawnerModule objSpawnerModule = CF_Modules<JMObjectSpawnerModule>.Get();
-				objSpawnerModule.SetupEntityForMode( created, PlayerBase.Cast( player ), setupMode );
+				objSpawnerModule.SetupEntityForMode( created, PlayerBase.Cast( player ), objSpawnerModule.m_ObjSetupMode );
 			}
 		}
 
@@ -3588,30 +3552,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_ObjectAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !senderRPC )
-			return;
-
-		if ( !target )
-			return;
-
-		//! General gate first: the action's own permission below can only be
-		//! answered once the action has been read.
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
-			return;
-
-		//! The permission belongs to the action, so the action is the one thing
-		//! read ahead of the gate. Nothing else leaves the stream until it passes.
 		int action;
 		if ( !ctx.Read( action ) )
-			return;
-
-		string permission = PermissionForAction( action );
-
-		if ( permission == "" )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !JMPermissions.HasRPC( permission, senderRPC, instance ) )
 			return;
 
 		int ivalue;
@@ -3620,6 +3562,21 @@ class JMESPModule: JMRenderableModuleBase
 
 		float fvalue;
 		if ( !ctx.Read( fvalue ) )
+			return;
+
+		string permission = PermissionForAction( action );
+
+		if ( permission == "" )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		if ( !target )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !JMPermissions.HasRPC( permission, senderRPC, instance ) )
 			return;
 
 		Exec_ObjectAction( action, ivalue, fvalue, target, senderRPC, instance );
@@ -3705,10 +3662,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_DeleteObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !senderRPC )
+		if ( !target )
 			return;
 
-		if ( !target )
+		if ( !senderRPC )
 			return;
 
 		JMPlayerInstance instance;
@@ -3757,6 +3714,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Build( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
 		if ( !senderRPC )
 			return;
 
@@ -3765,10 +3726,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_BUILD, senderRPC, instance ) )
-			return;
-
-		string part_name;
-		if ( !ctx.Read( part_name ) )
 			return;
 
 		EntityAI bb;
@@ -3810,6 +3767,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Dismantle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
 		if ( !senderRPC )
 			return;
 
@@ -3818,10 +3779,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_DISMANTLE, senderRPC, instance ) )
-			return;
-
-		string part_name;
-		if ( !ctx.Read( part_name ) )
 			return;
 
 		EntityAI bb;
@@ -3860,6 +3817,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
 		if ( !senderRPC )
 			return;
 
@@ -3868,10 +3829,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_REPAIR, senderRPC, instance ) )
-			return;
-
-		string part_name;
-		if ( !ctx.Read( part_name ) )
 			return;
 
 		EntityAI bb;
@@ -3926,6 +3883,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	protected void RPC_BaseBuilding_SetPartHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
+		float health01;
+		if ( !ctx.Read( health01 ) )
+			return;
+
 		if ( !senderRPC )
 			return;
 
@@ -3934,14 +3899,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_ESP_OBJECT_BASEBUILDING_SETHEALTH, senderRPC, instance ) )
-			return;
-
-		string part_name;
-		if ( !ctx.Read( part_name ) )
-			return;
-
-		float health01;
-		if ( !ctx.Read( health01 ) )
 			return;
 
 		EntityAI bb;
@@ -4398,13 +4355,29 @@ class JMESPModule: JMRenderableModuleBase
 		int moved = 0;
 		int count = objects.Count();
 		
-		foreach (Object obj: objects)
+		int i = objects.Count();
+		while ( i > 0 )
 		{
-			if (obj)
+			Object obj = objects[i  - 1];
+			objects.Remove( i - 1 );
+
+			if ( obj != NULL )
 			{
-				Exec_SetPosition(cursor, obj, instance);
+				vector transform[4];
+				obj.GetTransform( transform );
+				string obtype = Object.GetDebugName( obj );
+
+				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=MoveToCursor" );
+
+				EntityAI ent = EntityAI.Cast(obj);
+				if (ent)
+					COT.PlaceOnSurfaceAtPosition(ent, cursor);
+				else
+					obj.SetPosition(cursor);
 				moved++;
 			}
+
+			i = objects.Count();
 		}
 
 		if ( moved > 0 )

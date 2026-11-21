@@ -463,9 +463,7 @@ class JMPlayerInstance : Managed
 	void CopyPermissions( JMPermission copy )
 	{
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "CopyPermissions");
-	#endif
 
 		m_RootPermission.CopyPermissions( copy );
 
@@ -494,9 +492,7 @@ class JMPlayerInstance : Managed
 	void LoadPermissions( array< string > permissions )
 	{
 	#ifdef JM_COT_ENABLE_INDIVIDUAL_PERMS
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this).Add(permissions.Count());
-	#endif
 
 		m_RootPermission.Deserialize( permissions );
 		m_SyncedToClient.Clear();
@@ -832,9 +828,7 @@ class JMPlayerInstance : Managed
 
 	void Save()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Save").Add(m_GUID);
-	#endif
 
 		if ( !g_Game.IsServer() )
 			return;
@@ -947,9 +941,7 @@ class JMPlayerInstance : Managed
 
 	void Load()
 	{
-	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Load").Add(m_GUID);
-	#endif
 
 		if ( !IsMissionHost() )
 			return;

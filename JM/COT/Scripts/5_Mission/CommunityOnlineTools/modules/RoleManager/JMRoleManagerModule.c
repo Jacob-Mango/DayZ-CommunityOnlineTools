@@ -234,7 +234,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		if ( !ctx.Read( count ) )
 			return;
 
-		GetPermissionsManager().ClearRoles();
+		GetPermissionsManager().Roles.Clear();
 
 		for ( int i = 0; i < count; i++ )
 		{

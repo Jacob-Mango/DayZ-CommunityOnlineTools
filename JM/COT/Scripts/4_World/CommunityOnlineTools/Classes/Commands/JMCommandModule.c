@@ -35,10 +35,6 @@ class JMCommandModule: JMModuleBase
 				auto trace = CF_Trace_1(this, "JMCommandModuleRPC.PerformCommand").Add(sender);
 				#endif
 
-				//! General gate first: the command's own permission can only be
-				//! answered once the input has been read and parsed.
-				if (!JMPermissions.HasRPC(JMConstants.PERM_COT_VIEW, sender)) return;
-
 				string input;
 				if (!ctx.Read(input)) return;
 

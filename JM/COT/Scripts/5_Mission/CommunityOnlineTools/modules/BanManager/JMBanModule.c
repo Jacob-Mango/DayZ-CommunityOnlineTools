@@ -74,9 +74,9 @@ class JMBanModule : JMRenderableModuleBase
     //  OnMissionLoaded - load ban store on server (matching JMLoadoutModule)
     // -------------------------------------------------------------------------
 
-    override void OnMissionStart()
+    override void OnMissionLoaded()
     {
-        super.OnMissionStart();
+        super.OnMissionLoaded();
 
         m_Store       = new JMPlayerBanStore();
         m_ActiveIndex = new map<string, ref JMPlayerBan>();

@@ -847,9 +847,9 @@ class JMESPActionMenu
 
 			PlayerBase player;
 			if ( Class.CastTo( player, g_Game.GetPlayer() ) && player.m_JM_SpectatedObject != target )
-				spectateLabel = "#STR_COT_PLAYER_MODULE_ACTION_SPECTATE";
+				spectateLabel = "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE";
 			else
-				spectateLabel = "#STR_COT_PLAYER_MODULE_ACTION_SPECTATE_STOP";
+				spectateLabel = "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_SPECTATE";
 
 			Add( PREFIX_ACTION + "spectate", spectateLabel, JMConstants.Lucide( "eye" ), Perm( JMConstants.PERM_PLAYER_SPECTATE ) );
 		}
@@ -1441,12 +1441,11 @@ class JMESPActionMenu
 			if ( attached )
 			{
 				string attLabel = GetUniqueAttachmentLabel( attached );
-				string displayName = attached.GetDisplayName();
 
-				if ( attLabel != displayName )
+				if ( attLabel != attached.GetDisplayName() )
 					label = attLabel;
-				else if ( displayName != label )
-					label += ": " + displayName;
+				else
+					label += ": " + attLabel;
 			}
 			else
 			{

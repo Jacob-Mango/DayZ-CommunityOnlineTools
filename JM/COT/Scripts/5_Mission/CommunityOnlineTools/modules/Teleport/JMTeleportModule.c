@@ -11,11 +11,6 @@ class JMTeleportModule: JMRenderableModuleBase
 			Class.CastTo(m_MapMenu, m_MapModule.GetForm());
 	}
 
-	JMTeleportSerialize GetSettings()
-	{
-		return m_Settings;
-	}
-
 	array< ref JMTeleportLocation > GetLocations()
 	{
 		return m_Settings.Locations;
@@ -85,9 +80,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		m_MapMenu.UpdateMapPosition(playerpos, pos);
 	}
 
-	override void OnMissionStart()
+	override void OnMissionLoaded()
 	{
-		super.OnMissionStart();
+		super.OnMissionLoaded();
 
 		if (g_Game.IsServer())
 			Load();
@@ -288,11 +283,9 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !isCursor && !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_POSITION ) )
 				return;
 
-			//! isCursor goes first: it names the permission, and the server
-			//! reads nothing else until that permission has been checked.
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( isCursor );
 			rpc.Write( position );
+			rpc.Write( isCursor );
 			rpc.Write( guids );
 			rpc.Send( NULL, JMTeleportModuleRPC.Position, true, NULL );
 		}
@@ -353,30 +346,15 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			//! General gate first: the specific permission below can only be
-			//! answered once isCursor has been read.
-			if ( !JMPermissions.HasRPC( JMConstants.PERM_COT_VIEW, senderRPC ) )
-				return;
-
-			//! The permission belongs to isCursor, so it is the one thing read
-			//! ahead of the gate. Exec_Position() answers it again for the
-			//! callers that do not come through here.
-			bool isCursor;
-			if ( !ctx.Read( isCursor ) )
-				return;
-
-			string positionPermission = JMConstants.PERM_PLAYER_TELEPORT_POSITION;
-			if ( isCursor )
-				positionPermission = JMConstants.PERM_PLAYER_TELEPORT_POSITION_CURSOR;
-
-			if ( !JMPermissions.HasRPC( positionPermission, senderRPC ) )
-				return;
-
 			vector pos;
 			if ( !ctx.Read( pos ) )
 				return;
 
 			if ( !COT.IsValidWorldPosition( pos ) )
+				return;
+
+			bool isCursor;
+			if ( !ctx.Read( isCursor ) )
 				return;
 
 			array< string > guids;
@@ -451,11 +429,6 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			//! Exec_PositionRaycast() answers it again for the callers that do
-			//! not come through here.
-			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_POSITION_CURSOR, senderRPC ) )
-				return;
-
 			vector pos;
 			if ( !ctx.Read( pos ) )
 				return;
@@ -553,11 +526,6 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			//! Exec_Location() answers it again for the callers that do not
-			//! come through here.
-			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION, senderRPC ) )
-				return;
-
 			string loc;
 			if ( !ctx.Read( loc ) )
 				return;
@@ -593,11 +561,6 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			//! Exec_AddLocation() answers it again for the callers that do not
-			//! come through here.
-			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_CREATE, senderRPC ) )
-				return;
-
 			string locName;
 			if ( !ctx.Read( locName ) )
 				return;
@@ -624,6 +587,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_CREATE, ident, instance ) )
 			return;
+		
+		if (m_Settings.Types.Find(catName) == -1)
+			m_Settings.Types.Insert(catName);
 
 		m_Settings.AddLocation(catName, locName, playerpos);
 
@@ -639,11 +605,6 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			//! Exec_RemoveLocation() answers it again for the callers that do
-			//! not come through here.
-			if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_REMOVE, senderRPC ) )
-				return;
-
 			JMTeleportLocation locName;
 			if ( !ctx.Read( locName ) )
 				return;
@@ -675,7 +636,36 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_REMOVE, ident, instance ) )
 			return;
 
-		m_Settings.RemoveLocation(locName.Name);
+		int id = -1;
+		bool hasType = false;
+		for(int i=0; i < m_Settings.Locations.Count(); i++)
+		{
+			if (m_Settings.Locations[i].Type == locName.Type)
+			{
+				if (m_Settings.Locations[i].Name == locName.Name)
+					id = i;
+				else
+					hasType = true;
+
+				if (id > -1)
+					break;
+			}
+		}
+		
+		if (id > -1)
+			m_Settings.Locations.Remove(id);
+
+		if (!hasType)
+		{
+			for(i=0; i < m_Settings.Types.Count(); i++)
+			{
+				if (m_Settings.Types[i] == locName.Type)
+				{
+					m_Settings.Types.Remove(i);
+					break;
+				}
+			}
+		}
 
 		m_Settings.Save();
 
@@ -713,11 +703,6 @@ class JMTeleportModule: JMRenderableModuleBase
 	protected void RPC_EditLocation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !IsMissionHost() )
-			return;
-
-		//! Exec_EditLocation() answers it again for the callers that do not come
-		//! through here.
-		if ( !JMPermissions.HasRPC( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_EDIT, senderRPC ) )
 			return;
 
 		JMTeleportLocation location;
@@ -772,7 +757,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		//! The old category may have just lost its last member, in which case it
 		//! is not a category any more. Add does the same bookkeeping in reverse.
 		if ( oldType != newCategory )
-			m_Settings.RemoveTypeIfUnused( oldType );
+			PruneEmptyType( oldType );
 
 		m_Settings.Save();
 
@@ -782,8 +767,24 @@ class JMTeleportModule: JMRenderableModuleBase
 		SendWebhookColored( "Location", instance, "Edited TP " + oldName + " (" + oldType + ") -> " + newName + " (" + newCategory + ")", JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
-	[Obsolete("Use JMTeleportSerialize::RemoveTypeIfUnused")]
-	protected void PruneEmptyType( string type );
+	//! Drop a category no location uses any more.
+	protected void PruneEmptyType( string type )
+	{
+		for ( int i = 0; i < m_Settings.Locations.Count(); i++ )
+		{
+			if ( m_Settings.Locations[i].Type == type )
+				return;
+		}
+
+		for ( int t = 0; t < m_Settings.Types.Count(); t++ )
+		{
+			if ( m_Settings.Types[t] != type )
+				continue;
+
+			m_Settings.Types.Remove( t );
+			return;
+		}
+	}
 
 	void Command_Position(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
 	{
